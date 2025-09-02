@@ -1,19 +1,30 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
     "outDir": "./dist",
-    "module": "nodenext",
-    "target": "esnext",
+    "rootDir": "./src",
     "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@interface/*": ["interface/*"],
+      "@shared/*": ["shared/*"]
+    }
   },
-  "include": ["src"],                               
-  "exclude": ["node_modules", "dist", "*.config.*"] 
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests"]
 }

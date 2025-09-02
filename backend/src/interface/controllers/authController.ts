@@ -1,187 +1,283 @@
-// src/interface/controllers/authController.ts
-import { type Request, type Response } from 'express';
-import { validationResult } from 'express-validator';
-import bcrypt from 'bcrypt';
-import jwt, { type SignOptions, type Secret } from 'jsonwebtoken';
-import otpGenerator from 'otp-generator';
-import { UserModel } from '../../infrastructure/models/userModel.ts';
-import { sendMail } from '../../infrastructure/mailer/mailer.ts';
-import { OTP_LENGTH, BCRYPT_ROUNDS, MAX_OTP_ATTEMPTS,JWT_EXPIRES_IN,OTP_TTL_SECONDS } from '../../utils/constants.ts';
+import { injectable, inject } from "inversify";
+import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 
-function genOtp(): string {
-    return otpGenerator.generate(OTP_LENGTH, {
-        digits: true,
-        lowerCaseAlphabets: false,
-        upperCaseAlphabets: false,
-        specialChars: false
-    });
-}
+import { SignupRequestUseCase } from "@application/use-cases/SignupRequestUseCase";
+import { SignupVerifyUseCase } from "@application/use-cases/SignupVerifyUseCase";
+import { LoginUseCase } from "@application/use-cases/LoginUseCase";
+import { ResendOtpUseCase } from "@application/use-cases/ResendOtpUseCase";
+import { UpdatePasswordUseCase } from '@application/use-cases/UpdatePasswordUseCase';
 
-// POST /api/auth/signup-request
-export async function signupRequest(req: Request, res: Response) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+import { SignupRequestDto } from "@application/dto/SignupRequestDto";
+import { SignupVerifyDto } from "@application/dto/SignupVerifyDto";
+import { LoginDto } from "@application/dto/LoginDto";
+import { ResendOtpDto } from "@application/dto/ResendOtpDto";
+import { UpdatePasswordDto } from '@application/dto/UpdatePasswordDto';
 
-    const { name, email, password, mobile, dob, gender, address, role } = req.body;
+import { ApiResponse } from "@shared/types/Common";
+import { Logger } from "@shared/utils/Logger";
 
-    try {
-        // If a verified user exists -> reject
-        const existingVerified = await UserModel.findOne({ email, isVerified: true });
-        if (existingVerified) return res.status(400).json({ message: 'User already registered' });
+@injectable()
+export class AuthController {
+    constructor(
+        @inject(SignupRequestUseCase)
+        private signupRequestUseCase: SignupRequestUseCase,
+        @inject(SignupVerifyUseCase)
+        private signupVerifyUseCase: SignupVerifyUseCase,
+        @inject(LoginUseCase) private loginUseCase: LoginUseCase,
+        @inject(ResendOtpUseCase) private resendOtpUseCase: ResendOtpUseCase,
+        @inject(UpdatePasswordUseCase) private updatePasswordUseCase: UpdatePasswordUseCase
+    ) { }
 
-        // Hash password immediately
-        const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-
-        // Generate OTP and hash it
-        const otp = genOtp();
-        const otpHash = await bcrypt.hash(otp, BCRYPT_ROUNDS);
-        const otpExpires = new Date(
-            Date.now() + (parseInt(OTP_TTL_SECONDS || '90', 10) * 1000)
-        );
-
-        // Upsert (create new or update existing unverified user)
-        await UserModel.findOneAndUpdate(
-            { email },
-            {
-                $set: {
-                    name,
-                    email,
-                    mobile: mobile || undefined,
-                    dob: dob ? new Date(dob) : undefined,
-                    gender: gender || undefined,
-                    address: address || undefined,
-                    password: passwordHash,
-                    role: role || 'Rider',
-                    status: 'Pending Verification',
-                    isVerified: false,
-                    otpHash,
-                    otpExpires,
-                    otpAttempts: 0
-                }
-            },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
-
-        // Send OTP email
-        const html = `<p>Your SteeriGo signup OTP is <b>${otp}</b>. It expires in ${OTP_TTL_SECONDS || '300'} seconds.</p>`;
-        await sendMail(email, 'SteeriGo Signup OTP', html);
-
-        return res.status(200).json({ message: 'OTP sent to email' });
-    } catch (err: any) {
-        if (err.code === 11000)
-            return res.status(400).json({ message: 'Email or mobile already in use' });
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
-    }
-}
-
-// POST /api/auth/signup-verify
-export async function signupVerify(req: Request, res: Response) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-    const { email, otp } = req.body;
-
-    try {
-        const user = await UserModel.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'No signup request found' });
-        if (user.isVerified) return res.status(400).json({ message: 'User already verified' });
-
-        // Check expiry
-        if (!user.otpExpires || user.otpExpires.getTime() < Date.now()) {
-            return res.status(400).json({ message: 'OTP expired. Request a new one.' });
-        }
-
-        // Check attempts
-        if ((user.otpAttempts || 0) >= MAX_OTP_ATTEMPTS) {
-            return res
-                .status(429)
-                .json({ message: 'Maximum OTP attempts exceeded. Request new OTP.' });
-        }
-
-        // Compare OTP
-        const match = await bcrypt.compare(otp, user.otpHash || '');
-        if (!match) {
-            user.otpAttempts = (user.otpAttempts || 0) + 1;
-            await user.save();
-            return res.status(400).json({ message: 'Invalid OTP' });
-        }
-
-        // OTP ok -> mark verified, clear otp fields
-        user.isVerified = true;
-        user.status = 'Active';
-        user.otpHash = null;
-        user.otpExpires = null;
-        user.otpAttempts = 0;
-        await user.save();
-
-        // Issue JWT
-        const jwtSecret: Secret = process.env.JWT_SECRET as string;
-        const jwtExpiresIn = (JWT_EXPIRES_IN ?? '1d') as '30m' | '1h' | '1d' | '7d';
-
-        const options: SignOptions = {
-            expiresIn: jwtExpiresIn
-        };
-
-        const token = jwt.sign(
-            { userId: user._id.toString(), role: user.role },
-            jwtSecret,
-            options
-        );
-
-
-
-        return res.status(201).json({
-            message: 'Signup completed',
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                mobile: user.mobile,
-                role: user.role
+    async signupRequest(req: Request, res: Response): Promise<void> {
+        try {
+            // Check validation errors
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: "Validation failed",
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
             }
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
+
+            const dto = new SignupRequestDto(req.body);
+            const result = await this.signupRequestUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message,
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const response: ApiResponse = {
+                success: true,
+                message:
+                    "OTP sent to your email address. Please verify to complete signup.",
+            };
+
+            res.status(200).json(response);
+            Logger.info("Signup request processed successfully", {
+                email: dto.email,
+            });
+        } catch (error) {
+            Logger.error("Error in signup request", error);
+            const response: ApiResponse = {
+                success: false,
+                message: "Internal server error",
+            };
+            res.status(500).json(response);
+        }
     }
-}
 
-// POST /api/auth/login
-export async function login(req: Request, res: Response) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    async signupVerify(req: Request, res: Response): Promise<void> {
+        try {
+            // Check validation errors
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: "Validation failed",
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
 
-    const { email, password } = req.body;
+            const dto = new SignupVerifyDto(req.body);
+            const result = await this.signupVerifyUseCase.execute(dto);
 
-    try {
-        const user = await UserModel.findOne({ email });
-        if (!user || !user.isVerified)
-            return res
-                .status(401)
-                .json({ message: 'Invalid credentials or email not verified' });
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message,
+                };
 
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+                // Different status codes for different error types
+                if (error.name === "MaxOtpAttemptsError") {
+                    res.status(429).json(response);
+                } else {
+                    res.status(400).json(response);
+                }
+                return;
+            }
 
-        const jwtSecret: Secret = process.env.JWT_SECRET as string;
-        const jwtExpiresIn = (JWT_EXPIRES_IN ?? '1d') as '30m' | '1h' | '1d' | '7d';
+            const data = result.getValue();
+            const response: ApiResponse = {
+                success: true,
+                message: "Signup completed successfully! Welcome to SteeriGo.",
+                data,
+            };
 
-        const options: SignOptions = {
-            expiresIn: jwtExpiresIn
-        };
+            res.status(201).json(response);
+            Logger.info("Signup verification completed successfully", {
+                email: dto.email,
+            });
+        } catch (error) {
+            Logger.error("Error in signup verification", error);
+            const response: ApiResponse = {
+                success: false,
+                message: "Internal server error",
+            };
+            res.status(500).json(response);
+        }
+    }
 
-        const token = jwt.sign(
-            { userId: user._id.toString(), role: user.role },
-            jwtSecret,
-            options
-        );
+    async login(req: Request, res: Response): Promise<void> {
+        try {
+            // Check validation errors
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: "Validation failed",
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
 
+            const dto = new LoginDto(req.body);
+            const result = await this.loginUseCase.execute(dto);
 
-        return res.json({ token });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message,
+                };
+                res.status(401).json(response);
+                return;
+            }
+
+            const data = result.getValue();
+            const response: ApiResponse = {
+                success: true,
+                message: "Login successful",
+                data,
+            };
+
+            res.status(200).json(response);
+            Logger.info("Login completed successfully", { email: dto.email });
+        } catch (error) {
+            Logger.error("Error in login", error);
+            const response: ApiResponse = {
+                success: false,
+                message: "Internal server error",
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async resendOtp(req: Request, res: Response): Promise<void> {
+        try {
+            // Check validation errors
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: "Validation failed",
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const dto = new ResendOtpDto(req.body);
+            const result = await this.resendOtpUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message,
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const response: ApiResponse = {
+                success: true,
+                message: "New OTP sent to your email address",
+            };
+
+            res.status(200).json(response);
+            Logger.info("OTP resent successfully", { email: dto.email });
+        } catch (error) {
+            Logger.error("Error in resend OTP", error);
+            const response: ApiResponse = {
+                success: false,
+                message: "Internal server error",
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async updatePassword(req: Request, res: Response): Promise<void> {
+        try {
+            // Check validation errors
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: 'Validation Failed',
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const userId = req.user!.userId;
+            const dto = new UpdatePasswordDto(req.body);
+            const result = await this.updatePasswordUseCase.execute(userId, dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message
+                };
+
+                const statusCode = error.name === 'InvalidCredentialsError' ? 401 : 400;
+                res.status(statusCode).json(response);
+                return
+            }
+            const response: ApiResponse = {
+                success: true,
+                message: 'Password updated successfully'
+            };
+
+            res.status(200).json(response);
+            Logger.info('Password updated successfully', { userId });
+        } catch (error) {
+            Logger.error('Error in update password', error);
+            const response: ApiResponse = {
+                success: false,
+                message: 'Internal server error'
+            };
+            res.status(500).json(response);
+        }
     }
 }
