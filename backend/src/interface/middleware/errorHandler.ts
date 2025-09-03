@@ -11,7 +11,7 @@ export class ErrorHandlerMiddleware {
             method: req.method,
             body: req.body,
             query: req.query,
-            params: req.params
+            params: req.params,
         });
 
         // Don't log sensitive data in production

@@ -5,6 +5,8 @@ import { ITokenService } from '@domain/services/ITokenService';
 import { IEmailService } from '@domain/services/IEmailService';
 import { OtpExpiredError, MaxOtpAttemptsError, DomainError } from '@domain/errors';
 import { SignupVerifyDto } from '../dto/SignupVerifyDto';
+import { RefreshToken } from '@domain/entities/RefreshToken';
+import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository';
 import { Result } from '@shared/utils/Result';
 
 @injectable()
@@ -13,10 +15,13 @@ export class SignupVerifyUseCase {
         @inject('IUserRepository') private userRepository: IUserRepository,
         @inject('IOtpService') private otpService: IOtpService,
         @inject('ITokenService') private tokenService: ITokenService,
-        @inject('IEmailService') private emailService: IEmailService
+        @inject('IEmailService') private emailService: IEmailService,
+        @inject('IRefreshTokenRepository') private refreshTokenRepository: IRefreshTokenRepository
     ) { }
 
-    async execute(dto: SignupVerifyDto): Promise<Result<{ token: string; user: any }>> {
+    async execute(dto: SignupVerifyDto): Promise<Result<{
+        accessToken: string, refreshToken: string; user: any
+    }>> {
         try {
             const user = await this.userRepository.findByEmail(dto.email);
 
@@ -54,14 +59,29 @@ export class SignupVerifyUseCase {
             user.verify();
             await this.userRepository.save(user);
 
-            // Generate JWT token
-            const token = this.tokenService.generate({
+            // Generate access token
+            const accessToken = this.tokenService.generate({
                 userId: user.getId(),
                 role: user.getRole()
             });
 
+            // Generate refresh token
+            const refreshTokenValue = this.tokenService.generateRefreshToken();
+            const refreshTokenExpiry = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+
+            // Create new refresh token
+            const { v4: uuid } = require('uuid');
+            const refreshToken = RefreshToken.create({
+                id: uuid(),
+                userId: user.getId(),
+                token: refreshTokenValue,
+                expiresAt: refreshTokenExpiry
+            });
+            await this.refreshTokenRepository.save(refreshToken);
+
             return Result.success({
-                token,
+                accessToken,
+                refreshToken: refreshTokenValue,
                 user: {
                     id: user.getId(),
                     name: user.getName(),

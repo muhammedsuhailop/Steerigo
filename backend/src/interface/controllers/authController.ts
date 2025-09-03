@@ -7,12 +7,15 @@ import { SignupVerifyUseCase } from "@application/use-cases/SignupVerifyUseCase"
 import { LoginUseCase } from "@application/use-cases/LoginUseCase";
 import { ResendOtpUseCase } from "@application/use-cases/ResendOtpUseCase";
 import { UpdatePasswordUseCase } from '@application/use-cases/UpdatePasswordUseCase';
+import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase';
+import { LogoutUseCase } from '@application/use-cases/LogoutUseCase';
 
 import { SignupRequestDto } from "@application/dto/SignupRequestDto";
 import { SignupVerifyDto } from "@application/dto/SignupVerifyDto";
 import { LoginDto } from "@application/dto/LoginDto";
 import { ResendOtpDto } from "@application/dto/ResendOtpDto";
 import { UpdatePasswordDto } from '@application/dto/UpdatePasswordDto';
+import { RefreshTokenDto } from '@application/dto/RefreshTokenDto';
 
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -26,7 +29,9 @@ export class AuthController {
         private signupVerifyUseCase: SignupVerifyUseCase,
         @inject(LoginUseCase) private loginUseCase: LoginUseCase,
         @inject(ResendOtpUseCase) private resendOtpUseCase: ResendOtpUseCase,
-        @inject(UpdatePasswordUseCase) private updatePasswordUseCase: UpdatePasswordUseCase
+        @inject(UpdatePasswordUseCase) private updatePasswordUseCase: UpdatePasswordUseCase,
+        @inject(RefreshTokenUseCase) private refreshTokenUseCase: RefreshTokenUseCase,
+        @inject(LogoutUseCase) private logoutUseCase: LogoutUseCase
     ) { }
 
     async signupRequest(req: Request, res: Response): Promise<void> {
@@ -106,7 +111,6 @@ export class AuthController {
                     message: error.message,
                 };
 
-                // Different status codes for different error types
                 if (error.name === "MaxOtpAttemptsError") {
                     res.status(429).json(response);
                 } else {
@@ -138,7 +142,6 @@ export class AuthController {
 
     async login(req: Request, res: Response): Promise<void> {
         try {
-            // Check validation errors
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 const response: ApiResponse = {
@@ -187,7 +190,6 @@ export class AuthController {
 
     async resendOtp(req: Request, res: Response): Promise<void> {
         try {
-            // Check validation errors
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 const response: ApiResponse = {
@@ -234,7 +236,6 @@ export class AuthController {
 
     async updatePassword(req: Request, res: Response): Promise<void> {
         try {
-            // Check validation errors
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 const response: ApiResponse = {
@@ -273,6 +274,109 @@ export class AuthController {
             Logger.info('Password updated successfully', { userId });
         } catch (error) {
             Logger.error('Error in update password', error);
+            const response: ApiResponse = {
+                success: false,
+                message: 'Internal server error'
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async refreshToken(req: Request, res: Response): Promise<void> {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: 'Validation failed',
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const dto = new RefreshTokenDto(req.body);
+            const result = await this.refreshTokenUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message
+                };
+
+                // Different status codes for different error types
+                if (error.name === 'RefreshTokenExpiredError' || error.name === 'RefreshTokenRevokedError') {
+                    res.status(401).json(response);
+                } else {
+                    res.status(400).json(response);
+                }
+                return;
+            }
+
+            const data = result.getValue();
+            const response: ApiResponse = {
+                success: true,
+                message: 'Tokens refreshed successfully',
+                data
+            };
+
+            res.status(200).json(response);
+            Logger.info('Tokens refreshed successfully');
+
+        } catch (error) {
+            Logger.error('Error in refresh token', error);
+            const response: ApiResponse = {
+                success: false,
+                message: 'Internal server error'
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async logout(req: Request, res: Response): Promise<void> {
+        try {
+            const errors = validationResult(req);
+            console.log('errors:', errors)
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: 'Validation failed',
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const dto = new RefreshTokenDto(req.body);
+            const result = await this.logoutUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const response: ApiResponse = {
+                success: true,
+                message: 'Logged out successfully'
+            };
+
+            res.status(200).json(response);
+            Logger.info('User logged out successfully');
+
+        } catch (error) {
+            Logger.error('Error in logout', error);
             const response: ApiResponse = {
                 success: false,
                 message: 'Internal server error'

@@ -6,13 +6,17 @@ import {
     signupVerifyValidation,
     loginValidation,
     resendOtpValidation,
-    updatePasswordValidation
+    updatePasswordValidation,
+    refreshTokenValidation,
+    logoutValidation
 } from '../validators/authValidators';
 import {
     signupRateLimiter,
     loginRateLimiter,
     otpRateLimiter,
     resendOtpRateLimiter,
+    refreshTokenRateLimiter,
+    logoutRateLimiter
 } from '../middleware/RateLimiter';
 import { AuthMiddleware } from '../middleware/AuthMiddleware';
 
@@ -49,9 +53,23 @@ router.post('/resend-otp',
 
 // PUT /api/auth/update-password - Update password for logged-in users
 router.put('/update-password',
-    AuthMiddleware.authenticate,  
+    AuthMiddleware.authenticate,
     updatePasswordValidation,
     (req: Request, res: Response) => authController.updatePassword(req, res)
+);
+
+// POST /api/auth/refresh - Refresh access token using refresh token
+router.post('/refresh',
+    refreshTokenRateLimiter,
+    refreshTokenValidation,
+    (req: Request, res: Response) => authController.refreshToken(req, res)
+);
+
+// POST /api/auth/logout - Logout and revoke refresh token
+router.post('/logout',
+    logoutRateLimiter,
+    logoutValidation,
+    (req: Request, res: Response) => authController.logout(req, res)
 );
 
 

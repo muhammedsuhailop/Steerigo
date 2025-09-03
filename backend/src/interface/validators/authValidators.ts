@@ -111,3 +111,20 @@ export const updatePasswordValidation = [
         })
 ]
 
+export const refreshTokenValidation = [
+    body('refreshToken')
+        .notEmpty()
+        .withMessage('Refresh token is required')
+        .isLength({ min: 64, max: 256 })
+        .withMessage('Invalid refresh token format')
+];
+
+export const logoutValidation = [
+    body('refreshToken')
+        .notEmpty()
+        .withMessage('Refresh token is required')
+        .isLength({ min: 64, max: 256 })
+        .withMessage('Invalid refresh token format')
+];
+
+
