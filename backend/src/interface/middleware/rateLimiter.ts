@@ -42,3 +42,17 @@ export const resendOtpRateLimiter = createRateLimiter(
     3,               // 3 requests max
     'Too many OTP resend attempts. Please try again later.'
 );
+
+// Refresh token rate limiter - 10 requests per 5 minutes
+export const refreshTokenRateLimiter = createRateLimiter(
+    5 * 60 * 1000, // 5 minutes
+    10,            // 10 requests max
+    'Too many token refresh attempts. Please try again later.'
+);
+
+// Logout rate limiter - 5 requests per minute (generous for logout)
+export const logoutRateLimiter = createRateLimiter(
+    60 * 1000,     // 1 minute
+    5,             // 5 requests max
+    'Too many logout attempts. Please try again later.'
+);

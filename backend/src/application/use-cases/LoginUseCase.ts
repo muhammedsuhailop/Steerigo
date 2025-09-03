@@ -2,7 +2,9 @@ import { injectable, inject } from "inversify";
 import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IPasswordService } from "@domain/services/IPasswordService";
 import { ITokenService } from "@domain/services/ITokenService";
+import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository';
 import { InvalidCredentialsError, DomainError } from "@domain/errors";
+import { RefreshToken } from '@domain/entities/RefreshToken';
 import { LoginDto } from "../dto/LoginDto";
 import { Result } from "@shared/utils/Result";
 
@@ -11,10 +13,13 @@ export class LoginUseCase {
     constructor(
         @inject("IUserRepository") private userRepository: IUserRepository,
         @inject("IPasswordService") private passwordService: IPasswordService,
-        @inject("ITokenService") private tokenService: ITokenService
+        @inject("ITokenService") private tokenService: ITokenService,
+        @inject('IRefreshTokenRepository') private refreshTokenRepository: IRefreshTokenRepository
     ) { }
 
-    async execute(dto: LoginDto): Promise<Result<{ token: string; user: any }>> {
+    async execute(dto: LoginDto): Promise<Result<{
+        accessToken: string, refreshToken: string; user: any
+    }>> {
         try {
             const user = await this.userRepository.findByEmail(dto.email);
 
@@ -38,14 +43,32 @@ export class LoginUseCase {
                 return Result.failure(new InvalidCredentialsError());
             }
 
-            // Generate JWT token
-            const token = this.tokenService.generate({
+            // Generate access token
+            const accessToken = this.tokenService.generate({
                 userId: user.getId(),
-                role: user.getRole(),
+                role: user.getRole()
             });
 
+            // Generate refresh token
+            const refreshTokenValue = this.tokenService.generateRefreshToken();
+            const refreshTokenExpiry = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+
+            // Delete any existing refresh tokens for this user
+            await this.refreshTokenRepository.deleteByUserId(user.getId())
+
+            // Create new refresh token
+            const { v4: uuid } = require('uuid');
+            const refreshToken = RefreshToken.create({
+                id: uuid(),
+                userId: user.getId(),
+                token: refreshTokenValue,
+                expiresAt: refreshTokenExpiry
+            });
+            await this.refreshTokenRepository.save(refreshToken);
+
             return Result.success({
-                token,
+                accessToken,
+                refreshToken: refreshTokenValue,
                 user: {
                     id: user.getId(),
                     name: user.getName(),

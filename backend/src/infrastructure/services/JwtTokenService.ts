@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 import jwt, { Secret } from 'jsonwebtoken';
+import crypto from 'crypto';
 import { ITokenService } from '@domain/services/ITokenService';
 import { AppConstants } from '@shared/constants/AppConstants';
 import { AuthTokenPayload } from '@shared/types/Common';
@@ -51,6 +52,20 @@ export class JwtTokenService implements ITokenService {
         } catch (error) {
             Logger.debug('JWT token verification failed', error);
             return null;
+        }
+    }
+
+    generateRefreshToken(): string {
+        try {
+            // Generate a cryptographically secure random token
+            const randomBytes = crypto.randomBytes(64);
+            const refreshToken = randomBytes.toString('hex');
+
+            Logger.debug('Refresh token generated successfully');
+            return refreshToken;
+        } catch (error) {
+            Logger.error('Error generating refresh token', error);
+            throw new Error('Failed to generate refresh token');
         }
     }
 }
