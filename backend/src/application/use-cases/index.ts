@@ -5,3 +5,5 @@ export * from './ResendOtpUseCase';
 export * from './UpdatePasswordUseCase';
 export * from './RefreshTokenUseCase';
 export * from './LogoutUseCase';
+export * from './ForgotPasswordRequestUseCase';
+export * from './ForgotPasswordVerifyUseCase';

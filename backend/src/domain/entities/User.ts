@@ -157,6 +157,25 @@ export class User {
         this.updatedAt = new Date()
     }
 
+    setPasswordResetOtp(otpHash: string, otpExpires: Date): void {
+        this.otpHash = otpHash;
+        this.otpExpires = otpExpires;
+        this.otpAttempts = 0;
+        this.updatedAt = new Date();
+    }
+
+    resetPassword(newPasswordHash: string): void {
+        if (!newPasswordHash || newPasswordHash.trim().length === 0) {
+            throw new DomainError('Password hash cannot be empty');
+        }
+
+        this.password = newPasswordHash;
+        this.otpHash = undefined;
+        this.otpExpires = undefined;
+        this.otpAttempts = 0;
+        this.updatedAt = new Date();
+    }
+
     // Validation helpers
     private static isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

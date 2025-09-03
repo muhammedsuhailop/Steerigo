@@ -8,7 +8,9 @@ import {
     resendOtpValidation,
     updatePasswordValidation,
     refreshTokenValidation,
-    logoutValidation
+    logoutValidation,
+    forgotPasswordRequestValidation,
+    forgotPasswordVerifyValidation,
 } from '../validators/authValidators';
 import {
     signupRateLimiter,
@@ -16,7 +18,9 @@ import {
     otpRateLimiter,
     resendOtpRateLimiter,
     refreshTokenRateLimiter,
-    logoutRateLimiter
+    logoutRateLimiter,
+    forgotPasswordRequestRateLimiter,
+    forgotPasswordVerifyRateLimiter,
 } from '../middleware/RateLimiter';
 import { AuthMiddleware } from '../middleware/AuthMiddleware';
 
@@ -70,6 +74,20 @@ router.post('/logout',
     logoutRateLimiter,
     logoutValidation,
     (req: Request, res: Response) => authController.logout(req, res)
+);
+
+// POST /api/auth/forgot-password - Request password reset OTP
+router.post('/forgot-password',
+    forgotPasswordRequestRateLimiter,
+    forgotPasswordRequestValidation,
+    (req: Request, res: Response) => authController.forgotPasswordRequest(req, res)
+);
+
+// POST /api/auth/reset-password - Verify OTP and reset password
+router.post('/reset-password',
+    forgotPasswordVerifyRateLimiter,
+    forgotPasswordVerifyValidation,
+    (req: Request, res: Response) => authController.forgotPasswordVerify(req, res)
 );
 
 

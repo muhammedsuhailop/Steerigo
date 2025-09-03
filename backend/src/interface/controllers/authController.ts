@@ -9,6 +9,8 @@ import { ResendOtpUseCase } from "@application/use-cases/ResendOtpUseCase";
 import { UpdatePasswordUseCase } from '@application/use-cases/UpdatePasswordUseCase';
 import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase';
 import { LogoutUseCase } from '@application/use-cases/LogoutUseCase';
+import { ForgotPasswordRequestUseCase } from "@application/use-cases";
+import { ForgotPasswordVerifyUseCase } from "@application/use-cases";
 
 import { SignupRequestDto } from "@application/dto/SignupRequestDto";
 import { SignupVerifyDto } from "@application/dto/SignupVerifyDto";
@@ -16,6 +18,8 @@ import { LoginDto } from "@application/dto/LoginDto";
 import { ResendOtpDto } from "@application/dto/ResendOtpDto";
 import { UpdatePasswordDto } from '@application/dto/UpdatePasswordDto';
 import { RefreshTokenDto } from '@application/dto/RefreshTokenDto';
+import { ForgotPasswordRequestDto } from "@application/dto";
+import { ForgotPasswordVerifyDto } from "@application/dto";
 
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -31,7 +35,9 @@ export class AuthController {
         @inject(ResendOtpUseCase) private resendOtpUseCase: ResendOtpUseCase,
         @inject(UpdatePasswordUseCase) private updatePasswordUseCase: UpdatePasswordUseCase,
         @inject(RefreshTokenUseCase) private refreshTokenUseCase: RefreshTokenUseCase,
-        @inject(LogoutUseCase) private logoutUseCase: LogoutUseCase
+        @inject(LogoutUseCase) private logoutUseCase: LogoutUseCase,
+        @inject(ForgotPasswordRequestUseCase) private forgotPasswordRequestUseCase: ForgotPasswordRequestUseCase,
+        @inject(ForgotPasswordVerifyUseCase) private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase
     ) { }
 
     async signupRequest(req: Request, res: Response): Promise<void> {
@@ -377,6 +383,105 @@ export class AuthController {
 
         } catch (error) {
             Logger.error('Error in logout', error);
+            const response: ApiResponse = {
+                success: false,
+                message: 'Internal server error'
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async forgotPasswordRequest(req: Request, res: Response): Promise<void> {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: 'Validation failed',
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const dto = new ForgotPasswordRequestDto(req.body);
+            const result = await this.forgotPasswordRequestUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const response: ApiResponse = {
+                success: true,
+                message: 'A password reset OTP has been sent to your email'
+            };
+
+            res.status(200).json(response);
+            Logger.info('Password reset OTP requested', { email: dto.email });
+
+        } catch (error) {
+            Logger.error('Error in forgot password request', error);
+            const response: ApiResponse = {
+                success: false,
+                message: 'Internal server error'
+            };
+            res.status(500).json(response);
+        }
+    }
+
+    async forgotPasswordVerify(req: Request, res: Response): Promise<void> {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const response: ApiResponse = {
+                    success: false,
+                    message: 'Validation failed',
+                    error: errors
+                        .array()
+                        .map((err) => `${err.msg}`)
+                        .join(", "),
+                };
+                res.status(400).json(response);
+                return;
+            }
+
+            const dto = new ForgotPasswordVerifyDto(req.body);
+            const result = await this.forgotPasswordVerifyUseCase.execute(dto);
+
+            if (result.isFailure()) {
+                const error = result.getError();
+                const response: ApiResponse = {
+                    success: false,
+                    message: error.message
+                };
+
+                if (error.name === 'MaxOtpAttemptsError') {
+                    res.status(429).json(response);
+                } else {
+                    res.status(400).json(response);
+                }
+                return;
+            }
+
+            const response: ApiResponse = {
+                success: true,
+                message: 'Password reset successfully. Please login with your new password'
+            };
+
+            res.status(200).json(response);
+            Logger.info('Password reset completed successfully', { email: dto.email });
+
+        } catch (error) {
+            Logger.error('Error in forgot password verification', error);
             const response: ApiResponse = {
                 success: false,
                 message: 'Internal server error'

@@ -54,6 +54,23 @@ export class NodemailerEmailService implements IEmailService {
         }
     }
 
+    async sendPasswordResetOtp(email: string, otp: string, userName: string): Promise<void> {
+        try {
+            const mailOptions = {
+                from: `"SteeriGo" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: 'SteeriGo - Password Reset OTP',
+                html: this.getOtpEmailTemplate(otp)
+            };
+
+            await this.transporter.sendMail(mailOptions);
+            Logger.info('Password reset OTP email sent successfully', { email });
+        } catch (error) {
+            Logger.error('Failed to send password reset OTP email', { email, error });
+            throw new Error('Failed to send password reset email');
+        }
+    }
+
     private getOtpEmailTemplate(otp: string): string {
         return `
         <!DOCTYPE html>
