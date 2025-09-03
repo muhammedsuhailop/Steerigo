@@ -66,7 +66,7 @@ export const signupVerifyValidation = [
         .normalizeEmail(),
 
     body('otp')
-        .isLength({ min: 6, max: 6 })
+        .isLength({ min: 4, max: 6 })
         .withMessage('OTP must be exactly 6 characters')
         .isNumeric()
         .withMessage('OTP must contain only numbers')
@@ -127,4 +127,32 @@ export const logoutValidation = [
         .withMessage('Invalid refresh token format')
 ];
 
+
+export const forgotPasswordRequestValidation = [
+    body('email')
+        .isEmail()
+        .withMessage('Please provide a valid email address')
+        .normalizeEmail()
+        .isLength({ max: 255 })
+        .withMessage('Email must be less than 255 characters')
+];
+
+export const forgotPasswordVerifyValidation = [
+    body('email')
+        .isEmail()
+        .withMessage('Please provide a valid email address')
+        .normalizeEmail(),
+
+    body('otp')
+        .isLength({ min: 4, max: 6 })
+        .withMessage('OTP must be exactly 6 characters')
+        .isNumeric()
+        .withMessage('OTP must contain only numbers'),
+
+    body('newPassword')
+        .isLength({ min: 8, max: 128 })
+        .withMessage('New password must be between 8 and 128 characters')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+        .withMessage('New password must contain at least one lowercase letter, one uppercase letter, one number, and one special character')
+];
 

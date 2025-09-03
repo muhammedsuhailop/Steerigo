@@ -56,3 +56,17 @@ export const logoutRateLimiter = createRateLimiter(
     5,             // 5 requests max
     'Too many logout attempts. Please try again later.'
 );
+
+// Forgot password request rate limiter - 3 requests per 15 minutes
+export const forgotPasswordRequestRateLimiter = createRateLimiter(
+    15 * 60 * 1000, // 15 minutes
+    3,              // 3 requests max
+    'Too many password reset requests. Please try again later.'
+);
+
+// Forgot password verify rate limiter - 5 requests per 10 minutes
+export const forgotPasswordVerifyRateLimiter = createRateLimiter(
+    10 * 60 * 1000, // 10 minutes
+    5,              // 5 requests max
+    'Too many password reset verification attempts. Please try again later.'
+);
