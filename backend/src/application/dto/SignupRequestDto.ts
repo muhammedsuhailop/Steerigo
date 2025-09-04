@@ -5,7 +5,7 @@ export class SignupRequestDto {
     public readonly mobile?: string;
     public readonly role?: string;
 
-    constructor(data: any) {
+    constructor(data: { name: string, email: string, password: string, mobile: string, role: string }) {
         this.name = data.name;
         this.email = data.email;
         this.password = data.password;
