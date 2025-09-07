@@ -5,6 +5,7 @@ import { IUserRepository } from '@domain/repositories/IUserRepository';
 import { ApiResponse } from '@shared/types/Common';
 import { Logger } from '@shared/utils/Logger';
 // Extend Request interface to include user
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
     namespace Express {
         interface Request {
@@ -15,6 +16,7 @@ declare global {
         }
     }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 export class AuthMiddleware {
     static async authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
