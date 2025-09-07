@@ -13,9 +13,9 @@ import {
   validateName,
   sanitizeInput,
 } from "@/utils";
-import steerigoLogoBanner from "@/assets/images/SteeriGoHorizontal.png";
 import Button from "@/components/common/Button";
 import Input from "@/components/forms/Input";
+import Select from "@/components/forms/Select";
 import OTPVerification from "./OTPVerification";
 
 interface SignupFormData {
@@ -37,7 +37,6 @@ interface ValidationErrors {
 
 const SignupForm: React.FC = () => {
   const dispatch = useAppDispatch();
-  //   const navigate = useNavigate();
   const { isLoading, error, requiresOTPVerification } = useAppSelector(
     (state) => state.auth
   );
@@ -48,7 +47,7 @@ const SignupForm: React.FC = () => {
     mobile: "",
     password: "",
     confirmPassword: "",
-    role: "rider",
+    role: "Rider",
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
@@ -84,7 +83,7 @@ const SignupForm: React.FC = () => {
 
     if (!formData.mobile.trim()) {
       errors.mobile = "Mobile number is required";
-    } else if (!/^\+?[\d\s-()]{10,}$/.test(formData.mobile)) {
+    } else if (!/^\+?[\d\s\-()]{10,}$/.test(formData.mobile)) {
       errors.mobile = "Please enter a valid mobile number";
     }
 
@@ -109,7 +108,7 @@ const SignupForm: React.FC = () => {
 
   const handleInputChange =
     (field: keyof SignupFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
       let value = e.target.value;
 
       if (field === "name") {
@@ -151,7 +150,6 @@ const SignupForm: React.FC = () => {
       await dispatch(signupUser(credentials)).unwrap();
     } catch (err) {
       console.log(err);
-
       // error is already handled by Redux slice
     }
   };
@@ -167,142 +165,128 @@ const SignupForm: React.FC = () => {
 
   if (showOTPVerification) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <OTPVerification email={formData.email} onBack={handleBackToSignup} />
-      </div>
+      <OTPVerification
+        email={formData.email}
+        onBack={handleBackToSignup}
+      />
     );
   }
 
+  const roleOptions = [
+    { value: "Rider", label: "Rider" },
+    { value: "Driver", label: "Driver" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white p-8 rounded-lg shadow-md">
           <div className="text-center mb-8">
-            <div className="flex flex-col items-center justify-center mb-8">
-              <img
-                src={steerigoLogoBanner}
-                alt="SteerGo Logo"
-                className="mb-2 max-h-16 w-auto"
-              />
+            <div className="mx-auto h-12 w-auto">
+              <div className="text-2xl font-bold text-gray-900">Steerigo</div>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Signup</h2>
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+              Signup
+            </h2>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <div className="text-sm text-red-600">{error}</div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Form inputs as you already wrote */}
-
-            {/* Name */}
+          <form onSubmit={handleSubmit} className="space-y-6">
             <Input
-              id="name"
-              name="name"
-              type="text"
               label="Full Name"
+              type="text"
               value={formData.name}
-              onChange={handleInputChange("name")}
+              onChange={handleInputChange('name')}
               error={validationErrors.name}
-              placeholder="Enter your Full Name"
-              disabled={isLoading}
-              autoComplete="name"
               required
+              disabled={isLoading}
             />
 
-            {/* Email */}
             <Input
-              id="email"
-              name="email"
-              type="email"
               label="Email"
+              type="email"
               value={formData.email}
-              onChange={handleInputChange("email")}
+              onChange={handleInputChange('email')}
               error={validationErrors.email}
-              placeholder="Enter your email"
-              disabled={isLoading}
-              autoComplete="email"
               required
+              disabled={isLoading}
             />
 
-            {/* Mobile Number */}
             <Input
-              id="mobile"
-              name="mobile"
-              type="tel"
               label="Mobile Number"
+              type="tel"
               value={formData.mobile}
-              onChange={handleInputChange("mobile")}
+              onChange={handleInputChange('mobile')}
               error={validationErrors.mobile}
-              placeholder="Enter your Mobile Number"
-              disabled={isLoading}
-              autoComplete="tel"
               required
+              disabled={isLoading}
             />
 
-            {/* Password */}
             <Input
-              id="password"
-              name="password"
-              type="password"
               label="Password"
+              type="password"
               value={formData.password}
-              onChange={handleInputChange("password")}
+              onChange={handleInputChange('password')}
               error={validationErrors.password}
-              placeholder="Enter your Password"
-              disabled={isLoading}
-              autoComplete="new-password"
               required
+              disabled={isLoading}
             />
 
-            {/* Confirm Password */}
             <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
               label="Confirm Password"
+              type="password"
               value={formData.confirmPassword}
-              onChange={handleInputChange("confirmPassword")}
+              onChange={handleInputChange('confirmPassword')}
               error={validationErrors.confirmPassword}
-              placeholder="Confirm password"
-              disabled={isLoading}
-              autoComplete="new-password"
               required
+              disabled={isLoading}
+            />
+
+            <Select
+              label="Role"
+              value={formData.role}
+              onChange={handleInputChange('role')}
+              options={roleOptions}
+              required
+              disabled={isLoading}
             />
 
             <Button
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={isLoading}
               fullWidth
+              loading={isLoading}
+              disabled={isLoading}
             >
-              Create New Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <Button
               type="button"
-              onClick={handleGoogleSignup}
-              variant="secondary"
-              size="lg"
-              disabled={isLoading}
+              variant="outline"
               fullWidth
+              onClick={handleGoogleSignup}
+              disabled={isLoading}
             >
-              Signing with Google
+              Sign up with Google
             </Button>
-          </form>
 
-          <div className="mt-6 text-center text-xs text-gray-500">
-            Existing User?{" "}
-            <Link
-              to="/login"
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              Login
-            </Link>
-          </div>
+            <div className="text-center">
+              <span className="text-sm text-gray-600">
+                Existing User?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Login
+                </Link>
+              </span>
+            </div>
+          </form>
         </div>
       </div>
     </div>

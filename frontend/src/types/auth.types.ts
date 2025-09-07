@@ -3,12 +3,12 @@ export interface User {
   readonly email: string;
   readonly name: string;
   readonly role: UserRole;
-  readonly isVerified: boolean;
-  readonly createdAt: string;
-  readonly updatedAt: string;
+  readonly status: "Active" | "Inactive" | "Suspended";
+  readonly createdAt?: string;
+  readonly updatedAt?: string;
 }
 
-export type UserRole = 'rider' | 'driver' | 'admin';
+export type UserRole = "Rider" | "Driver" | "Admin";
 
 export interface LoginCredentials {
   readonly email: string;
@@ -37,7 +37,7 @@ export interface AuthState {
   readonly passwordResetEmailSent: boolean;
 }
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T = unknown> {
   readonly success: boolean;
   readonly data?: T;
   readonly message?: string;
@@ -62,7 +62,10 @@ export interface SignupResponse {
 }
 
 export interface RefreshTokenResponse {
-  readonly token: string;
+  readonly success: boolean;
+  readonly data: {
+    accessToken: string;
+  };
 }
 
 export interface VerifyOTPCredentials {

@@ -5,8 +5,6 @@ import { verifyOTP, resendOTP, clearError } from '@/redux/slices/authSlice';
 import { validateOTP } from '@/utils';
 import { OTP_CONFIG, ROLE_ROUTES } from '@/constants';
 import Button from '@/components/common/Button';
-import steerigoLogoBanner from '@/assets/images/SteeriGoHorizontal.png';
-// import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface OTPVerificationProps {
   readonly email: string;
@@ -62,13 +60,13 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ email, onBack }) => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent): void => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent): void => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
     e.preventDefault();
     const pastedData = e.clipboardData
       .getData('text')
@@ -116,97 +114,97 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ email, onBack }) => {
   const isOTPComplete = otp.every((digit) => digit !== '');
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="text-center mb-8">
-        <div className="flex flex-col items-center justify-center mb-8">
-          <img
-            src={steerigoLogoBanner}
-            alt="SteerGo Logo"
-            className="mb-2 max-h-16 w-auto"
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <div className="text-center mb-8">
+            <div className="mx-auto h-12 w-auto">
+              <div className="text-2xl font-bold text-gray-900">Steerigo</div>
+            </div>
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+              Verify Your Email
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We've sent a {OTP_CONFIG.LENGTH}-digit verification code to
+            </p>
+            <p className="font-semibold text-gray-900">{email}</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* OTP Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Enter verification code
+              </label>
+              <div className="flex justify-center space-x-2" onPaste={handlePaste}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el): void => {
+                      inputRefs.current[index] = el;
+                    }}
+                    type="text"
+                    value={digit}
+                    onChange={(e): void => handleOTPChange(index, e.target.value)}
+                    onKeyDown={(e): void => handleKeyDown(index, e)}
+                    className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    maxLength={1}
+                    disabled={isLoading}
+                    inputMode="numeric"
+                    pattern="\d"
+                    autoComplete="off"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Error message */}
+            {error && (
+              <div className="text-center text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            {/* Submit button */}
+            <Button
+              type="submit"
+              fullWidth
+              loading={isLoading}
+              disabled={!isOTPComplete || isLoading}
+            >
+              {isLoading ? 'Verifying...' : 'Verify Email'}
+            </Button>
+
+            {/* Resend OTP */}
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Didn't receive the code?
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleResendOTP}
+                disabled={resendCooldown > 0}
+              >
+                {resendCooldown > 0
+                  ? `Resend in ${resendCooldown}s`
+                  : 'Resend Code'}
+              </Button>
+            </div>
+
+            {/* Back button */}
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBack}
+              >
+                Back to Signup
+              </Button>
+            </div>
+          </form>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Verify Your Email
-        </h2>
-        <p className="text-sm text-gray-600">
-          We've sent a {OTP_CONFIG.LENGTH}-digit verification code to
-        </p>
-        <p className="text-sm font-medium text-gray-900">{email}</p>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* OTP Input */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Enter verification code
-          </label>
-          <div className="flex justify-center space-x-2" onPaste={handlePaste}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el): void => {
-                  inputRefs.current[index] = el;
-                }}
-                type="text"
-                value={digit}
-                onChange={(e): void => handleOTPChange(index, e.target.value)}
-                onKeyDown={(e): void => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                maxLength={1}
-                disabled={isLoading}
-                inputMode="numeric"
-                pattern="\d"
-                autoComplete="off"
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="bg-error-50 border border-error-200 text-error-600 px-4 py-3 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Submit button */}
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          loading={isLoading}
-          disabled={!isOTPComplete}
-          fullWidth
-        >
-          Verify Email
-        </Button>
-
-        {/* Resend OTP */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-          <button
-            type="button"
-            onClick={(): Promise<void> => handleResendOTP()}
-            disabled={resendCooldown > 0 || isLoading}
-            className="text-sm font-medium text-primary-600 hover:text-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {resendCooldown > 0
-              ? `Resend code in ${resendCooldown}s`
-              : 'Resend verification code'}
-          </button>
-        </div>
-
-        {/* Back button */}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={onBack}
-            className="text-sm text-gray-600 hover:text-gray-500"
-          >
-            ← Back to signup
-          </button>
-        </div>
-      </form>
     </div>
   );
 };

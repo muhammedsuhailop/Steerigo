@@ -24,7 +24,7 @@ import type {
   VerifyOTPCredentials,
   RefreshTokenResponse,
 } from "@/types";
-import { log } from '@/utils/logger';
+import { log } from "@/utils/logger";
 
 const initialState: AuthState = {
   user: null,
@@ -39,8 +39,18 @@ const initialState: AuthState = {
   passwordResetEmailSent: false,
 };
 
-function isUserRole(value: string): value is UserRole {
-  return ["rider", "driver", "admin"].includes(value);
+function normalizeRole(role: string): UserRole {
+  // Handle different case variations from the API
+  const roleMap: Record<string, UserRole> = {
+    rider: "Rider",
+    Rider: "Rider",
+    driver: "Driver",
+    Driver: "Driver",
+    admin: "Admin",
+    Admin: "Admin",
+  };
+
+  return roleMap[role] || "Rider";
 }
 
 // Async Thunks with proper error handling
@@ -48,32 +58,33 @@ export const loginUser = createAsyncThunk<
   LoginResponse,
   LoginCredentials,
   { rejectValue: string }
->("/api/auth/login", async (credentials, { rejectWithValue }) => {
+>("/auth/login", async (credentials, { rejectWithValue }) => {
   try {
-    const response = await authService.login(credentials);
-    const rawRole = response.data.user.role.toLowerCase();
+    log.info("Login attempt", { email: credentials.email });
 
+    const response = await authService.login(credentials);
+
+    // Normalize the role to match our UserRole type
     const normalizedResponse: LoginResponse = {
       ...response,
       data: {
         ...response.data,
         user: {
           ...response.data.user,
-          role: isUserRole(rawRole) ? rawRole : "rider",
+          role: normalizeRole(response.data.user.role),
         },
       },
     };
 
-    log.debug('Login response', normalizedResponse);
-
+    // log.debug("Login response", normalizedResponse);
     return normalizedResponse;
   } catch (error) {
+    console.error("📝 loginUser thunk catch:", {
+      message: error.message,
+      responseData: error.response?.data,
+      status: error.response?.status,
+    });
 
-    console.error('📝 loginUser thunk catch:', {
-        message: error.message,
-        responseData: error.response?.data,
-        status: error.response?.status
-      });
     const message = error instanceof Error ? error.message : "Login failed";
     return rejectWithValue(message);
   }
@@ -83,7 +94,7 @@ export const signupUser = createAsyncThunk<
   SignupResponse,
   SignupCredentials,
   { rejectValue: string }
->("/api/auth/signup", async (credentials, { rejectWithValue }) => {
+>("/auth/signup", async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.signup(credentials);
     return response;
@@ -97,7 +108,7 @@ export const verifyOTP = createAsyncThunk<
   LoginResponse,
   VerifyOTPCredentials,
   { rejectValue: string }
->("/api/auth/signup/verify", async (credentials, { rejectWithValue }) => {
+>("/auth/verify", async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.verifyOTP(credentials);
     return response;
@@ -142,7 +153,7 @@ export const refreshToken = createAsyncThunk<
   RefreshTokenResponse,
   void,
   { rejectValue: string }
->("/api/auth/refresh", async (_, { rejectWithValue, getState }) => {
+>("/auth/refresh", async (_, { rejectWithValue, getState }) => {
   try {
     const state = getState() as { auth: AuthState };
     const refreshToken = state.auth.refreshToken;
@@ -160,8 +171,8 @@ export const refreshToken = createAsyncThunk<
   }
 });
 
-export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
-  "/api/auth/logout",
+export const logoutUser = createAsyncThunk(
+  "/auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
@@ -176,7 +187,7 @@ export const getCurrentUser = createAsyncThunk<
   User,
   void,
   { rejectValue: string }
->("/api/auth/logout", async (_, { rejectWithValue }) => {
+>("/auth/me", async (_, { rejectWithValue }) => {
   try {
     const user = await authService.getCurrentUser();
     return user;
@@ -262,7 +273,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log('loginUser.fulfilled payload:', action.payload);   
+        console.log("loginUser.fulfilled payload:", action.payload);
+
         state.user = action.payload.data.user;
         state.token = action.payload.data.accessToken;
         state.refreshToken = action.payload.data.refreshToken;
@@ -277,7 +289,6 @@ const authSlice = createSlice({
         );
         setStoredUser(action.payload.data.user);
       })
-
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || "Login failed";
@@ -318,7 +329,10 @@ const authSlice = createSlice({
         state.pendingVerificationEmail = null;
         state.error = null;
 
-        setStoredTokens(action.payload.data.accessToken, action.payload.data.refreshToken);
+        setStoredTokens(
+          action.payload.data.accessToken,
+          action.payload.data.refreshToken
+        );
         setStoredUser(action.payload.data.user);
       })
       .addCase(verifyOTP.rejected, (state, action) => {
@@ -357,10 +371,12 @@ const authSlice = createSlice({
 
       // Refresh token cases
       .addCase(refreshToken.fulfilled, (state, action) => {
-        state.token = action.payload.token;
+        if (action.payload.success && action.payload.data) {
+          state.token = action.payload.data.accessToken;
 
-        if (state.token) {
-          setStoredTokens(state.token, state.refreshToken || "");
+          if (state.token && state.refreshToken) {
+            setStoredTokens(state.token, state.refreshToken);
+          }
         }
       })
       .addCase(refreshToken.rejected, (state) => {

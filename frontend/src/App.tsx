@@ -10,7 +10,7 @@ import { store } from "@/redux/store";
 import { initializeAuth } from "@/redux/slices/authSlice";
 
 // Components
-// import ProtectedRoute from '@/components/common/ProtectedRoute';
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 // Auth Components
 import LoginForm from "@/features/auth/components/LoginForm";
@@ -21,10 +21,27 @@ import LandingPage from "@/pages/LandingPage";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 
-// Dashboard placeholders (you'll implement these later)
-// const RiderDashboard = React.lazy(() => import('@/features/rider/pages/RiderDashboard'));
-// const DriverDashboard = React.lazy(() => import('@/features/driver/pages/DriverDashboard'));
-// const AdminDashboard = React.lazy(() => import('@/features/admin/pages/AdminDashboard'));
+// Placeholder dashboard components
+const RiderDashboard: React.FC = () => (
+  <div className="p-8">
+    <h1 className="text-2xl font-bold">Rider Dashboard</h1>
+    <p>Welcome to your rider dashboard!</p>
+  </div>
+);
+
+const DriverDashboard: React.FC = () => (
+  <div className="p-8">
+    <h1 className="text-2xl font-bold">Driver Dashboard</h1>
+    <p>Welcome to your driver dashboard!</p>
+  </div>
+);
+
+const AdminDashboard: React.FC = () => (
+  <div className="p-8">
+    <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+    <p>Welcome to your admin dashboard!</p>
+  </div>
+);
 
 function AppContent(): React.JSX.Element {
   useEffect(() => {
@@ -34,55 +51,47 @@ function AppContent(): React.JSX.Element {
 
   return (
     <Router>
-      <React.Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          </div>
-        }
-      >
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/signup" element={<SignupForm />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupForm />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-          {/* Protected Routes - Rider */}
-          {/* <Route
-            path="/rider/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['rider']}>
-                <RiderDashboard />
-              </ProtectedRoute>
-            }
-          /> */}
+        {/* Protected Routes - Rider */}
+        <Route
+          path="/user/home"
+          element={
+            <ProtectedRoute allowedRoles={["Rider"]}>
+              <RiderDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Protected Routes - Driver */}
-          {/* <Route
-            path="/driver/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['driver']}>
-                <DriverDashboard />
-              </ProtectedRoute>
-            }
-          /> */}
+        {/* Protected Routes - Driver */}
+        <Route
+          path="/driver/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["Driver"]}>
+              <DriverDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Protected Routes - Admin */}
-          {/* <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          /> */}
+        {/* Protected Routes - Admin */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Fallback Routes */}
-          <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-      </React.Suspense>
+        {/* Fallback Routes */}
+        <Route path="/404" element={<NotFoundPage />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
     </Router>
   );
 }

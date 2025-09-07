@@ -10,7 +10,7 @@ export interface PaginatedResponse<T> {
   readonly meta: PaginationMeta;
 }
 
-export type LoadingState = 'idle' | 'pending' | 'fulfilled' | 'rejected';
+export type LoadingState = "idle" | "pending" | "fulfilled" | "rejected";
 
 export interface FormFieldProps {
   readonly label?: string;
