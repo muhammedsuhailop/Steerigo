@@ -19,35 +19,15 @@ interface AuthServiceResponse<T = unknown> {
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    console.log("🔍 authService.login called with:", {
-      email: credentials.email,
-    });
-
     try {
       const response = await apiClient.post<LoginResponse>(
         API_ENDPOINTS.AUTH.LOGIN,
         credentials
       );
 
-      console.log("✅ authService.login success response:", response);
-
-      if (!response.success || !response.data) {
-        throw new Error(response.message || "Login failed");
-      }
-
       return response;
-    } catch (error) {
-      console.error("❌ authService.login error:", error);
-
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-
-      if (error.message) {
-        throw new Error(error.message);
-      }
-
-      throw new Error("Login failed");
+    } catch (error: any) {
+      throw this.handleAuthError(error);
     }
   }
 
@@ -78,10 +58,6 @@ class AuthService {
         API_ENDPOINTS.AUTH.VERIFY_OTP,
         credentials
       );
-
-      if (!response.data) {
-        throw new Error("Invalid response format");
-      }
 
       return response;
     } catch (error) {
@@ -116,7 +92,7 @@ class AuthService {
   }
 
   async confirmPasswordReset(
-    credentials: ResetPasswordConfirmCredentials
+    credentials: ResetPasswordConfirmCredentials & { email: string }
   ): Promise<AuthServiceResponse> {
     try {
       const response = await apiClient.post<AuthServiceResponse>(
@@ -150,7 +126,6 @@ class AuthService {
         await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
       }
     } catch (error) {
-      // Even if logout API fails, we should continue with local cleanup
       console.error("Logout API failed:", error);
     }
   }

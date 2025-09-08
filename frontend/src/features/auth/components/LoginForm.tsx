@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/redux/store';
-import { loginUser, clearError } from '@/redux/slices/authSlice';
-import type { LoginCredentials } from '@/types';
-import { validateEmail, sanitizeInput } from '@/utils';
-import { ROLE_ROUTES } from '@/constants';
-import { log } from '@/utils/logger';
-import Button from '@/components/common/Button';
-import Input from '@/components/forms/Input';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { loginUser, clearError } from "@/redux/slices/authSlice";
+import type { LoginCredentials } from "@/types";
+import { validateEmail, sanitizeInput } from "@/utils";
+import { ROLE_ROUTES } from "@/constants";
+import { log } from "@/utils/logger";
+import Button from "@/components/common/Button";
+import Input from "@/components/forms/Input";
+import TitleLogo from "@/assets/images/SteeriGoHorizontal.png";
 
 interface LoginFormData {
   readonly email: string;
@@ -29,8 +30,8 @@ const LoginForm: React.FC = () => {
   );
 
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
@@ -49,7 +50,7 @@ const LoginForm: React.FC = () => {
       const from = (location.state as { from?: { pathname: string } })?.from
         ?.pathname;
       const defaultRoute = ROLE_ROUTES[role];
-      log.info('Login success, redirecting', { role, from });
+      log.info("Login success, redirecting", { role, from });
       navigate(from || defaultRoute, { replace: true });
     }
   }, [isAuthenticated, role, navigate, location]);
@@ -58,17 +59,17 @@ const LoginForm: React.FC = () => {
     const errors: ValidationErrors = {};
 
     if (!formData.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
-      errors.email = 'Please enter a valid email';
+      errors.email = "Please enter a valid email";
     }
 
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
     }
 
     setValidationErrors(errors);
-    log.debug('Validation result', errors);
+    log.debug("Validation result", errors);
     return Object.keys(errors).length === 0;
   };
 
@@ -76,7 +77,7 @@ const LoginForm: React.FC = () => {
     (field: keyof LoginFormData) =>
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       const value =
-        field === 'email'
+        field === "email"
           ? sanitizeInput(e.target.value.toLowerCase())
           : e.target.value;
 
@@ -107,18 +108,18 @@ const LoginForm: React.FC = () => {
       password: formData.password,
     };
 
-    log.info('Login attempt', { email: formData.email });
+    log.info("Login attempt", { email: formData.email });
     try {
       await dispatch(loginUser(credentials)).unwrap();
     } catch (err: unknown) {
-      if (err instanceof Error) log.warn('Login failed', err.message);
-      else log.warn('Login failed');
+      if (err instanceof Error) log.warn("Login failed", err.message);
+      else log.warn("Login failed");
     }
   };
 
   const handleGoogleSignIn = (): void => {
     // Implement Google Sign-In logic
-    console.log('Google Sign-In clicked');
+    console.log("Google Sign-In clicked");
   };
 
   return (
@@ -128,15 +129,18 @@ const LoginForm: React.FC = () => {
         {/* Login Card */}
         <div className="bg-white p-8 rounded-lg shadow-md">
           {/* Logo and Title */}
-          <div className="text-center mb-8">
-            <div className="mx-auto h-12 w-auto">
-              <div className="text-2xl font-bold text-gray-900">Steerigo</div>
+          <div className="text-center mb-4">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex flex-col items-center justify-center mb-2">
+                <img
+                  src={TitleLogo}
+                  alt="SteerGo Logo"
+                  className="mb-1 max-h-16 w-auto"
+                />
+              </div>
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Login
-            </h2>
+            <h2 className="text-3xl font-semibold text-gray-900 mb-6">Login</h2>
           </div>
-
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
@@ -151,7 +155,7 @@ const LoginForm: React.FC = () => {
               label="Email"
               type="email"
               value={formData.email}
-              onChange={handleInputChange('email')}
+              onChange={handleInputChange("email")}
               error={validationErrors.email}
               required
               disabled={isLoading}
@@ -162,7 +166,7 @@ const LoginForm: React.FC = () => {
               label="Password"
               type="password"
               value={formData.password}
-              onChange={handleInputChange('password')}
+              onChange={handleInputChange("password")}
               error={validationErrors.password}
               required
               disabled={isLoading}
@@ -179,7 +183,10 @@ const LoginForm: React.FC = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   Remember me
                 </label>
               </div>
@@ -201,7 +208,7 @@ const LoginForm: React.FC = () => {
               loading={isLoading}
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
 
             {/* Google Sign In */}
@@ -218,13 +225,16 @@ const LoginForm: React.FC = () => {
             {/* Sign Up Link */}
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Don't have an Account?{' '}
+                Don't have an Account?{" "}
                 <Link
                   to="/signup"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Click here
                 </Link>
+              </span>
+              <span className="text-sm text-gray-600">
+                Forgot password? <Link to="/forgot-password">Reset Here?</Link>
               </span>
             </div>
           </form>

@@ -17,6 +17,7 @@ import type {
   AuthState,
   LoginCredentials,
   SignupCredentials,
+  ResetPasswordConfirmCredentials,
   User,
   UserRole,
   LoginResponse,
@@ -40,7 +41,6 @@ const initialState: AuthState = {
 };
 
 function normalizeRole(role: string): UserRole {
-  // Handle different case variations from the API
   const roleMap: Record<string, UserRole> = {
     rider: "Rider",
     Rider: "Rider",
@@ -64,7 +64,10 @@ export const loginUser = createAsyncThunk<
 
     const response = await authService.login(credentials);
 
-    // Normalize the role to match our UserRole type
+    if (!response.success || !response.data) {
+      return rejectWithValue(response.message || "Login failed");
+    }
+
     const normalizedResponse: LoginResponse = {
       ...response,
       data: {
@@ -76,15 +79,9 @@ export const loginUser = createAsyncThunk<
       },
     };
 
-    // log.debug("Login response", normalizedResponse);
     return normalizedResponse;
-  } catch (error) {
-    console.error("📝 loginUser thunk catch:", {
-      message: error.message,
-      responseData: error.response?.data,
-      status: error.response?.status,
-    });
-
+  } catch (error: any) {
+    log.error("Login failed", error.message);
     const message = error instanceof Error ? error.message : "Login failed";
     return rejectWithValue(message);
   }
@@ -97,8 +94,13 @@ export const signupUser = createAsyncThunk<
 >("/auth/signup", async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.signup(credentials);
+
+    if (!response.success) {
+      return rejectWithValue(response.message || "Signup failed");
+    }
+
     return response;
-  } catch (error) {
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : "Signup failed";
     return rejectWithValue(message);
   }
@@ -111,8 +113,13 @@ export const verifyOTP = createAsyncThunk<
 >("/auth/verify", async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.verifyOTP(credentials);
+
+    if (!response.success || !response.data) {
+      return rejectWithValue(response.message || "OTP verification failed");
+    }
+
     return response;
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error ? error.message : "OTP verification failed";
     return rejectWithValue(message);
@@ -126,8 +133,13 @@ export const resendOTP = createAsyncThunk<
 >("auth/resend-otp", async (email, { rejectWithValue }) => {
   try {
     const response = await authService.resendOTP(email);
+
+    if (!response.success) {
+      return rejectWithValue(response.message || "Failed to resend OTP");
+    }
+
     return { success: response.success, message: response.message };
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error ? error.message : "Failed to resend OTP";
     return rejectWithValue(message);
@@ -141,10 +153,37 @@ export const requestPasswordReset = createAsyncThunk<
 >("auth/requestPasswordReset", async (email, { rejectWithValue }) => {
   try {
     const response = await authService.requestPasswordReset(email);
+
+    if (!response.success) {
+      return rejectWithValue(
+        response.message || "Password reset request failed"
+      );
+    }
+
     return { success: response.success, message: response.message };
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error ? error.message : "Password reset request failed";
+    return rejectWithValue(message);
+  }
+});
+
+export const resetPassword = createAsyncThunk<
+  { success: boolean; message: string },
+  ResetPasswordConfirmCredentials & { email: string },
+  { rejectValue: string }
+>("auth/resetPassword", async (credentials, { rejectWithValue }) => {
+  try {
+    const response = await authService.confirmPasswordReset(credentials);
+
+    if (!response.success) {
+      return rejectWithValue(response.message || "Password reset failed");
+    }
+
+    return response;
+  } catch (error: any) {
+    const message =
+      error instanceof Error ? error.message : "Password reset failed";
     return rejectWithValue(message);
   }
 });
@@ -164,7 +203,7 @@ export const refreshToken = createAsyncThunk<
 
     const response = await authService.refreshToken(refreshToken);
     return response;
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error ? error.message : "Token refresh failed";
     return rejectWithValue(message);
@@ -176,27 +215,12 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
-    } catch (error) {
+    } catch (error: any) {
       const message = error instanceof Error ? error.message : "Logout failed";
       return rejectWithValue(message);
     }
   }
 );
-
-export const getCurrentUser = createAsyncThunk<
-  User,
-  void,
-  { rejectValue: string }
->("/auth/me", async (_, { rejectWithValue }) => {
-  try {
-    const user = await authService.getCurrentUser();
-    return user;
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to get user";
-    return rejectWithValue(message);
-  }
-});
 
 const authSlice = createSlice({
   name: "auth",
@@ -223,7 +247,6 @@ const authSlice = createSlice({
       state.requiresOTPVerification = false;
       state.pendingVerificationEmail = null;
 
-      // Persist to storage
       setStoredTokens(token, refreshToken);
       setStoredUser(user);
     },
@@ -238,7 +261,6 @@ const authSlice = createSlice({
       state.pendingVerificationEmail = null;
       state.passwordResetEmailSent = false;
 
-      // Clear storage
       clearStoredTokens();
       clearStoredUser();
     },
@@ -273,8 +295,6 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log("loginUser.fulfilled payload:", action.payload);
-
         state.user = action.payload.data.user;
         state.token = action.payload.data.accessToken;
         state.refreshToken = action.payload.data.refreshToken;
@@ -303,7 +323,6 @@ const authSlice = createSlice({
       .addCase(signupUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
-
         if (action.payload.requiresVerification) {
           state.requiresOTPVerification = true;
         }
@@ -369,6 +388,21 @@ const authSlice = createSlice({
         state.error = action.payload || "Password reset request failed";
       })
 
+      // Reset password cases
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+        state.passwordResetEmailSent = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Password reset failed";
+      })
+
       // Refresh token cases
       .addCase(refreshToken.fulfilled, (state, action) => {
         if (action.payload.success && action.payload.data) {
@@ -404,21 +438,6 @@ const authSlice = createSlice({
 
         clearStoredTokens();
         clearStoredUser();
-      })
-
-      // Get current user cases
-      .addCase(getCurrentUser.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-        state.role = action.payload.role;
-        state.isAuthenticated = true;
-      })
-      .addCase(getCurrentUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Failed to get user";
       });
   },
 });

@@ -61,9 +61,25 @@ class ApiClient {
           _retry?: boolean;
         };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip token refresh for auth endpoints
+        const authEndpoints = [
+          "/api/auth/login",
+          "/api/auth/signup",
+          "/api/auth/forgot-password",
+          "/api/auth/reset-password",
+          "/api/auth/verify-otp",
+          "/apiauth/resend-otp",
+        ];
+        const isAuthEndpoint = authEndpoints.some((endpoint) =>
+          originalRequest.url?.includes(endpoint)
+        );
+
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !isAuthEndpoint
+        ) {
           if (this.isRefreshing) {
-            // Queue the request
             return new Promise((resolve) => {
               this.refreshSubscribers.push((token: string) => {
                 if (originalRequest.headers) {
@@ -124,7 +140,9 @@ class ApiClient {
       success: boolean;
       data: { accessToken: string };
     }>(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/auth/refresh`,
+      `${
+        import.meta.env.VITE_API_URL || "http://localhost:3000"
+      }/api/auth/refresh`,
       { refreshToken },
       {
         headers: { "Content-Type": "application/json" },

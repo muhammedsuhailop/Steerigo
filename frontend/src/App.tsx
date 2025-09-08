@@ -15,6 +15,7 @@ import ProtectedRoute from "@/components/common/ProtectedRoute";
 // Auth Components
 import LoginForm from "@/features/auth/components/LoginForm";
 import SignupForm from "@/features/auth/components/SignupForm";
+import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 
 // Pages
 import LandingPage from "@/pages/LandingPage";
@@ -25,7 +26,7 @@ import NotFoundPage from "@/pages/NotFoundPage";
 const RiderDashboard: React.FC = () => (
   <div className="p-8">
     <h1 className="text-2xl font-bold">Rider Dashboard</h1>
-    <p>Welcome to your rider dashboard!</p>
+    <p>Welcome to your user home page!</p>
   </div>
 );
 
@@ -57,6 +58,7 @@ function AppContent(): React.JSX.Element {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
 
         {/* Protected Routes - Rider */}
         <Route
