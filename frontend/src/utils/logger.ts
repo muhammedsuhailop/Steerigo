@@ -1,17 +1,27 @@
-import { logger, consoleTransport } from 'react-native-logs';
+interface Logger {
+  debug: (message: string, ...args: unknown[]) => void;
+  info: (message: string, ...args: unknown[]) => void;
+  warn: (message: string, ...args: unknown[]) => void;
+  error: (message: string, ...args: unknown[]) => void;
+}
 
-export const log = logger.createLogger({
-  severity: import.meta.env.DEV ? 'debug' : 'error',
-  transport: consoleTransport,
-  transportOptions: {
-    colors: {
-      info: 'blueBright',
-      warn: 'yellowBright',
-      error: 'redBright',
+const createLogger = (): Logger => {
+  const isDev = import.meta.env.DEV;
+
+  return {
+    debug: (message: string, ...args: unknown[]) => {
+      if (isDev) console.debug(`[DEBUG] ${message}`, ...args);
     },
-  },
-  async: true,
-  dateFormat: 'time',
-  printLevel: true,
-  printDate: true,
-});
+    info: (message: string, ...args: unknown[]) => {
+      if (isDev) console.info(`[INFO] ${message}`, ...args);
+    },
+    warn: (message: string, ...args: unknown[]) => {
+      console.warn(`[WARN] ${message}`, ...args);
+    },
+    error: (message: string, ...args: unknown[]) => {
+      console.error(`[ERROR] ${message}`, ...args);
+    },
+  };
+};
+
+export const log = createLogger();

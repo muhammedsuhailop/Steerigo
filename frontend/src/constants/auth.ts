@@ -19,7 +19,7 @@ export const OTP_CONFIG = {
 } as const;
 
 export const ROLE_ROUTES = {
-  rider: '/user/home',
-  driver: '/driver/dashboard',
-  admin: '/admin/dashboard',
+  Rider: '/user/home',
+  Driver: '/driver/dashboard',
+  Admin: '/admin/dashboard',
 } as const;

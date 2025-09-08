@@ -1,12 +1,12 @@
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/api/auth/login',
-    SIGNUP: '/api/auth/signup',
-    VERIFY_OTP: '/api/auth/verify-otp',
+    SIGNUP: 'api/auth/signup',
+    VERIFY_OTP: '/api/auth/signup/verify',
     RESEND_OTP: '/api/auth/resend-otp',
     REFRESH: '/api/auth/refresh',
     LOGOUT: '/api/auth/logout',
-    ME: '/api/auth/me',
+    ME: '/auth/me',
     RESET_PASSWORD: '/api/auth/forgot-password',
     RESET_PASSWORD_CONFIRM: '/api/auth/reset-password',
   },
