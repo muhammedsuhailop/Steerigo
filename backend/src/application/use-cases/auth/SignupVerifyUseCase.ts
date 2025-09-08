@@ -4,7 +4,7 @@ import { IOtpService } from '@domain/services/IOtpService';
 import { ITokenService } from '@domain/services/ITokenService';
 import { IEmailService } from '@domain/services/IEmailService';
 import { OtpExpiredError, MaxOtpAttemptsError, DomainError } from '@domain/errors';
-import { SignupVerifyDto } from '../dto/SignupVerifyDto';
+import { SignupVerifyDto } from '../../dto/auth/SignupVerifyDto';
 import { RefreshToken } from '@domain/entities/RefreshToken';
 import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository';
 import { Result } from '@shared/utils/Result';

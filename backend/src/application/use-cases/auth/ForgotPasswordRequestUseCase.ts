@@ -3,7 +3,7 @@ import { IUserRepository } from '@domain/repositories/IUserRepository';
 import { IEmailService } from '@domain/services/IEmailService';
 import { IOtpService } from '@domain/services/IOtpService';
 import { DomainError } from '@domain/errors';
-import { ForgotPasswordRequestDto } from '../dto/ForgotPasswordRequestDto';
+import { ForgotPasswordRequestDto } from '../../dto/auth/ForgotPasswordRequestDto';
 import { Result } from '@shared/utils/Result';
 
 @injectable()

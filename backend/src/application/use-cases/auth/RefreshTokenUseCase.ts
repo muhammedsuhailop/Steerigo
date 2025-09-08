@@ -4,7 +4,7 @@ import { IUserRepository } from '@domain/repositories/IUserRepository';
 import { ITokenService } from '@domain/services/ITokenService';
 import { RefreshTokenExpiredError, RefreshTokenRevokedError, DomainError } from '@domain/errors';
 import { RefreshToken } from '@domain/entities/RefreshToken';
-import { RefreshTokenDto } from '../dto/RefreshTokenDto';
+import { RefreshTokenDto } from '../../dto/auth/RefreshTokenDto';
 import { Result } from '@shared/utils/Result';
 
 @injectable()
