@@ -8,6 +8,7 @@ import { API_TIMEOUT } from "@/constants";
 import {
   getStoredToken,
   getStoredRefreshToken,
+  setStoredTokens,
   clearStoredTokens,
 } from "@/utils";
 
@@ -25,7 +26,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
+      baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
       timeout: API_TIMEOUT,
       headers: {
         "Content-Type": "application/json",
@@ -60,10 +61,26 @@ class ApiClient {
           _retry?: boolean;
         };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip token refresh for auth endpoints
+        const authEndpoints = [
+          "/api/auth/login",
+          "/api/auth/signup",
+          "/api/auth/forgot-password",
+          "/api/auth/reset-password",
+          "/api/auth/verify-otp",
+          "/apiauth/resend-otp",
+        ];
+        const isAuthEndpoint = authEndpoints.some((endpoint) =>
+          originalRequest.url?.includes(endpoint)
+        );
+
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !isAuthEndpoint
+        ) {
           if (this.isRefreshing) {
-            // Queue the request
-            return new Promise<unknown>((resolve) => {
+            return new Promise((resolve) => {
               this.refreshSubscribers.push((token: string) => {
                 if (originalRequest.headers) {
                   originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -84,7 +101,10 @@ class ApiClient {
             }
 
             const response = await this.refreshTokenRequest(refreshToken);
-            const newToken = response.token;
+            const newToken = response.data.accessToken;
+
+            // Update stored tokens
+            setStoredTokens(newToken, refreshToken);
 
             // Process queued requests
             this.refreshSubscribers.forEach((callback) => callback(newToken));
@@ -115,11 +135,14 @@ class ApiClient {
 
   private async refreshTokenRequest(
     refreshToken: string
-  ): Promise<{ token: string }> {
-    const response = await axios.post<{ token: string }>(
+  ): Promise<{ success: boolean; data: { accessToken: string } }> {
+    const response = await axios.post<{
+      success: boolean;
+      data: { accessToken: string };
+    }>(
       `${
-        import.meta.env.VITE_API_URL || "http://localhost:3001/api"
-      }/auth/refresh`,
+        import.meta.env.VITE_API_URL || "http://localhost:3000"
+      }/api/auth/refresh`,
       { refreshToken },
       {
         headers: { "Content-Type": "application/json" },

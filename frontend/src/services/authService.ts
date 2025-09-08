@@ -7,12 +7,11 @@ import type {
   SignupResponse,
   RefreshTokenResponse,
   VerifyOTPCredentials,
-  //   ResetPasswordCredentials,
   ResetPasswordConfirmCredentials,
   User,
 } from "@/types";
 
-interface AuthServiceResponse<T> {
+interface AuthServiceResponse<T = unknown> {
   readonly success: boolean;
   readonly data?: T;
   readonly message: string;
@@ -20,24 +19,15 @@ interface AuthServiceResponse<T> {
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    console.log('🔍 authService.login called with:', credentials);
     try {
-      const response = await apiClient.post<AuthServiceResponse<LoginResponse>>(
+      const response = await apiClient.post<LoginResponse>(
         API_ENDPOINTS.AUTH.LOGIN,
         credentials
       );
 
-      console.log('✅ authService.login success response:', response);
-      if (!response.success || !response.data) {
-        throw new Error(response.message || "Login failed");
-      }
-      console.log('res at auth service',response);
-      return response.data;
-    } catch (error) {
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-      throw new Error(error.message || "Login failed");
+      return response;
+    } catch (error: any) {
+      throw this.handleAuthError(error);
     }
   }
 
@@ -46,6 +36,7 @@ class AuthService {
       const signupData = {
         name: credentials.name,
         email: credentials.email,
+        mobile: credentials.mobile,
         password: credentials.password,
         role: credentials.role,
       };
@@ -63,24 +54,20 @@ class AuthService {
 
   async verifyOTP(credentials: VerifyOTPCredentials): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post<AuthServiceResponse<LoginResponse>>(
+      const response = await apiClient.post<LoginResponse>(
         API_ENDPOINTS.AUTH.VERIFY_OTP,
         credentials
       );
 
-      if (!response.data) {
-        throw new Error("Invalid response format");
-      }
-
-      return response.data;
+      return response;
     } catch (error) {
       throw this.handleAuthError(error);
     }
   }
 
-  async resendOTP(email: string): Promise<AuthServiceResponse<null>> {
+  async resendOTP(email: string): Promise<AuthServiceResponse> {
     try {
-      const response = await apiClient.post<AuthServiceResponse<null>>(
+      const response = await apiClient.post<AuthServiceResponse>(
         API_ENDPOINTS.AUTH.RESEND_OTP,
         { email }
       );
@@ -91,11 +78,9 @@ class AuthService {
     }
   }
 
-  async requestPasswordReset(
-    email: string
-  ): Promise<AuthServiceResponse<null>> {
+  async requestPasswordReset(email: string): Promise<AuthServiceResponse> {
     try {
-      const response = await apiClient.post<AuthServiceResponse<null>>(
+      const response = await apiClient.post<AuthServiceResponse>(
         API_ENDPOINTS.AUTH.RESET_PASSWORD,
         { email }
       );
@@ -107,10 +92,10 @@ class AuthService {
   }
 
   async confirmPasswordReset(
-    credentials: ResetPasswordConfirmCredentials
-  ): Promise<AuthServiceResponse<null>> {
+    credentials: ResetPasswordConfirmCredentials & { email: string }
+  ): Promise<AuthServiceResponse> {
     try {
-      const response = await apiClient.post<AuthServiceResponse<null>>(
+      const response = await apiClient.post<AuthServiceResponse>(
         API_ENDPOINTS.AUTH.RESET_PASSWORD_CONFIRM,
         credentials
       );
@@ -138,10 +123,9 @@ class AuthService {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       if (refreshToken) {
-        await apiClient.post<void>(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+        await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
       }
     } catch (error) {
-      // Even if logout API fails, we should continue with local cleanup
       console.error("Logout API failed:", error);
     }
   }
