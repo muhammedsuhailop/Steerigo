@@ -78,7 +78,7 @@ export interface ResetPasswordCredentials {
 }
 
 export interface ResetPasswordConfirmCredentials {
-  readonly token: string;
+  // readonly token: string;
   readonly otp: string;
   readonly newPassword: string;
   readonly confirmPassword: string;

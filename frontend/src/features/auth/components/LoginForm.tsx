@@ -143,11 +143,13 @@ const LoginForm: React.FC = () => {
           <div className="text-center mb-4">
             <div className="flex items-center justify-center mb-4">
               <div className="flex flex-col items-center justify-center mb-2">
-                <img
-                  src={TitleLogo}
-                  alt="SteerGo Logo"
-                  className="mb-1 max-h-16 w-auto"
-                />
+                <Link to="/">
+                  <img
+                    src={TitleLogo}
+                    alt="SteeriGo Logo"
+                    className="mx-auto mb-4 max-h-16 w-auto"
+                  />
+                </Link>
               </div>
             </div>
             <h2 className="text-3xl font-semibold text-gray-900 mb-6">Login</h2>
@@ -204,7 +206,7 @@ const LoginForm: React.FC = () => {
 
               <div className="text-sm">
                 <Link
-                  to="/api/auth/forgot-password"
+                  to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Forgot Password?

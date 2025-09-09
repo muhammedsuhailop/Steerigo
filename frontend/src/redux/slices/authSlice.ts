@@ -150,7 +150,7 @@ export const requestPasswordReset = createAsyncThunk<
   { success: boolean; message: string },
   string,
   { rejectValue: string }
->("auth/requestPasswordReset", async (email, { rejectWithValue }) => {
+>("/api/auth/forgot-password", async (email, { rejectWithValue }) => {
   try {
     const response = await authService.requestPasswordReset(email);
 
@@ -172,7 +172,7 @@ export const resetPassword = createAsyncThunk<
   { success: boolean; message: string },
   ResetPasswordConfirmCredentials & { email: string },
   { rejectValue: string }
->("auth/resetPassword", async (credentials, { rejectWithValue }) => {
+>("/api/auth/reset-password", async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.confirmPasswordReset(credentials);
 
