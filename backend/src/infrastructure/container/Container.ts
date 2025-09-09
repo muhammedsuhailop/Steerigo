@@ -6,6 +6,7 @@ import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 import { IDriverRepository } from "@domain/repositories/driver/IDriverRepository";
 import { IDriverKycRepository } from "@domain/repositories/driver/IDriverKycRepository";
+import { MongoAdminUserRepository } from "../database/repositories/admin/MongoAdminUserRepository";
 
 // Domain Services
 import { IPasswordService } from "@domain/services/IPasswordService";
@@ -39,9 +40,13 @@ import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDri
 import { DriverController } from "@interface/controllers/driver/DriverController";
 import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
 import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
+import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
+import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
 
 // Interface Controllers
 import { AuthController } from "@interface/controllers/AuthController";
+import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
+import { IAdminUserRepository } from "@domain/repositories/admin/IAdminUserRepository";
 
 const container = new Container();
 
@@ -56,6 +61,9 @@ container
 container
   .bind<IDriverKycRepository>("IDriverKycRepository")
   .to(MongoDriverKycRepository);
+container
+  .bind<IAdminUserRepository>("IAdminUserRepository")
+  .to(MongoAdminUserRepository);
 
 // Service Bindings
 container.bind<IPasswordService>("IPasswordService").to(BcryptPasswordService);
@@ -81,9 +89,12 @@ container
 container.bind<RegisterDriverUseCase>(RegisterDriverUseCase).toSelf();
 container.bind<GoogleLoginUseCase>(GoogleLoginUseCase).toSelf();
 container.bind<GetGoogleAuthUrlUseCase>(GetGoogleAuthUrlUseCase).toSelf();
+container.bind<GetUsersUseCase>(GetUsersUseCase).toSelf();
+container.bind<UpdateUserStatusUseCase>(UpdateUserStatusUseCase).toSelf();
 
 // Controller Bindings
 container.bind<AuthController>(AuthController).toSelf();
 container.bind<DriverController>(DriverController).toSelf();
+container.bind<AdminUserController>(AdminUserController).toSelf();
 
 export { container };
