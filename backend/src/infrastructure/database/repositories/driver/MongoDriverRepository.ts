@@ -30,7 +30,7 @@ export class MongoDriverRepository implements IDriverRepository {
     if (!doc) return null;
 
     return Driver.reconstruct({
-      id: doc._id.toString(),
+      id: doc.id.toString(),
       userId: doc.userId,
       licenseNumber: doc.licenseNumber,
       licenseIssueDate: doc.licenseIssueDate,

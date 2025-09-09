@@ -12,6 +12,7 @@ import { IPasswordService } from "@domain/services/IPasswordService";
 import { IEmailService } from "@domain/services/IEmailService";
 import { IOtpService } from "@domain/services/IOtpService";
 import { ITokenService } from "@domain/services/ITokenService";
+import { IGoogleAuthService } from "@domain/services/IGoogleAuthService";
 
 // Infrastructure Implementations
 import { MongoUserRepository } from "../database/repositories/MongoUserRepository";
@@ -22,6 +23,7 @@ import { JwtTokenService } from "../services/JwtTokenService";
 import { MongoRefreshTokenRepository } from "../database/repositories/MongoRefreshTokenRepository";
 import { MongoDriverRepository } from "../database/repositories/driver/MongoDriverRepository";
 import { MongoDriverKycRepository } from "../database/repositories/driver/MongoDriverKycRepository";
+import { GoogleAuthService } from "../services/GoogleAuthService";
 
 // Application Use Cases
 import { SignupRequestUseCase } from "@application/use-cases/auth/SignupRequestUseCase";
@@ -35,6 +37,8 @@ import { ForgotPasswordRequestUseCase } from "@application/use-cases";
 import { ForgotPasswordVerifyUseCase } from "@application/use-cases";
 import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { DriverController } from "@interface/controllers/driver/DriverController";
+import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
+import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
 
 // Interface Controllers
 import { AuthController } from "@interface/controllers/AuthController";
@@ -58,6 +62,7 @@ container.bind<IPasswordService>("IPasswordService").to(BcryptPasswordService);
 container.bind<IEmailService>("IEmailService").to(NodemailerEmailService);
 container.bind<IOtpService>("IOtpService").to(OtpGeneratorService);
 container.bind<ITokenService>("ITokenService").to(JwtTokenService);
+container.bind<IGoogleAuthService>("IGoogleAuthService").to(GoogleAuthService);
 
 // Use Case Bindings
 container.bind<SignupRequestUseCase>(SignupRequestUseCase).toSelf();
@@ -74,6 +79,8 @@ container
   .bind<ForgotPasswordVerifyUseCase>(ForgotPasswordVerifyUseCase)
   .toSelf();
 container.bind<RegisterDriverUseCase>(RegisterDriverUseCase).toSelf();
+container.bind<GoogleLoginUseCase>(GoogleLoginUseCase).toSelf();
+container.bind<GetGoogleAuthUrlUseCase>(GetGoogleAuthUrlUseCase).toSelf();
 
 // Controller Bindings
 container.bind<AuthController>(AuthController).toSelf();

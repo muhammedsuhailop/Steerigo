@@ -100,4 +100,12 @@ router.post(
   (req: Request, res: Response) => authController.forgotPasswordVerify(req, res)
 );
 
+// GET /api/auth/google - Get Google OAuth URL
+router.get("/google", (req, res) => authController.getGoogleAuthUrl(req, res));
+
+// GET /api/auth/google/callback - Handle Google OAuth callback
+router.get("/google/callback", (req, res) =>
+  authController.googleCallback(req, res)
+);
+
 export { router as authRoutes };

@@ -11,6 +11,8 @@ import { RefreshTokenUseCase } from "@application/use-cases/auth/RefreshTokenUse
 import { LogoutUseCase } from "@application/use-cases/auth/LogoutUseCase";
 import { ForgotPasswordRequestUseCase } from "@application/use-cases";
 import { ForgotPasswordVerifyUseCase } from "@application/use-cases";
+import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
+import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
 
 import { SignupRequestDto } from "@application/dto/auth/SignupRequestDto";
 import { SignupVerifyDto } from "@application/dto/auth/SignupVerifyDto";
@@ -20,6 +22,7 @@ import { UpdatePasswordDto } from "@application/dto/auth/UpdatePasswordDto";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { ForgotPasswordRequestDto } from "@application/dto";
 import { ForgotPasswordVerifyDto } from "@application/dto";
+import { GoogleLoginDto } from "@application/dto/auth/GoogleLoginDto";
 
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -41,7 +44,10 @@ export class AuthController {
     @inject(ForgotPasswordRequestUseCase)
     private forgotPasswordRequestUseCase: ForgotPasswordRequestUseCase,
     @inject(ForgotPasswordVerifyUseCase)
-    private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase
+    private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase,
+    @inject(GoogleLoginUseCase) private googleLoginUseCase: GoogleLoginUseCase,
+    @inject(GetGoogleAuthUrlUseCase)
+    private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase
   ) {}
 
   async signupRequest(req: Request, res: Response): Promise<void> {
@@ -493,6 +499,72 @@ export class AuthController {
         message: "Internal server error",
       };
       res.status(500).json(response);
+    }
+  }
+
+  // Get Google OAuth URL
+  async getGoogleAuthUrl(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.getGoogleAuthUrlUseCase.execute();
+
+      if (result.isFailure()) {
+        const response: ApiResponse = {
+          success: false,
+          message: result.getError().message,
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        message: "Google auth URL generated successfully",
+        data: result.getValue(),
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      Logger.error("Error generating Google auth URL", error);
+      const response: ApiResponse = {
+        success: false,
+        message: "Internal server error",
+      };
+      res.status(500).json(response);
+    }
+  }
+
+  /// Handle Google OAuth callback
+  async googleCallback(req: Request, res: Response): Promise<void> {
+    try {
+      const dto = new GoogleLoginDto(req.query);
+      const result = await this.googleLoginUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        // Redirect to frontend with error
+        const frontendUrl = `${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(error.message)}`;
+        res.redirect(frontendUrl);
+        return;
+      }
+
+      const data = result.getValue();
+
+      const frontendUrl =
+        `${process.env.FRONTEND_URL}/auth/callback?` +
+        `accessToken=${encodeURIComponent(data.accessToken)}` +
+        `&refreshToken=${encodeURIComponent(data.refreshToken)}` +
+        `&isNewUser=${data.isNewUser}`;
+
+      res.redirect(frontendUrl);
+
+      Logger.info("Google login completed successfully", {
+        email: data.user.email,
+        isNewUser: data.isNewUser,
+      });
+    } catch (error) {
+      Logger.error("Error in Google callback", error);
+      const frontendUrl = `${process.env.FRONTEND_URL}/login?error=authentication_failed`;
+      res.redirect(frontendUrl);
     }
   }
 }
