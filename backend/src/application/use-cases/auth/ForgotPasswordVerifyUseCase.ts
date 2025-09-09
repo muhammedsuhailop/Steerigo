@@ -4,7 +4,7 @@ import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepos
 import { IOtpService } from '@domain/services/IOtpService';
 import { IPasswordService } from '@domain/services/IPasswordService';
 import { OtpExpiredError, MaxOtpAttemptsError, DomainError } from '@domain/errors';
-import { ForgotPasswordVerifyDto } from '../dto/ForgotPasswordVerifyDto';
+import { ForgotPasswordVerifyDto } from '../../dto/auth/ForgotPasswordVerifyDto';
 import { Result } from '@shared/utils/Result';
 
 @injectable()

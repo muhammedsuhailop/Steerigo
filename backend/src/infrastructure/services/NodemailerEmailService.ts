@@ -31,6 +31,7 @@ export class NodemailerEmailService implements IEmailService {
 
             await this.transporter.sendMail(mailOptions);
             Logger.info('OTP email sent successfully', { email });
+            Logger.info('OTP :', { otp })
         } catch (error) {
             Logger.error('Failed to send OTP email', { email, error });
             throw new Error('Failed to send verification email');

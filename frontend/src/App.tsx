@@ -21,6 +21,7 @@ import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 import LandingPage from "@/pages/LandingPage";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import AuthCallback from "./features/auth/components/AuthCallback";
 
 // Placeholder dashboard components
 const RiderDashboard: React.FC = () => (
@@ -59,6 +60,7 @@ function AppContent(): React.JSX.Element {
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Protected Routes - Rider */}
         <Route
