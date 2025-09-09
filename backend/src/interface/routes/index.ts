@@ -1,13 +1,15 @@
 import { Router } from "express";
 import { authRoutes } from "./authRoutes";
 import { driverRoutes } from "./driver/driverRoutes";
+import { adminRoutes } from "./admin";
 
 const router = Router();
 
-// Mount auth routes
 router.use("/auth", authRoutes);
 
 router.use("/driver", driverRoutes);
+
+router.use("/admin", adminRoutes);
 
 // Test Server endpoint
 router.get("/test", (req, res) => {
