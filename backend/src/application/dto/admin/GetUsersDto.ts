@@ -5,7 +5,8 @@ export class GetUsersDto {
     | "Active"
     | "Suspended"
     | "Pending Verification"
-    | "Inactive";
+    | "Inactive"
+    | "Blocked";
   public readonly search?: string;
   public readonly dateFrom?: string;
   public readonly dateTo?: string;

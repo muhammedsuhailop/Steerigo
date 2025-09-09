@@ -12,7 +12,12 @@ export interface IAdminUserRepository {
 }
 
 export interface UserFilters {
-  status?: "Active" | "Suspended" | "Pending Verification" | "Inactive";
+  status?:
+    | "Active"
+    | "Suspended"
+    | "Pending Verification"
+    | "Inactive"
+    | "Blocked";
   search?: string;
   dateFrom?: Date;
   dateTo?: Date;

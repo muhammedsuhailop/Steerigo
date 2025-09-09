@@ -13,7 +13,7 @@ export const getUsersValidation = [
 
   query("status")
     .optional()
-    .isIn(["Active", "Suspended", "Pending Verification", "Inactive"])
+    .isIn(["Active", "Suspended", "Pending Verification", "Inactive","Blocked"])
     .withMessage("Invalid status value"),
 
   query("search")
