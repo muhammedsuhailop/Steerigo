@@ -5,7 +5,7 @@ import { IEmailService } from '@domain/services/IEmailService';
 import { IOtpService } from '@domain/services/IOtpService';
 import { User } from '@domain/entities/User';
 import { UserAlreadyExistsError } from '@domain/errors';
-import { SignupRequestDto } from '../dto/SignupRequestDto';
+import { SignupRequestDto } from '../../dto/auth/SignupRequestDto';
 import { Result } from '@shared/utils/Result';
 import { v4 as uuid } from 'uuid';
 

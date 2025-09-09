@@ -9,6 +9,7 @@ import { log } from "@/utils/logger";
 import Button from "@/components/common/Button";
 import Input from "@/components/forms/Input";
 import TitleLogo from "@/assets/images/SteeriGoHorizontal.png";
+import { FcGoogle } from "react-icons/fc";
 
 interface LoginFormData {
   readonly email: string;
@@ -117,9 +118,19 @@ const LoginForm: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = (): void => {
-    // Implement Google Sign-In logic
-    console.log("Google Sign-In clicked");
+  const handleGoogleLogin = async () => {
+    try {
+      const res = await fetch("/api/auth/google");
+      const data = await res.json();
+
+      if (data.success && data.data?.authUrl) {
+        window.location.href = data.data.authUrl; // send user to Google
+      } else {
+        console.error("Failed to get Google auth URL:", data.message);
+      }
+    } catch (err) {
+      console.error("Google login failed:", err);
+    }
   };
 
   return (
@@ -193,7 +204,7 @@ const LoginForm: React.FC = () => {
 
               <div className="text-sm">
                 <Link
-                  to="/reset-password"
+                  to="/api/auth/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Forgot Password?
@@ -211,13 +222,13 @@ const LoginForm: React.FC = () => {
               {isLoading ? "Signing In..." : "Sign In"}
             </Button>
 
-            {/* Google Sign In */}
             <Button
               type="button"
               variant="outline"
               fullWidth
-              onClick={handleGoogleSignIn}
+              onClick={handleGoogleLogin}
               disabled={isLoading}
+              icon={<FcGoogle />}
             >
               Sign in with Google
             </Button>
@@ -232,9 +243,6 @@ const LoginForm: React.FC = () => {
                 >
                   Click here
                 </Link>
-              </span>
-              <span className="text-sm text-gray-600">
-                Forgot password? <Link to="/forgot-password">Reset Here?</Link>
               </span>
             </div>
           </form>

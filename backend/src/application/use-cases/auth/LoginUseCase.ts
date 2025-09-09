@@ -5,7 +5,7 @@ import { ITokenService } from "@domain/services/ITokenService";
 import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository';
 import { InvalidCredentialsError, DomainError } from "@domain/errors";
 import { RefreshToken } from '@domain/entities/RefreshToken';
-import { LoginDto } from "../dto/LoginDto";
+import { LoginDto } from "../../dto/auth/LoginDto";
 import { Result } from "@shared/utils/Result";
 
 @injectable()
