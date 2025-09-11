@@ -6,7 +6,6 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [
-    // run tailwind plugin first so CSS transforms are available early
     tailwindcss(),
     react(),
   ],
@@ -31,7 +30,10 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
-    }
+    },
+    allowedHosts: [
+      "huge-planets-arrive.loca.lt" 
+    ]
   },
   build: {
     outDir: 'dist',
@@ -47,7 +49,6 @@ export default defineConfig({
       }
     }
   },
-  // safer define: expose only specific keys you need
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
   }
