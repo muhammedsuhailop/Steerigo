@@ -22,14 +22,7 @@ import LandingPage from "@/pages/LandingPage";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import AuthCallback from "./features/auth/components/AuthCallback";
-
-// Placeholder dashboard components
-const RiderDashboard: React.FC = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">Rider Dashboard</h1>
-    <p>Welcome to your user home page!</p>
-  </div>
-);
+import HomePage from "@/features/user/pages/HomePage";
 
 const DriverDashboard: React.FC = () => (
   <div className="p-8">
@@ -67,7 +60,7 @@ function AppContent(): React.JSX.Element {
           path="/user/home"
           element={
             <ProtectedRoute allowedRoles={["Rider"]}>
-              <RiderDashboard />
+              <HomePage />
             </ProtectedRoute>
           }
         />
