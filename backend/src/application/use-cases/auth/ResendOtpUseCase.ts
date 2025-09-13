@@ -22,10 +22,6 @@ export class ResendOtpUseCase {
                 return Result.failure(new DomainError('No signup request found for this email'));
             }
 
-            if (user.getIsVerified()) {
-                return Result.failure(new DomainError('User is already verified'));
-            }
-
             // Check if user can receive a new OTP (basic rate limiting at domain level)
             const lastOtpTime = user.getUpdatedAt();
             const now = new Date();
