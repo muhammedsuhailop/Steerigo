@@ -1,142 +1,101 @@
 import { useState, useCallback } from "react";
-import { validateLoginForm, validateSignupForm } from "../utils/validation";
-import type { LoginRequest, SignupRequest, ValidationErrors } from "../types";
+import {
+    validateSignupForm,
+    validateLoginForm,
+} from "../utils/validation";
+import type { ValidationErrors } from "../types";
 
-interface UseAuthFormOptions {
-  onSubmit: (data: any) => Promise<{ success: boolean; message: string }>;
-  validationType: "login" | "signup";
+interface Options {
+    onSubmit: (data: any) => Promise<{ success: boolean; message: string }>;
+    validationType: "login" | "signup";
 }
 
-export const useAuthForm = ({
-  onSubmit,
-  validationType,
-}: UseAuthFormOptions) => {
-  const [formData, setFormData] = useState<any>({});
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+export const useAuthForm = ({ onSubmit, validationType }: Options) => {
+    const [formData, setFormData] = useState<any>({});
+    const [errors, setErrors] = useState<ValidationErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<{
+        type: "success" | "error";
+        text: string;
+    } | null>(null);
 
-  const handleChange = useCallback(
-    (field: string, value: string) => {
-      setFormData((prev: any) => ({ ...prev, [field]: value }));
+    const handleChange = useCallback(
+        (field: string, value: string) => {
+            setFormData((p: any) => ({ ...p, [field]: value }));
+            if (errors[field]) setErrors((p) => ({ ...p, [field]: "" }));
+            if (submitMessage) setSubmitMessage(null);
+        },
+        [errors, submitMessage]
+    );
 
-      // Clear field error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: "" }));
-      }
-
-      // Clear submit message when user makes changes
-      if (submitMessage) {
-        setSubmitMessage(null);
-      }
-    },
-    [errors, submitMessage]
-  );
-
-  const validateForm = useCallback(() => {
-    let validationResult;
-
-    if (validationType === "login") {
-      validationResult = validateLoginForm(
-        formData.email || "",
-        formData.password || ""
-      );
-    } else if (validationType === "signup") {
-      validationResult = validateSignupForm({
-        firstName: formData.firstName || "",
-        lastName: formData.lastName || "",
-        email: formData.email || "",
-        password: formData.password || "",
-        confirmPassword: formData.confirmPassword || "",
-      });
-    } else {
-      validationResult = { errors: {}, isValid: true };
-    }
-
-    setErrors(validationResult.errors);
-    return validationResult.isValid;
-  }, [formData, validationType]);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!validateForm()) {
-        return;
-      }
-
-      setIsSubmitting(true);
-      setSubmitMessage(null);
-
-      try {
-        const result = await onSubmit(formData);
-
-        if (result.success) {
-          setSubmitMessage({ type: "success", text: result.message });
-          // Clear form on success if it's not login (for signup, etc.)
-          if (validationType !== "login") {
-            setFormData({});
-          }
+    const validateForm = useCallback(() => {
+        let result;
+        if (validationType === "signup") {
+            result = validateSignupForm({
+                name: formData.name || "",
+                email: formData.email || "",
+                mobile: formData.mobile || "",
+                password: formData.password || "",
+                confirmPassword: formData.confirmPassword || "",
+            });
         } else {
-          setSubmitMessage({ type: "error", text: result.message });
+            result = validateLoginForm(
+                formData.email || "",
+                formData.password || ""
+            );
         }
-      } catch (error: any) {
-        setSubmitMessage({
-          type: "error",
-          text:
-            error.message || "An unexpected error occurred. Please try again.",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [formData, onSubmit, validateForm, validationType]
-  );
+        setErrors(result.errors);
+        return result.isValid;
+    }, [formData, validationType]);
 
-  const clearMessage = useCallback(() => {
-    setSubmitMessage(null);
-  }, []);
+    const handleSubmit = useCallback(
+        async (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!validateForm()) return;
+            setIsSubmitting(true);
+            setSubmitMessage(null);
+            try {
+                const result = await onSubmit(formData);
+                setSubmitMessage({
+                    type: result.success ? "success" : "error",
+                    text: result.message,
+                });
+                // DON'T clear formData on success - we need email for OTP
+                if (result.success && validationType === "signup") {
+                    // Only clear errors, keep formData for OTP verification
+                    setErrors({});
+                }
+            } catch (err: any) {
+                setSubmitMessage({
+                    type: "error",
+                    text: err.message || "Unexpected error",
+                });
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        [formData, onSubmit, validateForm, validationType]
+    );
 
-  const resetForm = useCallback(() => {
-    setFormData({});
-    setErrors({});
-    setSubmitMessage(null);
-  }, []);
+    const resetForm = useCallback(() => {
+        setFormData({});
+        setErrors({});
+        setSubmitMessage(null);
+    }, []);
 
-  const setFieldError = useCallback((field: string, error: string) => {
-    setErrors((prev) => ({ ...prev, [field]: error }));
-  }, []);
-
-  return {
-    formData,
-    errors,
-    isSubmitting,
-    submitMessage,
-    handleChange,
-    handleSubmit,
-    clearMessage,
-    resetForm,
-    setFieldError,
-    validateForm,
-  };
+    return {
+        formData,
+        errors,
+        isSubmitting,
+        submitMessage,
+        handleChange,
+        handleSubmit,
+        resetForm,
+        validateForm,
+    };
 };
 
-// Specialized hooks for different form types
-export const useLoginForm = (
-  onSubmit: (
-    data: LoginRequest
-  ) => Promise<{ success: boolean; message: string }>
-) => {
-  return useAuthForm({ onSubmit, validationType: "login" });
-};
-
-export const useSignupForm = (
-  onSubmit: (
-    data: SignupRequest
-  ) => Promise<{ success: boolean; message: string }>
-) => {
-  return useAuthForm({ onSubmit, validationType: "signup" });
-};
+export const useSignupForm = (onSubmit: any) =>
+    useAuthForm({ onSubmit, validationType: "signup" });
+export const useLoginForm = (onSubmit: any) =>
+    useAuthForm({ onSubmit, validationType: "login" });

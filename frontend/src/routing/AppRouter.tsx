@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth, AuthCallback } from "@/features/auth";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { LandingPage } from "@/features/public/pages/LandingPage";
+import { SignupPage } from "@/features/auth/pages/SignupPage";
 
 const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -104,6 +105,17 @@ export const AppRouter: React.FC = () => {
             <Navigate to={getDashboardRedirect()} replace />
           ) : (
             <LoginPage />
+          )
+        }
+      />
+
+      <Route
+        path="/signup"
+        element={
+          isAuthenticated ? (
+            <Navigate to={getDashboardRedirect()} replace />
+          ) : (
+            <SignupPage />
           )
         }
       />
