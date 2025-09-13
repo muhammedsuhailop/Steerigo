@@ -7,7 +7,6 @@ import type {
     OTPVerificationRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
-    GoogleAuthResponse,
     User,
 } from "../types";
 
@@ -62,9 +61,26 @@ export const authApi = createApi({
             invalidatesTags: ["Auth"],
         }),
 
+        verifySignupOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
+            query: (otpData) => ({
+                url: "/signup/verify",
+                method: "POST",
+                body: otpData,
+            }),
+            invalidatesTags: ["Auth"],
+        }),
+
+        resendSignupOTP: builder.mutation<{ success: boolean; message: string }, { email: string }>({
+            query: ({ email }) => ({
+                url: "/signup/resend",
+                method: "POST",
+                body: { email },
+            }),
+        }),
+
         verifyOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
             query: (otpData) => ({
-                url: "/verify-otp",
+                url: "/signup/verify",
                 method: "POST",
                 body: otpData,
             }),

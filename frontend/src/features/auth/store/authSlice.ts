@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "../services/authApi";
 import type { AuthState, User } from "../types";
