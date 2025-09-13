@@ -40,7 +40,7 @@ export const selectUserRole = createSelector(
 
 export const selectIsEmailVerified = createSelector(
   [selectCurrentUser],
-  (user) => user?.isEmailVerified ?? false
+  (user) => user?.isVerified ?? false
 );
 
 export const selectUserFullName = createSelector([selectCurrentUser], (user) =>

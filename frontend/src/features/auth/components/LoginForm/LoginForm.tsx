@@ -29,6 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleGoogleLogin = async () => {
     try {
+      setShowPassword(false);
       await loginWithGoogle();
     } catch (error) {
       console.error("Google login failed:", error);

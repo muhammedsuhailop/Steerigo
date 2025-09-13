@@ -3,7 +3,7 @@ export interface User {
   email: string;
   name: string;
   role: "Rider" | "Driver" | "Admin";
-  isEmailVerified: boolean;
+  isVerified: boolean;
   createdAt: string;
   updatedAt: string;
 }

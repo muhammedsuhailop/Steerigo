@@ -1,5 +1,3 @@
-// src/features/auth/components/AuthCallback/AuthCallback.tsx
-
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch } from "@/app/store/hooks";
@@ -26,10 +24,21 @@ export const AuthCallback: React.FC = () => {
   // Extract tokens from URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+
     const accessToken = params.get("accessToken");
     const refreshToken = params.get("refreshToken") || "";
 
+    const error = params.get("error");
+    const errorDescription = params.get("error_description");
+
+    if (error) {
+      console.error("OAuth error:", error, errorDescription);
+      navigate(`/login?error=${error}`, { replace: true });
+      return;
+    }
+
     if (!accessToken) {
+      console.error("Missing access token in callback");
       navigate("/login?error=missing_token", { replace: true });
       return;
     }
@@ -56,12 +65,10 @@ export const AuthCallback: React.FC = () => {
   }, [isAuthenticated, userRole, isLoading, error, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <LoadingSpinner size="large" className="mb-4" />
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">
-        Signing you in...
-      </h2>
-      <p className="text-gray-600">Please wait while we complete your login.</p>
+    <div>
+      <LoadingSpinner />
+      <h2>Signing you in...</h2>
+      <p>Please wait while we complete your login.</p>
     </div>
   );
 };

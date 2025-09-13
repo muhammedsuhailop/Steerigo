@@ -4,7 +4,6 @@ import { useAuth, AuthCallback } from "@/features/auth";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { LandingPage } from "@/features/public/pages/LandingPage";
 
-// Simple dashboard components for testing
 const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   return (
@@ -109,6 +108,8 @@ export const AppRouter: React.FC = () => {
         }
       />
 
+      <Route path="/auth/callback" element={<AuthCallback />} />
+
       {/* Protected dashboard routes */}
       <Route
         path="/user/dashboard"
@@ -120,18 +121,6 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
-
-      <Route
-        path="/auth/callback"
-        element={
-          isAuthenticated && user?.role === "Rider" ? (
-            <AuthCallback />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-
       <Route
         path="/driver/dashboard"
         element={
@@ -142,7 +131,6 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
-
       <Route
         path="/admin/dashboard"
         element={
@@ -154,7 +142,7 @@ export const AppRouter: React.FC = () => {
         }
       />
 
-      {/* Redirect routes */}
+      {/* Redirect shorthand */}
       <Route
         path="/dashboard"
         element={

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { LoginForm } from '../components/LoginForm';
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { LoginForm } from "../components/LoginForm";
 
 export const LoginPage: React.FC = () => {
   const { isAuthenticated, isLoading, initialize } = useAuth();
@@ -11,7 +11,6 @@ export const LoginPage: React.FC = () => {
     initialize();
   }, [initialize]);
 
-  // Show loading while checking authentication status
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -20,9 +19,8 @@ export const LoginPage: React.FC = () => {
     );
   }
 
-  // Redirect if already authenticated
   if (isAuthenticated) {
-    const from = (location.state as any)?.from?.pathname || '/dashboard';
+    const from = (location.state as any)?.from?.pathname || "/dashboard";
     return <Navigate to={from} replace />;
   }
 
