@@ -1,4 +1,5 @@
-import axios from "axios";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import axios from 'axios';
 import { store } from "../../app/store";
 import { refreshAuthToken, logout } from "../../features/auth/store/authSlice";
 

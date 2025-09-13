@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback } from "react";
-// import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
     useLoginMutation,
@@ -157,8 +157,7 @@ export const useAuth = () => {
     };
 };
 
-// Helper function to get dashboard path based on user role
-const getUserDashboardPath = (role: string): string => {
+export const getUserDashboardPath = (role: string): string => {
     switch (role) {
         case "ADMIN":
             return "/admin/dashboard";
