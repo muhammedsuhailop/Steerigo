@@ -7,7 +7,7 @@ export {AuthCallback } from './components/AuthCallback';
 // export { AuthCallback } from './components/AuthCallback';
 
 // Pages
-export { LoginPage } from './pages/LoginPage';
+export { default as LoginPage } from './pages/LoginPage';
 // export { SignupPage } from './pages/SignupPage';
 // export { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 

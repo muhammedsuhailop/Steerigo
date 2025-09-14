@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { LoginForm } from "../components/LoginForm";
 
-export const LoginPage: React.FC = () => {
+const LoginPage: React.FC = () => {
   const { isAuthenticated, isLoading, initialize } = useAuth();
   const location = useLocation();
 
@@ -53,3 +53,5 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+
+export default LoginPage;
