@@ -2,13 +2,15 @@ import { useState, useCallback } from "react";
 import {
     validateSignupForm,
     validateLoginForm,
+    validateUpdatePasswordForm,
 } from "../utils/validation";
 import type { ValidationErrors } from "../types";
 
 interface Options {
     onSubmit: (data: any) => Promise<{ success: boolean; message: string }>;
-    validationType: "login" | "signup";
+    validationType: "login" | "signup" | "updatePassword";
 }
+
 
 export const useAuthForm = ({ onSubmit, validationType }: Options) => {
     const [formData, setFormData] = useState<any>({});
@@ -36,6 +38,12 @@ export const useAuthForm = ({ onSubmit, validationType }: Options) => {
                 email: formData.email || "",
                 mobile: formData.mobile || "",
                 password: formData.password || "",
+                confirmPassword: formData.confirmPassword || "",
+            });
+        } else if (validationType === "updatePassword") {
+            result = validateUpdatePasswordForm({
+                currentPassword: formData.currentPassword || "",
+                newPassword: formData.newPassword || "",
                 confirmPassword: formData.confirmPassword || "",
             });
         } else {
@@ -99,3 +107,5 @@ export const useSignupForm = (onSubmit: any) =>
     useAuthForm({ onSubmit, validationType: "signup" });
 export const useLoginForm = (onSubmit: any) =>
     useAuthForm({ onSubmit, validationType: "login" });
+export const useUpdatePasswordForm = (onSubmit: any) =>
+    useAuthForm({ onSubmit, validationType: "updatePassword" });
