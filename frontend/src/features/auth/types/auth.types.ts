@@ -11,7 +11,7 @@ export interface User {
 
 export interface AuthState {
     user: User | null;
-    token: string | null;
+    accessToken: string | null;
     refreshToken: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
@@ -47,13 +47,17 @@ export interface ResetPasswordRequest {
     newPassword: string;
     confirmPassword: string;
 }
-
+export interface UpdatePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string
+}
 export interface AuthResponse {
     success: boolean;
     message: string;
     data: {
         user: User;
-        token: string;
+        accessToken: string;
         refreshToken: string;
     };
 }

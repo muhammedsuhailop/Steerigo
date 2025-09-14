@@ -14,10 +14,10 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const state = store.getState();
-    const token = state.auth.token;
+    const accessToken = state.auth.accessToken;
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
     return config;
@@ -41,7 +41,7 @@ api.interceptors.response.use(
 
         // Retry the original request with new token
         const state = store.getState();
-        const newToken = state.auth.token;
+        const newToken = state.auth.accessToken;
 
         if (newToken) {
           original.headers.Authorization = `Bearer ${newToken}`;

@@ -89,3 +89,27 @@ export const validateSignupForm = (data: {
     if (e5) errors.confirmPassword = e5;
     return { errors, isValid: Object.keys(errors).length === 0 };
 };
+
+export const validateUpdatePasswordForm = (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}) => {
+    const errors: Record<string, string> = {};
+
+    if (!data.currentPassword) {
+        errors.currentPassword = "Current password is required";
+    }
+
+    const newPasswordError = validatePassword(data.newPassword);
+    if (newPasswordError) errors.newPassword = newPasswordError;
+
+    const confirmPasswordError = validateConfirmPassword(data.newPassword, data.confirmPassword);
+    if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
+
+    if (data.currentPassword && data.newPassword && data.currentPassword === data.newPassword) {
+        errors.newPassword = "New password must be different from current password";
+    }
+
+    return { errors, isValid: Object.keys(errors).length === 0 };
+};

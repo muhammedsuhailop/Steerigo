@@ -5,6 +5,24 @@ import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { LandingPage } from "@/features/public/pages/LandingPage";
 import { SignupPage } from "@/features/auth/pages/SignupPage";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
+import { UpdatePasswordPage } from "@/features/auth/pages/UpdatePasswordPage";
+import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
+
+// ProtectedRoute wrapper
+const ProtectedRoute = ({
+  isAllowed,
+  redirectPath = "/login",
+  isLoading,
+  children,
+}: {
+  isAllowed: boolean;
+  redirectPath?: string;
+  isLoading?: boolean;
+  children: React.JSX.Element;
+}) => {
+  if (isLoading) return <><LoadingSpinner/></>
+  return isAllowed ? children : <Navigate to={redirectPath} replace />;
+};
 
 const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -70,7 +88,8 @@ const AdminDashboard: React.FC = () => {
 };
 
 export const AppRouter: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
+  console.log("is auth?", isAuthenticated);
 
   const getDashboardRedirect = () => {
     if (!user) return "/";
@@ -109,7 +128,6 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
-
       <Route
         path="/signup"
         element={
@@ -120,9 +138,8 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
-
       <Route
-        path="forgot-password"
+        path="/forgot-password"
         element={
           isAuthenticated ? (
             <Navigate to={getDashboardRedirect()} replace />
@@ -131,38 +148,52 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
-
       <Route path="/auth/callback" element={<AuthCallback />} />
 
-      {/* Protected dashboard routes */}
+      {/* Protected routes */}
+      <Route
+        path="/update-password"
+        element={
+          <ProtectedRoute
+            isAllowed={isAuthenticated}
+            isLoading={isLoading}
+            redirectPath="/login"
+          >
+            <UpdatePasswordPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/user/dashboard"
         element={
-          isAuthenticated && user?.role === "Rider" ? (
+          <ProtectedRoute
+            isAllowed={isAuthenticated && user?.role === "Rider"}
+            isLoading={isLoading}
+          >
             <UserDashboard />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
       <Route
         path="/driver/dashboard"
         element={
-          isAuthenticated && user?.role === "Driver" ? (
+          <ProtectedRoute
+            isAllowed={isAuthenticated && user?.role === "Driver"}
+            isLoading={isLoading}
+          >
             <DriverDashboard />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
       <Route
         path="/admin/dashboard"
         element={
-          isAuthenticated && user?.role === "Admin" ? (
+          <ProtectedRoute
+            isAllowed={isAuthenticated && user?.role === "Admin"}
+            isLoading={isLoading}
+          >
             <AdminDashboard />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
 
@@ -170,11 +201,9 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/dashboard"
         element={
-          isAuthenticated ? (
+          <ProtectedRoute isAllowed={isAuthenticated} isLoading={isLoading}>
             <Navigate to={getDashboardRedirect()} replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
 

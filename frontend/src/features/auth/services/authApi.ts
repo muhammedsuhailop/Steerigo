@@ -7,6 +7,7 @@ import type {
     OTPVerificationRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
+    UpdatePasswordRequest,
     User,
 } from "../types";
 
@@ -14,9 +15,9 @@ const baseQuery = fetchBaseQuery({
     baseUrl: "/api/auth",
     credentials: "include",
     prepareHeaders: (headers, { getState }) => {
-        const token = (getState() as any).auth.token;
-        if (token) {
-            headers.set("authorization", `Bearer ${token}`);
+        const accessToken = (getState() as any).auth.accessToken;
+        if (accessToken) {
+            headers.set("authorization", `Bearer ${accessToken}`);
         }
         headers.set("Content-Type", "application/json");
         return headers;
@@ -111,7 +112,16 @@ export const authApi = createApi({
             }),
         }),
 
-        refreshToken: builder.mutation<{ token: string; refreshToken: string }, void>({
+        updatePassword: builder.mutation<{ success: boolean; message: string }, UpdatePasswordRequest>({
+            query: (passwordData) => ({
+                url: "/update-password",
+                method: "PUT",
+                body: passwordData,
+            }),
+            invalidatesTags: ["Auth"],
+        }),
+
+        refreshToken: builder.mutation<{ accessToken: string; refreshToken: string }, void>({
             query: () => ({
                 url: "/refresh-token",
                 method: "POST",
@@ -161,4 +171,5 @@ export const {
     useRefreshTokenMutation,
     useLogoutMutation,
     useGetCurrentUserQuery,
+    useUpdatePasswordMutation,
 } = authApi;
