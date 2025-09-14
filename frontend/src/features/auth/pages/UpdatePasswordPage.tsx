@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { UpdatePasswordForm } from "../components/UpdatePasswordForm";
 
-export const UpdatePasswordPage: React.FC = () => {
+const UpdatePasswordPage: React.FC = () => {
     const { isAuthenticated, isLoading, initialize } = useAuth();
     console.log('is auth in update password', isAuthenticated);
     const location = useLocation();
@@ -45,3 +45,5 @@ export const UpdatePasswordPage: React.FC = () => {
         </div>
     );
 };
+
+export default UpdatePasswordPage;
