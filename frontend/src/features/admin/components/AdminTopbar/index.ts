@@ -1,2 +1,2 @@
-export { AdminTopbar } from './AdminTopbar';
-export type { AdminTopbarProps } from './AdminTopbar.types';
+export { AdminTopbar } from "./AdminTopbar";
+export type { AdminTopbarProps } from "./AdminTopbar.types";

@@ -1,61 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
-import { AdminSidebar, AdminTopbar } from "@/features/admin/components";
+import {
+  AdminSidebar,
+  AdminTopbar,
+  DashboardOverview,
+  RecentActivity,
+  QuickActions,
+} from "@/features/admin/components";
+import { Footer } from "@/features/public/components";
 
 const AdminDashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
+
+  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50">
+      {/* Sidebar */}
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
         onToggle={toggleSidebar}
+        isMobile={isMobile}
       />
 
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <AdminTopbar
-          title="Admin Dashboard"
-          onToggleSidebar={toggleSidebar}
-        />
+      {/* Main Content */}
+      <div
+        className="flex-1 flex flex-col min-h-screen transition-all duration-300"
+        style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
+      >
+        {/* Topbar */}
+        <AdminTopbar title="Admin Dashboard" onToggleSidebar={toggleSidebar} />
 
-        <main className="p-6">
+        {/* Page Content */}
+        <main className="flex-1 overflow-auto p-4 sm:p-6">
           <div className="max-w-7xl mx-auto">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Welcome, {user?.name}!
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-blue-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-blue-900">Total Users</h3>
-                  <p className="text-3xl font-bold text-blue-600">1,234</p>
-                </div>
-                <div className="bg-green-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-green-900">Active Drivers</h3>
-                  <p className="text-3xl font-bold text-green-600">567</p>
-                </div>
-                <div className="bg-yellow-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-yellow-900">Total Rides</h3>
-                  <p className="text-3xl font-bold text-yellow-600">8,901</p>
-                </div>
-                <div className="bg-purple-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-purple-900">Revenue</h3>
-                  <p className="text-3xl font-bold text-purple-600">₹2,34,567</p>
+            <DashboardOverview userName={user?.name} />
+            <QuickActions />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <RecentActivity />
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  System Status
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Server Status</span>
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Online
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Database</span>
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Connected
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                      Payment Gateway
+                    </span>
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
-      {!sidebarCollapsed && (
+      {/* Mobile Overlay */}
+      {isMobile && !sidebarCollapsed && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           onClick={toggleSidebar}
         />
       )}
