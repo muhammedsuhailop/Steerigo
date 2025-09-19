@@ -108,4 +108,9 @@ router.get("/google/callback", (req, res) =>
   authController.googleCallback(req, res)
 );
 
+// GET /api/auth/me - Get current user data
+router.get("/me", authMiddleware, (req: Request, res: Response) =>
+  authController.getCurrentUser(req, res)
+);
+
 export { router as authRoutes };

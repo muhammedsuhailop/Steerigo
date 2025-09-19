@@ -8,3 +8,4 @@ export * from "./auth/LogoutUseCase";
 export * from "./auth/ForgotPasswordRequestUseCase";
 export * from "./auth/ForgotPasswordVerifyUseCase";
 export * from "./driver/RegisterDriverUseCase";
+export { GetCurrentUserUseCase } from './auth/GetCurrentUserUseCase';
