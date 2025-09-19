@@ -10,16 +10,21 @@ import UserDashboard from "@/features/user/pages/UserDashboard";
 import DriverDashboard from "@/features/driver/pages/DriverDashboard";
 import AdminDashboard from "@/features/admin/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
+import AdminUsersLayout from "@/features/admin/pages/AdminUsersLayout";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
 
   const getDashboardRedirect = () => {
     switch (user?.role) {
-      case "Admin": return "/admin/dashboard";
-      case "Driver": return "/driver/dashboard";
-      case "Rider": return "/user/dashboard";
-      default: return "/";
+      case "Admin":
+        return "/admin/dashboard";
+      case "Driver":
+        return "/driver/dashboard";
+      case "Rider":
+        return "/user/dashboard";
+      default:
+        return "/";
     }
   };
 
@@ -28,30 +33,42 @@ export const AppRouter: React.FC = () => {
       {/* Public */}
       <Route
         path="/"
-        element={user
-          ? <Navigate to={getDashboardRedirect()} replace />
-          : <LandingPage />
+        element={
+          user ? (
+            <Navigate to={getDashboardRedirect()} replace />
+          ) : (
+            <LandingPage />
+          )
         }
       />
       <Route
         path="/login"
-        element={user
-          ? <Navigate to={getDashboardRedirect()} replace />
-          : <LoginPage />
+        element={
+          user ? (
+            <Navigate to={getDashboardRedirect()} replace />
+          ) : (
+            <LoginPage />
+          )
         }
       />
       <Route
         path="/signup"
-        element={user
-          ? <Navigate to={getDashboardRedirect()} replace />
-          : <SignupPage />
+        element={
+          user ? (
+            <Navigate to={getDashboardRedirect()} replace />
+          ) : (
+            <SignupPage />
+          )
         }
       />
       <Route
         path="/forgot-password"
-        element={user
-          ? <Navigate to={getDashboardRedirect()} replace />
-          : <ForgotPasswordPage />
+        element={
+          user ? (
+            <Navigate to={getDashboardRedirect()} replace />
+          ) : (
+            <ForgotPasswordPage />
+          )
         }
       />
       <Route path="/auth/callback" element={<AuthCallback />} />
@@ -70,6 +87,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminUsersLayout />
           </ProtectedRoute>
         }
       />
