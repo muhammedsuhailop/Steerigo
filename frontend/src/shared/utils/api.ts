@@ -1,20 +1,52 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// Updated src/shared/utils/api.ts
 import axios from "axios";
 import { store } from "../../app/store";
 import { refreshAuthToken, logout } from "../../features/auth/store/authSlice";
+import { isTokenExpired } from "./tokenUtils";
 
-// Create axios instance
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
   timeout: 10000,
   withCredentials: true,
 });
 
-// Request interceptor to add auth token
+let refreshPromise: Promise<any> | null = null;
+
+// Request interceptor
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const state = store.getState();
-    const accessToken = state.auth.accessToken;
+    let accessToken = state.auth.accessToken;
+
+    if (config.url?.includes("/auth/")) {
+      if (accessToken && !config.url?.includes("/refresh")) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return config;
+    }
+
+    // Check token expiry for other endpoints
+    if (accessToken && isTokenExpired(accessToken, 300)) {
+      console.log("Token expiring soon, refreshing...");
+
+      try {
+        if (refreshPromise) {
+          await refreshPromise;
+        } else {
+          refreshPromise = store.dispatch(refreshAuthToken()).unwrap();
+          await refreshPromise;
+          refreshPromise = null;
+        }
+
+        const newState = store.getState();
+        accessToken = newState.auth.accessToken;
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        refreshPromise = null;
+        store.dispatch(logout());
+        throw error;
+      }
+    }
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -22,12 +54,10 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -36,10 +66,20 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
 
-      try {
-        await store.dispatch(refreshAuthToken()).unwrap();
+      if (original.url?.includes("/refresh")) {
+        store.dispatch(logout());
+        return Promise.reject(error);
+      }
 
-        // Retry the original request with new token
+      try {
+        if (refreshPromise) {
+          await refreshPromise;
+        } else {
+          refreshPromise = store.dispatch(refreshAuthToken()).unwrap();
+          await refreshPromise;
+          refreshPromise = null;
+        }
+
         const state = store.getState();
         const newToken = state.auth.accessToken;
 
@@ -48,12 +88,18 @@ api.interceptors.response.use(
           return api(original);
         }
       } catch (refreshError) {
-        // Refresh failed, logout user
+        console.error("Refresh in response interceptor failed:", refreshError);
+        refreshPromise = null;
         store.dispatch(logout());
-        window.location.href = "/login";
+
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
       }
     }
 
     return Promise.reject(error);
   }
 );
+
+export default api;
