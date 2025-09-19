@@ -17,6 +17,7 @@ export class OtpGeneratorService implements IOtpService {
             });
 
             Logger.debug('OTP generated successfully');
+            console.log('OTP :', otp);  //for dev only
             return otp;
         } catch (error) {
             Logger.error('Error generating OTP', error);
