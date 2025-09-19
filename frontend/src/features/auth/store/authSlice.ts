@@ -9,16 +9,13 @@ import {
   getTimeUntilTokenExpiry,
 } from "../../../shared/utils/tokenUtils";
 
-// Token utilities
 const getAccessTokenFromStorage = (): string | null => {
   if (typeof window !== "undefined") {
     try {
       const token = localStorage.getItem("accessToken");
-      // Validate token before returning
       if (token && !isTokenExpired(token)) {
         return token;
       }
-      // Remove expired token
       if (token) {
         localStorage.removeItem("accessToken");
       }
@@ -89,47 +86,26 @@ const setUserInStorage = (user: User) => {
 // Auto-refresh timer ID
 let refreshTimerId: NodeJS.Timeout | null = null;
 
-// Async thunks
-export const initializeAuth = createAsyncThunk(
-  "auth/initialize",
-  async (_, { dispatch }) => {
-    const accessToken = getAccessTokenFromStorage();
-    const refreshToken = getRefreshTokenFromStorage();
-    const user = getUserFromStorage();
+interface DecodedJwt {
+  userId: string;
+  role: string;
+  iat?: number;
+  exp?: number;
+  aud?: string;
+  iss?: string;
+}
 
-    if (accessToken && refreshToken && user) {
-      // Setup auto-refresh timer
-      dispatch(setupAutoRefresh(accessToken));
-      return { user, accessToken, refreshToken };
-    }
+// Add defaults for missing fields
+const mapDecodedToUser = (decoded: DecodedJwt): User => ({
+  id: decoded.userId,
+  email: "",
+  name: "",
+  role: decoded.role as any,
+  isVerified: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
 
-    if (refreshToken) {
-      try {
-        // Try to refresh token
-        const result = await dispatch(refreshAuthToken()).unwrap();
-
-        // Get user info with new token
-        const userResult = await dispatch(
-          authApi.endpoints.getCurrentUser.initiate()
-        ).unwrap();
-
-        if (userResult.success) {
-          setUserInStorage(userResult.data);
-          dispatch(setupAutoRefresh(result.accessToken));
-          return {
-            user: userResult.data,
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
-          };
-        }
-      } catch (error) {
-        removeTokensFromStorage();
-      }
-    }
-
-    return null;
-  }
-);
 export const refreshAuthToken = createAsyncThunk(
   "auth/refresh",
   async (_, { dispatch, rejectWithValue }) => {
@@ -138,13 +114,30 @@ export const refreshAuthToken = createAsyncThunk(
         authApi.endpoints.refreshToken.initiate()
       ).unwrap();
 
-      setTokensInStorage(result.accessToken, result.refreshToken);
+      console.log("Raw refresh result:", result);
 
-      // Setup new auto-refresh timer
-      dispatch(setupAutoRefresh(result.accessToken));
+      const accessToken = result.data?.accessToken;
+      const refreshToken = result.data?.refreshToken;
 
-      return result;
+      if (!accessToken || !refreshToken) {
+        throw new Error("Invalid refresh response structure");
+      }
+
+      setTokensInStorage(accessToken, refreshToken);
+      console.log("Tokens stored in localStorage:", {
+        accessToken,
+        refreshToken,
+      });
+
+      dispatch(setupAutoRefresh(accessToken));
+
+      return {
+        accessToken,
+        refreshToken,
+        data: { accessToken, refreshToken },
+      };
     } catch (error: any) {
+      console.error("Refresh token failed:", error);
       removeTokensFromStorage();
       dispatch(clearAutoRefresh());
       return rejectWithValue(error.message || "Token refresh failed");
@@ -152,7 +145,6 @@ export const refreshAuthToken = createAsyncThunk(
   }
 );
 
-// Auto-refresh setup
 export const setupAutoRefresh = createAsyncThunk(
   "auth/setupAutoRefresh",
   async (accessToken: string, { dispatch }) => {
@@ -164,16 +156,12 @@ export const setupAutoRefresh = createAsyncThunk(
     const timeUntilExpiry = getTimeUntilTokenExpiry(accessToken);
 
     if (timeUntilExpiry) {
-      // Refresh 5 minutes before expiry
-      const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60000); // At least 1 minute
+      // Refresh 2 minutes before expiry
+      const refreshTime = Math.max(timeUntilExpiry - 2 * 60 * 1000, 60000);
 
       refreshTimerId = setTimeout(() => {
         dispatch(refreshAuthToken());
       }, refreshTime);
-
-      console.log(
-        `Auto-refresh scheduled in ${Math.round(refreshTime / 1000)} seconds`
-      );
     }
 
     return { scheduled: true };
@@ -191,6 +179,116 @@ export const clearAutoRefresh = createAsyncThunk(
   }
 );
 
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const result = await dispatch(
+        authApi.endpoints.getCurrentUser.initiate()
+      ).unwrap();
+
+      if (result.success) {
+        const userData = result.data;
+        setUserInStorage(userData);
+        return userData;
+      } else {
+        throw new Error("Failed to fetch user");
+      }
+    } catch (error: any) {
+      console.error("Fetch current user failed:", error);
+      return rejectWithValue(error.message || "Failed to fetch user details");
+    }
+  }
+);
+
+export const initializeAuth = createAsyncThunk(
+  "auth/initialize",
+  async (_, { dispatch }) => {
+    const accessToken = getAccessTokenFromStorage();
+    const refreshToken = getRefreshTokenFromStorage();
+    const user = getUserFromStorage();
+
+    if (accessToken && refreshToken && user) {
+      dispatch(setupAutoRefresh(accessToken));
+      return { user, accessToken, refreshToken };
+    }
+
+    if (accessToken && refreshToken) {
+      try {
+        const userData = await dispatch(fetchCurrentUser()).unwrap();
+        dispatch(setupAutoRefresh(accessToken));
+
+        return {
+          user: userData,
+          accessToken,
+          refreshToken,
+        };
+      } catch (error) {
+        console.error("Failed to fetch user during init:", error);
+        try {
+          const decoded = jwtDecode<DecodedJwt>(accessToken);
+          const fallbackUser = mapDecodedToUser(decoded);
+          setUserInStorage(fallbackUser);
+          dispatch(setupAutoRefresh(accessToken));
+
+          return {
+            user: fallbackUser,
+            accessToken,
+            refreshToken,
+          };
+        } catch (decodeError) {
+          console.error("JWT decode also failed:", decodeError);
+          removeTokensFromStorage();
+        }
+      }
+    }
+
+    if (refreshToken) {
+      try {
+        const result = await dispatch(refreshAuthToken()).unwrap();
+
+        const newAccessToken = result.data?.accessToken;
+        const newRefreshToken = result.data?.refreshToken;
+
+        if (!newAccessToken) {
+          throw new Error("No access token in refresh response");
+        }
+
+        try {
+          const userData = await dispatch(fetchCurrentUser()).unwrap();
+          dispatch(setupAutoRefresh(newAccessToken));
+
+          return {
+            user: userData,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+          };
+        } catch (userError) {
+          console.error(
+            "Failed to fetch user after refresh, using JWT fallback:",
+            userError
+          );
+          const decoded = jwtDecode<DecodedJwt>(newAccessToken);
+          const fallbackUser = mapDecodedToUser(decoded);
+          setUserInStorage(fallbackUser);
+          dispatch(setupAutoRefresh(newAccessToken));
+
+          return {
+            user: fallbackUser,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+          };
+        }
+      } catch (error) {
+        console.error("Token refresh during init failed:", error);
+        removeTokensFromStorage();
+      }
+    }
+
+    return null;
+  }
+);
+
 export const initiateGoogleAuth = createAsyncThunk(
   "auth/initiateGoogleAuth",
   async (_, { rejectWithValue }) => {
@@ -204,25 +302,6 @@ export const initiateGoogleAuth = createAsyncThunk(
     }
   }
 );
-
-interface DecodedJwt {
-  id: string;
-  email: string;
-  role: string;
-  name?: string;
-  status?: string;
-}
-
-// Add defaults for missing fields
-const mapDecodedToUser = (decoded: DecodedJwt): User => ({
-  id: decoded.id,
-  email: decoded.email,
-  name: decoded.name || "",
-  role: decoded.role as any,
-  isVerified: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
 
 export const handleGoogleCallback = createAsyncThunk(
   "auth/handleGoogleCallback",
@@ -291,7 +370,6 @@ const authSlice = createSlice({
 
       removeTokensFromStorage();
 
-      // Clear auto-refresh timer
       if (refreshTimerId) {
         clearTimeout(refreshTimerId);
         refreshTimerId = null;
@@ -344,11 +422,28 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       });
 
+    builder
+      .addCase(fetchCurrentUser.pending, (state) => {
+        // loading
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        if (state.accessToken) {
+          state.isAuthenticated = true;
+        }
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
+        console.warn("Failed to fetch current user:", action.payload);
+      });
+
     // Refresh token
     builder
       .addCase(refreshAuthToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
+        const accessToken = action.payload.accessToken;
+        const refreshToken = action.payload.refreshToken;
+
+        state.accessToken = accessToken;
+        state.refreshToken = refreshToken;
         state.error = null;
       })
       .addCase(refreshAuthToken.rejected, (state, action) => {

@@ -149,7 +149,11 @@ export const authApi = createApi({
     }),
 
     refreshToken: builder.mutation<
-      { accessToken: string; refreshToken: string },
+      {
+        data: any;
+        accessToken: string;
+        refreshToken: string;
+      },
       void
     >({
       query: () => {
