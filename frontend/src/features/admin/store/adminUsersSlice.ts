@@ -3,6 +3,7 @@ import { api } from "@/shared/utils/api";
 import type {
   User,
   UserFilters,
+  UserAction,
 } from "../components/UserManagement/UserManagement.types";
 
 export const fetchAdminUsers = createAsyncThunk(
@@ -29,6 +30,57 @@ export const fetchAdminUsers = createAsyncThunk(
   }
 );
 
+export const updateUserStatus = createAsyncThunk(
+  "adminUsers/updateStatus",
+  async (
+    { userId, action }: { userId: string; action: UserAction },
+    { rejectWithValue }
+  ) => {
+    console.log("🔍 UpdateUserStatus thunk called:", { userId, action });
+
+    try {
+      if (!userId || userId === "undefined") {
+        throw new Error(`Invalid user ID: ${userId}`);
+      }
+
+      if (!action) {
+        throw new Error(`Invalid action: ${action}`);
+      }
+
+      const res = await api.put(`/api/admin/users/${userId}/action`, {
+        action,
+      });
+
+      return { userId, action, response: res.data };
+    } catch (err: any) {
+      console.error("UpdateUserStatus error:", err);
+
+      if (err.response) {
+        console.error("Response error:", {
+          status: err.response.status,
+          statusText: err.response.statusText,
+          data: err.response.data,
+          url: err.response.config?.url,
+        });
+
+        return rejectWithValue(
+          err.response.data?.message ||
+            err.response.data?.error ||
+            `HTTP ${err.response.status}: ${err.response.statusText}`
+        );
+      } else if (err.request) {
+        console.error("Request error (no response):", err.request);
+        return rejectWithValue(
+          "No response from server. Check if backend is running."
+        );
+      } else {
+        console.error("General error:", err.message);
+        return rejectWithValue(err.message || "Unknown error occurred");
+      }
+    }
+  }
+);
+
 interface AdminUsersState {
   users: User[];
   loading: boolean;
@@ -42,6 +94,7 @@ interface AdminUsersState {
     page: number;
     pageSize: number;
   };
+  actionLoading: Record<string, boolean>;
 }
 
 const initialState: AdminUsersState = {
@@ -52,6 +105,7 @@ const initialState: AdminUsersState = {
   page: 1,
   limit: 10,
   pagination: { totalItems: 0, totalPages: 0, page: 1, pageSize: 10 },
+  actionLoading: {},
 };
 
 const adminUsersSlice = createSlice({
@@ -68,6 +122,9 @@ const adminUsersSlice = createSlice({
     setLimit(state, action: PayloadAction<number>) {
       state.limit = action.payload;
       state.page = 1;
+    },
+    clearActionLoading(state, action: PayloadAction<string>) {
+      delete state.actionLoading[action.payload];
     },
   },
   extraReducers: (builder) => {
@@ -86,9 +143,24 @@ const adminUsersSlice = createSlice({
       .addCase(fetchAdminUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(updateUserStatus.pending, (state, action) => {
+        const userId = action.meta.arg.userId;
+        state.actionLoading[userId] = true;
+        state.error = null;
+      })
+      .addCase(updateUserStatus.fulfilled, (state, action) => {
+        const { userId } = action.payload;
+        delete state.actionLoading[userId];
+      })
+      .addCase(updateUserStatus.rejected, (state, action) => {
+        const userId = action.meta.arg.userId;
+        delete state.actionLoading[userId];
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { setFilters, setPage, setLimit } = adminUsersSlice.actions;
+export const { setFilters, setPage, setLimit, clearActionLoading } =
+  adminUsersSlice.actions;
 export default adminUsersSlice.reducer;
