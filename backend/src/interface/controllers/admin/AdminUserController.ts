@@ -63,11 +63,14 @@ export class AdminUserController {
         return;
       }
 
+      console.log('params:', req.params)
       const dto = new UpdateUserStatusDto({
         userId: req.params.userId,
         action: req.body.action,
         reason: req.body.reason,
       });
+
+      console.log('cjecking dto after', dto)
 
       const result = await this.updateUserStatusUseCase.execute(dto);
 

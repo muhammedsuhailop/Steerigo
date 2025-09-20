@@ -16,7 +16,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
   itemsPerPage,
   onPageChange,
   showSizeChanger = true,
-  onSizeChange,
+  onPageSizeChange,
 }) => {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -35,11 +35,11 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
         <span className="text-sm text-gray-600">
           Showing {startItem} to {endItem} of {totalItems} results
         </span>
-        {showSizeChanger && onSizeChange && (
+        {showSizeChanger && onPageSizeChange && (
           <Select
             options={pageSizeOptions}
             value={itemsPerPage.toString()}
-            onChange={(e) => onSizeChange(parseInt(e.target.value))}
+            onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
             size="sm"
             fullWidth={false}
             className="w-32"
@@ -47,7 +47,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
         )}
       </div>
 
-      {/* Right: Redesigned pagination controls */}
+      {/* Right: pagination controls */}
       <div className="flex items-center space-x-2">
         {/* First Page */}
         <Button
@@ -73,7 +73,8 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
 
         {/* Page Indicator */}
         <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
-          {String(currentPage).padStart(2, '0')} of {String(totalPages).padStart(2, '0')}
+          {String(currentPage).padStart(2, "0")} of{" "}
+          {String(totalPages).padStart(2, "0")}
         </div>
 
         {/* Next Page */}

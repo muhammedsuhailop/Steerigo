@@ -7,3 +7,4 @@ export type {
   User,
   UserFilters,
 } from "./UserManagement.types";
+export { ActionDropdown } from "./ActionDropdown";
