@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAppDispatch } from "@/app/store/hooks";
-import { handleGoogleCallback } from "../../store/authSlice";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import {
+  fetchCurrentUser,
+  setupAutoRefresh,
+  loginSuccess,
+} from "../../store/authSlice";
 import {
   selectIsAuthenticated,
   selectAuthLoading,
@@ -9,7 +13,6 @@ import {
   selectUserRole,
 } from "../../store/authSelectors";
 import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
-import { useAppSelector } from "@/app/store/hooks";
 
 export const AuthCallback: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -21,54 +24,66 @@ export const AuthCallback: React.FC = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const userRole = useAppSelector(selectUserRole);
 
-  // Extract tokens from URL
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const handleAuth = async () => {
+      const params = new URLSearchParams(location.search);
+      const accessToken = params.get("accessToken");
+      const refreshToken = params.get("refreshToken") || "";
+      const err = params.get("error");
 
-    const accessToken = params.get("accessToken");
-    const refreshToken = params.get("refreshToken") || "";
-
-    const error = params.get("error");
-    const errorDescription = params.get("error_description");
-
-    if (error) {
-      console.error("OAuth error:", error, errorDescription);
-      navigate(`/login?error=${error}`, { replace: true });
-      return;
-    }
-
-    if (!accessToken) {
-      console.error("Missing access token in callback");
-      navigate("/login?error=missing_token", { replace: true });
-      return;
-    }
-
-    dispatch(handleGoogleCallback({ accessToken, refreshToken }))
-      .unwrap()
-      .catch((err) => {
-        console.error("Google callback failed:", err);
+      if (err || !accessToken) {
+        console.error("OAuth error or missing token", err);
         navigate("/login?error=auth_failed", { replace: true });
-      });
+        return;
+      }
+
+      localStorage.setItem("accessToken", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+
+      dispatch(setupAutoRefresh(accessToken));
+
+      try {
+        const userData = await dispatch(fetchCurrentUser()).unwrap();
+        dispatch(loginSuccess({ user: userData, accessToken, refreshToken }));
+      } catch (e) {
+        console.error("Fetching user failed, falling back to JWT decode");
+      }
+    };
+
+    handleAuth();
   }, [dispatch, navigate, location]);
 
-  // Redirect when auth state changes
   useEffect(() => {
     if (isAuthenticated && userRole && !isLoading && !error) {
       const path =
-        userRole.toUpperCase() === "ADMIN"
+        userRole.toLowerCase() === "admin"
           ? "/admin/dashboard"
-          : userRole.toUpperCase() === "DRIVER"
+          : userRole.toLowerCase() === "driver"
           ? "/driver/dashboard"
           : "/user/dashboard";
       navigate(path, { replace: true });
     }
   }, [isAuthenticated, userRole, isLoading, error, navigate]);
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button onClick={() => navigate("/login")} className="btn">
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center h-screen">
       <LoadingSpinner />
-      <h2>Signing you in...</h2>
-      <p>Please wait while we complete your login.</p>
+      <p className="mt-4">Signing you in…</p>
     </div>
   );
 };

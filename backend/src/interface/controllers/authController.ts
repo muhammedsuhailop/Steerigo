@@ -13,6 +13,7 @@ import { ForgotPasswordRequestUseCase } from "@application/use-cases";
 import { ForgotPasswordVerifyUseCase } from "@application/use-cases";
 import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
 import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
+import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
 
 import { SignupRequestDto } from "@application/dto/auth/SignupRequestDto";
 import { SignupVerifyDto } from "@application/dto/auth/SignupVerifyDto";
@@ -23,6 +24,7 @@ import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { ForgotPasswordRequestDto } from "@application/dto";
 import { ForgotPasswordVerifyDto } from "@application/dto";
 import { GoogleLoginDto } from "@application/dto/auth/GoogleLoginDto";
+import { GetCurrentUserDto } from "@application/dto/auth/GetCurrentUserDto";
 
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -47,7 +49,9 @@ export class AuthController {
     private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase,
     @inject(GoogleLoginUseCase) private googleLoginUseCase: GoogleLoginUseCase,
     @inject(GetGoogleAuthUrlUseCase)
-    private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase
+    private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase,
+    @inject(GetCurrentUserUseCase)
+    private getCurrentUserUseCase: GetCurrentUserUseCase
   ) {}
 
   async signupRequest(req: Request, res: Response): Promise<void> {
@@ -494,6 +498,42 @@ export class AuthController {
       });
     } catch (error) {
       Logger.error("Error in forgot password verification", error);
+      const response: ApiResponse = {
+        success: false,
+        message: "Internal server error",
+      };
+      res.status(500).json(response);
+    }
+  }
+
+  async getCurrentUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.userId;
+      const dto = new GetCurrentUserDto(userId);
+      const result = await this.getCurrentUserUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const response: ApiResponse = {
+          success: false,
+          message: error.message,
+        };
+
+        const statusCode = error.message === "User not found" ? 404 : 400;
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        message: "User data fetched successfully",
+        data: result.getValue(),
+      };
+
+      res.status(200).json(response);
+      Logger.info("Current user fetched successfully", { userId });
+    } catch (error) {
+      Logger.error("Error in getCurrentUser", error);
       const response: ApiResponse = {
         success: false,
         message: "Internal server error",

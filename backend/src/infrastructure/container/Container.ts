@@ -42,9 +42,10 @@ import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCa
 import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
 import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
 import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
+import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
 
 // Interface Controllers
-import { AuthController } from "@interface/controllers/AuthController";
+import { AuthController } from "@interface/controllers";
 import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
 import { IAdminUserRepository } from "@domain/repositories/admin/IAdminUserRepository";
 
@@ -91,6 +92,7 @@ container.bind<GoogleLoginUseCase>(GoogleLoginUseCase).toSelf();
 container.bind<GetGoogleAuthUrlUseCase>(GetGoogleAuthUrlUseCase).toSelf();
 container.bind<GetUsersUseCase>(GetUsersUseCase).toSelf();
 container.bind<UpdateUserStatusUseCase>(UpdateUserStatusUseCase).toSelf();
+container.bind(GetCurrentUserUseCase).toSelf();
 
 // Controller Bindings
 container.bind<AuthController>(AuthController).toSelf();

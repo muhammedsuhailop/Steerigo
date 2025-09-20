@@ -43,8 +43,7 @@ export class GoogleAuthService implements IGoogleAuthService {
         state: "steerigo_auth",
       });
 
-      Logger.info("Generated Google auth URL");
-      Logger.info("Generated Google auth URL :", authUrl);
+      Logger.info("Generated Google auth URL", authUrl);
       return authUrl;
     } catch (error) {
       Logger.error("Failed to generate Google auth URL", error);
