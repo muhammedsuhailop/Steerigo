@@ -2,22 +2,32 @@ import React from "react";
 import { LoadingSpinner } from "../LoadingSpinner";
 import type { ButtonProps } from "./Button.types";
 
-const getVariantStyles = (variant: ButtonProps["variant"] = "primary") => {
+const getVariantStyles = (
+  variant: ButtonProps["variant"] = "primary",
+  isLoading?: boolean,
+  disabled?: boolean
+) => {
+  const baseStyles = "border-2 transition-all duration-200 ease-in-out shadow-sm";
+
+  if (disabled || isLoading) {
+    return `${baseStyles} bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed`;
+  }
+
   const variants = {
     primary:
-      "bg-[#232323] hover:bg-[#2e2e2e] text-white border-transparent focus:ring-[#3a3a3a] shadow-sm",
+      `${baseStyles} bg-gray-700 hover:bg-gray-800 text-white border-gray-700 hover:border-gray-800 focus:ring-4 focus:ring-gray-200`,
     secondary:
-      "bg-gray-700 hover:bg-gray-600 text-white border-transparent focus:ring-gray-500 shadow-sm",
+      `${baseStyles} bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
     outline:
-      "bg-transparent hover:bg-gray-100 text-gray-900 border border-gray-400 focus:ring-gray-500",
+      `${baseStyles} bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
     ghost:
-      "bg-transparent hover:bg-gray-200 text-gray-900 border-transparent focus:ring-gray-400",
+      `${baseStyles} bg-transparent hover:bg-gray-100 text-gray-700 border-transparent hover:border-gray-300 focus:ring-4 focus:ring-gray-100`,
     danger:
-      "bg-red-700 hover:bg-red-600 text-white border-transparent focus:ring-red-500 shadow-sm",
+      `${baseStyles} bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 focus:ring-4 focus:ring-red-100`,
     success:
-      "bg-emerald-700 hover:bg-emerald-600 text-white border-transparent focus:ring-emerald-500 shadow-sm",
+      `${baseStyles} bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 hover:border-emerald-700 focus:ring-4 focus:ring-emerald-100`,
     white:
-      "bg-gray-100 hover:bg-white text-gray-900 border border-gray-300 focus:ring-gray-400 shadow-sm",
+      `${baseStyles} bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
   };
 
   return variants[variant];
@@ -25,12 +35,12 @@ const getVariantStyles = (variant: ButtonProps["variant"] = "primary") => {
 
 const getSizeStyles = (size: ButtonProps["size"] = "md") => {
   const sizes = {
-    xs: "px-2.5 py-1.5 text-xs",
-    sm: "px-3 py-2 text-sm",
-    md: "px-4 py-2 text-sm",
-    lg: "px-4 py-2 text-base",
-    xl: "px-6 py-3 text-base",
-    icon: "p-2",
+    xs: "px-2.5 py-1.5 text-xs font-medium",
+    sm: "px-3 py-2 text-sm font-medium",
+    md: "px-4 py-2.5 text-sm font-semibold",
+    lg: "px-5 py-3 text-base font-semibold",
+    xl: "px-6 py-3.5 text-base font-semibold",
+    icon: "p-2.5",
   };
   return sizes[size];
 };
@@ -41,6 +51,7 @@ const getRoundedStyles = (rounded: ButtonProps["rounded"] = "md") => {
     sm: "rounded-sm",
     md: "rounded-md",
     lg: "rounded-lg",
+    xl: "rounded-xl", // Added xl option to match Select
     full: "rounded-full",
   };
   return roundedStyles[rounded];
@@ -60,20 +71,28 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border";
-  const variantStyles = getVariantStyles(variant);
+    "inline-flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none focus:ring-offset-0";
+
+  const variantStyles = getVariantStyles(variant, isLoading, disabled);
   const sizeStyles = getSizeStyles(size);
   const roundedStyles = getRoundedStyles(rounded);
   const widthStyles = fullWidth ? "w-full" : "";
-  const disabledStyles =
-    disabled || isLoading ? "opacity-50 cursor-not-allowed" : "";
 
   const buttonClass =
-    `${baseStyles} ${variantStyles} ${sizeStyles} ${roundedStyles} ${widthStyles} ${disabledStyles} ${className}`.trim();
+    `${baseStyles} ${variantStyles} ${sizeStyles} ${roundedStyles} ${widthStyles} ${className}`.trim();
 
   const renderContent = () => {
     if (isLoading) {
-      return <LoadingSpinner size="small" className="m-0" />;
+      return (
+        <div className="flex items-center justify-center">
+          <LoadingSpinner 
+            size="small" 
+            color={variant === "primary" || variant === "danger" || variant === "success" ? "white" : "gray"} 
+            className="mr-2" 
+          />
+          <span>{children || "Loading..."}</span>
+        </div>
+      );
     }
 
     // Icon-only button when size is icon and no children
@@ -82,20 +101,24 @@ export const Button: React.FC<ButtonProps> = ({
     }
 
     return (
-      <>
+      <div className="flex items-center justify-center">
         {leftIcon && (
-          <span className={isLoading ? "" : "mr-2"}>{leftIcon}</span>
+          <span className={children ? "mr-2" : ""}>{leftIcon}</span>
         )}
-        <span>{children}</span>
+        {children && <span className="truncate">{children}</span>}
         {rightIcon && (
-          <span className={isLoading ? "" : "ml-2"}>{rightIcon}</span>
+          <span className={children ? "ml-2" : ""}>{rightIcon}</span>
         )}
-      </>
+      </div>
     );
   };
 
   return (
-    <button className={buttonClass} disabled={disabled || isLoading} {...props}>
+    <button 
+      className={buttonClass} 
+      disabled={disabled || isLoading} 
+      {...props}
+    >
       {renderContent()}
     </button>
   );

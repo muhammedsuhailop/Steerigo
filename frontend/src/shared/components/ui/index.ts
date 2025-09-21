@@ -7,6 +7,7 @@ export { Logo } from "./Logo";
 export { Table, TablePagination } from "./Table";
 export { Badge } from "./Badge";
 export { ConfirmationModal } from "./ConfirmationModal";
+export { DateInput } from "./DateInput";
 
 export type { ButtonProps } from "./Button";
 export type { InputProps } from "./Input";
@@ -18,3 +19,4 @@ export type {
   ConfirmationModalProps,
   ConfirmationVariant,
 } from "./ConfirmationModal";
+export type { DateInputProps } from "./DateInput";

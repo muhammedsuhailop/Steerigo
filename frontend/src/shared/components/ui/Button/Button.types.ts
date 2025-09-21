@@ -13,5 +13,5 @@ export interface ButtonProps
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
-  rounded?: "none" | "sm" | "md" | "lg" | "full";
+  rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 }

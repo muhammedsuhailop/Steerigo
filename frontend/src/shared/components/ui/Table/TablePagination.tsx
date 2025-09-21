@@ -13,13 +13,13 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
   currentPage,
   totalPages,
   totalItems,
-  itemsPerPage,
+  pageSize,
   onPageChange,
   showSizeChanger = true,
   onPageSizeChange,
 }) => {
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const pageSizeOptions = [
     { value: "10", label: "10 / page" },
@@ -38,7 +38,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
         {showSizeChanger && onPageSizeChange && (
           <Select
             options={pageSizeOptions}
-            value={itemsPerPage.toString()}
+            value={pageSize.toString()}
             onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
             size="sm"
             fullWidth={false}
