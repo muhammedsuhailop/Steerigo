@@ -18,8 +18,50 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
   showSizeChanger = true,
   onPageSizeChange,
 }) => {
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems);
+  // Boundary validation
+  const safeTotalPages = Math.max(totalPages, 0);
+  const safeCurrentPage = Math.max(
+    1,
+    Math.min(currentPage, safeTotalPages || 1)
+  );
+  const safeTotalItems = Math.max(totalItems, 0);
+
+  const startItem =
+    safeTotalItems === 0 ? 0 : (safeCurrentPage - 1) * pageSize + 1;
+  const endItem =
+    safeTotalItems === 0
+      ? 0
+      : Math.min(safeCurrentPage * pageSize, safeTotalItems);
+
+  const isPaginationDisabled = safeTotalItems === 0 || safeTotalPages <= 1;
+
+  const handleFirstPage = () => {
+    if (!isPaginationDisabled && safeCurrentPage > 1) {
+      onPageChange(1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (!isPaginationDisabled && safeCurrentPage > 1) {
+      onPageChange(safeCurrentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (!isPaginationDisabled && safeCurrentPage < safeTotalPages) {
+      onPageChange(safeCurrentPage + 1);
+    }
+  };
+
+  const handleLastPage = () => {
+    if (
+      !isPaginationDisabled &&
+      safeCurrentPage < safeTotalPages &&
+      safeTotalPages > 0
+    ) {
+      onPageChange(safeTotalPages);
+    }
+  };
 
   const pageSizeOptions = [
     { value: "10", label: "10 / page" },
@@ -29,20 +71,23 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
   ];
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
+    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
       {/* Left: Items count & size selector */}
       <div className="flex items-center space-x-4">
-        <span className="text-sm text-gray-600">
-          Showing {startItem} to {endItem} of {totalItems} results
-        </span>
+        <div className="text-sm text-gray-700">
+          {safeTotalItems === 0
+            ? "No results found"
+            : `Showing ${startItem} to ${endItem} of ${safeTotalItems} results`}
+        </div>
         {showSizeChanger && onPageSizeChange && (
           <Select
             options={pageSizeOptions}
-            value={pageSize.toString()}
+            value={String(pageSize)}
             onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
             size="sm"
             fullWidth={false}
             className="w-32"
+            disabled={safeTotalItems === 0}
           />
         )}
       </div>
@@ -52,52 +97,51 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
         {/* First Page */}
         <Button
           variant="outline"
-          size="icon"
-          disabled={currentPage === 1}
-          onClick={() => onPageChange(1)}
-          className="p-2 text-gray-500 disabled:text-gray-300 hover:bg-gray-100"
-        >
-          <RiArrowLeftDoubleLine className="w-5 h-5" />
-        </Button>
+          size="sm"
+          onClick={handleFirstPage}
+          disabled={isPaginationDisabled || safeCurrentPage <= 1}
+          leftIcon={<RiArrowLeftDoubleLine />}
+          aria-label="Go to first page"
+        />
 
         {/* Previous Page */}
         <Button
           variant="outline"
-          size="icon"
-          disabled={currentPage === 1}
-          onClick={() => onPageChange(currentPage - 1)}
-          className="p-2 text-gray-500 disabled:text-gray-300 hover:bg-gray-100"
-        >
-          <RiArrowLeftSLine className="w-5 h-5" />
-        </Button>
+          size="sm"
+          onClick={handlePreviousPage}
+          disabled={isPaginationDisabled || safeCurrentPage <= 1}
+          leftIcon={<RiArrowLeftSLine />}
+          aria-label="Go to previous page"
+        />
 
         {/* Page Indicator */}
-        <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
-          {String(currentPage).padStart(2, "0")} of{" "}
-          {String(totalPages).padStart(2, "0")}
+        <div className="flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-md min-w-[80px] justify-center">
+          {safeTotalPages === 0
+            ? "0 of 0"
+            : `${String(safeCurrentPage).padStart(2, "0")} of ${String(
+                safeTotalPages
+              ).padStart(2, "0")}`}
         </div>
 
         {/* Next Page */}
         <Button
           variant="outline"
-          size="icon"
-          disabled={currentPage === totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-          className="p-2 text-gray-500 disabled:text-gray-300 hover:bg-gray-100"
-        >
-          <RiArrowRightSLine className="w-5 h-5" />
-        </Button>
+          size="sm"
+          onClick={handleNextPage}
+          disabled={isPaginationDisabled || safeCurrentPage >= safeTotalPages}
+          rightIcon={<RiArrowRightSLine />}
+          aria-label="Go to next page"
+        />
 
         {/* Last Page */}
         <Button
           variant="outline"
-          size="icon"
-          disabled={currentPage === totalPages}
-          onClick={() => onPageChange(totalPages)}
-          className="p-2 text-gray-500 disabled:text-gray-300 hover:bg-gray-100"
-        >
-          <RiArrowRightDoubleLine className="w-5 h-5" />
-        </Button>
+          size="sm"
+          onClick={handleLastPage}
+          disabled={isPaginationDisabled || safeCurrentPage >= safeTotalPages}
+          rightIcon={<RiArrowRightDoubleLine />}
+          aria-label="Go to last page"
+        />
       </div>
     </div>
   );
