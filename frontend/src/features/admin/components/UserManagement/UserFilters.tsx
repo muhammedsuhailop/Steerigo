@@ -3,16 +3,15 @@ import { Button, Input, Select } from "@/shared/components/ui";
 import type { UserFiltersProps } from "./UserManagement.types";
 import {
   RiSearchLine,
-  RiAddLine,
-  RiDownloadLine,
   RiFilterLine,
+  RiArrowUpLine,
+  RiArrowDownLine,
 } from "react-icons/ri";
+import { DateInput } from "@/shared/components/ui/DateInput";
 
 export const UserFilters: React.FC<UserFiltersProps> = ({
   filters,
   onFiltersChange,
-  onAddUser,
-  onExport,
 }) => {
   const statusOptions = [
     { value: "", label: "All Status" },
@@ -20,6 +19,7 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
     { value: "Pending Verification", label: "Pending Verification" },
     { value: "Suspended", label: "Suspended" },
     { value: "Blocked", label: "Blocked" },
+    { value: "Inactive", label: "Inactive" },
   ];
 
   const sortOptions = [
@@ -29,28 +29,61 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
     { value: "totalSpent", label: "Total Spent" },
     { value: "createdAt", label: "Date Joined" },
     { value: "lastBooked", label: "Last Booked" },
+    { value: "status", label: "Status" },
   ];
 
+  const handleSortOrderToggle = () => {
+    const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
+    onFiltersChange({ ...filters, sortOrder: newOrder });
+  };
+
+  const handleDateFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFiltersChange({ ...filters, dateFrom: e.target.value });
+  };
+
+  const handleDateToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFiltersChange({ ...filters, dateTo: e.target.value });
+  };
+
+  const clearFilters = () => {
+    onFiltersChange({
+      search: "",
+      status: "",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      dateFrom: "",
+      dateTo: "",
+    });
+  };
+
+  const hasActiveFilters =
+    filters.search ||
+    filters.status ||
+    filters.dateFrom ||
+    filters.dateTo ||
+    filters.sortBy !== "createdAt" ||
+    filters.sortOrder !== "desc";
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         {/* Left side - Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4 flex-1">
           {/* Search */}
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 min-w-0">
             <Input
-              placeholder="Search users by name, email..."
+              placeholder="Search by name or email..."
               value={filters.search}
               onChange={(e) =>
                 onFiltersChange({ ...filters, search: e.target.value })
               }
-              leftIcon={<RiSearchLine className="w-4 h-4 text-gray-400" />}
+              leftIcon={<RiSearchLine />}
               size="md"
             />
           </div>
 
           {/* Status Filter */}
-          <div className="w-full sm:w-48">
+          <div className="min-w-[200px]">
             <Select
               options={statusOptions}
               value={filters.status}
@@ -62,8 +95,33 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
             />
           </div>
 
-          {/* Sort By */}
-          <div className="w-full sm:w-48">
+          {/* Date Range Filters */}
+          <div className="flex gap-2 min-w-[300px]">
+            <div className="flex-1">
+              <DateInput
+                emptyPlaceholder="From date"
+                datePrefix="From:"
+                value={filters.dateFrom}
+                onChange={handleDateFromChange}
+                size="md"
+              />
+            </div>
+            <div className="flex-1">
+              <DateInput
+                emptyPlaceholder="To date"
+                datePrefix="To:"
+                value={filters.dateTo}
+                onChange={handleDateToChange}
+                size="md"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right side - Sort and Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          {/* Sort Controls */}
+          <div className="flex gap-2 items-center">
             <Select
               options={sortOptions}
               value={filters.sortBy}
@@ -71,29 +129,37 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
                 onFiltersChange({ ...filters, sortBy: e.target.value })
               }
               size="md"
+              className="min-w-[140px]"
             />
+
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleSortOrderToggle}
+              className="!px-3"
+              title={`Sort ${
+                filters.sortOrder === "asc" ? "Ascending" : "Descending"
+              }`}
+            >
+              {filters.sortOrder === "asc" ? (
+                <RiArrowUpLine className="h-4 w-4" />
+              ) : (
+                <RiArrowDownLine className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        </div>
 
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="md"
-            onClick={onExport}
-            leftIcon={<RiDownloadLine className="w-4 h-4" />}
-          >
-            Export
-          </Button>
-
-          <Button
-            variant="primary"
-            size="md"
-            onClick={onAddUser}
-            leftIcon={<RiAddLine className="w-4 h-4" />}
-          >
-            Add User
-          </Button>
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="md"
+              onClick={clearFilters}
+              leftIcon={<RiFilterLine />}
+            >
+              Clear
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import type {
   User,
   UserFilters,
   UserAction,
+  getDefaultFilters,
 } from "../components/UserManagement/UserManagement.types";
 
 export const fetchAdminUsers = createAsyncThunk(
@@ -11,12 +12,29 @@ export const fetchAdminUsers = createAsyncThunk(
   async (_: void, { getState, rejectWithValue }) => {
     const state = getState() as { adminUsers: AdminUsersState };
     const { page, limit, filters } = state.adminUsers;
+
     try {
-      const params: any = { page, limit };
-      if (filters.search) params.search = filters.search;
-      if (filters.status) params.status = filters.status;
-      params.sortBy = filters.sortBy;
-      params.sortOrder = filters.sortOrder;
+      const params: any = {
+        page,
+        pageSize: limit,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+      };
+
+      if (filters.search?.trim()) {
+        params.search = filters.search.trim();
+      }
+      if (filters.status) {
+        params.status = filters.status;
+      }
+      if (filters.dateFrom) {
+        params.dateFrom = filters.dateFrom;
+      }
+      if (filters.dateTo) {
+        params.dateTo = filters.dateTo;
+      }
+
+      console.log("Fetching users with params:", params);
 
       const res = await api.get("/api/admin/users", { params });
 
@@ -25,6 +43,7 @@ export const fetchAdminUsers = createAsyncThunk(
         pagination: res.data.data.pagination,
       };
     } catch (err: any) {
+      console.error("Error fetching users:", err);
       return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
@@ -101,7 +120,14 @@ const initialState: AdminUsersState = {
   users: [],
   loading: false,
   error: null,
-  filters: { search: "", status: "", sortBy: "name", sortOrder: "asc" },
+  filters: {
+    search: "",
+    status: "",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+    dateFrom: "",
+    dateTo: "",
+  },
   page: 1,
   limit: 10,
   pagination: { totalItems: 0, totalPages: 0, page: 1, pageSize: 10 },
@@ -113,8 +139,21 @@ const adminUsersSlice = createSlice({
   initialState,
   reducers: {
     setFilters(state, action: PayloadAction<Partial<UserFilters>>) {
-      state.filters = { ...state.filters, ...action.payload };
+      const newFilters = { ...state.filters, ...action.payload };
+
+      if (newFilters.dateFrom && newFilters.dateTo) {
+        const fromDate = new Date(newFilters.dateFrom);
+        const toDate = new Date(newFilters.dateTo);
+
+        if (fromDate > toDate) {
+          // If from date is after to date, clear the to date
+          newFilters.dateTo = "";
+        }
+      }
+
+      state.filters = newFilters;
       state.page = 1;
+      state.error = null;
     },
     setPage(state, action: PayloadAction<number>) {
       state.page = action.payload;
@@ -125,6 +164,21 @@ const adminUsersSlice = createSlice({
     },
     clearActionLoading(state, action: PayloadAction<string>) {
       delete state.actionLoading[action.payload];
+    },
+    clearError(state) {
+      state.error = null;
+    },
+    resetFilters(state) {
+      state.filters = {
+        search: "",
+        status: "",
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        dateFrom: "",
+        dateTo: "",
+      };
+      state.page = 1;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -137,8 +191,7 @@ const adminUsersSlice = createSlice({
         state.loading = false;
         state.users = action.payload.users;
         state.pagination = action.payload.pagination;
-        state.page = action.payload.pagination.page;
-        state.limit = action.payload.pagination.pageSize;
+        state.error = null;
       })
       .addCase(fetchAdminUsers.rejected, (state, action) => {
         state.loading = false;
@@ -152,6 +205,7 @@ const adminUsersSlice = createSlice({
       .addCase(updateUserStatus.fulfilled, (state, action) => {
         const { userId } = action.payload;
         delete state.actionLoading[userId];
+        state.error = null;
       })
       .addCase(updateUserStatus.rejected, (state, action) => {
         const userId = action.meta.arg.userId;
@@ -161,6 +215,13 @@ const adminUsersSlice = createSlice({
   },
 });
 
-export const { setFilters, setPage, setLimit, clearActionLoading } =
-  adminUsersSlice.actions;
+export const {
+  setFilters,
+  setPage,
+  setLimit,
+  clearActionLoading,
+  clearError,
+  resetFilters,
+} = adminUsersSlice.actions;
+
 export default adminUsersSlice.reducer;

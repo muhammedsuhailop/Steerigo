@@ -22,6 +22,8 @@ export interface UserFilters {
   status: string;
   sortBy: string;
   sortOrder: "asc" | "desc";
+  dateFrom: string;
+  dateTo: string;
 }
 
 export interface UserManagementProps {
@@ -34,13 +36,12 @@ export interface UserTableProps {
   onUserClick: (user: User) => void;
   onDeleteUser: (user: User) => void;
   onUserAction: (userId: string, action: UserAction) => Promise<void>;
+  isActionLoading: (userId: string) => boolean;
 }
 
 export interface UserFiltersProps {
   filters: UserFilters;
   onFiltersChange: (filters: UserFilters) => void;
-  onAddUser: () => void;
-  onExport: () => void;
 }
 
 export type UserAction =
@@ -105,4 +106,21 @@ export const getAvailableActions = (status: User["status"]): UserAction[] => {
     default:
       return [];
   }
+};
+
+export const getDefaultFilters = (): UserFilters => ({
+  search: "",
+  status: "",
+  sortBy: "createdAt",
+  sortOrder: "desc",
+  dateFrom: "",
+  dateTo: "",
+});
+
+export const validateDateRange = (
+  dateFrom: string,
+  dateTo: string
+): boolean => {
+  if (!dateFrom || !dateTo) return true;
+  return new Date(dateFrom) <= new Date(dateTo);
 };
