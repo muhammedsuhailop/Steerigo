@@ -20,7 +20,9 @@ export class AuthErrorMapper {
       "Invalid email or password. Please check your credentials and try again.",
     VALIDATION_ERROR: "Please check your input and try again.",
     UNKNOWN: "An unexpected error occurred. Please try again.",
+    AUTHORIZATION_ERROR: "Account access restricted",
   };
+  static USER_FRIENDLY_MESSAGES: any;
 
   static processAuthError(
     error: any,
@@ -101,6 +103,11 @@ export class AuthErrorMapper {
           return this.USER_MESSAGES.INVALID_CREDENTIALS;
         }
         return this.USER_MESSAGES.INVALID_CREDENTIALS;
+
+      case ErrorType.AUTHORIZATION:
+        return (
+          parsedError.userMessage || this.USER_MESSAGES.AUTHORIZATION_ERROR
+        );
 
       case ErrorType.NETWORK:
         return this.USER_MESSAGES.NETWORK_ERROR;
