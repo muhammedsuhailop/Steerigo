@@ -21,7 +21,7 @@ export interface TablePaginationProps {
   currentPage: number;
   totalPages: number;
   totalItems: number;
-  itemsPerPage: number;
+  pageSize: number;
   onPageChange: (page: number) => void;
   showSizeChanger?: boolean;
   onPageSizeChange?: (size: number) => void;

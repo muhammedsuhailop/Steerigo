@@ -38,8 +38,14 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
 
       if (filters.dateFrom || filters.dateTo) {
         query.createdAt = {};
-        if (filters.dateFrom) query.createdAt.$gte = filters.dateFrom;
-        if (filters.dateTo) query.createdAt.$lte = filters.dateTo;
+        if (filters.dateFrom) {
+          query.createdAt.$gte = new Date(filters.dateFrom);
+        }
+        if (filters.dateTo) {
+          const endDate = new Date(filters.dateTo);
+          endDate.setHours(23, 59, 59, 999);
+          query.createdAt.$lte = endDate;
+        }
       }
 
       const skip = (pagination.page - 1) * pagination.pageSize;
@@ -80,10 +86,14 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
             lastBooked: 1,
             joinedDate: "$createdAt",
             isVerified: 1,
+            createdAt: 1,
           },
         },
-        { $sort: { createdAt: -1 } },
       ];
+
+      const sortField = this.mapSortField(filters.sortBy || "createdAt");
+      const sortOrder = filters.sortOrder === "desc" ? -1 : 1;
+      pipeline.push({ $sort: { [sortField]: sortOrder } });
 
       const totalPipeline = [...pipeline, { $count: "total" }];
       const totalResult = await UserModel.aggregate(totalPipeline);
@@ -110,6 +120,14 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
         totalItems,
         page: pagination.page,
         pageSize: pagination.pageSize,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        filters: {
+          status: filters.status,
+          search: filters.search,
+          dateFrom: filters.dateFrom,
+          dateTo: filters.dateTo,
+        },
       });
 
       return {
@@ -125,6 +143,19 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
       Logger.error("Error fetching users from database", error);
       throw error;
     }
+  }
+
+  private mapSortField(sortBy: string): string {
+    const sortFieldMap: Record<string, string> = {
+      name: "name",
+      email: "email",
+      totalBookings: "totalBookings",
+      totalSpent: "totalSpent",
+      createdAt: "createdAt",
+      lastBooked: "lastBooked",
+      status: "status",
+    };
+    return sortFieldMap[sortBy] || "createdAt";
   }
 
   async updateUserStatus(
@@ -156,7 +187,7 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
     }
   }
 
-  async getUserStats(userId: string): Promise<any> {
+  async getUserStats(userId: string): Promise<UserWithStats> {
     try {
       const pipeline = [
         { $match: { _id: userId } },

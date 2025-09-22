@@ -28,46 +28,32 @@ import { GetCurrentUserDto } from "@application/dto/auth/GetCurrentUserDto";
 
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
+import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 
 @injectable()
 export class AuthController {
   constructor(
-    @inject(SignupRequestUseCase)
-    private signupRequestUseCase: SignupRequestUseCase,
-    @inject(SignupVerifyUseCase)
-    private signupVerifyUseCase: SignupVerifyUseCase,
+    @inject(SignupRequestUseCase) private signupRequestUseCase: SignupRequestUseCase,
+    @inject(SignupVerifyUseCase) private signupVerifyUseCase: SignupVerifyUseCase,
     @inject(LoginUseCase) private loginUseCase: LoginUseCase,
     @inject(ResendOtpUseCase) private resendOtpUseCase: ResendOtpUseCase,
-    @inject(UpdatePasswordUseCase)
-    private updatePasswordUseCase: UpdatePasswordUseCase,
-    @inject(RefreshTokenUseCase)
-    private refreshTokenUseCase: RefreshTokenUseCase,
+    @inject(UpdatePasswordUseCase) private updatePasswordUseCase: UpdatePasswordUseCase,
+    @inject(RefreshTokenUseCase) private refreshTokenUseCase: RefreshTokenUseCase,
     @inject(LogoutUseCase) private logoutUseCase: LogoutUseCase,
-    @inject(ForgotPasswordRequestUseCase)
-    private forgotPasswordRequestUseCase: ForgotPasswordRequestUseCase,
-    @inject(ForgotPasswordVerifyUseCase)
-    private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase,
+    @inject(ForgotPasswordRequestUseCase) private forgotPasswordRequestUseCase: ForgotPasswordRequestUseCase,
+    @inject(ForgotPasswordVerifyUseCase) private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase,
     @inject(GoogleLoginUseCase) private googleLoginUseCase: GoogleLoginUseCase,
-    @inject(GetGoogleAuthUrlUseCase)
-    private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase,
-    @inject(GetCurrentUserUseCase)
-    private getCurrentUserUseCase: GetCurrentUserUseCase
+    @inject(GetGoogleAuthUrlUseCase) private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase,
+    @inject(GetCurrentUserUseCase) private getCurrentUserUseCase: GetCurrentUserUseCase
   ) {}
 
   async signupRequest(req: Request, res: Response): Promise<void> {
     try {
-      // Check validation errors
+      // Validation check
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -76,48 +62,31 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'signup_request');
+        res.status(statusCode).json(response);
         return;
       }
 
       const response: ApiResponse = {
         success: true,
-        message:
-          "OTP sent to your email address. Please verify to complete signup.",
+        message: "OTP sent to your email address. Please verify to complete signup.",
       };
 
       res.status(200).json(response);
-      Logger.info("Signup request processed successfully", {
-        email: dto.email,
-      });
+      Logger.info("Signup request processed successfully", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in signup request", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'signup_request');
+      res.status(statusCode).json(response);
     }
   }
 
   async signupVerify(req: Request, res: Response): Promise<void> {
     try {
-      // Check validation errors
+      // Validation check
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -126,16 +95,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-
-        if (error.name === "MaxOtpAttemptsError") {
-          res.status(429).json(response);
-        } else {
-          res.status(400).json(response);
-        }
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'signup_verify');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -147,16 +108,10 @@ export class AuthController {
       };
 
       res.status(201).json(response);
-      Logger.info("Signup verification completed successfully", {
-        email: dto.email,
-      });
+      Logger.info("Signup verification completed successfully", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in signup verification", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'signup_verify');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -164,15 +119,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -181,11 +129,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-        res.status(401).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'login');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -199,12 +144,8 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("Login completed successfully", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in login", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'login');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -212,15 +153,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -229,11 +163,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'resend_otp');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -245,12 +176,8 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("OTP resent successfully", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in resend OTP", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'resend_otp');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -258,15 +185,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation Failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -276,15 +196,11 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-
-        const statusCode = error.name === "InvalidCredentialsError" ? 401 : 400;
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'update_password');
         res.status(statusCode).json(response);
         return;
       }
+
       const response: ApiResponse = {
         success: true,
         message: "Password updated successfully",
@@ -293,12 +209,8 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("Password updated successfully", { userId });
     } catch (error) {
-      Logger.error("Error in update password", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'update_password');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -306,15 +218,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -323,20 +228,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-
-        // Different status codes for different error types
-        if (
-          error.name === "RefreshTokenExpiredError" ||
-          error.name === "RefreshTokenRevokedError"
-        ) {
-          res.status(401).json(response);
-        } else {
-          res.status(400).json(response);
-        }
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'refresh_token');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -350,29 +243,17 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("Tokens refreshed successfully");
     } catch (error) {
-      Logger.error("Error in refresh token", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'refresh_token');
+      res.status(statusCode).json(response);
     }
   }
 
   async logout(req: Request, res: Response): Promise<void> {
     try {
       const errors = validationResult(req);
-      console.log("errors:", errors);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -381,11 +262,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'logout');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -397,12 +275,8 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("User logged out successfully");
     } catch (error) {
-      Logger.error("Error in logout", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'logout');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -410,15 +284,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -427,11 +294,8 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'forgot_password_request');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -443,12 +307,8 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("Password reset OTP requested", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in forgot password request", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'forgot_password_request');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -456,15 +316,8 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ApiResponse = {
-          success: false,
-          message: "Validation failed",
-          error: errors
-            .array()
-            .map((err) => `${err.msg}`)
-            .join(", "),
-        };
-        res.status(400).json(response);
+        const { response, statusCode } = ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -473,36 +326,21 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-
-        if (error.name === "MaxOtpAttemptsError") {
-          res.status(429).json(response);
-        } else {
-          res.status(400).json(response);
-        }
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'forgot_password_verify');
+        res.status(statusCode).json(response);
         return;
       }
 
       const response: ApiResponse = {
         success: true,
-        message:
-          "Password reset successfully. Please login with your new password",
+        message: "Password reset successfully. Please login with your new password",
       };
 
       res.status(200).json(response);
-      Logger.info("Password reset completed successfully", {
-        email: dto.email,
-      });
+      Logger.info("Password reset completed successfully", { email: dto.email });
     } catch (error) {
-      Logger.error("Error in forgot password verification", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'forgot_password_verify');
+      res.status(statusCode).json(response);
     }
   }
 
@@ -514,12 +352,7 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const response: ApiResponse = {
-          success: false,
-          message: error.message,
-        };
-
-        const statusCode = error.message === "User not found" ? 404 : 400;
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'get_current_user');
         res.status(statusCode).json(response);
         return;
       }
@@ -533,26 +366,19 @@ export class AuthController {
       res.status(200).json(response);
       Logger.info("Current user fetched successfully", { userId });
     } catch (error) {
-      Logger.error("Error in getCurrentUser", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'get_current_user');
+      res.status(statusCode).json(response);
     }
   }
 
-  // Get Google OAuth URL
   async getGoogleAuthUrl(req: Request, res: Response): Promise<void> {
     try {
       const result = await this.getGoogleAuthUrlUseCase.execute();
 
       if (result.isFailure()) {
-        const response: ApiResponse = {
-          success: false,
-          message: result.getError().message,
-        };
-        res.status(400).json(response);
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(error, 'get_google_auth_url');
+        res.status(statusCode).json(response);
         return;
       }
 
@@ -564,16 +390,11 @@ export class AuthController {
 
       res.status(200).json(response);
     } catch (error) {
-      Logger.error("Error generating Google auth URL", error);
-      const response: ApiResponse = {
-        success: false,
-        message: "Internal server error",
-      };
-      res.status(500).json(response);
+      const { response, statusCode } = ErrorHandlerService.handleError(error, 'get_google_auth_url');
+      res.status(statusCode).json(response);
     }
   }
 
-  /// Handle Google OAuth callback
   async googleCallback(req: Request, res: Response): Promise<void> {
     try {
       const dto = new GoogleLoginDto(req.query);
@@ -581,14 +402,13 @@ export class AuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        // Redirect to frontend with error
-        const frontendUrl = `${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(error.message)}`;
+        // For OAuth callback, redirect to frontend with error
+        const frontendUrl = `${process.env.FRONTEND_URL}/login?error=authentication_failed`;
         res.redirect(frontendUrl);
         return;
       }
 
       const data = result.getValue();
-
       const frontendUrl =
         `${process.env.FRONTEND_URL}/auth/callback?` +
         `accessToken=${encodeURIComponent(data.accessToken)}` +
@@ -596,7 +416,6 @@ export class AuthController {
         `&isNewUser=${data.isNewUser}`;
 
       res.redirect(frontendUrl);
-
       Logger.info("Google login completed successfully", {
         email: data.user.email,
         isNewUser: data.isNewUser,
