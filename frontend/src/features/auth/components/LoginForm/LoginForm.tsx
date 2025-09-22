@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { useAuth } from "../../hooks/useAuth";
 import { useLoginForm } from "../../hooks/useAuthForm";
-import { selectErrorsByContext } from "../../../../shared/components/ui/ErrorHandling/errorSlice";
-import { AuthContext } from "../../../../shared/utils/errorUtils";
 import type { LoginFormProps } from "./LoginForm.types";
-import type { RootState } from "@/app/store";
 import LogoText from "@/../public/SteeriGoHorizontal.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -22,26 +18,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { login, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Get login errors from centralized system
-  const loginErrors = useSelector((state: RootState) =>
-    selectErrorsByContext(AuthContext.LOGIN)(state)
-  );
-
   const {
     formData,
+    errors,
     isSubmitting,
     submitMessage,
     handleChange,
     handleSubmit,
-    getFieldError, // Use enhanced field error getter
   } = useLoginForm(onSubmit || login);
-
-  // Clear errors when component unmounts or on successful navigation
-  // useEffect(() => {
-  //   return () => {
-  //     clearAuthErrors(AuthContext.LOGIN);
-  //   };
-  // }, [clearAuthErrors]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -52,75 +36,76 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   };
 
-  // Check if there are critical login errors that should block the form
-  const hasCriticalError = loginErrors.some(error => 
-    error.severity === "critical" || error.severity === "high"
-  );
-
   return (
-    <div className={`w-full max-w-md mx-auto ${className}`}>
+    <div className={`w-full max-w-sm mx-auto ${className}`}>
       {/* Logo */}
       <div className="text-center mb-8">
-        <img
-          src={LogoText}
-          alt="SteeriGo"
-          className="mx-auto h-12 w-auto mb-4"
-        />
-        <h1 className="text-2xl font-bold text-gray-900">Login</h1>
-        <p className="text-gray-600 mt-2">Welcome back to SteeriGo</p>
+        <div className="flex items-center justify-center">
+          <img src={LogoText} alt="SteeriGo Logo" className="w-3/4 h-auto" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Login</h2>
       </div>
 
-      {/* Submit Message - Only show local success messages, API errors shown via Toast */}
-      {submitMessage && submitMessage.type === "success" && (
-        <div className="mb-4 p-3 rounded-md bg-green-50 border border-green-200">
-          <p className="text-green-700 text-sm">{submitMessage.text}</p>
+      {/* Submit Message */}
+      {submitMessage && (
+        <div
+          className={`p-3 rounded-md text-sm mb-2 ${
+            submitMessage.type === "success"
+              ? "bg-green-50 text-green-800 border border-green-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
+          <p>{submitMessage.text}</p>
         </div>
       )}
-
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Field */}
         <Input
-          label="Email"
           type="email"
+          id="email"
+          label="Email"
           value={formData.email || ""}
           onChange={(e) => handleChange("email", e.target.value)}
-          error={getFieldError("email")} // Uses centralized + validation errors
-          isInvalid={!!getFieldError("email")}
-          disabled={isSubmitting || isLoading || hasCriticalError}
+          error={errors.email}
+          isInvalid={!!errors.email}
+          disabled={isSubmitting || isLoading}
           placeholder="Enter your email"
         />
 
         {/* Password Field */}
         <Input
-          label="Password"
           type={showPassword ? "text" : "password"}
+          id="password"
+          label="Password"
           value={formData.password || ""}
           onChange={(e) => handleChange("password", e.target.value)}
-          error={getFieldError("password")}
-          isInvalid={!!getFieldError("password")}
-          disabled={isSubmitting || isLoading || hasCriticalError}
+          error={errors.password}
+          isInvalid={!!errors.password}
+          disabled={isSubmitting || isLoading}
           placeholder="Enter your password"
           rightIcon={
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-gray-400 hover:text-gray-600"
+              className="focus:outline-none"
               disabled={isSubmitting || isLoading}
             >
-              {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+              {showPassword ? (
+                <FaRegEyeSlash className="text-gray-500" />
+              ) : (
+                <FaRegEye className="text-gray-500" />
+              )}
             </button>
           }
         />
 
         {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            {/* Remember me checkbox can be added here if needed */}
-          </div>
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center"></div>
           <Link
             to="/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-gray-700 hover:text-gray-900 font-medium"
           >
             Forgot Password?
           </Link>
@@ -130,12 +115,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <Button
           type="submit"
           variant="primary"
-          size="lg"
-          className="w-full"
+          size="md"
+          fullWidth
           isLoading={isSubmitting || isLoading}
-          disabled={hasCriticalError}
+          disabled={isSubmitting || isLoading}
         >
-          Sign In
+          Login
         </Button>
 
         {/* Google Auth Button */}
@@ -143,11 +128,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <Button
             type="button"
             variant="outline"
-            size="lg"
-            className="w-full"
+            size="md"
+            fullWidth
             leftIcon={<FcGoogle className="w-5 h-5" />}
             onClick={handleGoogleLogin}
-            disabled={isSubmitting || isLoading || hasCriticalError}
           >
             Sign in with Google
           </Button>
@@ -155,12 +139,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </form>
 
       {/* Sign Up Link */}
-      <div className="mt-6 text-center">
+      <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
           Don't have an account?{" "}
           <Link
             to="/signup"
-            className="text-blue-600 hover:text-blue-500 font-medium"
+            className="font-medium text-gray-800 hover:text-gray-900"
           >
             Sign up here
           </Link>

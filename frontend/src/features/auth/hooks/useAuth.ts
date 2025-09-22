@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import {
   useLoginMutation,
   useLogoutMutation,
@@ -16,16 +15,11 @@ import {
 } from "../store/authSelectors";
 import {
   logout as logoutAction,
+  clearError,
   initializeAuth,
   initiateGoogleAuth,
   setupAutoRefresh,
 } from "../store/authSlice";
-import { errorHandler, AuthContext } from "../../../shared/utils/errorUtils";
-import {
-  selectLoginErrors,
-  selectSignupErrors,
-  selectOtpErrors,
-} from "./authErrorSelectors";
 import type { LoginRequest } from "../types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { isTokenExpired } from "@/shared/utils/tokenUtils";
@@ -42,11 +36,6 @@ export const useAuth = () => {
   const userRole = useAppSelector(selectUserRole);
   const accessToken = useAppSelector((state) => state.auth.accessToken);
 
-  // Get auth-related errors from centralized system using memoized selectors
-  const loginErrors = useSelector(selectLoginErrors);
-  const signupErrors = useSelector(selectSignupErrors);
-  const otpErrors = useSelector(selectOtpErrors);
-
   // Mutations
   const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation();
   const [logoutMutation, { isLoading: isLogoutLoading }] = useLogoutMutation();
@@ -62,12 +51,9 @@ export const useAuth = () => {
     return accessToken && !isTokenExpired(accessToken);
   }, [accessToken]);
 
-  // Login function - preserve all existing logic, add error cleanup
+  // Login function
   const login = useCallback(
     async (credentials: LoginRequest) => {
-      // Clear previous login errors
-      errorHandler.clearAuthErrors(AuthContext.LOGIN);
-      
       try {
         const result = await loginMutation(credentials).unwrap();
         if (result.success) {
@@ -81,17 +67,16 @@ export const useAuth = () => {
         }
         return { success: false, message: result.message };
       } catch (error: any) {
-        // Error handled by middleware - just return failure
         return {
           success: false,
           message: error.data?.message || "Login failed. Please try again.",
         };
       }
     },
-    [loginMutation, navigate, dispatch]
+    [loginMutation, navigate]
   );
 
-  // Logout function - preserve all existing logic
+  // Logout function
   const logout = useCallback(async () => {
     try {
       await logoutMutation().unwrap();
@@ -105,7 +90,7 @@ export const useAuth = () => {
     return { success: true, message: "Logged out successfully" };
   }, [logoutMutation, dispatch, navigate]);
 
-  // Refresh token function - preserve all existing logic
+  // Refresh token function
   const refreshToken = useCallback(async () => {
     try {
       await refreshTokenMutation().unwrap();
@@ -121,22 +106,12 @@ export const useAuth = () => {
     }
   }, [refreshTokenMutation, dispatch, navigate]);
 
-  // Clear auth errors - only use centralized error handling
-  const clearAuthErrors = useCallback((context?: string) => {
-    if (context) {
-      errorHandler.clearAuthErrors(context);
-    } else {
-      // Clear all auth errors
-      errorHandler.clearAuthErrors(AuthContext.LOGIN);
-      errorHandler.clearAuthErrors(AuthContext.SIGNUP);
-      errorHandler.clearAuthErrors(AuthContext.OTP_VERIFICATION);
-      errorHandler.clearAuthErrors(AuthContext.PASSWORD_RESET);
-      errorHandler.clearAuthErrors(AuthContext.PASSWORD_UPDATE);
-      errorHandler.clearAuthErrors(AuthContext.GOOGLE_AUTH);
-    }
-  }, []);
+  // Clear error function
+  const clearAuthError = useCallback(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
-  // Check if user has specific role - preserve existing logic
+  // Check if user has specific role
   const hasRole = useCallback(
     (role: string) => {
       return userRole === role;
@@ -156,15 +131,11 @@ export const useAuth = () => {
     return userRole === "Rider";
   }, [userRole]);
 
-  // Google login - preserve existing logic, add error cleanup
   const loginWithGoogle = useCallback(async () => {
-    errorHandler.clearAuthErrors(AuthContext.GOOGLE_AUTH);
-    
     try {
       await dispatch(initiateGoogleAuth()).unwrap();
       return { success: true, message: "Redirecting to Google..." };
     } catch (error: any) {
-      // Error handled by middleware
       return {
         success: false,
         message:
@@ -178,14 +149,9 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading: isLoading || isLoginLoading || isLogoutLoading,
-    error, // Keep legacy error for backward compatibility
+    error,
     userRole,
     accessToken,
-
-    // Centralized errors (now memoized)
-    loginErrors,
-    signupErrors, 
-    otpErrors,
 
     // Actions
     initialize,
@@ -193,7 +159,7 @@ export const useAuth = () => {
     loginWithGoogle,
     logout,
     refreshToken,
-    clearAuthError: clearAuthErrors, // Use centralized error clearing
+    clearAuthError,
 
     // Utilities
     hasRole,

@@ -3,7 +3,6 @@ import { authApi } from "../../features/auth/services/authApi";
 import authReducer from "../../features/auth/store/authSlice";
 import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
 import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
-import { rtkQueryErrorMiddleware } from "../../shared/middleware/errorMiddleware";
 
 export const store = configureStore({
   reducer: {
@@ -20,17 +19,10 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          "error/addError",
-          "authApi/executeMutation/rejected",
-          "error/hideGlobalError",
-        ],
-        // Ignore the entire error state to avoid timestamp serialization issues
-        ignoredPaths: ["error"],
+        ignoredActions: ["error/addError"],
+        ignoredPaths: ["error.errors.timestamp", "error.globalError.timestamp"],
       },
-    })
-    .concat(authApi.middleware)
-    .concat(rtkQueryErrorMiddleware),
+    }).concat(authApi.middleware),
   devTools: import.meta.env.DEV,
 });
 

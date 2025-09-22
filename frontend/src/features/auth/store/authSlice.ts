@@ -8,7 +8,6 @@ import {
   isTokenExpired,
   getTimeUntilTokenExpiry,
 } from "../../../shared/utils/tokenUtils";
-import { errorHandler, AuthContext } from "../../../shared/utils/errorUtils";
 
 const getAccessTokenFromStorage = (): string | null => {
   if (typeof window !== "undefined") {
@@ -327,13 +326,14 @@ export const handleGoogleCallback = createAsyncThunk(
   }
 );
 
-// Initial state - removed error property
+// Initial state
 const initialState: AuthState = {
   user: null,
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
+  error: null,
 };
 
 const authSlice = createSlice({
@@ -354,12 +354,10 @@ const authSlice = createSlice({
       state.refreshToken = refreshToken;
       state.isAuthenticated = true;
       state.isLoading = false;
+      state.error = null;
 
       setTokensInStorage(accessToken, refreshToken);
       setUserInStorage(user);
-      
-      // Clear any auth errors on successful login
-      errorHandler.clearAuthErrors(AuthContext.LOGIN);
     },
 
     logout: (state) => {
@@ -368,16 +366,9 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.isLoading = false;
+      state.error = null;
 
       removeTokensFromStorage();
-
-      // Clear all auth-related errors
-      errorHandler.clearAuthErrors(AuthContext.LOGIN);
-      errorHandler.clearAuthErrors(AuthContext.SIGNUP);
-      errorHandler.clearAuthErrors(AuthContext.OTP_VERIFICATION);
-      errorHandler.clearAuthErrors(AuthContext.PASSWORD_RESET);
-      errorHandler.clearAuthErrors(AuthContext.PASSWORD_UPDATE);
-      errorHandler.clearAuthErrors(AuthContext.GOOGLE_AUTH);
 
       if (refreshTimerId) {
         clearTimeout(refreshTimerId);
@@ -385,8 +376,17 @@ const authSlice = createSlice({
       }
     },
 
+    clearError: (state) => {
+      state.error = null;
+    },
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
+    },
+
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+      state.isLoading = false;
     },
 
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
@@ -444,27 +444,32 @@ const authSlice = createSlice({
 
         state.accessToken = accessToken;
         state.refreshToken = refreshToken;
+        state.error = null;
       })
       .addCase(refreshAuthToken.rejected, (state, action) => {
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        state.error = action.payload as string;
       });
 
     // Google Auth
     builder
       .addCase(initiateGoogleAuth.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(initiateGoogleAuth.fulfilled, (state) => {
         state.isLoading = false;
       })
       .addCase(initiateGoogleAuth.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
       })
       .addCase(handleGoogleCallback.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(handleGoogleCallback.fulfilled, (state, action) => {
         const { user, accessToken, refreshToken } = action.payload;
@@ -473,18 +478,17 @@ const authSlice = createSlice({
         state.refreshToken = refreshToken;
         state.isAuthenticated = true;
         state.isLoading = false;
+        state.error = null;
 
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
-        
-        // Clear Google auth errors on success
-        errorHandler.clearAuthErrors(AuthContext.GOOGLE_AUTH);
       })
       .addCase(handleGoogleCallback.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
       });
 
-    // Handle auth API responses - preserved all functionality, added error cleanup
+    // Handle auth API responses
     builder
       .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
         const { user, accessToken, refreshToken } = action.payload.data;
@@ -493,12 +497,14 @@ const authSlice = createSlice({
         state.refreshToken = refreshToken;
         state.isAuthenticated = true;
         state.isLoading = false;
+        state.error = null;
 
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
-        
-        // Clear login errors on successful login
-        errorHandler.clearAuthErrors(AuthContext.LOGIN);
+      })
+      .addMatcher(authApi.endpoints.login.matchRejected, (state, action) => {
+        state.error = action.error.message || "Login failed";
+        state.isLoading = false;
       })
       .addMatcher(
         authApi.endpoints.verifyOTP.matchFulfilled,
@@ -509,12 +515,10 @@ const authSlice = createSlice({
           state.refreshToken = refreshToken;
           state.isAuthenticated = true;
           state.isLoading = false;
+          state.error = null;
 
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
-          
-          // Clear OTP errors on successful verification
-          errorHandler.clearAuthErrors(AuthContext.OTP_VERIFICATION);
         }
       )
       .addMatcher(
@@ -526,12 +530,10 @@ const authSlice = createSlice({
           state.refreshToken = refreshToken;
           state.isAuthenticated = true;
           state.isLoading = false;
+          state.error = null;
 
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
-          
-          // Clear Google auth errors on successful callback
-          errorHandler.clearAuthErrors(AuthContext.GOOGLE_AUTH);
         }
       )
       .addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
@@ -540,6 +542,7 @@ const authSlice = createSlice({
         state.refreshToken = null;
         state.isAuthenticated = false;
         state.isLoading = false;
+        state.error = null;
 
         removeTokensFromStorage();
       });
@@ -549,7 +552,9 @@ const authSlice = createSlice({
 export const {
   loginSuccess,
   logout,
+  clearError,
   setLoading,
+  setError,
   updateUser,
   setGoogleAuthLoading,
 } = authSlice.actions;

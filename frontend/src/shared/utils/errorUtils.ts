@@ -7,20 +7,6 @@ import {
   NetworkError,
   ServerError,
 } from "../components/ui/ErrorHandling/ErrorHandling.types";
-import { addError, clearErrorsByContext, removeError } from "../components/ui/ErrorHandling/errorSlice";
-import { store } from "../../app/store";
-
-// Auth-specific error contexts
-export const AuthContext = {
-  LOGIN: "auth:login",
-  SIGNUP: "auth:signup",
-  OTP_VERIFICATION: "auth:otp_verification",
-  PASSWORD_RESET: "auth:password_reset",
-  PASSWORD_UPDATE: "auth:password_update",
-  TOKEN_REFRESH: "auth:token_refresh",
-  GOOGLE_AUTH: "auth:google_auth",
-  LOGOUT: "auth:logout",
-} as const;
 
 export class ErrorHandler {
   private static instance: ErrorHandler;
@@ -30,60 +16,6 @@ export class ErrorHandler {
       ErrorHandler.instance = new ErrorHandler();
     }
     return ErrorHandler.instance;
-  }
-
-  // Dispatch error to centralized system
-  public dispatchError(error: BaseError): void {
-    this.logError(error);
-    store.dispatch(addError(error));
-  }
-
-  // Remove error by code
-  public removeError(errorCode: string): void {
-    store.dispatch(removeError(errorCode));
-  }
-
-  // Clear errors by auth context
-  public clearAuthErrors(context: string): void {
-    store.dispatch(clearErrorsByContext(context));
-  }
-
-  // Handle auth-specific errors
-  public handleAuthError(
-    error: any,
-    context: string,
-    customUserMessage?: string
-  ): BaseError {
-    const parsedError = this.parseApiError(error, context);
-
-    // Override user message for auth-specific contexts
-    if (customUserMessage) {
-      parsedError.userMessage = customUserMessage;
-    } else {
-      parsedError.userMessage = this.getAuthUserMessage(context, parsedError);
-    }
-
-    this.dispatchError(parsedError);
-    return parsedError;
-  }
-
-  private getAuthUserMessage(context: string, error: BaseError): string {
-    const authMessages: Record<string, string> = {
-      [AuthContext.LOGIN]: "Login failed. Please check your credentials and try again.",
-      [AuthContext.SIGNUP]: "Account creation failed. Please check your information.",
-      [AuthContext.OTP_VERIFICATION]: "OTP verification failed. Please check your code.",
-      [AuthContext.PASSWORD_RESET]: "Password reset failed. Please try again.",
-      [AuthContext.PASSWORD_UPDATE]: "Password update failed. Please try again.",
-      [AuthContext.TOKEN_REFRESH]: "Session expired. Please log in again.",
-      [AuthContext.GOOGLE_AUTH]: "Google authentication failed. Please try again.",
-      [AuthContext.LOGOUT]: "Logout failed. Please try again.",
-    };
-
-    if (context in authMessages) {
-      return authMessages[context as keyof typeof authMessages];
-    }
-
-    return error.userMessage || this.getDefaultUserMessage(error.type);
   }
 
   // Parse API error response
