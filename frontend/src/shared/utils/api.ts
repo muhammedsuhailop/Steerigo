@@ -5,10 +5,12 @@ import axios, {
 } from "axios";
 import { store } from "../../app/store";
 import { refreshAuthToken, logout } from "../../features/auth/store/authSlice";
+import { errorHandler, AuthContext } from "./errorUtils";
 import { isTokenExpired } from "./tokenUtils";
 
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
+  _skipErrorHandling?: boolean; // Flag to skip middleware error handling
 }
 
 interface RefreshTokenResponse {
@@ -41,12 +43,34 @@ const handleTokenRefresh = async (): Promise<void> => {
     await refreshPromise;
   } catch (error) {
     console.error("Token refresh failed:", error);
+    
+    // Handle refresh failure with proper error context
+    errorHandler.handleAuthError(
+      error,
+      AuthContext.TOKEN_REFRESH,
+      "Your session has expired. Please log in again."
+    );
+    
     store.dispatch(logout());
     throw error;
   } finally {
     refreshPromise = null;
   }
 };
+
+// Helper function to determine context from URL
+function getContextFromUrl(url: string): string {
+  if (url.includes('/auth/login')) return AuthContext.LOGIN;
+  if (url.includes('/auth/signup')) return AuthContext.SIGNUP;
+  if (url.includes('/auth/verify')) return AuthContext.OTP_VERIFICATION;
+  if (url.includes('/auth/forgot-password')) return AuthContext.PASSWORD_RESET;
+  if (url.includes('/auth/reset-password')) return AuthContext.PASSWORD_RESET;
+  if (url.includes('/auth/update-password')) return AuthContext.PASSWORD_UPDATE;
+  if (url.includes('/auth/google')) return AuthContext.GOOGLE_AUTH;
+  if (url.includes('/auth/logout')) return AuthContext.LOGOUT;
+  if (url.includes('/auth/refresh')) return AuthContext.TOKEN_REFRESH;
+  return 'api:general';
+}
 
 // Request interceptor
 api.interceptors.request.use(
@@ -68,7 +92,6 @@ api.interceptors.request.use(
 
       try {
         await handleTokenRefresh();
-
         // Get the new token after refresh
         const newState = store.getState();
         accessToken = newState.auth.accessToken;
@@ -85,7 +108,16 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    // Handle request setup errors
+    const context = 'api:request_setup';
+    errorHandler.handleAuthError(
+      error,
+      context,
+      'Failed to setup request. Please try again.'
+    );
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor
@@ -93,6 +125,11 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
+
+    // Skip error handling if specifically requested (for RTK Query middleware to handle)
+    if (originalRequest?._skipErrorHandling) {
+      return Promise.reject(error);
+    }
 
     // Handle 401 unauthorized responses
     if (
@@ -104,6 +141,11 @@ api.interceptors.response.use(
 
       // Don't retry refresh endpoint to avoid infinite loops
       if (originalRequest.url?.includes("/refresh")) {
+        errorHandler.handleAuthError(
+          error,
+          AuthContext.TOKEN_REFRESH,
+          "Session refresh failed. Please log in again."
+        );
         store.dispatch(logout());
         return Promise.reject(error);
       }
@@ -124,8 +166,7 @@ api.interceptors.response.use(
           "Token refresh failed during response handling:",
           refreshError
         );
-        store.dispatch(logout());
-
+        
         // Redirect to login if not already there
         if (window.location.pathname !== "/login") {
           window.location.href = "/login";
@@ -133,6 +174,12 @@ api.interceptors.response.use(
 
         return Promise.reject(refreshError);
       }
+    }
+
+    // Handle other HTTP errors only if not handled by RTK Query middleware
+    if (!originalRequest?.url?.includes('/api/')) {
+      const context = getContextFromUrl(originalRequest?.url || '');
+      errorHandler.handleAuthError(error, context);
     }
 
     return Promise.reject(error);
