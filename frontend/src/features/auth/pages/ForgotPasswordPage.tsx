@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ForgotPasswordForm } from "../components/ForgotPassword";
 
-export const ForgotPasswordPage: React.FC = () => {
+const ForgotPasswordPage: React.FC = () => {
     const { isAuthenticated, isLoading, initialize } = useAuth();
     const location = useLocation();
 
@@ -38,3 +38,5 @@ export const ForgotPasswordPage: React.FC = () => {
         </div>
     );
 };
+
+export default ForgotPasswordPage;

@@ -1,22 +1,30 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
 import { authApi } from "../../features/auth/services/authApi";
-import { rootReducer } from "./rootReducer";
+import authReducer from "../../features/auth/store/authSlice";
+import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
+import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
 
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    // Auth with RTK Query
+    auth: authReducer,
+    [authApi.reducerPath]: authApi.reducer,
+
+    // Feature reducers
+    adminUsers: adminUsersReducer,
+
+    // Global error handling
+    error: errorReducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+        ignoredActions: ["error/addError"],
+        ignoredPaths: ["error.errors.timestamp", "error.globalError.timestamp"],
       },
-    }).concat(
-      authApi.middleware
-    ),
-  devTools: process.env.NODE_ENV !== "production",
+    }).concat(authApi.middleware),
+  devTools: import.meta.env.DEV,
 });
-
-setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

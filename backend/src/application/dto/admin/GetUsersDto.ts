@@ -10,6 +10,8 @@ export class GetUsersDto {
   public readonly search?: string;
   public readonly dateFrom?: string;
   public readonly dateTo?: string;
+  public readonly sortBy: string;
+  public readonly sortOrder: "asc" | "desc";
 
   constructor(data: any) {
     this.page = parseInt(data.page) || 1;
@@ -18,5 +20,20 @@ export class GetUsersDto {
     this.search = data.search?.trim();
     this.dateFrom = data.dateFrom;
     this.dateTo = data.dateTo;
+    this.sortBy = this.validateSortBy(data.sortBy || "createdAt");
+    this.sortOrder = data.sortOrder === "desc" ? "desc" : "asc";
+  }
+
+  private validateSortBy(sortBy: string): string {
+    const allowedSortFields = [
+      "name",
+      "email",
+      "totalBookings",
+      "totalSpent",
+      "createdAt",
+      "lastBooked",
+      "status",
+    ];
+    return allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
   }
 }
