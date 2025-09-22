@@ -42,6 +42,8 @@ export interface UserTableProps {
 export interface UserFiltersProps {
   filters: UserFilters;
   onFiltersChange: (filters: UserFilters) => void;
+  onResetFilters: () => void;
+  loading: boolean;
 }
 
 export type UserAction =
