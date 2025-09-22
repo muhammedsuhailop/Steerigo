@@ -23,6 +23,7 @@ import {
 import type { LoginRequest } from "../types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { isTokenExpired } from "@/shared/utils/tokenUtils";
+import { authErrorMapper } from "../utils/authErrorMapper";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -51,7 +52,6 @@ export const useAuth = () => {
     return accessToken && !isTokenExpired(accessToken);
   }, [accessToken]);
 
-  // Login function
   const login = useCallback(
     async (credentials: LoginRequest) => {
       try {
@@ -67,21 +67,21 @@ export const useAuth = () => {
         }
         return { success: false, message: result.message };
       } catch (error: any) {
+        const errorResult = authErrorMapper.processAuthError(error, "login");
+
         return {
           success: false,
-          message: error.data?.message || "Login failed. Please try again.",
+          message: errorResult.message,
         };
       }
     },
-    [loginMutation, navigate]
+    [loginMutation, navigate, dispatch]
   );
 
-  // Logout function
   const logout = useCallback(async () => {
     try {
       await logoutMutation().unwrap();
     } catch (error) {
-      // Continue with logout even if server request fails
       console.warn("Logout request failed, but continuing with client logout");
     } finally {
       dispatch(logoutAction());
@@ -90,18 +90,23 @@ export const useAuth = () => {
     return { success: true, message: "Logged out successfully" };
   }, [logoutMutation, dispatch, navigate]);
 
-  // Refresh token function
+  // Refresh token
   const refreshToken = useCallback(async () => {
     try {
       await refreshTokenMutation().unwrap();
       return { success: true };
     } catch (error: any) {
-      // If refresh fails, logout user
+      const errorResult = authErrorMapper.processAuthError(
+        error,
+        "refresh_token"
+      );
+
       dispatch(logoutAction());
       navigate("/login");
+
       return {
         success: false,
-        message: "Session expired. Please login again.",
+        message: "Your session has expired. Please log in again.",
       };
     }
   }, [refreshTokenMutation, dispatch, navigate]);
@@ -136,10 +141,14 @@ export const useAuth = () => {
       await dispatch(initiateGoogleAuth()).unwrap();
       return { success: true, message: "Redirecting to Google..." };
     } catch (error: any) {
+      const errorResult = authErrorMapper.processAuthError(
+        error,
+        "google_auth"
+      );
+
       return {
         success: false,
-        message:
-          error.message || "Google authentication failed. Please try again.",
+        message: errorResult.message,
       };
     }
   }, [dispatch]);

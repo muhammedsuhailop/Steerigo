@@ -9,7 +9,6 @@ import {
   setFilters,
   setPage,
   setLimit,
-  clearError,
   resetFilters,
 } from "@/features/admin/store/adminUsersSlice";
 import type { RootState, AppDispatch } from "@/app/store";
@@ -37,16 +36,8 @@ const useDebounce = (value: string, delay: number) => {
 
 export const UserManagement: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const {
-    users,
-    loading,
-    error,
-    filters,
-    page,
-    limit,
-    pagination,
-    actionLoading,
-  } = useSelector((state: RootState) => state.adminUsers);
+  const { users, loading, filters, page, limit, pagination, actionLoading } =
+    useSelector((state: RootState) => state.adminUsers);
 
   // Local state for immediate search input
   const [localSearch, setLocalSearch] = useState(filters.search);
@@ -71,12 +62,18 @@ export const UserManagement: React.FC = () => {
     setLocalSearch(filters.search);
   }, [filters.search]);
 
+  useEffect(() => {
+    if (pagination.totalPages > 0 && page > pagination.totalPages) {
+      dispatch(setPage(pagination.totalPages));
+    } else if (pagination.totalPages === 0 && page !== 1) {
+      dispatch(setPage(1));
+    }
+  }, [pagination.totalPages, page, dispatch]);
+
   const handleFiltersChange = useCallback(
     (newFilters: UserFiltersType) => {
-      // Handle search separately for immediate UI feedback
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
-        // Don't dispatch search immediately, let debounce handle it
         const { search, ...otherFilters } = newFilters;
         if (Object.keys(otherFilters).length > 0) {
           dispatch(setFilters(otherFilters));
@@ -90,14 +87,26 @@ export const UserManagement: React.FC = () => {
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      dispatch(setPage(newPage));
+      const safePage = Math.max(
+        1,
+        Math.min(newPage, pagination.totalPages || 1)
+      );
+
+      if (
+        safePage !== page &&
+        safePage >= 1 &&
+        (pagination.totalPages === 0 || safePage <= pagination.totalPages)
+      ) {
+        dispatch(setPage(safePage));
+      }
     },
-    [dispatch]
+    [dispatch, page, pagination.totalPages]
   );
 
   const handleSizeChange = useCallback(
     (newSize: number) => {
-      dispatch(setLimit(newSize));
+      const safeSize = Math.max(1, Math.min(newSize, 100));
+      dispatch(setLimit(safeSize));
     },
     [dispatch]
   );
@@ -105,18 +114,19 @@ export const UserManagement: React.FC = () => {
   const handleUserAction = useCallback(
     async (userId: string, action: UserAction) => {
       try {
-        await dispatch(updateUserStatus({ userId, action })).unwrap();
+        const result = await dispatch(
+          updateUserStatus({ userId, action })
+        ).unwrap();
+
+        console.log("User action completed:", result.message);
+
         dispatch(fetchAdminUsers());
       } catch (error) {
-        console.error("Failed to update user status:", error);
+        console.error("User action failed:", error);
       }
     },
     [dispatch]
   );
-
-  const handleClearError = useCallback(() => {
-    dispatch(clearError());
-  }, [dispatch]);
 
   const handleResetFilters = useCallback(() => {
     setLocalSearch("");
@@ -133,25 +143,22 @@ export const UserManagement: React.FC = () => {
     search: localSearch,
   };
 
+  // Safe pagination values
+  const safePagination = {
+    currentPage: Math.max(1, page),
+    totalPages: Math.max(0, pagination.totalPages),
+    totalItems: Math.max(0, pagination.totalItems),
+    pageSize: Math.max(1, limit),
+  };
+
   return (
     <div className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="text-red-600 text-sm font-medium">{error}</div>
-          </div>
-          <button
-            onClick={handleClearError}
-            className="text-red-500 hover:text-red-700 text-sm font-medium"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
+      {/* Clean component - no error handling UI needed */}
       <UserFilters
         filters={displayFilters}
         onFiltersChange={handleFiltersChange}
+        onResetFilters={handleResetFilters}
+        loading={loading}
       />
 
       <UserTable
@@ -164,10 +171,10 @@ export const UserManagement: React.FC = () => {
       />
 
       <TablePagination
-        currentPage={page}
-        totalPages={pagination.totalPages}
-        pageSize={limit}
-        totalItems={pagination.totalItems}
+        currentPage={safePagination.currentPage}
+        totalPages={safePagination.totalPages}
+        totalItems={safePagination.totalItems}
+        pageSize={safePagination.pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handleSizeChange}
       />

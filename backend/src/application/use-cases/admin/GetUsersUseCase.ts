@@ -61,6 +61,7 @@ export class GetUsersUseCase {
         totalBookings: user.totalBookings,
         totalSpent: user.totalSpent,
         status: user.status,
+        mobile: user.mobile,
         lastBooked: user.lastBooked
           ? this.formatDate(new Date(user.lastBooked))
           : null,
