@@ -26,11 +26,11 @@ export class UpdateUserStatusUseCase {
       if (dto.action === "suspend" && user.getRole() === "Admin") {
         return Result.failure(new DomainError("Cannot suspend admin users"));
       }
-      //await this.adminUserRepository.updateUserStatus(dto.userId, newStatus);
       // If action is activate or verify, set isVerified = true
       const shouldVerify = dto.action === "activate" || dto.action === "verify";
       if (shouldVerify && !user.getIsVerified()) {
         user.verify();
+        await this.userRepository.save(user);
       } else {
         await this.adminUserRepository.updateUserStatus(dto.userId, newStatus);
       }
