@@ -81,6 +81,7 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
             name: 1,
             email: 1,
             status: 1,
+            mobile: 1,
             totalBookings: 1,
             totalSpent: { $ifNull: ["$totalSpent", 0] },
             lastBooked: 1,

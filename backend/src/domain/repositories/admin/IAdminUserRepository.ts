@@ -27,6 +27,7 @@ export interface UserWithStats {
   name: string;
   email: string;
   status: string;
+  mobile: string;
   totalBookings: number;
   totalSpent: number;
   lastBooked?: string;

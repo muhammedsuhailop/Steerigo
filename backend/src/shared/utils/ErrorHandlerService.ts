@@ -8,6 +8,7 @@ import {
   OtpExpiredError,
   RefreshTokenExpiredError,
   RefreshTokenRevokedError,
+  AccountStatusError,
 } from "@domain/errors";
 
 export enum ErrorType {
@@ -17,6 +18,7 @@ export enum ErrorType {
   VALIDATION_ERROR = "VALIDATION_ERROR",
   NETWORK_ERROR = "NETWORK_ERROR",
   DATABASE_ERROR = "DATABASE_ERROR",
+  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
 }
 
 export interface ErrorDetails {
@@ -48,6 +50,17 @@ export class ErrorHandlerService {
         statusCode: 409,
         message: "An account with this email already exists",
         type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      AccountStatusError.name,
+      {
+        statusCode: 403,
+        message: "Account access restricted",
+        type: ErrorType.AUTHORIZATION_ERROR,
         shouldLog: false,
         isOperational: true,
       },
