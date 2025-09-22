@@ -1,23 +1,28 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../../features/auth/store/authSlice';
-import adminUsersReducer from '../../features/admin/store/adminUsersSlice';
-import errorReducer from '../../shared/components/ui/ErrorHandling/errorSlice';
-// Add other feature reducers here
+import { configureStore } from "@reduxjs/toolkit";
+import { authApi } from "../../features/auth/services/authApi";
+import authReducer from "../../features/auth/store/authSlice";
+import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
+import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
 
 export const store = configureStore({
   reducer: {
+    // Auth with RTK Query
     auth: authReducer,
+    [authApi.reducerPath]: authApi.reducer,
+
+    // Feature reducers
     adminUsers: adminUsersReducer,
+
+    // Global error handling
     error: errorReducer,
-    // Add other reducers here
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['error/addError'],
-        ignoredPaths: ['error.errors.timestamp', 'error.globalError.timestamp'],
+        ignoredActions: ["error/addError"],
+        ignoredPaths: ["error.errors.timestamp", "error.globalError.timestamp"],
       },
-    }),
+    }).concat(authApi.middleware),
   devTools: import.meta.env.DEV,
 });
 

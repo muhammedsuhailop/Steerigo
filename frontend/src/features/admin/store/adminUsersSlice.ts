@@ -1,16 +1,18 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { apiClient } from "@/shared/utils/api";  // ✅ Now properly exported
+import { apiClient } from "@/shared/utils/api";
+import { clearErrorsByContext } from "@/shared/components/ui/ErrorHandling/errorSlice";
 import type {
   User,
   UserFilters,
   UserAction,
 } from "../components/UserManagement/UserManagement.types";
 
-// Enhanced async thunk with proper error handling
 export const fetchAdminUsers = createAsyncThunk(
   "adminUsers/fetch",
-  async (_: void, { getState, rejectWithValue }) => {
+  async (_: void, { getState, dispatch, rejectWithValue }) => {
     try {
+      dispatch(clearErrorsByContext("adminUsers/fetch"));
+
       const state = getState() as { adminUsers: AdminUsersState };
       const { page, limit, filters } = state.adminUsers;
 
@@ -35,36 +37,53 @@ export const fetchAdminUsers = createAsyncThunk(
       }
 
       const response = await apiClient.get<{
-        users: User[];
-        pagination: {
-          totalItems: number;
-          totalPages: number;
-          page: number;
-          pageSize: number;
+        success: boolean;
+        message: string;
+        data: {
+          users: User[];
+          pagination?: {
+            totalItems: number;
+            totalPages: number;
+            page: number;
+            pageSize: number;
+          };
         };
       }>("/api/admin/users", { params });
 
-      // Validate response data
-      const users = Array.isArray(response.users) ? response.users : [];
-      const pagination = response.pagination || {
-        totalItems: 0,
-        totalPages: 0,
+      const users = Array.isArray(response.data?.users)
+        ? response.data.users
+        : [];
+      const pagination = response.data?.pagination || {
+        totalItems: users.length,
+        totalPages: Math.ceil(users.length / limit),
         page: 1,
-        pageSize: limit
+        pageSize: limit,
       };
 
       return {
         users,
         pagination: {
           totalItems: Math.max(0, pagination.totalItems),
-          totalPages: Math.max(0, pagination.totalPages),
-          page: Math.max(1, Math.min(pagination.page, pagination.totalPages || 1)),
-          pageSize: Math.max(1, Math.min(pagination.pageSize, 100))
+          totalPages: Math.max(1, pagination.totalPages),
+          page: Math.max(
+            1,
+            Math.min(pagination.page || 1, pagination.totalPages || 1)
+          ),
+          pageSize: Math.max(1, Math.min(pagination.pageSize || limit, 100)),
         },
       };
-    } catch (error) {
-      // API client handles error display, we just need to handle the rejection
-      return rejectWithValue(error);
+    } catch (error: any) {
+      const errorMessage =
+        error.userMessage || error.message || "Failed to fetch users";
+      const errorCode = error.code || "FETCH_USERS_ERROR";
+      const errorStatus = error.status || error.response?.status;
+
+      return rejectWithValue({
+        message: errorMessage,
+        code: errorCode,
+        status: errorStatus,
+        context: "adminUsers/fetch",
+      });
     }
   }
 );
@@ -73,9 +92,11 @@ export const updateUserStatus = createAsyncThunk(
   "adminUsers/updateStatus",
   async (
     { userId, action }: { userId: string; action: UserAction },
-    { rejectWithValue }
+    { dispatch, rejectWithValue }
   ) => {
     try {
+      dispatch(clearErrorsByContext(`adminUsers/updateStatus/${userId}`));
+
       if (!userId || userId === "undefined") {
         throw new Error(`Invalid user ID: ${userId}`);
       }
@@ -84,21 +105,29 @@ export const updateUserStatus = createAsyncThunk(
         throw new Error(`Invalid action: ${action}`);
       }
 
-      const response = await apiClient.put<{
-        success: boolean;
-        message: string;
-        user: User;
-      }>(`/api/admin/users/${userId}/action`, { action });
+      const response = await apiClient.put(
+        `/api/admin/users/${userId}/action`,
+        { action }
+      );
 
-      return { 
-        userId, 
-        action, 
-        user: response.user,
-        message: response.message 
+      return {
+        userId,
+        action,
+        message: response.message || "User status updated successfully",
       };
-    } catch (error) {
-      // API client handles error display, we just need to handle the rejection
-      return rejectWithValue(error);
+    } catch (error: any) {
+      const errorMessage =
+        error.userMessage || error.message || "Failed to update user status";
+      const errorCode = error.code || "UPDATE_USER_ERROR";
+      const errorStatus = error.status || error.response?.status;
+
+      return rejectWithValue({
+        message: errorMessage,
+        code: errorCode,
+        status: errorStatus,
+        context: `adminUsers/updateStatus/${userId}`,
+        userId,
+      });
     }
   }
 );
@@ -132,7 +161,7 @@ const initialState: AdminUsersState = {
   },
   page: 1,
   limit: 10,
-  pagination: { totalItems: 0, totalPages: 0, page: 1, pageSize: 10 },
+  pagination: { totalItems: 0, totalPages: 1, page: 1, pageSize: 10 },
 };
 
 const adminUsersSlice = createSlice({
@@ -152,13 +181,12 @@ const adminUsersSlice = createSlice({
       }
 
       state.filters = newFilters;
-      state.page = 1; // Reset to first page when filters change
+      state.page = 1;
     },
 
     setPage(state, action: PayloadAction<number>) {
       const newPage = Math.max(1, action.payload);
 
-      // Only update page if it's within valid bounds
       if (state.pagination.totalPages === 0) {
         state.page = 1;
       } else {
@@ -199,8 +227,10 @@ const adminUsersSlice = createSlice({
         state.users = action.payload.users;
         state.pagination = action.payload.pagination;
 
-        // Validate current page against new pagination data
-        if (state.pagination.totalPages > 0 && state.page > state.pagination.totalPages) {
+        if (
+          state.pagination.totalPages > 0 &&
+          state.page > state.pagination.totalPages
+        ) {
           state.page = state.pagination.totalPages;
         } else if (state.pagination.totalPages === 0) {
           state.page = 1;
@@ -208,8 +238,12 @@ const adminUsersSlice = createSlice({
       })
       .addCase(fetchAdminUsers.rejected, (state) => {
         state.loading = false;
-        // Reset pagination on error
-        state.pagination = { totalItems: 0, totalPages: 0, page: 1, pageSize: state.limit };
+        state.pagination = {
+          totalItems: 0,
+          totalPages: 1,
+          page: 1,
+          pageSize: state.limit,
+        };
         state.page = 1;
       })
 
@@ -219,13 +253,26 @@ const adminUsersSlice = createSlice({
         state.actionLoading[userId] = true;
       })
       .addCase(updateUserStatus.fulfilled, (state, action) => {
-        const { userId, user } = action.payload;
+        const { userId, action: userAction } = action.payload;
         delete state.actionLoading[userId];
 
-        // Update the user in the list
-        const userIndex = state.users.findIndex(u => u.userId === userId);
-        if (userIndex !== -1 && user) {
-          state.users[userIndex] = user;
+        const userIndex = state.users.findIndex((u) => u.userId === userId);
+        if (userIndex !== -1) {
+          // Update status based on action
+          switch (userAction) {
+            case "activate":
+              state.users[userIndex].status = "Active";
+              break;
+            case "deactivate":
+              state.users[userIndex].status = "Inactive";
+              break;
+            case "suspend":
+              state.users[userIndex].status = "Suspended";
+              break;
+            case "block":
+              state.users[userIndex].status = "Blocked";
+              break;
+          }
         }
       })
       .addCase(updateUserStatus.rejected, (state, action) => {
@@ -246,10 +293,16 @@ export const {
 export default adminUsersSlice.reducer;
 
 // Selectors
-export const selectUsers = (state: { adminUsers: AdminUsersState }) => state.adminUsers.users;
-export const selectLoading = (state: { adminUsers: AdminUsersState }) => state.adminUsers.loading;
-export const selectFilters = (state: { adminUsers: AdminUsersState }) => state.adminUsers.filters;
-export const selectPagination = (state: { adminUsers: AdminUsersState }) => state.adminUsers.pagination;
-export const selectActionLoading = (state: { adminUsers: AdminUsersState }) => state.adminUsers.actionLoading;
-export const selectIsActionLoading = (userId: string) => (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.actionLoading[userId] || false;
+export const selectUsers = (state: { adminUsers: AdminUsersState }) =>
+  state.adminUsers.users;
+export const selectLoading = (state: { adminUsers: AdminUsersState }) =>
+  state.adminUsers.loading;
+export const selectFilters = (state: { adminUsers: AdminUsersState }) =>
+  state.adminUsers.filters;
+export const selectPagination = (state: { adminUsers: AdminUsersState }) =>
+  state.adminUsers.pagination;
+export const selectActionLoading = (state: { adminUsers: AdminUsersState }) =>
+  state.adminUsers.actionLoading;
+export const selectIsActionLoading =
+  (userId: string) => (state: { adminUsers: AdminUsersState }) =>
+    state.adminUsers.actionLoading[userId] || false;

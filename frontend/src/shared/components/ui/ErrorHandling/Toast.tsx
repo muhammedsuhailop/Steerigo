@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BaseError, ErrorSeverity, ToastProps } from "./ErrorHandling.types";
+import { BaseError, ErrorSeverity } from "./ErrorHandling.types";
 import { removeError, hideGlobalError } from "./errorSlice";
 import type { RootState } from "../../../../app/store";
+
+interface ToastProps {
+  error: BaseError;
+  onClose: () => void;
+  autoClose?: boolean;
+  duration?: number;
+}
 
 const Toast: React.FC<ToastProps> = ({
   error,
@@ -147,7 +154,7 @@ const Toast: React.FC<ToastProps> = ({
   );
 };
 
-// Toast Container
+// Toast Container Component
 export const ToastContainer: React.FC = () => {
   const dispatch = useDispatch();
   const errors = useSelector((state: RootState) => state.error.errors);
@@ -260,3 +267,5 @@ export const GlobalErrorModal: React.FC = () => {
     </div>
   );
 };
+
+export default Toast;

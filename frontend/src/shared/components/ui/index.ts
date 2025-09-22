@@ -10,10 +10,9 @@ export { Badge } from "./Badge";
 export { ConfirmationModal } from "./ConfirmationModal";
 
 // Error Handling exports
-export {
-  ErrorBoundary,
-  ToastContainer,
-  GlobalErrorModal,
+export { ErrorBoundary } from "./ErrorHandling/ErrorBoundary";
+export { ToastContainer, GlobalErrorModal } from "./ErrorHandling/Toast";
+export { 
   addError,
   removeError,
   clearErrors,
@@ -28,9 +27,10 @@ export {
   selectIsErrorVisible,
   selectErrorsByType,
   selectErrorsByField,
-  selectErrorsByContext,
-} from "./ErrorHandling";
+  selectErrorsByContext
+} from "./ErrorHandling/errorSlice";
 
+// Type exports
 export type { ButtonProps } from "./Button";
 export type { InputProps } from "./Input";
 export type { DateInputProps } from "./DateInput";
@@ -52,7 +52,7 @@ export type {
   ErrorState,
   ErrorBoundaryProps,
   ToastProps,
-  ErrorDisplayProps,
-} from "./ErrorHandling";
+  ErrorDisplayProps
+} from "./ErrorHandling/ErrorHandling.types";
 
-export { ErrorType, ErrorSeverity } from "./ErrorHandling";
+export { ErrorType, ErrorSeverity } from "./ErrorHandling/ErrorHandling.types";

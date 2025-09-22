@@ -1,19 +1,20 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import {
-  BaseError,
-  ErrorType,
-  ErrorSeverity,
-  ErrorBoundaryProps,
-} from "./ErrorHandling.types";
+import { BaseError, ErrorType, ErrorSeverity } from "./ErrorHandling.types";
 import { errorHandler } from "../../../utils/errorUtils";
+
+interface Props {
+  children: ReactNode;
+  fallback?: (error: BaseError, resetError: () => void) => ReactNode;
+  onError?: (error: BaseError, errorInfo: ErrorInfo) => void;
+}
 
 interface State {
   hasError: boolean;
   error: BaseError | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
-  constructor(props: ErrorBoundaryProps) {
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
