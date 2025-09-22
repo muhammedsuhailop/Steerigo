@@ -149,7 +149,7 @@ export class ErrorHandler {
       type: ErrorType.AUTHORIZATION,
       code: "FORBIDDEN",
       message: data?.error?.message || data?.message || "Access forbidden",
-      userMessage: "You don't have permission to perform this action.",
+      userMessage: data?.error || data?.error?.userMessage || data?.message,
       severity: ErrorSeverity.MEDIUM,
       timestamp,
       requestId,
@@ -303,7 +303,7 @@ export class ErrorHandler {
     // Console logging for development
     if (import.meta.env.DEV) {
       console.group(
-        `🚨 [${error.severity.toUpperCase()}] ${error.type.toUpperCase()}`
+        `[${error.severity.toUpperCase()}] ${error.type.toUpperCase()}`
       );
       console.error("Error:", error.message);
       console.error("User Message:", error.userMessage);
@@ -326,9 +326,7 @@ export class ErrorHandler {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(errorData),
-      }).catch(() => {
-        // Silently fail - don't let logging errors break the app
-      });
+      }).catch(() => {});
     } catch {
       // Silently fail
     }
