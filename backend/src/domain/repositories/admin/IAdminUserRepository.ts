@@ -1,49 +1,15 @@
-export interface IAdminUserRepository {
-  findUsersOnly(
-    filters: UserFilters,
-    pagination: PaginationOptions
-  ): Promise<PaginatedResult<UserWithStats>>;
-  updateUserStatus(
-    userId: string,
-    status: string,
-    reason?: string
-  ): Promise<void>;
-  getUserStats(userId: string): Promise<UserStats>;
-}
-
 export interface UserFilters {
-  status?:
-    | "Active"
-    | "Suspended"
-    | "Pending Verification"
-    | "Inactive"
-    | "Blocked";
+  status?: string;
   search?: string;
   dateFrom?: Date;
   dateTo?: Date;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginationOptions {
   page: number;
   pageSize: number;
-}
-
-export interface UserWithStats {
-  userId: string;
-  name: string;
-  email: string;
-  status: string;
-  totalBookings: number;
-  totalSpent: number;
-  lastBooked: string | null;
-  joinedDate: Date;
-  isVerified: boolean;
-}
-
-export interface UserStats {
-  totalBookings: number;
-  totalSpent: number;
-  lastBookingDate: Date | null;
 }
 
 export interface PaginatedResult<T> {
@@ -54,4 +20,32 @@ export interface PaginatedResult<T> {
     totalPages: number;
     totalItems: number;
   };
+}
+
+export interface UserWithStats {
+  userId: string;
+  name: string;
+  email: string;
+  status: string;
+  mobile: string;
+  totalBookings: number;
+  totalSpent: number;
+  lastBooked?: string;
+  joinedDate?: Date;
+  isVerified?: boolean;
+}
+
+export interface IAdminUserRepository {
+  findUsersOnly(
+    filters: UserFilters,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<UserWithStats>>;
+
+  updateUserStatus(
+    userId: string,
+    status: string,
+    reason?: string
+  ): Promise<void>;
+
+  getUserStats(userId: string): Promise<UserWithStats>;
 }

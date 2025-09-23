@@ -1,6 +1,12 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { container } from "@infrastructure/container/Container";
-import { AuthController } from "../controllers/AuthController";
+import { SignupController } from "../controllers/auth/SignupController";
+import { LoginController } from "../controllers/auth/LoginController";
+import { OtpController } from "../controllers/auth/OtpController";
+import { PasswordController } from "../controllers/auth/PasswordController";
+import { SocialAuthController } from "../controllers/auth/SocialAuthController";
+import { UserController } from "../controllers/auth/UserController";
+
 import {
   signupRequestValidation,
   signupVerifyValidation,
@@ -12,6 +18,7 @@ import {
   forgotPasswordRequestValidation,
   forgotPasswordVerifyValidation,
 } from "../validators/authValidators";
+
 import {
   signupRateLimiter,
   loginRateLimiter,
@@ -22,90 +29,86 @@ import {
   forgotPasswordRequestRateLimiter,
   forgotPasswordVerifyRateLimiter,
 } from "../middleware/security/RateLimiter";
+
 import { authMiddleware } from "../middleware/auth/AuthMiddleware";
 
 const router = Router();
-const authController = container.get<AuthController>(AuthController);
 
-// POST /api/auth/signup - Signup request with OTP
+// Resolve controllers
+const signupCtrl = container.resolve(SignupController);
+const loginCtrl = container.resolve(LoginController);
+const otpCtrl = container.resolve(OtpController);
+const pwdCtrl = container.resolve(PasswordController);
+const socialCtrl = container.resolve(SocialAuthController);
+const userCtrl = container.resolve(UserController);
+
+// Signup
 router.post(
   "/signup",
   signupRateLimiter,
   signupRequestValidation,
-  (req: Request, res: Response) => authController.signupRequest(req, res)
+  signupCtrl.request.bind(signupCtrl)
 );
-
-// POST /api/auth/signup/verify - Verify signup OTP
 router.post(
   "/signup/verify",
   otpRateLimiter,
   signupVerifyValidation,
-  (req: Request, res: Response) => authController.signupVerify(req, res)
+  signupCtrl.verify.bind(signupCtrl)
 );
 
-// POST /api/auth/login - User login
+// Login & Session
 router.post(
   "/login",
   loginRateLimiter,
   loginValidation,
-  (req: Request, res: Response) => authController.login(req, res)
+  loginCtrl.login.bind(loginCtrl)
 );
-
-// POST /api/auth/resend-otp - Resend OTP for signup
-router.post(
-  "/resend-otp",
-  resendOtpRateLimiter,
-  resendOtpValidation,
-  (req: Request, res: Response) => authController.resendOtp(req, res)
-);
-
-// PUT /api/auth/update-password - Update password for logged-in users
-router.put(
-  "/update-password",
-  authMiddleware,
-  updatePasswordValidation,
-  (req: Request, res: Response) => authController.updatePassword(req, res)
-);
-
-// POST /api/auth/refresh - Refresh access token using refresh token
-router.post(
-  "/refresh",
-  refreshTokenRateLimiter,
-  refreshTokenValidation,
-  (req: Request, res: Response) => authController.refreshToken(req, res)
-);
-
-// POST /api/auth/logout - Logout and revoke refresh token
 router.post(
   "/logout",
   logoutRateLimiter,
   logoutValidation,
-  (req: Request, res: Response) => authController.logout(req, res)
+  loginCtrl.logout.bind(loginCtrl)
+);
+router.post(
+  "/refresh",
+  refreshTokenRateLimiter,
+  refreshTokenValidation,
+  loginCtrl.refreshToken.bind(loginCtrl)
 );
 
-// POST /api/auth/forgot-password - Request password reset OTP
+// OTP Flows
+router.post(
+  "/resend-otp",
+  resendOtpRateLimiter,
+  resendOtpValidation,
+  otpCtrl.resendOtp.bind(otpCtrl)
+);
 router.post(
   "/forgot-password",
   forgotPasswordRequestRateLimiter,
   forgotPasswordRequestValidation,
-  (req: Request, res: Response) =>
-    authController.forgotPasswordRequest(req, res)
+  otpCtrl.forgotPasswordRequest.bind(otpCtrl)
 );
-
-// POST /api/auth/reset-password - Verify OTP and reset password
 router.post(
-  "/reset-password",
+  "/forgot-password/verify",
   forgotPasswordVerifyRateLimiter,
   forgotPasswordVerifyValidation,
-  (req: Request, res: Response) => authController.forgotPasswordVerify(req, res)
+  otpCtrl.forgotPasswordVerify.bind(otpCtrl)
 );
 
-// GET /api/auth/google - Get Google OAuth URL
-router.get("/google", (req, res) => authController.getGoogleAuthUrl(req, res));
-
-// GET /api/auth/google/callback - Handle Google OAuth callback
-router.get("/google/callback", (req, res) =>
-  authController.googleCallback(req, res)
+// Password
+router.put(
+  "/update-password",
+  authMiddleware,
+  updatePasswordValidation,
+  pwdCtrl.updatePassword.bind(pwdCtrl)
 );
+
+// Social Auth
+router.get("/google", socialCtrl.getGoogleAuthUrl.bind(socialCtrl));
+router.get("/google/callback", socialCtrl.googleCallback.bind(socialCtrl));
+
+// Current User
+router.get("/me", authMiddleware, userCtrl.getCurrentUser.bind(userCtrl));
 
 export { router as authRoutes };

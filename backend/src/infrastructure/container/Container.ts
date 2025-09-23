@@ -6,6 +6,7 @@ import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 import { IDriverRepository } from "@domain/repositories/driver/IDriverRepository";
 import { IDriverKycRepository } from "@domain/repositories/driver/IDriverKycRepository";
+import { IAdminUserRepository } from "@domain/repositories/admin/IAdminUserRepository";
 import { MongoAdminUserRepository } from "../database/repositories/admin/MongoAdminUserRepository";
 
 // Domain Services
@@ -17,13 +18,14 @@ import { IGoogleAuthService } from "@domain/services/IGoogleAuthService";
 
 // Infrastructure Implementations
 import { MongoUserRepository } from "../database/repositories/MongoUserRepository";
+import { MongoRefreshTokenRepository } from "../database/repositories/MongoRefreshTokenRepository";
+import { MongoDriverRepository } from "../database/repositories/driver/MongoDriverRepository";
+import { MongoDriverKycRepository } from "../database/repositories/driver/MongoDriverKycRepository";
+
 import { BcryptPasswordService } from "../services/BcryptPasswordService";
 import { NodemailerEmailService } from "../services/NodemailerEmailService";
 import { OtpGeneratorService } from "../services/OtpGeneratorService";
 import { JwtTokenService } from "../services/JwtTokenService";
-import { MongoRefreshTokenRepository } from "../database/repositories/MongoRefreshTokenRepository";
-import { MongoDriverRepository } from "../database/repositories/driver/MongoDriverRepository";
-import { MongoDriverKycRepository } from "../database/repositories/driver/MongoDriverKycRepository";
 import { GoogleAuthService } from "../services/GoogleAuthService";
 
 // Application Use Cases
@@ -34,19 +36,24 @@ import { ResendOtpUseCase } from "@application/use-cases/auth/ResendOtpUseCase";
 import { UpdatePasswordUseCase } from "@application/use-cases/auth/UpdatePasswordUseCase";
 import { RefreshTokenUseCase } from "@application/use-cases/auth/RefreshTokenUseCase";
 import { LogoutUseCase } from "@application/use-cases/auth/LogoutUseCase";
-import { ForgotPasswordRequestUseCase } from "@application/use-cases";
-import { ForgotPasswordVerifyUseCase } from "@application/use-cases";
-import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
-import { DriverController } from "@interface/controllers/driver/DriverController";
+import { ForgotPasswordRequestUseCase } from "@application/use-cases/auth/ForgotPasswordRequestUseCase";
+import { ForgotPasswordVerifyUseCase } from "@application/use-cases/auth/ForgotPasswordVerifyUseCase";
 import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
 import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
+import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
+import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
 import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
 
-// Interface Controllers
-import { AuthController } from "@interface/controllers/AuthController";
+// Controllers
+import { SignupController } from "@interface/controllers/auth/SignupController";
+import { LoginController } from "@interface/controllers/auth/LoginController";
+import { OtpController } from "@interface/controllers/auth/OtpController";
+import { PasswordController } from "@interface/controllers/auth/PasswordController";
+import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
+import { UserController } from "@interface/controllers/auth/UserController";
+import { DriverController } from "@interface/controllers/driver/DriverController";
 import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
-import { IAdminUserRepository } from "@domain/repositories/admin/IAdminUserRepository";
 
 const container = new Container();
 
@@ -73,27 +80,31 @@ container.bind<ITokenService>("ITokenService").to(JwtTokenService);
 container.bind<IGoogleAuthService>("IGoogleAuthService").to(GoogleAuthService);
 
 // Use Case Bindings
-container.bind<SignupRequestUseCase>(SignupRequestUseCase).toSelf();
-container.bind<SignupVerifyUseCase>(SignupVerifyUseCase).toSelf();
-container.bind<LoginUseCase>(LoginUseCase).toSelf();
-container.bind<ResendOtpUseCase>(ResendOtpUseCase).toSelf();
-container.bind<UpdatePasswordUseCase>(UpdatePasswordUseCase).toSelf();
-container.bind<RefreshTokenUseCase>(RefreshTokenUseCase).toSelf();
-container.bind<LogoutUseCase>(LogoutUseCase).toSelf();
-container
-  .bind<ForgotPasswordRequestUseCase>(ForgotPasswordRequestUseCase)
-  .toSelf();
-container
-  .bind<ForgotPasswordVerifyUseCase>(ForgotPasswordVerifyUseCase)
-  .toSelf();
-container.bind<RegisterDriverUseCase>(RegisterDriverUseCase).toSelf();
-container.bind<GoogleLoginUseCase>(GoogleLoginUseCase).toSelf();
-container.bind<GetGoogleAuthUrlUseCase>(GetGoogleAuthUrlUseCase).toSelf();
-container.bind<GetUsersUseCase>(GetUsersUseCase).toSelf();
-container.bind<UpdateUserStatusUseCase>(UpdateUserStatusUseCase).toSelf();
+[
+  SignupRequestUseCase,
+  SignupVerifyUseCase,
+  LoginUseCase,
+  ResendOtpUseCase,
+  UpdatePasswordUseCase,
+  RefreshTokenUseCase,
+  LogoutUseCase,
+  ForgotPasswordRequestUseCase,
+  ForgotPasswordVerifyUseCase,
+  GoogleLoginUseCase,
+  GetGoogleAuthUrlUseCase,
+  GetCurrentUserUseCase,
+  RegisterDriverUseCase,
+  GetUsersUseCase,
+  UpdateUserStatusUseCase,
+].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings
-container.bind<AuthController>(AuthController).toSelf();
+container.bind<SignupController>(SignupController).toSelf();
+container.bind<LoginController>(LoginController).toSelf();
+container.bind<OtpController>(OtpController).toSelf();
+container.bind<PasswordController>(PasswordController).toSelf();
+container.bind<SocialAuthController>(SocialAuthController).toSelf();
+container.bind<UserController>(UserController).toSelf();
 container.bind<DriverController>(DriverController).toSelf();
 container.bind<AdminUserController>(AdminUserController).toSelf();
 
