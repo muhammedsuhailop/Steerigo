@@ -7,27 +7,22 @@ const getVariantStyles = (
   isLoading?: boolean,
   disabled?: boolean
 ) => {
-  const baseStyles = "border-2 transition-all duration-200 ease-in-out shadow-sm";
+  const baseStyles =
+    "border-2 transition-all duration-200 ease-in-out shadow-sm";
 
   if (disabled || isLoading) {
     return `${baseStyles} bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed`;
   }
 
   const variants = {
-    primary:
-      `${baseStyles} bg-gray-700 hover:bg-gray-800 text-white border-gray-700 hover:border-gray-800 focus:ring-4 focus:ring-gray-200`,
-    secondary:
-      `${baseStyles} bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
-    outline:
-      `${baseStyles} bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
-    ghost:
-      `${baseStyles} bg-transparent hover:bg-gray-100 text-gray-700 border-transparent hover:border-gray-300 focus:ring-4 focus:ring-gray-100`,
-    danger:
-      `${baseStyles} bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 focus:ring-4 focus:ring-red-100`,
-    success:
-      `${baseStyles} bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 hover:border-emerald-700 focus:ring-4 focus:ring-emerald-100`,
-    white:
-      `${baseStyles} bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
+    primary: `${baseStyles} bg-gray-700 hover:bg-gray-800 text-white border-gray-700 hover:border-gray-800 focus:ring-4 focus:ring-gray-200`,
+    secondary: `${baseStyles} bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
+    outline: `${baseStyles} bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
+    ghost: `${baseStyles} bg-transparent hover:bg-gray-100 text-gray-700 border-transparent hover:border-gray-300 focus:ring-4 focus:ring-gray-100`,
+    danger: `${baseStyles} bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 focus:ring-4 focus:ring-red-100`,
+    success: `${baseStyles} bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 hover:border-emerald-700 focus:ring-4 focus:ring-emerald-100`,
+    white: `${baseStyles} bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 focus:ring-4 focus:ring-gray-100`,
+    dark: `${baseStyles} bg-gray-900 hover:bg-black text-white border-gray-900 hover:border-black focus:ring-4 focus:ring-gray-300`,
   };
 
   return variants[variant];
@@ -51,7 +46,7 @@ const getRoundedStyles = (rounded: ButtonProps["rounded"] = "md") => {
     sm: "rounded-sm",
     md: "rounded-md",
     lg: "rounded-lg",
-    xl: "rounded-xl", // Added xl option to match Select
+    xl: "rounded-xl",
     full: "rounded-full",
   };
   return roundedStyles[rounded];
@@ -85,26 +80,30 @@ export const Button: React.FC<ButtonProps> = ({
     if (isLoading) {
       return (
         <div className="flex items-center justify-center">
-          <LoadingSpinner 
-            size="small" 
-            color={variant === "primary" || variant === "danger" || variant === "success" ? "white" : "gray"} 
-            className="mr-2" 
+          <LoadingSpinner
+            size="small"
+            color={
+              variant === "primary" ||
+              variant === "danger" ||
+              variant === "success" ||
+              variant === "dark"
+                ? "white"
+                : "gray"
+            }
+            className="mr-2"
           />
           <span>{children || "Loading..."}</span>
         </div>
       );
     }
 
-    // Icon-only button when size is icon and no children
     if (size === "icon" && !children) {
       return <>{leftIcon || rightIcon}</>;
     }
 
     return (
       <div className="flex items-center justify-center">
-        {leftIcon && (
-          <span className={children ? "mr-2" : ""}>{leftIcon}</span>
-        )}
+        {leftIcon && <span className={children ? "mr-2" : ""}>{leftIcon}</span>}
         {children && <span className="truncate">{children}</span>}
         {rightIcon && (
           <span className={children ? "ml-2" : ""}>{rightIcon}</span>
@@ -114,11 +113,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button 
-      className={buttonClass} 
-      disabled={disabled || isLoading} 
-      {...props}
-    >
+    <button className={buttonClass} disabled={disabled || isLoading} {...props}>
       {renderContent()}
     </button>
   );
