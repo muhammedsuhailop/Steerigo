@@ -1,11 +1,14 @@
 import React, { useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { LoginForm } from "../components/LoginForm";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { LoginForm } from "@/features/auth/components/LoginForm";
+import { Header } from "@/features/public/components/Header";
+import { Footer } from "@/features/public/components/Footer";
 
 const LoginPage: React.FC = () => {
   const { isAuthenticated, isLoading, initialize } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     initialize();
@@ -20,36 +23,23 @@ const LoginPage: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    const from = (location.state as any)?.from?.pathname || "/dashboard";
+    const from = (location.state as any)?.from?.pathname || "/user/dashboard";
     return <Navigate to={from} replace />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Main Login Container */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-sm rounded-lg border border-gray-200">
-          <LoginForm />
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <Header />
+
+      <div className="flex-grow flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-6 shadow-sm rounded-lg border border-gray-200">
+            <LoginForm />
+          </div>
         </div>
       </div>
 
-      {/* Footer Links */}
-      <div className="mt-8 text-center">
-        <div className="text-sm text-gray-600 space-x-6">
-          <a href="/help" className="hover:text-gray-900">
-            Help Center
-          </a>
-          <a href="/privacy" className="hover:text-gray-900">
-            Privacy Policy
-          </a>
-          <a href="/terms" className="hover:text-gray-900">
-            Terms of Service
-          </a>
-        </div>
-        <p className="mt-4 text-xs text-gray-500">
-          © 2025 SteeriGo. All rights reserved.
-        </p>
-      </div>
+      <Footer />
     </div>
   );
 };

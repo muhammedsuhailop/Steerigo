@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/shared/components/ui/Button";
 import { Logo } from "@/shared/components/ui/Logo";
 import { Navigation } from "./Navigation";
@@ -27,6 +28,15 @@ export const Header: React.FC<HeaderProps> = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const onLoginClick = () => navigate("/login");
+  const onSignupClick = () => navigate("/signup");
+
+  const hideLogin = location.pathname === "/login";
+  const hideSignup = location.pathname === "/signup";
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -180,12 +190,16 @@ export const Header: React.FC<HeaderProps> = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm">
-                  <Link to="/login">Login</Link>
-                </Button>
-                <Button variant="primary" size="sm">
-                  <Link to="/signup">Sign Up</Link>
-                </Button>
+                {!hideLogin && (
+                  <Button variant="ghost" size="sm" onClick={onLoginClick}>
+                    Login
+                  </Button>
+                )}
+                {!hideSignup && (
+                  <Button variant="primary" size="sm" onClick={onSignupClick}>
+                    Sign Up
+                  </Button>
+                )}
               </>
             )}
           </div>
