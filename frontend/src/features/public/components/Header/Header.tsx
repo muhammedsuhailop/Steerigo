@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center">
+            <Link to="/dashboard" className="flex items-center">
               <Logo variant="horizontal" />
             </Link>
           </div>
