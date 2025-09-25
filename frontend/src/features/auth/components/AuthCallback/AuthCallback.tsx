@@ -5,6 +5,8 @@ import {
   fetchCurrentUser,
   setupAutoRefresh,
   loginSuccess,
+  mapDecodedToUser,
+  DecodedJwt,
 } from "../../store/authSlice";
 import {
   selectIsAuthenticated,
@@ -13,6 +15,7 @@ import {
   selectUserRole,
 } from "../../store/authSelectors";
 import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthCallback: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -42,13 +45,34 @@ export const AuthCallback: React.FC = () => {
         localStorage.setItem("refreshToken", refreshToken);
       }
 
-      dispatch(setupAutoRefresh(accessToken));
-
       try {
-        const userData = await dispatch(fetchCurrentUser()).unwrap();
-        dispatch(loginSuccess({ user: userData, accessToken, refreshToken }));
-      } catch (e) {
-        console.error("Fetching user failed, falling back to JWT decode");
+        const decoded = jwtDecode<DecodedJwt>(accessToken);
+        const fallbackUser = mapDecodedToUser(decoded);
+        dispatch(
+          loginSuccess({
+            user: fallbackUser,
+            accessToken,
+            refreshToken,
+          })
+        );
+
+        dispatch(setupAutoRefresh(accessToken));
+
+        try {
+          const userData = await dispatch(fetchCurrentUser()).unwrap();
+          dispatch(
+            loginSuccess({
+              user: userData,
+              accessToken,
+              refreshToken,
+            })
+          );
+        } catch (e) {
+          console.log("Using JWT decoded user data as fallback");
+        }
+      } catch (decodeError) {
+        console.error("Failed to decode JWT token:", decodeError);
+        navigate("/login?error=auth_failed", { replace: true });
       }
     };
 

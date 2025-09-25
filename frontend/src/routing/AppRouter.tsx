@@ -11,6 +11,7 @@ import DriverDashboard from "@/features/driver/pages/DriverDashboard";
 import AdminDashboard from "@/features/admin/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminUsersLayout from "@/features/admin/pages/AdminUsersLayout";
+import { NotFoundPage } from "@/features/public/pages";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -119,7 +120,7 @@ export const AppRouter: React.FC = () => {
       />
 
       {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

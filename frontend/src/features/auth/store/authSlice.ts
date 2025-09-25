@@ -86,7 +86,7 @@ const setUserInStorage = (user: User) => {
 // Auto-refresh timer ID
 let refreshTimerId: NodeJS.Timeout | null = null;
 
-interface DecodedJwt {
+export interface DecodedJwt {
   userId: string;
   role: string;
   iat?: number;
@@ -96,7 +96,7 @@ interface DecodedJwt {
 }
 
 // Add defaults for missing fields
-const mapDecodedToUser = (decoded: DecodedJwt): User => ({
+export const mapDecodedToUser = (decoded: DecodedJwt): User => ({
   id: decoded.userId,
   email: "",
   name: "",
