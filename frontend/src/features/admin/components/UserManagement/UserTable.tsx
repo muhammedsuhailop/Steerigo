@@ -86,11 +86,11 @@ export const UserTable: React.FC<UserTableProps> = ({
       width: "280px",
     },
     {
-      key: "phone",
-      header: "Phone",
-      render: (phone) => (
+      key: "mobile",
+      header: "mobile",
+      render: (mobile) => (
         <span className="text-sm text-gray-600">
-          {phone || <span className="text-gray-400">—</span>}
+          {mobile || <span className="text-gray-400">—</span>}
         </span>
       ),
       width: "140px",
@@ -137,11 +137,7 @@ export const UserTable: React.FC<UserTableProps> = ({
       header: "Last Booked",
       render: (date) => (
         <span className="text-sm text-gray-600">
-          {date ? (
-            formatDate(date)
-          ) : (
-            <span className="text-gray-400">Never</span>
-          )}
+          {date ? formatDate(date) : <span className="text-gray-400">NA</span>}
         </span>
       ),
       align: "center",
@@ -152,17 +148,6 @@ export const UserTable: React.FC<UserTableProps> = ({
       header: "Actions",
       render: (_, user) => (
         <div className="flex items-center justify-center space-x-2">
-          {/* View Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onUserClick(user)}
-            className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-            title="View user details"
-          >
-            <RiEyeLine className="w-4 h-4" />
-          </Button>
-
           {/* Action Dropdown */}
           <ActionDropdown
             user={user}
@@ -171,17 +156,6 @@ export const UserTable: React.FC<UserTableProps> = ({
               actionLoading === user.id || actionLoading === (user as any)._id
             }
           />
-
-          {/* Delete Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDeleteUser(user)}
-            className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
-            title="Delete user"
-          >
-            <RiDeleteBin6Line className="w-4 h-4" />
-          </Button>
         </div>
       ),
       align: "center",
