@@ -14,8 +14,6 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
     try {
       console.log('Searching for drivers with:', searchData);
       // TODO: Implement driver search logic
-      // This could navigate to a search results page or open a modal
-      // Example: navigate(`/search-results?pickup=${encodeURIComponent(searchData.pickupLocation)}&destination=${encodeURIComponent(searchData.destination)}`);
     } catch (error) {
       console.error('Driver search failed:', error);
     }
