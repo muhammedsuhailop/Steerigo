@@ -23,7 +23,7 @@ export const AppRouter: React.FC = () => {
       case "Driver":
         return "/driver/dashboard";
       case "Rider":
-        return "/user/dashboard";
+        return "/dashboard";
       default:
         return "/";
     }
@@ -111,7 +111,7 @@ export const AppRouter: React.FC = () => {
       />
 
       <Route
-        path="/user/dashboard"
+        path="/dashboard"
         element={
           <ProtectedRoute allowedRoles={["Rider"]}>
             <UserDashboard />

@@ -38,7 +38,7 @@ const NotFoundPage: React.FC = () => {
       case "Rider":
         return [
           {
-            path: "/user/dashboard",
+            path: "/dashboard",
             label: "Dashboard",
             variant: "primary" as const,
           },

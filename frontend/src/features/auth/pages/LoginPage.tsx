@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    const from = (location.state as any)?.from?.pathname || "/user/dashboard";
+    const from = (location.state as any)?.from?.pathname || "/dashboard";
     return <Navigate to={from} replace />;
   }
 

@@ -44,7 +44,7 @@ export const AuthenticatedHeroContent: React.FC<AuthenticatedHeroContentProps> =
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Button size="lg" className="text-lg px-8 py-4">
-          <Link to="/user/dashboard">View My Rides</Link>
+          <Link to="/dashboard">View My Rides</Link>
         </Button>
       </div>
     </div>
