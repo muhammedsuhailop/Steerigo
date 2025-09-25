@@ -15,7 +15,7 @@ export const Navigation: React.FC<NavigationProps> = ({ isAuthenticated }) => {
 
   // Navigation items for authenticated users
   const authNavigationItems: NavigationItem[] = [
-    { name: "Home", href: "/user/dashboard" },
+    { name: "Home", href: "/dashboard" },
     { name: "My Rides", href: "user/rides" },
   ];
 

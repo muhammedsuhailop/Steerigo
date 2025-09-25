@@ -8,10 +8,10 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
   },
   USER: {
-    DASHBOARD: "/user/dashboard",
-    BOOK_RIDE: "/user/book-ride",
-    TRIPS: "/user/trips",
-    PROFILE: "/user/profile",
+    DASHBOARD: "/dashboard",
+    BOOK_RIDE: "/book-ride",
+    TRIPS: "/trips",
+    PROFILE: "/profile",
   },
   DRIVER: {
     DASHBOARD: "/driver/dashboard",

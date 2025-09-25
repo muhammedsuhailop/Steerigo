@@ -187,6 +187,6 @@ export const getUserDashboardPath = (role: string): string => {
       return "/driver/dashboard";
     case "USER":
     default:
-      return "/user/dashboard";
+      return "/dashboard";
   }
 };

@@ -86,7 +86,7 @@ export const AuthCallback: React.FC = () => {
           ? "/admin/dashboard"
           : userRole.toLowerCase() === "driver"
           ? "/driver/dashboard"
-          : "/user/dashboard";
+          : "/dashboard";
       navigate(path, { replace: true });
     }
   }, [isAuthenticated, userRole, isLoading, error, navigate]);
