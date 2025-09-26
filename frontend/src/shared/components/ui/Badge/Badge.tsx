@@ -2,16 +2,18 @@ import React from "react";
 import type { BadgeProps } from "./Badge.types";
 
 const getVariantStyles = (variant: BadgeProps["variant"] = "secondary") => {
-  const variants = {
+  const variants: Record<Exclude<BadgeProps["variant"], undefined>, string> = {
     success: "bg-green-100 text-green-800 border-green-200",
     warning: "bg-yellow-100 text-yellow-800 border-yellow-200",
     danger: "bg-red-100 text-red-800 border-red-200",
     info: "bg-blue-100 text-blue-800 border-blue-200",
     secondary: "bg-gray-100 text-gray-800 border-gray-200",
+    primary: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    outline: "border border-gray-300 text-gray-700 bg-transparent",
   };
-  return variants[variant];
-};
 
+  return variant ? variants[variant] : variants["secondary"];
+};
 const getSizeStyles = (size: BadgeProps["size"] = "md") => {
   const sizes = {
     sm: "px-2 py-1 text-xs",

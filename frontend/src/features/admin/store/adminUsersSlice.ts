@@ -1,308 +1,209 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { apiClient } from "@/shared/utils/api";
-import { clearErrorsByContext } from "@/shared/components/ui/ErrorHandling/errorSlice";
-import type {
-  User,
-  UserFilters,
-  UserAction,
-} from "../components/UserManagement/UserManagement.types";
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { AdminUsersState, AdminUser } from '../types/admin.types';
 
-export const fetchAdminUsers = createAsyncThunk(
-  "adminUsers/fetch",
-  async (_: void, { getState, dispatch, rejectWithValue }) => {
-    try {
-      dispatch(clearErrorsByContext("adminUsers/fetch"));
-
-      const state = getState() as { adminUsers: AdminUsersState };
-      const { page, limit, filters } = state.adminUsers;
-
-      const params: any = {
-        page: Math.max(1, page),
-        pageSize: Math.max(1, Math.min(limit, 100)),
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-      };
-
-      if (filters.search?.trim()) {
-        params.search = filters.search.trim();
-      }
-      if (filters.status) {
-        params.status = filters.status;
-      }
-      if (filters.dateFrom) {
-        params.dateFrom = filters.dateFrom;
-      }
-      if (filters.dateTo) {
-        params.dateTo = filters.dateTo;
-      }
-
-      const response = await apiClient.get<{
-        success: boolean;
-        message: string;
-        data: {
-          users: User[];
-          pagination?: {
-            totalItems: number;
-            totalPages: number;
-            page: number;
-            pageSize: number;
-          };
-        };
-      }>("/api/admin/users", { params });
-
-      const users = Array.isArray(response.data?.users)
-        ? response.data.users
-        : [];
-      const pagination = response.data?.pagination || {
-        totalItems: users.length,
-        totalPages: Math.ceil(users.length / limit),
-        page: 1,
-        pageSize: limit,
-      };
-
-      return {
-        users,
-        pagination: {
-          totalItems: Math.max(0, pagination.totalItems),
-          totalPages: Math.max(1, pagination.totalPages),
-          page: Math.max(
-            1,
-            Math.min(pagination.page || 1, pagination.totalPages || 1)
-          ),
-          pageSize: Math.max(1, Math.min(pagination.pageSize || limit, 100)),
-        },
-      };
-    } catch (error: any) {
-      const errorMessage =
-        error.userMessage || error.message || "Failed to fetch users";
-      const errorCode = error.code || "FETCH_USERS_ERROR";
-      const errorStatus = error.status || error.response?.status;
-
-      return rejectWithValue({
-        message: errorMessage,
-        code: errorCode,
-        status: errorStatus,
-        context: "adminUsers/fetch",
-      });
-    }
-  }
-);
-
-export const updateUserStatus = createAsyncThunk(
-  "adminUsers/updateStatus",
-  async (
-    { userId, action }: { userId: string; action: UserAction },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      dispatch(clearErrorsByContext(`adminUsers/updateStatus/${userId}`));
-
-      if (!userId || userId === "undefined") {
-        throw new Error(`Invalid user ID: ${userId}`);
-      }
-
-      if (!action) {
-        throw new Error(`Invalid action: ${action}`);
-      }
-
-      const response = await apiClient.put(
-        `/api/admin/users/${userId}/action`,
-        { action }
-      );
-
-      return {
-        userId,
-        action,
-        message: response.message || "User status updated successfully",
-      };
-    } catch (error: any) {
-      const errorMessage =
-        error.userMessage || error.message || "Failed to update user status";
-      const errorCode = error.code || "UPDATE_USER_ERROR";
-      const errorStatus = error.status || error.response?.status;
-
-      return rejectWithValue({
-        message: errorMessage,
-        code: errorCode,
-        status: errorStatus,
-        context: `adminUsers/updateStatus/${userId}`,
-        userId,
-      });
-    }
-  }
-);
-
-interface AdminUsersState {
-  users: User[];
-  loading: boolean;
-  actionLoading: Record<string, boolean>;
-  filters: UserFilters;
-  page: number;
-  limit: number;
-  pagination: {
-    totalItems: number;
-    totalPages: number;
-    page: number;
-    pageSize: number;
-  };
-}
-
+// Initial state with proper defaults
 const initialState: AdminUsersState = {
   users: [],
-  loading: false,
-  actionLoading: {},
-  filters: {
-    search: "",
-    status: "",
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    dateFrom: "",
-    dateTo: "",
-  },
-  page: 1,
-  limit: 10,
-  pagination: { totalItems: 0, totalPages: 1, page: 1, pageSize: 10 },
+  isLoading: false,
+  error: null,
+  currentPage: 1,
+  totalPages: 0,
+  totalUsers: 0, // Make sure this is initialized
+  searchQuery: '',
+  roleFilter: '',
+  statusFilter: '',
 };
 
+// Async thunks for existing functionality
+export const fetchAdminUsersAsync = createAsyncThunk(
+  'adminUsers/fetchUsers',
+  async (params: { search?: string; role?: string; status?: string; page?: number; limit?: number } = {}) => {
+    const queryParams = new URLSearchParams();
+    
+    if (params.search) queryParams.append('search', params.search);
+    if (params.role) queryParams.append('role', params.role);
+    if (params.status) queryParams.append('status', params.status);
+    queryParams.append('page', (params.page || 1).toString());
+    queryParams.append('limit', (params.limit || 10).toString());
+
+    const response = await fetch(`/api/admin/users?${queryParams.toString()}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+);
+
+export const updateAdminUserAsync = createAsyncThunk(
+  'adminUsers/updateUser',
+  async (payload: { id: string; name?: string; role?: string; status?: string; isVerified?: boolean }) => {
+    const response = await fetch(`/api/admin/users/${payload.id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.data;
+  }
+);
+
+export const deleteAdminUserAsync = createAsyncThunk(
+  'adminUsers/deleteUser',
+  async (userId: string) => {
+    const response = await fetch(`/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return userId;
+  }
+);
+
+// Admin users slice
 const adminUsersSlice = createSlice({
-  name: "adminUsers",
+  name: 'adminUsers',
   initialState,
   reducers: {
-    setFilters(state, action: PayloadAction<Partial<UserFilters>>) {
-      const newFilters = { ...state.filters, ...action.payload };
-
-      if (newFilters.dateFrom && newFilters.dateTo) {
-        const fromDate = new Date(newFilters.dateFrom);
-        const toDate = new Date(newFilters.dateTo);
-
-        if (fromDate > toDate) {
-          newFilters.dateTo = "";
-        }
-      }
-
-      state.filters = newFilters;
-      state.page = 1;
+    // Maintain existing action names for compatibility
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
     },
-
-    setPage(state, action: PayloadAction<number>) {
-      const newPage = Math.max(1, action.payload);
-
-      if (state.pagination.totalPages === 0) {
-        state.page = 1;
-      } else {
-        state.page = Math.min(newPage, state.pagination.totalPages);
-      }
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
-
-    setLimit(state, action: PayloadAction<number>) {
-      const newLimit = Math.max(1, Math.min(action.payload, 100));
-      state.limit = newLimit;
-      state.page = 1;
+    setUsers: (state, action: PayloadAction<AdminUser[]>) => {
+      state.users = action.payload || [];
     },
-
-    clearActionLoading(state, action: PayloadAction<string>) {
-      delete state.actionLoading[action.payload];
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload || 1;
     },
-
-    resetFilters(state) {
-      state.filters = {
-        search: "",
-        status: "",
-        sortBy: "createdAt",
-        sortOrder: "desc",
-        dateFrom: "",
-        dateTo: "",
-      };
-      state.page = 1;
+    setTotalPages: (state, action: PayloadAction<number>) => {
+      state.totalPages = action.payload || 0;
+    },
+    setTotalUsers: (state, action: PayloadAction<number>) => {
+      state.totalUsers = action.payload || 0;
+    },
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload || '';
+    },
+    setRoleFilter: (state, action: PayloadAction<string>) => {
+      state.roleFilter = action.payload || '';
+    },
+    setStatusFilter: (state, action: PayloadAction<string>) => {
+      state.statusFilter = action.payload || '';
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearFilters: (state) => {
+      state.searchQuery = '';
+      state.roleFilter = '';
+      state.statusFilter = '';
+      state.currentPage = 1;
     },
   },
   extraReducers: (builder) => {
+    // Fetch users
     builder
-      // Fetch Admin Users
-      .addCase(fetchAdminUsers.pending, (state) => {
-        state.loading = true;
+      .addCase(fetchAdminUsersAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
       })
-      .addCase(fetchAdminUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.users = action.payload.users;
-        state.pagination = action.payload.pagination;
-
-        if (
-          state.pagination.totalPages > 0 &&
-          state.page > state.pagination.totalPages
-        ) {
-          state.page = state.pagination.totalPages;
-        } else if (state.pagination.totalPages === 0) {
-          state.page = 1;
+      .addCase(fetchAdminUsersAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload?.success) {
+          state.users = action.payload.data?.users || [];
+          state.totalUsers = action.payload.data?.totalCount || 0;
+          state.currentPage = action.payload.data?.currentPage || 1;
+          state.totalPages = action.payload.data?.totalPages || 0;
         }
       })
-      .addCase(fetchAdminUsers.rejected, (state) => {
-        state.loading = false;
-        state.pagination = {
-          totalItems: 0,
-          totalPages: 1,
-          page: 1,
-          pageSize: state.limit,
-        };
-        state.page = 1;
-      })
+      .addCase(fetchAdminUsersAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to fetch users';
+      });
 
-      // Update User Status
-      .addCase(updateUserStatus.pending, (state, action) => {
-        const userId = action.meta.arg.userId;
-        state.actionLoading[userId] = true;
+    // Update user
+    builder
+      .addCase(updateAdminUserAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
       })
-      .addCase(updateUserStatus.fulfilled, (state, action) => {
-        const { userId, action: userAction } = action.payload;
-        delete state.actionLoading[userId];
-
-        const userIndex = state.users.findIndex((u) => u.userId === userId);
-        if (userIndex !== -1) {
-          // Update status based on action
-          switch (userAction) {
-            case "activate":
-              state.users[userIndex].status = "Active";
-              break;
-            case "deactivate":
-              state.users[userIndex].status = "Inactive";
-              break;
-            case "suspend":
-              state.users[userIndex].status = "Suspended";
-              break;
-            case "block":
-              state.users[userIndex].status = "Blocked";
-              break;
+      .addCase(updateAdminUserAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          const updatedUser = action.payload;
+          const index = state.users.findIndex(user => user.id === updatedUser.id);
+          if (index !== -1) {
+            state.users[index] = updatedUser;
           }
         }
       })
-      .addCase(updateUserStatus.rejected, (state, action) => {
-        const userId = action.meta.arg.userId;
-        delete state.actionLoading[userId];
+      .addCase(updateAdminUserAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to update user';
+      });
+
+    // Delete user
+    builder
+      .addCase(deleteAdminUserAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteAdminUserAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          const deletedUserId = action.payload;
+          state.users = state.users.filter(user => user.id !== deletedUserId);
+          state.totalUsers = Math.max(0, state.totalUsers - 1);
+        }
+      })
+      .addCase(deleteAdminUserAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to delete user';
       });
   },
 });
 
+// Export actions (maintain compatibility with existing components)
 export const {
-  setFilters,
-  setPage,
-  setLimit,
-  clearActionLoading,
-  resetFilters,
+  setLoading,
+  setError,
+  setUsers,
+  setCurrentPage,
+  setTotalPages,
+  setTotalUsers,
+  setSearchQuery,
+  setRoleFilter,
+  setStatusFilter,
+  clearError,
+  clearFilters,
 } = adminUsersSlice.actions;
 
 export default adminUsersSlice.reducer;
-
-// Selectors
-export const selectUsers = (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.users;
-export const selectLoading = (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.loading;
-export const selectFilters = (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.filters;
-export const selectPagination = (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.pagination;
-export const selectActionLoading = (state: { adminUsers: AdminUsersState }) =>
-  state.adminUsers.actionLoading;
-export const selectIsActionLoading =
-  (userId: string) => (state: { adminUsers: AdminUsersState }) =>
-    state.adminUsers.actionLoading[userId] || false;

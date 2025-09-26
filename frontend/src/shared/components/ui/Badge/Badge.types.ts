@@ -1,6 +1,13 @@
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: "success" | "warning" | "danger" | "info" | "secondary";
+  variant?:
+    | "info"
+    | "success"
+    | "warning"
+    | "secondary"
+    | "danger"
+    | "primary"
+    | "outline";
   size?: "sm" | "md" | "lg";
   className?: string;
 }
