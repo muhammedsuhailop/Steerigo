@@ -7,7 +7,7 @@ import {
 } from "../types/admin.interfaces";
 import { ReduxAdminStateService } from "./AdminStateService";
 import { ToastAdminNotificationService } from "./AdminNotificationService";
-import { ApiAdminDataService } from "./adminDataService";
+import { ApiAdminDataService } from "./AdminDataService";
 
 export interface AdminServices {
   dataService: AdminDataService;
