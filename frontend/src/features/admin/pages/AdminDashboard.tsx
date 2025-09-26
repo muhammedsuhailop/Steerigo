@@ -1,18 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
+import { useAdminDashboard } from "../hooks/useAdminDashboard";
+import { AdminServiceContainer } from "../services/AdminServiceContainer";
+import { useAppDispatch } from "@/app/store/hooks";
 import {
   AdminSidebar,
   AdminTopbar,
   DashboardOverview,
   RecentActivity,
   QuickActions,
+  SystemStatus,
+  RecentUsers,
 } from "@/features/admin/components";
 import { Footer } from "@/features/public/components";
+import { MdOutlineRefresh } from "react-icons/md";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Use service layer instead of direct Redux access
+  const { getDashboardStats, loading, refreshDashboardData } =
+    useAdminDashboard();
+
+  // Initialize services
+  const container = AdminServiceContainer.getInstance();
+  try {
+    container.getServices();
+  } catch {
+    container.initialize(dispatch);
+  }
+  const services = container.getServices();
+
+  // Get stats using service layer
+  const stats = getDashboardStats();
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,11 +52,27 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
-
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
+  const handleRefresh = () => {
+    refreshDashboardData();
+    services.notificationService.showInfo("Dashboard data refreshed");
+  };
+
+  const handleViewAllUsers = () => {
+    // Navigate to users page
+    window.location.href = "/admin/users";
+  };
+
+  const handleUserClick = (clickedUser: any) => {
+    // Handle user click - could navigate to user detail page
+    services.notificationService.showInfo(
+      `Viewing details for ${clickedUser.name}`
+    );
+  };
+
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
@@ -47,44 +86,48 @@ const AdminDashboard: React.FC = () => {
         style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
       >
         {/* Topbar */}
-        <AdminTopbar title="Admin Dashboard" onToggleSidebar={toggleSidebar} />
+        <AdminTopbar onToggleSidebar={toggleSidebar} />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
-            <DashboardOverview userName={user?.name} />
-            <QuickActions />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-              <RecentActivity />
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  System Status
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Server Status</span>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Online
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Database</span>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Connected
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      Payment Gateway
-                    </span>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <main className="flex-1 px-6 py-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 transition-colors"
+            >
+              {loading ? "Refreshing..." : <MdOutlineRefresh />}
+            </button>
           </div>
+
+          <DashboardOverview />
+          <QuickActions />
+
+          {/* System Status Component */}
+          <SystemStatus
+            stats={{
+              totalUsers: stats.totalUsers,
+              activeUsers: stats.activeUsers,
+              pendingUsers: stats.pendingUsers,
+              suspendedUsers: stats.suspendedUsers,
+              blockedUsers: stats.blockedUsers,
+              inactiveUsers: stats.inactiveUsers,
+            }}
+            loading={loading}
+            onRefresh={handleRefresh}
+          />
+
+          {/* Recent Users Component */}
+          <RecentUsers
+            users={stats.recentUsers}
+            loading={loading}
+            onUserClick={handleUserClick}
+            onViewAll={handleViewAllUsers}
+            maxUsers={5}
+          />
+
+          <RecentActivity />
         </main>
 
         {/* Footer */}

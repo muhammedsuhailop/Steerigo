@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Table, Badge, Button } from "@/shared/components/ui";
+import { Table, Button } from "@/shared/components/ui";
+import { UserStatusBadge } from "../UserStatusBadge/UserStatusBadge";
 import type { UserTableProps, User } from "./UserManagement.types";
 import { ActionDropdown } from "./ActionDropdown";
 import type { Column } from "@/shared/components/ui/Table";
-import { RiEyeLine, RiDeleteBin6Line, RiUserLine } from "react-icons/ri";
+import { RiUserLine } from "react-icons/ri";
 
 export const UserTable: React.FC<UserTableProps> = ({
   users,
@@ -13,23 +14,6 @@ export const UserTable: React.FC<UserTableProps> = ({
   onUserAction,
 }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-  const getBadgeVariant = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "success";
-      case "Inactive":
-        return "secondary";
-      case "Suspended":
-        return "warning";
-      case "Pending Verification":
-        return "info";
-      case "Blocked":
-        return "danger";
-      default:
-        return "secondary";
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -70,16 +54,16 @@ export const UserTable: React.FC<UserTableProps> = ({
                 alt={user.name}
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                <RiUserLine className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <RiUserLine className="w-5 h-5 text-gray-500" />
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-gray-900 truncate">
+            <div className="text-sm font-semibold text-gray-900 truncate">
               {user.name}
-            </p>
-            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+            </div>
+            <div className="text-sm text-gray-500 truncate">{user.email}</div>
           </div>
         </div>
       ),
@@ -87,11 +71,9 @@ export const UserTable: React.FC<UserTableProps> = ({
     },
     {
       key: "mobile",
-      header: "mobile",
+      header: "Mobile",
       render: (mobile) => (
-        <span className="text-sm text-gray-600">
-          {mobile || <span className="text-gray-400">—</span>}
-        </span>
+        <span className="text-sm text-gray-900">{mobile || "—"}</span>
       ),
       width: "140px",
     },
@@ -100,9 +82,7 @@ export const UserTable: React.FC<UserTableProps> = ({
       header: "Bookings",
       render: (bookings) => (
         <div className="text-center">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {bookings}
-          </span>
+          <span className="text-sm font-medium text-gray-900">{bookings}</span>
         </div>
       ),
       align: "center",
@@ -124,9 +104,7 @@ export const UserTable: React.FC<UserTableProps> = ({
       header: "Status",
       render: (status) => (
         <div className="flex justify-center">
-          <Badge variant={getBadgeVariant(status)} size="sm">
-            {status}
-          </Badge>
+          <UserStatusBadge status={status} />
         </div>
       ),
       align: "center",
@@ -136,8 +114,8 @@ export const UserTable: React.FC<UserTableProps> = ({
       key: "lastBooked",
       header: "Last Booked",
       render: (date) => (
-        <span className="text-sm text-gray-600">
-          {date ? formatDate(date) : <span className="text-gray-400">NA</span>}
+        <span className="text-sm text-gray-900">
+          {date ? formatDate(date) : "N/A"}
         </span>
       ),
       align: "center",
@@ -147,8 +125,7 @@ export const UserTable: React.FC<UserTableProps> = ({
       key: "actions",
       header: "Actions",
       render: (_, user) => (
-        <div className="flex items-center justify-center space-x-2">
-          {/* Action Dropdown */}
+        <div className="flex justify-center">
           <ActionDropdown
             user={user}
             onAction={handleUserAction}

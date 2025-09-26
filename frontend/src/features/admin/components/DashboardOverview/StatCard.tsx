@@ -12,8 +12,8 @@ import {
 const getIconComponent = (iconName?: string) => {
   const icons = {
     users: RiUserLine,
-    drivers: RiCarLine,
-    rides: RiSteeringFill,
+    drivers: RiSteeringFill,
+    rides: RiCarLine,
     revenue: RiMoneyDollarCircleLine,
   };
   return iconName ? icons[iconName as keyof typeof icons] : null;

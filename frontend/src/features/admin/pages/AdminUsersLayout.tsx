@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { AdminSidebar, AdminTopbar } from "@/features/admin/components";
-import AdminUsers from "./AdminUsers";
+import { UserManagement } from "@/features/admin/components/UserManagement";
 
 const AdminUsersLayout: React.FC = () => {
   const { user } = useAuth();
@@ -23,11 +23,10 @@ const AdminUsersLayout: React.FC = () => {
   }, []);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
-
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
@@ -41,15 +40,12 @@ const AdminUsersLayout: React.FC = () => {
         style={{ marginLeft: `${sidebarWidth}px` }}
       >
         {/* Topbar */}
-        <AdminTopbar
-          title="Admin - Users"
-          onToggleSidebar={toggleSidebar}
-        />
+        <AdminTopbar title="Admin - Users" onToggleSidebar={toggleSidebar} />
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-auto">
-          <AdminUsers />
-        </main>
+        {/* Page Content  */}
+        <div className="p-6">
+          <UserManagement />
+        </div>
       </div>
 
       {/* Mobile Overlay */}
