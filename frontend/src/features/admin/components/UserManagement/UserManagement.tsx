@@ -3,21 +3,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { UserFilters } from "./UserFilters";
 import { UserTable } from "./UserTable";
 import { TablePagination } from "@/shared/components/ui/Table";
-import {
-  fetchAdminUsers,
-  updateUserStatus,
-  setFilters,
-  setPage,
-  setLimit,
-  resetFilters,
-} from "@/features/admin/store/adminUsersSlice";
+import { fetchAdminUsers } from "@/features/admin/store/adminUsersSlice";
+import { useAdminOperations } from "../../hooks/useAdminOperations";
 import type { RootState, AppDispatch } from "@/app/store";
-import type {
-  UserAction,
-  UserFilters as UserFiltersType,
-} from "./UserManagement.types";
+import type { UserFilters as UserFiltersType } from "./UserManagement.types";
 
-// Debounce hook for search
+// debounce hook
 const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -39,99 +30,80 @@ export const UserManagement: React.FC = () => {
   const { users, loading, filters, page, limit, pagination, actionLoading } =
     useSelector((state: RootState) => state.adminUsers);
 
-  // Local state for immediate search input
-  const [localSearch, setLocalSearch] = useState(filters.search);
+  const {
+    handleFiltersChange,
+    handlePageChange,
+    handleSizeChange,
+    handleUserAction,
+    handleResetFilters,
+    clearActionLoading,
+  } = useAdminOperations();
 
-  // Debounced search value
+  // local search state and debounce logic
+  const [localSearch, setLocalSearch] = useState(filters.search);
   const debouncedSearch = useDebounce(localSearch, 300);
 
-  // Effect to update filters when debounced search changes
   useEffect(() => {
     if (debouncedSearch !== filters.search) {
-      dispatch(setFilters({ search: debouncedSearch }));
+      handleFiltersChange({ search: debouncedSearch });
     }
-  }, [debouncedSearch, filters.search, dispatch]);
+  }, [debouncedSearch, filters.search, handleFiltersChange]);
 
-  // Effect to fetch users when dependencies change
   useEffect(() => {
     dispatch(fetchAdminUsers());
   }, [dispatch, filters, page, limit]);
 
-  // Effect to sync local search with store when filters reset
   useEffect(() => {
     setLocalSearch(filters.search);
   }, [filters.search]);
 
   useEffect(() => {
     if (pagination.totalPages > 0 && page > pagination.totalPages) {
-      dispatch(setPage(pagination.totalPages));
+      handlePageChange(pagination.totalPages);
     } else if (pagination.totalPages === 0 && page !== 1) {
-      dispatch(setPage(1));
+      handlePageChange(1);
     }
-  }, [pagination.totalPages, page, dispatch]);
+  }, [pagination.totalPages, page, handlePageChange]);
 
-  const handleFiltersChange = useCallback(
+  const onFiltersChange = useCallback(
     (newFilters: UserFiltersType) => {
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
         const { search, ...otherFilters } = newFilters;
         if (Object.keys(otherFilters).length > 0) {
-          dispatch(setFilters(otherFilters));
+          handleFiltersChange(otherFilters);
         }
       } else {
-        dispatch(setFilters(newFilters));
+        handleFiltersChange(newFilters);
       }
     },
-    [dispatch]
+    [handleFiltersChange]
   );
 
-  const handlePageChange = useCallback(
+  const onPageChange = useCallback(
     (newPage: number) => {
       const safePage = Math.max(
         1,
         Math.min(newPage, pagination.totalPages || 1)
       );
-
       if (
         safePage !== page &&
         safePage >= 1 &&
         (pagination.totalPages === 0 || safePage <= pagination.totalPages)
       ) {
-        dispatch(setPage(safePage));
+        handlePageChange(safePage);
       }
     },
-    [dispatch, page, pagination.totalPages]
+    [handlePageChange, page, pagination.totalPages]
   );
 
-  const handleSizeChange = useCallback(
+  const onSizeChange = useCallback(
     (newSize: number) => {
       const safeSize = Math.max(1, Math.min(newSize, 100));
-      dispatch(setLimit(safeSize));
+      handleSizeChange(safeSize);
     },
-    [dispatch]
+    [handleSizeChange]
   );
-
-  const handleUserAction = useCallback(
-    async (userId: string, action: UserAction) => {
-      try {
-        const result = await dispatch(
-          updateUserStatus({ userId, action })
-        ).unwrap();
-
-        console.log("User action completed:", result.message);
-
-        dispatch(fetchAdminUsers());
-      } catch (error) {
-        console.error("User action failed:", error);
-      }
-    },
-    [dispatch]
-  );
-
-  const handleResetFilters = useCallback(() => {
-    setLocalSearch("");
-    dispatch(resetFilters());
-  }, [dispatch]);
 
   const isActionLoading = (userId: string) => {
     return actionLoading[userId] || false;
@@ -143,7 +115,6 @@ export const UserManagement: React.FC = () => {
     search: localSearch,
   };
 
-  // Safe pagination values
   const safePagination = {
     currentPage: Math.max(1, page),
     totalPages: Math.max(0, pagination.totalPages),
@@ -153,10 +124,9 @@ export const UserManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Clean component - no error handling UI needed */}
       <UserFilters
         filters={displayFilters}
-        onFiltersChange={handleFiltersChange}
+        onFiltersChange={onFiltersChange}
         onResetFilters={handleResetFilters}
         loading={loading}
       />
@@ -175,8 +145,8 @@ export const UserManagement: React.FC = () => {
         totalPages={safePagination.totalPages}
         totalItems={safePagination.totalItems}
         pageSize={safePagination.pageSize}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handleSizeChange}
+        onPageChange={onPageChange}
+        onPageSizeChange={onSizeChange}
       />
     </div>
   );
