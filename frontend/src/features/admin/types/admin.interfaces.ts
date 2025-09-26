@@ -64,3 +64,24 @@ export interface AdminAnalyticsService {
   trackPageView(page: string): void;
   trackError(error: Error, context?: string): void;
 }
+
+// Stats Service Interface
+export interface AdminStatsService {
+  calculateStats(
+    users: User[],
+    pagination?: any
+  ): {
+    totalUsers: number;
+    activeUsers: number;
+    pendingUsers: number;
+    inactiveUsers: number;
+    suspendedUsers: number;
+    blockedUsers: number;
+    recentUsers: User[];
+    systemHealth: {
+      serverStatus: "online" | "offline" | "maintenance";
+      databaseStatus: "connected" | "disconnected" | "slow";
+      paymentGateway: "active" | "inactive" | "error";
+    };
+  };
+}

@@ -1,6 +1,5 @@
 export * from "./components";
 export * from "./pages/AdminDashboard";
-export * from "./pages/AdminUsers";
 export * from "./pages/AdminUsersLayout";
 export * from "./store/adminUsersSlice";
 
