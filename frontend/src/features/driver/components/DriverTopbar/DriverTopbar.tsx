@@ -9,6 +9,7 @@ import {
   RiArrowDropDownLine,
   RiMessage3Line,
   RiWallet3Line,
+  RiMore2Line,
 } from "react-icons/ri";
 import {
   NotificationDropdown,
@@ -16,11 +17,12 @@ import {
   MessagesDropdown,
   WalletDropdown,
   OnlineStatus,
+  Logo,
 } from "@/shared/components/ui";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
 
 export const DriverTopbar: React.FC<DriverTopbarProps> = ({
-  title = "Driver Dashboard",
+  title = "Dashboard",
   onToggleSidebar,
   className = "",
 }) => {
@@ -28,14 +30,17 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const walletRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const { user } = useSelector((state: RootState) => state.auth);
   const { isOnline, driver } = useSelector((state: RootState) => state.driver);
+  const walletBalance = driver?.todayEarnings || 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,16 +68,17 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       ) {
         setIsWalletOpen(false);
       }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const topbarClasses =
-    `bg-white border-b border-gray-200 shadow-sm h-16 ${className}`.trim();
-
-  // Profile actions for driver
   const profileActions = [
     {
       id: "profile",
@@ -86,137 +92,142 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       icon: HiOutlineCog,
       to: "/driver/settings",
     },
-    {
-      id: "logout",
-      label: "Sign out",
-      icon: HiOutlineLogout,
-      danger: true,
-    },
+    { id: "logout", label: "Sign out", icon: HiOutlineLogout, danger: true },
   ];
 
-  const walletBalance = driver?.todayEarnings || 0;
-
-  // Handler functions
-  const handleViewAllMessages = () => {
-    console.log("Navigate to messages page");
-  };
-
-  const handleWithdrawMoney = () => {
-    console.log("Open withdraw money modal");
-  };
-
-  const handleViewTransactionHistory = () => {
-    console.log("Navigate to transaction history");
-  };
-
   return (
-    <div className={topbarClasses}>
-      <div className="flex items-center justify-between px-6 h-full">
-        {/* Left Side */}
-        <div className="flex items-center space-x-4">
-          {/* Mobile Menu Button */}
+    <div
+      className={`bg-white border-b border-gray-200 shadow-sm h-16 ${className}`}
+    >
+      <div className="flex items-center justify-between px-4 sm:px-6 h-full">
+        {/* Left */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <button
             onClick={onToggleSidebar}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+            className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
             aria-label="Toggle sidebar"
           >
             <RiMenuLine className="w-5 h-5 text-gray-600" />
           </button>
-
-          {/* Title with Online Status */}
-          <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-            <OnlineStatus isOnline={isOnline} size="md" showPulse={true} />
+          <div className="block lg:hidden">
+            <Logo size="md" variant="square" />
           </div>
+          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
         </div>
 
-        {/* Right Side */}
-        <div className="flex items-center space-x-4">
-          {/* Messages */}
-          <div className="relative" ref={messagesRef}>
-            <button
-              onClick={() => setIsMessagesOpen(!isMessagesOpen)}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Messages"
-            >
-              <RiMessage3Line className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </button>
+        {/* Right */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Desktop icons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Messages */}
+            <div className="relative" ref={messagesRef}>
+              <button
+                onClick={() => setIsMessagesOpen(!isMessagesOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Messages"
+              >
+                <RiMessage3Line className="w-5 h-5 text-gray-600" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                  3
+                </span>
+              </button>
+              <MessagesDropdown
+                isOpen={isMessagesOpen}
+                onClose={() => setIsMessagesOpen(false)}
+              />
+            </div>
 
-            <MessagesDropdown
-              isOpen={isMessagesOpen}
-              onClose={() => setIsMessagesOpen(false)}
-              onViewAll={handleViewAllMessages}
-            />
+            {/* Wallet */}
+            <div className="relative" ref={walletRef}>
+              <button
+                onClick={() => setIsWalletOpen(!isWalletOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Wallet"
+              >
+                <RiWallet3Line className="w-5 h-5 text-gray-600" />
+              </button>
+              <WalletDropdown
+                isOpen={isWalletOpen}
+                onClose={() => setIsWalletOpen(false)}
+                balance={walletBalance}
+              />
+            </div>
+
+            {/* Notifications */}
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Notifications"
+              >
+                <FaRegBell className="w-5 h-5 text-gray-600" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  2
+                </span>
+              </button>
+              <NotificationDropdown
+                isOpen={isNotificationOpen}
+                onClose={() => setIsNotificationOpen(false)}
+              />
+            </div>
           </div>
 
-          {/* Wallet */}
-          <div className="relative" ref={walletRef}>
+          {/* Mobile menu */}
+          <div className="relative md:hidden" ref={mobileMenuRef}>
             <button
-              onClick={() => setIsWalletOpen(!isWalletOpen)}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Wallet"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+              aria-label="More options"
             >
-              <RiWallet3Line className="w-5 h-5 text-gray-600" />
+              <RiMore2Line className="w-5 h-5 text-gray-600" />
             </button>
-
-            <WalletDropdown
-              isOpen={isWalletOpen}
-              onClose={() => setIsWalletOpen(false)}
-              balance={walletBalance}
-              onWithdraw={handleWithdrawMoney}
-              onViewHistory={handleViewTransactionHistory}
-            />
-          </div>
-
-          {/* Notifications */}
-          <div className="relative" ref={notificationRef}>
-            <button
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Notifications"
-            >
-              <FaRegBell className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                2
-              </span>
-            </button>
-
-            <NotificationDropdown
-              isOpen={isNotificationOpen}
-              onClose={() => setIsNotificationOpen(false)}
-            />
+            {isMobileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <RiMessage3Line className="w-5 h-5 mr-3 text-gray-400" />
+                  Messages
+                  <span className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    3
+                  </span>
+                </button>
+                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <RiWallet3Line className="w-5 h-5 mr-3 text-gray-400" />
+                  Wallet
+                  <span className="ml-auto text-xs text-gray-700">
+                    ₹{walletBalance}
+                  </span>
+                </button>
+                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <FaRegBell className="w-5 h-5 mr-3 text-gray-400" />
+                  Notifications
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    2
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Profile */}
           <div className="relative" ref={profileRef}>
-            <button
+            <div
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="User menu"
+              className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <RiUserLine className="w-4 h-4 text-gray-600" />
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.name || "Driver"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {user?.email || "driver@example.com"}
-                </p>
-              </div>
+              <OnlineStatus isOnline={isOnline} size="sm" showPulse={false} />
+              <RiUserLine className="w-5 h-5 text-gray-600" />
               <RiArrowDropDownLine className="w-5 h-5 text-gray-600 hidden sm:block" />
-            </button>
-
-            <ProfileDropdown
-              isOpen={isProfileOpen}
-              onClose={() => setIsProfileOpen(false)}
-              user={user}
-              actions={profileActions}
-            />
+            </div>
+            {isProfileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <ProfileDropdown
+                  isOpen={isProfileOpen}
+                  onClose={() => setIsProfileOpen(false)}
+                  user={user}
+                  actions={profileActions}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

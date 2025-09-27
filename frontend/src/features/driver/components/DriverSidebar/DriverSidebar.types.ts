@@ -1,15 +1,22 @@
 export interface DriverSidebarProps {
-  isCollapsed: boolean;
-  onToggle: () => void;
-  isMobile: boolean;
+  isCollapsed?: boolean;
+  onToggle?: () => void;
   className?: string;
+  isMobile?: boolean;
 }
 
 export interface SidebarItem {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: string;
   path: string;
-  badge?: string | number;
+  badge?: number;
   isActive?: boolean;
+}
+
+export interface SidebarItemProps {
+  item: SidebarItem;
+  isCollapsed: boolean;
+  isMobile: boolean;
+  isActive: boolean;
 }
