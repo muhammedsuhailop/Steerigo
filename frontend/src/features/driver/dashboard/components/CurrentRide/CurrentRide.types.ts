@@ -1,4 +1,4 @@
-import type { CurrentRide } from "../../types/driver.types";
+import type { CurrentRide } from "../../../shared/types/driver.types";
 
 export interface CurrentRideProps {
   ride: CurrentRide;

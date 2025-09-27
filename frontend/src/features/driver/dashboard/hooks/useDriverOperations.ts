@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useAppDispatch } from "@/app/store/hooks";
-import { DriverServiceContainer } from "../services/DriverServiceContainer";
-import type { CurrentRide } from "../types/driver.types";
+import { DriverServiceContainer } from "../../shared/services/DriverServiceContainer";
+import type { CurrentRide } from "../../shared/types/driver.types";
 
 export const useDriverOperations = () => {
   const dispatch = useAppDispatch();

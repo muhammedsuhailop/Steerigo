@@ -1,9 +1,9 @@
 // Components
-export * from "./components";
+export * from "./dashboard/components";
 
 // Pages
-export { default as DriverDashboard } from "./pages/DriverDashboard";
-export { default as DriverDashboardLayout } from "./pages/DriverDashboardLayout";
+export { default as DriverDashboard } from "./dashboard/pages/DriverDashboard";
+export { default as DriverDashboardLayout } from "./dashboard/pages/DriverDashboardLayout";
 
 // Store
 export {
@@ -23,12 +23,12 @@ export {
   selectIsOnline,
   selectDriverLoading,
   selectDriverError,
-} from "./store/driverSlice";
+} from "./shared/store/driverSlice";
 
 // Services
-export * from "./services";
+export * from "./shared/services";
 
 // Hooks
-export * from "./hooks";
+export * from "./dashboard/hooks";
 
 

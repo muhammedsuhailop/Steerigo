@@ -1,4 +1,4 @@
-import type { RideRequest } from "../../types/driver.types";
+import type { RideRequest } from "../../../shared/types/driver.types";
 
 export interface PendingRequestsProps {
   requests: RideRequest[];

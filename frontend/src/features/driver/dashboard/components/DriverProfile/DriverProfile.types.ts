@@ -1,4 +1,4 @@
-import type { Driver } from "../../types/driver.types";
+import type { Driver } from "../../../shared/types/driver.types";
 
 export interface DriverProfileProps {
   driver: Driver;

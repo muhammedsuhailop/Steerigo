@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/app/store/hooks";
-import { DriverServiceContainer } from "../services/DriverServiceContainer";
+import { DriverServiceContainer } from "../../shared/services/DriverServiceContainer";
 import type { RootState } from "@/app/store";
 
 export const useDriverDashboard = () => {

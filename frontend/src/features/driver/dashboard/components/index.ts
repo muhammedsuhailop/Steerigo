@@ -1,6 +1,6 @@
 // Core Components
-export { DriverSidebar } from "./DriverSidebar";
-export { DriverTopbar } from "./DriverTopbar";
+export { DriverSidebar } from "../../shared/components/DriverSidebar";
+export { DriverTopbar } from "../../shared/components/DriverTopbar";
 export { DriverProfile } from "./DriverProfile";
 export { DriverStats } from "./DriverStats";
 export { DriverActions } from "./DriverActions";
@@ -10,8 +10,8 @@ export { PendingRequests } from "./PendingRequests";
 export { CurrentRide } from "./CurrentRide";
 
 // Types
-export type { DriverSidebarProps, SidebarItem } from "./DriverSidebar";
-export type { DriverTopbarProps } from "./DriverTopbar";
+export type { DriverSidebarProps, SidebarItem } from "../../shared/components/DriverSidebar";
+export type { DriverTopbarProps } from "../../shared/components/DriverTopbar";
 export type { DriverProfileProps } from "./DriverProfile";
 export type { DriverStatsProps } from "./DriverStats";
 export type { DriverActionsProps } from "./DriverActions";
