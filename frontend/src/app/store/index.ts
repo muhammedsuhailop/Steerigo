@@ -3,6 +3,7 @@ import { authApi } from "../../features/auth/services/authApi";
 import authReducer from "../../features/auth/store/authSlice";
 import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
 import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
+import driverReducer from "../../features/driver/shared/store/driverSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
 
     // Feature reducers
     adminUsers: adminUsersReducer,
+    driver: driverReducer,
 
     // Global error handling
     error: errorReducer,
