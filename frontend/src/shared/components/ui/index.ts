@@ -9,10 +9,16 @@ export { Table, TablePagination } from "./Table";
 export { Badge } from "./Badge";
 export { ConfirmationModal } from "./ConfirmationModal";
 
+export { MessagesDropdown } from "./Messages";
+export { WalletDropdown } from "./Wallet";
+export { OnlineStatus } from "./OnlineStatus";
+export { NotificationDropdown } from "./Notification";
+export { ProfileDropdown } from "./Profile";
+
 // Error Handling exports
 export { ErrorBoundary } from "./ErrorHandling/ErrorBoundary";
 export { ToastContainer, GlobalErrorModal } from "./ErrorHandling/Toast";
-export { 
+export {
   addError,
   removeError,
   clearErrors,
@@ -27,7 +33,7 @@ export {
   selectIsErrorVisible,
   selectErrorsByType,
   selectErrorsByField,
-  selectErrorsByContext
+  selectErrorsByContext,
 } from "./ErrorHandling/errorSlice";
 
 // Type exports
@@ -42,6 +48,9 @@ export type {
   ConfirmationModalProps,
   ConfirmationVariant,
 } from "./ConfirmationModal";
+export type { MessagesDropdownProps, Message } from "./Messages";
+export type { WalletDropdownProps, Transaction } from "./Wallet";
+export type { OnlineStatusProps } from "./OnlineStatus";
 
 // Error Handling types
 export type {
@@ -52,7 +61,6 @@ export type {
   ErrorState,
   ErrorBoundaryProps,
   ToastProps,
-  ErrorDisplayProps
+  ErrorDisplayProps,
 } from "./ErrorHandling/ErrorHandling.types";
-
 export { ErrorType, ErrorSeverity } from "./ErrorHandling/ErrorHandling.types";
