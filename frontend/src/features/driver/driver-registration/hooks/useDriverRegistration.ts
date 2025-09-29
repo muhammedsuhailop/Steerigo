@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import {
   updateFormData,
@@ -9,8 +9,6 @@ import {
   clearError,
   clearAllErrors,
   resetForm,
-  uploadDocument,
-  submitRegistration,
   selectFormData,
   selectCurrentStep,
   selectErrors,
@@ -24,11 +22,25 @@ import {
   DriverRegistrationData,
   RegistrationStep,
   ValidationResult,
+  UploadResponse,
 } from "../types/driverRegistration.types";
 import { driverValidationService } from "../services/driverValidation.service";
+import { getPincodeDetails } from "../services/pincodeService";
+import {
+  useRegisterDriverMutation,
+  useUploadDocumentMutation,
+} from "../services/driverRegistrationApi";
 
 export const useDriverRegistration = () => {
   const dispatch = useAppDispatch();
+
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [loadingPin, setLoadingPin] = useState(false);
+  const lastFetchedPinRef = useRef<string | null>(null);
+
+  // RTK Query mutations
+  const [registerDriver] = useRegisterDriverMutation();
+  const [uploadDocumentApi] = useUploadDocumentMutation();
 
   // Selectors
   const formData = useAppSelector(selectFormData);
@@ -43,13 +55,11 @@ export const useDriverRegistration = () => {
   const updateData = useCallback(
     (data: Partial<DriverRegistrationData>, validateStep: boolean = false) => {
       dispatch(updateFormData(data));
-
       Object.keys(data).forEach((key) => {
         if (errors[key]) {
           dispatch(clearError(key));
         }
       });
-
       if (validateStep) {
         const updatedData = { ...formData, ...data };
         const validation = driverValidationService.validateStep(
@@ -64,24 +74,47 @@ export const useDriverRegistration = () => {
     [dispatch, formData, errors, currentStep]
   );
 
+  useEffect(() => {
+    const pin = formData.pin;
+    if (/^\d{6}$/.test(pin) && pin !== lastFetchedPinRef.current) {
+      setLoadingPin(true);
+      setPinError(null);
+      lastFetchedPinRef.current = pin;
+
+      getPincodeDetails(pin).then((res) => {
+        setLoadingPin(false);
+        if (res.success) {
+          updateData({ state: res.data.state });
+        } else {
+          setPinError(res.error);
+          dispatch(setErrors({ ...errors, pin: res.error }));
+        }
+      });
+    }
+  }, [formData.pin]);
+
   const goToNextStep = useCallback(() => {
     const validation = driverValidationService.validateStep(
       currentStep,
       formData
     );
 
-    if (validation.isValid) {
-      dispatch(clearAllErrors());
-      dispatch(nextStep());
-      return true;
-    } else {
+    if (!validation.isValid) {
       dispatch(setErrors(validation.errors));
-
       scrollToFirstError(validation.errors);
-
       return false;
     }
-  }, [dispatch, currentStep, formData]);
+
+    if (pinError) {
+      dispatch(setErrors({ ...validation.errors, pin: pinError }));
+      scrollToFirstError({ pin: pinError });
+      return false;
+    }
+
+    dispatch(clearAllErrors());
+    dispatch(nextStep());
+    return true;
+  }, [dispatch, currentStep, formData, pinError]);
 
   const scrollToFirstError = (errors: Record<string, string>) => {
     const firstErrorField = Object.keys(errors)[0];
@@ -109,6 +142,19 @@ export const useDriverRegistration = () => {
     },
     [dispatch]
   );
+
+  // const handleDocumentUpload = useCallback(
+  //   async (file: File, fieldName: string): Promise<UploadResponse> => {
+  //     try {
+  //       const response = await uploadDocumentApi({ file, fieldName }).unwrap();
+  //       updateData({ [fieldName]: response.url! });
+  //       return { success: true, url: response.url, message: response.message };
+  //     } catch (error: any) {
+  //       return { success: false, message: error.data?.message || "Upload failed" };
+  //     }
+  //   },
+  //   [uploadDocumentApi, updateData]
+  // );
 
   const handleDocumentUpload = useCallback(
     async (file: File, fieldName: string) => {
@@ -144,62 +190,30 @@ export const useDriverRegistration = () => {
 
   const handleSubmitRegistration = useCallback(async () => {
     const validation = validateForm();
-
     if (!validation.isValid) {
       dispatch(setErrors(validation.errors));
       return { success: false, errors: validation.errors };
     }
-
     try {
-      const formDataToSubmit = new FormData();
-
-      // Add text fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value && typeof value === "string") {
-          formDataToSubmit.append(key, value);
-        } else if (Array.isArray(value)) {
-          formDataToSubmit.append(key, JSON.stringify(value));
-        }
-      });
-
-      // Add files if they exist
-      if (formData.licenseFrontImage instanceof File) {
-        formDataToSubmit.append(
-          "licenseFrontImage",
-          formData.licenseFrontImage
-        );
-      }
-      if (formData.licenseBackImage instanceof File) {
-        formDataToSubmit.append("licenseBackImage", formData.licenseBackImage);
-      }
-      if (formData.idFrontImage instanceof File) {
-        formDataToSubmit.append("idFrontImage", formData.idFrontImage);
-      }
-      if (formData.idBackImage instanceof File) {
-        formDataToSubmit.append("idBackImage", formData.idBackImage);
-      }
-
-      const result = await dispatch(submitRegistration(formDataToSubmit));
-
-      if (submitRegistration.fulfilled.match(result)) {
-        return { success: true, data: result.payload };
-      } else {
-        return { success: false, error: result.payload };
-      }
-    } catch (error) {
+      const result = await registerDriver(
+        formData as DriverRegistrationData
+      ).unwrap();
+      dispatch(resetForm());
+      return { success: true, data: result.data };
+    } catch (error: any) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Registration failed",
+        error: error.data?.message || "Registration failed",
       };
     }
-  }, [dispatch, formData, validateForm]);
+  }, [dispatch, formData, validateForm, registerDriver]);
 
   const resetRegistrationForm = useCallback(() => {
     dispatch(resetForm());
   }, [dispatch]);
 
   const getStepCompletionStatus = useCallback(() => {
-    const stepStatus: Record<RegistrationStep, boolean> = {
+    return {
       [RegistrationStep.PERSONAL_INFO]:
         driverValidationService.validatePersonalInfo(formData).isValid,
       [RegistrationStep.LICENSE_INFO]:
@@ -211,20 +225,20 @@ export const useDriverRegistration = () => {
       [RegistrationStep.REVIEW]: driverValidationService.validateAll(
         formData as DriverRegistrationData
       ).isValid,
-    };
-
-    return stepStatus;
+    } as Record<RegistrationStep, boolean>;
   }, [formData]);
 
-  const canProceedToNext = useCallback(() => {
-    const validation = validateCurrentStep();
-    return validation.isValid;
-  }, [validateCurrentStep]);
+  const canProceedToNext = useCallback(
+    () => validateCurrentStep().isValid,
+    [validateCurrentStep]
+  );
 
   const getFormCompletionPercentage = useCallback(() => {
-    const stepStatus = getStepCompletionStatus();
-    const completedSteps = Object.values(stepStatus).filter(Boolean).length;
-    return Math.round((completedSteps / Object.keys(stepStatus).length) * 100);
+    const status = getStepCompletionStatus();
+    const completed = Object.values(status).filter(Boolean).length;
+    return Math.round(
+      (completed / Object.values(RegistrationStep).length) * 100
+    );
   }, [getStepCompletionStatus]);
 
   return {
@@ -237,6 +251,8 @@ export const useDriverRegistration = () => {
     isSubmitting,
     registrationSuccess,
     registrationError,
+    pinError,
+    loadingPin,
 
     // Actions
     updateData,
@@ -246,12 +262,10 @@ export const useDriverRegistration = () => {
     handleDocumentUpload,
     handleSubmitRegistration,
     resetRegistrationForm,
-
     // Validation
     validateCurrentStep,
     validateForm,
     canProceedToNext,
-
     // Utilities
     getStepCompletionStatus,
     getFormCompletionPercentage,

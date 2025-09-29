@@ -75,8 +75,7 @@ export const DriverRegistrationForm: React.FC = () => {
             Registration Successful!
           </h2>
           <p className="text-gray-600 mb-6">
-            Your driver registration has been submitted successfully. You will
-            receive a confirmation email shortly.
+            Your driver registration has been submitted successfully.
           </p>
           <button
             onClick={resetRegistrationForm}

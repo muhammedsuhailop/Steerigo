@@ -9,6 +9,8 @@ export interface DriverPersonalInfo {
 }
 
 export interface DriverLicenseInfo {
+  bodyTypes: string[];
+  gearTypes: string[];
   licenseCategory: string[];
   licenseNumber: string;
   licenseBodyTypes: string[];
@@ -18,7 +20,7 @@ export interface DriverLicenseInfo {
 }
 
 export interface DriverIdInfo {
-  idType: string;
+  idType: "PAN" | "Aadhaar" | "DrivingLicense";
   idNumber: string;
   idIssueDate: string;
   idExpiryDate: string;
@@ -37,22 +39,15 @@ export interface DriverRegistrationData
     DriverIdInfo,
     DriverDocuments {}
 
-export interface RegistrationState {
-  currentStep: number;
-  isLoading: boolean;
-  errors: Record<string, string>;
-  uploadProgress: Record<string, number>;
+export interface UploadResponse {
+  success: boolean;
+  url?: string;
+  message?: string;
 }
 
 export interface ValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
-}
-
-export interface UploadResponse {
-  success: boolean;
-  url?: string;
-  message?: string;
 }
 
 export enum RegistrationStep {
@@ -63,9 +58,26 @@ export enum RegistrationStep {
   REVIEW = 4,
 }
 
-export interface DriverRegistrationState extends RegistrationState {
-  formData: Partial<DriverRegistrationData>;
-  isSubmitting: boolean;
-  registrationSuccess: boolean;
-  registrationError: string | null;
+export const LICENSE_CATEGORIES = [
+  { value: "LMV", label: "LMV (Light Motor Vehicle)" },
+  { value: "HMV", label: "HMV (Heavy Motor Vehicle)" },
+  { value: "LMVTR", label: "LMV-TR (Light Motor Vehicle Transport)" },
+  { value: "HPMV", label: "HPMV (Heavy Passenger Motor Vehicle)" },
+];
+
+export const BODY_TYPES = [
+  { value: "Sedan", label: "Sedan" },
+  { value: "SUV", label: "SUV" },
+  { value: "Hatchback", label: "Hatchback" },
+];
+
+export const GEAR_TYPES = [
+  { value: "Manual", label: "Manual" },
+  { value: "Automatic", label: "Automatic" },
+];
+
+export interface PincodeDetails {
+  state: string;
+  district: string;
+  postOffice: string;
 }

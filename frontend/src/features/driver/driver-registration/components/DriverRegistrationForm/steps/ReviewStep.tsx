@@ -1,10 +1,11 @@
 import React from "react";
 import { useDriverRegistration } from "../../../hooks/useDriverRegistration";
 import { Badge } from "@/shared/components/ui";
+import { MdErrorOutline, MdCheck, MdWarning } from "react-icons/md";
 
 export const ReviewStep: React.FC = () => {
   const { formData, goToStep } = useDriverRegistration();
-
+  console.log(formData.licenseCategory);
   const handleEditSection = (step: number) => {
     goToStep(step);
   };
@@ -72,7 +73,13 @@ export const ReviewStep: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-500">Category:</span>
-            <span className="ml-2 font-medium">{formData.licenseCategory}</span>
+            <div className="ml-2 flex flex-wrap gap-1 mt-1">
+              {formData.licenseCategory?.map((type: string) => (
+                <Badge key={type} variant="secondary">
+                  {type}
+                </Badge>
+              ))}
+            </div>
           </div>
           <div>
             <span className="text-gray-500">Number:</span>
@@ -93,7 +100,7 @@ export const ReviewStep: React.FC = () => {
           <div>
             <span className="text-gray-500">Body Types:</span>
             <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.licenseBodyTypes?.map((type) => (
+              {formData.bodyTypes?.map((type: string) => (
                 <Badge key={type} variant="secondary">
                   {type}
                 </Badge>
@@ -103,7 +110,7 @@ export const ReviewStep: React.FC = () => {
           <div>
             <span className="text-gray-500">Gear Types:</span>
             <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.licenseGearTypes?.map((type) => (
+              {formData.gearTypes?.map((type: string) => (
                 <Badge key={type} variant="secondary">
                   {type}
                 </Badge>
@@ -171,17 +178,7 @@ export const ReviewStep: React.FC = () => {
                 }`}
               >
                 {(formData as any)[doc.key] && (
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <MdCheck className="w-4 h-4 text-white" />
                 )}
               </div>
               <span
@@ -201,17 +198,7 @@ export const ReviewStep: React.FC = () => {
       {/* Final Confirmation */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <div className="flex">
-          <svg
-            className="w-5 h-5 text-yellow-400 mr-2 mt-0.5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <MdWarning className="w-5 h-5 text-yellow-400 mr-2 mt-0.5" />
           <div>
             <h3 className="text-sm font-medium text-yellow-800">Important</h3>
             <p className="text-sm text-yellow-700 mt-1">

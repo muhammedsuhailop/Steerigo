@@ -46,9 +46,8 @@ export class RegisterDriverUseCase {
         licenseNumber: dto.licenseNumber,
         licenseIssueDate: new Date(dto.dob),
         licenseExpiryDate: new Date(dto.dob),
-        rto: dto.state,
-        licenseCategory: [dto.licenseCategory],
-        eligibleVehicleType: dto.vehicleTypes,
+        licenseCategory: dto.licenseCategory,
+        eligibleVehicleType: dto.bodyTypes,
         eligibleGearType: dto.gearTypes,
       });
       await this.driverRepository.save(driver);

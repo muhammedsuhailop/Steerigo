@@ -23,17 +23,40 @@ export const driverRegistrationApi = createApi({
   endpoints: (builder) => ({
     registerDriver: builder.mutation<
       { success: boolean; data: any; message: string },
-      FormData
+      DriverRegistrationData
     >({
-      query: (formData) => ({
-        url: "/register",
-        method: "POST",
-        body: formData,
-        prepareHeaders: (headers: { delete: (arg0: string) => void }) => {
-          headers.delete("content-type");
-          return headers;
-        },
-      }),
+      query: (driverData) => {
+        // Format data for backend
+        const formattedData = {
+          ...driverData,
+          vehicleTypes: Array.isArray(driverData.bodyTypes)
+            ? driverData.bodyTypes
+            : [],
+          gearTypes: Array.isArray(driverData.gearTypes)
+            ? driverData.gearTypes
+            : [],
+          licenseCategory: Array.isArray(driverData.licenseCategory)
+            ? driverData.licenseCategory
+            : [],
+          licenseBodyTypes: Array.isArray(driverData.licenseBodyTypes)
+            ? driverData.licenseBodyTypes
+            : [],
+          licenseGearTypes: Array.isArray(driverData.licenseGearTypes)
+            ? driverData.licenseGearTypes
+            : [],
+        };
+
+        console.log("Sending driver registration data:", formattedData);
+
+        return {
+          url: "/register",
+          method: "POST",
+          body: formattedData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       invalidatesTags: ["DriverRegistration"],
     }),
 
@@ -50,41 +73,11 @@ export const driverRegistrationApi = createApi({
           url: "/upload-document",
           method: "POST",
           body: formData,
-          prepareHeaders: (headers: { delete: (arg0: string) => void }) => {
-            headers.delete("content-type");
-            return headers;
-          },
         };
       },
-    }),
-
-    validateDriverData: builder.mutation<
-      { isValid: boolean; errors?: Record<string, string> },
-      Partial<DriverRegistrationData>
-    >({
-      query: (driverData) => ({
-        url: "/validate",
-        method: "POST",
-        body: driverData,
-      }),
-    }),
-
-    checkDriverExists: builder.mutation<
-      { exists: boolean; message?: string },
-      { mobile: string; licenseNumber?: string }
-    >({
-      query: (checkData) => ({
-        url: "/check-exists",
-        method: "POST",
-        body: checkData,
-      }),
     }),
   }),
 });
 
-export const {
-  useRegisterDriverMutation,
-  useUploadDocumentMutation,
-  useValidateDriverDataMutation,
-  useCheckDriverExistsMutation,
-} = driverRegistrationApi;
+export const { useRegisterDriverMutation, useUploadDocumentMutation } =
+  driverRegistrationApi;

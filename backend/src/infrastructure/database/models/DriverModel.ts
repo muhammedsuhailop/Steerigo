@@ -5,7 +5,6 @@ export interface IDriverDocument extends Document {
   licenseNumber: string;
   licenseIssueDate: Date;
   licenseExpiryDate: Date;
-  rto: string;
   licenseCategory: string[];
   kycStatus: string;
   status: string;
@@ -21,7 +20,6 @@ const DriverSchema = new Schema<IDriverDocument>(
     licenseNumber: { type: String, required: true },
     licenseIssueDate: { type: Date, required: true },
     licenseExpiryDate: { type: Date, required: true },
-    rto: { type: String, required: true },
     licenseCategory: { type: [String], required: true },
     kycStatus: {
       type: String,

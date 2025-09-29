@@ -7,7 +7,6 @@ export class Driver {
     private licenseNumber: string,
     private licenseIssueDate: Date,
     private licenseExpiryDate: Date,
-    private rto: string,
     private licenseCategory: string[],
     private kycStatus: "Pending" | "Verified" | "Rejected" = "Pending",
     private status: "Active" | "Blocked" | "InReview" = "InReview",
@@ -23,7 +22,6 @@ export class Driver {
     licenseNumber: string;
     licenseIssueDate: Date;
     licenseExpiryDate: Date;
-    rto: string;
     licenseCategory: string[];
     eligibleVehicleType: string[];
     eligibleGearType: string[];
@@ -38,7 +36,6 @@ export class Driver {
       props.licenseNumber,
       props.licenseIssueDate,
       props.licenseExpiryDate,
-      props.rto,
       props.licenseCategory,
       "Pending",
       "InReview",
@@ -53,7 +50,6 @@ export class Driver {
     licenseNumber: string;
     licenseIssueDate: Date;
     licenseExpiryDate: Date;
-    rto: string;
     licenseCategory: string[];
     kycStatus: "Pending" | "Verified" | "Rejected";
     status: "Active" | "Blocked" | "InReview";
@@ -68,7 +64,6 @@ export class Driver {
       props.licenseNumber,
       props.licenseIssueDate,
       props.licenseExpiryDate,
-      props.rto,
       props.licenseCategory,
       props.kycStatus,
       props.status,
@@ -100,9 +95,6 @@ export class Driver {
     return this.licenseExpiryDate;
   }
 
-  getRto(): string {
-    return this.rto;
-  }
 
   getLicenseCategory(): string[] {
     return this.licenseCategory;
