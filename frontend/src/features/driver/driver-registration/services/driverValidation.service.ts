@@ -108,12 +108,12 @@ class DriverValidationService {
       errors.licenseNumber = "License number must be at least 8 characters";
     }
 
-    if (!data.licenseBodyTypes?.length) {
-      errors.licenseBodyTypes = "At least one body type is required";
+    if (!data.bodyTypes?.length) {
+      errors.bodyTypes = "At least one body type is required";
     }
 
-    if (!data.licenseGearTypes?.length) {
-      errors.licenseGearTypes = "At least one gear type is required";
+    if (!data.gearTypes?.length) {
+      errors.gearTypes = "At least one gear type is required";
     }
 
     if (!data.licenseIssueDate) {

@@ -60,7 +60,7 @@ export const PersonalInfoStep: React.FC = () => {
               </h3>
               <ul className="mt-2 text-sm text-red-700 list-disc list-inside">
                 {Object.entries(errors).map(([field, message]) => (
-                  <li key={field}>{message}</li>
+                  <li key={field}>{String(message)}</li>
                 ))}
               </ul>
             </div>

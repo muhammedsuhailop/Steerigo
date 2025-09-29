@@ -1,6 +1,7 @@
 import React from "react";
 import { Input, Select, DateInput } from "@/shared/components/ui";
 import { useDriverRegistration } from "../../../hooks/useDriverRegistration";
+import { BODY_TYPES, GEAR_TYPES, LICENSE_CATEGORIES } from "../../../types";
 
 export const LicenseInfoStep: React.FC = () => {
   const { formData, updateData, errors } = useDriverRegistration();
@@ -26,25 +27,6 @@ export const LicenseInfoStep: React.FC = () => {
     return currentValues.includes(value);
   };
 
-  // Updated license category options for multi-select
-  const licenseCategoryOptions = [
-    { value: "LMV", label: "LMV (Light Motor Vehicle)" },
-    { value: "HMV", label: "HMV (Heavy Motor Vehicle)" },
-    { value: "LMVTR", label: "LMV-TR (Light Motor Vehicle Transport)" },
-    { value: "HPMV", label: "HPMV (Heavy Passenger Motor Vehicle)" },
-  ];
-
-  const bodyTypeOptions = [
-    { value: "Sedan", label: "Sedan" },
-    { value: "SUV", label: "SUV" },
-    { value: "Hatchback", label: "Hatchback" },
-  ];
-
-  const gearTypeOptions = [
-    { value: "Manual", label: "Manual" },
-    { value: "Automatic", label: "Automatic" },
-  ];
-
   return (
     <div className="space-y-6">
       {hasErrors && (
@@ -67,7 +49,7 @@ export const LicenseInfoStep: React.FC = () => {
               </h3>
               <ul className="mt-2 text-sm text-red-700 list-disc list-inside">
                 {Object.entries(errors).map(([field, message]) => (
-                  <li key={field}>{message}</li>
+                  <li key={field}>{String(message)}</li>
                 ))}
               </ul>
             </div>
@@ -85,7 +67,7 @@ export const LicenseInfoStep: React.FC = () => {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {licenseCategoryOptions.map((option) => (
+          {LICENSE_CATEGORIES.map((option) => (
             <label
               key={option.value}
               className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
@@ -171,32 +153,32 @@ export const LicenseInfoStep: React.FC = () => {
         </p>
 
         <div className="grid grid-cols-2 gap-3">
-          {bodyTypeOptions.map((option) => (
+          {BODY_TYPES.map((option) => (
             <label
               key={option.value}
               className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                isSelected("licenseBodyTypes", option.value)
+                isSelected("bodyTypes", option.value)
                   ? "border-gray-700 bg-gray-50 text-gray-900"
                   : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <input
                 type="checkbox"
-                checked={isSelected("licenseBodyTypes", option.value)}
+                checked={isSelected("bodyTypes", option.value)}
                 onChange={() =>
-                  handleMultiSelectChange("licenseBodyTypes", option.value)
+                  handleMultiSelectChange("bodyTypes", option.value)
                 }
                 className="sr-only"
               />
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    isSelected("licenseBodyTypes", option.value)
+                    isSelected("bodyTypes", option.value)
                       ? "border-gray-700 bg-gray-700"
                       : "border-gray-300"
                   }`}
                 >
-                  {isSelected("licenseBodyTypes", option.value) && (
+                  {isSelected("bodyTypes", option.value) && (
                     <svg
                       className="w-3 h-3 text-white"
                       fill="currentColor"
@@ -216,7 +198,7 @@ export const LicenseInfoStep: React.FC = () => {
           ))}
         </div>
 
-        {errors.licenseBodyTypes && (
+        {errors.bodyTypes && (
           <p className="text-sm text-red-600 mt-2 flex items-center">
             <svg
               className="w-4 h-4 mr-1"
@@ -229,7 +211,7 @@ export const LicenseInfoStep: React.FC = () => {
                 clipRule="evenodd"
               />
             </svg>
-            {errors.licenseBodyTypes}
+            {errors.bodyTypes}
           </p>
         )}
       </div>
@@ -244,32 +226,32 @@ export const LicenseInfoStep: React.FC = () => {
         </p>
 
         <div className="grid grid-cols-2 gap-3">
-          {gearTypeOptions.map((option) => (
+          {GEAR_TYPES.map((option) => (
             <label
               key={option.value}
               className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                isSelected("licenseGearTypes", option.value)
+                isSelected("gearTypes", option.value)
                   ? "border-gray-700 bg-gray-50 text-gray-900"
                   : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <input
                 type="checkbox"
-                checked={isSelected("licenseGearTypes", option.value)}
+                checked={isSelected("gearTypes", option.value)}
                 onChange={() =>
-                  handleMultiSelectChange("licenseGearTypes", option.value)
+                  handleMultiSelectChange("gearTypes", option.value)
                 }
                 className="sr-only"
               />
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    isSelected("licenseGearTypes", option.value)
+                    isSelected("gearTypes", option.value)
                       ? "border-gray-700 bg-gray-700"
                       : "border-gray-300"
                   }`}
                 >
-                  {isSelected("licenseGearTypes", option.value) && (
+                  {isSelected("gearTypes", option.value) && (
                     <svg
                       className="w-3 h-3 text-white"
                       fill="currentColor"
@@ -289,7 +271,7 @@ export const LicenseInfoStep: React.FC = () => {
           ))}
         </div>
 
-        {errors.licenseGearTypes && (
+        {errors.gearTypes && (
           <p className="text-sm text-red-600 mt-2 flex items-center">
             <svg
               className="w-4 h-4 mr-1"
@@ -302,7 +284,7 @@ export const LicenseInfoStep: React.FC = () => {
                 clipRule="evenodd"
               />
             </svg>
-            {errors.licenseGearTypes}
+            {errors.gearTypes}
           </p>
         )}
       </div>
