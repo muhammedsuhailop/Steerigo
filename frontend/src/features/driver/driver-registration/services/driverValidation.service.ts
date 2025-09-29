@@ -11,7 +11,7 @@ class DriverValidationService {
   }
 
   private validateMobile(mobile: string): boolean {
-    const mobileRegex = /^(\+91[\s-]?)??(91)?[6789]\d{9}$/;
+    const mobileRegex = /^(\+91[\s-]?)??(91)?\d{10}$/;
     return mobileRegex.test(mobile.replace(/[\s-]/g, ""));
   }
 
@@ -95,28 +95,11 @@ class DriverValidationService {
     };
   }
 
-  validateVehicleInfo(data: Partial<DriverRegistrationData>): ValidationResult {
-    const errors: Record<string, string> = {};
-
-    if (!data.vehicleTypes?.length) {
-      errors.vehicleTypes = "At least one vehicle type is required";
-    }
-
-    if (!data.gearTypes?.length) {
-      errors.gearTypes = "At least one gear type is required";
-    }
-
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors,
-    };
-  }
-
   validateLicenseInfo(data: Partial<DriverRegistrationData>): ValidationResult {
     const errors: Record<string, string> = {};
 
-    if (!data.licenseCategory?.trim()) {
-      errors.licenseCategory = "License category is required";
+    if (!data.licenseCategory?.length) {
+      errors.licenseCategory = "At least one license category is required";
     }
 
     if (!data.licenseNumber?.trim()) {
@@ -145,11 +128,15 @@ class DriverValidationService {
       const issueDate = new Date(data.licenseIssueDate);
       const expiryDate = new Date(data.licenseExpiryDate);
 
+      issueDate.setHours(0, 0, 0, 0);
+      expiryDate.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       if (expiryDate <= issueDate) {
         errors.licenseExpiryDate = "Expiry date must be after issue date";
-      }
-
-      if (expiryDate <= new Date()) {
+      } else if (expiryDate < today) {
         errors.licenseExpiryDate = "License is expired";
       }
     }
@@ -169,11 +156,8 @@ class DriverValidationService {
 
     if (!data.idNumber?.trim()) {
       errors.idNumber = "ID number is required";
-    } else if (
-      data.idType === "Aadhaar" &&
-      !/^\d{4}-\d{4}-\d{4}$/.test(data.idNumber)
-    ) {
-      errors.idNumber = "Aadhaar number format: XXXX-XXXX-XXXX";
+    } else if (data.idType === "Aadhaar" && !/^\d{12}$/.test(data.idNumber)) {
+      errors.idNumber = "Aadhaar number must be 12 digits";
     }
 
     if (!data.idIssueDate) {
@@ -235,8 +219,6 @@ class DriverValidationService {
     switch (step) {
       case RegistrationStep.PERSONAL_INFO:
         return this.validatePersonalInfo(data);
-      case RegistrationStep.VEHICLE_INFO:
-        return this.validateVehicleInfo(data);
       case RegistrationStep.LICENSE_INFO:
         return this.validateLicenseInfo(data);
       case RegistrationStep.ID_INFO:
@@ -252,13 +234,11 @@ class DriverValidationService {
     const allErrors: Record<string, string> = {};
 
     const personalValidation = this.validatePersonalInfo(data);
-    const vehicleValidation = this.validateVehicleInfo(data);
     const licenseValidation = this.validateLicenseInfo(data);
     const idValidation = this.validateIdInfo(data);
     const documentsValidation = this.validateDocuments(data);
 
     Object.assign(allErrors, personalValidation.errors);
-    Object.assign(allErrors, vehicleValidation.errors);
     Object.assign(allErrors, licenseValidation.errors);
     Object.assign(allErrors, idValidation.errors);
     Object.assign(allErrors, documentsValidation.errors);

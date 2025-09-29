@@ -27,11 +27,9 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
 
   const handleNextClick = async () => {
     if (isLastStep) {
-      // Submit the form
       await handleSubmitRegistration();
     } else {
-      // Move to next step
-      onNext();
+      const canProceed = onNext();
     }
   };
 
@@ -74,7 +72,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       <div>
         <Button
           onClick={handleNextClick}
-          disabled={!canProceed || isLoading || isSubmitting}
+          disabled={isLoading || isSubmitting}
           isLoading={isSubmitting}
           rightIcon={
             isLastStep ? (

@@ -56,43 +56,6 @@ export const ReviewStep: React.FC = () => {
         </div>
       </div>
 
-      {/* Vehicle Information */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Vehicle Information
-          </h3>
-          <button
-            onClick={() => handleEditSection(1)}
-            className="text-gray-700 hover:text-gray-900 font-medium text-sm"
-          >
-            Edit
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-500">Vehicle Types:</span>
-            <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.vehicleTypes?.map((type) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <div>
-            <span className="text-gray-500">Gear Types:</span>
-            <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.gearTypes?.map((type) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* License Information */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">

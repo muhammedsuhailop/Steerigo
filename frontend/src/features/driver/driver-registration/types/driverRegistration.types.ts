@@ -8,13 +8,8 @@ export interface DriverPersonalInfo {
   address: string;
 }
 
-export interface DriverVehicleInfo {
-  vehicleTypes: string[];
-  gearTypes: string[];
-}
-
 export interface DriverLicenseInfo {
-  licenseCategory: string;
+  licenseCategory: string[];
   licenseNumber: string;
   licenseBodyTypes: string[];
   licenseGearTypes: string[];
@@ -38,7 +33,6 @@ export interface DriverDocuments {
 
 export interface DriverRegistrationData
   extends DriverPersonalInfo,
-    DriverVehicleInfo,
     DriverLicenseInfo,
     DriverIdInfo,
     DriverDocuments {}
@@ -63,11 +57,10 @@ export interface UploadResponse {
 
 export enum RegistrationStep {
   PERSONAL_INFO = 0,
-  VEHICLE_INFO = 1,
-  LICENSE_INFO = 2,
-  ID_INFO = 3,
-  DOCUMENTS = 4,
-  REVIEW = 5,
+  LICENSE_INFO = 1,
+  ID_INFO = 2,
+  DOCUMENTS = 3,
+  REVIEW = 4,
 }
 
 export interface DriverRegistrationState extends RegistrationState {

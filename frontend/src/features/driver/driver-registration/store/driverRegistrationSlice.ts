@@ -6,6 +6,7 @@ import {
   DriverRegistrationState,
 } from "../types/driverRegistration.types";
 import { driverValidationService } from "../services/driverValidation.service";
+import { api } from "@/shared/utils/api";
 
 const initialState: DriverRegistrationState = {
   currentStep: RegistrationStep.PERSONAL_INFO,
@@ -90,7 +91,6 @@ export const uploadDocument = createAsyncThunk<
         dispatch(updateUploadProgress({ fieldName, progress: i }));
       }
 
-      // Return mock URL
       const mockUrl = `https://mockcdn.example.com/${fieldName}-${Date.now()}.jpg`;
 
       return {
@@ -104,40 +104,23 @@ export const uploadDocument = createAsyncThunk<
   }
 );
 
-// Async thunk for submitting registration
 export const submitRegistration = createAsyncThunk<
   any,
-  DriverRegistrationData,
+  FormData,
   { rejectValue: string }
 >(
   "driverRegistration/submitRegistration",
-  async (driverData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      // Final validation before submission
-      const validation = driverValidationService.validateAll(driverData);
-      if (!validation.isValid) {
-        return rejectWithValue("Please fix validation errors");
-      }
-
-      const response = await fetch("/api/driver/register", {
-        method: "POST",
+      const response = await api.post("/api/driver/register", formData, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
-        body: JSON.stringify(driverData),
-        credentials: "include",
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        return rejectWithValue(errorData.message || "Registration failed");
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
+      return response.data;
+    } catch (error: any) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Registration failed"
+        error.response?.data?.message || error.message || "Registration failed"
       );
     }
   }
@@ -212,7 +195,6 @@ const driverRegistrationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Upload document cases
       .addCase(uploadDocument.pending, (state) => {
         state.isLoading = true;
       })
@@ -230,8 +212,6 @@ const driverRegistrationSlice = createSlice({
         const fieldName = action.meta.arg.fieldName;
         state.errors[fieldName] = action.payload || "Upload failed";
       })
-
-      // Submit registration cases
       .addCase(submitRegistration.pending, (state) => {
         state.isSubmitting = true;
         state.registrationError = null;
@@ -265,35 +245,28 @@ export const {
 
 export default driverRegistrationSlice.reducer;
 
-// Selectors
-export const selectFormData = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.formData;
+import type { RootState } from "@/app/store/rootReducer";
 
-export const selectCurrentStep = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.currentStep;
+export const selectFormData = (state: RootState) =>
+  state.driverRegistration.formData;
 
-export const selectErrors = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.errors;
+export const selectCurrentStep = (state: RootState) =>
+  state.driverRegistration.currentStep;
 
-export const selectIsLoading = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.isLoading;
+export const selectErrors = (state: RootState) =>
+  state.driverRegistration.errors;
 
-export const selectUploadProgress = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.uploadProgress;
+export const selectIsLoading = (state: RootState) =>
+  state.driverRegistration.isLoading;
 
-export const selectIsSubmitting = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.isSubmitting;
+export const selectUploadProgress = (state: RootState) =>
+  state.driverRegistration.uploadProgress;
 
-export const selectRegistrationSuccess = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.registrationSuccess;
+export const selectIsSubmitting = (state: RootState) =>
+  state.driverRegistration.isSubmitting;
 
-export const selectRegistrationError = (state: {
-  driverRegistration: DriverRegistrationState;
-}) => state.driverRegistration.registrationError;
+export const selectRegistrationSuccess = (state: RootState) =>
+  state.driverRegistration.registrationSuccess;
+
+export const selectRegistrationError = (state: RootState) =>
+  state.driverRegistration.registrationError;

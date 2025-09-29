@@ -23,12 +23,16 @@ export const driverRegistrationApi = createApi({
   endpoints: (builder) => ({
     registerDriver: builder.mutation<
       { success: boolean; data: any; message: string },
-      DriverRegistrationData
+      FormData
     >({
-      query: (driverData) => ({
+      query: (formData) => ({
         url: "/register",
         method: "POST",
-        body: driverData,
+        body: formData,
+        prepareHeaders: (headers: { delete: (arg0: string) => void }) => {
+          headers.delete("content-type");
+          return headers;
+        },
       }),
       invalidatesTags: ["DriverRegistration"],
     }),
@@ -46,6 +50,10 @@ export const driverRegistrationApi = createApi({
           url: "/upload-document",
           method: "POST",
           body: formData,
+          prepareHeaders: (headers: { delete: (arg0: string) => void }) => {
+            headers.delete("content-type");
+            return headers;
+          },
         };
       },
     }),
@@ -60,6 +68,17 @@ export const driverRegistrationApi = createApi({
         body: driverData,
       }),
     }),
+
+    checkDriverExists: builder.mutation<
+      { exists: boolean; message?: string },
+      { mobile: string; licenseNumber?: string }
+    >({
+      query: (checkData) => ({
+        url: "/check-exists",
+        method: "POST",
+        body: checkData,
+      }),
+    }),
   }),
 });
 
@@ -67,4 +86,5 @@ export const {
   useRegisterDriverMutation,
   useUploadDocumentMutation,
   useValidateDriverDataMutation,
+  useCheckDriverExistsMutation,
 } = driverRegistrationApi;

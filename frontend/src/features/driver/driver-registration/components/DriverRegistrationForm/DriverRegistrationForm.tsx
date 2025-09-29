@@ -2,7 +2,6 @@ import React from "react";
 import { useDriverRegistration } from "../../hooks/useDriverRegistration";
 import { RegistrationStep } from "../../types/driverRegistration.types";
 import { PersonalInfoStep } from "./steps/PersonalInfoStep";
-import { VehicleInfoStep } from "./steps/VehicleInfoStep";
 import { LicenseInfoStep } from "./steps/LicenseInfoStep";
 import { IdInfoStep } from "./steps/IdInfoStep";
 import { DocumentsStep } from "./steps/DocumentsStep";
@@ -28,8 +27,6 @@ export const DriverRegistrationForm: React.FC = () => {
     switch (currentStep) {
       case RegistrationStep.PERSONAL_INFO:
         return <PersonalInfoStep />;
-      case RegistrationStep.VEHICLE_INFO:
-        return <VehicleInfoStep />;
       case RegistrationStep.LICENSE_INFO:
         return <LicenseInfoStep />;
       case RegistrationStep.ID_INFO:
@@ -43,22 +40,9 @@ export const DriverRegistrationForm: React.FC = () => {
     }
   };
 
-  //   const getStepTitle = () => {
-  //     const titles = {
-  //       [RegistrationStep.PERSONAL_INFO]: "Personal Information",
-  //       [RegistrationStep.VEHICLE_INFO]: "Vehicle Information",
-  //       [RegistrationStep.LICENSE_INFO]: "License Information",
-  //       [RegistrationStep.ID_INFO]: "ID Information",
-  //       [RegistrationStep.DOCUMENTS]: "Document Upload",
-  //       [RegistrationStep.REVIEW]: "Review & Submit"
-  //     };
-  //     return titles[currentStep] || "Registration";
-  //   };
-
   const getStepTitle = (currentStep: RegistrationStep = 0) => {
     const titles: Record<RegistrationStep, string> = {
       [RegistrationStep.PERSONAL_INFO]: "Personal Information",
-      [RegistrationStep.VEHICLE_INFO]: "Vehicle Information",
       [RegistrationStep.LICENSE_INFO]: "License Information",
       [RegistrationStep.ID_INFO]: "ID Information",
       [RegistrationStep.DOCUMENTS]: "Document Upload",
@@ -163,7 +147,7 @@ export const DriverRegistrationForm: React.FC = () => {
         <div className="mb-8">
           <div className="bg-gray-50 p-6 rounded-lg mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Step {currentStep + 1}: {getStepTitle()}
+              Step {currentStep + 1}: {getStepTitle(currentStep)}
             </h2>
 
             {/* Loading Overlay */}
