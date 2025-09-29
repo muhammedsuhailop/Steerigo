@@ -41,7 +41,7 @@ export const registerDriverValidation = [
 
   // ID Information
   body("idType")
-    .isIn(["PAN", "Aadhaar", "DrivingLicense"])
+    .isIn(["PAN", "Aadhaar", "DrivingLicense", "Passport"])
     .withMessage("Invalid ID type"),
   body("idNumber").notEmpty().withMessage("ID number is required"),
   body("idIssueDate").isISO8601().withMessage("Invalid ID issue date format"),
