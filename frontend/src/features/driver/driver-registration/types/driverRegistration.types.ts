@@ -75,3 +75,9 @@ export const GEAR_TYPES = [
   { value: "Manual", label: "Manual" },
   { value: "Automatic", label: "Automatic" },
 ];
+
+export interface PincodeDetails {
+  state: string;
+  district: string;
+  postOffice: string;
+}

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import {
   updateFormData,
@@ -25,6 +25,7 @@ import {
   UploadResponse,
 } from "../types/driverRegistration.types";
 import { driverValidationService } from "../services/driverValidation.service";
+import { getPincodeDetails } from "../services/pincodeService";
 import {
   useRegisterDriverMutation,
   useUploadDocumentMutation,
@@ -32,6 +33,10 @@ import {
 
 export const useDriverRegistration = () => {
   const dispatch = useAppDispatch();
+
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [loadingPin, setLoadingPin] = useState(false);
+  const lastFetchedPinRef = useRef<string | null>(null);
 
   // RTK Query mutations
   const [registerDriver] = useRegisterDriverMutation();
@@ -69,21 +74,47 @@ export const useDriverRegistration = () => {
     [dispatch, formData, errors, currentStep]
   );
 
+  useEffect(() => {
+    const pin = formData.pin;
+    if (/^\d{6}$/.test(pin) && pin !== lastFetchedPinRef.current) {
+      setLoadingPin(true);
+      setPinError(null);
+      lastFetchedPinRef.current = pin;
+
+      getPincodeDetails(pin).then((res) => {
+        setLoadingPin(false);
+        if (res.success) {
+          updateData({ state: res.data.state });
+        } else {
+          setPinError(res.error);
+          dispatch(setErrors({ ...errors, pin: res.error }));
+        }
+      });
+    }
+  }, [formData.pin]);
+
   const goToNextStep = useCallback(() => {
     const validation = driverValidationService.validateStep(
       currentStep,
       formData
     );
-    if (validation.isValid) {
-      dispatch(clearAllErrors());
-      dispatch(nextStep());
-      return true;
-    } else {
+
+    if (!validation.isValid) {
       dispatch(setErrors(validation.errors));
       scrollToFirstError(validation.errors);
       return false;
     }
-  }, [dispatch, currentStep, formData]);
+
+    if (pinError) {
+      dispatch(setErrors({ ...validation.errors, pin: pinError }));
+      scrollToFirstError({ pin: pinError });
+      return false;
+    }
+
+    dispatch(clearAllErrors());
+    dispatch(nextStep());
+    return true;
+  }, [dispatch, currentStep, formData, pinError]);
 
   const scrollToFirstError = (errors: Record<string, string>) => {
     const firstErrorField = Object.keys(errors)[0];
@@ -220,6 +251,9 @@ export const useDriverRegistration = () => {
     isSubmitting,
     registrationSuccess,
     registrationError,
+    pinError,
+    loadingPin,
+
     // Actions
     updateData,
     goToNextStep,
