@@ -17,7 +17,7 @@ export class RegisterDriverDto {
   public readonly licenseExpiryDate: string;
 
   // ID Information
-  public readonly idType: "PAN" | "Aadhaar" | "DrivingLicense";
+  public readonly idType: "PAN" | "Aadhaar" | "DrivingLicense" | "Passport";
   public readonly idNumber: string;
   public readonly idIssueDate: string;
   public readonly idExpiryDate: string;
