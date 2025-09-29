@@ -15,6 +15,8 @@ import { IEmailService } from "@domain/services/IEmailService";
 import { IOtpService } from "@domain/services/IOtpService";
 import { ITokenService } from "@domain/services/ITokenService";
 import { IGoogleAuthService } from "@domain/services/IGoogleAuthService";
+import { IFileUploadService } from "@domain/services/IFileUploadService";
+import { CloudinaryService } from "../services/CloudinaryService";
 
 // Infrastructure Implementations
 import { MongoUserRepository } from "../database/repositories/MongoUserRepository";
@@ -44,6 +46,7 @@ import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUse
 import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
 import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
+import { UploadFileUseCase } from "@application/use-cases/file/UploadFileUseCase";
 
 // Controllers
 import { SignupController } from "@interface/controllers/auth/SignupController";
@@ -54,6 +57,7 @@ import { SocialAuthController } from "@interface/controllers/auth/SocialAuthCont
 import { UserController } from "@interface/controllers/auth/UserController";
 import { DriverController } from "@interface/controllers/driver/DriverController";
 import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
+import { FileController } from "@interface/controllers/file/FileController";
 
 const container = new Container();
 
@@ -71,6 +75,7 @@ container
 container
   .bind<IAdminUserRepository>("IAdminUserRepository")
   .to(MongoAdminUserRepository);
+container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
 
 // Service Bindings
 container.bind<IPasswordService>("IPasswordService").to(BcryptPasswordService);
@@ -96,6 +101,7 @@ container.bind<IGoogleAuthService>("IGoogleAuthService").to(GoogleAuthService);
   RegisterDriverUseCase,
   GetUsersUseCase,
   UpdateUserStatusUseCase,
+  UploadFileUseCase,
 ].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings
@@ -107,5 +113,6 @@ container.bind<SocialAuthController>(SocialAuthController).toSelf();
 container.bind<UserController>(UserController).toSelf();
 container.bind<DriverController>(DriverController).toSelf();
 container.bind<AdminUserController>(AdminUserController).toSelf();
+container.bind<FileController>(FileController).toSelf();
 
 export { container };
