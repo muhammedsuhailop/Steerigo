@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
         BOOK_RIDE: "/api/user/book-ride",
     },
     DRIVER: {
+        REGISTER: "/api/driver/register",
         PROFILE: "/api/driver/profile",
         RIDES: "/api/driver/rides",
         STATUS: "/api/driver/status",

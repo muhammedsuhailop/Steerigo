@@ -12,6 +12,7 @@ import AdminDashboard from "@/features/admin/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminUsersLayout from "@/features/admin/pages/AdminUsersLayout";
 import { NotFoundPage } from "@/features/public/pages";
+import { DriverRegistrationPage } from "@/features/driver/driver-registration/pages";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -106,6 +107,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <DriverDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/driver/register"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <DriverRegistrationPage />
           </ProtectedRoute>
         }
       />
