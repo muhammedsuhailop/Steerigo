@@ -2,14 +2,16 @@ import { injectable } from "inversify";
 import { IDriverRepository } from "@domain/repositories/driver/IDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel } from "../../models/DriverModel";
+import { Types } from "mongoose";
 
 @injectable()
 export class MongoDriverRepository implements IDriverRepository {
   async save(driver: Driver): Promise<void> {
+    const userObjectId = new Types.ObjectId(driver.getUserId());
     await DriverModel.findOneAndUpdate(
-      { userId: driver.getUserId() },
+      { userId: userObjectId },
       {
-        userId: driver.getUserId(),
+        userId: userObjectId,
         licenseNumber: driver.getLicenseNumber(),
         licenseIssueDate: driver.getLicenseIssueDate(),
         licenseExpiryDate: driver.getLicenseExpiryDate(),
@@ -24,13 +26,15 @@ export class MongoDriverRepository implements IDriverRepository {
   }
 
   async findByUserId(userId: string): Promise<Driver | null> {
-    const doc = await DriverModel.findOne({ userId });
+    const userObjectId = new Types.ObjectId(userId);
+
+    const doc = await DriverModel.findOne({ userId: userObjectId });
 
     if (!doc) return null;
 
     return Driver.reconstruct({
       id: doc.id.toString(),
-      userId: doc.userId,
+      userId: doc.userId.toString(),
       licenseNumber: doc.licenseNumber,
       licenseIssueDate: doc.licenseIssueDate,
       licenseExpiryDate: doc.licenseExpiryDate,
