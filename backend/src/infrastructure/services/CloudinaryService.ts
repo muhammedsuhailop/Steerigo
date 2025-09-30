@@ -23,12 +23,12 @@ export class CloudinaryService implements IFileUploadService {
   }> {
     try {
       const timestamp = Date.now();
-      const publicId = `${userId}_${purpose}_${timestamp}`;
+      const publicId = `${userId}_${timestamp}`;
 
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: "steerigo",
+            folder: `steerigo/${purpose}`,
             public_id: publicId,
             resource_type: "auto",
             transformation: [

@@ -1,9 +1,6 @@
 import { useState, useCallback } from "react";
 import { useUploadFileMutation } from "../services/driverRegistrationApi";
-import {
-  FILE_UPLOAD_PURPOSES,
-  FileUploadPurpose,
-} from "../types/driverRegistration.types";
+import { FILE_UPLOAD_PURPOSES } from "../types/driverRegistration.types";
 
 interface FileUploadOptions {
   accept?: string;
@@ -116,6 +113,10 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
         const result = await uploadFile({ file, purpose }).unwrap();
 
         setUploadProgress(100);
+
+        setTimeout(() => {
+          setUploadProgress(0);
+        }, 500);
 
         onSuccess?.(result);
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDriverRegistration } from "../../hooks/useDriverRegistration";
 import { RegistrationStep } from "../../types/driverRegistration.types";
 import { PersonalInfoStep } from "./steps/PersonalInfoStep";
@@ -75,14 +75,12 @@ export const DriverRegistrationForm: React.FC = () => {
             Registration Successful!
           </h2>
           <p className="text-gray-600 mb-6">
-            Your driver registration has been submitted successfully.
+            Your driver registration has been submitted successfully. You will
+            be notified once your application is approved.
           </p>
-          <button
-            onClick={resetRegistrationForm}
-            className="bg-gray-700 hover:bg-gray-800 text-white px-6 py-2 rounded-md transition-colors"
-          >
-            Register Another Driver
-          </button>
+          <div className="text-sm text-gray-500">
+            Redirecting to Dashboard in 3 seconds...
+          </div>
         </div>
       </div>
     );

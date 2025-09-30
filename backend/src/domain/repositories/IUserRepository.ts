@@ -5,6 +5,7 @@ export interface IUserRepository {
   save(user: User): Promise<void>;
   delete(id: string): Promise<void>;
   exists(email: string): Promise<boolean>;
+  existsByMobile(mobile: string): Promise<boolean>;
   findByGoogleId(googleId: string): Promise<User | null>;
   findByEmailAndProvider(
     email: string,

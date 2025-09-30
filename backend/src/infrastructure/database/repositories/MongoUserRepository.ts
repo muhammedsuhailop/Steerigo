@@ -65,6 +65,18 @@ export class MongoUserRepository implements IUserRepository {
     }
   }
 
+  async existsByMobile(mobile: string): Promise<boolean> {
+    try {
+      const count = await UserModel.countDocuments({
+        mobile: mobile.trim(),
+      });
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking if mobile exists", { mobile, error });
+      throw error;
+    }
+  }
+
   private toDomain(userDoc: IUserDocument): User {
     return User.reconstruct({
       id: userDoc.id.toString(),
