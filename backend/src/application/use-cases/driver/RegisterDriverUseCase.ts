@@ -7,6 +7,7 @@ import { Driver } from "@domain/entities/Driver";
 import { DriverKycDocument } from "@domain/entities/DriverKycDocument";
 import { Result } from "@shared/utils/Result";
 import { v4 as uuid } from "uuid";
+import { MobileAlreadyExistsError } from "@domain/errors";
 
 @injectable()
 export class RegisterDriverUseCase {
@@ -21,6 +22,11 @@ export class RegisterDriverUseCase {
       const user = await this.userRepository.findById(userId);
       if (!user) {
         return Result.failure(new Error("User not found"));
+      }
+
+      const mobileExists = await this.userRepository.existsByMobile(dto.mobile);
+      if (mobileExists && dto.mobile !== user.getMobile()) {
+        return Result.failure(new MobileAlreadyExistsError());
       }
 
       const existingDriver = await this.driverRepository.findByUserId(userId);

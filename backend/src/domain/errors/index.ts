@@ -6,3 +6,4 @@ export * from "./MaxOtpAttemptsError";
 export * from "./RefreshTokenExpiredError";
 export * from "./RefreshTokenRevokedError";
 export * from "./AccountStatusError";
+export * from "./MobileAlreadyExistsError";
