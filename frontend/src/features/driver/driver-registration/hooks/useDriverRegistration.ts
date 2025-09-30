@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { selectCurrentUser } from "@/features/auth/store/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   updateFormData,
@@ -35,6 +36,8 @@ import {
 export const useDriverRegistration = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const currentUser = useAppSelector(selectCurrentUser);
 
   const [pinError, setPinError] = useState<string | null>(null);
   const [loadingPin, setLoadingPin] = useState(false);
@@ -74,6 +77,18 @@ export const useDriverRegistration = () => {
     },
     [dispatch, formData, currentStep]
   );
+
+  useEffect(() => {
+    if (currentUser) {
+      console.log(currentUser);
+      dispatch(
+        updateFormData({
+          name: currentUser.name || "",
+          mobile: currentUser.mobile || "",
+        })
+      );
+    }
+  }, [currentUser, dispatch]);
 
   // PIN validation effect
   useEffect(() => {
