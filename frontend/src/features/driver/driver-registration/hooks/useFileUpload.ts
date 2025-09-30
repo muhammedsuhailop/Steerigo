@@ -1,8 +1,13 @@
 import { useState, useCallback } from "react";
+import { useUploadFileMutation } from "../services/driverRegistrationApi";
+import {
+  FILE_UPLOAD_PURPOSES,
+  FileUploadPurpose,
+} from "../types/driverRegistration.types";
 
 interface FileUploadOptions {
   accept?: string;
-  maxSize?: number; // in bytes
+  maxSize?: number;
   maxFiles?: number;
   onProgress?: (progress: number) => void;
   onError?: (error: string) => void;
@@ -18,20 +23,20 @@ interface FileUploadResult {
 export const useFileUpload = (options: FileUploadOptions = {}) => {
   const {
     accept = "image/*",
-    maxSize = 5 * 1024 * 1024, // 5MB default
+    maxSize = 2 * 1024 * 1024,
     maxFiles = 1,
     onProgress,
     onError,
     onSuccess,
   } = options;
 
-  const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
+  const [uploadFile, { isLoading: isUploadingFile }] = useUploadFileMutation();
+
   const validateFile = useCallback(
     (file: File): { isValid: boolean; error?: string } => {
-      // Check file size
       if (file.size > maxSize) {
         const sizeMB = (maxSize / (1024 * 1024)).toFixed(1);
         return {
@@ -40,7 +45,6 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
         };
       }
 
-      // Check file type
       if (accept !== "*" && !file.type.match(accept.replace("*", ".*"))) {
         return {
           isValid: false,
@@ -57,7 +61,6 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
     (event: React.ChangeEvent<HTMLInputElement>): File[] => {
       const files = Array.from(event.target.files || []);
 
-      // Check max files limit
       if (files.length > maxFiles) {
         const error = `Maximum ${maxFiles} file${
           maxFiles > 1 ? "s" : ""
@@ -66,7 +69,6 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
         return [];
       }
 
-      // Validate each file
       const validFiles: File[] = [];
       for (const file of files) {
         const validation = validateFile(file);
@@ -92,7 +94,6 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
       event.preventDefault();
       const files = Array.from(event.dataTransfer.files);
 
-      // Create synthetic change event
       const changeEvent = {
         target: { files } as unknown as HTMLInputElement,
       } as React.ChangeEvent<HTMLInputElement>;
@@ -100,6 +101,42 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
       return handleFileSelect(changeEvent);
     },
     [handleFileSelect]
+  );
+
+  const uploadToBackend = useCallback(
+    async (file: File, fieldName: string): Promise<FileUploadResult> => {
+      try {
+        setUploadProgress(0);
+
+        const purpose =
+          FILE_UPLOAD_PURPOSES[
+            fieldName as keyof typeof FILE_UPLOAD_PURPOSES
+          ] || "document";
+
+        const result = await uploadFile({ file, purpose }).unwrap();
+
+        setUploadProgress(100);
+
+        onSuccess?.(result);
+
+        return {
+          success: true,
+          url: result.data.url,
+        };
+      } catch (error: any) {
+        setUploadProgress(0);
+
+        const errorMessage =
+          error?.data?.message || error?.message || "Upload failed";
+        onError?.(errorMessage);
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    },
+    [uploadFile, onSuccess, onError]
   );
 
   const removeFile = useCallback((index: number) => {
@@ -130,7 +167,7 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
 
   return {
     // State
-    isUploading,
+    isUploading: isUploadingFile,
     uploadProgress,
     uploadedFiles,
 
@@ -142,6 +179,7 @@ export const useFileUpload = (options: FileUploadOptions = {}) => {
 
     // Upload
     validateFile,
+    uploadToBackend,
 
     // Utilities
     getFilePreview,

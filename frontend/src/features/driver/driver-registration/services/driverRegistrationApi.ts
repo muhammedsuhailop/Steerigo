@@ -2,10 +2,11 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type {
   DriverRegistrationData,
   UploadResponse,
+  FileUploadResponse,
 } from "../types/driverRegistration.types";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "/api/driver",
+  baseUrl: "/api",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const accessToken = (getState() as any).auth.accessToken;
@@ -19,7 +20,7 @@ const baseQuery = fetchBaseQuery({
 export const driverRegistrationApi = createApi({
   reducerPath: "driverRegistrationApi",
   baseQuery,
-  tagTypes: ["DriverRegistration"],
+  tagTypes: ["DriverRegistration", "FileUpload"],
   endpoints: (builder) => ({
     registerDriver: builder.mutation<
       { success: boolean; data: any; message: string },
@@ -49,7 +50,7 @@ export const driverRegistrationApi = createApi({
         console.log("Sending driver registration data:", formattedData);
 
         return {
-          url: "/register",
+          url: "/driver/register",
           method: "POST",
           body: formattedData,
           headers: {
@@ -60,24 +61,46 @@ export const driverRegistrationApi = createApi({
       invalidatesTags: ["DriverRegistration"],
     }),
 
-    uploadDocument: builder.mutation<
-      UploadResponse,
-      { file: File; fieldName: string }
+    uploadFile: builder.mutation<
+      FileUploadResponse,
+      { file: File; purpose: string }
     >({
-      query: ({ file, fieldName }) => {
+      query: ({ file, purpose }) => {
         const formData = new FormData();
-        formData.append("document", file);
-        formData.append("fieldName", fieldName);
+        formData.append("file", file);
+        formData.append("purpose", purpose);
 
         return {
-          url: "/upload-document",
+          url: "/file/upload",
           method: "POST",
           body: formData,
         };
       },
+      invalidatesTags: ["FileUpload"],
     }),
+
+    //   // Legacy upload document endpoint (for backward compatibility)
+    //   uploadDocument: builder.mutation<
+    //     UploadResponse,
+    //     { file: File; fieldName: string }
+    //   >({
+    //     query: ({ file, fieldName }) => {
+    //       const formData = new FormData();
+    //       formData.append("document", file);
+    //       formData.append("fieldName", fieldName);
+
+    //       return {
+    //         url: "/driver/upload-document",
+    //         method: "POST",
+    //         body: formData,
+    //       };
+    //     },
+    //   }),
   }),
 });
 
-export const { useRegisterDriverMutation, useUploadDocumentMutation } =
-  driverRegistrationApi;
+export const {
+  useRegisterDriverMutation,
+  // useUploadDocumentMutation,
+  useUploadFileMutation,
+} = driverRegistrationApi;
