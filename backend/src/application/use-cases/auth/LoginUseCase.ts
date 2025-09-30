@@ -78,6 +78,7 @@ export class LoginUseCase {
           email: user.getEmail(),
           role: user.getRole(),
           status: user.getStatus(),
+          mobile:user.getMobile(),
         },
       });
     } catch (error) {
