@@ -12,10 +12,11 @@ export class FileUploadDto {
 
     const allowedPurposes = [
       "avatar",
-      "license",
+      "licenseFront",
+      "licenseBack",
       "insurance",
-      "kycdoc1",
-      "kycdoc2",
+      "kycdocFront",
+      "kycdocBack",
       "profile",
       "document",
     ];

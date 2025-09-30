@@ -7,14 +7,15 @@ export const uploadFileValidation = [
     .withMessage("Purpose is required")
     .isIn([
       "avatar",
-      "license",
+      "licenseFront",
+      "licenseBack",
       "insurance",
-      "kycdoc1",
-      "kycdoc2",
+      "kycdocFront",
+      "kycdocBack",
       "profile",
       "document",
     ])
     .withMessage(
-      "Invalid purpose. Allowed values: avatar, license, insurance, kycdoc1, kycdoc2, profile, document"
+      "Invalid purpose. Allowed values: avatar, licenseFront,licenseBack, insurance, kycdocFront, kycdocBack, profile, document"
     ),
 ];
