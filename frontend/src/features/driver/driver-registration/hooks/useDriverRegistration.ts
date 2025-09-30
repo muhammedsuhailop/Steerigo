@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { useNavigate } from "react-router-dom";
 import {
   updateFormData,
   setCurrentStep,
@@ -9,10 +10,10 @@ import {
   clearError,
   clearAllErrors,
   resetForm,
+  setSubmissionState,
   selectFormData,
   selectCurrentStep,
   selectErrors,
-  selectIsLoading,
   selectUploadProgress,
   selectIsSubmitting,
   selectRegistrationSuccess,
@@ -26,38 +27,40 @@ import {
 } from "../types/driverRegistration.types";
 import { driverValidationService } from "../services/driverValidation.service";
 import { getPincodeDetails } from "../services/pincodeService";
-import { useRegisterDriverMutation } from "../services/driverRegistrationApi";
-import { useUploadFileMutation } from "../services/driverRegistrationApi";
+import {
+  useRegisterDriverMutation,
+  useUploadFileMutation,
+} from "../services/driverRegistrationApi";
 
 export const useDriverRegistration = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [pinError, setPinError] = useState<string | null>(null);
   const [loadingPin, setLoadingPin] = useState(false);
   const lastFetchedPinRef = useRef<string | null>(null);
 
   // RTK Query mutations
-  const [registerDriver] = useRegisterDriverMutation();
-  const [uploadFileApi] = useUploadFileMutation();
+  const [registerDriver, { isLoading: isRegisterLoading }] =
+    useRegisterDriverMutation();
+  const [uploadFileApi, { isLoading: isUploadLoading }] =
+    useUploadFileMutation();
 
   // Selectors
   const formData = useAppSelector(selectFormData);
   const currentStep = useAppSelector(selectCurrentStep);
   const errors = useAppSelector(selectErrors);
-  const isLoading = useAppSelector(selectIsLoading);
   const uploadProgress = useAppSelector(selectUploadProgress);
   const isSubmitting = useAppSelector(selectIsSubmitting);
   const registrationSuccess = useAppSelector(selectRegistrationSuccess);
   const registrationError = useAppSelector(selectRegistrationError);
 
+  // Combined loading state
+  const isLoading = isRegisterLoading || isUploadLoading;
+
   const updateData = useCallback(
     (data: Partial<DriverRegistrationData>, validateStep: boolean = false) => {
       dispatch(updateFormData(data));
-      Object.keys(data).forEach((key) => {
-        if (errors[key]) {
-          dispatch(clearError(key));
-        }
-      });
       if (validateStep) {
         const updatedData = { ...formData, ...data };
         const validation = driverValidationService.validateStep(
@@ -69,9 +72,10 @@ export const useDriverRegistration = () => {
         }
       }
     },
-    [dispatch, formData, errors, currentStep]
+    [dispatch, formData, currentStep]
   );
 
+  // PIN validation effect
   useEffect(() => {
     const pin = formData.pin;
     if (/^\d{6}$/.test(pin) && pin !== lastFetchedPinRef.current) {
@@ -89,8 +93,9 @@ export const useDriverRegistration = () => {
         }
       });
     }
-  }, [formData.pin]);
+  }, [formData.pin, errors, dispatch, updateData]);
 
+  // Navigation handlers
   const goToNextStep = useCallback(() => {
     const validation = driverValidationService.validateStep(
       currentStep,
@@ -141,6 +146,7 @@ export const useDriverRegistration = () => {
     [dispatch]
   );
 
+  // File upload handler
   const handleDocumentUpload = useCallback(
     async (file: File, fieldName: string): Promise<UploadResponse> => {
       try {
@@ -154,16 +160,21 @@ export const useDriverRegistration = () => {
         };
 
         const purpose = purposeMap[fieldName] || "document";
-
         const response = await uploadFileApi({ file, purpose }).unwrap();
 
-        updateData({ [fieldName]: response.data.publicId });
-
-        return {
-          success: true,
-          publicId: response.data.publicId,
-          message: response.message,
-        };
+        if (response.success) {
+          updateData({ [fieldName]: response.data.url });
+          return {
+            success: true,
+            publicId: response.data.publicId,
+            message: response.message,
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Upload failed",
+          };
+        }
       } catch (error: any) {
         return {
           success: false,
@@ -174,6 +185,69 @@ export const useDriverRegistration = () => {
     [uploadFileApi, updateData]
   );
 
+  // Registration submission
+  const handleSubmitRegistration = useCallback(async () => {
+    const validation = driverValidationService.validateAll(
+      formData as DriverRegistrationData
+    );
+    if (!validation.isValid) {
+      dispatch(setErrors(validation.errors));
+      return { success: false, errors: validation.errors };
+    }
+
+    dispatch(setSubmissionState({ isSubmitting: true }));
+
+    try {
+      const result = await registerDriver(
+        formData as DriverRegistrationData
+      ).unwrap();
+
+      if (!result.success) {
+        dispatch(
+          setSubmissionState({
+            isSubmitting: false,
+            success: false,
+            error: result.message || "Registration failed",
+          })
+        );
+        dispatch(setErrors({ form: result.message || "Registration failed" }));
+        return { success: false, error: result.message };
+      }
+
+      dispatch(
+        setSubmissionState({
+          isSubmitting: false,
+          success: true,
+          error: null,
+        })
+      );
+
+      // Navigate to dashboard after delay
+      setTimeout(() => {
+        dispatch(resetForm());
+        navigate("/dashboard");
+      }, 3000);
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      const errorMessage = error.data?.message || "Registration failed";
+      dispatch(
+        setSubmissionState({
+          isSubmitting: false,
+          success: false,
+          error: errorMessage,
+        })
+      );
+      dispatch(setErrors({ form: errorMessage }));
+      return { success: false, error: errorMessage };
+    }
+  }, [dispatch, formData, registerDriver, navigate]);
+
+  const resetRegistrationForm = useCallback(() => {
+    dispatch(resetForm());
+  }, [dispatch]);
+
+  // Validation methods
   const validateCurrentStep = useCallback((): ValidationResult => {
     return driverValidationService.validateStep(currentStep, formData);
   }, [currentStep, formData]);
@@ -184,30 +258,7 @@ export const useDriverRegistration = () => {
     );
   }, [formData]);
 
-  const handleSubmitRegistration = useCallback(async () => {
-    const validation = validateForm();
-    if (!validation.isValid) {
-      dispatch(setErrors(validation.errors));
-      return { success: false, errors: validation.errors };
-    }
-    try {
-      const result = await registerDriver(
-        formData as DriverRegistrationData
-      ).unwrap();
-      dispatch(resetForm());
-      return { success: true, data: result.data };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.data?.message || "Registration failed",
-      };
-    }
-  }, [dispatch, formData, validateForm, registerDriver]);
-
-  const resetRegistrationForm = useCallback(() => {
-    dispatch(resetForm());
-  }, [dispatch]);
-
+  // Utility methods
   const getStepCompletionStatus = useCallback(() => {
     return {
       [RegistrationStep.PERSONAL_INFO]:
@@ -258,10 +309,12 @@ export const useDriverRegistration = () => {
     handleDocumentUpload,
     handleSubmitRegistration,
     resetRegistrationForm,
+
     // Validation
     validateCurrentStep,
     validateForm,
     canProceedToNext,
+
     // Utilities
     getStepCompletionStatus,
     getFormCompletionPercentage,

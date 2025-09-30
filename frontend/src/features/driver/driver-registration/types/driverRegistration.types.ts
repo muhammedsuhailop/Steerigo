@@ -1,3 +1,12 @@
+export interface DriverRegistrationState {
+  currentStep: RegistrationStep;
+  errors: Record<string, string>;
+  uploadProgress: Record<string, number>;
+  formData: DriverRegistrationData;
+  isSubmitting: boolean;
+  registrationSuccess: boolean;
+  registrationError: string | null;
+}
 export interface DriverPersonalInfo {
   name: string;
   mobile: string;
