@@ -26,10 +26,8 @@ import {
 } from "../types/driverRegistration.types";
 import { driverValidationService } from "../services/driverValidation.service";
 import { getPincodeDetails } from "../services/pincodeService";
-import {
-  useRegisterDriverMutation,
-  useUploadDocumentMutation,
-} from "../services/driverRegistrationApi";
+import { useRegisterDriverMutation } from "../services/driverRegistrationApi";
+import { useUploadFileMutation } from "../services/driverRegistrationApi";
 
 export const useDriverRegistration = () => {
   const dispatch = useAppDispatch();
@@ -40,7 +38,7 @@ export const useDriverRegistration = () => {
 
   // RTK Query mutations
   const [registerDriver] = useRegisterDriverMutation();
-  const [uploadDocumentApi] = useUploadDocumentMutation();
+  const [uploadFileApi] = useUploadFileMutation();
 
   // Selectors
   const formData = useAppSelector(selectFormData);
@@ -143,39 +141,37 @@ export const useDriverRegistration = () => {
     [dispatch]
   );
 
-  // const handleDocumentUpload = useCallback(
-  //   async (file: File, fieldName: string): Promise<UploadResponse> => {
-  //     try {
-  //       const response = await uploadDocumentApi({ file, fieldName }).unwrap();
-  //       updateData({ [fieldName]: response.url! });
-  //       return { success: true, url: response.url, message: response.message };
-  //     } catch (error: any) {
-  //       return { success: false, message: error.data?.message || "Upload failed" };
-  //     }
-  //   },
-  //   [uploadDocumentApi, updateData]
-  // );
-
   const handleDocumentUpload = useCallback(
-    async (file: File, fieldName: string) => {
+    async (file: File, fieldName: string): Promise<UploadResponse> => {
       try {
-        // Simulate upload delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const purposeMap: Record<string, string> = {
+          licenseFrontImage: "licenseFront",
+          licenseBackImage: "licenseBack",
+          idFrontImage: "kycdocFront",
+          idBackImage: "kycdocBack",
+          avatar: "avatar",
+          insurance: "insurance",
+        };
 
-        const mockUrl = `https://mockcdn.example.com/${fieldName}-${Date.now()}.jpg`;
+        const purpose = purposeMap[fieldName] || "document";
 
-        // Update form data directly with mock URL
-        updateData({ [fieldName]: mockUrl });
+        const response = await uploadFileApi({ file, purpose }).unwrap();
 
-        return { success: true, url: mockUrl };
-      } catch (error) {
+        updateData({ [fieldName]: response.data.publicId });
+
+        return {
+          success: true,
+          publicId: response.data.publicId,
+          message: response.message,
+        };
+      } catch (error: any) {
         return {
           success: false,
-          error: error instanceof Error ? error.message : "Upload failed",
+          message: error.data?.message || "Upload failed",
         };
       }
     },
-    [updateData]
+    [uploadFileApi, updateData]
   );
 
   const validateCurrentStep = useCallback((): ValidationResult => {
