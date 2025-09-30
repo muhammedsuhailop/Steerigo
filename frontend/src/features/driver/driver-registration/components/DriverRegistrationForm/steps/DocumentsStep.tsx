@@ -15,8 +15,11 @@ export const DocumentsStep: React.FC = () => {
 
   const handleFileSelect = async (file: File, fieldName: string) => {
     const result = await handleDocumentUpload(file, fieldName);
-    if (result.success) {
-      updateData({ [fieldName]: result.url || file });
+
+    if (result.success && result.publicId) {
+      updateData({ [fieldName]: result.publicId });
+    } else if (result.success) {
+      updateData({ [fieldName]: file });
     }
   };
 
@@ -55,7 +58,7 @@ export const DocumentsStep: React.FC = () => {
                 <li>
                   Ensure all text is readable and document corners are visible
                 </li>
-                <li>Accepted formats: JPG, PNG (max 5MB each)</li>
+                <li>Accepted formats: JPG, PNG (max 2MB each)</li>
                 <li>Documents should not be expired</li>
               </ul>
             </div>
@@ -70,9 +73,9 @@ export const DocumentsStep: React.FC = () => {
           fieldName={field.fieldName}
           label={field.label}
           accept="image/*"
-          maxSize={5 * 1024 * 1024}
+          maxSize={2 * 1024 * 1024}
           required={field.required}
-          currentFile={(formData as any)[field.fieldName]}
+          currentFile={formData[field.fieldName]}
           onFileSelect={handleFileSelect}
           onFileRemove={handleFileRemove}
           error={errors[field.fieldName]}
@@ -88,7 +91,7 @@ export const DocumentsStep: React.FC = () => {
         </h3>
         <div className="grid grid-cols-2 gap-4">
           {documentFields.map((field) => {
-            const hasFile = !!(formData as any)[field.fieldName];
+            const hasFile = !!formData[field.fieldName];
             return (
               <div
                 key={field.fieldName}

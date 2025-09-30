@@ -41,8 +41,21 @@ export interface DriverRegistrationData
 
 export interface UploadResponse {
   success: boolean;
-  url?: string;
+  publicId?: string;
   message?: string;
+}
+
+export interface FileUploadResponse {
+  success: boolean;
+  message: string;
+  data: {
+    url: string;
+    publicId: string;
+    purpose: string;
+    filename: string;
+    size: number;
+    uploadedAt: string;
+  };
 }
 
 export interface ValidationResult {
@@ -81,3 +94,17 @@ export interface PincodeDetails {
   district: string;
   postOffice: string;
 }
+
+export const FILE_UPLOAD_PURPOSES = {
+  licenseFrontImage: "licenseFront",
+  licenseBackImage: "licenseBack",
+  idFrontImage: "kycdocFront",
+  idBackImage: "kycdocBack",
+  avatar: "avatar",
+  insurance: "insurance",
+  profile: "profile",
+  document: "document",
+} as const;
+
+export type FileUploadPurpose =
+  (typeof FILE_UPLOAD_PURPOSES)[keyof typeof FILE_UPLOAD_PURPOSES];
