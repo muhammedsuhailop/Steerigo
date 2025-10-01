@@ -1,11 +1,13 @@
 import { injectable } from "inversify";
 import {
   IAdminKycRepository,
+  KycRequestDetailed,
   KycRequestWithDriver,
   PaginatedResult,
 } from "@domain/repositories/admin/IAdminKycRepository";
 import { DriverKycDocumentModel } from "../../models/DriverKycDocumentModel";
 import { Logger } from "@shared/utils/Logger";
+import { Types } from "mongoose";
 
 @injectable()
 export class MongoAdminKycRepository implements IAdminKycRepository {
@@ -184,6 +186,52 @@ export class MongoAdminKycRepository implements IAdminKycRepository {
         driverId,
         error,
       });
+      throw error;
+    }
+  }
+
+  async findKycRequestDetailedById(
+    kycId: string
+  ): Promise<KycRequestDetailed | null> {
+    try {
+      const _id = new Types.ObjectId(kycId);
+
+      const doc = await DriverKycDocumentModel.findById(_id)
+        .populate({
+          path: "driverId",
+          populate: [{ path: "userId", select: "name email" }],
+        })
+        .lean();
+
+      if (!doc || !doc.driverId || !(doc.driverId as any).userId) {
+        Logger.info("KYC request not found or missing driver/user", { kycId });
+        return null;
+      }
+
+      const driver = doc.driverId as any;
+      const user = driver.userId as any;
+
+      const detailed: KycRequestDetailed = {
+        kycId: doc._id.toString(),
+        driverId: driver._id.toString(),
+        driverName: user.name,
+        driverEmail: user.email,
+        docType: doc.docType,
+        docNumber: doc.docNumber,
+        issueDate: doc.issueDate,
+        expiryDate: doc.expiryDate,
+        docImageUrls: doc.docImageUrls,
+        isVerified: doc.isVerified,
+        comments: doc.comments,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+        verifiedAt: doc.verifiedAt,
+      };
+
+      Logger.info("KYC request fetched by id", { kycId });
+      return detailed;
+    } catch (error) {
+      Logger.error("Error fetching KYC request by id", { kycId, error });
       throw error;
     }
   }

@@ -7,6 +7,7 @@ import {
   getKycRequestsValidation,
   getDriverProfileValidation,
   updateKycStatusValidation,
+  getKycRequestByIdValidation,
 } from "../../validators/admin/adminDriverValidators";
 import { authMiddleware } from "../../middleware/auth/AuthMiddleware";
 import { requireRoles } from "../../middleware/auth/RoleMiddleware";
@@ -31,20 +32,20 @@ router.put(
   (req: Request, res: Response) => adminDriverController.driverAction(req, res)
 );
 
-// GET /api/admin/kyc-requests
-router.get(
-  "/kyc-requests",
-  getKycRequestsValidation,
-  (req: Request, res: Response) =>
-    adminDriverController.getKycRequests(req, res)
-);
-
 // GET /api/admin/drivers/:driverId/profile
 router.get(
   "/drivers/:driverId/profile",
   getDriverProfileValidation,
   (req: Request, res: Response) =>
     adminDriverController.getDriverProfile(req, res)
+);
+
+// GET /api/admin/kyc-requests
+router.get(
+  "/kyc-requests",
+  getKycRequestsValidation,
+  (req: Request, res: Response) =>
+    adminDriverController.getKycRequests(req, res)
 );
 
 // PATCH /api/admin/kyc-requests/:kycId/action
@@ -55,11 +56,12 @@ router.patch(
     adminDriverController.updateKycStatus(req, res)
 );
 
-/*
-// PUT /api/admin/drivers/:driverId/kyc-status 
-router.put("/:driverId/kyc-status", updateKycStatusValidation, (req: Request, res: Response) =>
-  adminDriverController.updateKycStatus(req, res)
+// GET /api/admin/kyc-requests/:kycId
+router.get(
+  "/kyc-requests/:kycId",
+  getKycRequestByIdValidation,
+  (req: Request, res: Response) =>
+    adminDriverController.getKycRequestById(req, res)
 );
-*/
 
 export { router as adminDriverRoutes };

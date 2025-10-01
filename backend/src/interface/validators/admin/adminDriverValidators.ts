@@ -113,3 +113,9 @@ export const updateKycStatusValidation = [
     .withMessage("Comments must not exceed 500 characters")
     .trim(),
 ];
+
+export const getKycRequestByIdValidation = [
+  param("kycId")
+    .isMongoId()
+    .withMessage("KYC ID must be a valid MongoDB ObjectId"),
+];

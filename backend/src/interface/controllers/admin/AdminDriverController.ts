@@ -13,6 +13,8 @@ import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverP
 import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
 import { GetDriverProfileDto } from "@application/dto/admin/GetDriverProfileDto";
 import { UpdateKycStatusDto } from "@application/dto/admin/UpdateKycStatusDto";
+import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycRequestByIdUseCase";
+import { GetKycRequestByIdDto } from "@application/dto/admin/GetKycRequestByIdDto";
 
 @injectable()
 export class AdminDriverController {
@@ -25,7 +27,9 @@ export class AdminDriverController {
     @inject(GetDriverProfileUseCase)
     private getDriverProfileUseCase: GetDriverProfileUseCase,
     @inject(UpdateKycStatusUseCase)
-    private updateKycStatusUseCase: UpdateKycStatusUseCase
+    private updateKycStatusUseCase: UpdateKycStatusUseCase,
+    @inject(GetKycRequestByIdUseCase)
+    private getKycRequestByIdUseCase: GetKycRequestByIdUseCase
   ) {}
 
   async getDrivers(req: Request, res: Response): Promise<void> {
@@ -254,6 +258,50 @@ export class AdminDriverController {
       res.status(200).json(response);
     } catch (error) {
       Logger.error("Error in updateKycStatus controller", error);
+      const response: ApiResponse = {
+        success: false,
+        message: "Internal server error",
+      };
+      res.status(500).json(response);
+    }
+  }
+
+  async getKycRequestById(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ApiResponse = {
+          success: false,
+          message: "Validation failed",
+          error: errors
+            .array()
+            .map((e) => `${e.msg}`)
+            .join(", "),
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      const dto = new GetKycRequestByIdDto({ kycId: req.params.kycId });
+      const result = await this.getKycRequestByIdUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const response: ApiResponse = {
+          success: false,
+          message: result.getError().message,
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        message: "KYC request fetched successfully",
+        data: result.getValue(),
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      Logger.error("Error in getKycRequestById controller", error);
       const response: ApiResponse = {
         success: false,
         message: "Internal server error",

@@ -47,6 +47,7 @@ import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDri
 import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
 import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
 import { UploadFileUseCase } from "@application/use-cases/file/UploadFileUseCase";
+import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycRequestByIdUseCase";
 
 // Controllers
 import { SignupController } from "@interface/controllers/auth/SignupController";
@@ -123,6 +124,7 @@ container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
   GetKycRequestsUseCase,
   GetDriverProfileUseCase,
   UpdateKycStatusUseCase,
+  GetKycRequestByIdUseCase,
 ].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings
