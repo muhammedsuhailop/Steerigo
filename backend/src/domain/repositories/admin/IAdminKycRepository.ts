@@ -1,0 +1,49 @@
+export interface PaginationOptions {
+  page: number;
+  pageSize: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface KycRequestWithDriver {
+  kycId: string;
+  driverId: string;
+  driverName: string;
+  docType: string;
+  docNumber: string;
+  issueDate: Date;
+  expiryDate: Date;
+  docImageUrls: string[];
+  isVerified: boolean;
+  comments?: string;
+  createdAt: Date;
+}
+
+export interface IAdminKycRepository {
+  findAllKycRequests(
+    filters: {
+      docType?: string;
+      isVerified?: boolean;
+      search?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+      sortBy?: string;
+      sortOrder?: "asc" | "desc";
+    },
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<KycRequestWithDriver>>;
+
+  updateKycStatus(
+    kycId: string,
+    isVerified: boolean,
+    comments?: string
+  ): Promise<void>;
+}
