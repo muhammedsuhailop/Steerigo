@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { AdminServiceContainer } from "../services/AdminServiceContainer";
+import { AdminServiceContainer } from "../../shared/services";
 import { useAppDispatch } from "@/app/store/hooks";
 import {
   AdminSidebar,

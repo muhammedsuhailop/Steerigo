@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { AdminSidebar, AdminTopbar } from "@/features/admin/components";
-import { UserManagement } from "@/features/admin/components/UserManagement";
+import { UserManagement } from "@/features/admin/user-management/components/UserManagement";
 
 const AdminUsersLayout: React.FC = () => {
   const { user } = useAuth();

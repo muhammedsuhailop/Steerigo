@@ -1,7 +1,7 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import { authApi } from "../../features/auth/services/authApi";
 import authReducer from "../../features/auth/store/authSlice";
-import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
+import adminUsersReducer from "../../features/admin/shared/store/adminUsersSlice";
 
 export const rootReducer = combineReducers({
   // Auth

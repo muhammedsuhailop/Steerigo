@@ -1,9 +1,9 @@
 export * from './components';
-export * from './pages/AdminDashboard';
-export * from './pages/AdminUsersLayout'; 
-export * from './store/adminUsersSlice';
+export * from './dashboard/pages/AdminDashboard';
+export * from './user-management/pages/AdminUsersLayout'; 
+export * from './shared/store/adminUsersSlice';
 
 export * from './services';
 export * from './hooks'; 
 export * from './types/admin.interfaces';
-export * from './components/UserStatusBadge';
+export * from './user-management/components/UserStatusBadge';

@@ -1,5 +1,6 @@
 import { AdminStatsService } from "../types/admin.interfaces";
-import type { User } from "../components/UserManagement/UserManagement.types";
+// import type { User } from "../user-management/components/UserManagement/UserManagement.types";
+import type { User } from "../../components";
 
 export interface DashboardStats {
   totalUsers: number;
