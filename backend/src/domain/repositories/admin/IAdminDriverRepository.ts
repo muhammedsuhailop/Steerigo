@@ -28,11 +28,43 @@ export interface DriverWithStats {
   eligibleGearType: string[];
 }
 
+export interface DriverWithUser {
+  driver: {
+    _id: string;
+    userId: string;
+    licenseNumber: string;
+    licenseIssueDate: Date;
+    licenseExpiryDate: Date;
+    licenseCategory: string[];
+    kycStatus: string;
+    status: string;
+    eligibleVehicleType: string[];
+    eligibleGearType: string[];
+    createdAt: Date;
+    updatedAt: Date;
+    getStatus(): string;
+  };
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    role: string;
+    status: string;
+    isVerified: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
 export interface IAdminDriverRepository {
   findDriversOnly(
     filters: DriverFilters,
     pagination: PaginationOptions
   ): Promise<PaginatedResult<DriverWithStats>>;
+
+  findDriverWithUser(driverId: string): Promise<DriverWithUser | null>;
+
   updateDriverStatus(
     driverId: string,
     status: string,

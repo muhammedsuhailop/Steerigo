@@ -63,7 +63,7 @@ import { MongoAdminDriverRepository } from "@infrastructure/database/repositorie
 import { IAdminKycRepository } from "@domain/repositories/admin/IAdminKycRepository";
 import { MongoAdminKycRepository } from "@infrastructure/database/repositories/admin/MongoAdminKycRepository";
 import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
-// import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
+import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
 import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycRequestsUseCase";
 // import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
 // import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
@@ -119,7 +119,7 @@ container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
   UpdateUserStatusUseCase,
   UploadFileUseCase,
   GetDriversUseCase,
-  // DriverActionUseCase,
+  DriverActionUseCase,
   GetKycRequestsUseCase,
   // GetDriverProfileUseCase,
   // UpdateKycStatusUseCase,

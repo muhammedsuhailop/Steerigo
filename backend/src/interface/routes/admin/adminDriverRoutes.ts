@@ -24,12 +24,14 @@ router.get("/drivers", getDriversValidation, (req: Request, res: Response) =>
   adminDriverController.getDrivers(req, res)
 );
 
-/*
-// PUT /api/admin/driver/:driverId/action 
-router.put("/:driverId/action", driverActionValidation, (req: Request, res: Response) =>
-  adminDriverController.driverAction(req, res)
+// PUT /api/admin/driver/:driverId/action
+router.put(
+  "/drivers/:driverId/action",
+  driverActionValidation,
+  (req: Request, res: Response) => adminDriverController.driverAction(req, res)
 );
 
+/*
 // GET /api/admin/kyc-requests 
 router.get("/kyc-requests", getKycRequestsValidation, (req: Request, res: Response) =>
   adminDriverController.getKycRequests(req, res)

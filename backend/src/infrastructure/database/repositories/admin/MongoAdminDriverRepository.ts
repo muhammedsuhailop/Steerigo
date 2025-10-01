@@ -6,6 +6,7 @@ import {
   PaginationOptions,
   PaginatedResult,
   DriverWithStats,
+  DriverWithUser,
 } from "@domain/repositories/admin/IAdminDriverRepository";
 import { UserModel } from "../../models/UserModel";
 import { DriverModel } from "../../models/DriverModel";
@@ -156,6 +157,61 @@ export class MongoAdminDriverRepository implements IAdminDriverRepository {
       };
     } catch (error) {
       Logger.error("Error fetching drivers from database", error);
+      throw error;
+    }
+  }
+
+  async findDriverWithUser(driverId: string): Promise<DriverWithUser | null> {
+    try {
+      const driverDoc = await DriverModel.findById(driverId).lean();
+
+      if (!driverDoc) {
+        Logger.info("Driver not found", { driverId });
+        return null;
+      }
+
+      const userDoc = await UserModel.findById(driverDoc.userId).lean();
+
+      if (!userDoc) {
+        Logger.error("User not found for driver", {
+          driverId,
+          userId: driverDoc.userId,
+        });
+        return null;
+      }
+
+      Logger.info("Driver with user found successfully", { driverId });
+
+      return {
+        driver: {
+          _id: driverDoc._id.toString(),
+          userId: driverDoc.userId.toString(),
+          licenseNumber: driverDoc.licenseNumber,
+          licenseIssueDate: driverDoc.licenseIssueDate,
+          licenseExpiryDate: driverDoc.licenseExpiryDate,
+          licenseCategory: driverDoc.licenseCategory,
+          kycStatus: driverDoc.kycStatus,
+          status: driverDoc.status,
+          eligibleVehicleType: driverDoc.eligibleVehicleType,
+          eligibleGearType: driverDoc.eligibleGearType,
+          createdAt: driverDoc.createdAt,
+          updatedAt: driverDoc.updatedAt,
+          getStatus: () => driverDoc.status,
+        },
+        user: {
+          _id: userDoc._id.toString(),
+          name: userDoc.name,
+          email: userDoc.email,
+          mobile: userDoc.mobile || "",
+          role: userDoc.role,
+          status: userDoc.status,
+          isVerified: userDoc.isVerified,
+          createdAt: userDoc.createdAt,
+          updatedAt: userDoc.updatedAt,
+        },
+      };
+    } catch (error) {
+      Logger.error("Error finding driver with user", { driverId, error });
       throw error;
     }
   }
