@@ -47,6 +47,7 @@ import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDri
 import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
 import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
 import { UploadFileUseCase } from "@application/use-cases/file/UploadFileUseCase";
+import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycRequestByIdUseCase";
 
 // Controllers
 import { SignupController } from "@interface/controllers/auth/SignupController";
@@ -58,6 +59,16 @@ import { UserController } from "@interface/controllers/auth/UserController";
 import { DriverController } from "@interface/controllers/driver/DriverController";
 import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
 import { FileController } from "@interface/controllers/file/FileController";
+import { IAdminDriverRepository } from "@domain/repositories/admin/IAdminDriverRepository";
+import { MongoAdminDriverRepository } from "@infrastructure/database/repositories/admin/MongoAdminDriverRepository";
+import { IAdminKycRepository } from "@domain/repositories/admin/IAdminKycRepository";
+import { MongoAdminKycRepository } from "@infrastructure/database/repositories/admin/MongoAdminKycRepository";
+import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
+import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
+import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycRequestsUseCase";
+import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
+import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
+import { AdminDriverController } from "@interface/controllers/admin/AdminDriverController";
 
 const container = new Container();
 
@@ -75,7 +86,12 @@ container
 container
   .bind<IAdminUserRepository>("IAdminUserRepository")
   .to(MongoAdminUserRepository);
-container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
+container
+  .bind<IAdminDriverRepository>("IAdminDriverRepository")
+  .to(MongoAdminDriverRepository);
+container
+  .bind<IAdminKycRepository>("IAdminKycRepository")
+  .to(MongoAdminKycRepository);
 
 // Service Bindings
 container.bind<IPasswordService>("IPasswordService").to(BcryptPasswordService);
@@ -83,6 +99,7 @@ container.bind<IEmailService>("IEmailService").to(NodemailerEmailService);
 container.bind<IOtpService>("IOtpService").to(OtpGeneratorService);
 container.bind<ITokenService>("ITokenService").to(JwtTokenService);
 container.bind<IGoogleAuthService>("IGoogleAuthService").to(GoogleAuthService);
+container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
 
 // Use Case Bindings
 [
@@ -102,6 +119,12 @@ container.bind<IGoogleAuthService>("IGoogleAuthService").to(GoogleAuthService);
   GetUsersUseCase,
   UpdateUserStatusUseCase,
   UploadFileUseCase,
+  GetDriversUseCase,
+  DriverActionUseCase,
+  GetKycRequestsUseCase,
+  GetDriverProfileUseCase,
+  UpdateKycStatusUseCase,
+  GetKycRequestByIdUseCase,
 ].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings
@@ -114,5 +137,6 @@ container.bind<UserController>(UserController).toSelf();
 container.bind<DriverController>(DriverController).toSelf();
 container.bind<AdminUserController>(AdminUserController).toSelf();
 container.bind<FileController>(FileController).toSelf();
+container.bind<AdminDriverController>(AdminDriverController).toSelf();
 
 export { container };
