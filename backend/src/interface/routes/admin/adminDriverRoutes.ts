@@ -39,12 +39,23 @@ router.get(
     adminDriverController.getKycRequests(req, res)
 );
 
-/*
-// GET /api/admin/drivers/:driverId/profile 
-router.get("/:driverId/profile", getDriverProfileValidation, (req: Request, res: Response) =>
-  adminDriverController.getDriverProfile(req, res)
+// GET /api/admin/drivers/:driverId/profile
+router.get(
+  "/drivers/:driverId/profile",
+  getDriverProfileValidation,
+  (req: Request, res: Response) =>
+    adminDriverController.getDriverProfile(req, res)
 );
 
+// PATCH /api/admin/kyc-requests/:kycId/action
+router.patch(
+  "/kyc-requests/:kycId/action",
+  updateKycStatusValidation,
+  (req: Request, res: Response) =>
+    adminDriverController.updateKycStatus(req, res)
+);
+
+/*
 // PUT /api/admin/drivers/:driverId/kyc-status 
 router.put("/:driverId/kyc-status", updateKycStatusValidation, (req: Request, res: Response) =>
   adminDriverController.updateKycStatus(req, res)

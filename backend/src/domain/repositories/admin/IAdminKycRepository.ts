@@ -46,4 +46,16 @@ export interface IAdminKycRepository {
     isVerified: boolean,
     comments?: string
   ): Promise<void>;
+
+  findKycRequestById(kycId: string): Promise<{
+    kycId: string;
+    driverId: string;
+    docType: string;
+    isVerified: boolean;
+  } | null>;
+
+  findKycRequestsByDriverId(
+    driverId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<KycRequestWithDriver>>;
 }

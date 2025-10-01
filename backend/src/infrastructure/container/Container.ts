@@ -65,8 +65,8 @@ import { MongoAdminKycRepository } from "@infrastructure/database/repositories/a
 import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
 import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
 import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycRequestsUseCase";
-// import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
-// import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
+import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
+import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
 import { AdminDriverController } from "@interface/controllers/admin/AdminDriverController";
 
 const container = new Container();
@@ -121,8 +121,8 @@ container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
   GetDriversUseCase,
   DriverActionUseCase,
   GetKycRequestsUseCase,
-  // GetDriverProfileUseCase,
-  // UpdateKycStatusUseCase,
+  GetDriverProfileUseCase,
+  UpdateKycStatusUseCase,
 ].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings

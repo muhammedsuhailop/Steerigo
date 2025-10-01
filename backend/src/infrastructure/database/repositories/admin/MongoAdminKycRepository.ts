@@ -91,4 +91,100 @@ export class MongoAdminKycRepository implements IAdminKycRepository {
     await DriverKycDocumentModel.findByIdAndUpdate(kycId, update);
     Logger.info("KYC status updated", { kycId, isVerified, comments });
   }
+
+  async findKycRequestById(kycId: string): Promise<{
+    kycId: string;
+    driverId: string;
+    docType: string;
+    isVerified: boolean;
+  } | null> {
+    try {
+      const kycRequest = await DriverKycDocumentModel.findById(kycId)
+        .populate("driverId", "_id")
+        .lean();
+
+      if (!kycRequest || !kycRequest.driverId) {
+        Logger.info("KYC request not found", { kycId });
+        return null;
+      }
+
+      return {
+        kycId: kycRequest._id.toString(),
+        driverId: (kycRequest.driverId as any)._id.toString(),
+        docType: kycRequest.docType,
+        isVerified: kycRequest.isVerified,
+      };
+    } catch (error) {
+      Logger.error("Error finding KYC request by ID", { kycId, error });
+      throw error;
+    }
+  }
+
+  async findKycRequestsByDriverId(
+    driverId: string,
+    pagination: { page: number; pageSize: number }
+  ): Promise<PaginatedResult<KycRequestWithDriver>> {
+    try {
+      const query = { driverId };
+
+      const totalItems = await DriverKycDocumentModel.countDocuments(query);
+
+      const docs = await DriverKycDocumentModel.find(query)
+        .skip((pagination.page - 1) * pagination.pageSize)
+        .limit(pagination.pageSize)
+        .sort({ createdAt: -1 })
+        .populate({
+          path: "driverId",
+          populate: {
+            path: "userId",
+            select: "name",
+          },
+        })
+        .lean();
+
+      const formatted: KycRequestWithDriver[] = docs
+        .filter((d) => d.driverId && (d.driverId as any).userId)
+        .map((d) => {
+          const driver = d.driverId as any;
+          const user = driver.userId as any;
+          return {
+            kycId: d._id.toString(),
+            driverId: driver._id.toString(),
+            driverName: user.name,
+            docType: d.docType,
+            docNumber: d.docNumber,
+            issueDate: d.issueDate,
+            expiryDate: d.expiryDate,
+            docImageUrls: d.docImageUrls,
+            isVerified: d.isVerified,
+            comments: d.comments,
+            createdAt: d.createdAt,
+          };
+        });
+
+      const totalPages = Math.ceil(totalItems / pagination.pageSize);
+
+      Logger.info("KYC requests fetched for driver", {
+        driverId,
+        totalItems,
+        page: pagination.page,
+      });
+
+      return {
+        data: formatted,
+        pagination: {
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          totalPages,
+          totalItems,
+        },
+      };
+    } catch (error) {
+      Logger.error("Error fetching KYC requests for driver", {
+        driverId,
+        error,
+      });
+      throw error;
+    }
+  }
 }

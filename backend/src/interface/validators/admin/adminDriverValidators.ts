@@ -101,19 +101,15 @@ export const getDriverProfileValidation = [
 ];
 
 export const updateKycStatusValidation = [
-  param("driverId")
+  param("kycId")
     .isMongoId()
-    .withMessage("Driver ID must be a valid MongoDB ObjectId"),
+    .withMessage("KYC ID must be a valid MongoDB ObjectId"),
   body("kycStatus")
-    .isIn(["Approved", "Rejected"])
-    .withMessage("KYC status must be either Approved or Rejected"),
-  body("section")
-    .isIn(["licenseEligibility", "documentVerification", "backgroundCheck"])
-    .withMessage(
-      "Section must be licenseEligibility, documentVerification, or backgroundCheck"
-    ),
+    .isIn(["approved", "rejected"])
+    .withMessage("KYC status must be either 'approved' or 'rejected'"),
   body("comments")
     .optional()
     .isLength({ min: 0, max: 500 })
-    .withMessage("Comments must not exceed 500 characters"),
+    .withMessage("Comments must not exceed 500 characters")
+    .trim(),
 ];
