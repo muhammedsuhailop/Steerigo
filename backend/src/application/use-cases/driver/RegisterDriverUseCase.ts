@@ -7,6 +7,7 @@ import { Driver } from "@domain/entities/Driver";
 import { DriverKycDocument } from "@domain/entities/DriverKycDocument";
 import { Result } from "@shared/utils/Result";
 import { v4 as uuid } from "uuid";
+import { MobileAlreadyExistsError } from "@domain/errors";
 
 @injectable()
 export class RegisterDriverUseCase {
@@ -21,6 +22,11 @@ export class RegisterDriverUseCase {
       const user = await this.userRepository.findById(userId);
       if (!user) {
         return Result.failure(new Error("User not found"));
+      }
+
+      const mobileExists = await this.userRepository.existsByMobile(dto.mobile);
+      if (mobileExists && dto.mobile !== user.getMobile()) {
+        return Result.failure(new MobileAlreadyExistsError());
       }
 
       const existingDriver = await this.driverRepository.findByUserId(userId);
@@ -46,17 +52,16 @@ export class RegisterDriverUseCase {
         licenseNumber: dto.licenseNumber,
         licenseIssueDate: new Date(dto.dob),
         licenseExpiryDate: new Date(dto.dob),
-        rto: dto.state,
-        licenseCategory: [dto.licenseCategory],
-        eligibleVehicleType: dto.vehicleTypes,
+        licenseCategory: dto.licenseCategory,
+        eligibleVehicleType: dto.bodyTypes,
         eligibleGearType: dto.gearTypes,
       });
-      await this.driverRepository.save(driver);
+      const savedDriver = await this.driverRepository.save(driver);
 
       const kycDocs = [
         DriverKycDocument.create({
           id: uuid(),
-          driverId: driver.getId(),
+          driverId: savedDriver.getId(),
           docType: dto.idType,
           docNumber: dto.idNumber,
           issueDate: new Date(dto.idIssueDate),
@@ -66,7 +71,7 @@ export class RegisterDriverUseCase {
 
         DriverKycDocument.create({
           id: uuid(),
-          driverId: driver.getId(),
+          driverId: savedDriver.getId(),
           docType: "DrivingLicense",
           docNumber: dto.licenseNumber,
           issueDate: new Date(dto.licenseIssueDate),

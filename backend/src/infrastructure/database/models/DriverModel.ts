@@ -1,11 +1,10 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IDriverDocument extends Document {
-  userId: string;
+  userId: Types.ObjectId;
   licenseNumber: string;
   licenseIssueDate: Date;
   licenseExpiryDate: Date;
-  rto: string;
   licenseCategory: string[];
   kycStatus: string;
   status: string;
@@ -17,11 +16,10 @@ export interface IDriverDocument extends Document {
 
 const DriverSchema = new Schema<IDriverDocument>(
   {
-    userId: { type: String, required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     licenseNumber: { type: String, required: true },
     licenseIssueDate: { type: Date, required: true },
     licenseExpiryDate: { type: Date, required: true },
-    rto: { type: String, required: true },
     licenseCategory: { type: [String], required: true },
     kycStatus: {
       type: String,

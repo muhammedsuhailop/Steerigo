@@ -9,6 +9,7 @@ import {
   RefreshTokenExpiredError,
   RefreshTokenRevokedError,
   AccountStatusError,
+  MobileAlreadyExistsError,
 } from "@domain/errors";
 
 export enum ErrorType {
@@ -49,6 +50,17 @@ export class ErrorHandlerService {
       {
         statusCode: 409,
         message: "An account with this email already exists",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      MobileAlreadyExistsError.name,
+      {
+        statusCode: 409,
+        message: "This mobile number is already registered",
         type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
@@ -171,6 +183,11 @@ export class ErrorHandlerService {
       return this.ERROR_MAP.get(error.constructor.name)!;
     }
 
+    // Handle MongoDB duplicate key errors
+    if (this.isMongoDbDuplicateKeyError(error)) {
+      return this.handleDuplicateKeyError(error);
+    }
+
     // Check for database/connection errors
     if (this.isDatabaseError(error)) {
       return {
@@ -236,6 +253,47 @@ export class ErrorHandlerService {
     return databasePatterns.some(
       (pattern) => message.includes(pattern) || code.includes(pattern)
     );
+  }
+
+  // Detect MongoDB duplicate key errors
+  private static isMongoDbDuplicateKeyError(error: any): boolean {
+    return (
+      error.code === 11000 ||
+      error.message?.includes("E11000 duplicate key error") ||
+      error.message?.includes("duplicate key error collection")
+    );
+  }
+
+  // Handle duplicate key errors gracefully
+  private static handleDuplicateKeyError(error: any): ErrorDetails {
+    const message = error.message?.toLowerCase() || "";
+
+    // Check which field is duplicated
+    if (message.includes("mobile")) {
+      return {
+        statusCode: 409,
+        message: "This mobile number is already registered",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      };
+    } else if (message.includes("email")) {
+      return {
+        statusCode: 409,
+        message: "An account with this email already exists",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      };
+    } else {
+      return {
+        statusCode: 409,
+        message: "This information is already registered",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: true,
+        isOperational: true,
+      };
+    }
   }
 
   //Check if error is network/SSL related

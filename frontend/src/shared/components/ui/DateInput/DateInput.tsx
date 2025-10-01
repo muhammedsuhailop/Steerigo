@@ -19,6 +19,10 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       fullWidth = true,
       className = "",
       id,
+      name,
+      min,
+      max,
+      calendarDefaultDate,
       onFocus,
       onBlur,
       onClick,
@@ -73,25 +77,59 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     );
 
     const handleClick = useCallback(
-      (e: React.MouseEvent<HTMLInputElement>) => {
-        if (!disabled) {
-          setIsNativeFocused(true);
-          if (inputRef.current) {
-            inputRef.current.showPicker?.();
-          }
+  (e: React.MouseEvent<HTMLInputElement>) => {
+    if (!disabled) {
+      setIsNativeFocused(true);
+
+      if (inputRef.current) {
+        inputRef.current.focus();
+        
+        // For empty inputs, set a temporary default to position the calendar
+        if (!value && calendarDefaultDate) {
+          // Create a change event with the default date
+          const event = {
+            target: { value: calendarDefaultDate, name: name || "" },
+            currentTarget: { value: calendarDefaultDate }
+          } as React.ChangeEvent<HTMLInputElement>;
+          
+          // Trigger onChange with default date immediately
+          onChange?.(event);
         }
-        onClick?.(e);
-      },
-      [disabled, onClick]
-    );
+        
+        // Show picker after setting default
+        setTimeout(() => {
+          inputRef.current?.showPicker?.();
+        }, 10);
+      }
+    }
+    onClick?.(e);
+  },
+  [disabled, onClick, value, calendarDefaultDate, onChange, name]
+);
 
     const handleOverlayClick = useCallback(() => {
-      if (!disabled && inputRef.current) {
-        setIsNativeFocused(true);
-        inputRef.current.focus();
-        inputRef.current.showPicker?.();
-      }
-    }, [disabled]);
+  if (!disabled && inputRef.current) {
+    setIsNativeFocused(true);
+    inputRef.current.focus();
+    
+    // Set default date if no value exists
+    if (!value && calendarDefaultDate) {
+      const event = {
+        target: { value: calendarDefaultDate, name: name || "" },
+        currentTarget: { value: calendarDefaultDate }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      onChange?.(event);
+      
+      // Show picker after setting default
+      setTimeout(() => {
+        inputRef.current?.showPicker?.();
+      }, 10);
+    } else {
+      inputRef.current.showPicker?.();
+    }
+  }
+}, [disabled, value, calendarDefaultDate, onChange, name]);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -116,6 +154,8 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
           isInvalid={hasError}
           fullWidth={fullWidth}
           id={id}
+          min={min}
+          max={max}  
           className={`
           ${
             shouldShowFormattedDate

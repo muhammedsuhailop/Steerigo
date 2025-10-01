@@ -25,8 +25,12 @@ export class MongoDriverKycRepository implements IDriverKycRepository {
     return docs.map((doc) =>
       DriverKycDocument.reconstruct({
         id: doc.id.toString(),
-        driverId: doc.driverId,
-        docType: doc.docType as "Aadhaar" | "PAN" | "DrivingLicense",
+        driverId: doc.driverId.toString(),
+        docType: doc.docType as
+          | "Aadhaar"
+          | "PAN"
+          | "DrivingLicense"
+          | "Passport",
         docNumber: doc.docNumber,
         issueDate: doc.issueDate,
         expiryDate: doc.expiryDate,

@@ -2,7 +2,7 @@ export class DriverKycDocument {
   private constructor(
     private readonly id: string,
     private readonly driverId: string,
-    private docType: "Aadhaar" | "PAN" | "DrivingLicense",
+    private docType: "PAN" | "Aadhaar" | "DrivingLicense" | "Passport",
     private docNumber: string,
     private issueDate: Date,
     private expiryDate: Date,
@@ -17,7 +17,7 @@ export class DriverKycDocument {
   static create(props: {
     id: string;
     driverId: string;
-    docType: "Aadhaar" | "PAN" | "DrivingLicense";
+    docType: "PAN" | "Aadhaar" | "DrivingLicense" | "Passport";
     docNumber: string;
     issueDate: Date;
     expiryDate: Date;
@@ -43,7 +43,7 @@ export class DriverKycDocument {
   static reconstruct(props: {
     id: string;
     driverId: string;
-    docType: "Aadhaar" | "PAN" | "DrivingLicense";
+    docType: "PAN" | "Aadhaar" | "DrivingLicense" | "Passport";
     docNumber: string;
     issueDate: Date;
     expiryDate: Date;
@@ -79,7 +79,7 @@ export class DriverKycDocument {
     return this.driverId;
   }
 
-  getDocType(): "Aadhaar" | "PAN" | "DrivingLicense" {
+  getDocType(): "PAN" | "Aadhaar" | "DrivingLicense" | "Passport" {
     return this.docType;
   }
 

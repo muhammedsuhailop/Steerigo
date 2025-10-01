@@ -75,6 +75,7 @@ const getUserFromStorage = (): User | null => {
 
 const setUserInStorage = (user: User) => {
   if (typeof window !== "undefined") {
+    console.log("user-------", user);
     try {
       localStorage.setItem("user", JSON.stringify(user));
     } catch (error) {
@@ -100,6 +101,7 @@ export const mapDecodedToUser = (decoded: DecodedJwt): User => ({
   id: decoded.userId,
   email: "",
   name: "",
+  mobile: "",
   role: decoded.role as any,
   isVerified: true,
   createdAt: new Date().toISOString(),
@@ -558,5 +560,8 @@ export const {
   updateUser,
   setGoogleAuthLoading,
 } = authSlice.actions;
+
+export const selectCurrentUser = (state: { auth: AuthState }) =>
+  state.auth.user;
 
 export default authSlice.reducer;

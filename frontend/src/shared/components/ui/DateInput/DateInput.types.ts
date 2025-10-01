@@ -13,6 +13,10 @@ export interface DateInputProps {
   fullWidth?: boolean;
   className?: string;
   id?: string;
+  name?:string;
+  min?: string;
+  max?: string;
+  calendarDefaultDate?: string;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
