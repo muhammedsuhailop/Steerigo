@@ -56,12 +56,12 @@ export class RegisterDriverUseCase {
         eligibleVehicleType: dto.bodyTypes,
         eligibleGearType: dto.gearTypes,
       });
-      await this.driverRepository.save(driver);
+      const savedDriver = await this.driverRepository.save(driver);
 
       const kycDocs = [
         DriverKycDocument.create({
           id: uuid(),
-          driverId: driver.getId(),
+          driverId: savedDriver.getId(),
           docType: dto.idType,
           docNumber: dto.idNumber,
           issueDate: new Date(dto.idIssueDate),
@@ -71,7 +71,7 @@ export class RegisterDriverUseCase {
 
         DriverKycDocument.create({
           id: uuid(),
-          driverId: driver.getId(),
+          driverId: savedDriver.getId(),
           docType: "DrivingLicense",
           docNumber: dto.licenseNumber,
           issueDate: new Date(dto.licenseIssueDate),
