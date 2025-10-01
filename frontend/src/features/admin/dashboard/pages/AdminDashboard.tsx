@@ -3,17 +3,16 @@ import { useAuth } from "@/features/auth";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import { AdminServiceContainer } from "../../shared/services";
 import { useAppDispatch } from "@/app/store/hooks";
-import {
-  AdminSidebar,
-  AdminTopbar,
-  DashboardOverview,
-  RecentActivity,
-  QuickActions,
-  SystemStatus,
-  RecentUsers,
-} from "@/features/admin/components";
 import { Footer } from "@/features/public/components";
 import { MdOutlineRefresh } from "react-icons/md";
+import { AdminSidebar, AdminTopbar } from "../../shared/components";
+import {
+  DashboardOverview,
+  QuickActions,
+  RecentActivity,
+  RecentUsers,
+  SystemStatus,
+} from "../components";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();

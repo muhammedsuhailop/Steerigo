@@ -1,7 +1,10 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { AdminServiceContainer } from "../../shared/services";
-import { fetchAdminUsers, updateUserStatus } from "../../shared/store/adminUsersSlice";
+import {
+  fetchAdminUsers,
+  updateUserStatus,
+} from "../../shared/store/adminUsersSlice";
 import type { AppDispatch } from "@/app/store";
 import type {
   UserAction,

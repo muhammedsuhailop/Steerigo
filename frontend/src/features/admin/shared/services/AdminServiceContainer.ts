@@ -6,11 +6,8 @@ import {
   AdminAnalyticsService,
   AdminStatsService,
 } from "../types/admin.interfaces";
-// import { AdminStateService } from "../../user-management/types/userManagement.types";
-// import { ReduxAdminStateService } from "../user-management/services/AdminStateService";
-import { ReduxAdminStateService } from "../../user-management/services";
+import { ReduxAdminStateService } from "./AdminStateService";
 import { ToastAdminNotificationService } from "./AdminNotificationService";
-// import { ApiAdminDataService } from "../user-management/services/AdminDataService";
 import { ApiAdminDataService } from "./AdminDataService";
 import { LocalAdminStatsService } from "./AdminStatsService";
 
