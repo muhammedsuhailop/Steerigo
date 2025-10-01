@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "../../features/auth/services/authApi";
 import { driverRegistrationApi } from "../../features/driver/driver-registration/services/driverRegistrationApi";
 import authReducer from "../../features/auth/store/authSlice";
-import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
+import adminUsersReducer from "../../features/admin/shared/store/adminUsersSlice";
 import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
 import driverReducer from "../../features/driver/shared/store/driverSlice";
 import driverRegistrationReducer from "../../features/driver/driver-registration/store/driverRegistrationSlice";

@@ -2,7 +2,7 @@ import type {
   User,
   UserFilters,
   UserAction,
-} from "../components/UserManagement/UserManagement.types";
+} from "../../user-management/components/UserManagement/UserManagement.types";
 
 // Data Service Interface
 export interface AdminDataService {
@@ -38,7 +38,6 @@ export interface AdminDataService {
   }>;
 }
 
-// State Service Interface
 export interface AdminStateService {
   setFilters(filters: Partial<UserFilters>): void;
   setPage(page: number): void;

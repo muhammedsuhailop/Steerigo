@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchAdminUsers } from "../store/adminUsersSlice";
+import { fetchAdminUsers } from "../../shared/store/adminUsersSlice";
 import type { RootState, AppDispatch } from "@/app/store";
 
 export const useAdminDashboard = () => {

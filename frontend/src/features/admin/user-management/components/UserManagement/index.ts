@@ -8,3 +8,4 @@ export type {
   UserFilters,
 } from "./UserManagement.types";
 export { ActionDropdown } from "./ActionDropdown";
+export * from './UserManagement.types';

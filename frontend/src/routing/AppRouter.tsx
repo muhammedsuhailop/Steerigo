@@ -8,9 +8,9 @@ import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage";
 import UpdatePasswordPage from "@/features/auth/pages/UpdatePasswordPage";
 import UserDashboard from "@/features/user/pages/UserDashboard";
 import DriverDashboard from "@/features/driver/dashboard/pages/DriverDashboard";
-import AdminDashboard from "@/features/admin/pages/AdminDashboard";
+import AdminDashboard from "@/features/admin/dashboard/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
-import AdminUsersLayout from "@/features/admin/pages/AdminUsersLayout";
+import AdminUsersLayout from "@/features/admin/user-management/pages/AdminUsersLayout";
 import { NotFoundPage } from "@/features/public/pages";
 import { DriverRegistrationPage } from "@/features/driver/driver-registration/pages";
 

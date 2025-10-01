@@ -1,10 +1,8 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import { authApi } from "../../features/auth/services/authApi";
 import authReducer from "../../features/auth/store/authSlice";
-import adminUsersReducer from "../../features/admin/store/adminUsersSlice";
-import driverRegistrationReducer from "../../features/driver/driver-registration/store/driverRegistrationSlice";
-import { driverRegistrationApi } from "../../features/driver/driver-registration/services/driverRegistrationApi";
-
+import adminUsersReducer from "../../features/admin/shared/store/adminUsersSlice";
+import { driverRegistrationApi, driverRegistrationReducer } from "@/features/driver/driver-registration";
 
 export const rootReducer = combineReducers({
   // Auth

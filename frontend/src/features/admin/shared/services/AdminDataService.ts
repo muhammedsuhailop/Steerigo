@@ -1,9 +1,9 @@
 import { apiClient } from "@/shared/utils/api";
-import type { AdminDataService } from "../types/admin.interfaces";
+import { AdminDataService } from "../types/admin.interfaces";
 import type {
   User,
   UserAction,
-} from "../components/UserManagement/UserManagement.types";
+} from "../../user-management/components/UserManagement";
 
 export class ApiAdminDataService implements AdminDataService {
   async fetchUsers(params: {

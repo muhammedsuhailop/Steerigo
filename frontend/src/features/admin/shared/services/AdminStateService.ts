@@ -1,5 +1,5 @@
 import { AppDispatch } from "@/app/store";
-import { AdminStateService } from "../types/admin.interfaces";
+import { AdminStateService } from "../../user-management/types/userManagement.types";
 import {
   setFilters,
   setPage,
@@ -7,7 +7,7 @@ import {
   clearActionLoading,
   resetFilters,
 } from "../store/adminUsersSlice";
-import type { UserFilters } from "../components/UserManagement/UserManagement.types";
+import type { UserFilters } from "../../user-management/components/UserManagement/UserManagement.types";
 
 export class ReduxAdminStateService implements AdminStateService {
   constructor(private dispatch: AppDispatch) {}

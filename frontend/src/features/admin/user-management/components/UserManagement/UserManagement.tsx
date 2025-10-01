@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { UserFilters } from "./UserFilters";
 import { UserTable } from "./UserTable";
 import { TablePagination } from "@/shared/components/ui/Table";
-import { fetchAdminUsers } from "@/features/admin/store/adminUsersSlice";
+import { fetchAdminUsers } from "@/features/admin/shared/store/adminUsersSlice";
 import { useAdminOperations } from "../../hooks/useAdminOperations";
 import type { RootState, AppDispatch } from "@/app/store";
 import type { UserFilters as UserFiltersType } from "./UserManagement.types";

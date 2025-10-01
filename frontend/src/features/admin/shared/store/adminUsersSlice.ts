@@ -5,7 +5,7 @@ import type {
   User,
   UserFilters,
   UserAction,
-} from "../components/UserManagement/UserManagement.types";
+} from "../../user-management/components/UserManagement/UserManagement.types";
 
 export const fetchAdminUsers = createAsyncThunk(
   "adminUsers/fetch",
