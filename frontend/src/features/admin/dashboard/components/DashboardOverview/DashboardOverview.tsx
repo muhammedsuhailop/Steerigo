@@ -44,13 +44,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   userName,
 }) => {
   return (
-    <div className="mb-8">
+    <div>
       {/* Welcome Section */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">
           Welcome back, {userName}!
         </h1>
-        <p className="text-gray-600">Here's what's happening today.</p>
+        <p className="text-gray-600 mt-2">Here's what's happening today.</p>
       </div>
 
       {/* Stats Grid */}

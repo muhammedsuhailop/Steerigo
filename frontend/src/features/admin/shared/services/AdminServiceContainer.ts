@@ -3,20 +3,15 @@ import {
   AdminDataService,
   AdminStateService,
   AdminNotificationService,
-  AdminAnalyticsService,
-  AdminStatsService,
 } from "../types/admin.interfaces";
+import { ApiAdminDataService } from "./AdminDataService";
 import { ReduxAdminStateService } from "./AdminStateService";
 import { ToastAdminNotificationService } from "./AdminNotificationService";
-import { ApiAdminDataService } from "../../user-management/services/AdminDataService";
-import { LocalAdminStatsService } from "./AdminStatsService";
 
 export interface AdminServices {
   dataService: AdminDataService;
   stateService: AdminStateService;
   notificationService: AdminNotificationService;
-  statsService: AdminStatsService;
-  analyticsService?: AdminAnalyticsService;
 }
 
 export class AdminServiceContainer {
@@ -35,7 +30,6 @@ export class AdminServiceContainer {
       dataService: new ApiAdminDataService(),
       stateService: new ReduxAdminStateService(dispatch),
       notificationService: new ToastAdminNotificationService(),
-      statsService: new LocalAdminStatsService(),
     };
   }
 

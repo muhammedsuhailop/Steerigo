@@ -21,7 +21,6 @@ export const useAdminOperations = () => {
   } catch {
     container.initialize(dispatch);
   }
-
   const services = container.getServices();
 
   const handleFiltersChange = useCallback(

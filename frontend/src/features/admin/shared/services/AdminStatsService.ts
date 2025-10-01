@@ -1,4 +1,4 @@
-import { AdminStatsService } from "../types/admin.interfaces";
+import { AdminStatsService } from "../types";
 import type { User } from "../../user-management/components/UserManagement";
 
 export interface DashboardStats {

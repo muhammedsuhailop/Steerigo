@@ -3,8 +3,8 @@ import type {
   UserFilters,
   UserAction,
 } from "../../user-management/components/UserManagement/UserManagement.types";
+import { DashboardStats } from "../services/AdminStatsService";
 
-// Data Service Interface
 export interface AdminDataService {
   fetchUsers(params: {
     page: number;
@@ -27,7 +27,6 @@ export interface AdminDataService {
       };
     };
   }>;
-
   updateUserStatus(
     userId: string,
     action: UserAction
@@ -46,41 +45,12 @@ export interface AdminStateService {
   resetFilters(): void;
 }
 
-// Notification Service Interface
 export interface AdminNotificationService {
   showSuccess(message: string): void;
   showError(message: string): void;
   showInfo(message: string): void;
 }
 
-// Analytics Service Interface
-export interface AdminAnalyticsService {
-  trackUserAction(
-    action: string,
-    userId: string,
-    metadata?: Record<string, any>
-  ): void;
-  trackPageView(page: string): void;
-  trackError(error: Error, context?: string): void;
-}
-
-// Stats Service Interface
 export interface AdminStatsService {
-  calculateStats(
-    users: User[],
-    pagination?: any
-  ): {
-    totalUsers: number;
-    activeUsers: number;
-    pendingUsers: number;
-    inactiveUsers: number;
-    suspendedUsers: number;
-    blockedUsers: number;
-    recentUsers: User[];
-    systemHealth: {
-      serverStatus: "online" | "offline" | "maintenance";
-      databaseStatus: "connected" | "disconnected" | "slow";
-      paymentGateway: "active" | "inactive" | "error";
-    };
-  };
+  calculateStats(users: User[], pagination?: any): DashboardStats;
 }

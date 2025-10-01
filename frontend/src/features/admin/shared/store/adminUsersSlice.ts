@@ -12,10 +12,9 @@ export const fetchAdminUsers = createAsyncThunk(
   async (_: void, { getState, dispatch, rejectWithValue }) => {
     try {
       dispatch(clearErrorsByContext("adminUsers/fetch"));
-
       const state = getState() as { adminUsers: AdminUsersState };
       const { page, limit, filters } = state.adminUsers;
-
+      
       const params: any = {
         page: Math.max(1, page),
         pageSize: Math.max(1, Math.min(limit, 100)),
@@ -77,7 +76,6 @@ export const fetchAdminUsers = createAsyncThunk(
         error.userMessage || error.message || "Failed to fetch users";
       const errorCode = error.code || "FETCH_USERS_ERROR";
       const errorStatus = error.status || error.response?.status;
-
       return rejectWithValue({
         message: errorMessage,
         code: errorCode,
@@ -96,11 +94,9 @@ export const updateUserStatus = createAsyncThunk(
   ) => {
     try {
       dispatch(clearErrorsByContext(`adminUsers/updateStatus/${userId}`));
-
       if (!userId || userId === "undefined") {
         throw new Error(`Invalid user ID: ${userId}`);
       }
-
       if (!action) {
         throw new Error(`Invalid action: ${action}`);
       }
@@ -120,7 +116,6 @@ export const updateUserStatus = createAsyncThunk(
         error.userMessage || error.message || "Failed to update user status";
       const errorCode = error.code || "UPDATE_USER_ERROR";
       const errorStatus = error.status || error.response?.status;
-
       return rejectWithValue({
         message: errorMessage,
         code: errorCode,
@@ -170,40 +165,32 @@ const adminUsersSlice = createSlice({
   reducers: {
     setFilters(state, action: PayloadAction<Partial<UserFilters>>) {
       const newFilters = { ...state.filters, ...action.payload };
-
       if (newFilters.dateFrom && newFilters.dateTo) {
         const fromDate = new Date(newFilters.dateFrom);
         const toDate = new Date(newFilters.dateTo);
-
         if (fromDate > toDate) {
           newFilters.dateTo = "";
         }
       }
-
       state.filters = newFilters;
       state.page = 1;
     },
-
     setPage(state, action: PayloadAction<number>) {
       const newPage = Math.max(1, action.payload);
-
       if (state.pagination.totalPages === 0) {
         state.page = 1;
       } else {
         state.page = Math.min(newPage, state.pagination.totalPages);
       }
     },
-
     setLimit(state, action: PayloadAction<number>) {
       const newLimit = Math.max(1, Math.min(action.payload, 100));
       state.limit = newLimit;
       state.page = 1;
     },
-
     clearActionLoading(state, action: PayloadAction<string>) {
       delete state.actionLoading[action.payload];
     },
-
     resetFilters(state) {
       state.filters = {
         search: "",
@@ -226,7 +213,6 @@ const adminUsersSlice = createSlice({
         state.loading = false;
         state.users = action.payload.users;
         state.pagination = action.payload.pagination;
-
         if (
           state.pagination.totalPages > 0 &&
           state.page > state.pagination.totalPages
@@ -246,7 +232,6 @@ const adminUsersSlice = createSlice({
         };
         state.page = 1;
       })
-
       // Update User Status
       .addCase(updateUserStatus.pending, (state, action) => {
         const userId = action.meta.arg.userId;
@@ -255,7 +240,6 @@ const adminUsersSlice = createSlice({
       .addCase(updateUserStatus.fulfilled, (state, action) => {
         const { userId, action: userAction } = action.payload;
         delete state.actionLoading[userId];
-
         const userIndex = state.users.findIndex((u) => u.userId === userId);
         if (userIndex !== -1) {
           // Update status based on action
