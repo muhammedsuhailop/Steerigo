@@ -31,12 +31,15 @@ router.put(
   (req: Request, res: Response) => adminDriverController.driverAction(req, res)
 );
 
-/*
-// GET /api/admin/kyc-requests 
-router.get("/kyc-requests", getKycRequestsValidation, (req: Request, res: Response) =>
-  adminDriverController.getKycRequests(req, res)
+// GET /api/admin/kyc-requests
+router.get(
+  "/kyc-requests",
+  getKycRequestsValidation,
+  (req: Request, res: Response) =>
+    adminDriverController.getKycRequests(req, res)
 );
 
+/*
 // GET /api/admin/drivers/:driverId/profile 
 router.get("/:driverId/profile", getDriverProfileValidation, (req: Request, res: Response) =>
   adminDriverController.getDriverProfile(req, res)
