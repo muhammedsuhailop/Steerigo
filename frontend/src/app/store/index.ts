@@ -6,6 +6,8 @@ import adminUsersReducer from "../../features/admin/shared/store/adminUsersSlice
 import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
 import driverReducer from "../../features/driver/shared/store/driverSlice";
 import driverRegistrationReducer from "../../features/driver/driver-registration/store/driverRegistrationSlice";
+import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
+import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,12 +15,14 @@ export const store = configureStore({
     auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
-    
+
     // Feature reducers
     adminUsers: adminUsersReducer,
     driver: driverReducer,
     driverRegistration: driverRegistrationReducer,
-    
+    adminDrivers: adminDriverReducer,
+    adminKYC: adminKYCReducer,
+
     // Global error handling
     error: errorReducer,
   },
