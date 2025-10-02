@@ -5,7 +5,7 @@ export { ProfileHeader, UpdateProfileForm, ProfileStats } from "./components";
 export { useUserProfile } from "./hooks";
 
 // Pages
-export { UserProfilePage } from "./pages";
+export { UserProfileLayout } from "./pages";
 
 // Services
 export { userProfileApi } from "./services";

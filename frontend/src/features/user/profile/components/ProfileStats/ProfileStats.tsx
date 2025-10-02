@@ -4,6 +4,7 @@ import {
   FaMapMarkerAlt,
   FaCalendarCheck,
   FaTimes,
+  FaHeart,
 } from "react-icons/fa";
 import { MdTrendingUp, MdAccessTime } from "react-icons/md";
 import { Card } from "@/shared/components/ui/Card";
@@ -159,7 +160,7 @@ export const ProfileStats: React.FC<ProfileStatsProps> = ({
         <Card>
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Favorite Destinations
+              Favorite Drivers
             </h3>
 
             {isLoading ? (
@@ -171,21 +172,19 @@ export const ProfileStats: React.FC<ProfileStatsProps> = ({
                   </div>
                 ))}
               </div>
-            ) : stats.favoriteDestinations.length > 0 ? (
+            ) : stats.favoriteDrivers.length > 0 ? (
               <div className="space-y-3">
-                {stats.favoriteDestinations
-                  .slice(0, 5)
-                  .map((destination, index) => (
-                    <div key={index} className="flex items-center">
-                      <FaMapMarkerAlt className="w-4 h-4 text-gray-400 mr-3" />
-                      <span className="text-sm text-gray-700 truncate">
-                        {destination}
-                      </span>
-                    </div>
-                  ))}
-                {stats.favoriteDestinations.length > 5 && (
+                {stats.favoriteDrivers.slice(0, 5).map((destination, index) => (
+                  <div key={index} className="flex items-center">
+                    <FaHeart className="w-4 h-4 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-700 truncate">
+                      {destination}
+                    </span>
+                  </div>
+                ))}
+                {stats.favoriteDrivers.length > 5 && (
                   <div className="text-xs text-gray-500 mt-2">
-                    +{stats.favoriteDestinations.length - 5} more destinations
+                    +{stats.favoriteDrivers.length - 5} more Drivers
                   </div>
                 )}
               </div>

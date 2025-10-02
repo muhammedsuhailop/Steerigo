@@ -1,1 +1,2 @@
-export { default as UserProfilePage } from "./UserProfilePage";
+export { default as UserProfileLayout } from "./UserProfileLayout";
+export * from "./UserProfilePage";

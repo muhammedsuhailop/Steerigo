@@ -4,7 +4,6 @@ export { DriverSearchForm } from "./dashbaord/components";
 
 // Profile
 export {
-  UserProfilePage,
   ProfileHeader,
   UpdateProfileForm,
   ProfileStats,
@@ -12,5 +11,6 @@ export {
   userProfileApi,
   userProfileReducer,
 } from "./profile";
+export { default as UserProfileLayout } from "./profile/pages/UserProfileLayout";
 
 export type { UserProfile, UserProfileFormData, UserStats } from "./profile";
