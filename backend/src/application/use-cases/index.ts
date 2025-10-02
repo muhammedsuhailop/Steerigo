@@ -10,4 +10,6 @@ export * from "./auth/ForgotPasswordVerifyUseCase";
 export * from "./driver/RegisterDriverUseCase";
 export * from "./auth/GetGoogleAuthUrlUseCase";
 export * from "./auth/GoogleLoginUseCase";
-export { GetCurrentUserUseCase } from './auth/GetCurrentUserUseCase';
+export { GetCurrentUserUseCase } from "./auth/GetCurrentUserUseCase";
+export * from "./user/GetUserProfileUseCase";
+export * from "./user/UpdateUserProfileUseCase";
