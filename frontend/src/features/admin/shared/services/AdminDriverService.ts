@@ -29,11 +29,11 @@ export class AdminDriverService {
 
   async fetchDriverById(driverId: string) {
     try {
-      const response = await apiClient.get(`/api/admin/drivers/${driverId}`);
+      const response = await apiClient.get(`/api/admin/drivers/${driverId}/profile`);
       return {
-        success: true,
-        data: response,
-      };
+      success: true,
+      data: response.data, 
+    };
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || "Failed to fetch driver"
@@ -47,7 +47,7 @@ export class AdminDriverService {
     reason?: string
   ) {
     try {
-      const response = await apiClient.patch(
+      const response = await apiClient.put(
         `/api/admin/drivers/${driverId}/action`,
         {
           action,

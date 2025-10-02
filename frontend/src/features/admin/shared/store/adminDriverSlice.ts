@@ -12,6 +12,8 @@ interface AdminDriverState {
   selectedDriver: Driver | null;
   loading: boolean;
   actionLoading: Record<string, boolean>;
+  actionMessage: string | null;
+  actionMessageType: "success" | "error" | null;
   error: string | null;
   filters: DriverFilters;
   page: number;
@@ -25,6 +27,8 @@ const initialState: AdminDriverState = {
   loading: false,
   actionLoading: {},
   error: null,
+  actionMessage: null,
+  actionMessageType: null,
   filters: {
     search: "",
     status: "",
@@ -136,6 +140,17 @@ const adminDriverSlice = createSlice({
     clearSelectedDriver: (state) => {
       state.selectedDriver = null;
     },
+    clearActionMessage: (state) => {
+      state.actionMessage = null;
+      state.actionMessageType = null;
+    },
+    setActionMessage: (
+      state,
+      action: PayloadAction<{ message: string; type: "success" | "error" }>
+    ) => {
+      state.actionMessage = action.payload.message;
+      state.actionMessageType = action.payload.type;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -166,7 +181,44 @@ const adminDriverSlice = createSlice({
       })
       .addCase(fetchDriverById.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedDriver = action.payload;
+
+        const data = action.payload;
+
+        state.selectedDriver = {
+          driverId: data.id,
+          name: data.user?.name || "",
+          email: data.user?.email || "",
+          mobile: data.user?.mobile || "",
+          status: data.driver?.status || "InReview",
+          kycStatus: data.driver?.kycStatus || "Pending",
+          createdAt: data.driver?.createdAt || "",
+          address: data.user?.address || "",
+          pinCode: data.user?.pinCode || "",
+          state: data.user?.state || "",
+          lastRide: data.driver?.statistics?.lastRideDate || null,
+          totalRides: data.driver?.statistics?.totalRides || 0,
+          rating: 0, // ToDo
+          profileImage: undefined, // ToDo:
+          licenseNumber: data.driver?.licenseNumber || "",
+          licenseIssueDate: data.driver?.licenseIssueDate || "",
+          licenseExpiryDate: data.driver?.licenseExpiryDate || "",
+          eligibleVehicleType: data.driver?.eligibleVehicleType || [],
+          eligibleGearType: data.driver?.eligibleGearType || [],
+          kycDocs: Array.isArray(data.kycDocuments)
+            ? data.kycDocuments.map((doc: any) => ({
+                id: doc.id,
+                driverId: doc.driverId,
+                documentType: doc.documentType,
+                documentNumber: doc.documentNumber,
+                issueDate: doc.issueDate,
+                expiryDate: doc.expiryDate,
+                documentImageUrls: doc.documentImageUrls || [],
+                isVerified: doc.isVerified,
+                comments: doc.comments,
+                submittedAt: doc.submittedAt,
+              }))
+            : [],
+        };
       })
       .addCase(fetchDriverById.rejected, (state, action) => {
         state.loading = false;
@@ -179,8 +231,12 @@ const adminDriverSlice = createSlice({
         state.error = null;
       })
       .addCase(updateDriverStatus.fulfilled, (state, action) => {
-        const { driverId, data } = action.payload;
+        const { driverId, data, message } = action.payload;
         delete state.actionLoading[driverId];
+
+        // Set success message
+        state.actionMessage = message || "Driver status updated successfully";
+        state.actionMessageType = "success";
 
         // Update driver in the list
         const index = state.drivers.findIndex(
@@ -198,6 +254,9 @@ const adminDriverSlice = createSlice({
       .addCase(updateDriverStatus.rejected, (state, action) => {
         const driverId = action.meta.arg.driverId;
         delete state.actionLoading[driverId];
+
+        state.actionMessage = action.payload as string;
+        state.actionMessageType = "error";
         state.error = action.payload as string;
       });
   },
@@ -211,6 +270,8 @@ export const {
   clearActionLoading,
   clearError,
   clearSelectedDriver,
+  clearActionMessage,
+  setActionMessage,
 } = adminDriverSlice.actions;
 
 export default adminDriverSlice.reducer;

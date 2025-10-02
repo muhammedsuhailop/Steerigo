@@ -1,14 +1,15 @@
-import { useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDriverById,
   updateDriverStatus,
   clearSelectedDriver,
   clearError,
-} from '@/features/admin/shared/store/adminDriverSlice';
-import type { AppDispatch, RootState } from '@/app/store';
-import type { DriverAction } from '@/features/admin/shared/types';
+  clearActionMessage,
+} from "@/features/admin/shared/store/adminDriverSlice";
+import type { AppDispatch, RootState } from "@/app/store";
+import type { DriverAction } from "@/features/admin/shared/types";
 
 export const useDriverProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,62 +20,69 @@ export const useDriverProfile = () => {
     loading,
     error,
     actionLoading,
-  } = useSelector((state: RootState) => state.adminDrivers);
+    actionMessage,
+    actionMessageType,
+  } = useSelector((s: RootState) => s.adminDrivers);
 
-  // Fetch driver on mount
   useEffect(() => {
-    if (id) {
-      dispatch(fetchDriverById(id));
-    }
+    if (id) dispatch(fetchDriverById(id));
     return () => {
       dispatch(clearSelectedDriver());
       dispatch(clearError());
     };
   }, [dispatch, id]);
 
-  // Update driver status (approve/reject/etc)
   const handleDriverAction = useCallback(
     async (action: DriverAction, reason?: string) => {
-      if (!id) return false;
+      if (!id) return;
       try {
-        const result = await dispatch(
+        await dispatch(
           updateDriverStatus({ driverId: id, action, reason })
         ).unwrap();
-        // Refresh profile
         dispatch(fetchDriverById(id));
-        return { success: true, message: result.message };
-      } catch (err: any) {
-        return { success: false, message: err.message || 'Action failed' };
+      } catch {
+        // error handle by slice
       }
     },
     [dispatch, id]
   );
 
-  // Check if a given action is loading
+  const clearMessage = useCallback(() => {
+    dispatch(clearActionMessage());
+  }, [dispatch]);
+
   const isActionLoading = useCallback(
-    (actionDriverId?: string) => {
-      const key = actionDriverId || id;
-      return key ? Boolean(actionLoading[key]) : false;
-    },
+    (did?: string) => Boolean(actionLoading[did || id!]),
     [actionLoading, id]
   );
 
-  // Retry fetch on error
-  const retryFetch = useCallback(() => {
-    if (id) {
-      dispatch(clearError());
-      dispatch(fetchDriverById(id));
-    }
-  }, [dispatch, id]);
+  const kycItems = (
+    driver?.kycDocs
+      ? driver.kycDocs.map((doc) => ({
+          id: doc.id,
+          driverId: doc.driverId,
+          documentType: doc.documentType,
+          documentNumber: doc.documentNumber,
+          issueDate: doc.issueDate,
+          expiryDate: doc.expiryDate,
+          urlFront: doc.documentImageUrls[0] || "",
+          urlBack: doc.documentImageUrls[1] || "",
+          isVerified: doc.isVerified,
+          comments: doc.comments,
+          submittedAt: doc.submittedAt,
+        }))
+      : []
+  ) as any[];
 
   return {
     driver,
+    kycItems,
     loading,
     error,
+    actionMessage,
+    actionMessageType,
+    clearMessage,
     handleDriverAction,
     isActionLoading,
-    retryFetch,
   };
 };
-
-export default useDriverProfile;
