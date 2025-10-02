@@ -5,7 +5,6 @@ import type { RootState } from "@/app/store";
 import { FaRegBell } from "react-icons/fa";
 import {
   RiMenuLine,
-  RiSearchLine,
   RiUserLine,
   RiArrowDropDownLine,
 } from "react-icons/ri";
@@ -96,16 +95,6 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({
 
         {/* Right */}
         <div className="flex items-center space-x-3">
-          {/* Search */}
-          <div className="relative hidden sm:block">
-            <RiSearchLine className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-3 py-2 border rounded-md focus:ring-1 focus:ring-blue-500 text-sm sm:w-64"
-            />
-          </div>
-
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <button

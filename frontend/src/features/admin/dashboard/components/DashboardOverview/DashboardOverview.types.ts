@@ -1,7 +1,3 @@
-export interface DashboardOverviewProps {
-  userName?: string;
-}
-
 export interface OverviewStat {
   id: string;
   title: string;
@@ -16,4 +12,8 @@ export interface OverviewStat {
 
 export interface StatCardProps {
   stat: OverviewStat;
+}
+
+export interface DashboardOverviewProps {
+  userName: string;
 }
