@@ -15,6 +15,10 @@ export { OnlineStatus } from "./OnlineStatus";
 export { NotificationDropdown } from "./Notification";
 export { ProfileDropdown } from "./Profile";
 
+export { Card, CardBody, CardFooter, CardHeader } from "./Card";
+export { Modal } from "./Modal";
+export { Alert } from "./Alert";
+
 // Error Handling exports
 export { ErrorBoundary } from "./ErrorHandling/ErrorBoundary";
 export { ToastContainer, GlobalErrorModal } from "./ErrorHandling/Toast";

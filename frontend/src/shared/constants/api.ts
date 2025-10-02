@@ -33,4 +33,6 @@ export const API_ENDPOINTS = {
 
 export const EXTERNAL_API = {
   POSTAL: "https://api.postalpincode.in/pincode",
+  CLOUDINARY_BASE:
+    "https://res.cloudinary.com/dlv7crxfz/image/upload/v1759336549",
 } as const;
