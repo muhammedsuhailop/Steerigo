@@ -71,7 +71,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             size="xs"
             variant="secondary"
             isLoading={isLoading}
-            onClick={() => onDriverAction(driver.driverId, "Block")}
+            onClick={() => onDriverAction(driver.driverId, "block")}
           >
             Block
           </Button>
@@ -82,7 +82,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             size="xs"
             variant="success"
             isLoading={isLoading}
-            onClick={() => onDriverAction(driver.driverId, "Active")}
+            onClick={() => onDriverAction(driver.driverId, "unblock")}
           >
             Activate
           </Button>
