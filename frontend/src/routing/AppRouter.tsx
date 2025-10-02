@@ -6,7 +6,7 @@ import LandingPage from "@/features/public/pages/LandingPage";
 import SignupPage from "@/features/auth/pages/SignupPage";
 import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage";
 import UpdatePasswordPage from "@/features/auth/pages/UpdatePasswordPage";
-import UserDashboard from "@/features/user/pages/UserDashboard";
+import UserDashboard from "@/features/user/dashbaord/pages/UserDashboard";
 import DriverDashboard from "@/features/driver/dashboard/pages/DriverDashboard";
 import AdminDashboard from "@/features/admin/dashboard/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAuth } from '@/features/auth';
-import { DriverSearchForm } from '@/features/user/components/DriverSearchForm';
+import { DriverSearchForm } from '@/features/user/dashbaord/components/DriverSearchForm';
 import { AuthenticatedHeroContent } from './AuthenticatedHeroContent';
 import { UnauthenticatedHeroContent } from './UnauthenticatedHeroContent';
 import type { HeroSectionProps } from './HeroSection.types';
-import type { SearchFormData } from '@/features/user/components/DriverSearchForm';
+import type { SearchFormData } from '@/features/user/dashbaord/components/DriverSearchForm';
 import { URLS } from '@/shared/constants';
 
 export const HeroSection: React.FC<HeroSectionProps> = () => {
