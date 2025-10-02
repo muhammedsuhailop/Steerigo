@@ -27,7 +27,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: "rides", label: "Rides", icon: "RiSteeringFill", path: "/admin/rides" },
         { id: "users", label: "Users", icon: "RiUserLine", path: "/admin/users" },
         { id: "drivers", label: "Drivers", icon: "RiCarLine", path: "/admin/drivers" },
-        { id: "kyc", label: "KYC", icon: "RiShieldCheckLine", path: "/admin/kyc", badge: 5 },
+        { id: "kyc", label: "KYC", icon: "RiShieldCheckLine", path: "/admin/kyc-requests", badge: 5 },
         { id: "revenue", label: "Revenue", icon: "RiMoneyDollarCircleLine", path: "/admin/revenue" },
         { id: "coupons", label: "Coupons", icon: "RiTicket2Line", path: "/admin/coupons" },
         { id: "transactions", label: "Transactions", icon: "GrTransaction", path: "/admin/transactions" },

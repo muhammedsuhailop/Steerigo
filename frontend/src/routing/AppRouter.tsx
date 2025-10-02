@@ -15,7 +15,7 @@ import { NotFoundPage } from "@/features/public/pages";
 import { DriverRegistrationPage } from "@/features/driver/driver-registration/pages";
 import DriverManagementLayout from "@/features/admin/driver-management/pages/DriverManagementLayout";
 import DriverProfilePage from "@/features/admin/driver/view-profile/pages/DriverProfilePage";
-import KYCRequestsLayout from "@/features/admin/kyc-requests/pages/KYCRequestsLayout";
+import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/KYCRequestsLayout";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();

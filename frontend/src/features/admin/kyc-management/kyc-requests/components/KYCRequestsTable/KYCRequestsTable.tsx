@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Badge, Button } from "@/shared/components/ui";
 import type { TableProps } from "@/shared/components/ui/Table/Table.types";
-import type { KYCRequest, KYCAction } from "../../../shared/types";
+import type { KYCRequest, KYCAction } from "../../../../shared/types";
 
 interface KYCRequestsTableProps {
   requests: KYCRequest[];

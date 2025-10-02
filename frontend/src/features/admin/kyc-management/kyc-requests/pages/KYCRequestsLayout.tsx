@@ -4,7 +4,7 @@ import { KYCFilters, KYCRequestsTable } from "../components";
 import { fetchKYCRequests } from "@/features/admin/shared/store/adminKYCSlice";
 import { useKYCOperations } from "../hooks/useKYCOperations";
 import { TablePagination, LoadingSpinner } from "@/shared/components/ui";
-import { AdminSidebar, AdminTopbar } from "../../shared/components";
+import { AdminSidebar, AdminTopbar } from "../../../shared/components";
 import type { RootState, AppDispatch } from "@/app/store";
 
 export const KYCRequestsLayout: React.FC = () => {
