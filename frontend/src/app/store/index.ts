@@ -8,6 +8,7 @@ import driverReducer from "../../features/driver/shared/store/driverSlice";
 import driverRegistrationReducer from "../../features/driver/driver-registration/store/driverRegistrationSlice";
 import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
 import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
+import { userProfileApi, userProfileReducer } from "@/features/user/profile";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
+    [userProfileApi.reducerPath]: userProfileApi.reducer,
 
     // Feature reducers
     adminUsers: adminUsersReducer,
@@ -22,6 +24,7 @@ export const store = configureStore({
     driverRegistration: driverRegistrationReducer,
     adminDrivers: adminDriverReducer,
     adminKYC: adminKYCReducer,
+    userProfile: userProfileReducer,
 
     // Global error handling
     error: errorReducer,
@@ -32,7 +35,11 @@ export const store = configureStore({
         ignoredActions: ["error/addError"],
         ignoredPaths: ["error.errors.timestamp", "error.globalError.timestamp"],
       },
-    }).concat(authApi.middleware, driverRegistrationApi.middleware),
+    }).concat(
+      authApi.middleware,
+      driverRegistrationApi.middleware,
+      userProfileApi.middleware
+    ),
   devTools: import.meta.env.DEV,
 });
 
