@@ -16,7 +16,7 @@ import { DriverRegistrationPage } from "@/features/driver/driver-registration/pa
 import DriverManagementLayout from "@/features/admin/driver-management/pages/DriverManagementLayout";
 import DriverProfilePage from "@/features/admin/driver/view-profile/pages/DriverProfilePage";
 import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/KYCRequestsLayout";
-import { UserProfilePage } from "@/features/user";
+import { UserProfileLayout } from "@/features/user";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -137,7 +137,7 @@ export const AppRouter: React.FC = () => {
         path="/profile"
         element={
           <ProtectedRoute>
-            <UserProfilePage />
+            <UserProfileLayout />
           </ProtectedRoute>
         }
       />

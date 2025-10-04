@@ -153,9 +153,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {stats.favoriteDestinations.length}
+              {stats.favoriteDrivers?.length}
             </div>
-            <div className="text-sm text-gray-600">Favorite Places</div>
+            <div className="text-sm text-gray-600">Favorite Drivers</div>
           </div>
         </div>
       </div>

@@ -1,1 +1,2 @@
-export * from './authValidators';
+export * from "./authValidators";
+export * from "./user/userProfileValidators";

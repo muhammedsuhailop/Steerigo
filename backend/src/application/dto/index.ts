@@ -8,3 +8,4 @@ export * from "./auth/ForgotPasswordRequestDto";
 export * from "./auth/ForgotPasswordVerifyDto";
 export * from "./auth/GoogleLoginDto";
 export { GetCurrentUserDto } from "./auth/GetCurrentUserDto";
+export * from './user';

@@ -47,7 +47,7 @@ export interface UserStats {
   cancelledRides: number;
   totalSpent: number;
   memberSince: string;
-  favoriteDestinations: string[];
+  favoriteDrivers: string[];
 }
 
 export interface ProfileHeaderProps {

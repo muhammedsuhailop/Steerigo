@@ -3,6 +3,7 @@ import { authRoutes } from "./authRoutes";
 import { driverRoutes } from "./driver/driverRoutes";
 import { adminRoutes } from "./admin";
 import { fileRoutes } from "./file/fileRoutes";
+import { userRoutes } from "./user";
 
 const router = Router();
 
@@ -11,6 +12,8 @@ router.use("/auth", authRoutes);
 router.use("/driver", driverRoutes);
 
 router.use("/admin", adminRoutes);
+
+router.use("/user", userRoutes);
 
 router.use("/file", fileRoutes);
 

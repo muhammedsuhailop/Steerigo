@@ -8,13 +8,16 @@ import { Alert } from "@/shared/components/ui/Alert";
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UpdateProfileForm } from "../components/UpdateProfileForm";
 import { ProfileStats } from "../components/ProfileStats";
-import type { UserProfileFormData } from "../types/userProfile.types";
+import type {
+  UserProfileFormData,
+  UserStats,
+} from "../types/userProfile.types";
 
 const UserProfilePage: React.FC = () => {
   const { user } = useAuth();
   const {
     profile,
-    stats,
+    // stats,
     isLoading,
     isUpdating,
     error,
@@ -24,6 +27,15 @@ const UserProfilePage: React.FC = () => {
     refreshData,
     clearErrors,
   } = useUserProfile();
+
+  const dummyStats: UserStats = {
+    totalRides: 42,
+    completedRides: 37,
+    cancelledRides: 2,
+    totalSpent: 1234.56,
+    memberSince: "2023-01-01",
+    favoriteDrivers: ["Sharuck", "Doe", "Sam"],
+  };
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -109,7 +121,7 @@ const UserProfilePage: React.FC = () => {
     );
   }
 
-  if (!profile || !stats) {
+  if (!profile || !dummyStats) {
     return null;
   }
 
@@ -173,7 +185,7 @@ const UserProfilePage: React.FC = () => {
           ) : (
             <ProfileHeader
               profile={profile}
-              stats={stats}
+              stats={dummyStats}
               onEditClick={handleEditClick}
               onDriverRegisterClick={navigateToDriverRegistration}
               isLoading={isLoading}
@@ -189,7 +201,7 @@ const UserProfilePage: React.FC = () => {
                 </h2>
               </div>
 
-              <ProfileStats stats={stats} isLoading={isLoading} />
+              <ProfileStats stats={dummyStats} isLoading={isLoading} />
             </div>
           )}
         </div>

@@ -69,6 +69,11 @@ import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycReques
 import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
 import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
 import { AdminDriverController } from "@interface/controllers/admin/AdminDriverController";
+import { IUserProfileRepository } from "@domain/repositories/user/IUserProfileRepository";
+import { MongoUserProfileRepository } from "@infrastructure/database/repositories/user/MongoUserProfileRepository";
+import { UserProfileController } from "@interface/controllers/user/UserProfileController";
+import { GetUserProfileUseCase } from "@application/use-cases/user/GetUserProfileUseCase";
+import { UpdateUserProfileUseCase } from "@application/use-cases/user/UpdateUserProfileUseCase";
 
 const container = new Container();
 
@@ -92,6 +97,9 @@ container
 container
   .bind<IAdminKycRepository>("IAdminKycRepository")
   .to(MongoAdminKycRepository);
+container
+  .bind<IUserProfileRepository>("IUserProfileRepository")
+  .to(MongoUserProfileRepository);
 
 // Service Bindings
 container.bind<IPasswordService>("IPasswordService").to(BcryptPasswordService);
@@ -125,6 +133,8 @@ container.bind<IFileUploadService>("IFileUploadService").to(CloudinaryService);
   GetDriverProfileUseCase,
   UpdateKycStatusUseCase,
   GetKycRequestByIdUseCase,
+  GetUserProfileUseCase,
+  UpdateUserProfileUseCase,
 ].forEach((useCase) => container.bind(useCase).toSelf());
 
 // Controller Bindings
@@ -138,5 +148,6 @@ container.bind<DriverController>(DriverController).toSelf();
 container.bind<AdminUserController>(AdminUserController).toSelf();
 container.bind<FileController>(FileController).toSelf();
 container.bind<AdminDriverController>(AdminDriverController).toSelf();
+container.bind(UserProfileController).toSelf();
 
 export { container };
