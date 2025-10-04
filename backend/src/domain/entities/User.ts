@@ -1,17 +1,51 @@
 import { DomainError } from "../errors/DomainError";
+import { Email } from "../value-objects/Email";
+import { Password } from "../value-objects/Password";
+import {
+  AuthProvider,
+  UserRole,
+  UserStatus,
+} from "@shared/constants/AuthConstants";
+import { BaseEntity } from "@shared/types/Repository";
 
-export class User {
+export interface UserCreationProps {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  mobile?: string;
+  dob?: Date;
+  gender?: string;
+  address?: string;
+  role?: UserRole;
+}
+
+export interface UserReconstructionProps extends UserCreationProps {
+  role: UserRole;
+  status: UserStatus;
+  isVerified: boolean;
+  otpHash?: string;
+  otpExpires?: Date;
+  otpAttempts: number;
+  createdAt: Date;
+  updatedAt: Date;
+  googleId?: string;
+  profilePicture?: string;
+  authProvider?: AuthProvider;
+}
+
+export class User implements BaseEntity {
   private constructor(
     private readonly id: string,
     private name: string,
-    private email: string,
-    private password: string,
+    private email: Email,
+    private password: Password,
     private mobile?: string,
     private dob?: Date,
     private gender?: string,
     private address?: string,
-    private role: string = "Rider",
-    private status: string = "Pending Verification",
+    private role: UserRole = UserRole.RIDER,
+    private status: UserStatus = UserStatus.PENDING_VERIFICATION,
     private isVerified: boolean = false,
     private otpHash?: string,
     private otpExpires?: Date,
@@ -20,68 +54,45 @@ export class User {
     private updatedAt: Date = new Date(),
     private googleId?: string,
     private profilePicture?: string,
-    private authProvider: "email" | "google" = "email"
+    private authProvider: AuthProvider = AuthProvider.EMAIL
   ) {}
 
-  static create(props: {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-    mobile?: string;
-    dob?: Date;
-    gender?: string;
-    address?: string;
-    role?: string;
-  }): User {
-    // Business rule validations
+  static create(props: UserCreationProps): User {
+    // Validate name
     if (!props.name || props.name.trim().length < 2) {
       throw new DomainError("Name must be at least 2 characters long");
     }
 
-    if (!User.isValidEmail(props.email)) {
-      throw new DomainError("Invalid email format");
+    if (props.name.trim().length > 100) {
+      throw new DomainError("Name must be less than 100 characters");
     }
+
+    // Create value objects
+    const email = Email.create(props.email);
+    const password = Password.createFromPlainText(props.password);
 
     return new User(
       props.id,
       props.name.trim(),
-      props.email.toLowerCase().trim(),
-      props.password,
+      email,
+      password,
       props.mobile,
       props.dob,
       props.gender,
       props.address,
-      props.role || "Rider"
+      props.role || UserRole.RIDER
     );
   }
 
-  static reconstruct(props: {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-    mobile?: string;
-    dob?: Date;
-    gender?: string;
-    address?: string;
-    role: string;
-    status: string;
-    isVerified: boolean;
-    otpHash?: string;
-    otpExpires?: Date;
-    otpAttempts: number;
-    createdAt: Date;
-    updatedAt: Date;
-    googleId?: string;
-    profilePicture?: string;
-    authProvider?: "email" | "google";
-  }): User {
+  static reconstruct(props: UserReconstructionProps): User {
+    const email = Email.create(props.email);
+    const password = Password.createFromHash(props.password);
+
     return new User(
       props.id,
       props.name,
-      props.email,
-      props.password,
+      email,
+      password,
       props.mobile,
       props.dob,
       props.gender,
@@ -93,7 +104,10 @@ export class User {
       props.otpExpires,
       props.otpAttempts,
       props.createdAt,
-      props.updatedAt
+      props.updatedAt,
+      props.googleId,
+      props.profilePicture,
+      props.authProvider || AuthProvider.EMAIL
     );
   }
 
@@ -104,39 +118,45 @@ export class User {
     email: string;
     profilePicture?: string;
   }): User {
-    if (!User.isValidEmail(props.email)) {
-      throw new DomainError("Invalid email format");
-    }
+    const email = Email.create(props.email);
+    const password = Password.createFromHash(""); // Google users don't have passwords
 
     return new User(
       props.id,
       props.name,
-      props.email,
-      "", // No password for Google users
-      undefined, // mobile
-      undefined, // dob
-      undefined, // gender
-      undefined, // address
-      "Rider", // default role
-      "Active", // Google users are pre-verified
-      true, // isVerified
-      undefined, // otpHash
-      undefined, // otpExpires
-      0, // otpAttempts
+      email,
+      password,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      UserRole.RIDER,
+      UserStatus.ACTIVE, // Google users are pre-verified
+      true,
+      undefined,
+      undefined,
+      0,
       new Date(),
       new Date(),
       props.googleId,
       props.profilePicture,
-      "google"
+      AuthProvider.GOOGLE
     );
   }
 
-  // Business methods
-  setOtpDetails(otpHash: string, otpExpires: Date): void {
-    this.otpHash = otpHash;
-    this.otpExpires = otpExpires;
-    this.otpAttempts = 0;
-    this.updatedAt = new Date();
+  // Business Logic Methods
+  canLogin(): boolean {
+    return this.isVerified && this.status === UserStatus.ACTIVE;
+  }
+
+  isAccountLocked(): boolean {
+    return (
+      this.status === UserStatus.BLOCKED || this.status === UserStatus.SUSPENDED
+    );
+  }
+
+  isGoogleUser(): boolean {
+    return this.authProvider === AuthProvider.GOOGLE;
   }
 
   canAttemptOtpVerification(): boolean {
@@ -148,78 +168,56 @@ export class User {
     return this.otpExpires.getTime() < Date.now();
   }
 
-  incrementOtpAttempts(): void {
-    this.otpAttempts += 1;
-    this.updatedAt = new Date();
-  }
-
-  verify(): void {
+  // Domain Events (for future implementation)
+  markEmailAsVerified(): void {
     if (this.isVerified) {
       throw new DomainError("User is already verified");
     }
-
     this.isVerified = true;
-    this.status = "Active";
+    this.status = UserStatus.ACTIVE;
     this.otpHash = undefined;
     this.otpExpires = undefined;
     this.otpAttempts = 0;
     this.updatedAt = new Date();
   }
 
-  updateProfile(props: {
+  incrementOtpAttempts(): void {
+    this.otpAttempts += 1;
+    this.updatedAt = new Date();
+  }
+
+  resetOtpAttempts(): void {
+    this.otpAttempts = 0;
+    this.updatedAt = new Date();
+  }
+
+  updateProfile(updates: {
     name?: string;
     mobile?: string;
     dob?: Date;
     gender?: string;
     address?: string;
   }): void {
-    if (props.name) {
-      if (props.name.trim().length < 2) {
+    if (updates.name) {
+      if (updates.name.trim().length < 2) {
         throw new DomainError("Name must be at least 2 characters long");
       }
-      this.name = props.name.trim();
+      this.name = updates.name.trim();
     }
 
-    if (props.mobile !== undefined) this.mobile = props.mobile;
-    if (props.dob !== undefined) this.dob = props.dob;
-    if (props.gender !== undefined) this.gender = props.gender;
-    if (props.address !== undefined) this.address = props.address;
+    if (updates.mobile !== undefined) this.mobile = updates.mobile;
+    if (updates.dob !== undefined) this.dob = updates.dob;
+    if (updates.gender !== undefined) this.gender = updates.gender;
+    if (updates.address !== undefined) this.address = updates.address;
 
     this.updatedAt = new Date();
   }
 
-  updatePassword(newPassword: string): void {
-    if (!newPassword || newPassword.trim().length === 0) {
-      throw new DomainError("Password cannot be empty");
-    }
-
-    this.password = newPassword;
-    this.updatedAt = new Date();
-  }
-
-  setPasswordResetOtp(otpHash: string, otpExpires: Date): void {
+  setOtpDetails(otpHash: string, otpExpires: Date): void {
     this.otpHash = otpHash;
     this.otpExpires = otpExpires;
     this.otpAttempts = 0;
     this.updatedAt = new Date();
-  }
-
-  resetPassword(newPasswordHash: string): void {
-    if (!newPasswordHash || newPasswordHash.trim().length === 0) {
-      throw new DomainError("Password hash cannot be empty");
-    }
-
-    this.password = newPasswordHash;
-    this.otpHash = undefined;
-    this.otpExpires = undefined;
-    this.otpAttempts = 0;
-    this.updatedAt = new Date();
-  }
-
-  // Validation helpers
-  private static isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 
   // Getters
@@ -229,11 +227,17 @@ export class User {
   getName(): string {
     return this.name;
   }
-  getEmail(): string {
+  getEmail(): Email {
     return this.email;
   }
-  getPassword(): string {
+  getEmailValue(): string {
+    return this.email.getValue();
+  }
+  getPassword(): Password {
     return this.password;
+  }
+  getPasswordHash(): string {
+    return this.password.getHashedValue();
   }
   getMobile(): string | undefined {
     return this.mobile;
@@ -247,10 +251,10 @@ export class User {
   getAddress(): string | undefined {
     return this.address;
   }
-  getRole(): string {
+  getRole(): UserRole {
     return this.role;
   }
-  getStatus(): string {
+  getStatus(): UserStatus {
     return this.status;
   }
   getIsVerified(): boolean {
@@ -271,18 +275,13 @@ export class User {
   getUpdatedAt(): Date {
     return this.updatedAt;
   }
-
   getGoogleId(): string | undefined {
     return this.googleId;
   }
   getProfilePicture(): string | undefined {
     return this.profilePicture;
   }
-  getAuthProvider(): "email" | "google" {
+  getAuthProvider(): AuthProvider {
     return this.authProvider;
-  }
-
-  isGoogleUser(): boolean {
-    return this.authProvider === "google";
   }
 }

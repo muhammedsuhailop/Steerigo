@@ -34,7 +34,8 @@
     "pino": "^9.9.0",
     "reflect-metadata": "^0.2.2",
     "streamifier": "^0.1.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
