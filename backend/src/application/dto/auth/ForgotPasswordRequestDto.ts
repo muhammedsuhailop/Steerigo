@@ -1,7 +1,13 @@
-export class ForgotPasswordRequestDto {
-    public readonly email: string;
+import { Email } from "@domain/value-objects/Email";
 
-    constructor(data: { email: string }) {
-        this.email = data.email;
-    }
+export class ForgotPasswordRequestDto {
+  private email: Email;
+
+  constructor(data: { email: string }) {
+    this.email = Email.create(data.email);
+  }
+
+  getEmail(): string {
+    return this.email.getValue();
+  }
 }

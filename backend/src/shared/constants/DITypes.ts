@@ -4,15 +4,33 @@ export const TYPES = {
   UserRepository: Symbol.for("UserRepository"),
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
 
-  // Services
+  // Application Services
   PasswordService: Symbol.for("PasswordService"),
   TokenService: Symbol.for("TokenService"),
+  EmailService: Symbol.for("EmailService"),
+  OtpService: Symbol.for("OtpService"),
+  GoogleAuthService: Symbol.for("GoogleAuthService"),
+  FileUploadService: Symbol.for("FileUploadService"),
 
-  // Use Cases
+  // Use Cases - Auth
   LoginUseCase: Symbol.for("LoginUseCase"),
   LogoutUseCase: Symbol.for("LogoutUseCase"),
   RefreshTokenUseCase: Symbol.for("RefreshTokenUseCase"),
+  SignupRequestUseCase: Symbol.for("SignupRequestUseCase"),
+  SignupVerifyUseCase: Symbol.for("SignupVerifyUseCase"),
+  ForgotPasswordRequestUseCase: Symbol.for("ForgotPasswordRequestUseCase"),
+  ForgotPasswordVerifyUseCase: Symbol.for("ForgotPasswordVerifyUseCase"),
+  UpdatePasswordUseCase: Symbol.for("UpdatePasswordUseCase"),
+  ResendOtpUseCase: Symbol.for("ResendOtpUseCase"),
+  GetCurrentUserUseCase: Symbol.for("GetCurrentUserUseCase"),
+  GoogleLoginUseCase: Symbol.for("GoogleLoginUseCase"),
+  GetGoogleAuthUrlUseCase: Symbol.for("GetGoogleAuthUrlUseCase"),
 
   // Controllers
-  AuthController: Symbol.for("AuthController"),
+  LoginController: Symbol.for("LoginController"),
+  SignupController: Symbol.for("SignupController"),
+  OtpController: Symbol.for("OtpController"),
+  PasswordController: Symbol.for("PasswordController"),
+  SocialAuthController: Symbol.for("SocialAuthController"),
+  UserController: Symbol.for("UserController"),
 };

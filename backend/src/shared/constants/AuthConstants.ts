@@ -32,6 +32,17 @@ export const AuthMessages = {
   ACCESS_TOKEN_REQUIRED: "Access token required",
   REFRESH_TOKEN_REQUIRED: "Refresh token required",
   AUTHENTICATION_FAILED: "Authentication failed",
+  SIGNUP_SUCCESS:
+    "Signup initiated. An OTP has been sent to your email for verification.",
+  SIGNUP_VERIFICATION_SUCCESS:
+    "Email verified successfully. Welcome to Steerigo!",
+  OTP_SENT_SUCCESS: "Verification code sent to your email",
+  OTP_RESEND_SUCCESS: "New verification code sent to your email",
+  PASSWORD_RESET_REQUEST_SUCCESS: "Password reset code sent to your email",
+  PASSWORD_RESET_SUCCESS: "Password reset successfully",
+  PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
+  GOOGLE_AUTH_SUCCESS: "Google authentication successful",
+  USER_PROFILE_SUCCESS: "User profile retrieved successfully",
 } as const;
 
 export const AuthValidationMessages = {
@@ -49,6 +60,18 @@ export const AuthValidationMessages = {
   NAME_TOO_SHORT: "Name must be at least 2 characters long",
   NAME_TOO_LONG: "Name must be less than 100 characters",
   NAME_INVALID: "Name can only contain letters and spaces",
+} as const;
+
+export const AuthErrorMessages = {
+  SIGNUP_FAILED: "Failed to create account",
+  OTP_SEND_FAILED: "Failed to send verification code",
+  OTP_VERIFICATION_FAILED: "OTP verification failed",
+  PASSWORD_RESET_FAILED: "Failed to reset password",
+  GOOGLE_AUTH_FAILED: "Google authentication failed",
+  USER_NOT_FOUND: "User not found",
+  OTP_NOT_FOUND: "No OTP found. Please request a new one",
+  OTP_INVALID: "Invalid verification code",
+  EMAIL_NOT_VERIFIED: "Please verify your email first",
 } as const;
 
 export const TokenConfig = {

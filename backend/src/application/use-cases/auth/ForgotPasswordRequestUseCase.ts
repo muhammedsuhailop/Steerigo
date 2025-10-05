@@ -1,54 +1,89 @@
-import { injectable, inject } from 'inversify';
-import { IUserRepository } from '@domain/repositories/IUserRepository';
-import { IEmailService } from '@domain/services/IEmailService';
-import { IOtpService } from '@domain/services/IOtpService';
-import { DomainError } from '@domain/errors';
-import { ForgotPasswordRequestDto } from '../../dto/auth/ForgotPasswordRequestDto';
-import { Result } from '@shared/utils/Result';
+import { injectable, inject } from "inversify";
+import { UserRepository } from "@domain/repositories/UserRepository";
+import { PasswordService } from "@application/services/PasswordService";
+import { EmailService } from "@application/services/EmailService";
+import { OtpService } from "@application/services/OtpService";
+import { ForgotPasswordRequestDto } from "../../dto/auth/ForgotPasswordRequestDto";
+import { Result } from "@shared/utils/Result";
+import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
+import {
+  AuthMessages,
+  AuthErrorMessages,
+} from "@shared/constants/AuthConstants";
+import { AppConstants } from "@shared/constants/AppConstants";
+import { UserNotFoundError, DomainError } from "@domain/errors";
 
 @injectable()
 export class ForgotPasswordRequestUseCase {
-    constructor(
-        @inject('IUserRepository') private userRepository: IUserRepository,
-        @inject('IEmailService') private emailService: IEmailService,
-        @inject('IOtpService') private otpService: IOtpService
-    ) { }
+  constructor(
+    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.PasswordService) private passwordService: PasswordService,
+    @inject(TYPES.EmailService) private emailService: EmailService,
+    @inject(TYPES.OtpService) private otpService: OtpService
+  ) {}
 
-    async execute(dto: ForgotPasswordRequestDto): Promise<Result<void>> {
-        try {
-            const user = await this.userRepository.findByEmail(dto.email);
+  async execute(dto: ForgotPasswordRequestDto): Promise<Result<void>> {
+    try {
+      Logger.info("Forgot password request started", { email: dto.getEmail() });
 
-            if (!user) {
-                return Result.failure(new DomainError('No account registered with this email address'));
-            }
+      const user = await this.userRepository.findByEmail(dto.getEmail());
+      if (!user) {
+        Logger.warn("Forgot password failed - user not found", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(new UserNotFoundError());
+      }
 
-            if (!user.getIsVerified()) {
-                return Result.failure(new DomainError('Account is not verified. Please complete signup verification first'));
-            }
+      if (!user.getIsVerified()) {
+        Logger.warn("Forgot password failed - user not verified", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(
+          new DomainError(AuthErrorMessages.EMAIL_NOT_VERIFIED)
+        );
+      }
 
-            const lastOtpTime = user.getUpdatedAt();
-            const now = new Date();
-            const timeDiffMinutes = (now.getTime() - lastOtpTime.getTime()) / (1000 * 60);
+      if (user.isGoogleUser()) {
+        Logger.warn("Forgot password failed - Google user", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(
+          new DomainError(
+            "Google users cannot reset password. Please sign in with Google."
+          )
+        );
+      }
 
-            if (timeDiffMinutes < 1) {
-                return Result.failure(new DomainError('Please wait at least 1 minute before requesting password reset again'));
-            }
+      // Generate and set reset OTP
+      const otp = this.otpService.generate();
+      const otpHash = await this.otpService.hash(otp);
+      const otpExpires = new Date(
+        Date.now() + AppConstants.OTP_TTL_SECONDS * 1000
+      );
 
-            // Generate OTP for password reset
-            const otp = this.otpService.generate();
-            const otpHash = await this.otpService.hash(otp);
-            const otpExpires = new Date(Date.now() + (parseInt(process.env.OTP_TTL_SECONDS || '300') * 1000));
+      user.setResetOtpDetails(otpHash, otpExpires);
+      await this.userRepository.save(user);
 
-            // Set password reset OTP (reusing existing OTP functionality)
-            user.setPasswordResetOtp(otpHash, otpExpires);
-            await this.userRepository.save(user);
+      // Send reset OTP email
+      await this.emailService.sendPasswordResetOtp(
+        dto.getEmail(),
+        otp,
+        user.getName()
+      );
 
-            // Send password reset OTP email
-            await this.emailService.sendPasswordResetOtp(dto.email, otp, user.getName());
+      Logger.info("Forgot password request completed successfully", {
+        email: dto.getEmail(),
+        userId: user.getId(),
+      });
 
-            return Result.success();
-        } catch (error) {
-            return Result.failure(error as Error);
-        }
+      return Result.success();
+    } catch (error) {
+      Logger.error("Forgot password request use case error", {
+        email: dto.getEmail(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return Result.failure(error as Error);
     }
+  }
 }

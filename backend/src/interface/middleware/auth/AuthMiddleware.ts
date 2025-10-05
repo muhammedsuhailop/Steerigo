@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { DIContainer, TYPES } from "@infrastructure/container/DIContainer";
+import { container } from "@infrastructure/container/DIContainer";
+import { TYPES } from "@shared/constants/DITypes";
 import { TokenService } from "@application/services/TokenService";
 import { UserRepository } from "@domain/repositories/UserRepository";
 import { AuthMessages } from "@shared/constants/AuthConstants";
@@ -37,7 +38,7 @@ export const authMiddleware = async (
     }
 
     const token = authHeader.substring(7);
-    const tokenService = DIContainer.get<TokenService>(TYPES.TokenService);
+    const tokenService = container.get<TokenService>(TYPES.TokenService);
 
     const payload = tokenService.verifyAccessToken(token);
     if (!payload) {
@@ -50,9 +51,7 @@ export const authMiddleware = async (
     }
 
     // Verify user still exists and is active
-    const userRepository = DIContainer.get<UserRepository>(
-      TYPES.UserRepository
-    );
+    const userRepository = container.get<UserRepository>(TYPES.UserRepository);
     const user = await userRepository.findById(payload.userId);
 
     if (!user || !user.canLogin()) {

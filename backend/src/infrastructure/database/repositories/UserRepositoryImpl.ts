@@ -9,6 +9,7 @@ import {
 } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
+import { Password } from "@domain/value-objects/Password";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
@@ -77,15 +78,24 @@ export class UserRepositoryImpl implements UserRepository {
   async save(user: User): Promise<void> {
     try {
       const userData = this.toPersistence(user);
-      await UserModel.findOneAndUpdate(
-        { email: user.getEmailValue() },
-        userData,
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true,
-        }
-      );
+
+      // For existing users, use regular update without setDefaultsOnInsert
+      const existingDoc = await UserModel.findOne({
+        email: user.getEmailValue(),
+      });
+
+      if (existingDoc) {
+        // Update existing user without resetting defaults
+        await UserModel.findOneAndUpdate(
+          { email: user.getEmailValue() },
+          userData,
+          { new: true }
+        );
+      } else {
+        // Create new user
+        await UserModel.create(userData);
+      }
+
       Logger.info("User saved successfully", { email: user.getEmailValue() });
     } catch (error) {
       Logger.error("Error saving user", { email: user.getEmailValue(), error });
@@ -229,11 +239,19 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   private toDomain(userDoc: IUserDocument): User {
+    const passwordHash = userDoc.password;
+    let passwordVo: Password;
+
+    if (!passwordHash || passwordHash.trim() === "") {
+      passwordVo = Password.createEmpty();
+    } else {
+      passwordVo = Password.createFromHash(passwordHash);
+    }
     return User.reconstruct({
       id: userDoc.id.toString(),
       name: userDoc.name,
       email: userDoc.email,
-      password: userDoc.password,
+      password: passwordVo.getHashedValue(),
       mobile: userDoc.mobile,
       dob: userDoc.dob,
       gender: userDoc.gender,
@@ -262,6 +280,9 @@ export class UserRepositoryImpl implements UserRepository {
       role: user.getRole(),
       status: user.getStatus(),
       isVerified: user.getIsVerified(),
+      otpHash: user.getOtpHash(),
+      otpExpires: user.getOtpExpires(),
+      otpAttempts: user.getOtpAttempts(),
       updatedAt: user.getUpdatedAt(),
       googleId: user.getGoogleId(),
       profilePicture: user.getProfilePicture(),

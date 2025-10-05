@@ -1,79 +1,88 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
 import { SignupRequestUseCase } from "@application/use-cases/auth/SignupRequestUseCase";
 import { SignupVerifyUseCase } from "@application/use-cases/auth/SignupVerifyUseCase";
-import { SignupRequestDto, SignupVerifyDto } from "@application/dto/auth";
+import { SignupRequestDto } from "@application/dto/auth/SignupRequestDto";
+import { SignupVerifyDto } from "@application/dto/auth/SignupVerifyDto";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { AuthMessages } from "@shared/constants/AuthConstants";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class SignupController {
   constructor(
-    @inject(SignupRequestUseCase)
+    @inject(TYPES.SignupRequestUseCase)
     private signupRequestUseCase: SignupRequestUseCase,
-    @inject(SignupVerifyUseCase)
+    @inject(TYPES.SignupVerifyUseCase)
     private signupVerifyUseCase: SignupVerifyUseCase
   ) {}
 
-  async request(req: Request, res: Response) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const { response, statusCode } =
-        ErrorHandlerService.handleValidationErrors(errors.array());
-      return res.status(statusCode).json(response);
-    }
+  async signup(req: Request, res: Response): Promise<void> {
     try {
       const dto = new SignupRequestDto(req.body);
       const result = await this.signupRequestUseCase.execute(dto);
+
       if (result.isFailure()) {
+        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          result.getError(),
-          "signup_request"
+          error,
+          "signup"
         );
-        return res.status(statusCode).json(response);
+        res.status(statusCode).json(response);
+        return;
       }
-      const response: ApiResponse = { success: true, message: "OTP sent." };
-      res.status(200).json(response);
-      Logger.info("Signup request succeeded", { email: dto.email });
-    } catch (err) {
+
+      const data = result.getValue();
+      const response: ApiResponse = {
+        success: true,
+        message: AuthMessages.SIGNUP_SUCCESS,
+        data,
+      };
+
+      res.status(201).json(response);
+      Logger.info("Signup request completed successfully", {
+        email: dto.getEmailValue(),
+      });
+    } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
-        err,
-        "signup_request"
+        error,
+        "signup"
       );
       res.status(statusCode).json(response);
     }
   }
 
-  async verify(req: Request, res: Response) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const { response, statusCode } =
-        ErrorHandlerService.handleValidationErrors(errors.array());
-      return res.status(statusCode).json(response);
-    }
+  async verify(req: Request, res: Response): Promise<void> {
     try {
       const dto = new SignupVerifyDto(req.body);
       const result = await this.signupVerifyUseCase.execute(dto);
+
       if (result.isFailure()) {
+        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          result.getError(),
+          error,
           "signup_verify"
         );
-        return res.status(statusCode).json(response);
+        res.status(statusCode).json(response);
+        return;
       }
+
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Signup complete",
+        message: AuthMessages.SIGNUP_VERIFICATION_SUCCESS,
         data,
       };
-      res.status(201).json(response);
-      Logger.info("Signup verify succeeded", { email: dto.email });
-    } catch (err) {
+
+      res.status(200).json(response);
+      Logger.info("Signup verification completed successfully", {
+        email: dto.getEmail(),
+      });
+    } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
-        err,
+        error,
         "signup_verify"
       );
       res.status(statusCode).json(response);

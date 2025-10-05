@@ -7,3 +7,7 @@ export * from "./RefreshTokenExpiredError";
 export * from "./RefreshTokenRevokedError";
 export * from "./AccountStatusError";
 export * from "./MobileAlreadyExistsError";
+export * from "./UserNotFoundError";
+export * from "./OtpNotFoundError";
+export * from "./EmailNotVerifiedError";
+export * from "./PasswordResetError";

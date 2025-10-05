@@ -1,3 +1,4 @@
+import { AppConstants } from "@shared/constants/AppConstants";
 import { DomainError } from "../errors/DomainError";
 import { Email } from "../value-objects/Email";
 import { Password } from "../value-objects/Password";
@@ -119,7 +120,7 @@ export class User implements BaseEntity {
     profilePicture?: string;
   }): User {
     const email = Email.create(props.email);
-    const password = Password.createFromHash(""); // Google users don't have passwords
+    const password = Password.createEmpty();
 
     return new User(
       props.id,
@@ -213,11 +214,46 @@ export class User implements BaseEntity {
     this.updatedAt = new Date();
   }
 
+  updateProfilePicture(newPictureUrl: string): void {
+    this.profilePicture = newPictureUrl;
+    this.updatedAt = new Date();
+  }
+
   setOtpDetails(otpHash: string, otpExpires: Date): void {
     this.otpHash = otpHash;
     this.otpExpires = otpExpires;
     this.otpAttempts = 0;
     this.updatedAt = new Date();
+  }
+
+  setResetOtpDetails(otpHash: string, expiresAt: Date): void {
+    this.otpHash = otpHash;
+    this.otpExpires = expiresAt;
+    this.otpAttempts = 0;
+  }
+
+  getResetOtpHash(): string | undefined {
+    return this.otpHash;
+  }
+
+  isResetOtpExpired(): boolean {
+    if (!this.otpExpires) return true;
+    return new Date() > this.otpExpires;
+  }
+
+  canAttemptResetOtp(): boolean {
+    return this.otpAttempts < AppConstants.MAX_OTP_ATTEMPTS;
+  }
+
+  incrementResetOtpAttempts(): void {
+    this.otpAttempts++;
+  }
+
+  updatePassword(newPasswordHash: Password): void {
+    this.password = newPasswordHash;
+    this.otpHash = undefined;
+    this.otpExpires = undefined;
+    this.otpAttempts = 0;
   }
 
   // Getters
@@ -278,9 +314,11 @@ export class User implements BaseEntity {
   getGoogleId(): string | undefined {
     return this.googleId;
   }
+
   getProfilePicture(): string | undefined {
     return this.profilePicture;
   }
+
   getAuthProvider(): AuthProvider {
     return this.authProvider;
   }

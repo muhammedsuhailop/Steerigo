@@ -37,6 +37,10 @@ export class Password {
     return new Password(hashedValue);
   }
 
+  static createEmpty(): Password {
+    return new Password("DUMMY_HASH_ALLOWED_EMPTY_HASH");
+  }
+
   private static isStrongPassword(password: string): boolean {
     const hasLowerCase = /[a-z]/.test(password);
     const hasUpperCase = /[A-Z]/.test(password);

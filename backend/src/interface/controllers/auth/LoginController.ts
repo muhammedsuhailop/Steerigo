@@ -4,17 +4,18 @@ import { validationResult } from "express-validator";
 import { LoginUseCase } from "@application/use-cases/auth/LoginUseCase";
 import { LogoutUseCase } from "@application/use-cases/auth/LogoutUseCase";
 import { RefreshTokenUseCase } from "@application/use-cases/auth/RefreshTokenUseCase";
-import { LoginDto, RefreshTokenDto } from "@application/dto/auth";
+import { LoginRequestDto, RefreshTokenDto } from "@application/dto/auth";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class LoginController {
   constructor(
-    @inject(LoginUseCase) private loginUseCase: LoginUseCase,
-    @inject(LogoutUseCase) private logoutUseCase: LogoutUseCase,
-    @inject(RefreshTokenUseCase)
+    @inject(TYPES.LoginUseCase) private loginUseCase: LoginUseCase, // Correct injection token (symbol)
+    @inject(TYPES.LogoutUseCase) private logoutUseCase: LogoutUseCase,
+    @inject(TYPES.RefreshTokenUseCase)
     private refreshTokenUseCase: RefreshTokenUseCase
   ) {}
 
@@ -28,7 +29,7 @@ export class LoginController {
         return;
       }
 
-      const dto = new LoginDto(req.body);
+      const dto = new LoginRequestDto(req.body);
       const result = await this.loginUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -49,7 +50,9 @@ export class LoginController {
       };
 
       res.status(200).json(response);
-      Logger.info("Login completed successfully", { email: dto.email });
+      Logger.info("Login completed successfully", {
+        email: dto.getEmailValue(),
+      });
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
