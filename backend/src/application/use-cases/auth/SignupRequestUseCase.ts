@@ -1,8 +1,5 @@
 import { injectable, inject } from "inversify";
 import { UserRepository } from "@application/repositories/UserRepository";
-import { IPasswordService } from "@domain/services/IPasswordService";
-import { IEmailService } from "@domain/services/IEmailService";
-import { IOtpService } from "@domain/services/IOtpService";
 import { User } from "@domain/entities/User";
 import { UserAlreadyExistsError } from "@domain/errors";
 import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";

@@ -232,7 +232,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  async count(filters?: Record<string, any>): Promise<number> {
+  async count(filters?: FilterOptions<User>): Promise<number> {
     try {
       return await UserModel.countDocuments(filters || {});
     } catch (error) {
@@ -251,7 +251,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  async deleteMany(filters: Record<string, any>): Promise<number> {
+  async deleteMany(filters: FilterOptions<User>): Promise<number> {
     try {
       const result = await UserModel.deleteMany(filters);
       Logger.info("Users deleted successfully", { filters });

@@ -6,6 +6,7 @@ import {
   IRefreshTokenDocument,
 } from "../models/RefreshTokenModel";
 import { Logger } from "@shared/utils/Logger";
+import { FilterOptions } from "@shared/types/Repository";
 
 @injectable()
 export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
@@ -93,7 +94,6 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  // Add base repository methods to satisfy the interface
   async findById(id: string): Promise<RefreshToken | null> {
     try {
       const tokenDoc = await RefreshTokenModel.findById(id);
@@ -179,12 +179,51 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async deleteMany(filters: Record<string, any>): Promise<void> {
+  async deleteMany(filters: FilterOptions<RefreshToken>): Promise<number> {
     try {
-      await RefreshTokenModel.deleteMany(filters);
+      const result = await RefreshTokenModel.deleteMany(filters);
       Logger.info("Refresh tokens deleted successfully", { filters });
+      return result.deletedCount ?? 0;
     } catch (error) {
       Logger.error("Error deleting refresh tokens", { filters, error });
+      throw error;
+    }
+  }
+
+  async updateMany(
+    filters: FilterOptions<RefreshToken>,
+    updates: Partial<RefreshToken>
+  ): Promise<number> {
+    try {
+      const result = await RefreshTokenModel.updateMany(filters, updates);
+      Logger.info("Refesh token updated successfully", { filters, updates });
+      return result.modifiedCount ?? 0;
+    } catch (error) {
+      Logger.error("Error updating multiple refesh tokens", {
+        filters,
+        updates,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async findByIds(ids: string[]): Promise<RefreshToken[]> {
+    try {
+      const refreshTokens = await RefreshTokenModel.find({ _id: { $in: ids } });
+      return refreshTokens.map((tokn) => this.toDomain(tokn));
+    } catch (error) {
+      Logger.error("Error finding refresh tokens", { ids, error });
+      throw error;
+    }
+  }
+
+  async existsByFilter(filters: FilterOptions<RefreshToken>): Promise<boolean> {
+    try {
+      const count = await RefreshTokenModel.countDocuments(filters);
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking existence by filter", { filters, error });
       throw error;
     }
   }
