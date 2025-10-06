@@ -11,6 +11,7 @@ import { EmailService } from "@application/services/EmailService";
 import { PasswordService } from "@application/services/PasswordService";
 import { OtpService } from "@application/services/OtpService";
 import { Logger } from "@shared/utils/Logger";
+import { Password } from "@domain/value-objects/Password";
 
 @injectable()
 export class SignupRequestUseCase {
@@ -34,6 +35,8 @@ export class SignupRequestUseCase {
         return Result.failure(new UserAlreadyExistsError());
       } else if (existingUser && !existingUser.getIsVerified()) {
         user = existingUser;
+        const passwordHash = await this.passwordService.hash(dto.getPassword());
+        user.updatePassword(Password.createFromHash(passwordHash));
         Logger.info("Updating existing unverified user", {
           email: dto.getEmailValue(),
           userId: user.getId(),
@@ -47,13 +50,15 @@ export class SignupRequestUseCase {
           mobile: dto.getMobile(),
           role: dto.getRole(),
         });
+
+        // Hash password
+        const passwordHash = await this.passwordService.hash(dto.getPassword());
+        user.updatePassword(Password.createFromHash(passwordHash));
         Logger.info("Creating new user", {
           email: dto.getEmailValue(),
           userId: user.getId(),
         });
       }
-      // Hash password
-      const passwordHash = await this.passwordService.hash(dto.getPassword());
 
       // Generate and set OTP
       const otp = this.otpService.generate();
