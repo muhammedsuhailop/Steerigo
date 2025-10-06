@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { userProfileRoutes } from "./userProfileRoutes";
+// import { Router } from "express";
+// import { userProfileRoutes } from "./userProfileRoutes";
 
-const router = Router();
+// const router = Router();
 
-router.use("/profile", userProfileRoutes);
+// router.use("/profile", userProfileRoutes);
 
-export { router as userRoutes };
+// export { router as userRoutes };
