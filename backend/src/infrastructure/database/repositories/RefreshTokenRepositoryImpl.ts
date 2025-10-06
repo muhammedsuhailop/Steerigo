@@ -6,7 +6,7 @@ import {
   IRefreshTokenDocument,
 } from "../models/RefreshTokenModel";
 import { Logger } from "@shared/utils/Logger";
-import { FilterOptions } from "@shared/types/Repository";
+import { FilterOptions, QueryOptions } from "@shared/types/Repository";
 
 @injectable()
 export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
@@ -124,7 +124,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async findAll(options?: any): Promise<RefreshToken[]> {
+  async findAll(options?: QueryOptions<RefreshToken>): Promise<RefreshToken[]> {
     try {
       const tokenDocs = await RefreshTokenModel.find({})
         .limit(options?.limit || 100)
@@ -136,7 +136,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async findPaginated(options: any): Promise<any> {
+  async findPaginated(options: QueryOptions<RefreshToken>): Promise<any> {
     try {
       const limit = options.limit || 10;
       const offset = options.offset || 0;
@@ -160,7 +160,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async count(filters?: Record<string, any>): Promise<number> {
+  async count(filters?: FilterOptions<RefreshToken>): Promise<number> {
     try {
       return await RefreshTokenModel.countDocuments(filters || {});
     } catch (error) {
@@ -169,7 +169,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async updateById(id: string, updates: any): Promise<void> {
+  async updateById(id: string, updates: Partial<RefreshToken>): Promise<void> {
     try {
       await RefreshTokenModel.findByIdAndUpdate(id, updates);
       Logger.info("Refresh token updated successfully", { id });
@@ -196,7 +196,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
   ): Promise<number> {
     try {
       const result = await RefreshTokenModel.updateMany(filters, updates);
-      Logger.info("Refesh token updated successfully", { filters, updates });
+      Logger.info("Refresh token updated successfully", { filters, updates });
       return result.modifiedCount ?? 0;
     } catch (error) {
       Logger.error("Error updating multiple refesh tokens", {
@@ -211,7 +211,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
   async findByIds(ids: string[]): Promise<RefreshToken[]> {
     try {
       const refreshTokens = await RefreshTokenModel.find({ _id: { $in: ids } });
-      return refreshTokens.map((tokn) => this.toDomain(tokn));
+      return refreshTokens.map((token) => this.toDomain(token));
     } catch (error) {
       Logger.error("Error finding refresh tokens", { ids, error });
       throw error;
@@ -244,7 +244,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     refreshToken: RefreshToken
   ): Partial<IRefreshTokenDocument> {
     return {
-      userId: refreshToken.getUserId() as any,
+      userId: refreshToken.getUserId(),
       token: refreshToken.getToken(),
       expiresAt: refreshToken.getExpiresAt(),
       isRevoked: refreshToken.getIsRevoked(),
