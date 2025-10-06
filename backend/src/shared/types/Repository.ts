@@ -4,19 +4,19 @@ export interface BaseEntity {
   getUpdatedAt(): Date;
 }
 
-export interface QueryOptions {
+export interface QueryOptions<T = any> {
   limit?: number;
   offset?: number;
-  sortBy?: string;
+  sortBy?: keyof T;
   sortOrder?: "asc" | "desc";
-  filters?: Record<string, any>;
+  filters?: Partial<T>;
 }
 
-export interface Repository<T extends BaseEntity> {
-  findById(id: string): Promise<T | null>;
+export interface Repository<T extends BaseEntity, ID = string> {
+  findById(id: ID): Promise<T | null>;
   save(entity: T): Promise<void>;
-  delete(id: string): Promise<void>;
-  exists(id: string): Promise<boolean>;
+  delete(id: ID): Promise<void>;
+  exists(id: ID): Promise<boolean>;
 }
 
 export interface PaginatedResult<T> {
@@ -26,3 +26,19 @@ export interface PaginatedResult<T> {
   limit: number;
   totalPages: number;
 }
+
+export interface UpdateOptions<T> {
+  data: Partial<T>;
+  validate?: boolean;
+}
+
+export type FilterOptions<T> = {
+  [K in keyof T]?:
+    | T[K]
+    | T[K][]
+    | {
+        $in?: T[K][];
+        $ne?: T[K];
+        $regex?: string;
+      };
+};

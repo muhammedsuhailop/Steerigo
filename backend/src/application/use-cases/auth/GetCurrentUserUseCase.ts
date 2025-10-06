@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { GetCurrentUserDto } from "../../dto/auth/GetCurrentUserDto";
 import { GetCurrentUserResponseDto } from "../../dto/auth/GetCurrentUserResponseDto";
 import { Result } from "@shared/utils/Result";

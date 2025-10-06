@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { RefreshTokenRepository } from "@domain/repositories/RefreshTokenRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
 import { RefreshToken } from "@domain/entities/RefreshToken";
 import {
   RefreshTokenModel,

@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { PasswordService } from "@application/services/PasswordService";
 import { TokenService } from "@application/services/TokenService";
-import { RefreshTokenRepository } from "@domain/repositories/RefreshTokenRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
 import { LoginRequestDto } from "../../dto/auth/LoginRequestDto";
 import { LoginResponseDto } from "../../dto/auth/LoginResponseDto";
 import { Result } from "@shared/utils/Result";

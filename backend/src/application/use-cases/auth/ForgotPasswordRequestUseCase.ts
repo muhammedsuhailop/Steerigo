@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { PasswordService } from "@application/services/PasswordService";
 import { EmailService } from "@application/services/EmailService";
 import { OtpService } from "@application/services/OtpService";

@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel, IUserDocument } from "../models/UserModel";
 import {
@@ -8,7 +8,11 @@ import {
   UserStatus,
 } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
-import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
+import {
+  QueryOptions,
+  PaginatedResult,
+  FilterOptions,
+} from "@shared/types/Repository";
 import { Password } from "@domain/value-objects/Password";
 
 @injectable()
@@ -71,6 +75,44 @@ export class UserRepositoryImpl implements UserRepository {
       return userDoc ? this.toDomain(userDoc) : null;
     } catch (error) {
       Logger.error("Error finding user by mobile", { mobile, error });
+      throw error;
+    }
+  }
+
+  async updateMany(
+    filters: FilterOptions<User>,
+    updates: Partial<User>
+  ): Promise<number> {
+    try {
+      const result = await UserModel.updateMany(filters, updates);
+      Logger.info("Users updated successfully", { filters, updates });
+      return result.modifiedCount ?? 0;
+    } catch (error) {
+      Logger.error("Error updating multiple users", {
+        filters,
+        updates,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    try {
+      const userDocs = await UserModel.find({ _id: { $in: ids } });
+      return userDocs.map((doc) => this.toDomain(doc));
+    } catch (error) {
+      Logger.error("Error finding users by IDs", { ids, error });
+      throw error;
+    }
+  }
+
+  async existsByFilter(filters: FilterOptions<User>): Promise<boolean> {
+    try {
+      const count = await UserModel.countDocuments(filters);
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking existence by filter", { filters, error });
       throw error;
     }
   }
@@ -155,7 +197,7 @@ export class UserRepositoryImpl implements UserRepository {
       if (options?.offset) query = query.skip(options.offset);
       if (options?.sortBy) {
         const sortOrder = options.sortOrder === "desc" ? -1 : 1;
-        query = query.sort({ [options.sortBy]: sortOrder });
+        query = query.sort({ [options.sortBy as string]: sortOrder });
       }
 
       const userDocs = await query.exec();
@@ -209,10 +251,11 @@ export class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  async deleteMany(filters: Record<string, any>): Promise<void> {
+  async deleteMany(filters: Record<string, any>): Promise<number> {
     try {
-      await UserModel.deleteMany(filters);
+      const result = await UserModel.deleteMany(filters);
       Logger.info("Users deleted successfully", { filters });
+      return result.deletedCount ?? 0;
     } catch (error) {
       Logger.error("Error deleting users", { filters, error });
       throw error;

@@ -2,8 +2,8 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Repositories
-import { UserRepository } from "@domain/repositories/UserRepository";
-import { RefreshTokenRepository } from "@domain/repositories/RefreshTokenRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
 import { UserRepositoryImpl } from "@infrastructure/database/repositories/UserRepositoryImpl";
 import { RefreshTokenRepositoryImpl } from "@infrastructure/database/repositories/RefreshTokenRepositoryImpl";
 

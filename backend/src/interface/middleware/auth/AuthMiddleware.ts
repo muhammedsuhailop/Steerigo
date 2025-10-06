@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { container } from "@infrastructure/container/DIContainer";
 import { TYPES } from "@shared/constants/DITypes";
 import { TokenService } from "@application/services/TokenService";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { ApiResponse } from "@shared/types/Common";

@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { GoogleAuthService } from "@application/services/GoogleAuthService";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { TokenService } from "@application/services/TokenService";
-import { RefreshTokenRepository } from "@domain/repositories/RefreshTokenRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
 import { EmailService } from "@application/services/EmailService";
 import { User } from "@domain/entities/User";
 import { GoogleLoginRequestDto } from "../../dto/auth/GoogleLoginRequestDto";

@@ -75,7 +75,7 @@ export const AuthErrorMessages = {
 } as const;
 
 export const TokenConfig = {
-  ACCESS_TOKEN_EXPIRES_IN: "1h",
+  ACCESS_TOKEN_EXPIRES_IN: "10min",
   REFRESH_TOKEN_EXPIRES_IN_DAYS: 7,
   JWT_ISSUER: "Steerigo",
   JWT_AUDIENCE: "Steerigo-Users",

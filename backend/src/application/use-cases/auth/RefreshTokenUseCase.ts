@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { RefreshTokenRepository } from "@domain/repositories/RefreshTokenRepository";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { TokenService } from "@application/services/TokenService";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { Result } from "@shared/utils/Result";
