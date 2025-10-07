@@ -1,60 +1,90 @@
-import { injectable, inject } from 'inversify';
-import { IUserRepository } from '@domain/repositories/IUserRepository';
-import { IPasswordService } from '@domain/services/IPasswordService';
-import { IEmailService } from '@domain/services/IEmailService';
-import { IOtpService } from '@domain/services/IOtpService';
-import { User } from '@domain/entities/User';
-import { UserAlreadyExistsError } from '@domain/errors';
-import { SignupRequestDto } from '../../dto/auth/SignupRequestDto';
-import { Result } from '@shared/utils/Result';
-import { v4 as uuid } from 'uuid';
+import { injectable, inject } from "inversify";
+import { UserRepository } from "@application/repositories/UserRepository";
+import { User } from "@domain/entities/User";
+import { UserAlreadyExistsError } from "@domain/errors";
+import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";
+import { Result } from "@shared/utils/Result";
+import { v4 as uuid } from "uuid";
+import { Email } from "@domain/value-objects/Email";
+import { TYPES } from "@shared/constants/DITypes";
+import { EmailService } from "@application/services/EmailService";
+import { PasswordService } from "@application/services/PasswordService";
+import { OtpService } from "@application/services/OtpService";
+import { Logger } from "@shared/utils/Logger";
+import { Password } from "@domain/value-objects/Password";
 
 @injectable()
 export class SignupRequestUseCase {
-    constructor(
-        @inject('IUserRepository') private userRepository: IUserRepository,
-        @inject('IPasswordService') private passwordService: IPasswordService,
-        @inject('IEmailService') private emailService: IEmailService,
-        @inject('IOtpService') private otpService: IOtpService
-    ) { }
+  constructor(
+    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.PasswordService) private passwordService: PasswordService,
+    @inject(TYPES.EmailService) private emailService: EmailService,
+    @inject(TYPES.OtpService) private otpService: OtpService
+  ) {}
 
-    async execute(dto: SignupRequestDto): Promise<Result<void>> {
-        try {
-            // Check if verified user exists
-            const existingUser = await this.userRepository.findByEmail(dto.email);
-            if (existingUser && existingUser.getIsVerified()) {
-                return Result.failure(new UserAlreadyExistsError());
-            }
+  async execute(dto: SignupRequestDto): Promise<Result<void>> {
+    try {
+      // Check if verified user exists
+      const existingUser = await this.userRepository.findByEmail(
+        dto.getEmailValue()
+      );
 
-            // Hash password
-            const passwordHash = await this.passwordService.hash(dto.password);
+      let user: User;
 
-            // Create or update user
-            const user = User.create({
-                id: uuid(),
-                name: dto.name,
-                email: dto.email,
-                password: passwordHash,
-                mobile: dto.mobile,
-                role: dto.role
-            });
+      if (existingUser && existingUser.getIsVerified()) {
+        return Result.failure(new UserAlreadyExistsError());
+      } else if (existingUser && !existingUser.getIsVerified()) {
+        user = existingUser;
+        const passwordHash = await this.passwordService.hash(dto.getPassword());
+        user.updatePassword(Password.createFromHash(passwordHash));
+        Logger.info("Updating existing unverified user", {
+          email: dto.getEmailValue(),
+          userId: user.getId(),
+        });
+      } else {
+        user = User.create({
+          id: uuid(),
+          name: dto.getName(),
+          email: dto.getEmailValue(),
+          password: dto.getPassword(),
+          mobile: dto.getMobile(),
+          role: dto.getRole(),
+        });
 
-            // Generate and set OTP
-            const otp = this.otpService.generate();
-            const otpHash = await this.otpService.hash(otp);
-            const otpExpires = new Date(Date.now() + (parseInt(process.env.OTP_TTL_SECONDS || '300') * 1000));
+        // Hash password
+        const passwordHash = await this.passwordService.hash(dto.getPassword());
+        user.updatePassword(Password.createFromHash(passwordHash));
+        Logger.info("Creating new user", {
+          email: dto.getEmailValue(),
+          userId: user.getId(),
+        });
+      }
 
-            user.setOtpDetails(otpHash, otpExpires);
+      // Generate and set OTP
+      const otp = this.otpService.generate();
+      const otpHash = await this.otpService.hash(otp);
+      const otpExpires = new Date(
+        Date.now() + parseInt(process.env.OTP_TTL_SECONDS || "300") * 1000
+      );
 
-            // Save user
-            await this.userRepository.save(user);
+      user.setOtpDetails(otpHash, otpExpires);
 
-            // Send OTP email
-            await this.emailService.sendOtp(dto.email, otp);
+      // Save user
+      await this.userRepository.save(user);
 
-            return Result.success();
-        } catch (error) {
-            return Result.failure(error as Error);
-        }
+      Logger.info("OTP Generated:", otp); // for dev
+      Logger.info("OTP expires at:", otpExpires); // for dev
+
+      // Send OTP email
+      await this.emailService.sendVerificationOtp(
+        dto.getEmailValue(),
+        otp,
+        user.getName()
+      );
+
+      return Result.success();
+    } catch (error) {
+      return Result.failure(error as Error);
     }
+  }
 }

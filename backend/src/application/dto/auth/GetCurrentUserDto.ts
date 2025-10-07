@@ -1,7 +1,11 @@
 export class GetCurrentUserDto {
-  public readonly userId: string;
+  private userId: string;
 
-  constructor(userId: string) {
-    this.userId = userId;
+  constructor(data: { userId: string }) {
+    this.userId = data.userId;
+  }
+
+  getUserId(): string {
+    return this.userId;
   }
 }

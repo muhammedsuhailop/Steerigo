@@ -1,44 +1,53 @@
 import { injectable, inject } from "inversify";
-import { IGoogleAuthService } from "@domain/services/IGoogleAuthService";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { ITokenService } from "@domain/services/ITokenService";
+import { GoogleAuthService } from "@application/services/GoogleAuthService";
+import { UserRepository } from "@application/repositories/UserRepository";
+import { TokenService } from "@application/services/TokenService";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { EmailService } from "@application/services/EmailService";
 import { User } from "@domain/entities/User";
-import { GoogleLoginDto } from "../../dto/auth/GoogleLoginDto";
+import { GoogleLoginRequestDto } from "../../dto/auth/GoogleLoginRequestDto";
+import { SignupVerifyResponseDto } from "../../dto/auth/SignupVerifyResponseDto";
+import { RefreshToken } from "@domain/entities/RefreshToken";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
+import {
+  AuthMessages,
+  AuthErrorMessages,
+} from "@shared/constants/AuthConstants";
+import { DomainError, EmailNotVerifiedError } from "@domain/errors";
 import { v4 as uuid } from "uuid";
-import { RefreshToken } from "@domain/entities/RefreshToken";
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 
 @injectable()
 export class GoogleLoginUseCase {
   constructor(
-    @inject("IGoogleAuthService") private googleAuthService: IGoogleAuthService,
-    @inject("IUserRepository") private userRepository: IUserRepository,
-    @inject("ITokenService") private tokenService: ITokenService,
-    @inject("IRefreshTokenRepository")
-    private refreshTokenRepository: IRefreshTokenRepository
+    @inject(TYPES.GoogleAuthService)
+    private googleAuthService: GoogleAuthService,
+    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.TokenService) private tokenService: TokenService,
+    @inject(TYPES.RefreshTokenRepository)
+    private refreshTokenRepository: RefreshTokenRepository,
+    @inject(TYPES.EmailService) private emailService: EmailService
   ) {}
 
-  async execute(dto: GoogleLoginDto): Promise<
-    Result<{
-      accessToken: string;
-      refreshToken: string;
-      user: any;
-      isNewUser: boolean;
-    }>
-  > {
+  async execute(
+    dto: GoogleLoginRequestDto
+  ): Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>> {
     try {
+      Logger.info("Google login attempt started");
+      Logger.debug("dto.getCode", dto.getCode());
       const tokens = await this.googleAuthService.exchangeCodeForTokens(
-        dto.code
+        dto.getCode()
       );
-
       const googleProfile = await this.googleAuthService.getUserProfile(
         tokens.access_token
       );
 
       if (!googleProfile.verified_email) {
-        return Result.failure(new Error("Google email not verified"));
+        Logger.warn("Google login failed - email not verified", {
+          email: googleProfile.email,
+        });
+        return Result.failure(new EmailNotVerifiedError());
       }
 
       let user = await this.userRepository.findByGoogleId(googleProfile.id);
@@ -48,10 +57,12 @@ export class GoogleLoginUseCase {
         const existingEmailUser = await this.userRepository.findByEmail(
           googleProfile.email
         );
-
         if (existingEmailUser && !existingEmailUser.isGoogleUser()) {
+          Logger.warn("Google login failed - email already registered", {
+            email: googleProfile.email,
+          });
           return Result.failure(
-            new Error(
+            new DomainError(
               "Email already registered. Please use email/password login."
             )
           );
@@ -68,30 +79,37 @@ export class GoogleLoginUseCase {
         await this.userRepository.save(user);
         isNewUser = true;
 
+        // Send welcome email for new users
+        await this.emailService.sendWelcomeEmail(
+          user.getEmailValue(),
+          user.getName()
+        );
+
         Logger.info("New Google user created", {
-          email: user.getEmail(),
+          email: user.getEmailValue(),
           googleId: googleProfile.id,
         });
       } else {
+        // Update profile picture if changed
         if (
           googleProfile.picture &&
           googleProfile.picture !== user.getProfilePicture()
         ) {
+          user.updateProfilePicture(googleProfile.picture);
           await this.userRepository.save(user);
         }
-
         Logger.info("Existing Google user logged in", {
-          email: user.getEmail(),
+          email: user.getEmailValue(),
         });
       }
 
-      const accessToken = this.tokenService.generate({
+      const accessToken = this.tokenService.generateAccessToken({
         userId: user.getId(),
         role: user.getRole(),
       });
 
       const refreshTokenValue = this.tokenService.generateRefreshToken();
-      const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
       await this.refreshTokenRepository.deleteByUserId(user.getId());
 
@@ -101,31 +119,37 @@ export class GoogleLoginUseCase {
         token: refreshTokenValue,
         expiresAt: refreshTokenExpiry,
       });
+
       await this.refreshTokenRepository.save(refreshToken);
 
-      return Result.success({
+      const response = {
         accessToken,
         refreshToken: refreshTokenValue,
-        // user: {
-        //   id: user.getId(),
-        //   name: user.getName(),
-        //   email: user.getEmail(),
-        //   role: user.getRole(),
-        //   status: user.getStatus(),
-        //   profilePicture: user.getProfilePicture(),
-        //   authProvider: user.getAuthProvider(),
-        // },
         user: {
           id: user.getId(),
           name: user.getName(),
-          email: user.getEmail(),
+          email: user.getEmailValue(),
           role: user.getRole(),
           status: user.getStatus(),
+          mobile: user.getMobile() ?? "",
+          profilePicture: user.getProfilePicture(),
+          isVerified: user.getIsVerified(),
         },
+        expiresIn: 3600,
+        isNewUser,
+      };
+
+      Logger.info("Google login successful", {
+        userId: user.getId(),
+        email: user.getEmailValue(),
         isNewUser,
       });
+
+      return Result.success(response);
     } catch (error) {
-      Logger.error("Google login failed", error);
+      Logger.error("Google login use case error", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return Result.failure(error as Error);
     }
   }

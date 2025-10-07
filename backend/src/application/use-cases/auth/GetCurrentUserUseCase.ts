@@ -1,59 +1,57 @@
 import { injectable, inject } from "inversify";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { GetCurrentUserDto } from "../../dto/auth/GetCurrentUserDto";
+import { GetCurrentUserResponseDto } from "../../dto/auth/GetCurrentUserResponseDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
-import { DomainError } from "@domain/errors/DomainError";
+import { TYPES } from "@shared/constants/DITypes";
+import { AuthMessages } from "@shared/constants/AuthConstants";
+import { UserNotFoundError } from "@domain/errors";
 
 @injectable()
 export class GetCurrentUserUseCase {
   constructor(
-    @inject("IUserRepository") private userRepository: IUserRepository
+    @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}
 
-  async execute(dto: GetCurrentUserDto): Promise<Result<any>> {
+  async execute(
+    dto: GetCurrentUserDto
+  ): Promise<Result<GetCurrentUserResponseDto>> {
     try {
-      const user = await this.userRepository.findById(dto.userId);
+      Logger.info("Get current user started", { userId: dto.getUserId() });
 
+      const user = await this.userRepository.findById(dto.getUserId());
       if (!user) {
-        Logger.warn("User not found for getCurrentUser", {
-          userId: dto.userId,
+        Logger.warn("Get current user failed - user not found", {
+          userId: dto.getUserId(),
         });
-        return Result.failure(new DomainError("User not found"));
+        return Result.failure(new UserNotFoundError());
       }
 
-      if (!user.getIsVerified()) {
-        Logger.warn("Unverified user attempted to access getCurrentUser", {
-          userId: dto.userId,
-        });
-        return Result.failure(new DomainError("User account not verified"));
-      }
-
-      const userData = {
+      const response: GetCurrentUserResponseDto = {
         id: user.getId(),
         name: user.getName(),
-        email: user.getEmail(),
-        mobile: user.getMobile(),
+        email: user.getEmailValue(),
+        mobile: user.getMobile() ?? "",
         role: user.getRole(),
         status: user.getStatus(),
-        isVerified: user.getIsVerified(),
-        createdAt: user.getCreatedAt().toISOString(),
-        updatedAt: user.getUpdatedAt().toISOString(),
         profilePicture: user.getProfilePicture(),
+        isVerified: user.getIsVerified(),
         authProvider: user.getAuthProvider(),
-        dob: user.getDob()?.toISOString(),
-        gender: user.getGender(),
-        address: user.getAddress(),
+        createdAt: user.getCreatedAt(),
+        updatedAt: user.getUpdatedAt(),
       };
 
-      Logger.info("Current user data fetched successfully", {
-        userId: dto.userId,
-        email: user.getEmail(),
+      Logger.info("Get current user completed successfully", {
+        userId: dto.getUserId(),
       });
 
-      return Result.success(userData);
+      return Result.success(response);
     } catch (error) {
-      Logger.error("Error fetching current user", error);
+      Logger.error("Get current user use case error", {
+        userId: dto.getUserId(),
+        error: error instanceof Error ? error.message : String(error),
+      });
       return Result.failure(error as Error);
     }
   }

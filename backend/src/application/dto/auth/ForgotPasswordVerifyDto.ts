@@ -1,11 +1,25 @@
-export class ForgotPasswordVerifyDto {
-    public readonly email: string;
-    public readonly otp: string;
-    public readonly newPassword: string;
+import { Email } from "@domain/value-objects/Email";
 
-    constructor(data: { email: string, otp: string, newPassword: string }) {
-        this.email = data.email;
-        this.otp = data.otp;
-        this.newPassword = data.newPassword;
-    }
+export class ForgotPasswordVerifyDto {
+  private email: Email;
+  private otp: string;
+  private newPassword: string;
+
+  constructor(data: { email: string; otp: string; newPassword: string }) {
+    this.email = Email.create(data.email);
+    this.otp = data.otp;
+    this.newPassword = data.newPassword;
+  }
+
+  getEmail(): string {
+    return this.email.getValue();
+  }
+
+  getOtp(): string {
+    return this.otp;
+  }
+
+  getNewPassword(): string {
+    return this.newPassword;
+  }
 }

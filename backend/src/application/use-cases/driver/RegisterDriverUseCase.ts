@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { RegisterDriverDto } from "../../dto/driver/RegisterDriverDto";
 import { IDriverRepository } from "@domain/repositories/driver/IDriverRepository";
 import { IDriverKycRepository } from "@domain/repositories/driver/IDriverKycRepository";
-import { IUserRepository } from "@domain/repositories";
+import { IUserRepository } from "@application/repositories";
 import { Driver } from "@domain/entities/Driver";
 import { DriverKycDocument } from "@domain/entities/DriverKycDocument";
 import { Result } from "@shared/utils/Result";

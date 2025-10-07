@@ -1,9 +1,19 @@
-export class SignupVerifyDto {
-    public readonly email: string;
-    public readonly otp: string;
+import { Email } from "@domain/value-objects/Email";
 
-    constructor(data: { email: string, otp: string }) {
-        this.email = data.email;
-        this.otp = data.otp;
-    }
+export class SignupVerifyDto {
+  private email: Email;
+  private otp: string;
+
+  constructor(data: { email: string; otp: string }) {
+    this.email = Email.create(data.email);
+    this.otp = data.otp;
+  }
+
+  getEmail(): string {
+    return this.email.getValue();
+  }
+
+  getOtp(): string {
+    return this.otp;
+  }
 }

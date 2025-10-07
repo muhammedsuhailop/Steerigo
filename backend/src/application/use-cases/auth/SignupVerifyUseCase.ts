@@ -1,98 +1,152 @@
-import { injectable, inject } from 'inversify';
-import { IUserRepository } from '@domain/repositories/IUserRepository';
-import { IOtpService } from '@domain/services/IOtpService';
-import { ITokenService } from '@domain/services/ITokenService';
-import { IEmailService } from '@domain/services/IEmailService';
-import { OtpExpiredError, MaxOtpAttemptsError, DomainError } from '@domain/errors';
-import { SignupVerifyDto } from '../../dto/auth/SignupVerifyDto';
-import { RefreshToken } from '@domain/entities/RefreshToken';
-import { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository';
-import { Result } from '@shared/utils/Result';
+import { injectable, inject } from "inversify";
+import { UserRepository } from "@application/repositories/UserRepository";
+import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { OtpService } from "@application/services/OtpService";
+import { TokenService } from "@application/services/TokenService";
+import { EmailService } from "@application/services/EmailService";
+import {
+  OtpExpiredError,
+  MaxOtpAttemptsError,
+  OtpNotFoundError,
+  DomainError,
+} from "@domain/errors";
+import { SignupVerifyDto } from "../../dto/auth/SignupVerifyDto";
+import { SignupVerifyResponseDto } from "../../dto/auth/SignupVerifyResponseDto";
+import { RefreshToken } from "@domain/entities/RefreshToken";
+import { Result } from "@shared/utils/Result";
+import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
+import { AuthMessages, AuthErrorMessages } from "@shared/constants/AuthConstants";
+import { v4 as uuid } from "uuid";
 
 @injectable()
 export class SignupVerifyUseCase {
-    constructor(
-        @inject('IUserRepository') private userRepository: IUserRepository,
-        @inject('IOtpService') private otpService: IOtpService,
-        @inject('ITokenService') private tokenService: ITokenService,
-        @inject('IEmailService') private emailService: IEmailService,
-        @inject('IRefreshTokenRepository') private refreshTokenRepository: IRefreshTokenRepository
-    ) { }
+  constructor(
+    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.RefreshTokenRepository)
+    private refreshTokenRepository: RefreshTokenRepository,
+    @inject(TYPES.OtpService) private otpService: OtpService,
+    @inject(TYPES.TokenService) private tokenService: TokenService,
+    @inject(TYPES.EmailService) private emailService: EmailService
+  ) {}
 
-    async execute(dto: SignupVerifyDto): Promise<Result<{
-        accessToken: string, refreshToken: string; user: any
-    }>> {
-        try {
-            const user = await this.userRepository.findByEmail(dto.email);
+  async execute(
+    dto: SignupVerifyDto
+  ): Promise<Result<SignupVerifyResponseDto>> {
+    try {
+      Logger.info("Signup verification started", { email: dto.getEmail() });
 
-            if (!user) {
-                return Result.failure(new DomainError('No signup request found for this email'));
-            }
+      const user = await this.userRepository.findByEmail(dto.getEmail());
+      if (!user) {
+        Logger.warn("Signup verify failed - user not found", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(
+          new DomainError("No signup request found for this email")
+        );
+      }
 
-            if (user.getIsVerified()) {
-                return Result.failure(new DomainError('User is already verified'));
-            }
+      if (user.getIsVerified()) {
+        Logger.warn("Signup verify failed - already verified", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(new DomainError("User is already verified"));
+      }
 
-            if (user.isOtpExpired()) {
-                return Result.failure(new OtpExpiredError());
-            }
+      if (user.isOtpExpired()) {
+        Logger.warn("Signup verify failed - OTP expired", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(new OtpExpiredError());
+      }
 
-            if (!user.canAttemptOtpVerification()) {
-                return Result.failure(new MaxOtpAttemptsError());
-            }
+      if (!user.canAttemptOtpVerification()) {
+        Logger.warn("Signup verify failed - max attempts exceeded", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(new MaxOtpAttemptsError());
+      }
 
-            // Verify OTP
-            const otpHash = user.getOtpHash();
-            if (!otpHash) {
-                return Result.failure(new DomainError('No OTP found. Please request a new one'));
-            }
+      // Verify OTP
+      const otpHash = user.getOtpHash();
+      if (!otpHash) {
+        Logger.warn("Signup verify failed - no OTP hash", {
+          email: dto.getEmail(),
+        });
+        return Result.failure(new OtpNotFoundError());
+      }
 
-            const isOtpValid = await this.otpService.verify(dto.otp, otpHash);
+      const isOtpValid = await this.otpService.verify(dto.getOtp(), otpHash);
+      if (!isOtpValid) {
+        user.incrementOtpAttempts();
+        await this.userRepository.save(user);
+        Logger.warn("Signup verify failed - invalid OTP", {
+          email: dto.getEmail(),
+          attempts: user.getOtpAttempts(),
+        });
+        return Result.failure(new DomainError(AuthErrorMessages.OTP_INVALID));
+      }
 
-            if (!isOtpValid) {
-                user.incrementOtpAttempts();
-                await this.userRepository.save(user);
-                return Result.failure(new DomainError('Invalid OTP'));
-            }
+      // Verify user
+      user.markEmailAsVerified();
+      await this.userRepository.save(user);
 
-            // Verify user
-            user.verify();
-            await this.userRepository.save(user);
+      // Generate tokens
+      const accessToken = this.tokenService.generateAccessToken({
+        userId: user.getId(),
+        role: user.getRole(),
+      });
 
-            // Generate access token
-            const accessToken = this.tokenService.generate({
-                userId: user.getId(),
-                role: user.getRole()
-            });
+      const refreshTokenValue = this.tokenService.generateRefreshToken();
+      const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-            // Generate refresh token
-            const refreshTokenValue = this.tokenService.generateRefreshToken();
-            const refreshTokenExpiry = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+      // Clean up existing refresh tokens
+      await this.refreshTokenRepository.deleteByUserId(user.getId());
 
-            // Create new refresh token
-            const { v4: uuid } = require('uuid');
-            const refreshToken = RefreshToken.create({
-                id: uuid(),
-                userId: user.getId(),
-                token: refreshTokenValue,
-                expiresAt: refreshTokenExpiry
-            });
-            await this.refreshTokenRepository.save(refreshToken);
+      // Create new refresh token
+      const refreshToken = RefreshToken.create({
+        id: uuid(),
+        userId: user.getId(),
+        token: refreshTokenValue,
+        expiresAt: refreshTokenExpiry,
+      });
 
-            return Result.success({
-                accessToken,
-                refreshToken: refreshTokenValue,
-                user: {
-                    id: user.getId(),
-                    name: user.getName(),
-                    email: user.getEmail(),
-                    mobile: user.getMobile(),
-                    role: user.getRole(),
-                    status: user.getStatus()
-                }
-            });
-        } catch (error) {
-            return Result.failure(error as Error);
-        }
+      await this.refreshTokenRepository.save(refreshToken);
+
+      // Send welcome email
+      await this.emailService.sendWelcomeEmail(
+        user.getEmailValue(),
+        user.getName()
+      );
+
+      const response: SignupVerifyResponseDto = {
+        accessToken,
+        refreshToken: refreshTokenValue,
+        user: {
+          id: user.getId(),
+          name: user.getName(),
+          email: user.getEmailValue(),
+          mobile: user.getMobile() ?? "",
+          role: user.getRole(),
+          status: user.getStatus(),
+          profilePicture: user.getProfilePicture(),
+          isVerified: user.getIsVerified(),
+        },
+        expiresIn: 3600, // 1 hour in seconds
+      };
+
+      Logger.info("Signup verification completed successfully", {
+        userId: user.getId(),
+        email: dto.getEmail(),
+      });
+
+      return Result.success(response);
+    } catch (error) {
+      Logger.error("Signup verify use case error", {
+        email: dto.getEmail(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return Result.failure(error as Error);
     }
+  }
 }
