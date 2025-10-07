@@ -12,6 +12,7 @@ import {
 } from "@domain/errors";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { AccountStatusErrorFactory } from "@domain/errors/strategies/AccountStatusErrorFactory";
 
 @injectable()
 export class LoginUseCase {
@@ -113,7 +114,9 @@ export class LoginUseCase {
         isVerified: user.getIsVerified(),
         reason,
       });
-      return Result.failure(new AccountStatusError(user.getStatus()));
+      return Result.failure(
+        AccountStatusErrorFactory.createError(user.getStatus())
+      );
     }
 
     // Verify password (skip for Google users)

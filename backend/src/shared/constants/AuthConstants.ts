@@ -27,6 +27,7 @@ export const AuthMessages = {
     "Account has been suspended. Contact support for assistance",
   ACCOUNT_BLOCKED: "Account has been blocked. Contact support for assistance",
   ACCOUNT_DEACTIVATED: "Account has been deactivated",
+  ACCOUNT_DEFAULT: "Your account is not active. Please contact support",
   TOKEN_EXPIRED: "Session expired. Please log in again",
   TOKEN_INVALID: "Invalid or expired token",
   ACCESS_TOKEN_REQUIRED: "Access token required",
