@@ -13,6 +13,7 @@ import { TokenService } from "@application/services/TokenService";
 import { EmailService } from "@application/services/EmailService";
 import { OtpService } from "@application/services/OtpService";
 import { GoogleAuthService } from "@application/services/GoogleAuthService";
+import { TokenManagementService } from "@application/services/TokenManagementService";
 
 // Infrastructure Services
 import { PasswordServiceImpl } from "@infrastructure/services/PasswordServiceImpl";
@@ -20,6 +21,7 @@ import { TokenServiceImpl } from "@infrastructure/services/TokenServiceImpl";
 import { EmailServiceImpl } from "@infrastructure/services/EmailServiceImpl";
 import { OtpServiceImpl } from "@infrastructure/services/OtpServiceImpl";
 import { GoogleAuthServiceImpl } from "@infrastructure/services/GoogleAuthServiceImpl";
+import { TokenManagementServiceImpl } from "@infrastructure/services/TokenManagementServiceImpl";
 
 // Use Cases
 import { LoginUseCase } from "@application/use-cases/auth/LoginUseCase";
@@ -42,6 +44,8 @@ import { PasswordController } from "@interface/controllers/auth/PasswordControll
 import { OtpController } from "@interface/controllers/auth/OtpController";
 import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
 import { UserController } from "@interface/controllers/auth/UserController";
+import { UserAuthController } from "@interface/controllers/auth/UserAuthController";
+import { TokenController } from "@interface/controllers/auth/TokenController";
 
 const container = new Container();
 
@@ -103,5 +107,12 @@ container
   .bind<SocialAuthController>(TYPES.SocialAuthController)
   .to(SocialAuthController);
 container.bind<UserController>(TYPES.UserController).to(UserController);
+container
+  .bind<UserAuthController>(TYPES.UserAuthController)
+  .to(UserAuthController);
+container.bind<TokenController>(TYPES.TokenController).to(TokenController);
+container
+  .bind<TokenManagementService>(TYPES.TokenManagementService)
+  .to(TokenManagementServiceImpl);
 
 export { container };

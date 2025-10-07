@@ -11,6 +11,7 @@ export const TYPES = {
   OtpService: Symbol.for("OtpService"),
   GoogleAuthService: Symbol.for("GoogleAuthService"),
   FileUploadService: Symbol.for("FileUploadService"),
+  TokenManagementService: Symbol.for("TokenManagementService"),
 
   // Use Cases - Auth
   LoginUseCase: Symbol.for("LoginUseCase"),
@@ -33,4 +34,6 @@ export const TYPES = {
   PasswordController: Symbol.for("PasswordController"),
   SocialAuthController: Symbol.for("SocialAuthController"),
   UserController: Symbol.for("UserController"),
+  UserAuthController: Symbol.for("UserAuthController"),
+  TokenController: Symbol.for("TokenController"),
 };
