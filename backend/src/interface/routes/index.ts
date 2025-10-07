@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authRoutes } from "./auth/AuthRoutes";
 // import { driverRoutes } from "./driver/driverRoutes";
-// import { adminRoutes } from "./admin";
+import { adminRoutes } from "./admin";
 // import { fileRoutes } from "./file/fileRoutes";
 // import { userRoutes } from "./user";
 
@@ -11,7 +11,7 @@ router.use("/auth", authRoutes);
 
 // router.use("/driver", driverRoutes);
 
-// router.use("/admin", adminRoutes);
+router.use("/admin", adminRoutes);
 
 // router.use("/user", userRoutes);
 

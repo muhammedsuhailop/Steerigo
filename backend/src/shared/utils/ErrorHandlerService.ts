@@ -236,7 +236,7 @@ export class ErrorHandlerService {
 
   private static isDatabaseError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
-    const code = error.code?.toLowerCase() || "";
+    const code = String(error.code ?? "").toLowerCase();
 
     const databasePatterns = [
       "database",
