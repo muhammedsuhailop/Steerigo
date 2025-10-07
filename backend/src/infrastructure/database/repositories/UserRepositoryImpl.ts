@@ -2,139 +2,85 @@ import { injectable } from "inversify";
 import { UserRepository } from "@application/repositories/UserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel, IUserDocument } from "../models/UserModel";
-import {
-  AuthProvider,
-  UserRole,
-  UserStatus,
-} from "@shared/constants/AuthConstants";
+import { AuthProvider } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 import {
   QueryOptions,
   PaginatedResult,
   FilterOptions,
 } from "@shared/types/Repository";
-import { Password } from "@domain/value-objects/Password";
+import { UserDomainMapper } from "../mappers/UserDomainMapper";
+import { UserQueryService } from "../services/UserQueryService";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
+  private queryService = new UserQueryService();
+
   async findById(id: string): Promise<User | null> {
-    try {
-      const userDoc = await UserModel.findById(id);
-      return userDoc ? this.toDomain(userDoc) : null;
-    } catch (error) {
-      Logger.error("Error finding user by ID", { id, error });
-      throw error;
-    }
+    const userDoc = await this.queryService.findById(id);
+    return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    try {
-      const userDoc = await UserModel.findOne({
-        email: email.toLowerCase().trim(),
-      });
-      return userDoc ? this.toDomain(userDoc) : null;
-    } catch (error) {
-      Logger.error("Error finding user by email", { email, error });
-      throw error;
-    }
+    const userDoc = await this.queryService.findByEmail(email);
+    return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
 
   async findByEmailAndProvider(
     email: string,
     provider: AuthProvider
   ): Promise<User | null> {
-    try {
-      const userDoc = await UserModel.findOne({
-        email: email.toLowerCase().trim(),
-        authProvider: provider,
-      });
-      return userDoc ? this.toDomain(userDoc) : null;
-    } catch (error) {
-      Logger.error("Error finding user by email and provider", {
-        email,
-        provider,
-        error,
-      });
-      throw error;
-    }
+    const userDoc = await this.queryService.findByEmailAndProvider(
+      email,
+      provider
+    );
+    return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
 
   async findByGoogleId(googleId: string): Promise<User | null> {
-    try {
-      const userDoc = await UserModel.findOne({ googleId });
-      return userDoc ? this.toDomain(userDoc) : null;
-    } catch (error) {
-      Logger.error("Error finding user by Google ID", { googleId, error });
-      throw error;
-    }
+    const userDoc = await this.queryService.findByGoogleId(googleId);
+    return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
 
   async findByMobile(mobile: string): Promise<User | null> {
-    try {
-      const userDoc = await UserModel.findOne({ mobile: mobile.trim() });
-      return userDoc ? this.toDomain(userDoc) : null;
-    } catch (error) {
-      Logger.error("Error finding user by mobile", { mobile, error });
-      throw error;
-    }
+    const userDoc = await this.queryService.findByMobile(mobile);
+    return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
 
-  async updateMany(
-    filters: FilterOptions<User>,
-    updates: Partial<User>
-  ): Promise<number> {
-    try {
-      const result = await UserModel.updateMany(filters, updates);
-      Logger.info("Users updated successfully", { filters, updates });
-      return result.modifiedCount ?? 0;
-    } catch (error) {
-      Logger.error("Error updating multiple users", {
-        filters,
-        updates,
-        error,
-      });
-      throw error;
-    }
+  async existsByEmail(email: string): Promise<boolean> {
+    return this.queryService.existsByEmail(email);
   }
 
-  async findByIds(ids: string[]): Promise<User[]> {
-    try {
-      const userDocs = await UserModel.find({ _id: { $in: ids } });
-      return userDocs.map((doc) => this.toDomain(doc));
-    } catch (error) {
-      Logger.error("Error finding users by IDs", { ids, error });
-      throw error;
-    }
+  async existsByMobile(mobile: string): Promise<boolean> {
+    return this.queryService.existsByMobile(mobile);
   }
 
-  async existsByFilter(filters: FilterOptions<User>): Promise<boolean> {
-    try {
-      const count = await UserModel.countDocuments(filters);
-      return count > 0;
-    } catch (error) {
-      Logger.error("Error checking existence by filter", { filters, error });
-      throw error;
-    }
+  async findActiveUsers(options?: QueryOptions): Promise<User[]> {
+    const userDocs = await this.queryService.findActiveUsers(options);
+    return userDocs.map((doc) => UserDomainMapper.toDomain(doc));
   }
 
+  async findByRole(role: string, options?: QueryOptions): Promise<User[]> {
+    const userDocs = await this.queryService.findByRole(role, options);
+    return userDocs.map((doc) => UserDomainMapper.toDomain(doc));
+  }
+
+  // Core persistence operations
   async save(user: User): Promise<void> {
     try {
-      const userData = this.toPersistence(user);
+      const userData = UserDomainMapper.toPersistence(user);
 
-      // For existing users, use regular update without setDefaultsOnInsert
       const existingDoc = await UserModel.findOne({
         email: user.getEmailValue(),
       });
 
       if (existingDoc) {
-        // Update existing user without resetting defaults
         await UserModel.findOneAndUpdate(
           { email: user.getEmailValue() },
           userData,
           { new: true }
         );
       } else {
-        // Create new user
         await UserModel.create(userData);
       }
 
@@ -155,57 +101,28 @@ export class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  async updateById(id: string, updates: Partial<User>): Promise<void> {
+    try {
+      await UserModel.findByIdAndUpdate(id, updates);
+      Logger.info("User updated successfully", { id });
+    } catch (error) {
+      Logger.error("Error updating user", { id, error });
+      throw error;
+    }
+  }
+
+  // Delegated query operations
   async exists(id: string): Promise<boolean> {
-    try {
-      const count = await UserModel.countDocuments({ _id: id });
-      return count > 0;
-    } catch (error) {
-      Logger.error("Error checking if user exists", { id, error });
-      throw error;
-    }
+    return this.queryService.exists(id);
   }
 
-  async existsByEmail(email: string): Promise<boolean> {
-    try {
-      const count = await UserModel.countDocuments({
-        email: email.toLowerCase().trim(),
-      });
-      return count > 0;
-    } catch (error) {
-      Logger.error("Error checking if email exists", { email, error });
-      throw error;
-    }
-  }
-
-  async existsByMobile(mobile: string): Promise<boolean> {
-    try {
-      const count = await UserModel.countDocuments({
-        mobile: mobile.trim(),
-      });
-      return count > 0;
-    } catch (error) {
-      Logger.error("Error checking if mobile exists", { mobile, error });
-      throw error;
-    }
+  async existsByFilter(filters: FilterOptions<User>): Promise<boolean> {
+    return this.queryService.existsByFilter(filters);
   }
 
   async findAll(options?: QueryOptions): Promise<User[]> {
-    try {
-      let query = UserModel.find(options?.filters || {});
-
-      if (options?.limit) query = query.limit(options.limit);
-      if (options?.offset) query = query.skip(options.offset);
-      if (options?.sortBy) {
-        const sortOrder = options.sortOrder === "desc" ? -1 : 1;
-        query = query.sort({ [options.sortBy as string]: sortOrder });
-      }
-
-      const userDocs = await query.exec();
-      return userDocs.map((doc) => this.toDomain(doc));
-    } catch (error) {
-      Logger.error("Error finding all users", error);
-      throw error;
-    }
+    const userDocs = await this.queryService.findAll(options);
+    return userDocs.map((doc) => UserDomainMapper.toDomain(doc));
   }
 
   async findPaginated(options: QueryOptions): Promise<PaginatedResult<User>> {
@@ -216,7 +133,7 @@ export class UserRepositoryImpl implements UserRepository {
 
       const [users, total] = await Promise.all([
         this.findAll(options),
-        this.count(options.filters),
+        this.queryService.count(options.filters),
       ]);
 
       return {
@@ -233,20 +150,23 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async count(filters?: FilterOptions<User>): Promise<number> {
-    try {
-      return await UserModel.countDocuments(filters || {});
-    } catch (error) {
-      Logger.error("Error counting users", error);
-      throw error;
-    }
+    return this.queryService.count(filters);
   }
 
-  async updateById(id: string, updates: Partial<User>): Promise<void> {
+  async updateMany(
+    filters: FilterOptions<User>,
+    updates: Partial<User>
+  ): Promise<number> {
     try {
-      await UserModel.findByIdAndUpdate(id, updates);
-      Logger.info("User updated successfully", { id });
+      const result = await UserModel.updateMany(filters, updates);
+      Logger.info("Users updated successfully", { filters, updates });
+      return result.modifiedCount ?? 0;
     } catch (error) {
-      Logger.error("Error updating user", { id, error });
+      Logger.error("Error updating multiple users", {
+        filters,
+        updates,
+        error,
+      });
       throw error;
     }
   }
@@ -262,74 +182,13 @@ export class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  async findActiveUsers(options?: QueryOptions): Promise<User[]> {
-    const activeFilters = {
-      ...options?.filters,
-      status: UserStatus.ACTIVE,
-      isVerified: true,
-    };
-
-    return this.findAll({ ...options, filters: activeFilters });
-  }
-
-  async findByRole(role: string, options?: QueryOptions): Promise<User[]> {
-    const roleFilters = {
-      ...options?.filters,
-      role,
-    };
-
-    return this.findAll({ ...options, filters: roleFilters });
-  }
-
-  private toDomain(userDoc: IUserDocument): User {
-    const passwordHash = userDoc.password;
-    let passwordVo: Password;
-
-    if (!passwordHash || passwordHash.trim() === "") {
-      passwordVo = Password.createEmpty();
-    } else {
-      passwordVo = Password.createFromHash(passwordHash);
+  async findByIds(ids: string[]): Promise<User[]> {
+    try {
+      const userDocs = await UserModel.find({ _id: { $in: ids } });
+      return userDocs.map((doc) => UserDomainMapper.toDomain(doc));
+    } catch (error) {
+      Logger.error("Error finding users by IDs", { ids, error });
+      throw error;
     }
-    return User.reconstruct({
-      id: userDoc.id.toString(),
-      name: userDoc.name,
-      email: userDoc.email,
-      password: passwordVo.getHashedValue(),
-      mobile: userDoc.mobile,
-      dob: userDoc.dob,
-      gender: userDoc.gender,
-      address: userDoc.address,
-      role: userDoc.role as UserRole,
-      status: userDoc.status as UserStatus,
-      isVerified: userDoc.isVerified,
-      otpHash: userDoc.otpHash,
-      otpExpires: userDoc.otpExpires,
-      otpAttempts: userDoc.otpAttempts,
-      createdAt: userDoc.createdAt,
-      updatedAt: userDoc.updatedAt,
-      googleId: userDoc.googleId,
-      profilePicture: userDoc.profilePicture,
-      authProvider:
-        (userDoc.authProvider as AuthProvider) || AuthProvider.EMAIL,
-    });
-  }
-
-  private toPersistence(user: User): Partial<IUserDocument> {
-    return {
-      name: user.getName(),
-      email: user.getEmailValue(),
-      password: user.getPasswordHash(),
-      mobile: user.getMobile(),
-      role: user.getRole(),
-      status: user.getStatus(),
-      isVerified: user.getIsVerified(),
-      otpHash: user.getOtpHash(),
-      otpExpires: user.getOtpExpires(),
-      otpAttempts: user.getOtpAttempts(),
-      updatedAt: user.getUpdatedAt(),
-      googleId: user.getGoogleId(),
-      profilePicture: user.getProfilePicture(),
-      authProvider: user.getAuthProvider(),
-    };
   }
 }
