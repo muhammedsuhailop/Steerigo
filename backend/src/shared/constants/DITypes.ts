@@ -13,6 +13,9 @@ export const TYPES = {
   FileUploadService: Symbol.for("FileUploadService"),
   TokenManagementService: Symbol.for("TokenManagementService"),
 
+  // Adapters
+  CryptoAdapter: Symbol.for("CryptoAdapter"),
+
   // Use Cases - Auth
   LoginUseCase: Symbol.for("LoginUseCase"),
   LogoutUseCase: Symbol.for("LogoutUseCase"),

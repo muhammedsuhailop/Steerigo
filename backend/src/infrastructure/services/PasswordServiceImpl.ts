@@ -1,18 +1,23 @@
-import { injectable } from "inversify";
-import bcrypt from "bcrypt";
+import { injectable, inject } from "inversify";
 import { PasswordService } from "@application/services/PasswordService";
+import { CryptoAdapter } from "@infrastructure/adapters/CryptoAdapter";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class PasswordServiceImpl implements PasswordService {
+  constructor(
+    @inject(TYPES.CryptoAdapter) private cryptoAdapter: CryptoAdapter
+  ) {}
+
   async hash(password: string): Promise<string> {
     try {
       if (!password) {
         throw new Error("Password cannot be empty");
       }
 
-      const hashedPassword = await bcrypt.hash(
+      const hashedPassword = await this.cryptoAdapter.hash(
         password,
         AppConstants.BCRYPT_ROUNDS
       );
@@ -30,7 +35,10 @@ export class PasswordServiceImpl implements PasswordService {
         return false;
       }
 
-      const isMatch = await bcrypt.compare(password, hashedPassword);
+      const isMatch = await this.cryptoAdapter.compare(
+        password,
+        hashedPassword
+      );
       Logger.debug("Password comparison completed", { isMatch });
       return isMatch;
     } catch (error) {
