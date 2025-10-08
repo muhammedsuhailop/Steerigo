@@ -162,7 +162,7 @@ export const authApi = createApi({
           throw new Error("No refresh token found");
         }
         return {
-          url: "/refresh",
+          url: "/refresh-token",
           method: "POST",
           body: { refreshToken },
         };

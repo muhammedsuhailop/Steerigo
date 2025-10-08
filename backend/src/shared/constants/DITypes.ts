@@ -3,6 +3,7 @@ export const TYPES = {
   // Repositories
   UserRepository: Symbol.for("UserRepository"),
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
+  AdminUserRepository: Symbol.for("AdminUserRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -29,6 +30,8 @@ export const TYPES = {
   GetCurrentUserUseCase: Symbol.for("GetCurrentUserUseCase"),
   GoogleLoginUseCase: Symbol.for("GoogleLoginUseCase"),
   GetGoogleAuthUrlUseCase: Symbol.for("GetGoogleAuthUrlUseCase"),
+  GetUsersUseCase: Symbol.for("GetUsersUseCase"),
+  UpdateUserStatusUseCase: Symbol.for("UpdateUserStatusUseCase"),
 
   // Controllers
   LoginController: Symbol.for("LoginController"),
@@ -39,4 +42,5 @@ export const TYPES = {
   UserController: Symbol.for("UserController"),
   UserAuthController: Symbol.for("UserAuthController"),
   TokenController: Symbol.for("TokenController"),
+  AdminUserController: Symbol.for("AdminUserController"),
 };

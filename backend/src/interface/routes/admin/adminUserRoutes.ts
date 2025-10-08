@@ -1,32 +1,33 @@
-// import { Router, Request, Response } from "express";
-// import { container } from "@infrastructure/container/Container";
-// import { AdminUserController } from "../../controllers/admin/AdminUserController";
-// import {
-//   getUsersValidation,
-//   updateUserStatusValidation,
-// } from "../../validators/admin/adminValidators";
-// import { authMiddleware } from "../../middleware/auth/AuthMiddleware";
-// import { requireRoles } from "../../middleware/auth/RoleMiddleware";
+import { Router } from "express";
+import { container } from "@infrastructure/container";
+import { AdminUserController } from "@interface/controllers/admin/AdminUserController";
+import {
+  validateGetUsersRequest,
+  validateUpdateUserStatusRequest,
+} from "@interface/validators/admin/AdminUserValidator";
+import { authMiddleware } from "@interface/middleware/auth/authMiddleware";
+import { requireRole } from "@interface/middleware/auth/authMiddleware";
+import { TYPES } from "@shared/constants/DITypes";
 
-// const router = Router();
-// const adminUserController =
-//   container.get<AdminUserController>(AdminUserController);
+const router = Router();
 
-// //authentication middleware
-// router.use(authMiddleware);
-// router.use(requireRoles("Admin"));
+// Get admin user controller instance from container
+const adminUserController = container.get<AdminUserController>(
+  TYPES.AdminUserController
+);
 
-// // GET /api/admin/users - Get users with filtering and pagination
-// router.get("/", getUsersValidation, (req: Request, res: Response) =>
-//   adminUserController.getUsers(req, res)
-// );
+// Apply authentication and admin role authorization to all routes
+router.use(authMiddleware);
+router.use(requireRole(["Admin"]));
 
-// // PUT /api/admin/users/:userId/action - Update user status
-// router.put(
-//   "/:userId/action",
-//   updateUserStatusValidation,
-//   (req: Request, res: Response) =>
-//     adminUserController.updateUserStatus(req, res)
-// );
+// GET /admin/users - Get all users with filters and pagination
+router.get("/", validateGetUsersRequest, (req, res) =>
+  adminUserController.getUsers(req, res)
+);
 
-// export { router as adminUserRoutes };
+// PUT /admin/users/:userId/action - Update user status
+router.put("/:userId/action", validateUpdateUserStatusRequest, (req, res) =>
+  adminUserController.updateUserStatus(req, res)
+);
+
+export { router as adminUserRoutes };

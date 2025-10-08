@@ -7,6 +7,7 @@ export interface BaseEntity {
 
 // Pagination and filtering options 
 export interface QueryOptions<T = any> {
+  page?:number;
   limit?: number;
   offset?: number;
   sortBy?: keyof T;
