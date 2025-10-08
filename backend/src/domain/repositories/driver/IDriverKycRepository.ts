@@ -1,4 +1,4 @@
-import { DriverKycDocument } from "../../entities/DriverKycDocument";
+import { DriverKycDocument } from "../../entities/KYC";
 
 export interface IDriverKycRepository {
   save(document: DriverKycDocument): Promise<void>;

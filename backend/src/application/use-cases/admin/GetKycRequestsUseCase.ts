@@ -1,51 +1,98 @@
 import { injectable, inject } from "inversify";
-import { IAdminKycRepository } from "@domain/repositories/admin/IAdminKycRepository";
-import { GetKycRequestsDto } from "../../dto/admin/GetKycRequestsDto";
+import {
+  KYCRepository,
+  KYCQuery,
+} from "@application/repositories/KYCRepository";
+import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class GetKycRequestsUseCase {
   constructor(
-    @inject("IAdminKycRepository")
-    private repo: IAdminKycRepository
+    @inject(TYPES.KYCRepository)
+    private kycRepository: KYCRepository
   ) {}
 
-  async execute(dto: GetKycRequestsDto): Promise<Result<any, Error>> {
+  async execute(dto: GetKycRequestsRequestDto): Promise<Result<any>> {
     try {
-      if (dto.dateFrom && dto.dateTo) {
-        const f = new Date(dto.dateFrom),
-          t = new Date(dto.dateTo);
-        if (f > t) return Result.failure(new Error("Date range invalid"));
+      const dateFrom = dto.getDateFrom();
+      const dateTo = dto.getDateTo();
+
+      if (dateFrom && dateTo && dateFrom > dateTo) {
+        return Result.failure(
+          new Error(
+            "Date range is invalid: 'from' date cannot be after 'to' date"
+          )
+        );
       }
-      const filters = {
-        docType: dto.docType,
-        isVerified: dto.isVerified,
-        search: dto.search,
-        dateFrom: dto.dateFrom ? new Date(dto.dateFrom) : undefined,
-        dateTo: dto.dateTo ? new Date(dto.dateTo) : undefined,
-        sortBy: dto.sortBy,
-        sortOrder: dto.sortOrder,
+
+      const filters: KYCQuery = {
+        status: dto.getStatus(),
+        driverId: dto.getDriverId(),
+        dateFrom,
+        dateTo,
       };
-      const pagination = { page: dto.page, pageSize: dto.pageSize };
-      Logger.info("GetKycRequestsUseCase", { filters, pagination });
-      const res = await this.repo.findAllKycRequests(filters, pagination);
-      return Result.success({
-        kycRequests: res.data,
-        pagination: res.pagination,
-        appliedFilters: {
-          docType: dto.docType || null,
-          isVerified: dto.isVerified !== undefined ? dto.isVerified : null,
-          search: dto.search || null,
-          dateFrom: dto.dateFrom || null,
-          dateTo: dto.dateTo || null,
-          sortBy: dto.sortBy,
-          sortOrder: dto.sortOrder,
+
+      const pagination = {
+        page: dto.getPage(),
+        pageSize: dto.getPageSize(),
+      };
+
+      Logger.info("Executing GetKycRequestsUseCase", {
+        filters: {
+          ...filters,
+          dateFrom: filters.dateFrom?.toISOString(),
+          dateTo: filters.dateTo?.toISOString(),
         },
+        pagination,
       });
-    } catch (e) {
-      Logger.error("Error GetKycRequestsUseCase", e);
-      return Result.failure(e as Error);
+
+      const result = await this.kycRepository.findKYCRequestsWithDriverInfo(
+        filters,
+        pagination
+      );
+
+      const response = {
+        kycRequests: result.data.map((item) => ({
+          kyc: {
+            id: item.kycRequest.getId(),
+            status: item.kycRequest.getStatus(),
+            documents: item.kycRequest.getDocuments(),
+            comments: item.kycRequest.getComments(),
+            reviewedBy: item.kycRequest.getReviewedBy(),
+            reviewedAt: item.kycRequest.getReviewedAt()?.toISOString() || null,
+            createdAt: item.kycRequest.getCreatedAt().toISOString(),
+            updatedAt: item.kycRequest.getUpdatedAt().toISOString(),
+          },
+          driver: {
+            driverId: item.driverInfo.driverId,
+            driverName: item.driverInfo.driverName,
+            driverEmail: item.driverInfo.driverEmail,
+            driverMobile: item.driverInfo.driverMobile,
+          },
+        })),
+        pagination: result.pagination,
+        appliedFilters: {
+          sortBy: dto.getSortBy(),
+          sortOrder: dto.getSortOrder(),
+          status: dto.getStatus() || null,
+          driverId: dto.getDriverId() || null,
+          dateFrom: dto.getDateFrom()?.toISOString() || null,
+          dateTo: dto.getDateTo()?.toISOString() || null,
+        },
+      };
+
+      Logger.info("KYC requests fetched successfully", {
+        totalItems: result.pagination.totalItems,
+        currentPage: result.pagination.currentPage,
+      });
+
+      return Result.success(response);
+    } catch (error) {
+      Logger.error("Error fetching KYC requests", error);
+      return Result.failure(error as Error);
     }
   }
 }

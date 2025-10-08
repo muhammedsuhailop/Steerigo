@@ -1,44 +1,43 @@
 import { injectable, inject } from "inversify";
-import { IAdminDriverRepository } from "@domain/repositories/admin/IAdminDriverRepository";
-import { GetDriversDto } from "../../dto/admin/GetDriversDto";
+import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import {
+  AdminDriverQuery,
+  GetDriversRequestDto,
+} from "@application/dto/admin/GetDriversRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class GetDriversUseCase {
   constructor(
-    @inject("IAdminDriverRepository")
-    private adminDriverRepository: IAdminDriverRepository
+    @inject(TYPES.AdminDriverRepository)
+    private adminDriverRepository: AdminDriverRepository
   ) {}
 
-  async execute(dto: GetDriversDto): Promise<Result<any, Error>> {
+  async execute(dto: GetDriversRequestDto): Promise<Result<any>> {
     try {
-      if (dto.dateFrom && dto.dateTo) {
-        const fromDate = new Date(dto.dateFrom);
-        const toDate = new Date(dto.dateTo);
+      const dateFrom = dto.getDateFrom();
+      const dateTo = dto.getDateTo();
 
-        if (fromDate > toDate) {
-          return Result.failure(
-            new Error(
-              "Date range is invalid: 'from' date cannot be after 'to' date"
-            )
-          );
-        }
+      if (dateFrom && dateTo && dateFrom > dateTo) {
+        return Result.failure(
+          new Error(
+            "Date range is invalid: 'from' date cannot be after 'to' date"
+          )
+        );
       }
 
-      const filters = {
-        status: dto.status,
-        kycStatus: dto.kycStatus,
-        search: dto.search,
-        dateFrom: dto.dateFrom ? new Date(dto.dateFrom) : undefined,
-        dateTo: dto.dateTo ? new Date(dto.dateTo) : undefined,
-        sortBy: dto.sortBy,
-        sortOrder: dto.sortOrder,
+      const filters: AdminDriverQuery = {
+        status: dto.getStatus(),
+        search: dto.getSearch(),
+        dateFrom,
+        dateTo,
       };
 
       const pagination = {
-        page: dto.page,
-        pageSize: dto.pageSize,
+        page: dto.getPage(),
+        pageSize: dto.getPageSize(),
       };
 
       Logger.info("Executing GetDriversUseCase", {
@@ -50,71 +49,49 @@ export class GetDriversUseCase {
         pagination,
       });
 
-      const result = await this.adminDriverRepository.findDriversOnly(
+      const result = await this.adminDriverRepository.findDriversWithSummary(
         filters,
         pagination
       );
 
-      const formattedDrivers = result.data.map((driver) => ({
-        driverId: driver.driverId,
-        name: driver.name,
-        email: driver.email,
-        mobile: driver.mobile,
-        totalRides: driver.totalRides,
-        totalEarned: driver.totalEarned,
-        status: driver.status,
-        kycStatus: driver.kycStatus,
-        lastRide: driver.lastRide
-          ? this.formatDate(new Date(driver.lastRide))
-          : null,
-        createdAt: driver.joinedDate
-          ? driver.joinedDate.toISOString()
-          : new Date().toISOString(),
-        isVerified: driver.isVerified,
-        licenseNumber: driver.licenseNumber,
-        licenseExpiryDate: driver.licenseExpiryDate,
-        eligibleVehicleType: driver.eligibleVehicleType,
-        eligibleGearType: driver.eligibleGearType,
-      }));
-
-      Logger.info("Drivers fetched successfully", {
-        page: dto.page,
-        pageSize: dto.pageSize,
-        totalItems: result.pagination.totalItems,
-        sortBy: dto.sortBy,
-        sortOrder: dto.sortOrder,
-        filtersApplied: {
-          hasSearch: !!dto.search,
-          hasStatus: !!dto.status,
-          hasKycStatus: !!dto.kycStatus,
-          hasDateRange: !!(dto.dateFrom || dto.dateTo),
-        },
-      });
-
-      return Result.success({
-        drivers: formattedDrivers,
+      const response = {
+        drivers: result.data.map((driver) => ({
+          driverId: driver.driverId,
+          userId: driver.userId,
+          name: driver.name,
+          email: driver.email,
+          mobile: driver.mobile,
+          status: driver.status,
+          licenseNumber: driver.licenseNumber,
+          vehicleNumber: driver.vehicleNumber,
+          profilePicture: driver.profilePicture,
+          totalRides: driver.totalRides,
+          totalEarnings: driver.totalEarnings,
+          rating: driver.rating,
+          lastRideDate: driver.lastRideDate?.toISOString() || null,
+          createdAt: driver.createdAt.toISOString(),
+          kycStatus: driver.kycStatus,
+        })),
         pagination: result.pagination,
         appliedFilters: {
-          sortBy: dto.sortBy,
-          sortOrder: dto.sortOrder,
-          search: dto.search || null,
-          status: dto.status || null,
-          kycStatus: dto.kycStatus || null,
-          dateFrom: dto.dateFrom || null,
-          dateTo: dto.dateTo || null,
+          sortBy: dto.getSortBy(),
+          sortOrder: dto.getSortOrder(),
+          search: dto.getSearch() || null,
+          status: dto.getStatus() || null,
+          dateFrom: dto.getDateFrom()?.toISOString() || null,
+          dateTo: dto.getDateTo()?.toISOString() || null,
         },
+      };
+
+      Logger.info("Drivers fetched successfully", {
+        totalItems: result.pagination.totalItems,
+        currentPage: result.pagination.currentPage,
       });
+
+      return Result.success(response);
     } catch (error) {
       Logger.error("Error fetching drivers", error);
       return Result.failure(error as Error);
     }
-  }
-
-  private formatDate(date: Date): string {
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
   }
 }

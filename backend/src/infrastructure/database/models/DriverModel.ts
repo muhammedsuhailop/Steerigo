@@ -1,43 +1,89 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
-export interface IDriverDocument extends Document {
-  userId: Types.ObjectId;
+export interface IDriverModel extends Document {
+  _id: string;
+  userId: string;
+  name: string;
+  email: string;
+  mobile: string;
   licenseNumber: string;
-  licenseIssueDate: Date;
-  licenseExpiryDate: Date;
-  licenseCategory: string[];
-  kycStatus: string;
+  vehicleNumber: string;
   status: string;
-  eligibleVehicleType: string[];
-  eligibleGearType: string[];
+  profilePicture?: string;
+  licenseDocument?: string;
+  vehicleDocument?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const DriverSchema = new Schema<IDriverDocument>(
+const driverSchema = new Schema<IDriverModel>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    licenseNumber: { type: String, required: true },
-    licenseIssueDate: { type: Date, required: true },
-    licenseExpiryDate: { type: Date, required: true },
-    licenseCategory: { type: [String], required: true },
-    kycStatus: {
+    userId: {
       type: String,
-      enum: ["Pending", "Verified", "Rejected"],
-      default: "Pending",
+      required: true,
+      unique: true,
+      ref: "User",
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      maxlength: 255,
+    },
+    mobile: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 15,
+    },
+    licenseNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      maxlength: 50,
+    },
+    vehicleNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 20,
     },
     status: {
       type: String,
-      enum: ["Active", "Blocked", "InReview"],
-      default: "InReview",
+      enum: ["Pending Verification", "Active", "Suspended", "Rejected"],
+      default: "Pending Verification",
     },
-    eligibleVehicleType: { type: [String], default: [] },
-    eligibleGearType: { type: [String], default: [] },
+    profilePicture: {
+      type: String,
+      trim: true,
+    },
+    licenseDocument: {
+      type: String,
+      trim: true,
+    },
+    vehicleDocument: {
+      type: String,
+      trim: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    collection: "drivers",
+  }
 );
 
-export const DriverModel = mongoose.model<IDriverDocument>(
-  "Driver",
-  DriverSchema
-);
+// Indexes 
+driverSchema.index({ email: 1 });
+driverSchema.index({ mobile: 1 });
+driverSchema.index({ status: 1 });
+driverSchema.index({ createdAt: -1 });
+
+export const DriverModel = model<IDriverModel>("Driver", driverSchema);

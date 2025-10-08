@@ -1,121 +1,348 @@
-import { body, query, param } from "express-validator";
+import { z } from "zod";
+import { Request, Response, NextFunction } from "express";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { ApiResponse } from "@shared/types/Common";
+import { Logger } from "@shared/utils/Logger";
 
-export const getDriversValidation = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
-  query("pageSize")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Page size must be between 1 and 100"),
-  query("status")
-    .optional()
-    .isIn(["Active", "Blocked", "InReview", "Pending", "Verified", "Rejected"])
-    .withMessage("Invalid status value"),
-  query("kycStatus")
-    .optional()
-    .isIn(["Pending", "Verified", "Rejected"])
-    .withMessage("Invalid KYC status value"),
-  query("search")
-    .optional()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Search term must be between 1 and 100 characters"),
-  query("dateFrom")
-    .optional()
-    .isISO8601()
-    .withMessage("Invalid date format for dateFrom"),
-  query("dateTo")
-    .optional()
-    .isISO8601()
-    .withMessage("Invalid date format for dateTo"),
-  query("sortBy")
-    .optional()
-    .isIn([
-      "name",
-      "email",
-      "totalRides",
-      "totalEarned",
-      "createdAt",
-      "lastRide",
-      "status",
-      "kycStatus",
-    ])
-    .withMessage("Invalid sortBy field"),
-  query("sortOrder")
-    .optional()
-    .isIn(["asc", "desc"])
-    .withMessage("Sort order must be 'asc' or 'desc'"),
-];
+// Driver validation schemas
+const getDriversSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(10),
+    status: z
+      .enum(["Pending Verification", "Active", "Suspended", "Rejected"])
+      .optional(),
+    search: z.string().min(1).max(255).optional(),
+    dateFrom: z
+      .union([
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+        z.string().datetime(),
+      ])
+      .optional(),
+    dateTo: z
+      .union([
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+        z.string().datetime(),
+      ])
+      .optional(),
+    sortBy: z
+      .enum([
+        "name",
+        "email",
+        "createdAt",
+        "totalRides",
+        "totalEarnings",
+        "rating",
+      ])
+      .default("createdAt"),
+    sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  }),
+});
 
-export const driverActionValidation = [
-  param("driverId")
-    .isMongoId()
-    .withMessage("Driver ID must be a valid MongoDB ObjectId"),
-  body("action")
-    .isIn(["block", "unblock"])
-    .withMessage("Action must be either block or unblock"),
-];
+const driverActionSchema = z.object({
+  params: z.object({
+    driverId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  }),
+  body: z.object({
+    action: z.enum(["approve", "suspend", "activate", "reject"], {
+        message: "Action must be one of: approve, suspend, activate, reject",
+    }),
+    reason: z
+      .string()
+      .min(3, "Reason must be at least 3 characters")
+      .max(500, "Reason cannot exceed 500 characters")
+      .optional(),
+  }),
+});
 
-export const getKycRequestsValidation = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
-  query("pageSize")
-    .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage("Page size must be between 1 and 50"),
-  query("docType")
-    .optional()
-    .isIn(["PAN", "Aadhaar", "DrivingLicense", "Passport"])
-    .withMessage(
-      "Document type must be PAN, Aadhaar, DrivingLicense, or Passport"
-    ),
-  query("isVerified")
-    .optional()
-    .isBoolean()
-    .withMessage("isVerified must be a boolean"),
-  query("dateFrom")
-    .optional()
-    .isISO8601()
-    .withMessage("Date from must be a valid ISO date"),
-  query("dateTo")
-    .optional()
-    .isISO8601()
-    .withMessage("Date to must be a valid ISO date"),
-  query("sortBy")
-    .optional()
-    .isIn(["createdAt", "docType", "isVerified", "expiryDate"])
-    .withMessage("Invalid sort field"),
-  query("sortOrder")
-    .optional()
-    .isIn(["asc", "desc"])
-    .withMessage("Sort order must be asc or desc"),
-];
+const getDriverProfileSchema = z.object({
+  params: z.object({
+    driverId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  }),
+});
 
-export const getDriverProfileValidation = [
-  param("driverId")
-    .isMongoId()
-    .withMessage("Driver ID must be a valid MongoDB ObjectId"),
-];
+// KYC validation schemas
+const getKycRequestsSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(10),
+    status: z
+      .enum(["Pending", "Under Review", "Approved", "Rejected"])
+      .optional(),
+    driverId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format")
+      .optional(),
+    dateFrom: z
+      .union([
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+        z.string().datetime(),
+      ])
+      .optional(),
+    dateTo: z
+      .union([
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+        z.string().datetime(),
+      ])
+      .optional(),
+    sortBy: z.enum(["createdAt", "updatedAt", "status"]).default("createdAt"),
+    sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  }),
+});
 
-export const updateKycStatusValidation = [
-  param("kycId")
-    .isMongoId()
-    .withMessage("KYC ID must be a valid MongoDB ObjectId"),
-  body("kycStatus")
-    .isIn(["approved", "rejected"])
-    .withMessage("KYC status must be either 'approved' or 'rejected'"),
-  body("comments")
-    .optional()
-    .isLength({ min: 0, max: 500 })
-    .withMessage("Comments must not exceed 500 characters")
-    .trim(),
-];
+const updateKycStatusSchema = z.object({
+  params: z.object({
+    kycId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  }),
+  body: z.object({
+    kycStatus: z.enum(["Approved", "Rejected", "Under Review"], {
+        message: "KYC status must be one of: Approved, Rejected, Under Review",
+    }),
+    comments: z
+      .string()
+      .min(1, "Comments must be at least 1 character")
+      .max(1000, "Comments cannot exceed 1000 characters")
+      .optional(),
+    reviewedBy: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid reviewer ID format")
+      .optional(), // Can be populated from auth middleware
+  }),
+});
 
-export const getKycRequestByIdValidation = [
-  param("kycId")
-    .isMongoId()
-    .withMessage("KYC ID must be a valid MongoDB ObjectId"),
-];
+const getKycRequestByIdSchema = z.object({
+  params: z.object({
+    kycId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  }),
+});
+
+// Validation middleware functions
+export const validateGetDriversRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = getDriversSchema.parse({
+      query: req.query,
+    });
+    req.query = validatedData.query as any;
+    next();
+  } catch (error) {
+    Logger.warn("Get drivers validation failed", {
+      query: req.query,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};
+
+export const validateDriverActionRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = driverActionSchema.parse({
+      params: req.params,
+      body: req.body,
+    });
+    req.params = validatedData.params;
+    req.body = validatedData.body;
+
+    // Additional business validation
+    if (
+      (req.body.action === "suspend" || req.body.action === "reject") &&
+      !req.body.reason
+    ) {
+      const response: ApiResponse = {
+        success: false,
+        message: `Reason is required for ${req.body.action} action`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+
+    next();
+  } catch (error) {
+    Logger.warn("Driver action validation failed", {
+      driverId: req.params?.driverId,
+      body: req.body,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};
+
+export const validateGetDriverProfileRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = getDriverProfileSchema.parse({
+      params: req.params,
+    });
+    req.params = validatedData.params;
+    next();
+  } catch (error) {
+    Logger.warn("Get driver profile validation failed", {
+      driverId: req.params?.driverId,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};
+
+export const validateGetKycRequestsRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = getKycRequestsSchema.parse({
+      query: req.query,
+    });
+    req.query = validatedData.query as any;
+    next();
+  } catch (error) {
+    Logger.warn("Get KYC requests validation failed", {
+      query: req.query,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};
+
+export const validateUpdateKycStatusRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    // Set reviewedBy from auth middleware if not provided
+    if (!req.body.reviewedBy && (req as any).user?.id) {
+      req.body.reviewedBy = (req as any).user.id;
+    }
+
+    const validatedData = updateKycStatusSchema.parse({
+      params: req.params,
+      body: req.body,
+    });
+    req.params = validatedData.params;
+    req.body = validatedData.body;
+
+    // Additional business validation
+    if (req.body.kycStatus === "Rejected" && !req.body.comments) {
+      const response: ApiResponse = {
+        success: false,
+        message: "Comments are required when rejecting KYC requests",
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+
+    next();
+  } catch (error) {
+    Logger.warn("Update KYC status validation failed", {
+      kycId: req.params?.kycId,
+      body: req.body,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};
+
+export const validateGetKycRequestByIdRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = getKycRequestByIdSchema.parse({
+      params: req.params,
+    });
+    req.params = validatedData.params;
+    next();
+  } catch (error) {
+    Logger.warn("Get KYC request by ID validation failed", {
+      kycId: req.params?.kycId,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+    next(error);
+  }
+};

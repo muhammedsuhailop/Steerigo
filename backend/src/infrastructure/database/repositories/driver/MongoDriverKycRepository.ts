@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { IDriverKycRepository } from "@domain/repositories/driver/IDriverKycRepository";
-import { DriverKycDocument } from "@domain/entities/DriverKycDocument";
-import { DriverKycDocumentModel } from "../../models/DriverKycDocumentModel";
+import { DriverKycDocument } from "@domain/entities/KYC";
+import { DriverKycDocumentModel } from "../../models/KYCModel";
 
 @injectable()
 export class MongoDriverKycRepository implements IDriverKycRepository {
