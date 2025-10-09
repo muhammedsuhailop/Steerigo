@@ -20,38 +20,38 @@ const adminDriverController = container.get<AdminDriverController>(
   TYPES.AdminDriverController
 );
 
-// Apply authentication and admin role authorization to all routes
+// authentication and admin role authorization to all routes
 router.use(authMiddleware);
 router.use(requireRole(["Admin"]));
 
-// GET /admin/drivers - Get all drivers with filters and pagination
+// GET /admin/drivers
 router.get("/", validateGetDriversRequest, (req, res) =>
   adminDriverController.getDrivers(req, res)
 );
 
-// PUT /admin/drivers/:driverId/action - Perform driver action
+// PUT /admin/drivers/:driverId/action
 router.put("/:driverId/action", validateDriverActionRequest, (req, res) =>
   adminDriverController.driverAction(req, res)
 );
 
-// GET /admin/drivers/:driverId/profile - Get driver profile
+// GET /admin/drivers/:driverId/profile
 router.get("/:driverId/profile", validateGetDriverProfileRequest, (req, res) =>
   adminDriverController.getDriverProfile(req, res)
 );
 
-// GET /admin/drivers/kyc-requests - Get KYC requests
+// GET /admin/drivers/kyc-requests
 router.get("/kyc-requests", validateGetKycRequestsRequest, (req, res) =>
   adminDriverController.getKycRequests(req, res)
 );
 
-// PATCH /admin/drivers/kyc-requests/:kycId/status - Update KYC status
+// PATCH /admin/drivers/kyc-requests/:kycId/status
 router.patch(
   "/kyc-requests/:kycId/status",
   validateUpdateKycStatusRequest,
   (req, res) => adminDriverController.updateKycStatus(req, res)
 );
 
-// GET /admin/drivers/kyc-requests/:kycId - Get KYC request by ID
+// GET /admin/drivers/kyc-requests/:kycId
 router.get(
   "/kyc-requests/:kycId",
   validateGetKycRequestByIdRequest,

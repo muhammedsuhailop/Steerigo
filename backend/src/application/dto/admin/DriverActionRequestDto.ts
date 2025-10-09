@@ -1,9 +1,11 @@
 import { z } from "zod";
 
 const driverActionRequestSchema = z.object({
-  driverId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid driver ID format"),
-  action: z.enum(["approve", "suspend", "activate", "reject"], {
-    message: "Action must be one of: approve, suspend, activate, reject",
+  driverId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  action: z.enum(["block", "suspend", "activate"], {
+      message: "Action must be one of: block, suspend, activate",
   }),
   reason: z.string().min(1).max(500).optional(),
 });
@@ -21,7 +23,7 @@ export class DriverActionRequestDto {
     return this.data.driverId;
   }
 
-  getAction(): "approve" | "suspend" | "activate" | "reject" {
+  getAction(): "block" | "suspend" | "activate" {
     return this.data.action;
   }
 
@@ -36,8 +38,8 @@ export class DriverActionRequestDto {
       errors.push("Reason is required for suspend action");
     }
 
-    if (this.data.action === "reject" && !this.data.reason) {
-      errors.push("Reason is required for reject action");
+    if (this.data.action === "block" && !this.data.reason) {
+      errors.push("Reason is required for block action");
     }
 
     return errors;

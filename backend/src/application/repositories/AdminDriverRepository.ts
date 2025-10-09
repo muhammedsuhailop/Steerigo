@@ -9,6 +9,8 @@ import { QueryableRepository } from "./interfaces/QueryableRepository";
 
 export interface AdminDriverQuery {
   status?: string;
+  kycStatus?: string;
+  licenceCategory?: string;
   search?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -19,19 +21,21 @@ export interface AdminDriverQuery {
 export interface AdminDriverSummary {
   driverId: string;
   userId: string;
-  name: string;
-  email: string;
-  mobile: string;
+  userName: string; // From User entity
+  userEmail: string; // From User entity
+  userMobile: string; // From User entity
   status: string;
-  licenseNumber: string;
-  vehicleNumber: string;
-  profilePicture?: string;
+  kycStatus: string;
+  licenceCategory: string;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  licenseIssueDate: Date;
+  licenseExpiryDate: Date;
   totalRides: number;
   totalEarnings: number;
   rating: number;
   lastRideDate?: Date;
   createdAt: Date;
-  kycStatus?: string;
 }
 
 export interface AdminDriverRepository
@@ -67,6 +71,12 @@ export interface AdminDriverRepository
 
   findDriverProfile(driverId: string): Promise<{
     driver: Driver;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      mobile: string;
+    };
     stats: {
       totalRides: number;
       totalEarnings: number;

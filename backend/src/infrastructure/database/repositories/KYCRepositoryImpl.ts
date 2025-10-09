@@ -14,12 +14,7 @@ import {
 } from "@shared/types/Repository";
 import { PipelineStage } from "mongoose";
 
-type KYCFilterOptions = FilterOptions<KYC> & {
-  status?: string;
-  driverId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-};
+type KYCFilterOptions = FilterOptions<KYC> & KYCQuery;
 
 @injectable()
 export class KYCRepositoryImpl implements KYCRepository {
@@ -85,13 +80,21 @@ export class KYCRepositoryImpl implements KYCRepository {
     return { data, total, page, limit, totalPages };
   }
 
-  async findByDriverId(driverId: string): Promise<KYC | null> {
-    const doc = await KYCModel.findOne({ driverId }).sort({ createdAt: -1 });
+  async findByDriverId(driverId: string): Promise<KYC[]> {
+    const docs = await KYCModel.find({ driverId }).sort({ createdAt: -1 });
+    return docs.map(KYCDomainMapper.toDomain);
+  }
+
+  async findByDriverIdAndDocType(
+    driverId: string,
+    docType: string
+  ): Promise<KYC | null> {
+    const doc = await KYCModel.findOne({ driverId, docType });
     return doc ? KYCDomainMapper.toDomain(doc) : null;
   }
 
-  async findKYCRequestsWithDriverInfo(
-    filters: KYCQuery,
+  async findKYCDocumentsWithDriverInfo(
+    filters: KYCFilterOptions,
     pagination: { page: number; pageSize: number }
   ): Promise<{
     data: KYCWithDriverInfo[];
@@ -119,20 +122,32 @@ export class KYCRepositoryImpl implements KYCRepository {
       },
       { $unwind: "$driver" },
       {
+        $lookup: {
+          from: "users",
+          localField: "driver.userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
         $project: {
           _id: 1,
           driverId: 1,
-          status: 1,
-          documents: 1,
+          docType: 1,
+          docNumber: 1,
+          issueDate: 1,
+          expiryDate: 1,
+          verificationStatus: 1,
           comments: 1,
-          reviewedBy: 1,
-          reviewedAt: 1,
           createdAt: 1,
           updatedAt: 1,
           "driver._id": 1,
-          "driver.name": 1,
-          "driver.email": 1,
-          "driver.mobile": 1,
+          "driver.status": 1,
+          "user._id": 1,
+          "user.name": 1,
+          "user.email": 1,
+          "user.mobile": 1,
         },
       },
       { $sort: { createdAt: -1 } },
@@ -144,22 +159,25 @@ export class KYCRepositoryImpl implements KYCRepository {
 
     return {
       data: results.map((r) => ({
-        kycRequest: KYCDomainMapper.toDomain({
+        kycDocument: KYCDomainMapper.toDomain({
           _id: r._id,
           driverId: r.driverId,
-          status: r.status,
-          documents: r.documents,
+          docType: r.docType,
+          docNumber: r.docNumber,
+          issueDate: r.issueDate,
+          expiryDate: r.expiryDate,
+          verificationStatus: r.verificationStatus,
           comments: r.comments,
-          reviewedBy: r.reviewedBy,
-          reviewedAt: r.reviewedAt,
           createdAt: r.createdAt,
           updatedAt: r.updatedAt,
         } as any),
         driverInfo: {
           driverId: r.driver._id.toString(),
-          driverName: r.driver.name,
-          driverEmail: r.driver.email,
-          driverMobile: r.driver.mobile,
+          userId: r.user._id.toString(),
+          userName: r.user.name,
+          userEmail: r.user.email,
+          userMobile: r.user.mobile,
+          driverStatus: r.driver.status,
         },
       })),
       pagination: {
@@ -171,16 +189,13 @@ export class KYCRepositoryImpl implements KYCRepository {
     };
   }
 
-  async updateKYCStatus(
+  async updateVerificationStatus(
     kycId: string,
     status: string,
-    reviewedBy: string,
     comments?: string
   ): Promise<boolean> {
     const update: Partial<any> = {
-      status,
-      reviewedBy,
-      reviewedAt: new Date(),
+      verificationStatus: status,
       updatedAt: new Date(),
     };
     if (comments) update.comments = comments;
@@ -204,20 +219,32 @@ export class KYCRepositoryImpl implements KYCRepository {
       },
       { $unwind: "$driver" },
       {
+        $lookup: {
+          from: "users",
+          localField: "driver.userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
         $project: {
           _id: 1,
           driverId: 1,
-          status: 1,
-          documents: 1,
+          docType: 1,
+          docNumber: 1,
+          issueDate: 1,
+          expiryDate: 1,
+          verificationStatus: 1,
           comments: 1,
-          reviewedBy: 1,
-          reviewedAt: 1,
           createdAt: 1,
           updatedAt: 1,
           "driver._id": 1,
-          "driver.name": 1,
-          "driver.email": 1,
-          "driver.mobile": 1,
+          "driver.status": 1,
+          "user._id": 1,
+          "user.name": 1,
+          "user.email": 1,
+          "user.mobile": 1,
         },
       },
     ];
@@ -226,31 +253,41 @@ export class KYCRepositoryImpl implements KYCRepository {
     if (!result) return null;
 
     return {
-      kycRequest: KYCDomainMapper.toDomain({
+      kycDocument: KYCDomainMapper.toDomain({
         _id: result._id,
         driverId: result.driverId,
-        status: result.status,
-        documents: result.documents,
+        docType: result.docType,
+        docNumber: result.docNumber,
+        issueDate: result.issueDate,
+        expiryDate: result.expiryDate,
+        verificationStatus: result.verificationStatus,
         comments: result.comments,
-        reviewedBy: result.reviewedBy,
-        reviewedAt: result.reviewedAt,
         createdAt: result.createdAt,
         updatedAt: result.updatedAt,
       } as any),
       driverInfo: {
         driverId: result.driver._id.toString(),
-        driverName: result.driver.name,
-        driverEmail: result.driver.email,
-        driverMobile: result.driver.mobile,
+        userId: result.user._id.toString(),
+        userName: result.user.name,
+        userEmail: result.user.email,
+        userMobile: result.user.mobile,
+        driverStatus: result.driver.status,
       },
     };
   }
 
-  private buildFilterQuery(filters: Partial<KYCFilterOptions | KYCQuery>): Record<string, any> {
+  private buildFilterQuery(filters: FilterOptions<KYC>): Record<string, any> {
     const q: Record<string, any> = {};
 
-    if ("status" in filters && typeof (filters as any).status === "string") {
-      q.status = (filters as any).status;
+    if (
+      "verificationStatus" in filters &&
+      typeof (filters as any).verificationStatus === "string"
+    ) {
+      q.verificationStatus = (filters as any).verificationStatus;
+    }
+
+    if ("docType" in filters && typeof (filters as any).docType === "string") {
+      q.docType = (filters as any).docType;
     }
 
     if (

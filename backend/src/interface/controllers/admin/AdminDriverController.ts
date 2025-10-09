@@ -38,24 +38,19 @@ export class AdminDriverController {
     try {
       const dto = new GetDriversRequestDto(req.query);
       const result = await this.getDriversUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "get_drivers"
         );
         res.status(statusCode).json(response);
         return;
       }
-
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
         message: "Drivers fetched successfully",
         data: result.getValue(),
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -72,30 +67,24 @@ export class AdminDriverController {
         action: req.body.action,
         reason: req.body.reason,
       });
-
       const result = await this.driverActionUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "driver_action"
         );
         res.status(statusCode).json(response);
         return;
       }
-
       const data = result.getValue();
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
         message: data.message,
         data: {
           driverId: data.driverId,
           newStatus: data.newStatus,
         },
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -110,26 +99,20 @@ export class AdminDriverController {
       const dto = new GetDriverProfileRequestDto({
         driverId: req.params.driverId,
       });
-
       const result = await this.getDriverProfileUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "get_driver_profile"
         );
         res.status(statusCode).json(response);
         return;
       }
-
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
         message: "Driver profile fetched successfully",
         data: result.getValue(),
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -143,24 +126,19 @@ export class AdminDriverController {
     try {
       const dto = new GetKycRequestsRequestDto(req.query);
       const result = await this.getKycRequestsUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "get_kyc_requests"
         );
         res.status(statusCode).json(response);
         return;
       }
-
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
         message: "KYC requests fetched successfully",
         data: result.getValue(),
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -174,34 +152,27 @@ export class AdminDriverController {
     try {
       const dto = new UpdateKycStatusRequestDto({
         kycId: req.params.kycId,
-        kycStatus: req.body.kycStatus,
+        verificationStatus: req.body.verificationStatus,
         comments: req.body.comments,
-        reviewedBy: req.body.reviewedBy || (req as any).user?.id, // Get from auth middleware
       });
-
       const result = await this.updateKycStatusUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "update_kyc_status"
         );
         res.status(statusCode).json(response);
         return;
       }
-
       const data = result.getValue();
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
         message: data.message,
         data: {
-          kycRequest: data.kycRequest,
-          driverStatusUpdated: data.driverStatusUpdated,
+          kycDocument: data.kycDocument,
+          driverKycStatusUpdated: data.driverKycStatusUpdated,
         },
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -213,29 +184,21 @@ export class AdminDriverController {
 
   async getKycRequestById(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetKycRequestByIdRequestDto({
-        kycId: req.params.kycId,
-      });
-
+      const dto = new GetKycRequestByIdRequestDto({ kycId: req.params.kycId });
       const result = await this.getKycRequestByIdUseCase.execute(dto);
-
       if (result.isFailure()) {
-        const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
+          result.getError(),
           "get_kyc_request_by_id"
         );
         res.status(statusCode).json(response);
         return;
       }
-
-      const response: ApiResponse<any> = {
+      res.status(200).json({
         success: true,
-        message: "KYC request fetched successfully",
+        message: "KYC document fetched successfully",
         data: result.getValue(),
-      };
-
-      res.status(200).json(response);
+      } as ApiResponse<any>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,

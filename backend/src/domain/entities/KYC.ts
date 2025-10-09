@@ -1,43 +1,62 @@
 import { KYCStatus } from "../value-objects/KYCStatus";
+import { DocumentType } from "../value-objects/DocumentType";
 
 export class KYC {
   private constructor(
     private readonly id: string,
     private readonly driverId: string,
-    private status: KYCStatus,
-    private documents: string[],
+    private docType: DocumentType,
+    private docNumber: string,
+    private verificationStatus: KYCStatus,
+    private issueDate?: Date,
+    private expiryDate?: Date,
     private comments?: string,
-    private reviewedBy?: string,
-    private reviewedAt?: Date,
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
 
-  // Factory method for creating new KYC requests
-  static create(id: string, driverId: string, documents: string[]): KYC {
-    return new KYC(id, driverId, KYCStatus.PENDING, documents);
+  // Factory method for creating new KYC documents
+  static create(
+    id: string,
+    driverId: string,
+    docType: DocumentType,
+    docNumber: string,
+    issueDate?: Date,
+    expiryDate?: Date
+  ): KYC {
+    return new KYC(
+      id,
+      driverId,
+      docType,
+      docNumber,
+      KYCStatus.IN_REVIEW,
+      issueDate,
+      expiryDate
+    );
   }
 
   // Factory method for reconstructing from database
   static fromData(data: {
     id: string;
     driverId: string;
-    status: KYCStatus;
-    documents: string[];
+    docType: DocumentType;
+    docNumber: string;
+    issueDate?: Date;
+    expiryDate?: Date;
+    verificationStatus: KYCStatus;
     comments?: string;
-    reviewedBy?: string;
-    reviewedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
   }): KYC {
     return new KYC(
       data.id,
       data.driverId,
-      data.status,
-      data.documents,
+      data.docType,
+      data.docNumber,
+      data.verificationStatus,
+      data.issueDate,
+      data.expiryDate,
       data.comments,
-      data.reviewedBy,
-      data.reviewedAt,
       data.createdAt,
       data.updatedAt
     );
@@ -50,20 +69,23 @@ export class KYC {
   getDriverId(): string {
     return this.driverId;
   }
-  getStatus(): KYCStatus {
-    return this.status;
+  getDocType(): DocumentType {
+    return this.docType;
   }
-  getDocuments(): string[] {
-    return [...this.documents];
+  getDocNumber(): string {
+    return this.docNumber;
+  }
+  getIssueDate(): Date | undefined {
+    return this.issueDate;
+  }
+  getExpiryDate(): Date | undefined {
+    return this.expiryDate;
+  }
+  getVerificationStatus(): KYCStatus {
+    return this.verificationStatus;
   }
   getComments(): string | undefined {
     return this.comments;
-  }
-  getReviewedBy(): string | undefined {
-    return this.reviewedBy;
-  }
-  getReviewedAt(): Date | undefined {
-    return this.reviewedAt;
   }
   getCreatedAt(): Date {
     return this.createdAt;
@@ -73,48 +95,54 @@ export class KYC {
   }
 
   // Business methods
-  approve(reviewedBy: string, comments?: string): void {
-    if (this.status !== KYCStatus.PENDING) {
-      throw new Error("Can only approve pending KYC requests");
+  approve(comments?: string): void {
+    if (this.verificationStatus === KYCStatus.APPROVED) {
+      throw new Error("KYC is already approved");
     }
-    this.status = KYCStatus.APPROVED;
-    this.reviewedBy = reviewedBy;
+    this.verificationStatus = KYCStatus.APPROVED;
     this.comments = comments;
-    this.reviewedAt = new Date();
     this.updatedAt = new Date();
   }
 
-  reject(reviewedBy: string, comments: string): void {
-    if (this.status !== KYCStatus.PENDING) {
-      throw new Error("Can only reject pending KYC requests");
-    }
+  reject(comments: string): void {
     if (!comments || comments.trim() === "") {
-      throw new Error("Comments are required for rejecting KYC requests");
+      throw new Error("Comments are required for rejecting KYC");
     }
-    this.status = KYCStatus.REJECTED;
-    this.reviewedBy = reviewedBy;
+    this.verificationStatus = KYCStatus.REJECTED;
     this.comments = comments;
-    this.reviewedAt = new Date();
     this.updatedAt = new Date();
   }
 
-  requiresReview(): void {
-    if (this.status === KYCStatus.UNDER_REVIEW) {
-      throw new Error("KYC request is already under review");
-    }
-    this.status = KYCStatus.UNDER_REVIEW;
+  markExpired(comments?: string): void {
+    this.verificationStatus = KYCStatus.EXPIRED;
+    this.comments = comments;
     this.updatedAt = new Date();
   }
 
-  isPending(): boolean {
-    return this.status === KYCStatus.PENDING;
+  updateDocument(
+    docType: DocumentType,
+    docNumber: string,
+    issueDate?: Date,
+    expiryDate?: Date
+  ): void {
+    this.docType = docType;
+    this.docNumber = docNumber;
+    this.issueDate = issueDate;
+    this.expiryDate = expiryDate;
+    this.verificationStatus = KYCStatus.IN_REVIEW; // Reset status when document changes
+    this.updatedAt = new Date();
+  }
+
+  isExpired(): boolean {
+    if (!this.expiryDate) return false;
+    return this.expiryDate < new Date();
   }
 
   isApproved(): boolean {
-    return this.status === KYCStatus.APPROVED;
+    return this.verificationStatus === KYCStatus.APPROVED;
   }
 
   isRejected(): boolean {
-    return this.status === KYCStatus.REJECTED;
+    return this.verificationStatus === KYCStatus.REJECTED;
   }
 }

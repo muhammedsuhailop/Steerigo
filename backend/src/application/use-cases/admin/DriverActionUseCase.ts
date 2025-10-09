@@ -13,9 +13,13 @@ export class DriverActionUseCase {
     private adminDriverRepository: AdminDriverRepository
   ) {}
 
-  async execute(
-    dto: DriverActionRequestDto
-  ): Promise<Result<{ message: string; driverId: string; newStatus: string }>> {
+  async execute(dto: DriverActionRequestDto): Promise<
+    Result<{
+      message: string;
+      driverId: string;
+      newStatus: string;
+    }>
+  > {
     try {
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
@@ -45,10 +49,10 @@ export class DriverActionUseCase {
       let message: string;
 
       switch (dto.getAction()) {
-        case "approve":
-          driver.approve();
-          newStatus = DriverStatus.ACTIVE;
-          message = "Driver approved successfully";
+        case "block":
+          driver.block(dto.getReason());
+          newStatus = DriverStatus.BLOCKED;
+          message = "Driver blocked successfully";
           break;
         case "suspend":
           driver.suspend(dto.getReason());
@@ -59,11 +63,6 @@ export class DriverActionUseCase {
           driver.activate();
           newStatus = DriverStatus.ACTIVE;
           message = "Driver activated successfully";
-          break;
-        case "reject":
-          driver.reject();
-          newStatus = DriverStatus.REJECTED;
-          message = "Driver rejected successfully";
           break;
         default:
           return Result.failure(new Error("Invalid action"));

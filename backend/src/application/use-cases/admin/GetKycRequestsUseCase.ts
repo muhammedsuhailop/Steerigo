@@ -29,7 +29,8 @@ export class GetKycRequestsUseCase {
       }
 
       const filters: KYCQuery = {
-        status: dto.getStatus(),
+        verificationStatus: dto.getVerificationStatus(),
+        docType: dto.getDocType(),
         driverId: dto.getDriverId(),
         dateFrom,
         dateTo,
@@ -49,49 +50,54 @@ export class GetKycRequestsUseCase {
         pagination,
       });
 
-      const result = await this.kycRepository.findKYCRequestsWithDriverInfo(
+      const result = await this.kycRepository.findKYCDocumentsWithDriverInfo(
         filters,
         pagination
       );
 
       const response = {
-        kycRequests: result.data.map((item) => ({
+        kycDocuments: result.data.map((item) => ({
           kyc: {
-            id: item.kycRequest.getId(),
-            status: item.kycRequest.getStatus(),
-            documents: item.kycRequest.getDocuments(),
-            comments: item.kycRequest.getComments(),
-            reviewedBy: item.kycRequest.getReviewedBy(),
-            reviewedAt: item.kycRequest.getReviewedAt()?.toISOString() || null,
-            createdAt: item.kycRequest.getCreatedAt().toISOString(),
-            updatedAt: item.kycRequest.getUpdatedAt().toISOString(),
+            id: item.kycDocument.getId(),
+            docType: item.kycDocument.getDocType(),
+            docNumber: item.kycDocument.getDocNumber(),
+            issueDate: item.kycDocument.getIssueDate()?.toISOString() || null,
+            expiryDate: item.kycDocument.getExpiryDate()?.toISOString() || null,
+            verificationStatus: item.kycDocument.getVerificationStatus(),
+            comments: item.kycDocument.getComments(),
+            createdAt: item.kycDocument.getCreatedAt().toISOString(),
+            updatedAt: item.kycDocument.getUpdatedAt().toISOString(),
+            isExpired: item.kycDocument.isExpired(),
           },
           driver: {
             driverId: item.driverInfo.driverId,
-            driverName: item.driverInfo.driverName,
-            driverEmail: item.driverInfo.driverEmail,
-            driverMobile: item.driverInfo.driverMobile,
+            userId: item.driverInfo.userId,
+            userName: item.driverInfo.userName,
+            userEmail: item.driverInfo.userEmail,
+            userMobile: item.driverInfo.userMobile,
+            driverStatus: item.driverInfo.driverStatus,
           },
         })),
         pagination: result.pagination,
         appliedFilters: {
           sortBy: dto.getSortBy(),
           sortOrder: dto.getSortOrder(),
-          status: dto.getStatus() || null,
+          verificationStatus: dto.getVerificationStatus() || null,
+          docType: dto.getDocType() || null,
           driverId: dto.getDriverId() || null,
           dateFrom: dto.getDateFrom()?.toISOString() || null,
           dateTo: dto.getDateTo()?.toISOString() || null,
         },
       };
 
-      Logger.info("KYC requests fetched successfully", {
+      Logger.info("KYC documents fetched successfully", {
         totalItems: result.pagination.totalItems,
         currentPage: result.pagination.currentPage,
       });
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("Error fetching KYC requests", error);
+      Logger.error("Error fetching KYC documents", error);
       return Result.failure(error as Error);
     }
   }

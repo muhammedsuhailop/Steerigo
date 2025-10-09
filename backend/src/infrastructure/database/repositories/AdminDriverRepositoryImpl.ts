@@ -2,6 +2,7 @@ import { injectable } from "inversify";
 import {
   AdminDriverRepository,
   AdminDriverSummary,
+  AdminDriverQuery,
 } from "@application/repositories/AdminDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel } from "../models/DriverModel";
@@ -12,13 +13,7 @@ import {
   FilterOptions,
 } from "@shared/types/Repository";
 
-// Local union of generic filters + admin extras
-type AdminDriverFilterOptions = FilterOptions<Driver> & {
-  status?: string;
-  search?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-};
+type AdminDriverFilterOptions = FilterOptions<Driver> & AdminDriverQuery;
 
 @injectable()
 export class AdminDriverRepositoryImpl implements AdminDriverRepository {
@@ -112,18 +107,19 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
       { $match: mongoFilter },
       {
         $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $lookup: {
           from: "rides",
           localField: "_id",
           foreignField: "driverId",
           as: "rides",
-        },
-      },
-      {
-        $lookup: {
-          from: "kyc_requests",
-          localField: "_id",
-          foreignField: "driverId",
-          as: "kycRequest",
         },
       },
       {
@@ -144,32 +140,27 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
               $map: { input: "$rides", as: "r", in: "$$r.completedAt" },
             },
           },
-          kycStatus: {
-            $cond: {
-              if: { $gt: [{ $size: "$kycRequest" }, 0] },
-              then: { $arrayElemAt: ["$kycRequest.status", 0] },
-              else: null,
-            },
-          },
         },
       },
       {
         $project: {
           driverId: "$_id",
           userId: 1,
-          name: 1,
-          email: 1,
-          mobile: 1,
+          userName: "$user.name",
+          userEmail: "$user.email",
+          userMobile: "$user.mobile",
           status: 1,
-          licenseNumber: 1,
-          vehicleNumber: 1,
-          profilePicture: 1,
+          kycStatus: 1,
+          licenceCategory: 1,
+          eligibleGearTypes: 1,
+          eligibleBodyTypes: 1,
+          licenseIssueDate: 1,
+          licenseExpiryDate: 1,
           totalRides: 1,
           totalEarnings: 1,
           rating: { $ifNull: ["$rating", 0] },
           lastRideDate: 1,
           createdAt: 1,
-          kycStatus: 1,
         },
       },
       {
@@ -185,19 +176,21 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
       data: results.map((r) => ({
         driverId: r.driverId.toString(),
         userId: r.userId,
-        name: r.name,
-        email: r.email,
-        mobile: r.mobile,
+        userName: r.userName,
+        userEmail: r.userEmail,
+        userMobile: r.userMobile,
         status: r.status,
-        licenseNumber: r.licenseNumber,
-        vehicleNumber: r.vehicleNumber,
-        profilePicture: r.profilePicture,
+        kycStatus: r.kycStatus,
+        licenceCategory: r.licenceCategory,
+        eligibleGearTypes: r.eligibleGearTypes ?? [],
+        eligibleBodyTypes: r.eligibleBodyTypes ?? [],
+        licenseIssueDate: r.licenseIssueDate,
+        licenseExpiryDate: r.licenseExpiryDate,
         totalRides: r.totalRides ?? 0,
         totalEarnings: r.totalEarnings ?? 0,
         rating: r.rating ?? 0,
         lastRideDate: r.lastRideDate ?? null,
         createdAt: r.createdAt,
-        kycStatus: r.kycStatus,
       })),
       pagination: {
         currentPage: pagination.page,
@@ -260,6 +253,12 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
 
   async findDriverProfile(driverId: string): Promise<{
     driver: Driver;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      mobile: string;
+    };
     stats: {
       totalRides: number;
       totalEarnings: number;
@@ -267,14 +266,60 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
       lastRideDate?: Date;
     };
   } | null> {
-    const driver = await this.findById(driverId);
-    if (!driver) return null;
+    const pipeline = [
+      { $match: { _id: driverId } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $lookup: {
+          from: "rides",
+          localField: "_id",
+          foreignField: "driverId",
+          as: "rides",
+        },
+      },
+      {
+        $addFields: {
+          totalRides: { $size: "$rides" },
+          totalEarnings: { $sum: "$rides.earnings" },
+          rating: { $avg: "$rides.rating" },
+          lastRideDate: { $max: "$rides.completedAt" },
+        },
+      },
+    ];
 
-    const stats = await this.getDriverStats(driverId);
-    return { driver, stats };
+    const [result] = await DriverModel.aggregate(pipeline);
+    if (!result) return null;
+
+    const driver = DriverDomainMapper.toDomain(result);
+
+    return {
+      driver,
+      user: {
+        id: result.user._id.toString(),
+        name: result.user.name,
+        email: result.user.email,
+        mobile: result.user.mobile,
+      },
+      stats: {
+        totalRides: result.totalRides ?? 0,
+        totalEarnings: result.totalEarnings ?? 0,
+        rating: result.rating ?? 0,
+        lastRideDate: result.lastRideDate,
+      },
+    };
   }
 
-  private buildFilterQuery(filters: FilterOptions<Driver>): Record<string, any> {
+  private buildFilterQuery(
+    filters: FilterOptions<Driver>
+  ): Record<string, any> {
     const q: Record<string, any> = {};
 
     if ("status" in filters && typeof (filters as any).status === "string") {
@@ -282,18 +327,28 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
     }
 
     if (
+      "kycStatus" in filters &&
+      typeof (filters as any).kycStatus === "string"
+    ) {
+      q.kycStatus = (filters as any).kycStatus;
+    }
+
+    if (
+      "licenceCategory" in filters &&
+      typeof (filters as any).licenceCategory === "string"
+    ) {
+      q.licenceCategory = (filters as any).licenceCategory;
+    }
+
+    if (
       "search" in filters &&
       typeof (filters as any).search === "string" &&
       (filters as any).search.trim() !== ""
     ) {
+      // Since we removed redundant fields, search will need to be handled via lookup
+      // For now, we'll search by userId only
       const s = (filters as any).search.trim();
-      q.$or = [
-        { name: { $regex: s, $options: "i" } },
-        { email: { $regex: s, $options: "i" } },
-        { mobile: { $regex: s, $options: "i" } },
-        { licenseNumber: { $regex: s, $options: "i" } },
-        { vehicleNumber: { $regex: s, $options: "i" } },
-      ];
+      q.userId = { $regex: s, $options: "i" };
     }
 
     if ("dateFrom" in filters || "dateTo" in filters) {

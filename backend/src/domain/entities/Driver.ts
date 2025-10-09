@@ -1,18 +1,19 @@
 import { DriverStatus } from "../value-objects/DriverStatus";
+import { KYCStatus } from "../value-objects/KYCStatus";
+import { LicenseCategory } from "../value-objects/LicenseCategory";
+import { GearType, BodyType } from "../value-objects/VehicleType";
 
 export class Driver {
   private constructor(
     private readonly id: string,
     private readonly userId: string,
-    private name: string,
-    private email: string,
-    private mobile: string,
-    private licenseNumber: string,
-    private vehicleNumber: string,
+    private eligibleGearTypes: GearType[],
+    private eligibleBodyTypes: BodyType[],
+    private licenceCategory: LicenseCategory,
+    private licenseIssueDate: Date,
+    private licenseExpiryDate: Date,
+    private kycStatus: KYCStatus,
     private status: DriverStatus,
-    private profilePicture?: string,
-    private licenseDocument?: string,
-    private vehicleDocument?: string,
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
@@ -21,21 +22,22 @@ export class Driver {
   static create(
     id: string,
     userId: string,
-    name: string,
-    email: string,
-    mobile: string,
-    licenseNumber: string,
-    vehicleNumber: string
+    eligibleGearTypes: GearType[],
+    eligibleBodyTypes: BodyType[],
+    licenceCategory: LicenseCategory,
+    licenseIssueDate: Date,
+    licenseExpiryDate: Date
   ): Driver {
     return new Driver(
       id,
       userId,
-      name,
-      email,
-      mobile,
-      licenseNumber,
-      vehicleNumber,
-      DriverStatus.PENDING_VERIFICATION
+      eligibleGearTypes,
+      eligibleBodyTypes,
+      licenceCategory,
+      licenseIssueDate,
+      licenseExpiryDate,
+      KYCStatus.IN_REVIEW,
+      DriverStatus.ACTIVE
     );
   }
 
@@ -43,30 +45,26 @@ export class Driver {
   static fromData(data: {
     id: string;
     userId: string;
-    name: string;
-    email: string;
-    mobile: string;
-    licenseNumber: string;
-    vehicleNumber: string;
+    eligibleGearTypes: GearType[];
+    eligibleBodyTypes: BodyType[];
+    licenceCategory: LicenseCategory;
+    licenseIssueDate: Date;
+    licenseExpiryDate: Date;
+    kycStatus: KYCStatus;
     status: DriverStatus;
-    profilePicture?: string;
-    licenseDocument?: string;
-    vehicleDocument?: string;
     createdAt: Date;
     updatedAt: Date;
   }): Driver {
     return new Driver(
       data.id,
       data.userId,
-      data.name,
-      data.email,
-      data.mobile,
-      data.licenseNumber,
-      data.vehicleNumber,
+      data.eligibleGearTypes,
+      data.eligibleBodyTypes,
+      data.licenceCategory,
+      data.licenseIssueDate,
+      data.licenseExpiryDate,
+      data.kycStatus,
       data.status,
-      data.profilePicture,
-      data.licenseDocument,
-      data.vehicleDocument,
       data.createdAt,
       data.updatedAt
     );
@@ -79,32 +77,26 @@ export class Driver {
   getUserId(): string {
     return this.userId;
   }
-  getName(): string {
-    return this.name;
+  getEligibleGearTypes(): GearType[] {
+    return [...this.eligibleGearTypes];
   }
-  getEmail(): string {
-    return this.email;
+  getEligibleBodyTypes(): BodyType[] {
+    return [...this.eligibleBodyTypes];
   }
-  getMobile(): string {
-    return this.mobile;
+  getLicenceCategory(): LicenseCategory {
+    return this.licenceCategory;
   }
-  getLicenseNumber(): string {
-    return this.licenseNumber;
+  getLicenseIssueDate(): Date {
+    return this.licenseIssueDate;
   }
-  getVehicleNumber(): string {
-    return this.vehicleNumber;
+  getLicenseExpiryDate(): Date {
+    return this.licenseExpiryDate;
+  }
+  getKycStatus(): KYCStatus {
+    return this.kycStatus;
   }
   getStatus(): DriverStatus {
     return this.status;
-  }
-  getProfilePicture(): string | undefined {
-    return this.profilePicture;
-  }
-  getLicenseDocument(): string | undefined {
-    return this.licenseDocument;
-  }
-  getVehicleDocument(): string | undefined {
-    return this.vehicleDocument;
   }
   getCreatedAt(): Date {
     return this.createdAt;
@@ -114,13 +106,11 @@ export class Driver {
   }
 
   // Business methods
-  approve(): void {
-    if (this.status !== DriverStatus.PENDING_VERIFICATION) {
-      throw new Error(
-        "Can only approve drivers with pending verification status"
-      );
+  block(reason?: string): void {
+    if (this.status === DriverStatus.BLOCKED) {
+      throw new Error("Driver is already blocked");
     }
-    this.status = DriverStatus.ACTIVE;
+    this.status = DriverStatus.BLOCKED;
     this.updatedAt = new Date();
   }
 
@@ -140,42 +130,37 @@ export class Driver {
     this.updatedAt = new Date();
   }
 
-  reject(): void {
-    if (this.status !== DriverStatus.PENDING_VERIFICATION) {
-      throw new Error(
-        "Can only reject drivers with pending verification status"
-      );
-    }
-    this.status = DriverStatus.REJECTED;
+  updateKycStatus(newStatus: KYCStatus): void {
+    this.kycStatus = newStatus;
     this.updatedAt = new Date();
   }
 
-  updateProfile(data: {
-    name?: string;
-    email?: string;
-    mobile?: string;
-    licenseNumber?: string;
-    vehicleNumber?: string;
-    profilePicture?: string;
-    licenseDocument?: string;
-    vehicleDocument?: string;
-  }): void {
-    if (data.name) this.name = data.name;
-    if (data.email) this.email = data.email;
-    if (data.mobile) this.mobile = data.mobile;
-    if (data.licenseNumber) this.licenseNumber = data.licenseNumber;
-    if (data.vehicleNumber) this.vehicleNumber = data.vehicleNumber;
-    if (data.profilePicture) this.profilePicture = data.profilePicture;
-    if (data.licenseDocument) this.licenseDocument = data.licenseDocument;
-    if (data.vehicleDocument) this.vehicleDocument = data.vehicleDocument;
+  updateEligibleVehicles(gearTypes: GearType[], bodyTypes: BodyType[]): void {
+    this.eligibleGearTypes = [...gearTypes];
+    this.eligibleBodyTypes = [...bodyTypes];
     this.updatedAt = new Date();
   }
 
-  canBeActioned(): boolean {
-    return this.status !== DriverStatus.REJECTED;
+  updateLicenseInfo(
+    category: LicenseCategory,
+    issueDate: Date,
+    expiryDate: Date
+  ): void {
+    this.licenceCategory = category;
+    this.licenseIssueDate = issueDate;
+    this.licenseExpiryDate = expiryDate;
+    this.updatedAt = new Date();
   }
 
   isActive(): boolean {
     return this.status === DriverStatus.ACTIVE;
+  }
+
+  isKycApproved(): boolean {
+    return this.kycStatus === KYCStatus.APPROVED;
+  }
+
+  canBeActioned(): boolean {
+    return true; // All drivers can be actioned in new schema
   }
 }

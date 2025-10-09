@@ -23,36 +23,41 @@ export class GetKycRequestByIdUseCase {
       );
 
       if (!kycWithDriver) {
-        return Result.failure(new Error("KYC request not found"));
+        return Result.failure(new Error("KYC document not found"));
       }
 
       const response = {
         kyc: {
-          id: kycWithDriver.kycRequest.getId(),
-          status: kycWithDriver.kycRequest.getStatus(),
-          documents: kycWithDriver.kycRequest.getDocuments(),
-          comments: kycWithDriver.kycRequest.getComments(),
-          reviewedBy: kycWithDriver.kycRequest.getReviewedBy(),
-          reviewedAt:
-            kycWithDriver.kycRequest.getReviewedAt()?.toISOString() || null,
-          createdAt: kycWithDriver.kycRequest.getCreatedAt().toISOString(),
-          updatedAt: kycWithDriver.kycRequest.getUpdatedAt().toISOString(),
+          id: kycWithDriver.kycDocument.getId(),
+          docType: kycWithDriver.kycDocument.getDocType(),
+          docNumber: kycWithDriver.kycDocument.getDocNumber(),
+          issueDate:
+            kycWithDriver.kycDocument.getIssueDate()?.toISOString() || null,
+          expiryDate:
+            kycWithDriver.kycDocument.getExpiryDate()?.toISOString() || null,
+          verificationStatus: kycWithDriver.kycDocument.getVerificationStatus(),
+          comments: kycWithDriver.kycDocument.getComments(),
+          createdAt: kycWithDriver.kycDocument.getCreatedAt().toISOString(),
+          updatedAt: kycWithDriver.kycDocument.getUpdatedAt().toISOString(),
+          isExpired: kycWithDriver.kycDocument.isExpired(),
         },
         driver: {
           driverId: kycWithDriver.driverInfo.driverId,
-          driverName: kycWithDriver.driverInfo.driverName,
-          driverEmail: kycWithDriver.driverInfo.driverEmail,
-          driverMobile: kycWithDriver.driverInfo.driverMobile,
+          userId: kycWithDriver.driverInfo.userId,
+          userName: kycWithDriver.driverInfo.userName,
+          userEmail: kycWithDriver.driverInfo.userEmail,
+          userMobile: kycWithDriver.driverInfo.userMobile,
+          driverStatus: kycWithDriver.driverInfo.driverStatus,
         },
       };
 
-      Logger.info("KYC request fetched successfully", {
+      Logger.info("KYC document fetched successfully", {
         kycId: dto.getKycId(),
       });
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("Error fetching KYC request by ID", error);
+      Logger.error("Error fetching KYC document by ID", error);
       return Result.failure(error as Error);
     }
   }

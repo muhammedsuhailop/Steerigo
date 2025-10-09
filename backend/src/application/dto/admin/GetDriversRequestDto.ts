@@ -3,9 +3,9 @@ import { z } from "zod";
 const getDriversRequestSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
-  status: z
-    .enum(["Pending Verification", "Active", "Suspended", "Rejected"])
-    .optional(),
+  status: z.enum(["Active", "Blocked", "Suspended"]).optional(),
+  kycStatus: z.enum(["InReview", "Rejected", "Approved", "Expired"]).optional(),
+  licenceCategory: z.enum(["LMV", "HMV", "MCWG", "MCWOG"]).optional(),
   search: z.string().min(1).max(255).optional(),
   dateFrom: z
     .union([
@@ -21,9 +21,10 @@ const getDriversRequestSchema = z.object({
     .optional(),
   sortBy: z
     .enum([
-      "name",
-      "email",
       "createdAt",
+      "status",
+      "kycStatus",
+      "licenceCategory",
       "totalRides",
       "totalEarnings",
       "rating",
@@ -34,6 +35,8 @@ const getDriversRequestSchema = z.object({
 
 export type AdminDriverQuery = {
   status?: string;
+  kycStatus?: string;
+  licenceCategory?: string;
   search?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -58,6 +61,14 @@ export class GetDriversRequestDto {
 
   getStatus(): string | undefined {
     return this.data.status;
+  }
+
+  getKycStatus(): string | undefined {
+    return this.data.kycStatus;
+  }
+
+  getLicenceCategory(): string | undefined {
+    return this.data.licenceCategory;
   }
 
   getSearch(): string | undefined {

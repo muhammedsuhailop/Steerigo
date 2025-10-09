@@ -8,7 +8,8 @@ import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
 import { QueryableRepository } from "./interfaces/QueryableRepository";
 
 export interface KYCQuery {
-  status?: string;
+  verificationStatus?: string;
+  docType?: string;
   driverId?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -17,19 +18,21 @@ export interface KYCQuery {
 }
 
 export interface KYCWithDriverInfo {
-  kycRequest: KYC;
+  kycDocument: KYC;
   driverInfo: {
     driverId: string;
-    driverName: string;
-    driverEmail: string;
-    driverMobile: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+    userMobile: string;
+    driverStatus: string;
   };
 }
 
 export interface KYCRepository
   extends ReadOnlyRepository<KYC>,
     QueryableRepository<KYC> {
-  findKYCRequestsWithDriverInfo(
+  findKYCDocumentsWithDriverInfo(
     filters: KYCQuery,
     pagination: { page: number; pageSize: number }
   ): Promise<{
@@ -42,12 +45,16 @@ export interface KYCRepository
     };
   }>;
 
-  findByDriverId(driverId: string): Promise<KYC | null>;
+  findByDriverId(driverId: string): Promise<KYC[]>;
 
-  updateKYCStatus(
+  findByDriverIdAndDocType(
+    driverId: string,
+    docType: string
+  ): Promise<KYC | null>;
+
+  updateVerificationStatus(
     kycId: string,
     status: string,
-    reviewedBy: string,
     comments?: string
   ): Promise<boolean>;
 

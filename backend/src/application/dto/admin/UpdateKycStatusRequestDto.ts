@@ -1,12 +1,14 @@
 import { z } from "zod";
 
 const updateKycStatusRequestSchema = z.object({
-  kycId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid KYC ID format"),
-  kycStatus: z.enum(["Approved", "Rejected", "Under Review"], {
-    message: "KYC status must be one of: Approved, Rejected, Under Review",
+  kycId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  verificationStatus: z.enum(["Approved", "Rejected", "Expired"], {
+      message:
+        "Verification status must be one of: Approved, Rejected, Expired",
   }),
   comments: z.string().min(1).max(1000).optional(),
-  reviewedBy: z.string().uuid("Invalid reviewer ID format"),
 });
 
 type UpdateKycStatusRequestData = z.infer<typeof updateKycStatusRequestSchema>;
@@ -22,23 +24,19 @@ export class UpdateKycStatusRequestDto {
     return this.data.kycId;
   }
 
-  getKycStatus(): "Approved" | "Rejected" | "Under Review" {
-    return this.data.kycStatus;
+  getVerificationStatus(): "Approved" | "Rejected" | "Expired" {
+    return this.data.verificationStatus;
   }
 
   getComments(): string | undefined {
     return this.data.comments;
   }
 
-  getReviewedBy(): string {
-    return this.data.reviewedBy;
-  }
-
   validate(): string[] {
     const errors: string[] = [];
 
-    if (this.data.kycStatus === "Rejected" && !this.data.comments) {
-      errors.push("Comments are required when rejecting KYC requests");
+    if (this.data.verificationStatus === "Rejected" && !this.data.comments) {
+      errors.push("Comments are required when rejecting KYC documents");
     }
 
     return errors;

@@ -3,10 +3,14 @@ import { z } from "zod";
 const getKycRequestsRequestSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
-  status: z
-    .enum(["Pending", "Under Review", "Approved", "Rejected"])
+  verificationStatus: z
+    .enum(["InReview", "Approved", "Rejected", "Expired"])
     .optional(),
-  driverId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid KYC ID format").optional(),
+  docType: z.enum(["Aadhaar", "PAN", "License", "Passport"]).optional(),
+  driverId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format")
+    .optional(),
   dateFrom: z
     .union([
       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
@@ -19,7 +23,9 @@ const getKycRequestsRequestSchema = z.object({
       z.string().datetime(),
     ])
     .optional(),
-  sortBy: z.enum(["createdAt", "updatedAt", "status"]).default("createdAt"),
+  sortBy: z
+    .enum(["createdAt", "updatedAt", "verificationStatus", "docType"])
+    .default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
@@ -40,8 +46,12 @@ export class GetKycRequestsRequestDto {
     return this.data.pageSize;
   }
 
-  getStatus(): string | undefined {
-    return this.data.status;
+  getVerificationStatus(): string | undefined {
+    return this.data.verificationStatus;
+  }
+
+  getDocType(): string | undefined {
+    return this.data.docType;
   }
 
   getDriverId(): string | undefined {

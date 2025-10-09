@@ -9,9 +9,11 @@ const getDriversSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(10),
-    status: z
-      .enum(["Pending Verification", "Active", "Suspended", "Rejected"])
+    status: z.enum(["Active", "Blocked", "Suspended"]).optional(),
+    kycStatus: z
+      .enum(["InReview", "Rejected", "Approved", "Expired"])
       .optional(),
+    licenceCategory: z.enum(["LMV", "HMV", "MCWG", "MCWOG"]).optional(),
     search: z.string().min(1).max(255).optional(),
     dateFrom: z
       .union([
@@ -27,9 +29,10 @@ const getDriversSchema = z.object({
       .optional(),
     sortBy: z
       .enum([
-        "name",
-        "email",
         "createdAt",
+        "status",
+        "kycStatus",
+        "licenceCategory",
         "totalRides",
         "totalEarnings",
         "rating",
@@ -46,8 +49,8 @@ const driverActionSchema = z.object({
       .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
   }),
   body: z.object({
-    action: z.enum(["approve", "suspend", "activate", "reject"], {
-        message: "Action must be one of: approve, suspend, activate, reject",
+    action: z.enum(["block", "suspend", "activate"], {
+        message: "Action must be one of: block, suspend, activate",
     }),
     reason: z
       .string()
@@ -57,22 +60,15 @@ const driverActionSchema = z.object({
   }),
 });
 
-const getDriverProfileSchema = z.object({
-  params: z.object({
-    driverId: z
-      .string()
-      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
-  }),
-});
-
 // KYC validation schemas
 const getKycRequestsSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(10),
-    status: z
-      .enum(["Pending", "Under Review", "Approved", "Rejected"])
+    verificationStatus: z
+      .enum(["InReview", "Approved", "Rejected", "Expired"])
       .optional(),
+    docType: z.enum(["Aadhaar", "PAN", "License", "Passport"]).optional(),
     driverId: z
       .string()
       .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format")
@@ -89,7 +85,9 @@ const getKycRequestsSchema = z.object({
         z.string().datetime(),
       ])
       .optional(),
-    sortBy: z.enum(["createdAt", "updatedAt", "status"]).default("createdAt"),
+    sortBy: z
+      .enum(["createdAt", "updatedAt", "verificationStatus", "docType"])
+      .default("createdAt"),
     sortOrder: z.enum(["asc", "desc"]).default("desc"),
   }),
 });
@@ -101,18 +99,23 @@ const updateKycStatusSchema = z.object({
       .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
   }),
   body: z.object({
-    kycStatus: z.enum(["Approved", "Rejected", "Under Review"], {
-        message: "KYC status must be one of: Approved, Rejected, Under Review",
+    verificationStatus: z.enum(["Approved", "Rejected", "Expired"], {
+        message:
+          "Verification status must be one of: Approved, Rejected, Expired",
     }),
     comments: z
       .string()
       .min(1, "Comments must be at least 1 character")
       .max(1000, "Comments cannot exceed 1000 characters")
       .optional(),
-    reviewedBy: z
+  }),
+});
+
+const getDriverProfileSchema = z.object({
+  params: z.object({
+    driverId: z
       .string()
-      .regex(/^[0-9a-fA-F]{24}$/, "Invalid reviewer ID format")
-      .optional(), // Can be populated from auth middleware
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
   }),
 });
 
@@ -171,7 +174,7 @@ export const validateDriverActionRequest = (
 
     // Additional business validation
     if (
-      (req.body.action === "suspend" || req.body.action === "reject") &&
+      (req.body.action === "suspend" || req.body.action === "block") &&
       !req.body.reason
     ) {
       const response: ApiResponse = {
@@ -272,11 +275,6 @@ export const validateUpdateKycStatusRequest = (
   next: NextFunction
 ): void => {
   try {
-    // Set reviewedBy from auth middleware if not provided
-    if (!req.body.reviewedBy && (req as any).user?.id) {
-      req.body.reviewedBy = (req as any).user.id;
-    }
-
     const validatedData = updateKycStatusSchema.parse({
       params: req.params,
       body: req.body,
@@ -285,10 +283,10 @@ export const validateUpdateKycStatusRequest = (
     req.body = validatedData.body;
 
     // Additional business validation
-    if (req.body.kycStatus === "Rejected" && !req.body.comments) {
+    if (req.body.verificationStatus === "Rejected" && !req.body.comments) {
       const response: ApiResponse = {
         success: false,
-        message: "Comments are required when rejecting KYC requests",
+        message: "Comments are required when rejecting KYC documents",
       };
       res.status(HttpStatusCodes.BAD_REQUEST).json(response);
       return;

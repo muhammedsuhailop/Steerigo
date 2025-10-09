@@ -29,8 +29,8 @@ export class GetDriverProfileUseCase {
         return Result.failure(new Error("Driver not found"));
       }
 
-      // Get KYC information
-      const kycRequest = await this.kycRepository.findByDriverId(
+      // Get KYC documents
+      const kycDocuments = await this.kycRepository.findByDriverId(
         dto.getDriverId()
       );
 
@@ -38,17 +38,25 @@ export class GetDriverProfileUseCase {
         driver: {
           id: driverProfile.driver.getId(),
           userId: driverProfile.driver.getUserId(),
-          name: driverProfile.driver.getName(),
-          email: driverProfile.driver.getEmail(),
-          mobile: driverProfile.driver.getMobile(),
-          licenseNumber: driverProfile.driver.getLicenseNumber(),
-          vehicleNumber: driverProfile.driver.getVehicleNumber(),
           status: driverProfile.driver.getStatus(),
-          profilePicture: driverProfile.driver.getProfilePicture(),
-          licenseDocument: driverProfile.driver.getLicenseDocument(),
-          vehicleDocument: driverProfile.driver.getVehicleDocument(),
+          kycStatus: driverProfile.driver.getKycStatus(),
+          licenceCategory: driverProfile.driver.getLicenceCategory(),
+          eligibleGearTypes: driverProfile.driver.getEligibleGearTypes(),
+          eligibleBodyTypes: driverProfile.driver.getEligibleBodyTypes(),
+          licenseIssueDate: driverProfile.driver
+            .getLicenseIssueDate()
+            .toISOString(),
+          licenseExpiryDate: driverProfile.driver
+            .getLicenseExpiryDate()
+            .toISOString(),
           createdAt: driverProfile.driver.getCreatedAt().toISOString(),
           updatedAt: driverProfile.driver.getUpdatedAt().toISOString(),
+        },
+        user: {
+          id: driverProfile.user.id,
+          name: driverProfile.user.name,
+          email: driverProfile.user.email,
+          mobile: driverProfile.user.mobile,
         },
         stats: {
           totalRides: driverProfile.stats.totalRides,
@@ -56,22 +64,23 @@ export class GetDriverProfileUseCase {
           rating: driverProfile.stats.rating,
           lastRideDate: driverProfile.stats.lastRideDate?.toISOString() || null,
         },
-        kyc: kycRequest
-          ? {
-              id: kycRequest.getId(),
-              status: kycRequest.getStatus(),
-              documents: kycRequest.getDocuments(),
-              comments: kycRequest.getComments(),
-              reviewedBy: kycRequest.getReviewedBy(),
-              reviewedAt: kycRequest.getReviewedAt()?.toISOString() || null,
-              createdAt: kycRequest.getCreatedAt().toISOString(),
-              updatedAt: kycRequest.getUpdatedAt().toISOString(),
-            }
-          : null,
+        kycDocuments: kycDocuments.map((kyc) => ({
+          id: kyc.getId(),
+          docType: kyc.getDocType(),
+          docNumber: kyc.getDocNumber(),
+          issueDate: kyc.getIssueDate()?.toISOString() || null,
+          expiryDate: kyc.getExpiryDate()?.toISOString() || null,
+          verificationStatus: kyc.getVerificationStatus(),
+          comments: kyc.getComments(),
+          isExpired: kyc.isExpired(),
+          createdAt: kyc.getCreatedAt().toISOString(),
+          updatedAt: kyc.getUpdatedAt().toISOString(),
+        })),
       };
 
       Logger.info("Driver profile fetched successfully", {
         driverId: dto.getDriverId(),
+        kycDocumentsCount: kycDocuments.length,
       });
 
       return Result.success(response);

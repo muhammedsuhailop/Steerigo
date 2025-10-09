@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 const getDriverProfileRequestSchema = z.object({
-  driverId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid driver ID format"),
+  driverId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
 });
 
 type GetDriverProfileRequestData = z.infer<

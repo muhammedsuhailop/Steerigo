@@ -1,5 +1,8 @@
 import { Driver } from "@domain/entities/Driver";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
+import { GearType, BodyType } from "@domain/value-objects/VehicleType";
 import { IDriverModel } from "../models/DriverModel";
 
 export class DriverDomainMapper {
@@ -7,15 +10,13 @@ export class DriverDomainMapper {
     return Driver.fromData({
       id: model._id.toString(),
       userId: model.userId,
-      name: model.name,
-      email: model.email,
-      mobile: model.mobile,
-      licenseNumber: model.licenseNumber,
-      vehicleNumber: model.vehicleNumber,
+      eligibleGearTypes: model.eligibleGearTypes as GearType[],
+      eligibleBodyTypes: model.eligibleBodyTypes as BodyType[],
+      licenceCategory: model.licenceCategory as LicenseCategory,
+      licenseIssueDate: model.licenseIssueDate,
+      licenseExpiryDate: model.licenseExpiryDate,
+      kycStatus: model.kycStatus as KYCStatus,
       status: model.status as DriverStatus,
-      profilePicture: model.profilePicture,
-      licenseDocument: model.licenseDocument,
-      vehicleDocument: model.vehicleDocument,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     });
@@ -24,15 +25,13 @@ export class DriverDomainMapper {
   static toModel(driver: Driver): Partial<IDriverModel> {
     return {
       userId: driver.getUserId(),
-      name: driver.getName(),
-      email: driver.getEmail(),
-      mobile: driver.getMobile(),
-      licenseNumber: driver.getLicenseNumber(),
-      vehicleNumber: driver.getVehicleNumber(),
+      eligibleGearTypes: driver.getEligibleGearTypes(),
+      eligibleBodyTypes: driver.getEligibleBodyTypes(),
+      licenceCategory: driver.getLicenceCategory(),
+      licenseIssueDate: driver.getLicenseIssueDate(),
+      licenseExpiryDate: driver.getLicenseExpiryDate(),
+      kycStatus: driver.getKycStatus(),
       status: driver.getStatus(),
-      profilePicture: driver.getProfilePicture(),
-      licenseDocument: driver.getLicenseDocument(),
-      vehicleDocument: driver.getVehicleDocument(),
       updatedAt: driver.getUpdatedAt(),
     };
   }
