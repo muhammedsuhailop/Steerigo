@@ -11,6 +11,8 @@ export class KYC {
     private issueDate?: Date,
     private expiryDate?: Date,
     private comments?: string,
+    private docImageUrlsFront: string[] = [],
+    private docImageUrlsBack: string[] = [],
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
@@ -22,7 +24,9 @@ export class KYC {
     docType: DocumentType,
     docNumber: string,
     issueDate?: Date,
-    expiryDate?: Date
+    expiryDate?: Date,
+    frontUrls: string[] = [],
+    backUrls: string[] = []
   ): KYC {
     return new KYC(
       id,
@@ -31,7 +35,10 @@ export class KYC {
       docNumber,
       KYCStatus.IN_REVIEW,
       issueDate,
-      expiryDate
+      expiryDate,
+      undefined,
+      frontUrls,
+      backUrls
     );
   }
 
@@ -45,6 +52,8 @@ export class KYC {
     expiryDate?: Date;
     verificationStatus: KYCStatus;
     comments?: string;
+    docImageUrlsFront: string[];
+    docImageUrlsBack: string[];
     createdAt: Date;
     updatedAt: Date;
   }): KYC {
@@ -57,6 +66,8 @@ export class KYC {
       data.issueDate,
       data.expiryDate,
       data.comments,
+      data.docImageUrlsFront,
+      data.docImageUrlsBack,
       data.createdAt,
       data.updatedAt
     );
@@ -94,6 +105,14 @@ export class KYC {
     return this.updatedAt;
   }
 
+  getDocImageUrlsFront(): string[] {
+    return [...this.docImageUrlsFront];
+  }
+
+  getDocImageUrlsBack(): string[] {
+    return [...this.docImageUrlsBack];
+  }
+
   // Business methods
   approve(comments?: string): void {
     if (this.verificationStatus === KYCStatus.APPROVED) {
@@ -129,7 +148,13 @@ export class KYC {
     this.docNumber = docNumber;
     this.issueDate = issueDate;
     this.expiryDate = expiryDate;
-    this.verificationStatus = KYCStatus.IN_REVIEW; // Reset status when document changes
+    this.verificationStatus = KYCStatus.IN_REVIEW;
+    this.updatedAt = new Date();
+  }
+
+  updateDocumentImages(frontUrls: string[], backUrls: string[]): void {
+    this.docImageUrlsFront = [...frontUrls];
+    this.docImageUrlsBack = [...backUrls];
     this.updatedAt = new Date();
   }
 

@@ -9,6 +9,8 @@ export interface IKYCModel extends Document {
   expiryDate?: Date;
   verificationStatus: string;
   comments?: string;
+  docImageUrlsFront: string[];
+  docImageUrlsBack: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +48,8 @@ const kycSchema = new Schema<IKYCModel>(
       trim: true,
       maxlength: 1000,
     },
+    docImageUrlsFront: [{ type: String, required: true }],
+    docImageUrlsBack: [{ type: String, required: true }],
   },
   {
     timestamps: true,
