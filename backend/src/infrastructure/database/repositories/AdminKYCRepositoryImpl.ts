@@ -3,7 +3,7 @@ import {
   KYCRepository,
   KYCQuery,
   KYCWithDriverInfo,
-} from "@application/repositories/KYCRepository";
+} from "@application/repositories/AdminDriverKYCRepository";
 import { KYC } from "@domain/entities/KYC";
 import { KYCModel } from "../models/KYCModel";
 import { KYCDomainMapper } from "../mappers/KYCDomainMapper";

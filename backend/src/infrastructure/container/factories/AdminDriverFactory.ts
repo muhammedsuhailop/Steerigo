@@ -4,8 +4,8 @@ import { TYPES } from "@shared/constants/DITypes";
 // Admin Driver Repositories
 import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
 import { AdminDriverRepositoryImpl } from "@infrastructure/database/repositories/AdminDriverRepositoryImpl";
-import { KYCRepository } from "@application/repositories/KYCRepository";
-import { KYCRepositoryImpl } from "@infrastructure/database/repositories/KYCRepositoryImpl";
+import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { KYCRepositoryImpl } from "@infrastructure/database/repositories/AdminKYCRepositoryImpl";
 
 // Admin Driver Use Cases
 import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
