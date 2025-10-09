@@ -12,6 +12,7 @@ import {
   PaginatedResult,
   FilterOptions,
 } from "@shared/types/Repository";
+import { Types } from "mongoose";
 
 type AdminDriverFilterOptions = FilterOptions<Driver> & AdminDriverQuery;
 
@@ -266,8 +267,11 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
       lastRideDate?: Date;
     };
   } | null> {
+
+    const objectId = new Types.ObjectId(driverId);
+
     const pipeline = [
-      { $match: { _id: driverId } },
+      { $match: { _id: objectId } },
       {
         $lookup: {
           from: "users",

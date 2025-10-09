@@ -10,8 +10,12 @@ export class DriverDomainMapper {
     return Driver.fromData({
       id: model._id.toString(),
       userId: model.userId,
-      eligibleGearTypes: model.eligibleGearTypes as GearType[],
-      eligibleBodyTypes: model.eligibleBodyTypes as BodyType[],
+      eligibleGearTypes: Array.isArray(model.eligibleGearTypes)
+        ? (model.eligibleGearTypes as GearType[])
+        : [],
+      eligibleBodyTypes: Array.isArray(model.eligibleBodyTypes)
+        ? (model.eligibleBodyTypes as BodyType[])
+        : [],
       licenceCategory: model.licenceCategory as LicenseCategory,
       licenseIssueDate: model.licenseIssueDate,
       licenseExpiryDate: model.licenseExpiryDate,

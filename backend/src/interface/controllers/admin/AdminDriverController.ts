@@ -154,6 +154,8 @@ export class AdminDriverController {
         kycId: req.params.kycId,
         verificationStatus: req.body.verificationStatus,
         comments: req.body.comments,
+        docImageUrlsFront: req.body.docImageUrlsFront,
+        docImageUrlsBack: req.body.docImageUrlsBack,
       });
       const result = await this.updateKycStatusUseCase.execute(dto);
       if (result.isFailure()) {
@@ -170,6 +172,8 @@ export class AdminDriverController {
         message: data.message,
         data: {
           kycDocument: data.kycDocument,
+          docImageUrlsFront: data.kycDocument.getDocImageUrlsFront(),
+          docImageUrlsBack: data.kycDocument.getDocImageUrlsBack(),
           driverKycStatusUpdated: data.driverKycStatusUpdated,
         },
       } as ApiResponse<any>);

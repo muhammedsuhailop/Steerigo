@@ -14,6 +14,12 @@ export class KYCDomainMapper {
       issueDate: model.issueDate,
       expiryDate: model.expiryDate,
       comments: model.comments,
+      docImageUrlsFront: Array.isArray(model.docImageUrlsFront)
+        ? model.docImageUrlsFront
+        : [],
+      docImageUrlsBack: Array.isArray(model.docImageUrlsBack)
+        ? model.docImageUrlsBack
+        : [],
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     });
@@ -28,6 +34,8 @@ export class KYCDomainMapper {
       issueDate: kyc.getIssueDate(),
       expiryDate: kyc.getExpiryDate(),
       comments: kyc.getComments(),
+      docImageUrlsFront: kyc.getDocImageUrlsFront(),
+      docImageUrlsBack: kyc.getDocImageUrlsBack(),
       updatedAt: kyc.getUpdatedAt(),
     };
   }

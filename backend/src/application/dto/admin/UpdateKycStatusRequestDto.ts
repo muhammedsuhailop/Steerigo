@@ -5,10 +5,11 @@ const updateKycStatusRequestSchema = z.object({
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
   verificationStatus: z.enum(["Approved", "Rejected", "Expired"], {
-      message:
-        "Verification status must be one of: Approved, Rejected, Expired",
+    message: "Verification status must be one of: Approved, Rejected, Expired",
   }),
   comments: z.string().min(1).max(1000).optional(),
+  docImageUrlsFront: z.array(z.string().url()).optional(),
+  docImageUrlsBack: z.array(z.string().url()).optional(),
 });
 
 type UpdateKycStatusRequestData = z.infer<typeof updateKycStatusRequestSchema>;
@@ -30,6 +31,13 @@ export class UpdateKycStatusRequestDto {
 
   getComments(): string | undefined {
     return this.data.comments;
+  }
+
+  getDocImageUrlsFront(): string[] | undefined {
+    return this.data.docImageUrlsFront;
+  }
+  getDocImageUrlsBack(): string[] | undefined {
+    return this.data.docImageUrlsBack;
   }
 
   validate(): string[] {

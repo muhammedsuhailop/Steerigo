@@ -237,6 +237,8 @@ export class KYCRepositoryImpl implements KYCRepository {
           expiryDate: 1,
           verificationStatus: 1,
           comments: 1,
+          docImageUrlsFront: 1, 
+          docImageUrlsBack: 1,
           createdAt: 1,
           updatedAt: 1,
           "driver._id": 1,
