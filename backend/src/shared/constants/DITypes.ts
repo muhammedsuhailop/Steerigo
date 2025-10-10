@@ -5,6 +5,7 @@ export const TYPES = {
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
   AdminUserRepository: Symbol.for("AdminUserRepository"),
   AdminDriverRepository: Symbol.for("AdminDriverRepository"),
+  AdminKYCRepository: Symbol.for("AdminKYCRepository"),
   KYCRepository: Symbol.for("KYCRepository"),
   DriverRepository: Symbol.for("DriverRepository"),
 

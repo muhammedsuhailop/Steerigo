@@ -25,7 +25,9 @@ export class AdminDriverFactory {
       .bind<AdminDriverRepository>(TYPES.AdminDriverRepository)
       .to(AdminDriverRepositoryImpl);
 
-    container.bind<KYCRepository>(TYPES.KYCRepository).to(KYCRepositoryImpl);
+    container
+      .bind<KYCRepository>(TYPES.AdminKYCRepository)
+      .to(KYCRepositoryImpl);
 
     // Use case bindings
     container

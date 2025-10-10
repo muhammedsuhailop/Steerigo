@@ -6,7 +6,7 @@ import { DriverRepository } from "@application/repositories/DriverRepository";
 import { DriverRepositoryImpl } from "@infrastructure/database/repositories/DriverRepositoryImpl";
 
 // Driver Use Cases
-import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
+import { DriverRegistrationUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 // import { GetDriverProfileUseCase } from "@application/use-cases/driver/GetDriverProfileUseCase";
 import { UpdateDriverProfileUseCase } from "@application/use-cases/driver/UpdateDriverProfileUseCase";
 import { SubmitKYCUseCase } from "@application/use-cases/driver/SubmitKYCUseCase";
@@ -14,6 +14,8 @@ import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusU
 
 // Driver Controllers
 import { DriverController } from "@interface/controllers/driver/DriverController";
+import { KYCRepository } from "@application/repositories/KYCRepository";
+import { KYCRepositoryImpl } from "@infrastructure/database/repositories/KYCRepositoryImpl";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -22,10 +24,12 @@ export class DriverFactory {
       .bind<DriverRepository>(TYPES.DriverRepository)
       .to(DriverRepositoryImpl);
 
+    container.bind<KYCRepository>(TYPES.KYCRepository).to(KYCRepositoryImpl);
+
     // Use case bindings
     container
-      .bind<RegisterDriverUseCase>(TYPES.RegisterDriverUseCase)
-      .to(RegisterDriverUseCase);
+      .bind<DriverRegistrationUseCase>(TYPES.RegisterDriverUseCase)
+      .to(DriverRegistrationUseCase);
 
     // container
     //   .bind<GetDriverProfileUseCase>(TYPES.GetDriverProfileUseCase)

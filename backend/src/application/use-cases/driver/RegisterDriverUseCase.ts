@@ -1,38 +1,47 @@
 import { injectable, inject } from "inversify";
 import { DriverRepository } from "@application/repositories/DriverRepository";
 import { UserRepository } from "@application/repositories/UserRepository";
+import { KYCRepository } from "@application/repositories/KYCRepository";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverResponseDto } from "@application/dto/driver/DriverResponseDto";
 import { Result } from "@shared/utils/Result";
 import { Driver } from "@domain/entities/Driver";
+import { KYC } from "@domain/entities/KYC";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { UserRole } from "@shared/constants/AuthConstants";
-import { v4 as uuidv4 } from "uuid";
 import { Types } from "mongoose";
+import { DocumentType } from "@domain/value-objects/DocumentType";
+
+export interface RegisterDriverResult {
+  driver: DriverResponseDto;
+  kycDocumentsCreated: {
+    license: string;
+    idDocument: string;
+  };
+  userUpdated: boolean;
+}
 
 @injectable()
-export class RegisterDriverUseCase {
+export class DriverRegistrationUseCase {
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
   ) {}
 
   async execute(
     userId: string,
     dto: DriverRegistrationRequestDto
-  ): Promise<Result<DriverResponseDto>> {
+  ): Promise<Result<RegisterDriverResult>> {
     try {
-      Logger.info("Driver registration started", { userId });
-
-      // Validate user exists and is not already a driver
+      Logger.info("Comprehensive driver registration started", { userId });
       const user = await this.userRepository.findById(userId);
       if (!user) {
         return Result.failure(new DomainError("User not found"));
       }
 
-      // Check if user is already registered as driver
       const existingDriver = await this.driverRepository.findByUserId(userId);
       if (existingDriver) {
         return Result.failure(
@@ -40,7 +49,6 @@ export class RegisterDriverUseCase {
         );
       }
 
-      // Validate license dates
       const now = new Date();
       if (dto.getLicenseExpiryDate() <= now) {
         return Result.failure(
@@ -54,53 +62,120 @@ export class RegisterDriverUseCase {
         );
       }
 
+      if (dto.getIdExpiryDate() <= now) {
+        return Result.failure(
+          new DomainError("ID expiry date must be in the future")
+        );
+      }
+
+      if (dto.getIdIssueDate() > now) {
+        return Result.failure(
+          new DomainError("ID issue date cannot be in the future")
+        );
+      }
+
       const driverId = new Types.ObjectId().toString();
 
-      // Create driver entity
+      user.updateProfile({
+        name: dto.getName(),
+        mobile: dto.getMobile(),
+        dob: dto.getDob(),
+        gender: dto.getGender(),
+        address: dto.getFullAddress(),
+      });
+
       const driver = Driver.create(
         driverId,
         userId,
         dto.getEligibleGearTypes(),
         dto.getEligibleBodyTypes(),
-        dto.getLicenceCategory(),
+        dto.getLicenseCategory(),
         dto.getLicenseIssueDate(),
         dto.getLicenseExpiryDate()
       );
 
-      // Save driver
-      const savedDriver = await this.driverRepository.save(driver);
+      const licenseKycId = new Types.ObjectId().toString();
+      const idKycId = new Types.ObjectId().toString();
 
-      if (!savedDriver) {
-        return Result.failure(new DomainError("Failed to save driver"));
+      const licenseKyc = KYC.create(
+        licenseKycId,
+        driverId,
+        DocumentType.LICENSE,
+        dto.getLicenseNumber(),
+        dto.getLicenseIssueDate(),
+        dto.getLicenseExpiryDate(),
+        [dto.getLicenseFrontImage()],
+        [dto.getLicenseBackImage()]
+      );
+
+      const idKyc = KYC.create(
+        idKycId,
+        driverId,
+        dto.getIdType(),
+        dto.getIdNumber(),
+        dto.getIdIssueDate(),
+        dto.getIdExpiryDate(),
+        [dto.getIdFrontImage()],
+        [dto.getIdBackImage()]
+      );
+
+      try {
+        await this.userRepository.save(user);
+
+        const savedDriver = await this.driverRepository.save(driver);
+        if (!savedDriver) {
+          throw new Error("Failed to save driver");
+        }
+
+        await this.kycRepository.save(licenseKyc);
+        await this.kycRepository.save(idKyc);
+
+        if (user.getRole() !== UserRole.DRIVER) {
+          Logger.info("User role should be updated to DRIVER", { userId });
+        }
+
+        const response: RegisterDriverResult = {
+          driver: {
+            id: savedDriver.getId(),
+            userId: savedDriver.getUserId(),
+            eligibleGearTypes: savedDriver.getEligibleGearTypes(),
+            eligibleBodyTypes: savedDriver.getEligibleBodyTypes(),
+            licenceCategory: savedDriver.getLicenceCategory(),
+            licenseIssueDate: savedDriver.getLicenseIssueDate(),
+            licenseExpiryDate: savedDriver.getLicenseExpiryDate(),
+            kycStatus: savedDriver.getKycStatus(),
+            status: savedDriver.getStatus(),
+            createdAt: savedDriver.getCreatedAt(),
+            updatedAt: savedDriver.getUpdatedAt(),
+          },
+          kycDocumentsCreated: {
+            license: licenseKycId,
+            idDocument: idKycId,
+          },
+          userUpdated: true,
+        };
+
+        Logger.info("Comprehensive driver registration successful", {
+          userId,
+          driverId: savedDriver.getId(),
+          licenseKycId,
+          idKycId,
+        });
+
+        return Result.success(response);
+      } catch (saveError) {
+        Logger.error("Failed to save driver registration data", {
+          userId,
+          error: saveError,
+        });
+
+        throw saveError;
       }
-
-      // Update user role to DRIVER if not already
-      if (user.getRole() !== UserRole.DRIVER) {
-        Logger.info("User role should be updated to DRIVER", { userId });
-      }
-
-      const response: DriverResponseDto = {
-        id: savedDriver.getId(),
-        userId: savedDriver.getUserId(),
-        eligibleGearTypes: savedDriver.getEligibleGearTypes(),
-        eligibleBodyTypes: savedDriver.getEligibleBodyTypes(),
-        licenceCategory: savedDriver.getLicenceCategory(),
-        licenseIssueDate: savedDriver.getLicenseIssueDate(),
-        licenseExpiryDate: savedDriver.getLicenseExpiryDate(),
-        kycStatus: savedDriver.getKycStatus(),
-        status: savedDriver.getStatus(),
-        createdAt: savedDriver.getCreatedAt(),
-        updatedAt: savedDriver.getUpdatedAt(),
-      };
-
-      Logger.info("Driver registration successful", {
-        userId,
-        driverId: savedDriver.getId(),
-      });
-
-      return Result.success(response);
     } catch (error) {
-      Logger.error("Driver registration failed", { userId, error });
+      Logger.error("Comprehensive driver registration failed", {
+        userId,
+        error,
+      });
       return Result.failure(error as Error);
     }
   }
