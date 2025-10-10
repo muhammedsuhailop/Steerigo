@@ -4,7 +4,7 @@ import { IDriverRepository } from "@domain/repositories/driver/IDriverRepository
 import { IDriverKycRepository } from "@domain/repositories/driver/IDriverKycRepository";
 import { IUserRepository } from "@application/repositories";
 import { Driver } from "@domain/entities/Driver";
-import { DriverKycDocument } from "@domain/entities/DriverKycDocument";
+import { DriverKycDocument } from "@domain/entities/KYC";
 import { Result } from "@shared/utils/Result";
 import { v4 as uuid } from "uuid";
 import { MobileAlreadyExistsError } from "@domain/errors";

@@ -1,43 +1,75 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
-export interface IDriverDocument extends Document {
-  userId: Types.ObjectId;
-  licenseNumber: string;
+export interface IDriverModel extends Document {
+  _id: string;
+  userId: string;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  licenceCategory: string;
   licenseIssueDate: Date;
   licenseExpiryDate: Date;
-  licenseCategory: string[];
   kycStatus: string;
   status: string;
-  eligibleVehicleType: string[];
-  eligibleGearType: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const DriverSchema = new Schema<IDriverDocument>(
+const driverSchema = new Schema<IDriverModel>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    licenseNumber: { type: String, required: true },
-    licenseIssueDate: { type: Date, required: true },
-    licenseExpiryDate: { type: Date, required: true },
-    licenseCategory: { type: [String], required: true },
+    userId: {
+      type: String,
+      required: true,
+      unique: true,
+      ref: "User",
+    },
+    eligibleGearTypes: [
+      {
+        type: String,
+        enum: ["Manual", "Automatic"],
+        required: true,
+      },
+    ],
+    eligibleBodyTypes: [
+      {
+        type: String,
+        enum: ["Sedan", "SUV", "Truck", "Hatchback", "Coupe"],
+        required: true,
+      },
+    ],
+    licenceCategory: {
+      type: String,
+      enum: ["LMV", "HMV", "MCWG", "MCWOG"],
+      required: true,
+    },
+    licenseIssueDate: {
+      type: Date,
+      required: true,
+    },
+    licenseExpiryDate: {
+      type: Date,
+      required: true,
+    },
     kycStatus: {
       type: String,
-      enum: ["Pending", "Verified", "Rejected"],
-      default: "Pending",
+      enum: ["InReview", "Rejected", "Approved", "Expired"],
+      default: "InReview",
     },
     status: {
       type: String,
-      enum: ["Active", "Blocked", "InReview"],
-      default: "InReview",
+      enum: ["Active", "Blocked", "Suspended"],
+      default: "Active",
     },
-    eligibleVehicleType: { type: [String], default: [] },
-    eligibleGearType: { type: [String], default: [] },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    collection: "drivers",
+  }
 );
 
-export const DriverModel = mongoose.model<IDriverDocument>(
-  "Driver",
-  DriverSchema
-);
+// Indexes
+driverSchema.index({ status: 1 });
+driverSchema.index({ kycStatus: 1 });
+driverSchema.index({ licenceCategory: 1 });
+driverSchema.index({ createdAt: -1 });
+
+export const DriverModel = model<IDriverModel>("Driver", driverSchema);

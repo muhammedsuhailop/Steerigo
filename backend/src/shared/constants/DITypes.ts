@@ -4,6 +4,8 @@ export const TYPES = {
   UserRepository: Symbol.for("UserRepository"),
   RefreshTokenRepository: Symbol.for("RefreshTokenRepository"),
   AdminUserRepository: Symbol.for("AdminUserRepository"),
+  AdminDriverRepository: Symbol.for("AdminDriverRepository"),
+  KYCRepository: Symbol.for("KYCRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -30,8 +32,18 @@ export const TYPES = {
   GetCurrentUserUseCase: Symbol.for("GetCurrentUserUseCase"),
   GoogleLoginUseCase: Symbol.for("GoogleLoginUseCase"),
   GetGoogleAuthUrlUseCase: Symbol.for("GetGoogleAuthUrlUseCase"),
+
+  // Use Cases - Admin Users
   GetUsersUseCase: Symbol.for("GetUsersUseCase"),
   UpdateUserStatusUseCase: Symbol.for("UpdateUserStatusUseCase"),
+
+  // Use Cases - Admin Drivers
+  GetDriversUseCase: Symbol.for("GetDriversUseCase"),
+  DriverActionUseCase: Symbol.for("DriverActionUseCase"),
+  GetDriverProfileUseCase: Symbol.for("GetDriverProfileUseCase"),
+  GetKycRequestsUseCase: Symbol.for("GetKycRequestsUseCase"),
+  UpdateKycStatusUseCase: Symbol.for("UpdateKycStatusUseCase"),
+  GetKycRequestByIdUseCase: Symbol.for("GetKycRequestByIdUseCase"),
 
   // Controllers
   LoginController: Symbol.for("LoginController"),
@@ -43,4 +55,5 @@ export const TYPES = {
   UserAuthController: Symbol.for("UserAuthController"),
   TokenController: Symbol.for("TokenController"),
   AdminUserController: Symbol.for("AdminUserController"),
+  AdminDriverController: Symbol.for("AdminDriverController"),
 };

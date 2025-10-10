@@ -1,46 +1,63 @@
 import { injectable, inject } from "inversify";
+import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
-import { IAdminKycRepository } from "@domain/repositories/admin/IAdminKycRepository";
-import { GetKycRequestByIdDto } from "../../dto/admin/GetKycRequestByIdDto";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class GetKycRequestByIdUseCase {
   constructor(
-    @inject("IAdminKycRepository")
-    private readonly kycRepo: IAdminKycRepository
+    @inject(TYPES.KYCRepository)
+    private kycRepository: KYCRepository
   ) {}
 
-  async execute(dto: GetKycRequestByIdDto): Promise<Result<any>> {
+  async execute(dto: GetKycRequestByIdRequestDto): Promise<Result<any>> {
     try {
-      Logger.info("GetKycRequestByIdUseCase start", { kycId: dto.kycId });
+      Logger.info("Executing GetKycRequestByIdUseCase", {
+        kycId: dto.getKycId(),
+      });
 
-      const kyc = await this.kycRepo.findKycRequestDetailedById(dto.kycId);
-      if (!kyc) {
-        return Result.failure(new Error("KYC request not found"));
+      const kycWithDriver = await this.kycRepository.findKYCWithDriverInfo(
+        dto.getKycId()
+      );
+
+      if (!kycWithDriver) {
+        return Result.failure(new Error("KYC document not found"));
       }
 
       const response = {
-        kycId: kyc.kycId,
-        driverId: kyc.driverId,
-        driverName: kyc.driverName,
-        driverEmail: kyc.driverEmail,
-        docType: kyc.docType,
-        docNumber: kyc.docNumber,
-        issueDate: kyc.issueDate,
-        expiryDate: kyc.expiryDate,
-        docImageUrls: kyc.docImageUrls,
-        isVerified: kyc.isVerified,
-        comments: kyc.comments,
-        createdAt: kyc.createdAt,
-        updatedAt: kyc.updatedAt,
-        verifiedAt: kyc.verifiedAt ?? null,
+        kyc: {
+          id: kycWithDriver.kycDocument.getId(),
+          docType: kycWithDriver.kycDocument.getDocType(),
+          docNumber: kycWithDriver.kycDocument.getDocNumber(),
+          issueDate:
+            kycWithDriver.kycDocument.getIssueDate()?.toISOString() || null,
+          expiryDate:
+            kycWithDriver.kycDocument.getExpiryDate()?.toISOString() || null,
+          verificationStatus: kycWithDriver.kycDocument.getVerificationStatus(),
+          comments: kycWithDriver.kycDocument.getComments(),
+          createdAt: kycWithDriver.kycDocument.getCreatedAt().toISOString(),
+          updatedAt: kycWithDriver.kycDocument.getUpdatedAt().toISOString(),
+          isExpired: kycWithDriver.kycDocument.isExpired(),
+        },
+        driver: {
+          driverId: kycWithDriver.driverInfo.driverId,
+          userId: kycWithDriver.driverInfo.userId,
+          userName: kycWithDriver.driverInfo.userName,
+          userEmail: kycWithDriver.driverInfo.userEmail,
+          userMobile: kycWithDriver.driverInfo.userMobile,
+          driverStatus: kycWithDriver.driverInfo.driverStatus,
+        },
       };
 
-      Logger.info("GetKycRequestByIdUseCase success", { kycId: dto.kycId });
+      Logger.info("KYC document fetched successfully", {
+        kycId: dto.getKycId(),
+      });
+
       return Result.success(response);
     } catch (error) {
-      Logger.error("GetKycRequestByIdUseCase error", error);
+      Logger.error("Error fetching KYC document by ID", error);
       return Result.failure(error as Error);
     }
   }

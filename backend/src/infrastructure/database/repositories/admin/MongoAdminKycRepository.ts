@@ -5,7 +5,7 @@ import {
   KycRequestWithDriver,
   PaginatedResult,
 } from "@domain/repositories/admin/IAdminKycRepository";
-import { DriverKycDocumentModel } from "../../models/DriverKycDocumentModel";
+import { DriverKycDocumentModel } from "../../models/KYCModel";
 import { Logger } from "@shared/utils/Logger";
 import { Types } from "mongoose";
 
