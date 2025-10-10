@@ -6,6 +6,7 @@ export const TYPES = {
   AdminUserRepository: Symbol.for("AdminUserRepository"),
   AdminDriverRepository: Symbol.for("AdminDriverRepository"),
   KYCRepository: Symbol.for("KYCRepository"),
+  DriverRepository: Symbol.for("DriverRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -45,6 +46,13 @@ export const TYPES = {
   UpdateKycStatusUseCase: Symbol.for("UpdateKycStatusUseCase"),
   GetKycRequestByIdUseCase: Symbol.for("GetKycRequestByIdUseCase"),
 
+  // Use Cases - Driver
+  RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
+  // GetDriverProfileUseCase: Symbol.for("GetDriverProfileUseCase"),
+  UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
+  SubmitKYCUseCase: Symbol.for("SubmitKYCUseCase"),
+  GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
+
   // Controllers
   LoginController: Symbol.for("LoginController"),
   SignupController: Symbol.for("SignupController"),
@@ -56,4 +64,5 @@ export const TYPES = {
   TokenController: Symbol.for("TokenController"),
   AdminUserController: Symbol.for("AdminUserController"),
   AdminDriverController: Symbol.for("AdminDriverController"),
+  DriverController: Symbol.for("DriverController"),
 };

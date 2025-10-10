@@ -1,0 +1,31 @@
+import { QueryOptions } from "@shared/types/Repository";
+import { Driver } from "@domain/entities/Driver";
+import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
+import { WriteOnlyRepository } from "./interfaces/WriteOnlyRepository";
+import { QueryableRepository } from "./interfaces/QueryableRepository";
+import { BatchRepository } from "./interfaces/BatchRepository";
+import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
+
+export interface DriverRepository
+  extends ReadOnlyRepository<Driver, string>,
+    WriteOnlyRepository<Driver, string>,
+    QueryableRepository<Driver>,
+    BatchRepository<Driver> {
+  // Driver-specific query methods
+  findByUserId(userId: string): Promise<Driver | null>;
+  existsByUserId(userId: string): Promise<boolean>;
+  findByStatus(status: DriverStatus, options?: QueryOptions): Promise<Driver[]>;
+  findByKycStatus(
+    kycStatus: KYCStatus,
+    options?: QueryOptions
+  ): Promise<Driver[]>;
+  findByLicenseCategory(
+    category: LicenseCategory,
+    options?: QueryOptions
+  ): Promise<Driver[]>;
+  findActiveDrivers(options?: QueryOptions): Promise<Driver[]>;
+  countByStatus(status: DriverStatus): Promise<number>;
+  countByKycStatus(kycStatus: KYCStatus): Promise<number>;
+}

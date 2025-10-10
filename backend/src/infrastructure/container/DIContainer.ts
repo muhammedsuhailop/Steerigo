@@ -5,6 +5,7 @@ import { UseCaseFactory } from "./factories/UseCaseFactory";
 import { ControllerFactory } from "./factories/ControllerFactory";
 import { AdminFactory } from "./factories/AdminFactory";
 import { AdminDriverFactory } from "./factories/AdminDriverFactory";
+import { DriverFactory } from "./factories/DriverFactory";
 
 const container = new Container();
 
@@ -15,5 +16,6 @@ UseCaseFactory.register(container);
 ControllerFactory.register(container);
 AdminFactory.register(container);
 AdminDriverFactory.register(container);
+DriverFactory.register(container);
 
 export { container };

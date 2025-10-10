@@ -1,20 +1,53 @@
-// import { Router } from "express";
-// import { container } from "@infrastructure/container/Container";
-// import { DriverController } from "../../controllers/driver/DriverController";
-// import { registerDriverValidation } from "../../validators/driver/driverValidators";
-// import { authMiddleware } from "../../middleware/auth/AuthMiddleware";
-// import { requireRoles } from "../../middleware/auth/RoleMiddleware";
+import { Router } from "express";
+import { container } from "@infrastructure/container/DIContainer";
+import { validateSchema } from "@interface/middleware/validationMiddleware";
+import {
+  authMiddleware,
+  requireRole,
+} from "@interface/middleware/auth/authMiddleware";
+import {
+  driverRegistrationSchema,
+  driverUpdateSchema,
+  kycSubmissionSchema,
+} from "@interface/validators/driver/driverValidationSchemas";
+import { DriverController } from "@interface/controllers/driver/DriverController";
+import { TYPES } from "@shared/constants/DITypes";
 
-// const router = Router();
-// const driverController = container.get<DriverController>(DriverController);
+const router = Router();
 
-// // POST /api/driver/register - Driver Registration
-// router.post(
-//   "/register",
-//   authMiddleware,
-//   requireRoles("Driver"),
-//   registerDriverValidation,
-//   driverController.register.bind(driverController)
-// );
+// Get controller instance from DI container
+const driverController = container.get<DriverController>(
+  TYPES.DriverController
+);
 
-// export { router as driverRoutes };
+router.use((req, res, next) => {
+  console.log("Request body:", req.body);
+  next();
+});
+
+// Apply authentication and DRIVER role authorization to all driver routes
+router.use(authMiddleware);
+router.use(requireRole(["Driver"]));
+
+// POST /api/driver/register - Register as driver
+router.post("/register", validateSchema(driverRegistrationSchema), (req, res) =>
+  driverController.register(req, res)
+);
+
+// GET /api/driver/profile - Get driver profile
+// router.get("/profile", (req, res) => driverController.getProfile(req, res));
+
+// PUT /api/driver/profile - Update driver profile
+router.put("/profile", validateSchema(driverUpdateSchema), (req, res) =>
+  driverController.updateProfile(req, res)
+);
+
+// POST /api/driver/kyc - Submit KYC document
+router.post("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
+  driverController.submitKYC(req, res)
+);
+
+// GET /api/driver/kyc - Get KYC status
+router.get("/kyc", (req, res) => driverController.getKYCStatus(req, res));
+
+export { router as driverRoutes };
