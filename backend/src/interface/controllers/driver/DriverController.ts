@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
-// import { RegisterDriverUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { DriverRegistrationUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { GetDriverProfileUseCase } from "@application/use-cases/driver/GetDriverProfileUseCase";
 import { UpdateDriverProfileUseCase } from "@application/use-cases/driver/UpdateDriverProfileUseCase";
 import { SubmitKYCUseCase } from "@application/use-cases/driver/SubmitKYCUseCase";
 import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusUseCase";
-// import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
-import { DriverUpdateRequestDto } from "@application/dto/driver/DriverUpdateRequestDto";
+import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
 import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
@@ -27,10 +25,6 @@ interface DriverRegistrationRequestBody {
   state: string;
   pin: string;
   address: string;
-
-  // Vehicle types (optional, for backward compatibility)
-  vehicleTypes?: string[];
-  gearTypes?: string[];
 
   // License data
   licenseCategory: LicenseCategory;
@@ -53,21 +47,35 @@ interface DriverRegistrationRequestBody {
   idBackImage: string;
 }
 
-// Keep existing interfaces for backward compatibility
-interface DriverRegistrationRequestBody {
-  eligibleGearTypes: GearType[];
-  eligibleBodyTypes: BodyType[];
-  licenceCategory: LicenseCategory;
-  licenseIssueDate: string;
-  licenseExpiryDate: string;
-}
-
-interface DriverUpdateRequestBody {
+interface DriverProfileUpdateRequestBody {
+  // User profile data
+  name?: string;
+  mobile?: string;
+  dob?: string;
+  gender?: "Male" | "Female" | "Other";
+  state?: string;
+  pin?: string;
+  address?: string;
+  
+  // Driver license data
   eligibleGearTypes?: GearType[];
   eligibleBodyTypes?: BodyType[];
   licenceCategory?: LicenseCategory;
+  licenseNumber?: string;
   licenseIssueDate?: string;
   licenseExpiryDate?: string;
+  
+  // ID document data
+  idType?: DocumentType;
+  idNumber?: string;
+  idIssueDate?: string;
+  idExpiryDate?: string;
+  
+  // Document images
+  licenseFrontImage?: string;
+  licenseBackImage?: string;
+  idFrontImage?: string;
+  idBackImage?: string;
 }
 
 interface KYCSubmissionRequestBody {
@@ -86,9 +94,9 @@ export class DriverController {
     private registerDriverUseCase: DriverRegistrationUseCase,
     // @inject(TYPES.RegisterDriverUseCase)
     // private RegisterDriverUseCase: RegisterDriverUseCase,
-    @inject(TYPES.GetDriverProfileUseCase)
     // private getDriverProfileUseCase: GetDriverProfileUseCase,
     // @inject(TYPES.UpdateDriverProfileUseCase)
+    @inject(TYPES.UpdateDriverProfileUseCase)
     private updateDriverProfileUseCase: UpdateDriverProfileUseCase,
     @inject(TYPES.SubmitKYCUseCase)
     private submitKYCUseCase: SubmitKYCUseCase,
@@ -113,7 +121,6 @@ export class DriverController {
 
       const body = req.body as DriverRegistrationRequestBody;
 
-      // Validate required fields for comprehensive registration
       const requiredFields = [
         "name",
         "mobile",
@@ -150,7 +157,6 @@ export class DriverController {
         return;
       }
 
-      // Create comprehensive DTO
       const dto = new DriverRegistrationRequestDto(
         body.name,
         body.mobile,
@@ -201,7 +207,6 @@ export class DriverController {
     }
   }
 
-  // Keep existing methods for backward compatibility
   async updateProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
@@ -212,30 +217,53 @@ export class DriverController {
         return;
       }
 
-      const body = req.body as DriverUpdateRequestBody;
-      const {
-        eligibleGearTypes,
-        eligibleBodyTypes,
-        licenceCategory,
-        licenseIssueDate,
-        licenseExpiryDate,
-      } = body;
+      const body = req.body as DriverProfileUpdateRequestBody;
 
-      const dto = new DriverUpdateRequestDto(
-        eligibleGearTypes,
-        eligibleBodyTypes,
-        licenceCategory,
-        licenseIssueDate ? new Date(licenseIssueDate) : undefined,
-        licenseExpiryDate ? new Date(licenseExpiryDate) : undefined
+      const dto = new DriverProfileUpdateDto(
+        // User profile data
+        body.name,
+        body.mobile,
+        body.dob ? new Date(body.dob) : undefined,
+        body.gender,
+        body.state,
+        body.pin,
+        body.address,
+
+        // Driver license data
+        body.eligibleGearTypes,
+        body.eligibleBodyTypes,
+        body.licenceCategory,
+        body.licenseNumber,
+        body.licenseIssueDate ? new Date(body.licenseIssueDate) : undefined,
+        body.licenseExpiryDate ? new Date(body.licenseExpiryDate) : undefined,
+
+        // ID document data
+        body.idType,
+        body.idNumber,
+        body.idIssueDate ? new Date(body.idIssueDate) : undefined,
+        body.idExpiryDate ? new Date(body.idExpiryDate) : undefined,
+
+        // Document images
+        body.licenseFrontImage,
+        body.licenseBackImage,
+        body.idFrontImage,
+        body.idBackImage
       );
 
       const result = await this.updateDriverProfileUseCase.execute(userId, dto);
 
       if (result.isSuccessful()) {
+        const responseData = result.getValue();
         res.status(HttpStatusCodes.OK).json({
           success: true,
           message: "Driver profile updated successfully",
-          data: result.getValue(),
+          data: responseData.driver,
+          updateSummary: {
+            userUpdated: responseData.userUpdated,
+            licenseKycUpdated: responseData.licenseKycUpdated,
+            idKycUpdated: responseData.idKycUpdated,
+            updatedFields: responseData.updatedFields,
+          },
         });
       } else {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
