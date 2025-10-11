@@ -5,8 +5,8 @@ import {
   validateGetUsersRequest,
   validateUpdateUserStatusRequest,
 } from "@interface/validators/admin/AdminUserValidator";
-import { authMiddleware } from "@interface/middleware/auth/authMiddleware";
-import { requireRole } from "@interface/middleware/auth/authMiddleware";
+import { authMiddleware } from "@interface/middleware/auth/AuthMiddleware";
+import { requireRole } from "@interface/middleware/auth/AuthMiddleware";
 import { TYPES } from "@shared/constants/DITypes";
 
 const router = Router();

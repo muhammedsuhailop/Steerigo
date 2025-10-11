@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { container } from "@infrastructure/container/DIContainer";
-import { validateSchema } from "@interface/middleware/validationMiddleware";
+import { validateSchema } from "@interface/middleware/ValidationMiddleware";
 import {
   authMiddleware,
   requireRole,
-} from "@interface/middleware/auth/authMiddleware";
+} from "@interface/middleware/auth/AuthMiddleware";
 import {
   driverRegistrationSchema,
   driverUpdateSchema,
