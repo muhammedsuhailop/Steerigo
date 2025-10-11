@@ -2,17 +2,19 @@ export class UpdateUserProfileDto {
   public readonly userId: string;
   public readonly name?: string;
   public readonly mobile?: string;
-  public readonly dob?: string;
+  public readonly dob?: Date;
   public readonly gender?: "Male" | "Female" | "Other";
   public readonly address?: string;
+  public readonly profilePicture?: string;
 
   constructor(data: any) {
     this.userId = data.userId;
     this.name = data.name?.trim();
     this.mobile = data.mobile?.trim();
-    this.dob = data.dob;
+    this.dob = data.dob ? new Date(data.dob) : undefined;
     this.gender = data.gender;
     this.address = data.address?.trim();
+    this.profilePicture = data.profilePicture?.trim();
   }
 
   validate(): string[] {
@@ -31,10 +33,8 @@ export class UpdateUserProfileDto {
     }
 
     if (this.dob !== undefined) {
-      const dobDate = new Date(this.dob);
       const today = new Date();
-      const age = today.getFullYear() - dobDate.getFullYear();
-
+      const age = today.getFullYear() - this.dob.getFullYear();
       if (age < 10 || age > 100) {
         errors.push("Age must be between 10 and 100 years");
       }
@@ -60,7 +60,26 @@ export class UpdateUserProfileDto {
       this.mobile ||
       this.dob ||
       this.gender ||
-      this.address
+      this.address ||
+      this.profilePicture
     );
+  }
+
+  getUserProfileUpdates(): Partial<{
+    name: string;
+    mobile: string;
+    dob: Date;
+    gender: string;
+    address: string;
+  }> {
+    const updates: any = {};
+
+    if (this.name) updates.name = this.name;
+    if (this.mobile) updates.mobile = this.mobile;
+    if (this.dob) updates.dob = this.dob;
+    if (this.gender) updates.gender = this.gender;
+    if (this.address !== undefined) updates.address = this.address;
+
+    return updates;
   }
 }

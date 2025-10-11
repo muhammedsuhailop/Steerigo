@@ -1,125 +1,130 @@
-import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
+import { injectable, inject } from "inversify";
 import { GetUserProfileUseCase } from "@application/use-cases/user/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "@application/use-cases/user/UpdateUserProfileUseCase";
-import { GetUserProfileDto, UpdateUserProfileDto } from "@application/dto/user";
+import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
+import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
 import { ApiResponse } from "@shared/types/Common";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
-import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { TYPES } from "@shared/constants/DITypes";
+
+interface UserProfileRequestBody {
+  name?: string;
+  mobile?: string;
+  dob?: string;
+  gender?: "Male" | "Female" | "Other";
+  address?: string;
+  profilePicture?: string;
+}
 
 @injectable()
 export class UserProfileController {
   constructor(
-    @inject(GetUserProfileUseCase)
+    @inject(TYPES.GetUserProfileUseCase)
     private getUserProfileUseCase: GetUserProfileUseCase,
-    @inject(UpdateUserProfileUseCase)
+    @inject(TYPES.UpdateUserProfileUseCase)
     private updateUserProfileUseCase: UpdateUserProfileUseCase
   ) {}
 
-  async getUserProfile(req: Request, res: Response): Promise<void> {
+  private getUserId(req: Request): string | null {
+    const user = (req as any).user;
+    return user?.userId ?? null;
+  }
+
+  async getProfile(req: Request, res: Response): Promise<void> {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const { response, statusCode } =
-          ErrorHandlerService.handleValidationErrors(errors.array());
-        res.status(statusCode).json(response);
+      const currentUserId = this.getUserId(req);
+      if (!currentUserId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
         return;
       }
 
       const { userId } = req.params;
-      const currentUserId = req.user!.userId;
 
-      // Users can only access their own profile (unless admin)
-      if (userId !== currentUserId && req.user!.role !== "Admin") {
-        const response: ApiResponse = {
+      const currentUser = (req as any).user;
+      if (userId !== currentUserId && currentUser?.role !== "Admin") {
+        res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
           message: "Access denied. You can only view your own profile.",
-        };
-        res.status(403).json(response);
+        });
         return;
       }
 
       const dto = new GetUserProfileDto(userId);
       const result = await this.getUserProfileUseCase.execute(dto);
 
-      if (result.isFailure()) {
-        const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_user_profile"
-        );
-        res.status(statusCode).json(response);
-        return;
+      if (result.isSuccessful()) {
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: "User profile fetched successfully",
+          data: result.getValue(),
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
       }
-
-      const response: ApiResponse = {
-        success: true,
-        message: "User profile fetched successfully",
-        data: result.getValue(),
-      };
-
-      res.status(200).json(response);
-      Logger.info("User profile fetched successfully", { userId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_user_profile"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Get user profile controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 
-  async updateUserProfile(req: Request, res: Response): Promise<void> {
+  async updateProfile(req: Request, res: Response): Promise<void> {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const { response, statusCode } =
-          ErrorHandlerService.handleValidationErrors(errors.array());
-        res.status(statusCode).json(response);
+      const currentUserId = this.getUserId(req);
+      if (!currentUserId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
         return;
       }
 
       const { userId } = req.params;
-      const currentUserId = req.user!.userId;
 
-      // Users can only update their own profile (unless admin)
-      if (userId !== currentUserId && req.user!.role !== "Admin") {
-        const response: ApiResponse = {
+      const currentUser = (req as any).user;
+      if (userId !== currentUserId && currentUser?.role !== "Admin") {
+        res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
           message: "Access denied. You can only update your own profile.",
-        };
-        res.status(403).json(response);
+        });
         return;
       }
 
-      const dto = new UpdateUserProfileDto({ ...req.body, userId });
+      const body = req.body as UserProfileRequestBody;
+      const dto = new UpdateUserProfileDto({ ...body, userId });
+
       const result = await this.updateUserProfileUseCase.execute(dto);
 
-      if (result.isFailure()) {
-        const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_user_profile"
-        );
-        res.status(statusCode).json(response);
-        return;
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: "User profile updated successfully",
+          data: responseData.user,
+          updateSummary: {
+            updatedFields: responseData.updatedFields,
+          },
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
       }
-
-      const response: ApiResponse = {
-        success: true,
-        message: "User profile updated successfully",
-        data: result.getValue(),
-      };
-
-      res.status(200).json(response);
-      Logger.info("User profile updated successfully", { userId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_user_profile"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Update user profile controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 }

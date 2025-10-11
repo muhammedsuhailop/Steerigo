@@ -9,7 +9,7 @@ import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
-export class UserController {
+export class AuthUserController {
   constructor(
     @inject(TYPES.GetCurrentUserUseCase)
     private getCurrentUserUseCase: GetCurrentUserUseCase
@@ -17,7 +17,7 @@ export class UserController {
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId; // From auth middleware
+      const userId = (req as any).user?.userId; 
       const dto = new GetCurrentUserDto({ userId });
       const result = await this.getCurrentUserUseCase.execute(dto);
 

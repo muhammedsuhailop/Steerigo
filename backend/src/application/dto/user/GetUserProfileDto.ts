@@ -12,6 +12,10 @@ export class GetUserProfileDto {
       errors.push("User ID is required");
     }
 
+    if (this.userId && typeof this.userId !== "string") {
+      errors.push("User ID must be a string");
+    }
+
     return errors;
   }
 }

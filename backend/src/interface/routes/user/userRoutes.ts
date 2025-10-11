@@ -13,7 +13,7 @@ router.use(authMiddleware);
 
 // GET /api/user/profile/:userId
 router.get("/profile/:userId", (req: Request, res: Response) =>
-  userProfileController.getProfile(req, res)
+  userProfileController.getProfile(req, res) 
 );
 
 // PUT /api/user/profile/:userId

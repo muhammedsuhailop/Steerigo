@@ -1,3 +1,5 @@
+import { AuthUserController } from "@interface/controllers/auth/AuthUserController";
+
 // Container Symbols (for better type safety)
 export const TYPES = {
   // Repositories
@@ -54,16 +56,21 @@ export const TYPES = {
   SubmitKYCUseCase: Symbol.for("SubmitKYCUseCase"),
   GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
 
+  // Use Cases - User
+  GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
+  UpdateUserProfileUseCase: Symbol.for("UpdateUserProfileUseCase"),
+
   // Controllers
   LoginController: Symbol.for("LoginController"),
   SignupController: Symbol.for("SignupController"),
   OtpController: Symbol.for("OtpController"),
   PasswordController: Symbol.for("PasswordController"),
   SocialAuthController: Symbol.for("SocialAuthController"),
-  UserController: Symbol.for("UserController"),
   UserAuthController: Symbol.for("UserAuthController"),
+  // AuthUserController: Symbol.for("AuthUserController"),
   TokenController: Symbol.for("TokenController"),
   AdminUserController: Symbol.for("AdminUserController"),
   AdminDriverController: Symbol.for("AdminDriverController"),
   DriverController: Symbol.for("DriverController"),
+  UserProfileController: Symbol.for("UserProfileController"),
 };
