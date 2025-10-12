@@ -59,6 +59,7 @@ export const TYPES = {
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
   UpdateUserProfileUseCase: Symbol.for("UpdateUserProfileUseCase"),
+  RegisterUserAsDriverUseCase: Symbol.for("RegisterUserAsDriverUseCase"),
 
   // Controllers
   LoginController: Symbol.for("LoginController"),

@@ -8,6 +8,8 @@ import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { RegisterAsDriverRequestDto } from "@application/dto/user";
+import { RegisterUserAsDriverUseCase } from "@application/use-cases/user/RegisterUserAsDriverUseCase";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -24,7 +26,9 @@ export class UserProfileController {
     @inject(TYPES.GetUserProfileUseCase)
     private getUserProfileUseCase: GetUserProfileUseCase,
     @inject(TYPES.UpdateUserProfileUseCase)
-    private updateUserProfileUseCase: UpdateUserProfileUseCase
+    private updateUserProfileUseCase: UpdateUserProfileUseCase,
+    @inject(TYPES.RegisterUserAsDriverUseCase)
+    private registerUserAsDriverUseCase: RegisterUserAsDriverUseCase
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -121,6 +125,77 @@ export class UserProfileController {
       }
     } catch (error) {
       Logger.error("Update user profile controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+
+  async registerAsDriver(req: Request, res: Response): Promise<void> {
+    try {
+      const currentUserId = this.getUserId(req);
+      if (!currentUserId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
+        return;
+      }
+
+      const { userId } = req.params;
+
+      if (userId !== currentUserId) {
+        Logger.warn("User ID mismatch in register as driver", {
+          currentUserId,
+          urlUserId: userId,
+          currentUserIdLength: currentUserId?.length,
+          urlUserIdLength: userId?.length,
+          tokenUser: (req as any).user,
+        });
+        res.status(HttpStatusCodes.FORBIDDEN).json({
+          success: false,
+          message: "Access denied. You can only register yourself as a driver.",
+        });
+        return;
+      }
+
+      const dto = new RegisterAsDriverRequestDto(userId);
+      const result = await this.registerUserAsDriverUseCase.execute(dto);
+
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: responseData.message,
+          data: {
+            id: responseData.id,
+            name: responseData.name,
+            email: responseData.email,
+            mobile: responseData.mobile,
+            role: responseData.role,
+            status: responseData.status,
+            isVerified: responseData.isVerified,
+            updatedAt: responseData.updatedAt,
+          },
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
+      }
+
+      Logger.info("Register as driver request processed", {
+        userId,
+        currentUserId,
+        success: result.isSuccessful(),
+      });
+    } catch (error) {
+      Logger.error("Register as driver controller error", {
+        error,
+        userId: req.params.userId,
+        currentUserId: this.getUserId(req),
+      });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error",
