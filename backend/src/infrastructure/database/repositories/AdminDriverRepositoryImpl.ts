@@ -349,8 +349,8 @@ export class AdminDriverRepositoryImpl implements AdminDriverRepository {
       typeof (filters as any).search === "string" &&
       (filters as any).search.trim() !== ""
     ) {
-      // Since we removed redundant fields, search will need to be handled via lookup
-      // For now, we'll search by userId only
+      // Search will need to be handled via lookup
+      // For now, search by userId only
       const s = (filters as any).search.trim();
       q.userId = { $regex: s, $options: "i" };
     }

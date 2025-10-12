@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authRoutes } from "./auth/AuthRoutes";
-// import { driverRoutes } from "./driver/driverRoutes";
+import { driverRoutes } from "./driver/driverRoutes";
 import { adminRoutes } from "./admin";
 // import { fileRoutes } from "./file/fileRoutes";
 // import { userRoutes } from "./user";
@@ -9,7 +9,7 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 
-// router.use("/driver", driverRoutes);
+router.use("/driver", driverRoutes);
 
 router.use("/admin", adminRoutes);
 
