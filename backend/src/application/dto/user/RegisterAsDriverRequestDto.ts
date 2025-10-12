@@ -1,4 +1,4 @@
-export class GetUserProfileDto {
+export class RegisterAsDriverRequestDto {
   public readonly userId: string;
 
   constructor(userId: string) {

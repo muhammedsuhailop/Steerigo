@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "@infrastructure/container/DIContainer";
-import { validateSchema } from "@interface/middleware/validationMiddleware";
-import { authMiddleware } from "@interface/middleware/auth/authMiddleware";
+import { validateSchema } from "@interface/middleware/ValidationMiddleware";
+import { authMiddleware } from "@interface/middleware/auth/AuthMiddleware";
 import {
   signupRequestSchema,
   signupVerifySchema,
@@ -18,7 +18,7 @@ import { SignupController } from "@interface/controllers/auth/SignupController";
 import { PasswordController } from "@interface/controllers/auth/PasswordController";
 import { OtpController } from "@interface/controllers/auth/OtpController";
 import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
-import { UserController } from "@interface/controllers/auth/UserController";
+import { AuthUserController } from "@interface/controllers/auth/AuthUserController";
 import { TYPES } from "@shared/constants/DITypes";
 
 const router = Router();
@@ -35,7 +35,9 @@ const otpController = container.get<OtpController>(TYPES.OtpController);
 const socialAuthController = container.get<SocialAuthController>(
   TYPES.SocialAuthController
 );
-const userController = container.get<UserController>(TYPES.UserController);
+const userController = container.get<AuthUserController>(
+  TYPES.UserAuthController
+);
 
 // Auth routes
 router.post(

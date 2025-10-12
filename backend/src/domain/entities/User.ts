@@ -256,6 +256,11 @@ export class User implements BaseEntity {
     this.otpAttempts = 0;
   }
 
+  updateRole(newRole: string): void {
+    this.role = newRole as UserRole;
+    this.updatedAt = new Date();
+  }
+
   // Getters
   getId(): string {
     return this.id;

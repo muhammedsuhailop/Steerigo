@@ -1,46 +1,43 @@
 import { injectable, inject } from "inversify";
-import { IUserProfileRepository } from "@domain/repositories/user/IUserProfileRepository";
-import { GetUserProfileDto } from "../../dto/user/GetUserProfileDto";
+import { UserRepository } from "@application/repositories/UserRepository";
+import { UserResponseDto } from "@application/dto/user/UserResponseDto";
+import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
 import { Result } from "@shared/utils/Result";
-import { Logger } from "@shared/utils/Logger";
 import { DomainError } from "@domain/errors/DomainError";
+import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class GetUserProfileUseCase {
   constructor(
-    @inject("IUserProfileRepository")
-    private userProfileRepository: IUserProfileRepository
+    @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}
 
-  async execute(dto: GetUserProfileDto): Promise<Result<any>> {
+  async execute(dto: GetUserProfileDto): Promise<Result<UserResponseDto>> {
     try {
+      Logger.info("Get user profile started", { userId: dto.userId });
+
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
         return Result.failure(new DomainError(validationErrors.join(", ")));
       }
 
-      const user = await this.userProfileRepository.findUserById(dto.userId);
+      const user = await this.userRepository.findById(dto.userId);
       if (!user) {
-        Logger.warn("User not found for profile fetch", {
-          userId: dto.userId,
-        });
         return Result.failure(new DomainError("User not found"));
       }
 
       if (!user.getIsVerified()) {
-        Logger.warn("Unverified user attempted to access profile", {
-          userId: dto.userId,
-        });
         return Result.failure(new DomainError("User account not verified"));
       }
 
-      const userProfile = {
+      const response: UserResponseDto = {
         id: user.getId(),
         name: user.getName(),
         email: user.getEmail(),
         mobile: user.getMobile(),
         dob: user.getDob()?.toISOString(),
-        gender: user.getGender(),
+        gender: user.getGender() as "Male" | "Female" | "Other" | undefined,
         address: user.getAddress(),
         role: user.getRole(),
         status: user.getStatus(),
@@ -51,14 +48,14 @@ export class GetUserProfileUseCase {
         updatedAt: user.getUpdatedAt().toISOString(),
       };
 
-      Logger.info("User profile fetched successfully", {
+      Logger.info("Get user profile successful", {
         userId: dto.userId,
         email: user.getEmail(),
       });
 
-      return Result.success(userProfile);
+      return Result.success(response);
     } catch (error) {
-      Logger.error("Error fetching user profile", error);
+      Logger.error("Get user profile failed", { userId: dto.userId, error });
       return Result.failure(error as Error);
     }
   }
