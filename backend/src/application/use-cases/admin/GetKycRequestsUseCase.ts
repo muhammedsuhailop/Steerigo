@@ -65,6 +65,8 @@ export class GetKycRequestsUseCase {
             expiryDate: item.kycDocument.getExpiryDate()?.toISOString() || null,
             verificationStatus: item.kycDocument.getVerificationStatus(),
             comments: item.kycDocument.getComments(),
+            docImageUrlsFront: item.kycDocument.getDocImageUrlsFront(),
+            docImageUrlsBack: item.kycDocument.getDocImageUrlsBack(),
             createdAt: item.kycDocument.getCreatedAt().toISOString(),
             updatedAt: item.kycDocument.getUpdatedAt().toISOString(),
             isExpired: item.kycDocument.isExpired(),

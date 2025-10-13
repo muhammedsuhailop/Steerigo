@@ -37,6 +37,8 @@ export class GetKycRequestByIdUseCase {
             kycWithDriver.kycDocument.getExpiryDate()?.toISOString() || null,
           verificationStatus: kycWithDriver.kycDocument.getVerificationStatus(),
           comments: kycWithDriver.kycDocument.getComments(),
+          docImageUrlsFront: kycWithDriver.kycDocument.getDocImageUrlsFront(),
+          docImageUrlsBack: kycWithDriver.kycDocument.getDocImageUrlsBack(),
           createdAt: kycWithDriver.kycDocument.getCreatedAt().toISOString(),
           updatedAt: kycWithDriver.kycDocument.getUpdatedAt().toISOString(),
           isExpired: kycWithDriver.kycDocument.isExpired(),
