@@ -1,88 +1,103 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { UploadFileUseCase } from "@application/use-cases/file/UploadFileUseCase";
+import { GetUserFilesUseCase } from "@application/use-cases/file/GetUserFilesUseCase";
+import { DeleteFileUseCase } from "@application/use-cases/file/DeleteFileUseCase";
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
-import { validationResult } from "express-validator";
+import { ApiResponse } from "@shared/types/Common";
+import { Logger } from "@shared/utils/Logger";
+import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { TYPES } from "@shared/constants/DITypes";
+import { v2 as cloudinary } from "cloudinary";
 
 type MulterRequest = Request & { file?: Express.Multer.File };
 
 @injectable()
 export class FileController {
   constructor(
-    @inject(UploadFileUseCase)
-    private uploadFileUseCase: UploadFileUseCase
+    @inject(TYPES.UploadFileUseCase) private uploadUc: UploadFileUseCase,
+    @inject(TYPES.GetUserFilesUseCase) private listUc: GetUserFilesUseCase,
+    @inject(TYPES.DeleteFileUseCase) private deleteUc: DeleteFileUseCase
   ) {}
 
-  async upload(req: MulterRequest, res: Response): Promise<void> {
+  async uploadFile(req: MulterRequest, res: Response): Promise<void> {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        });
-        return;
-      }
-
       const userId = req.user?.userId;
-      if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: "Unauthorized: Missing user ID",
-        });
+      if (!userId || !req.file) {
+        res
+          .status(400)
+          .json({ success: false, message: "Missing user or file" });
         return;
       }
-
-      if (!req.file) {
-        res.status(400).json({
-          success: false,
-          message: "File is required",
-        });
-        return;
-      }
-
-      console.log("File upload request:", {
-        userId,
-        purpose: req.body.purpose,
-        filename: req.file.originalname,
-        size: req.file.size,
-        mimetype: req.file.mimetype,
-      });
-
       const dto = new FileUploadDto({
         purpose: req.body.purpose,
         file: req.file,
       });
-
-      const result = await this.uploadFileUseCase.execute(dto, userId);
+      const result = await this.uploadUc.execute(dto, userId);
 
       if (result.isFailure()) {
-        res.status(400).json({
-          success: false,
-          message: result.getError().message,
-        });
-      } else {
-        const uploadData = result.getValue();
-        res.status(200).json({
-          success: true,
-          message: "File uploaded successfully",
-          data: {
-            url: uploadData.url,
-            publicId: uploadData.publicId,
-            purpose: uploadData.purpose,
-            filename: uploadData.filename,
-            size: uploadData.size,
-            uploadedAt: new Date().toISOString(),
-          },
-        });
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "file_upload"
+        );
+        res.status(statusCode).json(response);
+        return;
       }
-    } catch (error) {
-      console.error("File upload controller error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+      res.json({ success: true, data: result.getValue() });
+    } catch (err) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        err as Error,
+        "file_upload"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getUserFiles(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ success: false, message: "Unauthorized" });
+        return;
+      }
+      const result = await this.listUc.execute(userId);
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "list_files"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+      res.json({ success: true, data: result.getValue() });
+    } catch (err) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        err as Error,
+        "list_files"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async deleteFile(req: Request, res: Response): Promise<void> {
+    try {
+      const publicId = req.params.publicId;
+      const result = await this.deleteUc.execute(publicId);
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "delete_file"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+      res.json({ success: true, message: result.getValue().message });
+    } catch (err) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        err as Error,
+        "delete_file"
+      );
+      res.status(statusCode).json(response);
     }
   }
 }
