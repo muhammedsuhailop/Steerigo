@@ -1,11 +1,13 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
-// Admin Driver Repositories
+import { DriverRepository } from "@application/repositories/DriverRepository";
 import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
-import { AdminDriverRepositoryImpl } from "@infrastructure/database/repositories/AdminDriverRepositoryImpl";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
-import { KYCRepositoryImpl } from "@infrastructure/database/repositories/AdminKYCRepositoryImpl";
+import { DriverRepositoryImpl } from "@infrastructure/database/repositories/DriverRepositoryImpl";
+
+import { KYCRepository } from "@application/repositories/KYCRepository";
+import { KYCRepository as AdminKYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { KYCRepositoryImpl } from "@infrastructure/database/repositories/KYCRepositoryImpl";
 
 // Admin Driver Use Cases
 import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
@@ -20,43 +22,33 @@ import { AdminDriverController } from "@interface/controllers/admin/AdminDriverC
 
 export class AdminDriverFactory {
   static register(container: Container): void {
-    // Repository bindings
+    container
+      .bind<DriverRepository>(TYPES.DriverRepository)
+      .to(DriverRepositoryImpl)
+      .inSingletonScope();
+
     container
       .bind<AdminDriverRepository>(TYPES.AdminDriverRepository)
-      .to(AdminDriverRepositoryImpl);
+      .toService(TYPES.DriverRepository);
 
     container
-      .bind<KYCRepository>(TYPES.AdminKYCRepository)
-      .to(KYCRepositoryImpl);
+      .bind<KYCRepository>(TYPES.KYCRepository)
+      .to(KYCRepositoryImpl)
+      .inSingletonScope();
+
+    container
+      .bind<AdminKYCRepository>(TYPES.AdminKYCRepository)
+      .toService(TYPES.KYCRepository);
 
     // Use case bindings
-    container
-      .bind<GetDriversUseCase>(TYPES.GetDriversUseCase)
-      .to(GetDriversUseCase);
-
-    container
-      .bind<DriverActionUseCase>(TYPES.DriverActionUseCase)
-      .to(DriverActionUseCase);
-
-    container
-      .bind<GetDriverProfileUseCase>(TYPES.GetDriverProfileUseCase)
-      .to(GetDriverProfileUseCase);
-
-    container
-      .bind<GetKycRequestsUseCase>(TYPES.GetKycRequestsUseCase)
-      .to(GetKycRequestsUseCase);
-
-    container
-      .bind<UpdateKycStatusUseCase>(TYPES.UpdateKycStatusUseCase)
-      .to(UpdateKycStatusUseCase);
-
-    container
-      .bind<GetKycRequestByIdUseCase>(TYPES.GetKycRequestByIdUseCase)
-      .to(GetKycRequestByIdUseCase);
+    container.bind(TYPES.GetDriversUseCase).to(GetDriversUseCase);
+    container.bind(TYPES.DriverActionUseCase).to(DriverActionUseCase);
+    container.bind(TYPES.GetDriverProfileUseCase).to(GetDriverProfileUseCase);
+    container.bind(TYPES.GetKycRequestsUseCase).to(GetKycRequestsUseCase);
+    container.bind(TYPES.UpdateKycStatusUseCase).to(UpdateKycStatusUseCase);
+    container.bind(TYPES.GetKycRequestByIdUseCase).to(GetKycRequestByIdUseCase);
 
     // Controller bindings
-    container
-      .bind<AdminDriverController>(TYPES.AdminDriverController)
-      .to(AdminDriverController);
+    container.bind(TYPES.AdminDriverController).to(AdminDriverController);
   }
 }
