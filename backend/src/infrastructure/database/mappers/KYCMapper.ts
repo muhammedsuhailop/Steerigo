@@ -25,7 +25,7 @@ export class KYCMapper {
   static toPersistence(kyc: KYC): Partial<IKYCModel> {
     return {
       _id: kyc.getId(),
-      driverId: new Types.ObjectId(kyc.getId()),
+      driverId: new Types.ObjectId(kyc.getDriverId()),
       docType: kyc.getDocType(),
       docNumber: kyc.getDocNumber(),
       issueDate: kyc.getIssueDate(),

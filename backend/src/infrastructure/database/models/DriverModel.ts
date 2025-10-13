@@ -5,6 +5,7 @@ export interface IDriverModel extends Document {
   userId: Types.ObjectId;
   eligibleGearTypes: string[];
   eligibleBodyTypes: string[];
+  licenseNumber: string;
   licenceCategory: string;
   licenseIssueDate: Date;
   licenseExpiryDate: Date;
@@ -36,6 +37,10 @@ const driverSchema = new Schema<IDriverModel>(
         required: true,
       },
     ],
+    licenseNumber: {
+      type: String,
+      required: true,
+    },
     licenceCategory: {
       type: String,
       enum: ["LMV", "HMV", "MCWG", "MCWOG"],

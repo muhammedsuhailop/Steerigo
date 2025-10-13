@@ -9,6 +9,7 @@ export class Driver {
     private readonly userId: string,
     private eligibleGearTypes: GearType[],
     private eligibleBodyTypes: BodyType[],
+    private licenseNumber: string,
     private licenceCategory: LicenseCategory,
     private licenseIssueDate: Date,
     private licenseExpiryDate: Date,
@@ -24,6 +25,7 @@ export class Driver {
     userId: string,
     eligibleGearTypes: GearType[],
     eligibleBodyTypes: BodyType[],
+    licenseNumber: string,
     licenceCategory: LicenseCategory,
     licenseIssueDate: Date,
     licenseExpiryDate: Date
@@ -33,6 +35,7 @@ export class Driver {
       userId,
       eligibleGearTypes,
       eligibleBodyTypes,
+      licenseNumber,
       licenceCategory,
       licenseIssueDate,
       licenseExpiryDate,
@@ -47,6 +50,7 @@ export class Driver {
     userId: string;
     eligibleGearTypes: GearType[];
     eligibleBodyTypes: BodyType[];
+    licenseNumber: string;
     licenceCategory: LicenseCategory;
     licenseIssueDate: Date;
     licenseExpiryDate: Date;
@@ -60,6 +64,7 @@ export class Driver {
       data.userId,
       data.eligibleGearTypes,
       data.eligibleBodyTypes,
+      data.licenseNumber,
       data.licenceCategory,
       data.licenseIssueDate,
       data.licenseExpiryDate,
@@ -85,6 +90,9 @@ export class Driver {
   }
   getLicenceCategory(): LicenseCategory {
     return this.licenceCategory;
+  }
+  getLicenseNumber(): string {
+    return this.licenseNumber;
   }
   getLicenseIssueDate(): Date {
     return this.licenseIssueDate;
@@ -161,6 +169,6 @@ export class Driver {
   }
 
   canBeActioned(): boolean {
-    return true; // All drivers can be actioned in new schema
+    return true; 
   }
 }
