@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import {
   FileUploadService,
   FileUploadResult,
+  DeleteResult,
 } from "@application/services/FileUploadService";
 import { Logger } from "@shared/utils/Logger";
 import streamifier from "streamifier";
@@ -90,26 +91,25 @@ export class CloudinaryService implements FileUploadService {
     }
   }
 
-  async delete(publicId: string): Promise<void> {
+  async delete(publicId: string): Promise<DeleteResult> {
     try {
-      Logger.info("Deleting file from Cloudinary", { publicId });
+      if (!publicId || publicId.trim() === "") {
+        throw new Error("Public ID is required for deletion");
+      }
 
       const result = await cloudinary.uploader.destroy(publicId);
 
-      if (result.result === "ok") {
-        Logger.info("File deleted successfully from Cloudinary", { publicId });
-      } else {
-        Logger.warn("File deletion returned non-ok result", {
-          publicId,
-          result,
-        });
-      }
+      return { result: result.result };
     } catch (error) {
       Logger.error("File deletion failed", {
         publicId,
         error: (error as Error).message,
+        stack: (error as Error).stack,
       });
-      throw new Error(`File deletion failed: ${(error as Error).message}`);
+
+      throw new Error(
+        `Failed to delete file from Cloudinary: ${(error as Error).message}`
+      );
     }
   }
 

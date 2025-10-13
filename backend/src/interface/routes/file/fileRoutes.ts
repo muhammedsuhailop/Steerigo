@@ -35,7 +35,7 @@ router.get(
 
 // DELETE /api/file/:fileId - Delete file
 router.delete(
-  "/:fileId",
+  "/:publicId",
   authMiddleware,
   fileController.deleteFile.bind(fileController)
 );

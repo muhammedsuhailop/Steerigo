@@ -7,6 +7,10 @@ export interface FileUploadResult {
   size: number;
 }
 
+export interface DeleteResult {
+  result: "ok" | "not found" | string;
+}
+
 export interface FileUploadService {
   upload(
     fileBuffer: Buffer,
@@ -14,7 +18,7 @@ export interface FileUploadService {
     purpose: string,
     originalName: string
   ): Promise<FileUploadResult>;
-  delete(publicId: string): Promise<void>;
+  delete(publicId: string): Promise<DeleteResult>;
   generateSignedUrl(publicId: string, expiresIn?: number): Promise<string>;
   validateFile(file: Express.Multer.File, purpose: string): Promise<boolean>;
   listByPrefix(prefix: string): Promise<CloudinaryResource[]>;

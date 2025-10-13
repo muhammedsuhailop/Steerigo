@@ -5,10 +5,9 @@ import { GetUserFilesUseCase } from "@application/use-cases/file/GetUserFilesUse
 import { DeleteFileUseCase } from "@application/use-cases/file/DeleteFileUseCase";
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
 import { ApiResponse } from "@shared/types/Common";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
-import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
-import { v2 as cloudinary } from "cloudinary";
 
 type MulterRequest = Request & { file?: Express.Multer.File };
 
@@ -20,84 +19,140 @@ export class FileController {
     @inject(TYPES.DeleteFileUseCase) private deleteUc: DeleteFileUseCase
   ) {}
 
+  private getUserId(req: Request): string | null {
+    const user = (req as any).user;
+    return user?.userId ?? null;
+  }
+
   async uploadFile(req: MulterRequest, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
-      if (!userId || !req.file) {
-        res
-          .status(400)
-          .json({ success: false, message: "Missing user or file" });
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "Unauthorized",
+        });
         return;
       }
+
+      if (!req.file) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "File is required",
+        });
+        return;
+      }
+
+      if (!req.body.purpose) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "Purpose is required",
+        });
+        return;
+      }
+
       const dto = new FileUploadDto({
         purpose: req.body.purpose,
         file: req.file,
       });
+
       const result = await this.uploadUc.execute(dto, userId);
 
-      if (result.isFailure()) {
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          result.getError(),
-          "file_upload"
-        );
-        res.status(statusCode).json(response);
-        return;
+      if (result.isSuccessful()) {
+        res.status(HttpStatusCodes.CREATED).json({
+          success: true,
+          message: "File uploaded successfully",
+          data: result.getValue(),
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
       }
-      res.json({ success: true, data: result.getValue() });
-    } catch (err) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        err as Error,
-        "file_upload"
-      );
-      res.status(statusCode).json(response);
+    } catch (error) {
+      Logger.error("Upload file controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 
   async getUserFiles(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
+      const userId = this.getUserId(req);
       if (!userId) {
-        res.status(401).json({ success: false, message: "Unauthorized" });
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "Unauthorized",
+        });
         return;
       }
+
       const result = await this.listUc.execute(userId);
-      if (result.isFailure()) {
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          result.getError(),
-          "list_files"
-        );
-        res.status(statusCode).json(response);
-        return;
+
+      if (result.isSuccessful()) {
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: "Files retrieved successfully",
+          data: result.getValue(),
+        });
+      } else {
+        res.status(HttpStatusCodes.NOT_FOUND).json({
+          success: false,
+          message: result.getError().message,
+        });
       }
-      res.json({ success: true, data: result.getValue() });
-    } catch (err) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        err as Error,
-        "list_files"
-      );
-      res.status(statusCode).json(response);
+    } catch (error) {
+      Logger.error("Get user files controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 
   async deleteFile(req: Request, res: Response): Promise<void> {
     try {
-      const publicId = req.params.publicId;
-      const result = await this.deleteUc.execute(publicId);
-      if (result.isFailure()) {
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          result.getError(),
-          "delete_file"
-        );
-        res.status(statusCode).json(response);
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "Unauthorized",
+        });
         return;
       }
-      res.json({ success: true, message: result.getValue().message });
-    } catch (err) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        err as Error,
-        "delete_file"
-      );
-      res.status(statusCode).json(response);
+
+      const publicId = decodeURIComponent(req.params.publicId);
+      if (!publicId) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "Public ID is required",
+        });
+        return;
+      }
+
+      const result = await this.deleteUc.execute(publicId);
+
+      if (result.isSuccessful()) {
+        const data = result.getValue();
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: data.message,
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Delete file controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
   }
 }

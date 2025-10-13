@@ -1,5 +1,3 @@
-// backend/src/application/use-cases/file/DeleteFileUseCase.ts
-
 import { injectable, inject } from "inversify";
 import { FileUploadService } from "@application/services/FileUploadService";
 import { Result } from "@shared/utils/Result";
@@ -16,10 +14,21 @@ export class DeleteFileUseCase {
   async execute(publicId: string): Promise<Result<{ message: string }, Error>> {
     try {
       Logger.info("Deleting file", { publicId });
-      await this.fileUploadService.delete(publicId);
-      return Result.success({ message: "File deleted successfully" });
+
+      const deleteResult = await this.fileUploadService.delete(publicId);
+
+      if (deleteResult.result === "ok") {
+        return Result.success({ message: "File deleted successfully" });
+      } else if (deleteResult.result === "not found") {
+        return Result.failure(new Error(`File not found`));
+      } else {
+        return Result.failure(
+          new Error(`Unexpected delete result: ${deleteResult.result}`)
+        );
+      }
     } catch (err) {
       Logger.error("DeleteFileUseCase failed", {
+        publicId,
         error: (err as Error).message,
       });
       return Result.failure(err as Error);
