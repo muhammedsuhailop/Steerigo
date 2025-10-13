@@ -12,7 +12,7 @@ import {
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, PipelineStage } from "mongoose";
+import { SortOrder, PipelineStage, Types } from "mongoose";
 import {
   KYCQuery,
   KYCWithDriverInfo,
@@ -430,8 +430,9 @@ export class KYCRepositoryImpl implements KYCRepository, AdminKYCRepository {
   async findKYCWithDriverInfo(
     kycId: string
   ): Promise<KYCWithDriverInfo | null> {
+    const objectId = new Types.ObjectId(kycId);
     const pipeline = [
-      { $match: { _id: kycId } },
+      { $match: { _id: objectId } },
       {
         $lookup: {
           from: "drivers",
