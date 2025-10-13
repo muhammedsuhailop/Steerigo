@@ -172,19 +172,6 @@ export const validateDriverActionRequest = (
     req.params = validatedData.params;
     req.body = validatedData.body;
 
-    // Additional business validation
-    if (
-      (req.body.action === "suspend" || req.body.action === "block") &&
-      !req.body.reason
-    ) {
-      const response: ApiResponse = {
-        success: false,
-        message: `Reason is required for ${req.body.action} action`,
-      };
-      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
-      return;
-    }
-
     next();
   } catch (error) {
     Logger.warn("Driver action validation failed", {
