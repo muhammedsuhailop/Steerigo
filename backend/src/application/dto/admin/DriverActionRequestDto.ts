@@ -5,7 +5,7 @@ const driverActionRequestSchema = z.object({
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
   action: z.enum(["block", "suspend", "activate"], {
-      message: "Action must be one of: block, suspend, activate",
+    message: "Action must be one of: block, suspend, activate",
   }),
   reason: z.string().min(1).max(500).optional(),
 });
@@ -34,12 +34,13 @@ export class DriverActionRequestDto {
   validate(): string[] {
     const errors: string[] = [];
 
-    if (this.data.action === "suspend" && !this.data.reason) {
-      errors.push("Reason is required for suspend action");
-    }
-
-    if (this.data.action === "block" && !this.data.reason) {
-      errors.push("Reason is required for block action");
+    if (this.data.reason) {
+      if (this.data.reason.length < 1) {
+        errors.push("Reason, if provided, cannot be empty");
+      }
+      if (this.data.reason.length > 500) {
+        errors.push("Reason cannot be longer than 500 characters");
+      }
     }
 
     return errors;

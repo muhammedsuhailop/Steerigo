@@ -4,14 +4,16 @@ import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { GearType, BodyType } from "@domain/value-objects/VehicleType";
+import { Types } from "mongoose";
 
 export class DriverMapper {
   static toDomain(raw: IDriverModel): Driver {
     return Driver.fromData({
       id: raw._id,
-      userId: raw.userId,
+      userId: raw.userId.toString(),
       eligibleGearTypes: raw.eligibleGearTypes as GearType[],
       eligibleBodyTypes: raw.eligibleBodyTypes as BodyType[],
+      licenseNumber: raw.licenseNumber,
       licenceCategory: raw.licenceCategory as LicenseCategory,
       licenseIssueDate: raw.licenseIssueDate,
       licenseExpiryDate: raw.licenseExpiryDate,
@@ -25,9 +27,10 @@ export class DriverMapper {
   static toPersistence(driver: Driver): Partial<IDriverModel> {
     return {
       _id: driver.getId(),
-      userId: driver.getUserId(),
+      userId: new Types.ObjectId(driver.getUserId()),
       eligibleGearTypes: driver.getEligibleGearTypes(),
       eligibleBodyTypes: driver.getEligibleBodyTypes(),
+      licenseNumber: driver.getLicenseNumber(),
       licenceCategory: driver.getLicenceCategory(),
       licenseIssueDate: driver.getLicenseIssueDate(),
       licenseExpiryDate: driver.getLicenseExpiryDate(),

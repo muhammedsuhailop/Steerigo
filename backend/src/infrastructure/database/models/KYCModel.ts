@@ -1,8 +1,8 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface IKYCModel extends Document {
   _id: string;
-  driverId: string;
+  driverId: Types.ObjectId;
   docType: string;
   docNumber: string;
   issueDate?: Date;
@@ -18,7 +18,7 @@ export interface IKYCModel extends Document {
 const kycSchema = new Schema<IKYCModel>(
   {
     driverId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       ref: "Driver",
     },

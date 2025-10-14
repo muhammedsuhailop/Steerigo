@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { IGoogleAuthService } from "@domain/services/IGoogleAuthService";
 import { GoogleAuthService } from "../../services/GoogleAuthService";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";

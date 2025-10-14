@@ -1,10 +1,11 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface IDriverModel extends Document {
   _id: string;
-  userId: string;
+  userId: Types.ObjectId;
   eligibleGearTypes: string[];
   eligibleBodyTypes: string[];
+  licenseNumber: string;
   licenceCategory: string;
   licenseIssueDate: Date;
   licenseExpiryDate: Date;
@@ -17,7 +18,7 @@ export interface IDriverModel extends Document {
 const driverSchema = new Schema<IDriverModel>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       unique: true,
       ref: "User",
@@ -36,6 +37,10 @@ const driverSchema = new Schema<IDriverModel>(
         required: true,
       },
     ],
+    licenseNumber: {
+      type: String,
+      required: true,
+    },
     licenceCategory: {
       type: String,
       enum: ["LMV", "HMV", "MCWG", "MCWOG"],

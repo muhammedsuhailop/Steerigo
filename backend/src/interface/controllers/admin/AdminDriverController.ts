@@ -172,8 +172,6 @@ export class AdminDriverController {
         message: data.message,
         data: {
           kycDocument: data.kycDocument,
-          docImageUrlsFront: data.kycDocument.getDocImageUrlsFront(),
-          docImageUrlsBack: data.kycDocument.getDocImageUrlsBack(),
           driverKycStatusUpdated: data.driverKycStatusUpdated,
         },
       } as ApiResponse<any>);

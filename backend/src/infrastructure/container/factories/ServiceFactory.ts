@@ -16,7 +16,12 @@ import { EmailServiceImpl } from "@infrastructure/services/EmailServiceImpl";
 import { OtpServiceImpl } from "@infrastructure/services/OtpServiceImpl";
 import { GoogleAuthServiceImpl } from "@infrastructure/services/GoogleAuthServiceImpl";
 import { TokenManagementServiceImpl } from "@infrastructure/services/TokenManagementServiceImpl";
-import { BcryptAdapter, CryptoAdapter } from "@infrastructure/adapters/CryptoAdapter";
+import {
+  BcryptAdapter,
+  CryptoAdapter,
+} from "@infrastructure/adapters/CryptoAdapter";
+import { FileUploadService } from "@application/services/FileUploadService";
+import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -36,6 +41,10 @@ export class ServiceFactory {
     container
       .bind<CryptoAdapter>(TYPES.CryptoAdapter)
       .to(BcryptAdapter)
+      .inSingletonScope();
+    container
+      .bind<FileUploadService>(TYPES.FileUploadService)
+      .to(CloudinaryService)
       .inSingletonScope();
   }
 }

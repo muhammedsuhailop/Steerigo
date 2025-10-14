@@ -128,6 +128,8 @@ export class UpdateKycStatusUseCase {
           docNumber: kycDocument.getDocNumber(),
           verificationStatus: kycDocument.getVerificationStatus(),
           comments: kycDocument.getComments(),
+          docImageUrlsFront: kycDocument.getDocImageUrlsFront(),
+          docImageUrlsBack: kycDocument.getDocImageUrlsBack(),
           updatedAt: kycDocument.getUpdatedAt().toISOString(),
         },
         driverKycStatusUpdated,

@@ -7,6 +7,7 @@ import { AdminFactory } from "./factories/AdminFactory";
 import { AdminDriverFactory } from "./factories/AdminDriverFactory";
 import { DriverFactory } from "./factories/DriverFactory";
 import { UserFactory } from "./factories/UserFactory";
+import { FileFactory } from "./factories/FileFactory";
 
 const container = new Container();
 
@@ -19,5 +20,6 @@ AdminFactory.register(container);
 AdminDriverFactory.register(container);
 DriverFactory.register(container);
 UserFactory.register(container);
+FileFactory.register(container);
 
 export { container };

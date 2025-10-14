@@ -89,6 +89,7 @@ export class DriverRegistrationUseCase {
         userId,
         dto.getEligibleGearTypes(),
         dto.getEligibleBodyTypes(),
+        dto.getLicenseNumber(),
         dto.getLicenseCategory(),
         dto.getLicenseIssueDate(),
         dto.getLicenseExpiryDate()

@@ -2,12 +2,13 @@ import { KYC } from "@domain/entities/KYC";
 import { IKYCModel } from "../models/KYCModel";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { Types } from "mongoose";
 
 export class KYCMapper {
   static toDomain(raw: IKYCModel): KYC {
     return KYC.fromData({
       id: raw._id,
-      driverId: raw.driverId,
+      driverId: raw.driverId.toString(),
       docType: raw.docType as DocumentType,
       docNumber: raw.docNumber,
       issueDate: raw.issueDate,
@@ -24,7 +25,7 @@ export class KYCMapper {
   static toPersistence(kyc: KYC): Partial<IKYCModel> {
     return {
       _id: kyc.getId(),
-      driverId: kyc.getDriverId(),
+      driverId: new Types.ObjectId(kyc.getDriverId()),
       docType: kyc.getDocType(),
       docNumber: kyc.getDocNumber(),
       issueDate: kyc.getIssueDate(),
