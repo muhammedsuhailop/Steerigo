@@ -12,6 +12,7 @@ import {
 } from "@interface/validators/driver/driverValidationSchemas";
 import { DriverController } from "@interface/controllers/driver/DriverController";
 import { TYPES } from "@shared/constants/DITypes";
+import { driverAvailabilityRoutes } from "./DriverAvailabilityRoutes";
 
 const router = Router();
 
@@ -49,5 +50,8 @@ router.post("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
 
 // GET /api/driver/kyc - Get KYC status
 router.get("/kyc", (req, res) => driverController.getKYCStatus(req, res));
+
+// /api/driver/availability
+router.use("/availability", driverAvailabilityRoutes);
 
 export { router as driverRoutes };
