@@ -11,6 +11,10 @@ import {
   AccountStatusError,
   MobileAlreadyExistsError,
 } from "@domain/errors";
+import {
+  DriverAlreadyAvailableError,
+  InvalidStatusTransitionError,
+} from "@domain/errors/DriverAvailabilityErrors";
 
 export enum ErrorType {
   CLIENT_ERROR = "CLIENT_ERROR",
@@ -94,6 +98,29 @@ export class ErrorHandlerService {
       {
         statusCode: 400,
         message: "OTP has expired. Please request a new one",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    //Driver Avaialbility
+    [
+      DriverAlreadyAvailableError.name,
+      {
+        statusCode: 409,
+        message: "Driver already has an active availability record",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      InvalidStatusTransitionError.name,
+      {
+        statusCode: 409,
+        message: "Invalid status transition",
         type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
