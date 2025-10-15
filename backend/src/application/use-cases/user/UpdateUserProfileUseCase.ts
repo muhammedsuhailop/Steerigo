@@ -80,7 +80,7 @@ export class UpdateUserProfileUseCase {
         user: {
           id: updatedUser.getId(),
           name: updatedUser.getName(),
-          email: updatedUser.getEmail(),
+          email: updatedUser.getEmail().getValue(),
           mobile: updatedUser.getMobile(),
           dob: updatedUser.getDob()?.toISOString(),
           gender: updatedUser.getGender() as

@@ -34,7 +34,7 @@ export class GetUserProfileUseCase {
       const response: UserResponseDto = {
         id: user.getId(),
         name: user.getName(),
-        email: user.getEmail(),
+        email: user.getEmail().getValue(),
         mobile: user.getMobile(),
         dob: user.getDob()?.toISOString(),
         gender: user.getGender() as "Male" | "Female" | "Other" | undefined,
