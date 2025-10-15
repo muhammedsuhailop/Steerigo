@@ -128,28 +128,28 @@ export const LicenseInfoStep: React.FC = () => {
             <label
               key={option.value}
               className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                isSelected("bodyTypes", option.value)
+                isSelected("licenseBodyTypes", option.value)
                   ? "border-gray-700 bg-gray-50 text-gray-900"
                   : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <input
                 type="checkbox"
-                checked={isSelected("bodyTypes", option.value)}
+                checked={isSelected("licenseBodyTypes", option.value)}
                 onChange={() =>
-                  handleMultiSelectChange("bodyTypes", option.value)
+                  handleMultiSelectChange("licenseBodyTypes", option.value)
                 }
                 className="sr-only"
               />
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    isSelected("bodyTypes", option.value)
+                    isSelected("licenseBodyTypes", option.value)
                       ? "border-gray-700 bg-gray-700"
                       : "border-gray-300"
                   }`}
                 >
-                  {isSelected("bodyTypes", option.value) && (
+                  {isSelected("licenseBodyTypes", option.value) && (
                     <MdCheck className="w-3 h-3 text-white" />
                   )}
                 </div>
@@ -159,10 +159,10 @@ export const LicenseInfoStep: React.FC = () => {
           ))}
         </div>
 
-        {errors.bodyTypes && (
+        {errors.licenseBodyTypes && (
           <p className="text-sm text-red-600 mt-2 flex items-center">
             <MdErrorOutline className="w-4 h-4 mr-1" />
-            {errors.bodyTypes}
+            {errors.licenseBodyTypes}
           </p>
         )}
       </div>
@@ -181,28 +181,28 @@ export const LicenseInfoStep: React.FC = () => {
             <label
               key={option.value}
               className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                isSelected("gearTypes", option.value)
+                isSelected("licenseGearTypes", option.value)
                   ? "border-gray-700 bg-gray-50 text-gray-900"
                   : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <input
                 type="checkbox"
-                checked={isSelected("gearTypes", option.value)}
+                checked={isSelected("licenseGearTypes", option.value)}
                 onChange={() =>
-                  handleMultiSelectChange("gearTypes", option.value)
+                  handleMultiSelectChange("licenseGearTypes", option.value)
                 }
                 className="sr-only"
               />
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    isSelected("gearTypes", option.value)
+                    isSelected("licenseGearTypes", option.value)
                       ? "border-gray-700 bg-gray-700"
                       : "border-gray-300"
                   }`}
                 >
-                  {isSelected("gearTypes", option.value) && (
+                  {isSelected("licenseGearTypes", option.value) && (
                     <MdCheck className="w-3 h-3 text-white" />
                   )}
                 </div>
@@ -212,10 +212,10 @@ export const LicenseInfoStep: React.FC = () => {
           ))}
         </div>
 
-        {errors.gearTypes && (
+        {errors.licenseGearTypes && (
           <p className="text-sm text-red-600 mt-2 flex items-center">
             <MdErrorOutline className="w-4 h-4 mr-1" />
-            {errors.gearTypes}
+            {errors.licenseGearTypes}
           </p>
         )}
       </div>

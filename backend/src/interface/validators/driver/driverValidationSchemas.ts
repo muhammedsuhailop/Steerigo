@@ -102,16 +102,10 @@ const driverRegistrationBodySchema = z.object({
     })
   ),
 
-  licenseFrontImage: z
-    .string()
-    .url({ message: "License front image must be a valid URL" }),
-  licenseBackImage: z
-    .string()
-    .url({ message: "License back image must be a valid URL" }),
-  idFrontImage: z
-    .string()
-    .url({ message: "ID front image must be a valid URL" }),
-  idBackImage: z.string().url({ message: "ID back image must be a valid URL" }),
+  licenseFrontImage: z.string(),
+  licenseBackImage: z.string(),
+  idFrontImage: z.string(),
+  idBackImage: z.string(),
 });
 
 export const driverRegistrationSchema = z.object({

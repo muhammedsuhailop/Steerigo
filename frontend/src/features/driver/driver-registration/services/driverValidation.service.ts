@@ -50,26 +50,31 @@ class DriverValidationService {
 
     if (!data.name?.trim()) {
       errors.name = "Name is required";
-    } else if (data.name.length < 2) {
-      errors.name = "Name must be at least 2 characters";
+    } else if (data.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters long";
+    } else if (data.name.trim().length > 100) {
+      errors.name = "Name must be less than 100 characters";
     }
 
     if (!data.mobile?.trim()) {
       errors.mobile = "Mobile number is required";
-    } else if (!this.validateMobile(data.mobile)) {
-      errors.mobile = "Please enter a valid mobile number";
+    } else if (!/^\+?[1-9]\d{10,14}$/.test(data.mobile.trim())) {
+      errors.mobile = "Invalid mobile number format (with county code)";
     }
 
     if (!data.dob) {
       errors.dob = "Date of birth is required";
     } else {
-      const dobValidation = this.validateDate(data.dob, 18);
-      if (!dobValidation.isValid) {
-        errors.dob = dobValidation.errors.date || "Invalid date of birth";
+      const date = new Date(data.dob);
+      const cutoff = new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000);
+      if (isNaN(date.getTime())) {
+        errors.dob = "Invalid date format";
+      } else if (date > cutoff) {
+        errors.dob = "Driver must be at least 18 years old";
       }
     }
 
-    if (!data.gender) {
+    if (!["Male", "Female", "Other"].includes(data.gender || "")) {
       errors.gender = "Gender is required";
     }
 
@@ -79,15 +84,18 @@ class DriverValidationService {
 
     if (!data.pin?.trim()) {
       errors.pin = "PIN code is required";
-    } else if (!/^\d{6}$/.test(data.pin)) {
+    } else if (!/^\d{6}$/.test(data.pin.trim())) {
       errors.pin = "PIN code must be 6 digits";
     }
 
     if (!data.address?.trim()) {
       errors.address = "Address is required";
-    } else if (data.address.length < 10) {
+    } else if (data.address.trim().length < 10) {
       errors.address = "Address must be at least 10 characters";
+    } else if (data.address.trim().length > 500) {
+      errors.address = "Address must be less than 500 characters";
     }
+
 
     return {
       isValid: Object.keys(errors).length === 0,
@@ -98,48 +106,55 @@ class DriverValidationService {
   validateLicenseInfo(data: Partial<DriverRegistrationData>): ValidationResult {
     const errors: Record<string, string> = {};
 
-    if (!data.licenseCategory?.length) {
-      errors.licenseCategory = "At least one license category is required";
+    if (!data.licenseCategory) {
+      errors.licenseCategory = "License category is required";
     }
 
     if (!data.licenseNumber?.trim()) {
       errors.licenseNumber = "License number is required";
-    } else if (data.licenseNumber.length < 8) {
-      errors.licenseNumber = "License number must be at least 8 characters";
+    } else if (data.licenseNumber.trim().length < 5) {
+      errors.licenseNumber = "License number must be at least 5 characters";
+    } else if (data.licenseNumber.trim().length > 20) {
+      errors.licenseNumber = "License number must not exceed 20 characters";
     }
 
-    if (!data.bodyTypes?.length) {
-      errors.bodyTypes = "At least one body type is required";
+    if (
+      !Array.isArray(data.licenseBodyTypes) ||
+      !data.licenseBodyTypes.length
+    ) {
+      errors.licenseBodyTypes = "At least one body type must be selected";
     }
 
-    if (!data.gearTypes?.length) {
-      errors.gearTypes = "At least one gear type is required";
+    if (
+      !Array.isArray(data.licenseGearTypes) ||
+      !data.licenseGearTypes.length
+    ) {
+      errors.licenseGearTypes = "At least one gear type must be selected";
     }
 
+    const today = new Date();
     if (!data.licenseIssueDate) {
       errors.licenseIssueDate = "License issue date is required";
+    } else {
+      const issue = new Date(data.licenseIssueDate);
+      if (isNaN(issue.getTime())) {
+        errors.licenseIssueDate = "Invalid issue date";
+      } else if (issue > today) {
+        errors.licenseIssueDate = "License issue date cannot be in the future";
+      }
     }
 
     if (!data.licenseExpiryDate) {
       errors.licenseExpiryDate = "License expiry date is required";
-    }
-
-    if (data.licenseIssueDate && data.licenseExpiryDate) {
-      const issueDate = new Date(data.licenseIssueDate);
-      const expiryDate = new Date(data.licenseExpiryDate);
-
-      issueDate.setHours(0, 0, 0, 0);
-      expiryDate.setHours(0, 0, 0, 0);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (expiryDate <= issueDate) {
-        errors.licenseExpiryDate = "Expiry date must be after issue date";
-      } else if (expiryDate < today) {
-        errors.licenseExpiryDate = "License is expired";
+    } else {
+      const expiry = new Date(data.licenseExpiryDate);
+      if (isNaN(expiry.getTime())) {
+        errors.licenseExpiryDate = "Invalid expiry date";
+      } else if (expiry <= new Date()) {
+        errors.licenseExpiryDate = "License expiry date must be in the future";
       }
     }
+
 
     return {
       isValid: Object.keys(errors).length === 0,
@@ -150,36 +165,48 @@ class DriverValidationService {
   validateIdInfo(data: Partial<DriverRegistrationData>): ValidationResult {
     const errors: Record<string, string> = {};
 
-    if (!data.idType?.trim()) {
+    if (!data.idType) {
       errors.idType = "ID type is required";
     }
 
     if (!data.idNumber?.trim()) {
       errors.idNumber = "ID number is required";
-    } else if (data.idType === "Aadhaar" && !/^\d{12}$/.test(data.idNumber)) {
+    } else if (data.idNumber.trim().length < 5) {
+      errors.idNumber = "ID number must be at least 5 characters";
+    } else if (data.idNumber.trim().length > 50) {
+      errors.idNumber = "ID number must not exceed 50 characters";
+    } else if (
+      data.idType === "Aadhaar" &&
+      !/^\d{12}$/.test(data.idNumber.trim())
+    ) {
       errors.idNumber = "Aadhaar number must be 12 digits";
     }
 
+    const now = new Date();
     if (!data.idIssueDate) {
       errors.idIssueDate = "ID issue date is required";
+    } else {
+      const issue = new Date(data.idIssueDate);
+      if (isNaN(issue.getTime())) {
+        errors.idIssueDate = "Invalid issue date";
+      } else if (issue > now) {
+        errors.idIssueDate = "ID issue date cannot be in the future";
+      }
     }
 
     if (!data.idExpiryDate) {
       errors.idExpiryDate = "ID expiry date is required";
-    }
-
-    if (data.idIssueDate && data.idExpiryDate) {
-      const issueDate = new Date(data.idIssueDate);
-      const expiryDate = new Date(data.idExpiryDate);
-
-      if (expiryDate <= issueDate) {
+    } else {
+      const expiry = new Date(data.idExpiryDate);
+      if (isNaN(expiry.getTime())) {
+        errors.idExpiryDate = "Invalid expiry date";
+      } else if (expiry <= new Date(data.idIssueDate || 0)) {
         errors.idExpiryDate = "Expiry date must be after issue date";
-      }
-
-      if (expiryDate <= new Date()) {
-        errors.idExpiryDate = "ID is expired";
+      } else if (expiry <= now) {
+        errors.idExpiryDate = "ID expiry date must be in the future";
       }
     }
+
 
     return {
       isValid: Object.keys(errors).length === 0,

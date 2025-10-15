@@ -18,9 +18,9 @@ export interface DriverPersonalInfo {
 }
 
 export interface DriverLicenseInfo {
-  bodyTypes: string[];
-  gearTypes: string[];
-  licenseCategory: string[];
+  // bodyTypes: string[];
+  // gearTypes: string[];
+  licenseCategory: string [];
   licenseNumber: string;
   licenseBodyTypes: string[];
   licenseGearTypes: string[];
