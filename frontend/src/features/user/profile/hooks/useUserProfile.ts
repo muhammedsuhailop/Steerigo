@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth";
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
-  useGetUserStatsQuery,
+  // useGetUserStatsQuery,
   useUploadProfilePictureMutation,
 } from "../services/userProfileApi";
 import {
@@ -34,7 +34,6 @@ export const useUserProfile = () => {
   const isUpdating = useSelector(selectUserProfileUpdating);
   const updateError = useSelector(selectUserProfileUpdateError);
 
-  // RTK Query hooks
   const {
     data: profileData,
     isLoading: profileLoading,
@@ -44,35 +43,33 @@ export const useUserProfile = () => {
     skip: !user?.id,
   });
 
-  const {
-    data: statsData,
-    isLoading: statsLoading,
-    error: statsError,
-    refetch: refetchStats,
-  } = useGetUserStatsQuery(user?.id || "", {
-    skip: !user?.id,
-  });
-
   const [updateProfileMutation, { isLoading: updateLoading }] =
     useUpdateUserProfileMutation();
-
   const [uploadProfilePicture, { isLoading: uploadLoading }] =
     useUploadProfilePictureMutation();
+
+  // --- MOCKED USER STATS DATA  ---
+  const statsData = {
+    success: true,
+    data: {
+      totalRides: 42,
+      completedRides: 37,
+      cancelledRides: 2,
+      totalSpent: 1234.56,
+      memberSince: "2023-01-01",
+      favoriteDrivers: ["Sharuck", "Doe", "Sam"],
+    },
+  };
+  const statsLoading = false;
+  const statsError = null;
+  const refetchStats = async () => Promise.resolve();
 
   // Actions
   const handleUpdateProfile = useCallback(
     async (data: UserProfileFormData) => {
       if (!user?.id) return;
-
       try {
-        await dispatch(
-          updateUserProfile({
-            userId: user.id,
-            data,
-          })
-        ).unwrap();
-
-        // Refetch data to ensure consistency
+        await dispatch(updateUserProfile({ userId: user.id, data })).unwrap();
         await refetchProfile();
         return { success: true };
       } catch (error: any) {
@@ -86,13 +83,11 @@ export const useUserProfile = () => {
   const handleUploadProfilePicture = useCallback(
     async (file: File) => {
       if (!user?.id) return { success: false, error: "User not found" };
-
       try {
         const result = await uploadProfilePicture({
           userId: user.id,
           file,
         }).unwrap();
-
         if (result.success) {
           await refetchProfile();
           return { success: true, data: result.data };
@@ -107,9 +102,10 @@ export const useUserProfile = () => {
     [user?.id, uploadProfilePicture, refetchProfile]
   );
 
-  const handleNavigateToDriverRegistration = useCallback(() => {
-    navigate("/driver/register");
-  }, [navigate]);
+  const handleNavigateToDriverRegistration = useCallback(
+    () => navigate("/driver/register"),
+    [navigate]
+  );
 
   const handleRefreshData = useCallback(async () => {
     await Promise.all([refetchProfile(), refetchStats()]);
@@ -138,7 +134,6 @@ export const useUserProfile = () => {
   const hasError = error || updateError || profileError || statsError;
 
   return {
-    // Data
     profile: currentProfile,
     stats: currentStats,
     user,
