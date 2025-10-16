@@ -4,6 +4,7 @@ import type {
   DriverRegistrationData,
   UploadResponse,
   FileUploadResponse,
+  DriverRegistrationApiResponse,
 } from "../types/driverRegistration.types";
 
 export const driverRegistrationApi = createApi({
@@ -12,33 +13,64 @@ export const driverRegistrationApi = createApi({
   tagTypes: ["DriverRegistration", "FileUpload"],
   endpoints: (builder) => ({
     registerDriver: builder.mutation<
-      { success: boolean; data: any; message: string },
+      DriverRegistrationApiResponse,
       DriverRegistrationData
     >({
       query: (driverData) => {
-        // Format data for backend
-        const formattedData = {
-          ...driverData,
-          vehicleTypes: Array.isArray(driverData.licenseBodyTypes)
+        const backendData = {
+          // Personal Info - direct mapping
+          name: driverData.name,
+          mobile: driverData.mobile,
+          dob: driverData.dob,
+          gender: driverData.gender,
+          state: driverData.state,
+          pin: driverData.pin,
+          address: driverData.address,
+
+          // License Info
+          licenseCategory: driverData.licenseCategory,
+          licenseNumber: driverData.licenseNumber,
+          licenseBodyTypes: Array.isArray(driverData.licenseBodyTypes)
             ? driverData.licenseBodyTypes
             : [],
           licenseGearTypes: Array.isArray(driverData.licenseGearTypes)
             ? driverData.licenseGearTypes
             : [],
-          licenseCategory: Array.isArray(driverData.licenseCategory)
-            ? driverData.licenseCategory
-            : [],
-          licenseBodyTypes: Array.isArray(driverData.licenseBodyTypes)
-            ? driverData.licenseBodyTypes
-            : [],
+          licenseIssueDate: driverData.licenseIssueDate,
+          licenseExpiryDate: driverData.licenseExpiryDate,
+
+          // ID Info
+          idType: driverData.idType,
+          idNumber: driverData.idNumber,
+          idIssueDate: driverData.idIssueDate,
+          idExpiryDate: driverData.idExpiryDate,
+
+          // Documents - convert File objects to URLs
+          licenseFrontImage:
+            typeof driverData.licenseFrontImage === "string"
+              ? driverData.licenseFrontImage
+              : "",
+          licenseBackImage:
+            typeof driverData.licenseBackImage === "string"
+              ? driverData.licenseBackImage
+              : "",
+          idFrontImage:
+            typeof driverData.idFrontImage === "string"
+              ? driverData.idFrontImage
+              : "",
+          idBackImage:
+            typeof driverData.idBackImage === "string"
+              ? driverData.idBackImage
+              : "",
         };
 
-        console.log("Sending driver registration data:", formattedData);
+        console.log("Frontend data:", driverData);
+        console.log("Transformed backend data:", backendData);
 
         return {
           url: "/driver/register",
           method: "POST",
-          data: formattedData,
+          data: backendData,
           headers: {
             "Content-Type": "application/json",
           },
@@ -67,32 +99,8 @@ export const driverRegistrationApi = createApi({
       },
       invalidatesTags: ["FileUpload"],
     }),
-
-    // Legacy upload document endpoint (for backward compatibility)
-    // uploadDocument: builder.mutation<
-    //   UploadResponse,
-    //   { file: File; fieldName: string }
-    // >({
-    //   query: ({ file, fieldName }) => {
-    //     const formData = new FormData();
-    //     formData.append("document", file);
-    //     formData.append("fieldName", fieldName);
-
-    //     return {
-    //       url: "/driver/upload-document",
-    //       method: "POST",
-    //       data: formData,
-    //       headers: {
-    //         "Content-Type": "multipart/form-data",
-    //       },
-    //     };
-    //   },
-    // }),
   }),
 });
 
-export const {
-  useRegisterDriverMutation,
-  // useUploadDocumentMutation,
-  useUploadFileMutation,
-} = driverRegistrationApi;
+export const { useRegisterDriverMutation, useUploadFileMutation } =
+  driverRegistrationApi;

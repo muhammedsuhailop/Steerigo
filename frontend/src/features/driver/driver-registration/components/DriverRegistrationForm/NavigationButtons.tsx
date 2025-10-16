@@ -8,7 +8,6 @@ interface NavigationButtonsProps {
   onPrevious: () => void;
   isLoading?: boolean;
   isSubmitting?: boolean;
-  canProceedToNext: boolean;
   onSubmit: () => Promise<any>;
 }
 
@@ -18,18 +17,21 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onPrevious,
   isLoading = false,
   isSubmitting = false,
-  canProceedToNext,
   onSubmit,
 }) => {
+  console.log("Current step index:", currentStep);
   const isFirstStep = currentStep === RegistrationStep.PERSONAL_INFO;
   const isLastStep = currentStep === RegistrationStep.REVIEW;
+  console.log("isLastStep step index:", isLastStep);
 
   const handleNextClick = async () => {
-    if (!canProceedToNext) return;
     if (isLastStep) {
       await onSubmit();
     } else {
-      onNext();
+      const isValid = onNext();
+      if (!isValid) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
@@ -49,7 +51,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       </div>
       <Button
         onClick={handleNextClick}
-        disabled={isLoading || isSubmitting || !canProceedToNext}
+        disabled={isLoading || isSubmitting}
         isLoading={isSubmitting}
       >
         {isLastStep

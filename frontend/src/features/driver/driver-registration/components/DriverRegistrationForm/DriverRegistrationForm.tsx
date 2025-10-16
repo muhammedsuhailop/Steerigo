@@ -168,7 +168,7 @@ export const DriverRegistrationForm: React.FC = () => {
           onPrevious={goToPreviousStep}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
-          canProceedToNext={canProceedToNext()}
+          // canProceedToNext={canProceedToNext()}
           onSubmit={handleSubmitRegistration}
         />
       </div>

@@ -1,3 +1,10 @@
+import {
+  LicenseCategory,
+  GearType,
+  BodyType,
+  DocumentType,
+} from "../constants/valueObjects";
+
 export interface DriverRegistrationState {
   currentStep: RegistrationStep;
   errors: Record<string, string>;
@@ -7,6 +14,7 @@ export interface DriverRegistrationState {
   registrationSuccess: boolean;
   registrationError: string | null;
 }
+
 export interface DriverPersonalInfo {
   name: string;
   mobile: string;
@@ -18,18 +26,16 @@ export interface DriverPersonalInfo {
 }
 
 export interface DriverLicenseInfo {
-  // bodyTypes: string[];
-  // gearTypes: string[];
-  licenseCategory: string [];
+  licenseCategory: LicenseCategory;
   licenseNumber: string;
-  licenseBodyTypes: string[];
-  licenseGearTypes: string[];
+  licenseBodyTypes: BodyType[];
+  licenseGearTypes: GearType[];
   licenseIssueDate: string;
   licenseExpiryDate: string;
 }
 
 export interface DriverIdInfo {
-  idType: "PAN" | "Aadhaar" | "DrivingLicense";
+  idType: DocumentType;
   idNumber: string;
   idIssueDate: string;
   idExpiryDate: string;
@@ -80,24 +86,6 @@ export enum RegistrationStep {
   REVIEW = 4,
 }
 
-export const LICENSE_CATEGORIES = [
-  { value: "LMV", label: "LMV (Light Motor Vehicle)" },
-  { value: "HMV", label: "HMV (Heavy Motor Vehicle)" },
-  { value: "LMVTR", label: "LMV-TR (Light Motor Vehicle Transport)" },
-  { value: "HPMV", label: "HPMV (Heavy Passenger Motor Vehicle)" },
-];
-
-export const BODY_TYPES = [
-  { value: "Sedan", label: "Sedan" },
-  { value: "SUV", label: "SUV" },
-  { value: "Hatchback", label: "Hatchback" },
-];
-
-export const GEAR_TYPES = [
-  { value: "Manual", label: "Manual" },
-  { value: "Automatic", label: "Automatic" },
-];
-
 export interface PincodeDetails {
   state: string;
   district: string;
@@ -117,3 +105,15 @@ export const FILE_UPLOAD_PURPOSES = {
 
 export type FileUploadPurpose =
   (typeof FILE_UPLOAD_PURPOSES)[keyof typeof FILE_UPLOAD_PURPOSES];
+
+export interface DriverRegistrationApiResponse {
+  success: boolean;
+  data: any;
+  message: string;
+}
+
+export interface StepValidationResult {
+  isValid: boolean;
+  errors: Record<string, string>;
+  completionPercentage: number;
+}
