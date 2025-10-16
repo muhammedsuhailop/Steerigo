@@ -23,7 +23,7 @@ const driverRegistrationBodySchema = z.object({
   mobile: z
     .string()
     .trim()
-    .regex(/^\+?[1-9]\d{10,14}$/, { message: "Invalid mobile number format" }),
+    .regex(/^\+?\d{10,15}$/, { message: "Invalid mobile number format" }),
   dob: z.preprocess(
     (arg) =>
       typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
@@ -42,15 +42,6 @@ const driverRegistrationBodySchema = z.object({
     .trim()
     .min(10, { message: "Address must be at least 10 characters" })
     .max(500, { message: "Address must be less than 500 characters" }),
-
-  vehicleTypes: z
-    .array(z.string())
-    .min(1, { message: "At least one vehicle type must be selected" })
-    .optional(),
-  gearTypes: z
-    .array(z.string())
-    .min(1, { message: "At least one gear type must be selected" })
-    .optional(),
 
   licenseCategory: z.enum(
     VALID_LICENSE_CATEGORIES as [LicenseCategory, ...LicenseCategory[]]
