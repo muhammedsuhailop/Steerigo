@@ -88,9 +88,12 @@ const driverRegistrationBodySchema = z.object({
   idExpiryDate: z.preprocess(
     (arg) =>
       typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
-    z.date().refine((d) => d > new Date(), {
-      message: "ID expiry date must be in the future",
-    })
+    z
+      .date()
+      .refine((d) => d > new Date(), {
+        message: "ID expiry date must be in the future",
+      })
+      .optional()
   ),
 
   licenseFrontImage: z.string(),
