@@ -37,6 +37,7 @@ const kycSchema = new Schema<IKYCModel>(
     },
     expiryDate: {
       type: Date,
+      default: null,
     },
     verificationStatus: {
       type: String,

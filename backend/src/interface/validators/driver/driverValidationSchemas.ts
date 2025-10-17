@@ -86,8 +86,15 @@ const driverRegistrationBodySchema = z.object({
     })
   ),
   idExpiryDate: z.preprocess(
-    (arg) =>
-      typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
+    (arg) => {
+      if (typeof arg === "string" && arg.trim() === "") {
+        return undefined;
+      }
+      if (typeof arg === "string" || arg instanceof Date) {
+        return new Date(arg);
+      }
+      return arg;
+    },
     z
       .date()
       .refine((d) => d > new Date(), {
