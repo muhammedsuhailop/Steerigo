@@ -1,4 +1,5 @@
-import { DriverDataService } from "../types/driver.interfaces";
+import { apiClient } from "@/shared/utils";
+import type { DriverDataService } from "../types/driver.interfaces";
 import type {
   Driver,
   RideRequest,
@@ -7,200 +8,86 @@ import type {
 } from "../types/driver.types";
 
 export class ApiDriverDataService implements DriverDataService {
-  private baseUrl = "/api/driver";
+  private baseUrl = "/driver";
 
   async getDriverProfile(): Promise<Driver> {
-    const response = await fetch(`${this.baseUrl}/profile`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    const response = await apiClient.get<{ data: Driver }>(
+      `${this.baseUrl}/profile`
+    );
+    return response.data;
   }
 
   async updateDriverProfile(updates: Partial<Driver>): Promise<Driver> {
-    const response = await fetch(`${this.baseUrl}/profile`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify(updates),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    const response = await apiClient.put<{ data: Driver }>(
+      `${this.baseUrl}/profile`,
+      updates
+    );
+    return response.data;
   }
 
   async getDriverStats(): Promise<DriverStats> {
-    const response = await fetch(`${this.baseUrl}/stats`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    const response = await apiClient.get<{ data: DriverStats }>(
+      `${this.baseUrl}/stats`
+    );
+    return response.data;
   }
 
   async getPendingRequests(): Promise<RideRequest[]> {
-    const response = await fetch(`${this.baseUrl}/requests/pending`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    const response = await apiClient.get<{ data: RideRequest[] }>(
+      `${this.baseUrl}/requests/pending`
+    );
+    return response.data;
   }
 
   async getCurrentRide(): Promise<CurrentRide | null> {
-    const response = await fetch(`${this.baseUrl}/rides/current`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
+    try {
+      const response = await apiClient.get<{ data: CurrentRide }>(
+        `${this.baseUrl}/rides/current`
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
         return null; // No current ride
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.data;
   }
 
   async acceptRideRequest(requestId: string): Promise<CurrentRide> {
-    const response = await fetch(
-      `${this.baseUrl}/requests/${requestId}/accept`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      }
+    const response = await apiClient.post<{ data: CurrentRide }>(
+      `${this.baseUrl}/requests/${requestId}/accept`
     );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    return response.data;
   }
 
   async rejectRideRequest(requestId: string): Promise<void> {
-    const response = await fetch(
-      `${this.baseUrl}/requests/${requestId}/reject`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    await apiClient.post(`${this.baseUrl}/requests/${requestId}/reject`);
   }
 
   async updateRideStatus(
     rideId: string,
     status: CurrentRide["status"]
   ): Promise<CurrentRide> {
-    const response = await fetch(`${this.baseUrl}/rides/${rideId}/status`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify({ status }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.data;
+    const response = await apiClient.put<{ data: CurrentRide }>(
+      `${this.baseUrl}/rides/${rideId}/status`,
+      { status }
+    );
+    return response.data;
   }
 
   async setDriverOnlineStatus(isOnline: boolean): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/status`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify({ isOnline }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    await apiClient.put(`${this.baseUrl}/status`, { isOnline });
   }
 
   async updateDriverLocation(location: {
     latitude: number;
     longitude: number;
   }): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/location`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify(location),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    await apiClient.put(`${this.baseUrl}/location`, location);
   }
 }
 
-// Mock implementation with dummy data for development
+// Mock implementation with dummy data for development 
 export class MockDriverDataService implements DriverDataService {
   private mockDriver: Driver = {
     id: "dfujf-1",
