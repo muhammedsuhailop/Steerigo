@@ -11,12 +11,15 @@ import driverRegistrationReducer from "@/features/driver/driver-registration/sto
 import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
 import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
 import { userProfileReducer } from "@/features/user/profile";
+import { adminApi } from "@/features/admin/shared/services/adminApi";
 
 export const store = configureStore({
   reducer: {
     // Auth with RTK Query
     auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
+
+    [adminApi.reducerPath]: adminApi.reducer,
 
     // Driver APIs with RTK Query
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
@@ -46,7 +49,8 @@ export const store = configureStore({
       authApi.middleware,
       driverRegistrationApi.middleware,
       driverApi.middleware,
-      userProfileApi.middleware
+      userProfileApi.middleware,
+      adminApi.middleware
     ),
   devTools: import.meta.env.DEV,
 });

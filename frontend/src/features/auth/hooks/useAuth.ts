@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useLoginMutation,
-  useLogoutMutation,
-  useRefreshTokenMutation,
-} from "../services/authApi";
+import { useLoginMutation, useLogoutMutation } from "../services/authApi";
 import {
   selectCurrentUser,
   selectIsAuthenticated,
@@ -18,11 +14,9 @@ import {
   clearError,
   initializeAuth,
   initiateGoogleAuth,
-  setupAutoRefresh,
 } from "../store/authSlice";
 import type { LoginRequest } from "../types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { isTokenExpired } from "@/shared/utils/tokenUtils";
 import { authErrorMapper } from "../utils/authErrorMapper";
 
 export const useAuth = () => {
@@ -40,7 +34,6 @@ export const useAuth = () => {
   // Mutations
   const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation();
   const [logoutMutation, { isLoading: isLogoutLoading }] = useLogoutMutation();
-  const [refreshTokenMutation] = useRefreshTokenMutation();
 
   // Initialize auth on app start
   const initialize = useCallback(() => {
@@ -49,7 +42,7 @@ export const useAuth = () => {
 
   // Check token validity
   const isTokenValid = useCallback(() => {
-    return accessToken && !isTokenExpired(accessToken);
+    return !!accessToken;
   }, [accessToken]);
 
   const login = useCallback(
@@ -57,9 +50,6 @@ export const useAuth = () => {
       try {
         const result = await loginMutation(credentials).unwrap();
         if (result.success) {
-          // Setup auto-refresh for new token
-          dispatch(setupAutoRefresh(result.data.accessToken));
-
           // Redirect based on user role
           const redirectPath = getUserDashboardPath(result.data.user.role);
           navigate(redirectPath);
@@ -75,7 +65,7 @@ export const useAuth = () => {
         };
       }
     },
-    [loginMutation, navigate, dispatch]
+    [loginMutation, navigate]
   );
 
   const logout = useCallback(async () => {
@@ -89,27 +79,6 @@ export const useAuth = () => {
     }
     return { success: true, message: "Logged out successfully" };
   }, [logoutMutation, dispatch, navigate]);
-
-  // Refresh token
-  const refreshToken = useCallback(async () => {
-    try {
-      await refreshTokenMutation().unwrap();
-      return { success: true };
-    } catch (error: any) {
-      const errorResult = authErrorMapper.processAuthError(
-        error,
-        "refresh_token"
-      );
-
-      dispatch(logoutAction());
-      navigate("/login");
-
-      return {
-        success: false,
-        message: "Your session has expired. Please log in again.",
-      };
-    }
-  }, [refreshTokenMutation, dispatch, navigate]);
 
   // Clear error function
   const clearAuthError = useCallback(() => {
@@ -167,7 +136,6 @@ export const useAuth = () => {
     login,
     loginWithGoogle,
     logout,
-    refreshToken,
     clearAuthError,
 
     // Utilities

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import {
   fetchCurrentUser,
-  setupAutoRefresh,
   loginSuccess,
   mapDecodedToUser,
   DecodedJwt,
@@ -40,14 +39,17 @@ export const AuthCallback: React.FC = () => {
         return;
       }
 
+      // Store tokens in localStorage
       localStorage.setItem("accessToken", accessToken);
       if (refreshToken) {
         localStorage.setItem("refreshToken", refreshToken);
       }
 
       try {
+        // Decode JWT and create fallback user
         const decoded = jwtDecode<DecodedJwt>(accessToken);
         const fallbackUser = mapDecodedToUser(decoded);
+
         dispatch(
           loginSuccess({
             user: fallbackUser,
@@ -56,8 +58,7 @@ export const AuthCallback: React.FC = () => {
           })
         );
 
-        dispatch(setupAutoRefresh(accessToken));
-
+        // Try to fetch full user data from backend
         try {
           const userData = await dispatch(fetchCurrentUser()).unwrap();
           dispatch(
@@ -69,6 +70,7 @@ export const AuthCallback: React.FC = () => {
           );
         } catch (e) {
           console.log("Using JWT decoded user data as fallback");
+          // Fallback user is already set above, so we can continue
         }
       } catch (decodeError) {
         console.error("Failed to decode JWT token:", decodeError);
