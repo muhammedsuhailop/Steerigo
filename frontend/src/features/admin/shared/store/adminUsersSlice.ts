@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { apiClient } from "@/shared/utils/api";
+import { apiClient } from "@/shared/utils";
 import { clearErrorsByContext } from "@/shared/components/ui/ErrorHandling/errorSlice";
 import type {
   User,
@@ -14,7 +14,7 @@ export const fetchAdminUsers = createAsyncThunk(
       dispatch(clearErrorsByContext("adminUsers/fetch"));
       const state = getState() as { adminUsers: AdminUsersState };
       const { page, limit, filters } = state.adminUsers;
-      
+
       const params: any = {
         page: Math.max(1, page),
         pageSize: Math.max(1, Math.min(limit, 100)),
@@ -47,7 +47,7 @@ export const fetchAdminUsers = createAsyncThunk(
             pageSize: number;
           };
         };
-      }>("/api/admin/users", { params });
+      }>("/admin/users", { params });
 
       const users = Array.isArray(response.data?.users)
         ? response.data.users
@@ -101,10 +101,9 @@ export const updateUserStatus = createAsyncThunk(
         throw new Error(`Invalid action: ${action}`);
       }
 
-      const response = await apiClient.put(
-        `/api/admin/users/${userId}/action`,
-        { action }
-      );
+      const response = await apiClient.put(`/admin/users/${userId}/action`, {
+        action,
+      });
 
       return {
         userId,
