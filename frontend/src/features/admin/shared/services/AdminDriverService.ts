@@ -1,4 +1,4 @@
-import { apiClient } from "@/shared/utils/api";
+import { apiClient } from "@/shared/utils";
 import type { Driver, DriverFilters, DriverAction } from "../types";
 
 export class AdminDriverService {
@@ -13,7 +13,7 @@ export class AdminDriverService {
         pageSize: params.pageSize,
         ...params.filters,
       };
-      const response = await apiClient.get("/api/admin/drivers", {
+      const response = await apiClient.get("/admin/drivers", {
         params: queryParams,
       });
       return {
@@ -29,7 +29,7 @@ export class AdminDriverService {
 
   async fetchDriverById(driverId: string) {
     try {
-      const response = await apiClient.get(`/api/admin/drivers/${driverId}/profile`);
+      const response = await apiClient.get(`/admin/drivers/${driverId}/profile`);
       return {
       success: true,
       data: response.data, 
@@ -48,7 +48,7 @@ export class AdminDriverService {
   ) {
     try {
       const response = await apiClient.put(
-        `/api/admin/drivers/${driverId}/action`,
+        `/admin/drivers/${driverId}/action`,
         {
           action,
           reason,
@@ -68,7 +68,7 @@ export class AdminDriverService {
 
   async getDriverStats() {
     try {
-      const response = await apiClient.get("/api/admin/drivers/stats");
+      const response = await apiClient.get("/admin/drivers/stats");
       return {
         success: true,
         data: response,
