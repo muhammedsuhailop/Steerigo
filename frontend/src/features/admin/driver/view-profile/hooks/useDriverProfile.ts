@@ -1,88 +1,105 @@
-import { useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useMemo } from "react";
 import {
-  fetchDriverById,
-  updateDriverStatus,
-  clearSelectedDriver,
-  clearError,
-  clearActionMessage,
-} from "@/features/admin/shared/store/adminDriverSlice";
-import type { AppDispatch, RootState } from "@/app/store";
-import type { DriverAction } from "@/features/admin/shared/types";
+  useGetDriverByIdQuery,
+  useUpdateDriverStatusMutation,
+} from "@/features/admin/shared/services/adminApi";
 
-export const useDriverProfile = () => {
-  const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+type DriverProfileAction =
+  | "activate"
+  | "deactivate"
+  | "suspend"
+  | "block"
+  | "approve"
+  | "reject";
+
+export const useDriverProfile = (driverId: string | undefined) => {
+  const [updateDriverStatus, { isLoading: isUpdating }] =
+    useUpdateDriverStatusMutation();
 
   const {
-    selectedDriver: driver,
-    loading,
+    data: driverData,
+    isLoading,
+    isFetching,
     error,
-    actionLoading,
-    actionMessage,
-    actionMessageType,
-  } = useSelector((s: RootState) => s.adminDrivers);
+    refetch,
+  } = useGetDriverByIdQuery(driverId!, {
+    skip: !driverId,
+  });
 
-  useEffect(() => {
-    if (id) dispatch(fetchDriverById(id));
-    return () => {
-      dispatch(clearSelectedDriver());
-      dispatch(clearError());
-    };
-  }, [dispatch, id]);
+  const driverProfile = useMemo(() => {
+    return driverData?.data || null;
+  }, [driverData]);
 
   const handleDriverAction = useCallback(
-    async (action: DriverAction, reason?: string) => {
-      if (!id) return;
+    async (action: DriverProfileAction, reason?: string) => {
+      if (!driverId) {
+        throw new Error("Driver ID is required");
+      }
+
       try {
-        await dispatch(
-          updateDriverStatus({ driverId: id, action, reason })
-        ).unwrap();
-        dispatch(fetchDriverById(id));
-      } catch {
-        // error handle by slice
+        const result = await updateDriverStatus({
+          driverId,
+          action,
+          reason,
+        }).unwrap();
+
+        console.log("✅ Driver profile action successful:", result.message);
+        refetch();
+
+        return { success: true, message: result.message };
+      } catch (error: any) {
+        const errorMessage =
+          error?.data?.message ||
+          error?.message ||
+          "Failed to update driver status";
+        console.error("Driver profile action failed:", errorMessage);
+        throw new Error(errorMessage);
       }
     },
-    [dispatch, id]
+    [driverId, updateDriverStatus, refetch]
   );
 
-  const clearMessage = useCallback(() => {
-    dispatch(clearActionMessage());
-  }, [dispatch]);
+  const refreshProfile = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
-  const isActionLoading = useCallback(
-    (did?: string) => Boolean(actionLoading[did || id!]),
-    [actionLoading, id]
+  const getAvailableActions = useCallback(
+    (status: string): DriverProfileAction[] => {
+      switch (status?.toLowerCase()) {
+        case "pending":
+        case "in_review":
+          return ["approve", "reject"];
+        case "active":
+          return ["suspend", "deactivate", "block"];
+        case "inactive":
+          return ["activate", "block"];
+        case "suspended":
+          return ["activate", "deactivate", "block"];
+        case "blocked":
+          return ["activate"];
+        case "rejected":
+          return ["approve"];
+        default:
+          return [];
+      }
+    },
+    []
   );
 
-  const kycItems = (
-    driver?.kycDocs
-      ? driver.kycDocs.map((doc) => ({
-          id: doc.id,
-          driverId: doc.driverId,
-          documentType: doc.documentType,
-          documentNumber: doc.documentNumber,
-          issueDate: doc.issueDate,
-          expiryDate: doc.expiryDate,
-          urlFront: doc.documentImageUrls[0] || "",
-          urlBack: doc.documentImageUrls[1] || "",
-          isVerified: doc.isVerified,
-          comments: doc.comments,
-          submittedAt: doc.submittedAt,
-        }))
-      : []
-  ) as any[];
+  const availableActions = useMemo(() => {
+    if (!driverProfile?.status) return [];
+    return getAvailableActions(driverProfile.status);
+  }, [driverProfile?.status, getAvailableActions]);
 
   return {
-    driver,
-    kycItems,
-    loading,
+    driverProfile,
+    isLoading,
+    isFetching,
+    isUpdating,
     error,
-    actionMessage,
-    actionMessageType,
-    clearMessage,
     handleDriverAction,
-    isActionLoading,
+    refreshProfile,
+    availableActions,
+    driverId,
   };
 };

@@ -1,62 +1,91 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { DriverFilters } from "../DriverFilters/DriverFilters";
 import { DriverTable } from "../DriverTable/DriverTable";
 import { TablePagination } from "@/shared/components/ui/Table";
-import { fetchAdminDrivers } from "@/features/admin/shared/store/adminDriverSlice";
+import { useGetAllDriversQuery } from "@/features/admin/shared/services/adminApi";
 import { useDriverOperations } from "../../hooks/useDriverOperations";
-import type { RootState, AppDispatch } from "@/app/store";
+import {
+  selectFilters,
+  selectPage,
+  selectLimit,
+} from "@/features/admin/shared/store/adminDriverSlice";
 import type { DriverFilters as DriverFiltersType } from "../../../shared/types";
+import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
 
-// debounce hook
+// Debounce hook for search input
 const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
   }, [value, delay]);
 
   return debouncedValue;
 };
 
+// Main Driver Management Component
 export const DriverManagement: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { drivers, loading, filters, page, limit, pagination, actionLoading } =
-    useSelector((state: RootState) => state.adminDrivers);
+  // Get local state from Redux
+  const filters = useSelector(selectFilters);
+  const page = useSelector(selectPage);
+  const limit = useSelector(selectLimit);
 
+  // Get operations from custom hook
   const {
     handleFiltersChange,
     handlePageChange,
     handleSizeChange,
     handleDriverAction,
     handleResetFilters,
-    clearActionLoading,
+    isUpdating,
   } = useDriverOperations();
 
-  // local search state and debounce logic
-  const [localSearch, setLocalSearch] = useState<string>(filters.search ?? "");
+  // Local search state with debounce
+  const [localSearch, setLocalSearch] = useState(filters.search || "");
   const debouncedSearch = useDebounce(localSearch, 300);
 
+  // Fetch drivers with RTK Query
+  const {
+    data: driversData,
+    isLoading,
+    isFetching,
+    error,
+  } = useGetAllDriversQuery({
+    page,
+    limit,
+    status: filters.status,
+    kycStatus: filters.kycStatus,
+    search: debouncedSearch,
+    vehicleType: filters.vehicleType,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+  });
+
+  // Safe pagination data - MOVE THIS BEFORE THE useEffect THAT USES IT
+  const pagination = {
+    currentPage: Math.max(1, driversData?.data.pagination.page || page),
+    totalPages: Math.max(0, driversData?.data.pagination.totalPages || 1),
+    totalItems: Math.max(0, driversData?.data.pagination.totalItems || 0),
+    pageSize: Math.max(1, driversData?.data.pagination.pageSize || limit),
+  };
+
+  // Sync debounced search with filters
   useEffect(() => {
     if (debouncedSearch !== filters.search) {
       handleFiltersChange({ search: debouncedSearch });
     }
   }, [debouncedSearch, filters.search, handleFiltersChange]);
 
+  // Sync local search with filters when filters reset
   useEffect(() => {
-    dispatch(fetchAdminDrivers());
-  }, [dispatch, filters, page, limit]);
-
-  useEffect(() => {
-    setLocalSearch(filters.search ?? "");
+    setLocalSearch(filters.search || "");
   }, [filters.search]);
 
+  // Validate page when pagination changes
   useEffect(() => {
     if (pagination.totalPages > 0 && page > pagination.totalPages) {
       handlePageChange(pagination.totalPages);
@@ -65,13 +94,13 @@ export const DriverManagement: React.FC = () => {
     }
   }, [pagination.totalPages, page, handlePageChange]);
 
+  // Handle filter changes
   const onFiltersChange = useCallback(
     (newFilters: Partial<DriverFiltersType>) => {
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
-
+        // Apply other filters immediately
         const { search, ...otherFilters } = newFilters;
-
         if (Object.keys(otherFilters).length > 0) {
           handleFiltersChange(otherFilters);
         }
@@ -82,12 +111,11 @@ export const DriverManagement: React.FC = () => {
     [handleFiltersChange]
   );
 
+  // Handle page changes with validation
   const onPageChange = useCallback(
     (newPage: number) => {
-      const safePage = Math.max(
-        1,
-        Math.min(newPage, pagination.totalPages || 1)
-      );
+      const totalPages = pagination.totalPages || 1;
+      const safePage = Math.max(1, Math.min(newPage, totalPages));
       if (
         safePage !== page &&
         safePage >= 1 &&
@@ -99,6 +127,7 @@ export const DriverManagement: React.FC = () => {
     [handlePageChange, page, pagination.totalPages]
   );
 
+  // Handle page size changes
   const onSizeChange = useCallback(
     (newSize: number) => {
       const safeSize = Math.max(1, Math.min(newSize, 100));
@@ -107,43 +136,42 @@ export const DriverManagement: React.FC = () => {
     [handleSizeChange]
   );
 
-  const isActionLoading = (driverId: string) => {
-    return actionLoading[driverId] || false;
-  };
+  // Check if specific driver action is loading
+  const isActionLoading = useCallback(
+    (driverId: string) => isUpdating,
+    [isUpdating]
+  );
 
-  const displayFilters: DriverFiltersType = {
-    ...filters,
-    search: localSearch,
-  };
+  // Display filters (with local search)
+  const displayFilters: DriverFiltersType = { ...filters, search: localSearch };
 
-  const safePagination = {
-    currentPage: Math.max(1, page),
-    totalPages: Math.max(0, pagination.totalPages),
-    totalItems: Math.max(0, pagination.totalItems),
-    pageSize: Math.max(1, limit),
-  };
+  // Drivers data (use API response directly)
+  const drivers: AdminDriver[] = driversData?.data.drivers || [];
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
       <DriverFilters
         filters={displayFilters}
         onFiltersChange={onFiltersChange}
         onResetFilters={handleResetFilters}
-        loading={loading}
+        loading={isLoading || isFetching}
       />
 
+      {/* Drivers Table */}
       <DriverTable
         drivers={drivers}
-        loading={loading}
+        loading={isLoading || isFetching}
         onDriverAction={handleDriverAction}
         isActionLoading={isActionLoading}
       />
 
+      {/* Pagination */}
       <TablePagination
-        currentPage={safePagination.currentPage}
-        totalPages={safePagination.totalPages}
-        totalItems={safePagination.totalItems}
-        pageSize={safePagination.pageSize}
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        pageSize={pagination.pageSize}
         onPageChange={onPageChange}
         onPageSizeChange={onSizeChange}
       />

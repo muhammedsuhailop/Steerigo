@@ -1,19 +1,40 @@
-import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
 import {
-  fetchAdminDrivers,
-  updateDriverStatus,
   setFilters,
   setPage,
   setLimit,
   resetFilters,
-  clearActionLoading,
-} from '@/features/admin/shared/store/adminDriverSlice';
-import type { AppDispatch } from '@/app/store';
-import type { DriverAction, DriverFilters } from '../../shared/types';
+} from "@/features/admin/shared/store/adminDriverSlice";
+import {
+  useGetAllDriversQuery,
+  useUpdateDriverStatusMutation,
+} from "@/features/admin/shared/services/adminApi";
+import type { AppDispatch } from "@/app/store";
+
+export type DriverAction =
+  | "activate"
+  | "suspend"
+  | "deactivate"
+  | "block"
+  | "approve"
+  | "reject";
+
+interface DriverFilters {
+  search: string;
+  status: string;
+  kycStatus: string;
+  vehicleType: string;
+  dateFrom: string;
+  dateTo: string;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+}
 
 export const useDriverOperations = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [updateDriverStatus, { isLoading: isUpdating }] =
+    useUpdateDriverStatusMutation();
 
   const handleFiltersChange = useCallback(
     (filters: Partial<DriverFilters>) => {
@@ -37,36 +58,31 @@ export const useDriverOperations = () => {
   );
 
   const handleDriverAction = useCallback(
-    async (driverId: string, action: DriverAction) => {
+    async (driverId: string, action: DriverAction, reason?: string) => {
       try {
-        const result = await dispatch(
-          updateDriverStatus({ driverId, action })
-        ).unwrap();
-        
-        // Show success notification (you can integrate your notification service here)
-        console.log(result.message);
-        
-        // Refresh data
-        dispatch(fetchAdminDrivers());
+        const result = await updateDriverStatus({
+          driverId,
+          action,
+          reason,
+        }).unwrap();
+
+        console.log("Driver action successful:", result.message);
+        return { success: true, message: result.message };
       } catch (error: any) {
-        const errorMessage = error.message || 'Failed to update driver status';
-        console.error('Driver action failed:', error);
-        // Show error notification
+        const errorMessage =
+          error?.data?.message ||
+          error?.message ||
+          "Failed to update driver status";
+        console.error("Driver action failed:", errorMessage);
+        throw new Error(errorMessage);
       }
     },
-    [dispatch]
+    [updateDriverStatus]
   );
 
   const handleResetFilters = useCallback(() => {
     dispatch(resetFilters());
   }, [dispatch]);
-
-  const handleClearActionLoading = useCallback(
-    (driverId: string) => {
-      dispatch(clearActionLoading(driverId));
-    },
-    [dispatch]
-  );
 
   return {
     handleFiltersChange,
@@ -74,6 +90,25 @@ export const useDriverOperations = () => {
     handleSizeChange,
     handleDriverAction,
     handleResetFilters,
-    clearActionLoading: handleClearActionLoading,
+    isUpdating,
   };
+};
+
+export const useDriversData = (
+  filters: DriverFilters,
+  page: number,
+  limit: number
+) => {
+  return useGetAllDriversQuery({
+    page,
+    limit,
+    status: filters.status,
+    kycStatus: filters.kycStatus,
+    search: filters.search,
+    vehicleType: filters.vehicleType,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+  });
 };

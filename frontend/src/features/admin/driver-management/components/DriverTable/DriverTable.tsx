@@ -2,12 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Badge, Button, OnlineStatus } from "@/shared/components/ui";
 import type { TableProps } from "@/shared/components/ui/Table/Table.types";
-import type { Driver, DriverAction } from "../../../shared/types";
+import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
+import { DriverAction } from "../../hooks";
 
 interface DriverTableProps {
-  drivers: Driver[];
+  drivers: AdminDriver[];
   loading: boolean;
-  onDriverAction: (driverId: string, action: DriverAction) => void;
+  onDriverAction: (
+    driverId: string,
+    action: DriverAction,
+    reason?: string
+  ) => Promise<{ success: boolean; message: string }> | void;
   isActionLoading: (driverId: string) => boolean;
 }
 
@@ -19,8 +24,8 @@ export const DriverTable: React.FC<DriverTableProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getStatusBadge = (status: Driver["status"]) => {
-    const statusConfig = {
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { variant: any; text: string }> = {
       InReview: { variant: "warning" as const, text: "In Review" },
       Active: { variant: "success" as const, text: "Verified" },
       Blocked: { variant: "secondary" as const, text: "Blocked" },
@@ -34,8 +39,8 @@ export const DriverTable: React.FC<DriverTableProps> = ({
     return <Badge variant={config.variant}>{config.text}</Badge>;
   };
 
-  const getKYCStatusBadge = (kycStatus: Driver["kycStatus"]) => {
-    const statusConfig = {
+  const getKYCStatusBadge = (kycStatus: string) => {
+    const statusConfig: Record<string, { variant: any; text: string }> = {
       Pending: { variant: "outline" as const, text: "KYC Pending" },
       Verified: { variant: "success" as const, text: "KYC Verified" },
       Rejected: { variant: "danger" as const, text: "KYC Rejected" },
@@ -53,15 +58,16 @@ export const DriverTable: React.FC<DriverTableProps> = ({
     );
   };
 
-  const getActionButtons = (driver: Driver) => {
-    const isLoading = isActionLoading(driver.driverId);
+  const getActionButtons = (driver: AdminDriver) => {
+    const driverId = driver.driverId || driver.id;
+    const isLoading = isActionLoading(driverId);
 
     return (
       <div className="flex space-x-2">
         <Button
           size="xs"
           variant="outline"
-          onClick={() => navigate(`/admin/drivers/${driver.driverId}`)}
+          onClick={() => navigate(`/admin/drivers/${driverId}`)}
         >
           View
         </Button>
@@ -71,7 +77,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             size="xs"
             variant="secondary"
             isLoading={isLoading}
-            onClick={() => onDriverAction(driver.driverId, "block")}
+            onClick={() => onDriverAction(driverId, "block")}
           >
             Block
           </Button>
@@ -82,7 +88,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             size="xs"
             variant="success"
             isLoading={isLoading}
-            onClick={() => onDriverAction(driver.driverId, "unblock")}
+            onClick={() => onDriverAction(driverId, "activate")}
           >
             Activate
           </Button>
@@ -91,7 +97,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
     );
   };
 
-  const columns: TableProps<Driver>["columns"] = [
+  const columns: TableProps<AdminDriver>["columns"] = [
     {
       key: "name",
       header: "Driver",
@@ -101,20 +107,20 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             {driver.profileImage ? (
               <img
                 src={driver.profileImage}
-                alt={driver.name}
+                alt={driver.userName}
                 className="w-8 h-8 rounded-full object-cover"
               />
             ) : (
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="text-xs font-medium text-gray-600">
-                  {driver.name.charAt(0)}
+                  {driver.userName.charAt(0)}
                 </span>
               </div>
             )}
             <OnlineStatus
               isOnline={
-                driver.lastRide
-                  ? new Date(driver.lastRide).getTime() >
+                driver.lastRideDate
+                  ? new Date(driver.lastRideDate).getTime() >
                     Date.now() - 5 * 60 * 1000
                   : false
               }
@@ -123,8 +129,8 @@ export const DriverTable: React.FC<DriverTableProps> = ({
             />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{driver.name}</div>
-            <div className="text-sm text-gray-500">{driver.email}</div>
+            <div className="font-medium text-gray-900">{driver.userName}</div>
+            <div className="text-sm text-gray-500">{driver.userEmail}</div>
           </div>
         </div>
       ),
@@ -132,14 +138,16 @@ export const DriverTable: React.FC<DriverTableProps> = ({
     {
       key: "mobile",
       header: "Mobile",
-      render: (mobile) => <div className="text-sm text-gray-900">{mobile}</div>,
+      render: (_, driver) => (
+        <div className="text-sm text-gray-900">{driver.userMobile}</div>
+      ),
     },
     {
-      key: "eligibleBodyType",
-      header: "Body Types",
+      key: "eligibleVehicleType",
+      header: "Vehicle Types",
       render: (_, driver) => (
         <div className="text-sm text-gray-900">
-          {driver.eligibleVehicleType.join(", ")}
+          {driver.eligibleBodyTypes?.join(", ") || "N/A"}
         </div>
       ),
     },
@@ -151,12 +159,12 @@ export const DriverTable: React.FC<DriverTableProps> = ({
     {
       key: "status",
       header: "Status",
-      render: (status) => getStatusBadge(status),
+      render: (status) => getStatusBadge(status as string),
     },
     {
       key: "kycStatus",
       header: "KYC",
-      render: (kycStatus) => getKYCStatusBadge(kycStatus),
+      render: (kycStatus) => getKYCStatusBadge(kycStatus as string),
     },
     {
       key: "createdAt",
@@ -178,7 +186,9 @@ export const DriverTable: React.FC<DriverTableProps> = ({
       emptyMessage="No drivers found"
       striped
       hoverable
-      onRowClick={(driver) => navigate(`/admin/drivers/${driver.driverId}`)}
+      onRowClick={(driver) =>
+        navigate(`/admin/drivers/${driver.driverId || driver.id}`)
+      }
     />
   );
 };

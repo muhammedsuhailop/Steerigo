@@ -1,19 +1,33 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import {
-  fetchKYCRequests,
-  updateKYCStatus,
   setFilters,
   setPage,
   setLimit,
   resetFilters,
-  clearActionLoading,
 } from "@/features/admin/shared/store/adminKYCSlice";
+import {
+  useGetKYCRequestsQuery,
+  useUpdateKYCStatusMutation,
+  useGetKYCByIdQuery,
+} from "@/features/admin/shared/services/adminApi";
 import type { AppDispatch } from "@/app/store";
-import type { KYCAction, KYCFilters } from "@/features/admin/shared/types";
+
+type KYCAction = "approve" | "reject";
+
+interface KYCFilters {
+  search: string;
+  status: string;
+  dateFrom: string;
+  dateTo: string;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+}
 
 export const useKYCOperations = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [updateKYCStatus, { isLoading: isUpdating }] =
+    useUpdateKYCStatusMutation();
 
   const handleFiltersChange = useCallback(
     (filters: Partial<KYCFilters>) => {
@@ -39,32 +53,30 @@ export const useKYCOperations = () => {
   const handleKYCAction = useCallback(
     async (requestId: string, action: KYCAction, reason?: string) => {
       try {
-        const result = await dispatch(
-          updateKYCStatus({ requestId, action, reason })
-        ).unwrap();
+        const result = await updateKYCStatus({
+          requestId,
+          action,
+          reason,
+          status: action === "approve" ? "approved" : "rejected",
+        }).unwrap();
 
-        // Refresh the list after action
-        dispatch(fetchKYCRequests());
-
+        console.log("KYC action successful:", result.message);
         return { success: true, message: result.message };
       } catch (error: any) {
-        const errorMessage = error.message || "Failed to update KYC status";
-        return { success: false, message: errorMessage };
+        const errorMessage =
+          error?.data?.message ||
+          error?.message ||
+          "Failed to update KYC status";
+        console.error("KYC action failed:", errorMessage);
+        throw new Error(errorMessage);
       }
     },
-    [dispatch]
+    [updateKYCStatus]
   );
 
   const handleResetFilters = useCallback(() => {
     dispatch(resetFilters());
   }, [dispatch]);
-
-  const handleClearActionLoading = useCallback(
-    (requestId: string) => {
-      dispatch(clearActionLoading(requestId));
-    },
-    [dispatch]
-  );
 
   return {
     handleFiltersChange,
@@ -72,8 +84,49 @@ export const useKYCOperations = () => {
     handleSizeChange,
     handleKYCAction,
     handleResetFilters,
-    clearActionLoading: handleClearActionLoading,
+    isUpdating,
   };
 };
 
-export default useKYCOperations;
+export const useKYCRequestsData = (
+  filters: KYCFilters,
+  page: number,
+  limit: number
+) => {
+  return useGetKYCRequestsQuery({
+    page,
+    limit,
+    status: filters.status as "pending" | "approved" | "rejected" | undefined,
+    search: filters.search,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+  });
+};
+
+export const useKYCDetails = (requestId: string | undefined) => {
+  const {
+    data: kycData,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetKYCByIdQuery(requestId!, {
+    skip: !requestId,
+  });
+
+  const kycRequest = kycData?.data || null;
+
+  const refreshKYC = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  return {
+    kycRequest,
+    isLoading,
+    isFetching,
+    error,
+    refreshKYC,
+  };
+};
