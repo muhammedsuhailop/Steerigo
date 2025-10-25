@@ -3,8 +3,8 @@ export interface Driver {
   name: string;
   email: string;
   mobile: string;
-  status: 'Active' | 'Blocked' | 'InReview';
-  kycStatus: 'Pending' | 'Verified' | 'Rejected';
+  status: "Active" | "Blocked" | "InReview";
+  kycStatus: "Pending" | "Verified" | "Rejected";
   createdAt: string;
   lastRide: string | null;
   totalRides: number;
@@ -23,17 +23,17 @@ export interface Driver {
 
 export interface KycDocument {
   uploadedAt: string;
-  status: 'Pending' | 'Verified' | 'Rejected';
+  status: "Pending" | "Verified" | "Rejected";
   id: string;
   driverId: string;
-  documentType: 'DrivingLicense' | 'Aadhaar' | 'VehicleRegistration' ;
+  documentType: "DrivingLicense" | "Aadhaar" | "VehicleRegistration";
   documentNumber: string;
   issueDate: string;
   expiryDate: string;
   documentImageUrls: string[];
   isVerified: boolean;
   comments?: string;
-  submittedAt: string;
+  createdAt: string;
 }
 
 export interface DocumentStatus {
@@ -63,18 +63,16 @@ export interface DriverPagination {
 
 export type DriverAction = "InReview" | "block" | "unblock";
 
-
 export interface KYCItem {
   id: string;
   documentType: string;
   urlFront: string;
   urlBack: string;
-  isVerified:boolean;
-  submittedAt: string;
-  documentNumber:string;
-  issueDate:string;
-  expiryDate:string;
-
+  isVerified: boolean;
+  createdAt: string;
+  documentNumber: string;
+  issueDate: string;
+  expiryDate: string;
 }
 
 export interface DriverProfileKYCProps {

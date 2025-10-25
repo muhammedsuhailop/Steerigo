@@ -3,7 +3,7 @@ import type {
   UserFilters,
   UserAction,
 } from "../../user-management/components/UserManagement/UserManagement.types";
-import { DashboardStats } from "../services/AdminStatsService";
+// import { DashboardStats } from "../services/AdminStatsService";
 
 export interface AdminDataService {
   fetchUsers(params: {
@@ -51,6 +51,3 @@ export interface AdminNotificationService {
   showInfo(message: string): void;
 }
 
-export interface AdminStatsService {
-  calculateStats(users: User[], pagination?: any): DashboardStats;
-}
