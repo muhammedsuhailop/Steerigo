@@ -136,7 +136,7 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["Rider"]}>
             <UserProfileLayout />
           </ProtectedRoute>
         }
