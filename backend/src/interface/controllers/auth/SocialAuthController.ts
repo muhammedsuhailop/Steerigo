@@ -53,46 +53,56 @@ export class SocialAuthController {
   }
 
   async googleLogin(req: Request, res: Response): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:4001";
+
     try {
       const code = req.query.code as string;
+
       if (!code) {
-        throw new Error("Authorization code missing in query");
+        Logger.warn("Google login - authorization code missing");
+        return res.redirect(`${frontendUrl}/login?error=missing_code`);
       }
+
       const dto = new GoogleLoginRequestDto({ code });
       const result = await this.googleLoginUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "google_login"
-        );
-        res.status(statusCode).json(response);
-        return;
+        Logger.error("Google login failed", {
+          error: error.message,
+          stack: error.stack,
+        });
+
+        // Redirect to frontend with error
+        return res.redirect(`${frontendUrl}/login?error=auth_failed`);
       }
 
       const data = result.getValue();
 
       CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
-      const { refreshToken, ...dataWithoutRefreshToken } = data;
 
-      const response: ApiResponse = {
-        success: true,
-        message: AuthMessages.GOOGLE_AUTH_SUCCESS,
-        data: dataWithoutRefreshToken,
-      };
+      const redirectUrl = new URL(`${frontendUrl}/auth/callback`);
+      redirectUrl.searchParams.set("accessToken", data.accessToken);
+      redirectUrl.searchParams.set("role", data.user.role);
+      redirectUrl.searchParams.set("isNewUser", String(data.isNewUser));
 
-      res.status(HttpStatusCodes.OK).json(response);
-      Logger.info("Google login completed successfully", {
+      Logger.info("Google login successful - redirecting to callback", {
         userId: data.user.id,
+        email: data.user.email,
+        role: data.user.role,
         isNewUser: data.isNewUser,
       });
+
+      // Redirect to frontend auth callback with access token in URL
+      return res.redirect(redirectUrl.toString());
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "google_login"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Google login controller error", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      // Redirect to frontend with error
+      return res.redirect(`${frontendUrl}/login?error=server_error`);
     }
   }
 }
