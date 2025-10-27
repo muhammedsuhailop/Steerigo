@@ -64,7 +64,7 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({
     },
     {
       id: "logout",
-      label: "Sign out",
+      label: "Logout",
       icon: HiOutlineLogout,
       danger: true,
     },

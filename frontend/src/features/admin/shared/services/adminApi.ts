@@ -303,7 +303,7 @@ export const adminApi = createApi({
       providesTags: [{ type: "AdminStats", id: "DRIVER_STATS" }],
     }),
 
-    // KYC MANAGEMENT - Updated to match actual API response structure
+    // KYC MANAGEMENT 
 
     getKYCRequests: builder.query<
       KYCListResponse,
