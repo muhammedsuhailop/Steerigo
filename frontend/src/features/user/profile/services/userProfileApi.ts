@@ -92,6 +92,20 @@ export const userProfileApi = createApi({
         { type: "UserStats", id: userId },
       ],
     }),
+    
+    // Register as driver
+    registerAsDriver: builder.mutation<
+      { success: boolean; message: string; data: UserProfile },
+      string
+    >({
+      query: (userId) => ({
+        url: `/user/${userId}/register-as-driver`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, userId) => [
+        { type: "UserProfile", id: userId },
+      ],
+    }),
   }),
 });
 
@@ -101,4 +115,5 @@ export const {
   useGetUserStatsQuery,
   useUploadProfilePictureMutation,
   useDeleteUserAccountMutation,
+  useRegisterAsDriverMutation,
 } = userProfileApi;

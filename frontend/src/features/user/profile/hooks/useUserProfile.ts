@@ -7,6 +7,7 @@ import {
   useUpdateUserProfileMutation,
   // useGetUserStatsQuery,
   useUploadProfilePictureMutation,
+  useRegisterAsDriverMutation,
 } from "../services/userProfileApi";
 import {
   fetchUserProfile,
@@ -47,6 +48,9 @@ export const useUserProfile = () => {
     useUpdateUserProfileMutation();
   const [uploadProfilePicture, { isLoading: uploadLoading }] =
     useUploadProfilePictureMutation();
+
+  const [registerAsDriverMutation, { isLoading: isRegisteringDriver }] =
+    useRegisterAsDriverMutation();
 
   // --- MOCKED USER STATS DATA  ---
   const statsData = {
@@ -111,6 +115,26 @@ export const useUserProfile = () => {
     await Promise.all([refetchProfile(), refetchStats()]);
   }, [refetchProfile, refetchStats]);
 
+  const handleRegisterAsDriver = useCallback(async () => {
+    if (!user?.id) return { success: false, error: "User not found" };
+
+    try {
+      const result = await registerAsDriverMutation(user.id).unwrap();
+
+      if (result.success) {
+        await refetchProfile();
+        return { success: true, data: result.data };
+      }
+
+      return { success: false, error: "Registration failed" };
+    } catch (error: any) {
+      const errorMessage =
+        error?.data?.message || error?.message || "Registration failed";
+      console.error("Registration error:", errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }, [user?.id, registerAsDriverMutation, refetchProfile]);
+
   const clearErrors = useCallback(() => {
     dispatch(clearError());
   }, [dispatch]);
@@ -153,8 +177,10 @@ export const useUserProfile = () => {
     uploadProfilePicture: handleUploadProfilePicture,
     navigateToDriverRegistration: handleNavigateToDriverRegistration,
     refreshData: handleRefreshData,
+    registerAsDriver: handleRegisterAsDriver,
     clearErrors,
     clearProfileData,
+    isRegisteringDriver,
 
     // Utils
     refetchProfile,

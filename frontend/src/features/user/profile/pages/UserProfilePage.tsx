@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { MdRefresh, MdError } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth";
 import { useUserProfile } from "../hooks/useUserProfile";
+import { useLogoutMutation } from "@/features/auth/services/authApi";
 import { Button } from "@/shared/components/ui/Button";
 import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -15,6 +17,8 @@ import type {
 
 const UserProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [logoutMutation] = useLogoutMutation();
   const {
     profile,
     // stats,
@@ -23,6 +27,8 @@ const UserProfilePage: React.FC = () => {
     error,
     updateError,
     updateProfile,
+    registerAsDriver,
+    isRegisteringDriver,
     navigateToDriverRegistration,
     refreshData,
     clearErrors,
@@ -71,6 +77,18 @@ const UserProfilePage: React.FC = () => {
     await refreshData();
   };
 
+  // Handle logout after successful driver registration
+  const handleRegistrationSuccess = async () => {
+    try {
+      await logoutMutation().unwrap();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      // Redirect to login page
+      navigate("/login", { replace: true });
+    }
+  };
+
   // Loading state
   if (isLoading && !profile) {
     return (
@@ -99,7 +117,6 @@ const UserProfilePage: React.FC = () => {
                 Failed to Load Profile
               </h2>
               <p className="text-gray-600 mb-6">
-                {" "}
                 {typeof error === "string"
                   ? error
                   : "message" in (error as any)
@@ -143,7 +160,7 @@ const UserProfilePage: React.FC = () => {
               leftIcon={<MdRefresh />}
               onClick={handleRefresh}
               isLoading={isLoading}
-              disabled={isUpdating}
+              disabled={isUpdating || isRegisteringDriver}
             >
               Refresh
             </Button>
@@ -188,6 +205,9 @@ const UserProfilePage: React.FC = () => {
               stats={dummyStats}
               onEditClick={handleEditClick}
               onDriverRegisterClick={navigateToDriverRegistration}
+              onRegisterAsDriver={registerAsDriver}
+              onRegistrationSuccess={handleRegistrationSuccess}
+              isRegisteringDriver={isRegisteringDriver}
               isLoading={isLoading}
             />
           )}
