@@ -99,7 +99,6 @@ export const fetchCurrentUser = createAsyncThunk(
       const result = await dispatch(
         authApi.endpoints.getCurrentUser.initiate()
       ).unwrap();
-
       if (result.success) {
         const userData = result.data;
         setUserInStorage(userData);
@@ -185,6 +184,7 @@ export const handleGoogleCallback = createAsyncThunk(
     if (!accessToken) {
       return rejectWithValue("Missing accessToken");
     }
+
     try {
       const decoded = jwtDecode<DecodedJwt>(accessToken);
       const user = mapDecodedToUser(decoded);
@@ -224,11 +224,9 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
-
       setTokensInStorage(accessToken, refreshToken);
       setUserInStorage(user);
     },
-
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
@@ -236,48 +234,41 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
-
       removeTokensFromStorage();
     },
-
     clearError: (state) => {
       state.error = null;
     },
-
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-
-    setError: (state, action: PayloadAction<string>) => {
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.isLoading = false;
     },
-
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
         setUserInStorage(state.user);
       }
     },
-
     setGoogleAuthLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-
-    // New reducer to update tokens (called from axios interceptor)
+    /**
+     * CRITICAL: This reducer is called by tokenRefresh.ts to update tokens
+     * It synchronizes localStorage and Redux state
+     */
     setTokens: (
       state,
       action: PayloadAction<{ accessToken: string; refreshToken: string }>
     ) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
-      setTokensInStorage(
-        action.payload.accessToken,
-        action.payload.refreshToken
-      );
+      // Tokens are already set in localStorage by tokenRefresh.ts
+      // This just updates Redux state to match
     },
   },
-
   extraReducers: (builder) => {
     // Initialize auth
     builder
@@ -339,7 +330,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.isLoading = false;
         state.error = null;
-
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
       })
@@ -358,7 +348,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.isLoading = false;
         state.error = null;
-
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
       })
@@ -376,7 +365,6 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.isLoading = false;
           state.error = null;
-
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
         }
@@ -391,7 +379,6 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.isLoading = false;
           state.error = null;
-
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
         }
@@ -403,7 +390,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isLoading = false;
         state.error = null;
-
         removeTokensFromStorage();
       });
   },

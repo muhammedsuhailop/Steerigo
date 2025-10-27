@@ -1,6 +1,12 @@
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import { api } from "./api";
+import {
+  refreshAccessToken,
+  waitForTokenRefresh,
+  isTokenRefreshing,
+} from "./tokenRefresh";
+import type { RootState } from "@/app/store";
 
 // Arguments type for custom baseQuery
 export interface AxiosBaseQueryArgs {
@@ -20,88 +26,30 @@ export interface AxiosBaseQueryError {
   error?: string;
 }
 
-// Refresh token state management
-let isRefreshing = false;
-let refreshPromise: Promise<string> | null = null;
-
-/**
- * Refresh access token using refresh token endpoint
- */
-const refreshAccessToken = async (): Promise<string> => {
+// Update Redux store with new tokens
+const updateReduxTokens = async (accessToken: string, refreshToken: string) => {
   try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) {
-      throw new Error("No refresh token available");
-    }
+    const { store } = await import("@/app/store");
+    const { setTokens } = await import("@/features/auth/store/authSlice");
 
-    const response = await api.post(
-      "/auth/refresh-token",
-      {},
-      {
-        withCredentials: true,
-        // @ts-ignore - Skip auth for refresh endpoint
-        skipAuth: true,
-      }
-    );
-
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-      response.data;
-
-    // Update localStorage
-    localStorage.setItem("accessToken", newAccessToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
-
-    // Update Redux store (lazy import to avoid circular dependency)
-    import("../../app/store").then(({ store }) => {
-      import("../../features/auth/store/authSlice").then(({ setTokens }) => {
-        store.dispatch(
-          setTokens({
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          })
-        );
-      });
-    });
-
-    return newAccessToken;
+    store.dispatch(setTokens({ accessToken, refreshToken }));
   } catch (error) {
-    // Clear auth state on refresh failure
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-
-    // Update Redux store
-    import("../../app/store").then(({ store }) => {
-      import("../../features/auth/store/authSlice").then(({ logout }) => {
-        store.dispatch(logout());
-      });
-    });
-
-    // Redirect to login
-    if (window.location.pathname !== "/login") {
-      window.location.href = "/login";
-    }
-
-    throw error;
+    console.error("Failed to update Redux tokens:", error);
   }
 };
 
-/**
- * Get or create refresh promise to prevent concurrent refresh calls
- */
-const getRefreshPromise = (): Promise<string> => {
-  if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => {
-      refreshPromise = null;
-      isRefreshing = false;
-    });
+const clearReduxAuth = async () => {
+  try {
+    const { store } = await import("@/app/store");
+    const { logout } = await import("@/features/auth/store/authSlice");
+
+    store.dispatch(logout());
+  } catch (error) {
+    console.error("Failed to clear Redux auth:", error);
   }
-  return refreshPromise;
 };
 
-/**
- * Custom Axios-based baseQuery for RTK Query with automatic token refresh
- */
+// Custom Axios-based baseQuery for RTK Query with automatic token refresh
 export const axiosBaseQuery = (): BaseQueryFn<
   AxiosBaseQueryArgs,
   unknown,
@@ -139,16 +87,27 @@ export const axiosBaseQuery = (): BaseQueryFn<
       if (
         err.response?.status === 401 &&
         !skipAuth &&
-        !url.includes("/auth/refresh-token")
+        !url.includes("/auth/refresh-token") &&
+        !url.includes("/auth/login") &&
+        !url.includes("/auth/signup")
       ) {
         try {
-          // Prevent concurrent refresh calls
-          if (!isRefreshing) {
-            isRefreshing = true;
-          }
+          let newAccessToken: string;
 
-          // Wait for refresh to complete
-          const newAccessToken = await getRefreshPromise();
+          // Check if refresh is already in progress
+          if (isTokenRefreshing()) {
+            // Wait for ongoing refresh to complete
+            newAccessToken = await waitForTokenRefresh();
+          } else {
+            // Start new refresh
+            newAccessToken = await refreshAccessToken();
+
+            // Update Redux store
+            const newRefreshToken = localStorage.getItem("refreshToken");
+            if (newRefreshToken) {
+              await updateReduxTokens(newAccessToken, newRefreshToken);
+            }
+          }
 
           // Retry original request with new token
           const retryConfig: AxiosRequestConfig = {
@@ -165,7 +124,9 @@ export const axiosBaseQuery = (): BaseQueryFn<
           const retryResult = await api.request(retryConfig);
           return { data: retryResult.data };
         } catch (refreshError) {
-          // Refresh failed, return original error
+          // Refresh failed - clear auth and return error
+          await clearReduxAuth();
+
           return {
             error: {
               status: 401,
