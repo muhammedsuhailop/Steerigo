@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import express, { Application } from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 // Load environment variables
 dotenv.config();
@@ -20,7 +21,6 @@ class App {
   constructor() {
     this.app = express();
     this.database = DatabaseConnection.getInstance();
-
     this.initializeMiddleware();
     this.initializeRoutes();
     this.initializeErrorHandling();
@@ -30,6 +30,9 @@ class App {
     // Security middleware
     this.app.use(SecurityMiddleware.helmet());
     this.app.use(SecurityMiddleware.cors());
+
+    // Cookie parser middleware 
+    this.app.use(cookieParser());
 
     // Body parsing middleware
     this.app.use(express.json({ limit: "10mb" }));
@@ -79,9 +82,8 @@ class App {
   }
 
   private initializeErrorHandling(): void {
-    // Global error handler (must be last)
+    // Global error handler
     this.app.use(ErrorHandlerMiddleware.handle);
-
     Logger.info("Error handling initialized successfully");
   }
 
@@ -103,7 +105,7 @@ class App {
       const PORT = process.env.PORT || 3000;
 
       this.app.listen(PORT, () => {
-        Logger.info(`--------------------------------------`);
+        Logger.info(`----------------------------------------`);
         Logger.info(`Server is running on port ${PORT}`);
         Logger.info(`Environment: ${process.env.NODE_ENV}`);
         Logger.info(`API Base URL: http://localhost:${PORT}/api`);

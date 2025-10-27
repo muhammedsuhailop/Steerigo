@@ -8,6 +8,7 @@ import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class TokenController {
@@ -27,7 +28,18 @@ export class TokenController {
         return;
       }
 
-      const dto = new RefreshTokenDto(req.body);
+      // Get refresh token from httpOnly cookie
+      const refreshToken = req.cookies.refreshToken;
+
+      if (!refreshToken) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "No refresh token provided",
+        });
+        return;
+      }
+
+      const dto = new RefreshTokenDto({ refreshToken });
       const result = await this.logoutUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -40,12 +52,20 @@ export class TokenController {
         return;
       }
 
+      // Clear the refresh token cookie
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        path: "/",
+      });
+
       const response: ApiResponse = {
         success: true,
         message: "Logged out successfully",
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("User logged out successfully");
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
@@ -66,10 +86,29 @@ export class TokenController {
         return;
       }
 
-      const dto = new RefreshTokenDto(req.body);
+      // Get refresh token from httpOnly cookie
+      const refreshToken = req.cookies.refreshToken;
+
+      if (!refreshToken) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "No refresh token provided",
+        });
+        return;
+      }
+
+      const dto = new RefreshTokenDto({ refreshToken });
       const result = await this.refreshTokenUseCase.execute(dto);
 
       if (result.isFailure()) {
+        // Clear invalid cookie
+        res.clearCookie("refreshToken", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+          path: "/",
+        });
+
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
@@ -80,13 +119,26 @@ export class TokenController {
       }
 
       const data = result.getValue();
+
+      // Set new refresh token as httpOnly cookie
+      res.cookie("refreshToken", data.refreshToken, {
+        httpOnly: true, // Cannot be accessed by JavaScript
+        secure: process.env.NODE_ENV === "production", // HTTPS only in production
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // CSRF protection
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: "/", // Available for all routes
+      });
+
+      // Send access token in response body
       const response: ApiResponse = {
         success: true,
         message: "Tokens refreshed successfully",
-        data,
+        data: {
+          accessToken: data.accessToken,
+        },
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Tokens refreshed successfully");
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(

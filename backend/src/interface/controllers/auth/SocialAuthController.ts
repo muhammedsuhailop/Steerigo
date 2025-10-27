@@ -8,6 +8,8 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
+import { CookieHelper } from "@shared/utils/CookieHelper";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class SocialAuthController {
@@ -39,7 +41,7 @@ export class SocialAuthController {
         data,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Google auth URL generated successfully");
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
@@ -52,7 +54,6 @@ export class SocialAuthController {
 
   async googleLogin(req: Request, res: Response): Promise<void> {
     try {
-
       const code = req.query.code as string;
       if (!code) {
         throw new Error("Authorization code missing in query");
@@ -71,13 +72,17 @@ export class SocialAuthController {
       }
 
       const data = result.getValue();
+
+      CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
+      const { refreshToken, ...dataWithoutRefreshToken } = data;
+
       const response: ApiResponse = {
         success: true,
         message: AuthMessages.GOOGLE_AUTH_SUCCESS,
-        data,
+        data: dataWithoutRefreshToken,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Google login completed successfully", {
         userId: data.user.id,
         isNewUser: data.isNewUser,

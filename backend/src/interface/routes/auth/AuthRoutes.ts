@@ -11,7 +11,6 @@ import {
   updatePasswordSchema,
   resendOtpSchema,
   googleLoginSchema,
-  refreshTokenSchema,
 } from "@interface/validators/auth/authValidationSchemas";
 import { LoginController } from "@interface/controllers/auth/LoginController";
 import { SignupController } from "@interface/controllers/auth/SignupController";
@@ -47,12 +46,10 @@ router.post(
 );
 router.post(
   "/logout",
-  validateSchema(refreshTokenSchema),
   loginController.logout.bind(loginController)
 );
 router.post(
   "/refresh-token",
-  validateSchema(refreshTokenSchema),
   loginController.refreshToken.bind(loginController)
 );
 
