@@ -35,7 +35,10 @@ export interface UserTableProps {
   loading: boolean;
   onUserClick: (user: User) => void;
   onDeleteUser: (user: User) => void;
-  onUserAction: (userId: string, action: UserAction) => Promise<void>;
+  onUserAction: (
+    userId: string,
+    action: UserAction
+  ) => Promise<void | { success: boolean; message: string }>;
   isActionLoading: (userId: string) => boolean;
 }
 

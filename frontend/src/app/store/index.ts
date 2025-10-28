@@ -1,24 +1,34 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authApi } from "../../features/auth/services/authApi";
-import { driverRegistrationApi } from "../../features/driver/driver-registration/services/driverRegistrationApi";
-import authReducer from "../../features/auth/store/authSlice";
-import adminUsersReducer from "../../features/admin/shared/store/adminUsersSlice";
-import errorReducer from "../../shared/components/ui/ErrorHandling/errorSlice";
-import driverReducer from "../../features/driver/shared/store/driverSlice";
-import driverRegistrationReducer from "../../features/driver/driver-registration/store/driverRegistrationSlice";
+import { authApi } from "@/features/auth/services/authApi";
+import { driverRegistrationApi } from "@/features/driver/driver-registration/services/driverRegistrationApi";
+import { driverApi } from "@/features/driver/shared/services/driverApi";
+import { userProfileApi } from "@/features/user/profile/services/userProfileApi";
+import authReducer from "@/features/auth/store/authSlice";
+import adminUsersReducer from "@/features/admin/shared/store/adminUsersSlice";
+import errorReducer from "@/shared/components/ui/ErrorHandling/errorSlice";
+import driverReducer from "@/features/driver/shared/store/driverSlice";
+import driverRegistrationReducer from "@/features/driver/driver-registration/store/driverRegistrationSlice";
 import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
 import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
-import { userProfileApi, userProfileReducer } from "@/features/user/profile";
+import { userProfileReducer } from "@/features/user/profile";
+import { adminApi } from "@/features/admin/shared/services/adminApi";
 
 export const store = configureStore({
   reducer: {
     // Auth with RTK Query
     auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
+
+    [adminApi.reducerPath]: adminApi.reducer,
+
+    // Driver APIs with RTK Query
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
+    [driverApi.reducerPath]: driverApi.reducer,
+
+    // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
 
-    // Feature reducers
+    // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
     driver: driverReducer,
     driverRegistration: driverRegistrationReducer,
@@ -38,7 +48,9 @@ export const store = configureStore({
     }).concat(
       authApi.middleware,
       driverRegistrationApi.middleware,
-      userProfileApi.middleware
+      driverApi.middleware,
+      userProfileApi.middleware,
+      adminApi.middleware
     ),
   devTools: import.meta.env.DEV,
 });

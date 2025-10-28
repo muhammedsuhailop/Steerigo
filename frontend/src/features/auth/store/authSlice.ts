@@ -4,22 +4,11 @@ import { authApi } from "../services/authApi";
 import type { AuthState, User } from "../types";
 import { GoogleAuthService } from "../services/googleAuthService";
 import { jwtDecode } from "jwt-decode";
-import {
-  isTokenExpired,
-  getTimeUntilTokenExpiry,
-} from "../../../shared/utils/tokenUtils";
 
 const getAccessTokenFromStorage = (): string | null => {
   if (typeof window !== "undefined") {
     try {
-      const token = localStorage.getItem("accessToken");
-      if (token && !isTokenExpired(token)) {
-        return token;
-      }
-      if (token) {
-        localStorage.removeItem("accessToken");
-      }
-      return null;
+      return localStorage.getItem("accessToken");
     } catch {
       return null;
     }
@@ -75,7 +64,6 @@ const getUserFromStorage = (): User | null => {
 
 const setUserInStorage = (user: User) => {
   if (typeof window !== "undefined") {
-    console.log("user-------", user);
     try {
       localStorage.setItem("user", JSON.stringify(user));
     } catch (error) {
@@ -83,9 +71,6 @@ const setUserInStorage = (user: User) => {
     }
   }
 };
-
-// Auto-refresh timer ID
-let refreshTimerId: NodeJS.Timeout | null = null;
 
 export interface DecodedJwt {
   userId: string;
@@ -96,7 +81,6 @@ export interface DecodedJwt {
   iss?: string;
 }
 
-// Add defaults for missing fields
 export const mapDecodedToUser = (decoded: DecodedJwt): User => ({
   id: decoded.userId,
   email: "",
@@ -108,79 +92,6 @@ export const mapDecodedToUser = (decoded: DecodedJwt): User => ({
   updatedAt: new Date().toISOString(),
 });
 
-export const refreshAuthToken = createAsyncThunk(
-  "auth/refresh",
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      const result = await dispatch(
-        authApi.endpoints.refreshToken.initiate()
-      ).unwrap();
-
-      console.log("Raw refresh result:", result);
-
-      const accessToken = result.data?.accessToken;
-      const refreshToken = result.data?.refreshToken;
-
-      if (!accessToken || !refreshToken) {
-        throw new Error("Invalid refresh response structure");
-      }
-
-      setTokensInStorage(accessToken, refreshToken);
-      console.log("Tokens stored in localStorage:", {
-        accessToken,
-        refreshToken,
-      });
-
-      dispatch(setupAutoRefresh(accessToken));
-
-      return {
-        accessToken,
-        refreshToken,
-        data: { accessToken, refreshToken },
-      };
-    } catch (error: any) {
-      console.error("Refresh token failed:", error);
-      removeTokensFromStorage();
-      dispatch(clearAutoRefresh());
-      return rejectWithValue(error.message || "Token refresh failed");
-    }
-  }
-);
-
-export const setupAutoRefresh = createAsyncThunk(
-  "auth/setupAutoRefresh",
-  async (accessToken: string, { dispatch }) => {
-    // Clear existing timer
-    if (refreshTimerId) {
-      clearTimeout(refreshTimerId);
-    }
-
-    const timeUntilExpiry = getTimeUntilTokenExpiry(accessToken);
-
-    if (timeUntilExpiry) {
-      // Refresh 2 minutes before expiry
-      const refreshTime = Math.max(timeUntilExpiry - 2 * 60 * 1000, 60000);
-
-      refreshTimerId = setTimeout(() => {
-        dispatch(refreshAuthToken());
-      }, refreshTime);
-    }
-
-    return { scheduled: true };
-  }
-);
-
-export const clearAutoRefresh = createAsyncThunk(
-  "auth/clearAutoRefresh",
-  async () => {
-    if (refreshTimerId) {
-      clearTimeout(refreshTimerId);
-      refreshTimerId = null;
-    }
-    return { cleared: true };
-  }
-);
-
 export const fetchCurrentUser = createAsyncThunk(
   "auth/fetchCurrentUser",
   async (_, { dispatch, rejectWithValue }) => {
@@ -188,7 +99,6 @@ export const fetchCurrentUser = createAsyncThunk(
       const result = await dispatch(
         authApi.endpoints.getCurrentUser.initiate()
       ).unwrap();
-
       if (result.success) {
         const userData = result.data;
         setUserInStorage(userData);
@@ -211,15 +121,12 @@ export const initializeAuth = createAsyncThunk(
     const user = getUserFromStorage();
 
     if (accessToken && refreshToken && user) {
-      dispatch(setupAutoRefresh(accessToken));
       return { user, accessToken, refreshToken };
     }
 
     if (accessToken && refreshToken) {
       try {
         const userData = await dispatch(fetchCurrentUser()).unwrap();
-        dispatch(setupAutoRefresh(accessToken));
-
         return {
           user: userData,
           accessToken,
@@ -231,8 +138,6 @@ export const initializeAuth = createAsyncThunk(
           const decoded = jwtDecode<DecodedJwt>(accessToken);
           const fallbackUser = mapDecodedToUser(decoded);
           setUserInStorage(fallbackUser);
-          dispatch(setupAutoRefresh(accessToken));
-
           return {
             user: fallbackUser,
             accessToken,
@@ -246,45 +151,7 @@ export const initializeAuth = createAsyncThunk(
     }
 
     if (refreshToken) {
-      try {
-        const result = await dispatch(refreshAuthToken()).unwrap();
-
-        const newAccessToken = result.data?.accessToken;
-        const newRefreshToken = result.data?.refreshToken;
-
-        if (!newAccessToken) {
-          throw new Error("No access token in refresh response");
-        }
-
-        try {
-          const userData = await dispatch(fetchCurrentUser()).unwrap();
-          dispatch(setupAutoRefresh(newAccessToken));
-
-          return {
-            user: userData,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          };
-        } catch (userError) {
-          console.error(
-            "Failed to fetch user after refresh, using JWT fallback:",
-            userError
-          );
-          const decoded = jwtDecode<DecodedJwt>(newAccessToken);
-          const fallbackUser = mapDecodedToUser(decoded);
-          setUserInStorage(fallbackUser);
-          dispatch(setupAutoRefresh(newAccessToken));
-
-          return {
-            user: fallbackUser,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          };
-        }
-      } catch (error) {
-        console.error("Token refresh during init failed:", error);
-        removeTokensFromStorage();
-      }
+      removeTokensFromStorage();
     }
 
     return null;
@@ -317,9 +184,9 @@ export const handleGoogleCallback = createAsyncThunk(
     if (!accessToken) {
       return rejectWithValue("Missing accessToken");
     }
+
     try {
       const decoded = jwtDecode<DecodedJwt>(accessToken);
-      console.log("decoded:", decoded);
       const user = mapDecodedToUser(decoded);
       return { user, accessToken, refreshToken: refreshToken || "" };
     } catch (e) {
@@ -357,11 +224,9 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
-
       setTokensInStorage(accessToken, refreshToken);
       setUserInStorage(user);
     },
-
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
@@ -369,40 +234,41 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
-
       removeTokensFromStorage();
-
-      if (refreshTimerId) {
-        clearTimeout(refreshTimerId);
-        refreshTimerId = null;
-      }
     },
-
     clearError: (state) => {
       state.error = null;
     },
-
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-
-    setError: (state, action: PayloadAction<string>) => {
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.isLoading = false;
     },
-
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
         setUserInStorage(state.user);
       }
     },
-
     setGoogleAuthLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    /**
+     * CRITICAL: This reducer is called by tokenRefresh.ts to update tokens
+     * It synchronizes localStorage and Redux state
+     */
+    setTokens: (
+      state,
+      action: PayloadAction<{ accessToken: string; refreshToken: string }>
+    ) => {
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+      // Tokens are already set in localStorage by tokenRefresh.ts
+      // This just updates Redux state to match
+    },
   },
-
   extraReducers: (builder) => {
     // Initialize auth
     builder
@@ -424,6 +290,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       });
 
+    // Fetch current user
     builder
       .addCase(fetchCurrentUser.pending, (state) => {
         // loading
@@ -436,24 +303,6 @@ const authSlice = createSlice({
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         console.warn("Failed to fetch current user:", action.payload);
-      });
-
-    // Refresh token
-    builder
-      .addCase(refreshAuthToken.fulfilled, (state, action) => {
-        const accessToken = action.payload.accessToken;
-        const refreshToken = action.payload.refreshToken;
-
-        state.accessToken = accessToken;
-        state.refreshToken = refreshToken;
-        state.error = null;
-      })
-      .addCase(refreshAuthToken.rejected, (state, action) => {
-        state.user = null;
-        state.accessToken = null;
-        state.refreshToken = null;
-        state.isAuthenticated = false;
-        state.error = action.payload as string;
       });
 
     // Google Auth
@@ -481,7 +330,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.isLoading = false;
         state.error = null;
-
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
       })
@@ -500,7 +348,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.isLoading = false;
         state.error = null;
-
         setTokensInStorage(accessToken, refreshToken);
         setUserInStorage(user);
       })
@@ -518,7 +365,6 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.isLoading = false;
           state.error = null;
-
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
         }
@@ -533,7 +379,6 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.isLoading = false;
           state.error = null;
-
           setTokensInStorage(accessToken, refreshToken);
           setUserInStorage(user);
         }
@@ -545,7 +390,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isLoading = false;
         state.error = null;
-
         removeTokensFromStorage();
       });
   },
@@ -559,6 +403,7 @@ export const {
   setError,
   updateUser,
   setGoogleAuthLoading,
+  setTokens,
 } = authSlice.actions;
 
 export const selectCurrentUser = (state: { auth: AuthState }) =>

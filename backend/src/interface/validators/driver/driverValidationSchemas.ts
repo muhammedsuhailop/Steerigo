@@ -23,7 +23,7 @@ const driverRegistrationBodySchema = z.object({
   mobile: z
     .string()
     .trim()
-    .regex(/^\+?[1-9]\d{10,14}$/, { message: "Invalid mobile number format" }),
+    .regex(/^\+?\d{10,15}$/, { message: "Invalid mobile number format" }),
   dob: z.preprocess(
     (arg) =>
       typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
@@ -42,15 +42,6 @@ const driverRegistrationBodySchema = z.object({
     .trim()
     .min(10, { message: "Address must be at least 10 characters" })
     .max(500, { message: "Address must be less than 500 characters" }),
-
-  vehicleTypes: z
-    .array(z.string())
-    .min(1, { message: "At least one vehicle type must be selected" })
-    .optional(),
-  gearTypes: z
-    .array(z.string())
-    .min(1, { message: "At least one gear type must be selected" })
-    .optional(),
 
   licenseCategory: z.enum(
     VALID_LICENSE_CATEGORIES as [LicenseCategory, ...LicenseCategory[]]
@@ -95,23 +86,27 @@ const driverRegistrationBodySchema = z.object({
     })
   ),
   idExpiryDate: z.preprocess(
-    (arg) =>
-      typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
-    z.date().refine((d) => d > new Date(), {
-      message: "ID expiry date must be in the future",
-    })
+    (arg) => {
+      if (typeof arg === "string" && arg.trim() === "") {
+        return undefined;
+      }
+      if (typeof arg === "string" || arg instanceof Date) {
+        return new Date(arg);
+      }
+      return arg;
+    },
+    z
+      .date()
+      .refine((d) => d > new Date(), {
+        message: "ID expiry date must be in the future",
+      })
+      .optional()
   ),
 
-  licenseFrontImage: z
-    .string()
-    .url({ message: "License front image must be a valid URL" }),
-  licenseBackImage: z
-    .string()
-    .url({ message: "License back image must be a valid URL" }),
-  idFrontImage: z
-    .string()
-    .url({ message: "ID front image must be a valid URL" }),
-  idBackImage: z.string().url({ message: "ID back image must be a valid URL" }),
+  licenseFrontImage: z.string(),
+  licenseBackImage: z.string(),
+  idFrontImage: z.string(),
+  idBackImage: z.string(),
 });
 
 export const driverRegistrationSchema = z.object({

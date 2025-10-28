@@ -9,6 +9,8 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { CookieHelper } from "@shared/utils/CookieHelper";
 
 @injectable()
 export class SignupController {
@@ -41,7 +43,7 @@ export class SignupController {
         data,
       };
 
-      res.status(201).json(response);
+      res.status(HttpStatusCodes.CREATED).json(response);
       Logger.info("Signup request completed successfully", {
         email: dto.getEmailValue(),
       });
@@ -70,13 +72,17 @@ export class SignupController {
       }
 
       const data = result.getValue();
+
+      CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
+      const { refreshToken, ...dataWithoutRefreshToken } = data;
+
       const response: ApiResponse = {
         success: true,
         message: AuthMessages.SIGNUP_VERIFICATION_SUCCESS,
-        data,
+        data: dataWithoutRefreshToken,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Signup verification completed successfully", {
         email: dto.getEmail(),
       });

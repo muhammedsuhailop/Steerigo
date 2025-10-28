@@ -21,6 +21,8 @@ export const DriverRegistrationForm: React.FC = () => {
     goToPreviousStep,
     getFormCompletionPercentage,
     resetRegistrationForm,
+    canProceedToNext,
+    handleSubmitRegistration,
   } = useDriverRegistration();
 
   const renderCurrentStep = () => {
@@ -166,6 +168,8 @@ export const DriverRegistrationForm: React.FC = () => {
           onPrevious={goToPreviousStep}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
+          // canProceedToNext={canProceedToNext()}
+          onSubmit={handleSubmitRegistration}
         />
       </div>
     </ErrorBoundary>

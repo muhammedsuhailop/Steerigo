@@ -38,7 +38,7 @@ interface DriverRegistrationRequestBody {
   idType: DocumentType;
   idNumber: string;
   idIssueDate: string;
-  idExpiryDate: string;
+  idExpiryDate: string ;
 
   // Document images
   licenseFrontImage: string;
@@ -138,7 +138,7 @@ export class DriverController {
         "idType",
         "idNumber",
         "idIssueDate",
-        "idExpiryDate",
+        // "idExpiryDate",
         "licenseFrontImage",
         "licenseBackImage",
         "idFrontImage",
@@ -174,7 +174,9 @@ export class DriverController {
         body.idType,
         body.idNumber,
         new Date(body.idIssueDate),
-        new Date(body.idExpiryDate),
+        body.idExpiryDate && body.idExpiryDate.trim() !== ""
+          ? new Date(body.idExpiryDate)
+          : null,
         body.licenseFrontImage,
         body.licenseBackImage,
         body.idFrontImage,

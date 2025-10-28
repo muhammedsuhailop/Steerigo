@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaEdit,
@@ -10,14 +10,23 @@ import { MdVerified, MdEmail, MdPhone } from "react-icons/md";
 import { Button } from "@/shared/components/ui/Button";
 import { Badge } from "@/shared/components/ui/Badge";
 import { Card } from "@/shared/components/ui/Card";
+import { Alert } from "@/shared/components/ui/Alert";
+import { ConfirmationModal } from "@/shared/components/ui/ConfirmationModal";
 import type { ProfileHeaderProps } from "./ProfileHeader.types";
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+interface ExtendedProfileHeaderProps extends ProfileHeaderProps {
+  onRegistrationSuccess?: () => Promise<void>;
+}
+
+export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
   profile,
   stats,
   onEditClick,
   onDriverRegisterClick,
+  onRegisterAsDriver,
+  onRegistrationSuccess,
   isLoading = false,
+  isRegisteringDriver = false,
 }) => {
   const formatMemberSince = (dateString: string) => {
     const date = new Date(dateString);
@@ -26,6 +35,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       month: "long",
     });
   };
+
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -36,9 +49,70 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       .slice(0, 2);
   };
 
+  useEffect(() => {
+    if (success && onRegistrationSuccess) {
+      const timer = setTimeout(async () => {
+        await onRegistrationSuccess();
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, onRegistrationSuccess]);
+
+  const handleRegisterClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmRegistration = async () => {
+    try {
+      setError(null);
+      setSuccess(null);
+
+      if (!onRegisterAsDriver) {
+        setError("Registration handler not available");
+        setShowConfirmation(false);
+        return;
+      }
+
+      const result = await onRegisterAsDriver();
+
+      if (result.success) {
+        setSuccess("Successfully registered as driver! Please Login again");
+      } else {
+        setError(result.error || "Registration failed");
+      }
+    } catch (err: any) {
+      setError("An error occurred during registration");
+    } finally {
+      setShowConfirmation(false);
+    }
+  };
+
   return (
     <Card className="mb-6">
       <div className="p-6">
+        {/* Error Alert */}
+        {error && (
+          <Alert
+            variant="danger"
+            className="mb-4"
+            onClose={() => setError(null)}
+          >
+            <p>{error}</p>
+          </Alert>
+        )}
+
+        {/* Success Alert */}
+        {success && (
+          <Alert
+            variant="success"
+            className="mb-4"
+            onClose={() => setSuccess(null)}
+          >
+            <p>{success}</p>
+          </Alert>
+        )}
+
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           {/* Profile Info */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 lg:mb-0">
@@ -108,19 +182,27 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Button
                 variant="outline"
                 leftIcon={<FaCar />}
-                onClick={onDriverRegisterClick}
-                disabled={isLoading}
+                onClick={handleRegisterClick}
+                disabled={isLoading || isRegisteringDriver}
+                isLoading={isRegisteringDriver}
                 className="justify-center sm:justify-start"
               >
-                Register as Driver
+                {isRegisteringDriver ? "Registering..." : "Register as Driver"}
               </Button>
+            )}
+
+            {profile.role === "Driver" && (
+              <Badge variant="success" className="text-sm py-2 px-3">
+                <FaCar className="w-3 h-3 mr-2" />
+                Driver Account
+              </Badge>
             )}
 
             <Button
               variant="primary"
               leftIcon={<FaEdit />}
               onClick={onEditClick}
-              disabled={isLoading}
+              disabled={isLoading || isRegisteringDriver}
               className="justify-center sm:justify-start"
             >
               Edit Profile
@@ -158,6 +240,19 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="text-sm text-gray-600">Favorite Drivers</div>
           </div>
         </div>
+
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          onConfirm={handleConfirmRegistration}
+          title="Register as Driver?"
+          message="Are you sure you want to register as a driver? You can’t switch back to a rider once registered."
+          confirmText="Yes, Register"
+          cancelText="Cancel"
+          variant="question"
+          isLoading={isRegisteringDriver}
+        />
       </div>
     </Card>
   );

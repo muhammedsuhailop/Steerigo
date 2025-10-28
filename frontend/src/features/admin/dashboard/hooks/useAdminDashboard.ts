@@ -1,23 +1,67 @@
-import { useCallback, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchAdminUsers } from "../../shared/store/adminUsersSlice";
-import type { RootState, AppDispatch } from "@/app/store";
+import { useCallback, useMemo } from "react";
+import {
+  useGetAllUsersQuery,
+  useGetAllDriversQuery,
+  useGetDriverStatsQuery,
+  useGetKYCRequestsQuery,
+} from "@/features/admin/shared/services/adminApi";
 
 export const useAdminDashboard = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  // Fetch users data with minimal params for dashboard
   const {
-    users = [],
-    pagination,
-    loading,
-  } = useSelector((state: RootState) => state.adminUsers || {});
+    data: usersData,
+    isLoading: usersLoading,
+    isFetching: usersFetching,
+    refetch: refetchUsers,
+  } = useGetAllUsersQuery({
+    page: 1,
+    limit: 100,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
 
-  // Fetch initial data for dashboard
-  useEffect(() => {
-    dispatch(fetchAdminUsers());
-  }, [dispatch]);
+  // Fetch drivers data for dashboard
+  const {
+    data: driversData,
+    isLoading: driversLoading,
+    isFetching: driversFetching,
+    refetch: refetchDrivers,
+  } = useGetAllDriversQuery({
+    page: 1,
+    limit: 100,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
 
-  const getDashboardStats = useCallback(() => {
-    const totalUsers = pagination?.totalItems || 0;
+  // Fetch driver statistics
+  const {
+    data: driverStatsData,
+    isLoading: driverStatsLoading,
+    refetch: refetchDriverStats,
+  } = useGetDriverStatsQuery();
+
+  // Fetch pending KYC requests
+  const {
+    data: kycData,
+    isLoading: kycLoading,
+    refetch: refetchKYC,
+  } = useGetKYCRequestsQuery({
+    status: "pending",
+    page: 1,
+    limit: 10,
+  });
+
+  // Extract data safely
+  const users = usersData?.data.users || [];
+  const drivers = driversData?.data.drivers || [];
+  const userPagination = usersData?.data.pagination;
+  const driverPagination = driversData?.data.pagination;
+  const kycRequests = kycData?.data.kycDocuments || [];
+
+  // Calculate user statistics from fetched data
+
+  const getUserStats = useMemo(() => {
+    const totalUsers = userPagination?.totalItems || 0;
     const activeUsers = users.filter((u) => u.status === "Active").length;
     const pendingUsers = users.filter(
       (u) => u.status === "Pending Verification"
@@ -33,19 +77,113 @@ export const useAdminDashboard = () => {
       inactiveUsers,
       suspendedUsers,
       blockedUsers,
-      recentUsers: users.slice(0, 5), //TODO
     };
-  }, [users, pagination]);
+  }, [users, userPagination]);
+
+  // Calculate driver statistics
+
+  const getDriverStats = useMemo(() => {
+    const totalDrivers = driverPagination?.totalItems || 0;
+    const activeDrivers = drivers.filter((d) => d.status === "active").length;
+    const pendingDrivers = drivers.filter((d) => d.status === "pending").length;
+    const suspendedDrivers = drivers.filter(
+      (d) => d.status === "suspended"
+    ).length;
+
+    // Use backend stats if available
+    const backendStats = driverStatsData?.data;
+
+    return {
+      totalDrivers: backendStats?.totalDrivers || totalDrivers,
+      activeDrivers: backendStats?.activeDrivers || activeDrivers,
+      pendingDrivers: backendStats?.pendingApproval || pendingDrivers,
+      suspendedDrivers: backendStats?.suspendedDrivers || suspendedDrivers,
+    };
+  }, [drivers, driverPagination, driverStatsData]);
+
+  // Get recent users (last 5)
+
+  const getRecentUsers = useMemo(() => {
+    return users.slice(0, 5);
+  }, [users]);
+
+  // Get recent drivers (last 5)
+
+  const getRecentDrivers = useMemo(() => {
+    return drivers.slice(0, 5);
+  }, [drivers]);
+
+  // Get KYC statistics
+
+  const getKYCStats = useMemo(() => {
+    return {
+      pendingKYC: kycRequests.length,
+      totalKYCRequests: kycData?.data.pagination.total || 0,
+    };
+  }, [kycRequests, kycData]);
+
+  // Get complete dashboard statistics
+
+  const getDashboardStats = useCallback(() => {
+    return {
+      // User stats
+      ...getUserStats,
+
+      // Driver stats
+      ...getDriverStats,
+
+      // KYC stats
+      ...getKYCStats,
+
+      // Recent data
+      recentUsers: getRecentUsers,
+      recentDrivers: getRecentDrivers,
+      recentKYCRequests: kycRequests.slice(0, 5),
+    };
+  }, [
+    getUserStats,
+    getDriverStats,
+    getKYCStats,
+    getRecentUsers,
+    getRecentDrivers,
+    kycRequests,
+  ]);
+
+  // Refresh all dashboard data
 
   const refreshDashboardData = useCallback(() => {
-    dispatch(fetchAdminUsers());
-  }, [dispatch]);
+    refetchUsers();
+    refetchDrivers();
+    refetchDriverStats();
+    refetchKYC();
+  }, [refetchUsers, refetchDrivers, refetchDriverStats, refetchKYC]);
+
+  // Check if any data is loading
+  const isLoading =
+    usersLoading || driversLoading || driverStatsLoading || kycLoading;
+  const isFetching = usersFetching || driversFetching;
 
   return {
+    // Main function
     getDashboardStats,
     refreshDashboardData,
-    loading,
+
+    // Loading states
+    loading: isLoading,
+    isFetching,
+
+    // Raw data (if needed)
     users,
-    pagination,
+    drivers,
+    kycRequests,
+    userPagination,
+    driverPagination,
+
+    // Individual stats getters
+    getUserStats,
+    getDriverStats,
+    getKYCStats,
+    getRecentUsers,
+    getRecentDrivers,
   };
 };

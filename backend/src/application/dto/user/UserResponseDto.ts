@@ -3,7 +3,7 @@ import { Email } from "@domain/value-objects/Email";
 export interface UserResponseDto {
   id: string;
   name: string;
-  email: Email;
+  email: string;
   mobile?: string;
   dob?: string;
   gender?: "Male" | "Female" | "Other";

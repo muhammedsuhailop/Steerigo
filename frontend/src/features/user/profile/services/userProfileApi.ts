@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { RootState } from "@/app/store";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import type {
   UserProfile,
   UserProfileFormData,
@@ -14,22 +14,13 @@ interface ApiResponse<T> {
 
 export const userProfileApi = createApi({
   reducerPath: "userProfileApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/user/profile",
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: axiosBaseQuery(),
   tagTypes: ["UserProfile", "UserStats"],
   endpoints: (builder) => ({
     // Get user profile
     getUserProfile: builder.query<ApiResponse<UserProfile>, string>({
       query: (userId) => ({
-        url: `/${userId}`,
+        url: `/user/profile/${userId}`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
@@ -43,9 +34,9 @@ export const userProfileApi = createApi({
       { userId: string; data: Partial<UserProfileFormData> }
     >({
       query: ({ userId, data }) => ({
-        url: `/${userId}`,
+        url: `/user/profile/${userId}`,
         method: "PUT",
-        body: data,
+        data,
       }),
       invalidatesTags: (result, error, { userId }) => [
         { type: "UserProfile", id: userId },
@@ -56,7 +47,7 @@ export const userProfileApi = createApi({
     // Get user statistics
     getUserStats: builder.query<ApiResponse<UserStats>, string>({
       query: (userId) => ({
-        url: `/${userId}/stats`,
+        url: `/user/profile/${userId}/stats`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
@@ -74,9 +65,12 @@ export const userProfileApi = createApi({
         formData.append("profilePicture", file);
 
         return {
-          url: `/${userId}/upload-picture`,
+          url: `/user/profile/${userId}/upload-picture`,
           method: "POST",
-          body: formData,
+          data: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         };
       },
       invalidatesTags: (result, error, { userId }) => [
@@ -90,12 +84,26 @@ export const userProfileApi = createApi({
       string
     >({
       query: (userId) => ({
-        url: `/${userId}`,
+        url: `/user/profile/${userId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, userId) => [
         { type: "UserProfile", id: userId },
         { type: "UserStats", id: userId },
+      ],
+    }),
+    
+    // Register as driver
+    registerAsDriver: builder.mutation<
+      { success: boolean; message: string; data: UserProfile },
+      string
+    >({
+      query: (userId) => ({
+        url: `/user/${userId}/register-as-driver`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, userId) => [
+        { type: "UserProfile", id: userId },
       ],
     }),
   }),
@@ -107,4 +115,5 @@ export const {
   useGetUserStatsQuery,
   useUploadProfilePictureMutation,
   useDeleteUserAccountMutation,
+  useRegisterAsDriverMutation,
 } = userProfileApi;

@@ -8,6 +8,8 @@ import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
+import { CookieHelper } from "@shared/utils/CookieHelper";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class UserAuthController {
@@ -41,13 +43,18 @@ export class UserAuthController {
       }
 
       const data = result.getValue();
+
+      // Set refresh token as httpOnly cookie
+      CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
+      const { refreshToken, ...dataWithoutRefreshToken } = data;
+
       const response: ApiResponse = {
         success: true,
         message: "Login successful",
-        data,
+        data: dataWithoutRefreshToken,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Login completed successfully", {
         email: dto.getEmailValue(),
       });
@@ -64,7 +71,9 @@ export class UserAuthController {
     try {
       const userId = req.user?.userId;
       if (!userId) {
-        res.status(401).json({ success: false, message: "Unauthorized" });
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
         return;
       }
 
@@ -89,7 +98,7 @@ export class UserAuthController {
         data,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,

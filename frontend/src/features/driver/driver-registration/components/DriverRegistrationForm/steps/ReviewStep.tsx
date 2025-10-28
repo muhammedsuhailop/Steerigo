@@ -1,11 +1,11 @@
 import React from "react";
 import { useDriverRegistration } from "../../../hooks/useDriverRegistration";
 import { Badge } from "@/shared/components/ui";
-import { MdErrorOutline, MdCheck, MdWarning } from "react-icons/md";
+import { MdCheck, MdWarning } from "react-icons/md";
 
 export const ReviewStep: React.FC = () => {
   const { formData, goToStep } = useDriverRegistration();
-  console.log(formData.licenseCategory);
+
   const handleEditSection = (step: number) => {
     goToStep(step);
   };
@@ -64,27 +64,64 @@ export const ReviewStep: React.FC = () => {
             License Information
           </h3>
           <button
-            onClick={() => handleEditSection(2)}
+            onClick={() => handleEditSection(1)}
             className="text-gray-700 hover:text-gray-900 font-medium text-sm"
           >
             Edit
           </button>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
+          {/* License Category - FIXED: Now single value, not array */}
           <div>
-            <span className="text-gray-500">Category:</span>
-            <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.licenseCategory?.map((type: string) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
+            <span className="text-gray-500">License Category:</span>
+            <div className="ml-2 mt-1">
+              {formData.licenseCategory ? (
+                <Badge variant="secondary">{formData.licenseCategory}</Badge>
+              ) : (
+                <span className="text-gray-400 text-xs">Not specified</span>
+              )}
             </div>
           </div>
+
           <div>
-            <span className="text-gray-500">Number:</span>
+            <span className="text-gray-500">License Number:</span>
             <span className="ml-2 font-medium">{formData.licenseNumber}</span>
           </div>
+
+          {/* License Body Types - FIXED: Correct field name */}
+          <div>
+            <span className="text-gray-500">License Body Types:</span>
+            <div className="ml-2 flex flex-wrap gap-1 mt-1">
+              {formData.licenseBodyTypes &&
+              formData.licenseBodyTypes.length > 0 ? (
+                formData.licenseBodyTypes.map((type: string) => (
+                  <Badge key={type} variant="secondary">
+                    {type}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-gray-400 text-xs">Not specified</span>
+              )}
+            </div>
+          </div>
+
+          {/* License Gear Types - FIXED: Correct field name */}
+          <div>
+            <span className="text-gray-500">License Gear Types:</span>
+            <div className="ml-2 flex flex-wrap gap-1 mt-1">
+              {formData.licenseGearTypes &&
+              formData.licenseGearTypes.length > 0 ? (
+                formData.licenseGearTypes.map((type: string) => (
+                  <Badge key={type} variant="secondary">
+                    {type}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-gray-400 text-xs">Not specified</span>
+              )}
+            </div>
+          </div>
+
           <div>
             <span className="text-gray-500">Issue Date:</span>
             <span className="ml-2 font-medium">
@@ -97,26 +134,6 @@ export const ReviewStep: React.FC = () => {
               {formData.licenseExpiryDate}
             </span>
           </div>
-          <div>
-            <span className="text-gray-500">Body Types:</span>
-            <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.bodyTypes?.map((type: string) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <div>
-            <span className="text-gray-500">Gear Types:</span>
-            <div className="ml-2 flex flex-wrap gap-1 mt-1">
-              {formData.gearTypes?.map((type: string) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -127,7 +144,7 @@ export const ReviewStep: React.FC = () => {
             ID Information
           </h3>
           <button
-            onClick={() => handleEditSection(3)}
+            onClick={() => handleEditSection(2)}
             className="text-gray-700 hover:text-gray-900 font-medium text-sm"
           >
             Edit
@@ -158,7 +175,7 @@ export const ReviewStep: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
           <button
-            onClick={() => handleEditSection(4)}
+            onClick={() => handleEditSection(3)}
             className="text-gray-700 hover:text-gray-900 font-medium text-sm"
           >
             Edit
@@ -173,7 +190,7 @@ export const ReviewStep: React.FC = () => {
           ].map((doc) => (
             <div key={doc.key} className="flex items-center space-x-2">
               <div
-                className={`w-4 h-4 rounded-full ${
+                className={`w-4 h-4 rounded-full flex items-center justify-center ${
                   (formData as any)[doc.key] ? "bg-emerald-500" : "bg-gray-300"
                 }`}
               >

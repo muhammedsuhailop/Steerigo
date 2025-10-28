@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { AdminServiceContainer } from "../../shared/services";
-import { useAppDispatch } from "@/app/store/hooks";
 import { Footer } from "@/features/public/components";
 import { MdOutlineRefresh } from "react-icons/md";
 import { AdminSidebar, AdminTopbar } from "../../shared/components";
@@ -16,24 +14,13 @@ import {
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
-  const dispatch = useAppDispatch();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Use service layer instead of direct Redux access
   const { getDashboardStats, loading, refreshDashboardData } =
     useAdminDashboard();
 
-  // Initialize services
-  const container = AdminServiceContainer.getInstance();
-  try {
-    container.getServices();
-  } catch {
-    container.initialize(dispatch);
-  }
-  const services = container.getServices();
-
-  // Get stats using service layer
+  // Get stats using the hook
   const stats = getDashboardStats();
 
   useEffect(() => {
@@ -55,7 +42,8 @@ const AdminDashboard: React.FC = () => {
 
   const handleRefresh = () => {
     refreshDashboardData();
-    services.notificationService.showInfo("Dashboard data refreshed");
+    // Show notification  //TODO
+    console.log("Dashboard data refreshed");
   };
 
   const handleViewAllUsers = () => {
@@ -65,9 +53,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleUserClick = (clickedUser: any) => {
     // Handle user click - could navigate to user detail page
-    services.notificationService.showInfo(
-      `Viewing details for ${clickedUser.name}`
-    );
+    console.log(`Viewing details for ${clickedUser.name}`);
   };
 
   return (

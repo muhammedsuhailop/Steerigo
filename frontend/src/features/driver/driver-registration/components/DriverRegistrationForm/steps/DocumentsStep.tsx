@@ -24,22 +24,30 @@ export const DocumentsStep: React.FC = () => {
   };
 
   const handleFileRemove = (fieldName: string) => {
-    updateData({ [fieldName]: null });
+    updateData({ [fieldName]: undefined });
   };
 
   const documentFields = [
     {
-      fieldName: "licenseFrontImage",
+      fieldName: "licenseFrontImage" as const,
       label: "License Front Image",
       required: true,
     },
     {
-      fieldName: "licenseBackImage",
+      fieldName: "licenseBackImage" as const,
       label: "License Back Image",
       required: true,
     },
-    { fieldName: "idFrontImage", label: "ID Front Image", required: true },
-    { fieldName: "idBackImage", label: "ID Back Image", required: true },
+    {
+      fieldName: "idFrontImage" as const,
+      label: "ID Front Image",
+      required: true,
+    },
+    {
+      fieldName: "idBackImage" as const,
+      label: "ID Back Image",
+      required: true,
+    },
   ];
 
   return (

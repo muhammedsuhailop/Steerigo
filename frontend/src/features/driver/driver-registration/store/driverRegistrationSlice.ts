@@ -10,6 +10,7 @@ const initialState: DriverRegistrationState = {
   errors: {},
   uploadProgress: {},
   formData: {
+    // Personal Info
     name: "",
     mobile: "",
     dob: "",
@@ -17,18 +18,26 @@ const initialState: DriverRegistrationState = {
     state: "",
     pin: "",
     address: "",
-    bodyTypes: [],
-    gearTypes: [],
-    licenseCategory: [],
+
+    // License Info
+    licenseCategory: "LMV",
     licenseNumber: "",
     licenseBodyTypes: [],
     licenseGearTypes: [],
     licenseIssueDate: "",
     licenseExpiryDate: "",
+
+    // ID Info
     idType: "PAN",
     idNumber: "",
     idIssueDate: "",
     idExpiryDate: "",
+
+    // Documents
+    licenseFrontImage: undefined,
+    licenseBackImage: undefined,
+    idFrontImage: undefined,
+    idBackImage: undefined,
   },
   isSubmitting: false,
   registrationSuccess: false,
@@ -44,32 +53,40 @@ const driverRegistrationSlice = createSlice({
       action: PayloadAction<Partial<DriverRegistrationData>>
     ) {
       state.formData = { ...state.formData, ...action.payload };
+      // Clear errors for updated fields
       Object.keys(action.payload).forEach((key) => {
         delete state.errors[key];
       });
     },
+
     setCurrentStep(state, action: PayloadAction<RegistrationStep>) {
       state.currentStep = action.payload;
     },
+
     nextStep(state) {
       if (state.currentStep < RegistrationStep.REVIEW) {
         state.currentStep += 1;
       }
     },
+
     previousStep(state) {
       if (state.currentStep > RegistrationStep.PERSONAL_INFO) {
         state.currentStep -= 1;
       }
     },
+
     setErrors(state, action: PayloadAction<Record<string, string>>) {
       state.errors = action.payload;
     },
+
     clearError(state, action: PayloadAction<string>) {
       delete state.errors[action.payload];
     },
+
     clearAllErrors(state) {
       state.errors = {};
     },
+
     updateUploadProgress(
       state,
       action: PayloadAction<{ fieldName: string; progress: number }>
@@ -77,6 +94,7 @@ const driverRegistrationSlice = createSlice({
       const { fieldName, progress } = action.payload;
       state.uploadProgress[fieldName] = progress;
     },
+
     setSubmissionState(
       state,
       action: PayloadAction<{
@@ -93,6 +111,7 @@ const driverRegistrationSlice = createSlice({
         state.registrationError = action.payload.error;
       }
     },
+
     resetForm(state) {
       return { ...initialState };
     },
@@ -119,15 +138,21 @@ import type { RootState } from "@/app/store/rootReducer";
 
 export const selectFormData = (state: RootState) =>
   state.driverRegistration.formData;
+
 export const selectCurrentStep = (state: RootState) =>
   state.driverRegistration.currentStep;
+
 export const selectErrors = (state: RootState) =>
   state.driverRegistration.errors;
+
 export const selectUploadProgress = (state: RootState) =>
   state.driverRegistration.uploadProgress;
+
 export const selectIsSubmitting = (state: RootState) =>
   state.driverRegistration.isSubmitting;
+
 export const selectRegistrationSuccess = (state: RootState) =>
   state.driverRegistration.registrationSuccess;
+
 export const selectRegistrationError = (state: RootState) =>
   state.driverRegistration.registrationError;

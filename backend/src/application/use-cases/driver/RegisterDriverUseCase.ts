@@ -62,11 +62,13 @@ export class DriverRegistrationUseCase {
         );
       }
 
-      if (dto.getIdExpiryDate() <= now) {
+      const idExpiryDate = dto.getIdExpiryDate();
+      if (idExpiryDate !== null && idExpiryDate <= now) {
         return Result.failure(
           new DomainError("ID expiry date must be in the future")
         );
       }
+
 
       if (dto.getIdIssueDate() > now) {
         return Result.failure(
@@ -115,7 +117,7 @@ export class DriverRegistrationUseCase {
         dto.getIdType(),
         dto.getIdNumber(),
         dto.getIdIssueDate(),
-        dto.getIdExpiryDate(),
+        dto.getIdExpiryDate() ?? undefined,
         [dto.getIdFrontImage()],
         [dto.getIdBackImage()]
       );

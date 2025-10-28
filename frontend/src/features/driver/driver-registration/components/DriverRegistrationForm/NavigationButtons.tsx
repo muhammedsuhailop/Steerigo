@@ -1,7 +1,6 @@
 import React from "react";
 import { RegistrationStep } from "../../types/driverRegistration.types";
 import { Button } from "@/shared/components/ui";
-import { useDriverRegistration } from "../../hooks/useDriverRegistration";
 
 interface NavigationButtonsProps {
   currentStep: RegistrationStep;
@@ -9,6 +8,7 @@ interface NavigationButtonsProps {
   onPrevious: () => void;
   isLoading?: boolean;
   isSubmitting?: boolean;
+  onSubmit: () => Promise<any>;
 }
 
 export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
@@ -17,102 +17,49 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onPrevious,
   isLoading = false,
   isSubmitting = false,
+  onSubmit,
 }) => {
-  const { canProceedToNext, handleSubmitRegistration } =
-    useDriverRegistration();
-
+  console.log("Current step index:", currentStep);
   const isFirstStep = currentStep === RegistrationStep.PERSONAL_INFO;
   const isLastStep = currentStep === RegistrationStep.REVIEW;
-  const canProceed = canProceedToNext();
+  console.log("isLastStep step index:", isLastStep);
 
   const handleNextClick = async () => {
     if (isLastStep) {
-      await handleSubmitRegistration();
+      await onSubmit();
     } else {
-      const canProceed = onNext();
+      const isValid = onNext();
+      if (!isValid) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
   return (
     <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-      {/* Previous Button */}
-      <div>
-        {!isFirstStep && (
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-            disabled={isLoading || isSubmitting}
-            leftIcon={
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            }
-          >
-            Previous
-          </Button>
-        )}
-      </div>
-
-      {/* Step Info */}
+      {!isFirstStep && (
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          disabled={isLoading || isSubmitting}
+        >
+          Previous
+        </Button>
+      )}
       <div className="text-sm text-gray-500">
         Step {currentStep + 1} of {Object.keys(RegistrationStep).length / 2}
       </div>
-
-      {/* Next/Submit Button */}
-      <div>
-        <Button
-          onClick={handleNextClick}
-          disabled={isLoading || isSubmitting}
-          isLoading={isSubmitting}
-          rightIcon={
-            isLastStep ? (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )
-          }
-        >
-          {isLastStep
-            ? isSubmitting
-              ? "Submitting..."
-              : "Submit Registration"
-            : "Next"}
-        </Button>
-      </div>
+      <Button
+        onClick={handleNextClick}
+        disabled={isLoading || isSubmitting}
+        isLoading={isSubmitting}
+      >
+        {isLastStep
+          ? isSubmitting
+            ? "Submitting..."
+            : "Submit Registration"
+          : "Next"}
+      </Button>
     </div>
   );
 };

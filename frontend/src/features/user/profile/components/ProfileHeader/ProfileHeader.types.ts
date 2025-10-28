@@ -5,5 +5,7 @@ export interface ProfileHeaderProps {
   stats: UserStats;
   onEditClick: () => void;
   onDriverRegisterClick: () => void;
+  onRegisterAsDriver?: () => Promise<{ success: boolean; error?: string }>;
+  isRegisteringDriver?: boolean;
   isLoading?: boolean;
 }

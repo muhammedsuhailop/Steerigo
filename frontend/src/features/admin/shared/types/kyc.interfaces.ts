@@ -1,54 +1,71 @@
-export interface KYCRequest {
-  kycId: string;
-  driverId: string;
-  driverName: string;
-  email: string;
-  phone: string;
-  status: "Pending" | "Approved" | "Rejected";
-  isVerified: boolean;
-  submittedAt: string;
+export interface KYCDocument {
+  id: string;
+  docType: string;
+  docNumber: string;
+  issueDate: string;
+  expiryDate: string | null;
+  verificationStatus: "InReview" | "Approved" | "Rejected";
+  docImageUrlsFront: string[];
+  docImageUrlsBack: string[];
+  createdAt: string;
   updatedAt: string;
+  isExpired: boolean;
+  rejectionReason?: string;
   reviewedBy?: string;
   reviewedAt?: string;
-  rejectionReason?: string;
-  personalInfo: {
-    fullName: string;
-    dateOfBirth: string;
-    address: string;
-    city: string;
-    zipCode: string;
-    gender: string;
-  };
-  licenseInfo: {
-    licenseNumber: string;
-    expiryDate: string;
-    issueDate: string;
-    licenseClass: string;
-  };
-  vehicleInfo: {
-    make: string;
-    model: string;
-    year: number;
-    plateNumber: string;
-    color: string;
-    type: string;
-  };
-  documents: {
-    frontSide: KYCDocument;
-    backSide: KYCDocument;
-    profilePhoto: KYCDocument;
-    vehicleRegistration?: KYCDocument;
-    insurance?: KYCDocument;
+}
+
+export interface KYCDriver {
+  driverId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userMobile: string;
+  driverStatus: "Active" | "Inactive" | "Suspended";
+}
+
+export interface KYCRequest {
+  kyc: KYCDocument;
+  driver: KYCDriver;
+}
+
+export interface KYCPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface KYCListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    kycDocuments: KYCRequest[];
+    pagination: KYCPagination;
   };
 }
 
-export interface KYCDocument {
-  id: string;
-  type: "DrivingLicense" | "Aadhaar" | "VehicleRegistration";
-  url: string;
-  uploadedAt: string;
-  status: "Pending" | "Approved" | "Rejected";
-  rejectionReason?: string;
+export interface KYCDetailResponse {
+  success: boolean;
+  message: string;
+  data: KYCRequest;
+}
+
+export interface KYCUpdateRequest {
+  requestId: string;
+  action: "approve" | "reject";
+  reason?: string;
+  status?: "approved" | "rejected";
+}
+
+export interface KYCUpdateResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    kyc: KYCDocument;
+  };
 }
 
 export interface KYCFilters {
@@ -60,4 +77,40 @@ export interface KYCFilters {
   sortOrder: "asc" | "desc";
 }
 
-export type KYCAction = "Approve" | "Reject";
+export type KYCAction = "approve" | "reject";
+
+export type KYCVerificationStatus = "InReview" | "Approved" | "Rejected";
+
+export type KYCDocType =
+  | "License"
+  | "PAN"
+  | "Aadhaar"
+  | "Passport"
+  | "Vehicle Registration"
+  | "Insurance";
+
+export type DriverStatus = "Active" | "Inactive" | "Suspended";
+
+// Filter options for UI components
+export const KYC_STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "InReview", label: "In Review" },
+  { value: "Approved", label: "Approved" },
+  { value: "Rejected", label: "Rejected" },
+] as const;
+
+export const KYC_SORT_OPTIONS = [
+  { value: "createdAt", label: "Submission Date" },
+  { value: "updatedAt", label: "Last Updated" },
+  { value: "verificationStatus", label: "Status" },
+  { value: "docType", label: "Document Type" },
+] as const;
+
+export const KYC_DOC_TYPES = [
+  "License",
+  "PAN",
+  "Aadhaar",
+  "Passport",
+  "Vehicle Registration",
+  "Insurance",
+] as const;

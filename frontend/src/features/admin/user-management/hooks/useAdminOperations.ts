@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { AdminServiceContainer } from "../../shared/services";
 import {
-  fetchAdminUsers,
-  updateUserStatus,
-} from "../../shared/store/adminUsersSlice";
+  setFilters,
+  setPage,
+  setLimit,
+  resetFilters,
+} from "@/features/admin/shared/store/adminUsersSlice";
+import { useUpdateUserStatusMutation } from "@/features/admin/shared/services/adminApi";
 import type { AppDispatch } from "@/app/store";
 import type {
   UserAction,
@@ -13,65 +15,51 @@ import type {
 
 export const useAdminOperations = () => {
   const dispatch = useDispatch<AppDispatch>();
-
-  // Initialize services
-  const container = AdminServiceContainer.getInstance();
-  try {
-    container.getServices();
-  } catch {
-    container.initialize(dispatch);
-  }
-  const services = container.getServices();
+  const [updateUserStatus, { isLoading: isUpdating }] =
+    useUpdateUserStatusMutation();
 
   const handleFiltersChange = useCallback(
     (filters: Partial<UserFilters>) => {
-      services.stateService.setFilters(filters);
+      dispatch(setFilters(filters));
     },
-    [services.stateService]
+    [dispatch]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      services.stateService.setPage(page);
+      dispatch(setPage(page));
     },
-    [services.stateService]
+    [dispatch]
   );
 
   const handleSizeChange = useCallback(
     (limit: number) => {
-      services.stateService.setLimit(limit);
+      dispatch(setLimit(limit));
     },
-    [services.stateService]
+    [dispatch]
   );
 
   const handleUserAction = useCallback(
     async (userId: string, action: UserAction) => {
       try {
-        const result = await dispatch(
-          updateUserStatus({ userId, action })
-        ).unwrap();
-        services.notificationService.showSuccess(result.message);
-        // Refresh data
-        dispatch(fetchAdminUsers());
+        const result = await updateUserStatus({ userId, action }).unwrap();
+        console.log("User action successful:", result.message);
+        return { success: true, message: result.message };
       } catch (error: any) {
-        const errorMessage = error.message || "Failed to update user status";
-        services.notificationService.showError(errorMessage);
-        console.error("User action failed:", error);
+        const errorMessage =
+          error?.data?.message ||
+          error?.message ||
+          "Failed to update user status";
+        console.error("User action failed:", errorMessage);
+        throw new Error(errorMessage);
       }
     },
-    [dispatch, services.notificationService]
+    [updateUserStatus]
   );
 
   const handleResetFilters = useCallback(() => {
-    services.stateService.resetFilters();
-  }, [services.stateService]);
-
-  const clearActionLoading = useCallback(
-    (userId: string) => {
-      services.stateService.clearActionLoading(userId);
-    },
-    [services.stateService]
-  );
+    dispatch(resetFilters());
+  }, [dispatch]);
 
   return {
     handleFiltersChange,
@@ -79,6 +67,6 @@ export const useAdminOperations = () => {
     handleSizeChange,
     handleUserAction,
     handleResetFilters,
-    clearActionLoading,
+    isUpdating,
   };
 };

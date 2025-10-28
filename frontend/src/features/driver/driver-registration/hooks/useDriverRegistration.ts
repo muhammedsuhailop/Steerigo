@@ -202,6 +202,7 @@ export const useDriverRegistration = () => {
 
   // Registration submission
   const handleSubmitRegistration = useCallback(async () => {
+    console.log("handleSubmitRegistration called");
     const validation = driverValidationService.validateAll(
       formData as DriverRegistrationData
     );

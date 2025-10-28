@@ -26,10 +26,15 @@ export class SecurityMiddleware {
       origin:
         process.env.NODE_ENV === "production"
           ? ["https://steerigo.com", "https://www.steerigo.com"]
-          : ["http://localhost:4000", "http://localhost:4001"],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          : [
+              "http://localhost:5173", 
+              "http://localhost:4000",
+              "http://localhost:4001",
+            ],
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
+      credentials: true, // allows cookies
+      exposedHeaders: ["Set-Cookie"], // Allow frontend to see Set-Cookie header
     });
   }
 

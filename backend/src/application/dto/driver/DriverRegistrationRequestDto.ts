@@ -22,7 +22,7 @@ export class DriverRegistrationRequestDto {
     private readonly idType: DocumentType,
     private readonly idNumber: string,
     private readonly idIssueDate: Date,
-    private readonly idExpiryDate: Date,
+    private readonly idExpiryDate: Date | null,
 
     private readonly licenseFrontImage: string,
     private readonly licenseBackImage: string,
@@ -101,7 +101,7 @@ export class DriverRegistrationRequestDto {
     return this.idIssueDate;
   }
 
-  getIdExpiryDate(): Date {
+  getIdExpiryDate(): Date | null {
     return this.idExpiryDate;
   }
 

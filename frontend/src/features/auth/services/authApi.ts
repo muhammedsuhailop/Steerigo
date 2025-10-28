@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import {
   logout as logoutAction,
   getRefreshTokenFromStorage,
@@ -14,29 +15,17 @@ import type {
   User,
 } from "../types";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: "/api/auth",
-  credentials: "include",
-  prepareHeaders: (headers, { getState }) => {
-    const accessToken = (getState() as any).auth.accessToken;
-    if (accessToken) {
-      headers.set("authorization", `Bearer ${accessToken}`);
-    }
-    headers.set("Content-Type", "application/json");
-    return headers;
-  },
-});
-
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery,
+  baseQuery: axiosBaseQuery(),
   tagTypes: ["Auth", "User"],
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
-        url: "/login",
+        url: "/auth/login",
         method: "POST",
-        body: credentials,
+        data: credentials,
+        skipAuth: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -46,9 +35,10 @@ export const authApi = createApi({
       SignupRequest
     >({
       query: (userData) => ({
-        url: "/signup",
+        url: "/auth/signup",
         method: "POST",
-        body: userData,
+        data: userData,
+        skipAuth: true,
       }),
     }),
 
@@ -57,8 +47,9 @@ export const authApi = createApi({
       void
     >({
       query: () => ({
-        url: "/google",
+        url: "/auth/google",
         method: "GET",
+        skipAuth: true,
       }),
     }),
 
@@ -67,18 +58,20 @@ export const authApi = createApi({
       { code: string; state?: string }
     >({
       query: (callbackData) => ({
-        url: "/google/callback",
+        url: "/auth/google/callback",
         method: "POST",
-        body: callbackData,
+        data: callbackData,
+        skipAuth: true,
       }),
       invalidatesTags: ["Auth"],
     }),
 
     verifySignupOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
       query: (otpData) => ({
-        url: "/signup/verify",
+        url: "/auth/signup/verify",
         method: "POST",
-        body: otpData,
+        data: otpData,
+        skipAuth: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -88,17 +81,19 @@ export const authApi = createApi({
       { email: string }
     >({
       query: ({ email }) => ({
-        url: "/signup/resend",
+        url: "/auth/signup/resend",
         method: "POST",
-        body: { email },
+        data: { email },
+        skipAuth: true,
       }),
     }),
 
     verifyOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
       query: (otpData) => ({
-        url: "/signup/verify",
+        url: "/auth/signup/verify",
         method: "POST",
-        body: otpData,
+        data: otpData,
+        skipAuth: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -108,9 +103,10 @@ export const authApi = createApi({
       { email: string }
     >({
       query: ({ email }) => ({
-        url: "/resend-otp",
+        url: "/auth/resend-otp",
         method: "POST",
-        body: { email },
+        data: { email },
+        skipAuth: true,
       }),
     }),
 
@@ -119,9 +115,10 @@ export const authApi = createApi({
       ForgotPasswordRequest
     >({
       query: (emailData) => ({
-        url: "/forgot-password",
+        url: "/auth/forgot-password",
         method: "POST",
-        body: emailData,
+        data: emailData,
+        skipAuth: true,
       }),
     }),
 
@@ -130,9 +127,10 @@ export const authApi = createApi({
       ResetPasswordRequest
     >({
       query: (resetData) => ({
-        url: "/reset-password",
+        url: "/auth/reset-password",
         method: "POST",
-        body: resetData,
+        data: resetData,
+        skipAuth: true,
       }),
     }),
 
@@ -141,9 +139,9 @@ export const authApi = createApi({
       UpdatePasswordRequest
     >({
       query: (passwordData) => ({
-        url: "/update-password",
+        url: "/auth/update-password",
         method: "PUT",
-        body: passwordData,
+        data: passwordData,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -162,9 +160,10 @@ export const authApi = createApi({
           throw new Error("No refresh token found");
         }
         return {
-          url: "/refresh-token",
+          url: "/auth/refresh-token",
           method: "POST",
-          body: { refreshToken },
+          data: { refreshToken },
+          skipAuth: true,
         };
       },
       invalidatesTags: ["Auth"],
@@ -181,10 +180,9 @@ export const authApi = createApi({
       query: () => {
         const refreshToken = getRefreshTokenFromStorage() || "";
         return {
-          url: "/logout",
+          url: "/auth/logout",
           method: "POST",
-          body: { refreshToken },
-          headers: { "Content-Type": "application/json" },
+          data: { refreshToken },
         };
       },
       invalidatesTags: ["Auth", "User"],
@@ -201,7 +199,10 @@ export const authApi = createApi({
     }),
 
     getCurrentUser: builder.query<{ success: boolean; data: User }, void>({
-      query: () => "/me",
+      query: () => ({
+        url: "/auth/me",
+        method: "GET",
+      }),
       providesTags: ["User"],
     }),
   }),

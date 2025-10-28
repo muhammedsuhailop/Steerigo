@@ -11,26 +11,6 @@ export const PersonalInfoStep: React.FC = () => {
   const [pinError, setPinError] = useState<string | null>(null);
   const hasErrors = Object.keys(errors).length > 0;
 
-  // const lastFetchedPinRef = useRef<string | null>(null);
-
-  // useEffect(() => {
-  //   const pin = formData.pin;
-  //   if (/^\d{6}$/.test(pin) && pin !== lastFetchedPinRef.current) {
-  //     setLoadingPin(true);
-  //     setPinError(null);
-  //     lastFetchedPinRef.current = pin;
-
-  //     getPincodeDetails(pin).then((res) => {
-  //       setLoadingPin(false);
-  //       if (res.success) {
-  //         updateData({ state: res.data.state });
-  //       } else {
-  //         setPinError(res.error);
-  //       }
-  //     });
-  //   }
-  // }, [formData.pin]);
-
   const handleInputChange =
     (field: string) =>
     (
@@ -138,7 +118,7 @@ export const PersonalInfoStep: React.FC = () => {
         name="pin"
         value={formData.pin || ""}
         onChange={handleInputChange("pin")}
-        error={errors.pin || pinError}
+        error={errors.pin || pinError || undefined}
         isInvalid={!!errors.pin}
         placeholder="Enter your postal code"
         maxLength={6}
