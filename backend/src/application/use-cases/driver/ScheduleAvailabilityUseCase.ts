@@ -57,13 +57,9 @@ export class ScheduleAvailabilityUseCase {
       }
 
       const driverId = driver.getId();
+      const location = Location.create(dto.getLocationData());
 
-      const existingAvailability =
-        await this.availabilityRepository.findActiveByDriverId(driverId);
-      if (existingAvailability) {
-        return Result.failure(new DriverAlreadyAvailableError(driverId));
-      }
-
+      // CHECK: Find conflicting schedule to update
       const conflictingSchedule =
         await this.availabilityRepository.findConflictingSchedule(
           driverId,
@@ -71,32 +67,45 @@ export class ScheduleAvailabilityUseCase {
           dto.getAvailableTill()
         );
 
+      let savedAvailability: DriverAvailability | void;
+
       if (conflictingSchedule) {
-        return Result.failure(
-          new InvalidAvailabilityScheduleError(
-            "Schedule conflicts with existing availability"
-          )
+        // UPDATE: Override existing schedule with new data
+        conflictingSchedule.updateSchedule(
+          dto.getAvailableFrom(),
+          dto.getAvailableTill()
         );
+        conflictingSchedule.updateLocation(location);
+        savedAvailability =
+          await this.availabilityRepository.save(conflictingSchedule);
+        Logger.info("Updated existing availability", {
+          driverId,
+          availabilityId: conflictingSchedule.getId(),
+        });
+      } else {
+        // CREATE: New availability if no conflict
+        const availabilityId = new Types.ObjectId();
+        const availability = DriverAvailability.create(
+          availabilityId.toString(),
+          driverId,
+          dto.getAvailableFrom(),
+          dto.getAvailableTill(),
+          location
+        );
+        savedAvailability =
+          await this.availabilityRepository.save(availability);
+        if (savedAvailability) {
+          Logger.info("Created new availability", {
+            driverId,
+            availabilityId: savedAvailability.getId(),
+          });
+        }
       }
-
-      const location = Location.create(dto.getLocationData());
-
-      const availabilityId = new Types.ObjectId();
-
-      const availability = DriverAvailability.create(
-        availabilityId.toString(),
-        driverId,
-        dto.getAvailableFrom(),
-        dto.getAvailableTill(),
-        location
-      );
-
-      const savedAvailability =
-        await this.availabilityRepository.save(availability);
 
       if (!savedAvailability) {
         return Result.failure(new Error("Failed to save driver availability"));
       }
+
       const response = {
         id: savedAvailability.getId(),
         driverId: savedAvailability.getDriverId(),
@@ -108,11 +117,6 @@ export class ScheduleAvailabilityUseCase {
           .getCoordinates(),
         createdAt: savedAvailability.getCreatedAt().toISOString(),
       };
-
-      Logger.info("Driver availability scheduled successfully", {
-        driverId,
-        availabilityId: savedAvailability.getId(),
-      });
 
       return Result.success(response);
     } catch (error) {
