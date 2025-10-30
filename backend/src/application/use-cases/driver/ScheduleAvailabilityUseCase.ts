@@ -59,7 +59,6 @@ export class ScheduleAvailabilityUseCase {
       const driverId = driver.getId();
       const location = Location.create(dto.getLocationData());
 
-      // CHECK: Find conflicting schedule to update
       const conflictingSchedule =
         await this.availabilityRepository.findConflictingSchedule(
           driverId,
@@ -70,7 +69,6 @@ export class ScheduleAvailabilityUseCase {
       let savedAvailability: DriverAvailability | void;
 
       if (conflictingSchedule) {
-        // UPDATE: Override existing schedule with new data
         conflictingSchedule.updateSchedule(
           dto.getAvailableFrom(),
           dto.getAvailableTill()
@@ -83,7 +81,6 @@ export class ScheduleAvailabilityUseCase {
           availabilityId: conflictingSchedule.getId(),
         });
       } else {
-        // CREATE: New availability if no conflict
         const availabilityId = new Types.ObjectId();
         const availability = DriverAvailability.create(
           availabilityId.toString(),
