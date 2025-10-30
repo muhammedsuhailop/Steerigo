@@ -48,22 +48,26 @@ export class DriverAvailabilityRepositoryImpl
         DriverAvailabilityMapper.toPersistence(availability);
       const availabilityId = availability.getId();
 
-      const existingDoc =
-        await DriverAvailabilityModel.findById(availabilityId);
-      let savedDoc: IDriverAvailabilityModel;
+      const savedDoc = await DriverAvailabilityModel.findByIdAndUpdate(
+        availabilityId,
+        availabilityData,
+        {
+          new: true,
+          upsert: true,
+          runValidators: true,
+        }
+      );
 
-      if (existingDoc) {
-        savedDoc = (await DriverAvailabilityModel.findByIdAndUpdate(
-          availabilityId,
-          availabilityData,
-          { new: true }
-        )) as IDriverAvailabilityModel;
-      } else {
-        savedDoc = (await DriverAvailabilityModel.create({
-          _id: availabilityId,
-          ...availabilityData,
-        })) as IDriverAvailabilityModel;
+      if (!savedDoc) {
+        throw new Error(
+          `Failed to save driver availability: ${availabilityId}`
+        );
       }
+
+      Logger.info("Driver availability saved successfully", {
+        availabilityId,
+        driverId: availability.getDriverId(),
+      });
 
       return DriverAvailabilityMapper.toDomain(savedDoc);
     } catch (error) {
