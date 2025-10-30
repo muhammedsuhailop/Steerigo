@@ -66,25 +66,32 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   // Core persistence operations
-  async save(user: User): Promise<void> {
+  async save(user: User): Promise<User> {
     try {
       const userData = UserDomainMapper.toPersistence(user);
 
+      let savedDoc;
       const existingDoc = await UserModel.findOne({
         email: user.getEmailValue(),
       });
 
       if (existingDoc) {
-        await UserModel.findOneAndUpdate(
+        savedDoc = await UserModel.findOneAndUpdate(
           { email: user.getEmailValue() },
           userData,
           { new: true }
         );
       } else {
-        await UserModel.create(userData);
+        savedDoc = await UserModel.create(userData);
+      }
+
+      if (!savedDoc) {
+        throw new Error("Failed to save user document");
       }
 
       Logger.info("User saved successfully", { email: user.getEmailValue() });
+
+      return UserDomainMapper.toDomain(savedDoc);
     } catch (error) {
       Logger.error("Error saving user", { email: user.getEmailValue(), error });
       throw error;

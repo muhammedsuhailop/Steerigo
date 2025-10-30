@@ -37,10 +37,10 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
   }
 
-  async save(refreshToken: RefreshToken): Promise<void> {
+  async save(refreshToken: RefreshToken): Promise<RefreshToken> {
     try {
       const tokenData = this.toPersistence(refreshToken);
-      await RefreshTokenModel.findOneAndUpdate(
+      const savedToken = await RefreshTokenModel.findOneAndUpdate(
         { token: refreshToken.getToken() },
         tokenData,
         { upsert: true, new: true }
@@ -48,6 +48,7 @@ export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
       Logger.info("Refresh token saved successfully", {
         tokenId: refreshToken.getId(),
       });
+      return this.toDomain(savedToken);
     } catch (error) {
       Logger.error("Error saving refresh token", {
         tokenId: refreshToken.getId(),
