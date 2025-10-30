@@ -17,6 +17,7 @@ import DriverManagementLayout from "@/features/admin/driver-management/pages/Dri
 import DriverProfilePage from "@/features/admin/driver/view-profile/pages/DriverProfilePage";
 import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/AdminKYCLayout";
 import { UserProfileLayout } from "@/features/user";
+import DriverScheduling from "@/features/driver/scheduling/pages/DriverScheduling";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -156,6 +157,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <DriverRegistrationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/driver/schedule"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <DriverScheduling />
           </ProtectedRoute>
         }
       />

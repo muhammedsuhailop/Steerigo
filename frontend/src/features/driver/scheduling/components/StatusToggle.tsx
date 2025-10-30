@@ -1,0 +1,137 @@
+import React, { useState } from "react";
+import { FaCheckCircle, FaHourglassHalf, FaRegCircle } from "react-icons/fa";
+
+type DriverStatus = "Available" | "Busy" | "Offline";
+
+interface StatusToggleProps {
+  currentStatus: DriverStatus;
+  onStatusChange: (status: DriverStatus) => void;
+  isLoading?: boolean;
+}
+
+const statusOptions = [
+  {
+    value: "Available" as DriverStatus,
+    label: "Available",
+    icon: <FaCheckCircle className="w-5 h-5" />,
+    iconColor: "text-emerald-600",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    activeBg: "bg-emerald-50",
+    activeBorder: "border-emerald-400",
+    activeText: "text-emerald-700",
+    hoverBg: "hover:bg-emerald-100",
+  },
+  {
+    value: "Busy" as DriverStatus,
+    label: "Busy",
+    icon: <FaHourglassHalf className="w-5 h-5" />,
+    iconColor: "text-amber-600",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    activeBg: "bg-amber-50",
+    activeBorder: "border-amber-400",
+    activeText: "text-amber-700",
+    hoverBg: "hover:bg-amber-100",
+  },
+  {
+    value: "Offline" as DriverStatus,
+    label: "Offline",
+    icon: <FaRegCircle className="w-5 h-5" />,
+    iconColor: "text-red-500",
+    bg: "bg-red-50",
+    text: "text-red-600",
+    activeBg: "bg-red-50",
+    activeBorder: "border-red-400",
+    activeText: "text-red-600",
+    hoverBg: "hover:bg-red-100",
+  },
+];
+
+const StatusToggle: React.FC<StatusToggleProps> = ({
+  currentStatus,
+  onStatusChange,
+  isLoading = false,
+}) => {
+  const [selectedStatus, setSelectedStatus] =
+    useState<DriverStatus>(currentStatus);
+
+  const handleStatusClick = (status: DriverStatus) => {
+    if (!isLoading && status !== selectedStatus) {
+      setSelectedStatus(status);
+      onStatusChange(status);
+    }
+  };
+
+  const activeOption = statusOptions.find(
+    (opt) => opt.value === selectedStatus
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Header with Status Badge */}
+      <div className="flex items-center justify-between gap-4">
+        <h3 className="text-base font-semibold text-gray-900">
+          Current Status
+        </h3>
+
+        {activeOption && (
+          <div
+            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-full border-2 transition-all
+              ${activeOption.activeBg} ${activeOption.activeBorder} ${activeOption.activeText}`}
+          >
+            <span className={activeOption.iconColor}>{activeOption.icon}</span>
+            <span className="text-sm font-semibold">{activeOption.label}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Status Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {statusOptions.map((option) => {
+          const isSelected = selectedStatus === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              disabled={isLoading}
+              onClick={() => handleStatusClick(option.value)}
+              aria-pressed={isSelected}
+              className={`
+                flex items-center justify-center gap-3
+                px-5 py-3.5 rounded-2xl
+                transition-all duration-200 ease-out
+                font-semibold text-sm
+                border-2
+                ${option.bg} ${option.text}
+                ${
+                  isSelected
+                    ? `${option.activeBorder} scale-[1.02] shadow-sm`
+                    : `border-transparent ${option.hoverBg} hover:scale-[1.01]`
+                }
+                ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                }
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300
+              `}
+            >
+              <span className={option.iconColor}>{option.icon}</span>
+              <span>{option.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 text-sm text-gray-600 py-2">
+          <FaHourglassHalf className="w-4 h-4 animate-spin text-amber-500" />
+          <span>Updating status...</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default StatusToggle;

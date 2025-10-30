@@ -12,6 +12,7 @@ import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
 import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
 import { userProfileReducer } from "@/features/user/profile";
 import { adminApi } from "@/features/admin/shared/services/adminApi";
+import { schedulingApi } from "@/features/driver/scheduling/api/schedulingApi";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     // Driver APIs with RTK Query
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
     [driverApi.reducerPath]: driverApi.reducer,
+    [schedulingApi.reducerPath]: schedulingApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
@@ -50,7 +52,8 @@ export const store = configureStore({
       driverRegistrationApi.middleware,
       driverApi.middleware,
       userProfileApi.middleware,
-      adminApi.middleware
+      adminApi.middleware,
+      schedulingApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });

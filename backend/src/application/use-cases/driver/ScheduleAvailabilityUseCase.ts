@@ -7,10 +7,7 @@ import { Location } from "@domain/value-objects/Location";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  DriverAlreadyAvailableError,
-  InvalidAvailabilityScheduleError,
-} from "@domain/errors/DriverAvailabilityErrors";
+import { InvalidAvailabilityScheduleError } from "@domain/errors/DriverAvailabilityErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
 
@@ -57,46 +54,45 @@ export class ScheduleAvailabilityUseCase {
       }
 
       const driverId = driver.getId();
+      const location = Location.create(dto.getLocationData());
+      const availableFrom = dto.getAvailableFrom();
+      const availableTill = dto.getAvailableTill();
 
       const existingAvailability =
         await this.availabilityRepository.findActiveByDriverId(driverId);
+
+      let savedAvailability: DriverAvailability;
+
       if (existingAvailability) {
-        return Result.failure(new DriverAlreadyAvailableError(driverId));
-      }
+        existingAvailability.updateSchedule(availableFrom, availableTill);
+        existingAvailability.updateLocation(location);
 
-      const conflictingSchedule =
-        await this.availabilityRepository.findConflictingSchedule(
+        savedAvailability =
+          await this.availabilityRepository.save(existingAvailability);
+
+        Logger.info("Updated existing availability", {
           driverId,
-          dto.getAvailableFrom(),
-          dto.getAvailableTill()
+          availabilityId: savedAvailability.getId(),
+        });
+      } else {
+        const availabilityId = new Types.ObjectId().toString();
+        const availability = DriverAvailability.create(
+          availabilityId,
+          driverId,
+          availableFrom,
+          availableTill,
+          location
         );
 
-      if (conflictingSchedule) {
-        return Result.failure(
-          new InvalidAvailabilityScheduleError(
-            "Schedule conflicts with existing availability"
-          )
-        );
+        savedAvailability =
+          await this.availabilityRepository.save(availability);
+
+        Logger.info("Created new availability", {
+          driverId,
+          availabilityId: savedAvailability.getId(),
+        });
       }
 
-      const location = Location.create(dto.getLocationData());
-
-      const availabilityId = new Types.ObjectId();
-
-      const availability = DriverAvailability.create(
-        availabilityId.toString(),
-        driverId,
-        dto.getAvailableFrom(),
-        dto.getAvailableTill(),
-        location
-      );
-
-      const savedAvailability =
-        await this.availabilityRepository.save(availability);
-
-      if (!savedAvailability) {
-        return Result.failure(new Error("Failed to save driver availability"));
-      }
       const response = {
         id: savedAvailability.getId(),
         driverId: savedAvailability.getDriverId(),
@@ -108,11 +104,6 @@ export class ScheduleAvailabilityUseCase {
           .getCoordinates(),
         createdAt: savedAvailability.getCreatedAt().toISOString(),
       };
-
-      Logger.info("Driver availability scheduled successfully", {
-        driverId,
-        availabilityId: savedAvailability.getId(),
-      });
 
       return Result.success(response);
     } catch (error) {
