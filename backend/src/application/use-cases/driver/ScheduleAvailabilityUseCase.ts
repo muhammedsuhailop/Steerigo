@@ -7,10 +7,7 @@ import { Location } from "@domain/value-objects/Location";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  DriverAlreadyAvailableError,
-  InvalidAvailabilityScheduleError,
-} from "@domain/errors/DriverAvailabilityErrors";
+import { InvalidAvailabilityScheduleError } from "@domain/errors/DriverAvailabilityErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
 
@@ -58,49 +55,42 @@ export class ScheduleAvailabilityUseCase {
 
       const driverId = driver.getId();
       const location = Location.create(dto.getLocationData());
+      const availableFrom = dto.getAvailableFrom();
+      const availableTill = dto.getAvailableTill();
 
-      const conflictingSchedule =
-        await this.availabilityRepository.findConflictingSchedule(
-          driverId,
-          dto.getAvailableFrom(),
-          dto.getAvailableTill()
-        );
+      const existingAvailability =
+        await this.availabilityRepository.findActiveByDriverId(driverId);
 
-      let savedAvailability: DriverAvailability | void;
+      let savedAvailability: DriverAvailability;
 
-      if (conflictingSchedule) {
-        conflictingSchedule.updateSchedule(
-          dto.getAvailableFrom(),
-          dto.getAvailableTill()
-        );
-        conflictingSchedule.updateLocation(location);
+      if (existingAvailability) {
+        existingAvailability.updateSchedule(availableFrom, availableTill);
+        existingAvailability.updateLocation(location);
+
         savedAvailability =
-          await this.availabilityRepository.save(conflictingSchedule);
+          await this.availabilityRepository.save(existingAvailability);
+
         Logger.info("Updated existing availability", {
           driverId,
-          availabilityId: conflictingSchedule.getId(),
+          availabilityId: savedAvailability.getId(),
         });
       } else {
-        const availabilityId = new Types.ObjectId();
+        const availabilityId = new Types.ObjectId().toString();
         const availability = DriverAvailability.create(
-          availabilityId.toString(),
+          availabilityId,
           driverId,
-          dto.getAvailableFrom(),
-          dto.getAvailableTill(),
+          availableFrom,
+          availableTill,
           location
         );
+
         savedAvailability =
           await this.availabilityRepository.save(availability);
-        if (savedAvailability) {
-          Logger.info("Created new availability", {
-            driverId,
-            availabilityId: savedAvailability.getId(),
-          });
-        }
-      }
 
-      if (!savedAvailability) {
-        return Result.failure(new Error("Failed to save driver availability"));
+        Logger.info("Created new availability", {
+          driverId,
+          availabilityId: savedAvailability.getId(),
+        });
       }
 
       const response = {
