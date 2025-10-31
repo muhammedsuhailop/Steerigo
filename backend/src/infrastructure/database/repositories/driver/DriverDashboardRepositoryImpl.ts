@@ -16,6 +16,7 @@ import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
+import { RideType } from "@domain/value-objects/RideType";
 
 interface AggregationResult {
   count: number;
@@ -30,6 +31,23 @@ interface RatingResult {
 export class DriverDashboardRepositoryImpl
   implements DriverDashboardRepository
 {
+  private parseRideType(rideTypeValue: string): RideType {
+    const normalizedValue = rideTypeValue?.trim().toLowerCase() ?? "";
+    if (normalizedValue === "one way" || normalizedValue === "oneway") {
+      return RideType.ONEWAY;
+    } else if (
+      normalizedValue === "round trip" ||
+      normalizedValue === "roundtrip"
+    ) {
+      return RideType.ROUNDTRIP;
+    } else {
+      Logger.warn("Invalid ride type value, defaulting to ONEWAY", {
+        rideTypeValue,
+      });
+      return RideType.ONEWAY;
+    }
+  }
+
   async getDashboardData(driverId: string): Promise<{
     currentRide: Ride | null;
     pendingRequests: RideRequest[];
@@ -93,7 +111,7 @@ export class DriverDashboardRepositoryImpl
         }),
       ]);
 
-      const completedData = completedStats || { count: 0, totalEarnings: 0 };
+      const completedData = completedStats[0] || { count: 0, totalEarnings: 0 };
 
       return DriverDashboardStatistics.create(
         completedData.count,
@@ -149,8 +167,8 @@ export class DriverDashboardRepositoryImpl
         totalAssigned > 0
           ? Math.round((totalCancelled / totalAssigned) * 100)
           : 0;
-      const averageRating = ratingData?.avgRating
-        ? Number(ratingData.avgRating.toFixed(1))
+      const averageRating = ratingData[0]?.avgRating
+        ? Number(ratingData[0].avgRating.toFixed(1))
         : 0;
 
       return DriverDashboardPerformance.create(
@@ -245,20 +263,22 @@ export class DriverDashboardRepositoryImpl
 
     // Reconstruct RideTimeline from document
     const timeline = RideTimeline.fromData({
-      startedAt: doc.startedAt || undefined,
-      completedAt: doc.completedAt || undefined,
-      cancelledAt: doc.cancelledAt || undefined,
+      startedAt: doc.timeline.startedAt || undefined,
+      completedAt: doc.timeline.completedAt || undefined,
+      cancelledAt: doc.timeline.cancelledAt || undefined,
     });
 
+    const rideTypeValue = this.parseRideType(doc.rideType);
+
     return Ride.fromData({
-      id: doc._id.toString(),
+      id: doc.id.toString(),
       rideId: doc.rideId,
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       status: doc.status as RideStatus,
       pickup,
       drop,
-      rideType: doc.rideType,
+      rideType: rideTypeValue,
       fareBreakdown,
       currency: doc.currency,
       timeline,
@@ -268,15 +288,29 @@ export class DriverDashboardRepositoryImpl
   }
 
   private mapDocumentToRideRequest(doc: IRideRequestDocument): RideRequest {
+    const pickup = Location.create({
+      latitude: doc.pickup.latitude,
+      longitude: doc.pickup.longitude,
+      address: doc.pickup.address,
+    });
+
+    const drop = Location.create({
+      latitude: doc.drop.latitude,
+      longitude: doc.drop.longitude,
+      address: doc.drop.address,
+    });
+
+    const rideTypeValue = this.parseRideType(doc.rideType);
+
     return RideRequest.fromData({
-      id: doc._id.toString(),
+      id: doc.id.toString(),
       requestId: doc.requestId,
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
-      pickup: doc.pickup,
-      drop: doc.drop,
+      pickup,
+      drop,
       pickupTime: doc.pickupTime,
-      rideType: doc.rideType,
+      rideType: rideTypeValue,
       fare: doc.fare,
       status: doc.status as RideRequestStatus,
       pickupETA: doc.pickupETA,

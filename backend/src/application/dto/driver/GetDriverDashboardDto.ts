@@ -1,14 +1,14 @@
 export class GetDriverDashboardDto {
-  private readonly driverId: string;
+  private readonly userId: string;
 
-  constructor(driverId: string) {
-    if (!driverId || driverId.trim() === "") {
-      throw new Error("Driver ID is required");
+  constructor(userId: string) {
+    if (!userId || userId.trim() === "") {
+      throw new Error("User ID is required");
     }
-    this.driverId = driverId;
+    this.userId = userId;
   }
 
-  getDriverId(): string {
-    return this.driverId;
+  getUserId(): string {
+    return this.userId;
   }
 }

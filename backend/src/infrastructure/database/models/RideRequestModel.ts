@@ -17,10 +17,10 @@ export interface IRideRequestDocument extends Document {
   };
 
   pickupTime: Date;
-  rideType: string; // RideType enum value (One way, Round Trip)
+  rideType: string; 
   fare: number;
 
-  status: string; // RideRequestStatus enum value
+  status: string; 
 
   pickupETA: string;
 
@@ -101,7 +101,7 @@ const rideRequestSchema = new Schema<IRideRequestDocument>(
 
     rideType: {
       type: String,
-      enum: ["One way", "Round Trip"],
+      enum: ["One Way", "Round Trip"],
       required: true,
     },
 
@@ -125,11 +125,10 @@ const rideRequestSchema = new Schema<IRideRequestDocument>(
       required: true,
     },
 
-    // Optional expiry for pending requests (auto-delete after 30 minutes)
+    // Expiry for pending requests (auto-delete after 30 minutes)
     expiresAt: {
       type: Date,
       default: () => new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
-      index: true,
     },
   },
   {

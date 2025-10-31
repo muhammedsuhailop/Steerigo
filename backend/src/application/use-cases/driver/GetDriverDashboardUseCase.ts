@@ -26,23 +26,25 @@ export class GetDriverDashboardUseCase {
     dto: GetDriverDashboardDto
   ): Promise<Result<DriverDashboardResponseDto>> {
     try {
-      const driverId = dto.getDriverId();
+      const userId = dto.getUserId();
 
-      Logger.info("Get driver dashboard started", { driverId });
-
-      // Fetch driver
-      const driver = await this.driverRepository.findById(driverId);
+      const driver = await this.driverRepository.findByUserId(userId);
       if (!driver) {
-        Logger.warn("Driver not found", { driverId });
+        return Result.failure(new DomainError("Driver profile not found"));
+      }
+
+      if (!driver) {
+        Logger.warn("Driver not found for userId: ", { userId });
         return Result.failure(new DomainError("Driver not found"));
       }
 
-      // Fetch driver user
       const driverUser = await this.userRepository.findById(driver.getUserId());
       if (!driverUser) {
         Logger.warn("Driver user not found", { userId: driver.getUserId() });
         return Result.failure(new DomainError("Driver user not found"));
       }
+
+      const driverId = driver.getId();
 
       // Fetch all dashboard data in parallel
       const [dashboardData, availability] = await Promise.all([

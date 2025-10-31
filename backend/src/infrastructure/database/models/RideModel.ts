@@ -4,7 +4,7 @@ export interface IRideDocument extends Document {
   rideId: string;
   driverId: Types.ObjectId;
   riderId: Types.ObjectId;
-  status: string; // RideStatus enum value
+  status: string; 
 
   pickup: {
     latitude: number;
@@ -17,7 +17,7 @@ export interface IRideDocument extends Document {
     address?: string;
   };
 
-  rideType: string; // RideType enum value (One way, Round Trip)
+  rideType: string; 
 
   fareBreakdown: {
     baseFare: number;
@@ -179,11 +179,9 @@ const rideSchema = new Schema<IRideDocument>(
       },
       startedAt: {
         type: Date,
-        index: true,
       },
       completedAt: {
         type: Date,
-        index: true,
       },
       cancelledAt: {
         type: Date,
