@@ -1,0 +1,273 @@
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { Location } from "@domain/value-objects/Location";
+import { RideStatus } from "@domain/value-objects/RideStatus";
+import { RideTimeline } from "@domain/value-objects/RideTimeline";
+import { RideType } from "@domain/value-objects/RideType";
+
+export class Ride {
+  private constructor(
+    private readonly id: string,
+    private readonly rideId: string,
+    private readonly driverId: string,
+    private readonly riderId: string,
+    private status: RideStatus,
+    private readonly pickup: Location,
+    private readonly drop: Location,
+    private readonly rideType: RideType,
+    private readonly fareBreakdown: FareBreakdown,
+    private readonly currency: string = "INR",
+    private readonly timeline: RideTimeline,
+    private readonly createdAt: Date = new Date(),
+    private readonly updatedAt: Date = new Date()
+  ) {}
+
+  /**
+   * Factory method for creating a new ride
+   */
+  static create(
+    id: string,
+    rideId: string,
+    driverId: string,
+    riderId: string,
+    pickup: Location,
+    drop: Location,
+    rideType: RideType,
+    fareBreakdown: FareBreakdown,
+    timeline: RideTimeline
+  ): Ride {
+    if (!id || !rideId || !driverId || !riderId) {
+      throw new Error("All ID fields are required");
+    }
+    if (!rideType || rideType.trim() === "") {
+      throw new Error("Ride type is required");
+    }
+    return new Ride(
+      id,
+      rideId,
+      driverId,
+      riderId,
+      RideStatus.REQUESTED,
+      pickup,
+      drop,
+      rideType,
+      fareBreakdown,
+      "INR",
+      timeline
+    );
+  }
+
+  /**
+   * Factory method for reconstructing from database
+   */
+  static fromData(data: {
+    id: string;
+    rideId: string;
+    driverId: string;
+    riderId: string;
+    status: RideStatus;
+    pickup: Location;
+    drop: Location;
+    rideType: RideType;
+    fareBreakdown: FareBreakdown;
+    currency: string;
+    timeline: RideTimeline;
+    createdAt: Date;
+    updatedAt: Date;
+  }): Ride {
+    return new Ride(
+      data.id,
+      data.rideId,
+      data.driverId,
+      data.riderId,
+      data.status,
+      data.pickup,
+      data.drop,
+      data.rideType,
+      data.fareBreakdown,
+      data.currency,
+      data.timeline,
+      data.createdAt,
+      data.updatedAt
+    );
+  }
+
+  // Getters
+  getId(): string {
+    return this.id;
+  }
+
+  getRideId(): string {
+    return this.rideId;
+  }
+
+  getDriverId(): string {
+    return this.driverId;
+  }
+
+  getRiderId(): string {
+    return this.riderId;
+  }
+
+  getStatus(): RideStatus {
+    return this.status;
+  }
+
+  getPickup(): Location {
+    return this.pickup;
+  }
+
+  getDrop(): Location {
+    return this.drop;
+  }
+
+  getRideType(): RideType {
+    return this.rideType;
+  }
+
+  getFareBreakdown(): FareBreakdown {
+    return this.fareBreakdown;
+  }
+
+  getCurrency(): string {
+    return this.currency;
+  }
+
+  getTimeline(): RideTimeline {
+    return this.timeline;
+  }
+
+  getCreatedAt(): Date {
+    return this.createdAt;
+  }
+
+  getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
+
+  // Convenience getters for fare
+  getFare(): number {
+    return this.fareBreakdown.getTotalFare();
+  }
+
+  // Status check methods
+  isRequested(): boolean {
+    return this.status === RideStatus.REQUESTED;
+  }
+
+  isAccepted(): boolean {
+    return this.status === RideStatus.ACCEPTED;
+  }
+
+  isStarted(): boolean {
+    return this.status === RideStatus.STARTED;
+  }
+
+  isCompleted(): boolean {
+    return this.status === RideStatus.COMPLETED;
+  }
+
+  isCancelled(): boolean {
+    return this.status === RideStatus.CANCELLED;
+  }
+
+  // Timeline convenience getters
+  getStartedAt(): Date | undefined {
+    return this.timeline.getStartedAt();
+  }
+
+  getCompletedAt(): Date | undefined {
+    return this.timeline.getCompletedAt();
+  }
+
+  getCancelledAt(): Date | undefined {
+    return this.timeline.getCancelledAt();
+  }
+
+  /**
+   * Calculate ride duration in milliseconds
+   */
+  getRideDurationMs(): number | undefined {
+    const startedAt = this.getStartedAt();
+    const completedAt = this.getCompletedAt();
+
+    if (!startedAt || !completedAt) {
+      return undefined;
+    }
+
+    return completedAt.getTime() - startedAt.getTime();
+  }
+
+  /**
+   * Calculate ride duration as formatted string (HH:MM:SS)
+   */
+  getFormattedRideDuration(): string {
+    const durationMs = this.getRideDurationMs();
+
+    if (!durationMs) {
+      return "00:00:00";
+    }
+
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+      seconds
+    ).padStart(2, "0")}`;
+  }
+
+  /**
+   * Calculate elapsed time from start (if ride is ongoing)
+   * Returns formatted string (HH:MM:SS)
+   */
+  getElapsedTimeFromStart(): string {
+    const startedAt = this.getStartedAt();
+
+    if (!startedAt) {
+      return "00:00:00";
+    }
+
+    const now = new Date();
+    const diff = now.getTime() - startedAt.getTime();
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+      seconds
+    ).padStart(2, "0")}`;
+  }
+
+  // Status mutators (if needed for state transitions)
+  setStatusToAccepted(): void {
+    if (this.status !== RideStatus.REQUESTED) {
+      throw new Error("Only requested rides can be accepted");
+    }
+    this.status = RideStatus.ACCEPTED;
+  }
+
+  setStatusToStarted(): void {
+    if (!this.isAccepted()) {
+      throw new Error("Only accepted rides can be started");
+    }
+    this.status = RideStatus.STARTED;
+    this.timeline.setStartedAt(new Date());
+  }
+
+  setStatusToCompleted(): void {
+    if (!this.isStarted()) {
+      throw new Error("Only started rides can be completed");
+    }
+    this.status = RideStatus.COMPLETED;
+    this.timeline.setCompletedAt(new Date());
+  }
+
+  setStatusToCancelled(): void {
+    if (this.isCancelled()) {
+      throw new Error("Ride is already cancelled");
+    }
+    this.status = RideStatus.CANCELLED;
+    this.timeline.setCancelledAt(new Date());
+  }
+}

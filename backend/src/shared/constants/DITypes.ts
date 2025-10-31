@@ -11,6 +11,7 @@ export const TYPES = {
   KYCRepository: Symbol.for("KYCRepository"),
   DriverRepository: Symbol.for("DriverRepository"),
   DriverAvailabilityRepository: Symbol.for("DriverAvailabilityRepository"),
+  DriverDashboardRepository: Symbol.for("DriverDashboardRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -56,6 +57,7 @@ export const TYPES = {
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
   SubmitKYCUseCase: Symbol.for("SubmitKYCUseCase"),
   GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
+  GetDriverDashboardUseCase: Symbol.for("GetDriverDashboardUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

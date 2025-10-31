@@ -15,6 +15,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
 
 interface DriverRegistrationRequestBody {
   // User profile data
@@ -101,7 +102,9 @@ export class DriverController {
     @inject(TYPES.SubmitKYCUseCase)
     private submitKYCUseCase: SubmitKYCUseCase,
     @inject(TYPES.GetKYCStatusUseCase)
-    private getKYCStatusUseCase: GetKYCStatusUseCase
+    private getKYCStatusUseCase: GetKYCStatusUseCase,
+    @inject(TYPES.GetDriverDashboardUseCase)
+    private getDashboardUseCase: GetDriverDashboardUseCase,
   ) {}
 
   private getUserId(req: Request): string | null {
