@@ -58,6 +58,7 @@ export const TYPES = {
   SubmitKYCUseCase: Symbol.for("SubmitKYCUseCase"),
   GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
   GetDriverDashboardUseCase: Symbol.for("GetDriverDashboardUseCase"),
+  GetDriverStatusUseCase: Symbol.for("GetDriverStatusUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

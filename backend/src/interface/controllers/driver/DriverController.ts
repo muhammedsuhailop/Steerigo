@@ -18,6 +18,7 @@ import { DocumentType } from "@domain/value-objects/DocumentType";
 import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
 
 interface DriverRegistrationRequestBody {
   // User profile data
@@ -106,7 +107,9 @@ export class DriverController {
     @inject(TYPES.GetKYCStatusUseCase)
     private getKYCStatusUseCase: GetKYCStatusUseCase,
     @inject(TYPES.GetDriverDashboardUseCase)
-    private getDashboardUseCase: GetDriverDashboardUseCase
+    private getDashboardUseCase: GetDriverDashboardUseCase,
+    @inject(TYPES.GetDriverStatusUseCase)
+    private getStatusUseCase: GetDriverStatusUseCase,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -415,6 +418,52 @@ export class DriverController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "get_driver_dashboard"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getStatus(req: Request, res: Response): Promise<void> {
+    try {
+      // Extract userId from authenticated request
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "Unauthorized - User ID not found",
+        });
+        return;
+      }
+
+      Logger.info("Getting driver status", { userId });
+
+      // Execute use case
+      const result = await this.getStatusUseCase.execute(userId);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_status"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const statusResponse = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: "Driver status retrieved successfully",
+        data: statusResponse,
+      });
+
+      Logger.info("Driver status returned successfully", { userId });
+    } catch (error) {
+      Logger.error("Get driver status controller error", { error });
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_status"
       );
       res.status(statusCode).json(response);
     }

@@ -14,6 +14,7 @@ import { DriverController } from "@interface/controllers/driver/DriverController
 import { DriverDashboardRepository } from "@application/repositories/DriverDashboardRepository";
 import { DriverDashboardRepositoryImpl } from "@infrastructure/database/repositories/driver/DriverDashboardRepositoryImpl";
 import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
+import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -31,6 +32,9 @@ export class DriverFactory {
     container
       .bind(TYPES.GetDriverDashboardUseCase)
       .to(GetDriverDashboardUseCase);
+    container
+      .bind<GetDriverStatusUseCase>(TYPES.GetDriverStatusUseCase)
+      .to(GetDriverStatusUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
