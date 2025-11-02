@@ -11,12 +11,12 @@ export interface ScheduleData {
 }
 
 export interface UpdateLocationPayload {
-  driverId: string;
+  driverId: string | null;
   currentLocation: Location;
 }
 
 export interface UpdateStatusPayload {
-  driverId: string;
+  driverId: string | null;
   status: "Available" | "Busy" | "Offline";
 }
 

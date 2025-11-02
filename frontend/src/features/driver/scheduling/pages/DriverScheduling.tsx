@@ -21,6 +21,8 @@ import {
   DriverTopbar,
 } from "@/features/driver/shared/components";
 import { Footer } from "@/features/public/components";
+import { useSelector } from "react-redux";
+import { selectDriverId } from "../../shared/store/driverSlice";
 
 interface AlertState {
   show: boolean;
@@ -55,7 +57,8 @@ const DriverScheduling: React.FC = () => {
   const [updateStatus, { isLoading: isStatusLoading }] =
     useUpdateStatusMutation();
 
-  const driverId = localStorage.getItem("driverId") || "";
+  const driverId = useSelector(selectDriverId);
+  console.log('driver id : ',driverId)
 
   const showAlert = (message: string, type: "success" | "danger") => {
     setAlert({ show: true, message, type });

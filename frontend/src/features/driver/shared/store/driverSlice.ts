@@ -15,6 +15,8 @@ const initialState: DriverState = {
   isLoading: false,
   error: null,
   isOnline: false,
+  driverId: null,
+  availability: null
 };
 
 const driverSlice = createSlice({
@@ -33,6 +35,10 @@ const driverSlice = createSlice({
     setDriver: (state, action: PayloadAction<Driver>) => {
       state.driver = action.payload;
       state.isOnline = action.payload.currentStatus !== "Offline";
+    },
+    setDriverId: (state, action: PayloadAction<string>) => {
+      state.driverId = action.payload;
+      localStorage.setItem("driverId", action.payload); 
     },
     setStats: (state, action: PayloadAction<DriverStats>) => {
       state.stats = action.payload;
@@ -89,6 +95,7 @@ const driverSlice = createSlice({
 export const {
   setLoading,
   setError,
+  setDriverId,
   setDriver,
   setStats,
   setPendingRequests,
@@ -118,3 +125,5 @@ export const selectDriverLoading = (state: { driver: DriverState }) =>
   state.driver.isLoading;
 export const selectDriverError = (state: { driver: DriverState }) =>
   state.driver.error;
+export const selectDriverId = (state: { driver: DriverState }) =>
+  state.driver.driverId;

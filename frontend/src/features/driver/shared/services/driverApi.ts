@@ -5,12 +5,12 @@ import type {
   RideRequest,
   CurrentRide,
   DriverStats,
+  DashboardApiResponse,
+  FullDashboardResponse,
 } from "../types/driver.types";
 
 // MOCK DATA - For Dev
-
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const mockSuccess = <T>(data: T) => ({ data: { data } });
 
 const MOCK_DRIVER: Driver = {
@@ -46,19 +46,15 @@ const MOCK_DRIVER: Driver = {
   },
   createdAt: new Date("2024-01-15").toISOString(),
   updatedAt: new Date().toISOString(),
-};
-
-const MOCK_DRIVER_STATS: DriverStats = {
-  totalRides: 156,
-  completedRides: 148,
-  scheduledRides: 3,
-  todayEarnings: 125.0,
-  weeklyEarnings: 520.0,
-  monthlyEarnings: 2100.0,
-  totalEarnings: 4280.5,
-  rating: 4.7,
-  acceptanceRate: 92,
-  completionRate: 95,
+  userId: "",
+  licenseNumber: "",
+  licenceCategory: "",
+  licenseIssueDate: "",
+  licenseExpiryDate: "",
+  kycStatus: "",
+  status: "",
+  eligibleGearTypes: [],
+  eligibleBodyTypes: []
 };
 
 const MOCK_PENDING_REQUESTS: RideRequest[] = [
@@ -136,19 +132,18 @@ const MOCK_PENDING_REQUESTS: RideRequest[] = [
 
 // Mock state management
 let mockDriverState = { ...MOCK_DRIVER };
-let mockDriverStatsState = { ...MOCK_DRIVER_STATS };
 let mockRequestsState = [...MOCK_PENDING_REQUESTS];
 let mockCurrentRideState: CurrentRide | null = null;
 
-// API CONFIGURATION
 
+
+// API CONFIGURATION
 export const driverApi = createApi({
   reducerPath: "driverApi",
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Driver", "DriverStats", "RideRequests", "CurrentRide"],
   endpoints: (builder) => ({
     // Driver Profile Endpoints
-
     getDriverProfile: builder.query<{ data: Driver }, void>({
       // Dev
       queryFn: async () => {
@@ -184,24 +179,101 @@ export const driverApi = createApi({
       invalidatesTags: ["Driver"],
     }),
 
-    // Driver Stats Endpoints
+    // Driver Stats Endpoints - Now using real API
+    getDriverStats: builder.query<{ data: FullDashboardResponse }, void>({
+      query: () => ({
+        url: "/driver/dashboard",
+        method: "GET",
+      }),
 
-    getDriverStats: builder.query<{ data: DriverStats }, void>({
-      // Dev
-      queryFn: async () => {
-        await delay(250);
-        return mockSuccess(mockDriverStatsState);
+      /**
+       * Transform the complete API response
+       * Maps all data from DashboardApiResponse to FullDashboardResponse
+       */
+      transformResponse: (response: DashboardApiResponse) => {
+        const {
+          driver,
+          statistics,
+          performance,
+          availability,
+          currentRide,
+          pendingRequests,
+          meta,
+        } = response.data;
+
+        // Transform driver data
+        const transformedDriver: Driver = {
+          id: driver.driverId, // Using driverId as id for consistency
+          driverId: driver.driverId,
+          userId: driver.userId,
+          name: driver.name,
+          email: driver.email.value,
+          mobile: driver.mobile,
+          profileImage: undefined, // Not provided in API
+          currentStatus:
+            availability?.status === "Available" ? "Available" : "Offline",
+          rating: performance.averageRating,
+          totalRides: statistics.ridesCompleted + statistics.ridesCancelled,
+          completedRides: statistics.ridesCompleted,
+          scheduledRides: statistics.scheduledRides,
+          totalEarnings: statistics.totalEarnings,
+          todayEarnings: statistics.totalEarnings, // Using total as today (API doesn't provide daily split)
+          weeklyEarnings: 0, // Not provided in API response
+          monthlyEarnings: 0, // Not provided in API response
+
+          // License info from API
+          licenseNumber: driver.licenseNumber,
+          licenceCategory: driver.licenceCategory,
+          licenseIssueDate: driver.licenseIssueDate,
+          licenseExpiryDate: driver.licenseExpiryDate,
+          kycStatus: driver.kycStatus,
+          status: driver.status,
+          eligibleGearTypes: driver.eligibleGearTypes,
+          eligibleBodyTypes: driver.eligibleBodyTypes,
+
+          location: availability?.currentLocation || {
+            latitude: 0,
+            longitude: 0,
+            address: "Location not available",
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: meta.lastUpdated,
+        };
+
+        // Transform stats data
+        const transformedStats: DriverStats = {
+          totalRides: statistics.ridesCompleted + statistics.ridesCancelled,
+          completedRides: statistics.ridesCompleted,
+          ridesCancelled: statistics.ridesCancelled,
+          scheduledRides: statistics.scheduledRides,
+          todayEarnings: statistics.totalEarnings,
+          weeklyEarnings: 0,
+          monthlyEarnings: 0,
+          totalEarnings: statistics.totalEarnings,
+          currency: statistics.currency,
+          rating: performance.averageRating,
+          acceptanceRate: performance.acceptanceRate,
+          cancellationRate: performance.cancellationRate,
+          completionRate: 100 - performance.cancellationRate,
+        };
+
+        // Full response object
+        const fullResponse: FullDashboardResponse = {
+          driver: transformedDriver,
+          stats: transformedStats,
+          availability: availability,
+          currentRide: currentRide,
+          pendingRequests: pendingRequests || [],
+          meta: meta,
+        };
+
+        return { data: fullResponse };
       },
-      // Prod
-      // query: () => ({
-      //   url: "/driver/stats",
-      //   method: "GET",
-      // }),
-      providesTags: ["DriverStats"],
+
+      providesTags: [ "Driver", "DriverStats"],
     }),
 
     // Ride Request Endpoints
-
     getPendingRequests: builder.query<{ data: RideRequest[] }, void>({
       // Dev
       queryFn: async () => {
@@ -232,7 +304,6 @@ export const driverApi = createApi({
         const acceptedRequest = mockRequestsState.find(
           (r) => r.id === requestId
         );
-
         if (!acceptedRequest) {
           return {
             error: {
@@ -243,7 +314,6 @@ export const driverApi = createApi({
         }
 
         mockRequestsState = mockRequestsState.filter((r) => r.id !== requestId);
-
         mockCurrentRideState = {
           id: `ride-${Date.now()}`,
           passengerId: acceptedRequest.passengerId,
@@ -298,7 +368,6 @@ export const driverApi = createApi({
     }),
 
     // Current Ride Endpoints
-
     getCurrentRide: builder.query<{ data: CurrentRide | null }, void>({
       // Dev
       queryFn: async () => {
@@ -342,14 +411,6 @@ export const driverApi = createApi({
           mockCurrentRideState.actualDropoffTime = new Date().toISOString();
           mockCurrentRideState.paymentStatus = "completed";
 
-          // Update stats
-          mockDriverStatsState.completedRides += 1;
-          mockDriverStatsState.totalRides += 1;
-          mockDriverStatsState.totalEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.todayEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.weeklyEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.monthlyEarnings += mockCurrentRideState.fare;
-
           // Update driver
           mockDriverState.completedRides += 1;
           mockDriverState.totalRides += 1;
@@ -383,7 +444,6 @@ export const driverApi = createApi({
     }),
 
     // Driver Status Endpoints
-
     setDriverOnlineStatus: builder.mutation<{ success: boolean }, boolean>({
       // Dev
       queryFn: async (isOnline) => {
@@ -427,7 +487,6 @@ export const driverApi = createApi({
 });
 
 // Export Hooks
-
 export const {
   useGetDriverProfileQuery,
   useUpdateDriverProfileMutation,

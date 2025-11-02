@@ -1,6 +1,7 @@
 export interface Driver {
   id: string;
   driverId: string;
+  userId: string; 
   name: string;
   email: string;
   mobile: string;
@@ -14,7 +15,18 @@ export interface Driver {
   todayEarnings: number;
   weeklyEarnings: number;
   monthlyEarnings: number;
-  vehicleInfo: VehicleInfo;
+
+  // Add driver license info
+  licenseNumber: string;
+  licenceCategory: string;
+  licenseIssueDate: string;
+  licenseExpiryDate: string;
+  kycStatus: string;
+  status: string;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+
+  vehicleInfo?: VehicleInfo;
   location: {
     latitude: number;
     longitude: number;
@@ -94,17 +106,93 @@ export interface CurrentRide {
   paymentStatus: "pending" | "completed" | "failed";
 }
 
+// Extended DriverStats with all fields
 export interface DriverStats {
+  // Basic stats
   totalRides: number;
   completedRides: number;
+  ridesCancelled: number;
   scheduledRides: number;
+
+  // Earnings
   todayEarnings: number;
   weeklyEarnings: number;
   monthlyEarnings: number;
   totalEarnings: number;
+  currency: string;
+
+  // Performance metrics
   rating: number;
   acceptanceRate: number;
+  cancellationRate: number;
   completionRate: number;
+}
+
+export interface Availability {
+  id: string;
+  status: string;
+  availableFrom: string;
+  availableTill: string;
+  currentLocation: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  updatedAt: string;
+}
+
+export interface DashboardMeta {
+  lastUpdated: string;
+  serverTime: string;
+}
+
+export interface DashboardApiResponse {
+  data: {
+    driver: {
+      driverId: string;
+      userId: string;
+      name: string;
+      email: {
+        value: string;
+      };
+      mobile: string;
+      licenseNumber: string;
+      licenceCategory: string;
+      licenseIssueDate: string;
+      licenseExpiryDate: string;
+      kycStatus: string;
+      status: string;
+      eligibleGearTypes: string[];
+      eligibleBodyTypes: string[];
+    };
+    availability: Availability | null;
+    currentRide: CurrentRide | null;
+    pendingRequests: RideRequest[];
+    statistics: {
+      ridesCompleted: number;
+      ridesCancelled: number;
+      scheduledRides: number;
+      totalEarnings: number;
+      currency: string;
+    };
+    performance: {
+      acceptanceRate: number;
+      cancellationRate: number;
+      averageRating: number;
+    };
+    meta: DashboardMeta;
+  };
+  success: boolean;
+  message: string;
+}
+
+export interface FullDashboardResponse {
+  driver: Driver;
+  stats: DriverStats;
+  availability: Availability | null;
+  currentRide: CurrentRide | null;
+  pendingRequests: RideRequest[];
+  meta: DashboardMeta;
 }
 
 export interface DriverState {
@@ -112,7 +200,9 @@ export interface DriverState {
   stats: DriverStats | null;
   pendingRequests: RideRequest[];
   currentRide: CurrentRide | null;
+  availability: Availability | null;
   isLoading: boolean;
   error: string | null;
   isOnline: boolean;
+  driverId: string | null;
 }
