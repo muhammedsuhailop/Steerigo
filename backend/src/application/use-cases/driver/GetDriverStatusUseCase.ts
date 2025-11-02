@@ -4,6 +4,10 @@ import { DriverAvailabilityRepository } from "@application/repositories/DriverAv
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
+import {
+  DriverAvailabilityNotFoundError,
+  DriverProfileNotFoundError,
+} from "@domain/errors/DriverAvailabilityErrors";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 
@@ -15,43 +19,30 @@ export class GetDriverStatusUseCase {
     private availabilityRepository: DriverAvailabilityRepository
   ) {}
 
-  /**
-   * Get driver's current status and availability
-   * Flow:
-   * 1. Extract userId from input
-   * 2. Find driver by userId
-   * 3. Get driver's availability status from DriverAvailabilityRepository
-   * 4. Map to response DTO
-   */
   async execute(userId: string): Promise<Result<DriverStatusResponseDto>> {
     try {
       Logger.info("Get driver status started", { userId });
 
-      // Step 1: Validate userId
       if (!userId || userId.trim() === "") {
         return Result.failure(new DomainError("User ID is required"));
       }
 
-      // Step 2: Find driver by userId
       const driver = await this.driverRepository.findByUserId(userId);
       if (!driver) {
         Logger.warn("Driver profile not found", { userId });
-        return Result.failure(new DomainError("Driver profile not found"));
+        return Result.failure(new DriverProfileNotFoundError(userId));
       }
 
       const driverId = driver.getId();
 
-      // Step 3: Get driver's availability status
       const availability =
         await this.availabilityRepository.findByDriverId(driverId);
       if (!availability) {
         Logger.warn("Driver availability not found", { driverId });
-        return Result.failure(
-          new DomainError("Driver availability status not found")
-        );
+        return Result.failure(new DriverAvailabilityNotFoundError(driverId));
       }
 
-      // Step 4: Map to response DTO
+      // Map to response DTO
       const response = new DriverStatusResponseDto(
         availability.getId(),
         driverId,
