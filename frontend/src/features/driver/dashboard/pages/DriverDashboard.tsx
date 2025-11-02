@@ -63,6 +63,7 @@ const DriverDashboard: React.FC = () => {
     refetch: refetchCurrentRide,
   } = useGetCurrentRideQuery();
 
+  // Mutations
   const [setOnlineStatus, { isLoading: isTogglingStatus }] =
     useSetDriverOnlineStatusMutation();
 
@@ -156,7 +157,7 @@ const DriverDashboard: React.FC = () => {
 
   const handleRejectRideRequest = async (requestId: string) => {
     try {
-      await rejectRide(requestId).unwrap();
+      await rejectRide({ requestId }).unwrap();
       console.log(`Ride ${requestId} rejected`);
     } catch (error) {
       console.error("Failed to reject ride:", error);
@@ -185,12 +186,12 @@ const DriverDashboard: React.FC = () => {
 
   const handleScheduleAvailability = () => {
     console.log("Schedule booking clicked");
-    // TODO
+    // TODO: Navigate to scheduling page
   };
 
   const handleViewEarnings = () => {
     console.log("View earnings clicked");
-    // TODO
+    // TODO: Navigate to earnings page
   };
 
   // Refresh all data

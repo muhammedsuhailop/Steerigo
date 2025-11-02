@@ -1,7 +1,7 @@
 export interface Driver {
   id: string;
   driverId: string;
-  userId: string; 
+  userId: string;
   name: string;
   email: string;
   mobile: string;
@@ -78,6 +78,7 @@ export interface CurrentRide {
   passengerId: string;
   passengerName: string;
   passengerPhone: string;
+  passengerRating: number;
   pickupLocation: {
     address: string;
     latitude: number;
@@ -88,6 +89,7 @@ export interface CurrentRide {
     latitude: number;
     longitude: number;
   };
+  rideType: string;
   fare: number;
   distance: number;
   duration: number;
@@ -102,8 +104,8 @@ export interface CurrentRide {
   estimatedArrival?: string;
   actualPickupTime?: string;
   actualDropoffTime?: string;
+  acceptedAt: string;
   paymentMethod: "cash" | "card" | "wallet";
-  paymentStatus: "pending" | "completed" | "failed";
 }
 
 // Extended DriverStats with all fields

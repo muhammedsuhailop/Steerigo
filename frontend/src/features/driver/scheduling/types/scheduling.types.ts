@@ -33,3 +33,36 @@ export interface GeocodeResult {
     lng: number;
   };
 }
+
+// Backend API Response Types
+export interface AvailabilityData {
+  id: string;
+  driverId: string;
+  status: "Available" | "Busy" | "Offline";
+  availableFrom: string;
+  availableTill: string;
+  currentLocation: Location;
+  updatedAt: string;
+}
+
+export interface DriverStatusResponse {
+  success: boolean;
+  message: string;
+  data: AvailabilityData;
+  type?: string;
+}
+
+export interface AvailabilityNotFoundResponse {
+  success: boolean;
+  message: string;
+  type: "NOT_FOUND_ERROR";
+}
+
+export interface SchedulingState {
+  availability: AvailabilityData | null;
+  driverId: string | null;
+  isLoading: boolean;
+  error: string | null;
+  statusCode: number | null;
+  hasAvailability: boolean; 
+}

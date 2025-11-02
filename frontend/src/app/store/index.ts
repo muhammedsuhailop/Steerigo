@@ -12,7 +12,7 @@ import adminDriverReducer from "@/features/admin/shared/store/adminDriverSlice";
 import adminKYCReducer from "@/features/admin/shared/store/adminKYCSlice";
 import { userProfileReducer } from "@/features/user/profile";
 import { adminApi } from "@/features/admin/shared/services/adminApi";
-import { schedulingApi } from "@/features/driver/scheduling/api/schedulingApi";
+import { schedulingApi } from "@/features/driver/scheduling/services/schedulingApi";
 
 export const store = configureStore({
   reducer: {

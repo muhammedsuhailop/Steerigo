@@ -6,6 +6,7 @@ import type {
   CurrentRide,
   DriverState,
 } from "../types/driver.types";
+import type { AvailabilityData } from "../../scheduling/types/scheduling.types";
 
 const initialState: DriverState = {
   driver: null,
@@ -16,7 +17,7 @@ const initialState: DriverState = {
   error: null,
   isOnline: false,
   driverId: null,
-  availability: null
+  availability: null,
 };
 
 const driverSlice = createSlice({
@@ -38,7 +39,7 @@ const driverSlice = createSlice({
     },
     setDriverId: (state, action: PayloadAction<string>) => {
       state.driverId = action.payload;
-      localStorage.setItem("driverId", action.payload); 
+      localStorage.setItem("driverId", action.payload);
     },
     setStats: (state, action: PayloadAction<DriverStats>) => {
       state.stats = action.payload;
@@ -55,6 +56,12 @@ const driverSlice = createSlice({
         state.driver.currentStatus = action.payload ? "Available" : "Offline";
       }
     },
+    setAvailability: (
+      state,
+      action: PayloadAction<AvailabilityData | null>
+    ) => {
+      state.availability = action.payload;
+    },
     addPendingRequest: (state, action: PayloadAction<RideRequest>) => {
       state.pendingRequests.unshift(action.payload);
     },
@@ -69,7 +76,6 @@ const driverSlice = createSlice({
     ) => {
       if (state.currentRide && state.currentRide.id === action.payload.rideId) {
         state.currentRide.status = action.payload.status;
-
         if (
           action.payload.status === "completed" &&
           state.driver &&
@@ -101,6 +107,7 @@ export const {
   setPendingRequests,
   setCurrentRide,
   setOnlineStatus,
+  setAvailability, 
   addPendingRequest,
   removePendingRequest,
   updateRideStatus,
@@ -113,17 +120,32 @@ export default driverSlice.reducer;
 // Selectors
 export const selectDriver = (state: { driver: DriverState }) =>
   state.driver.driver;
+
 export const selectDriverStats = (state: { driver: DriverState }) =>
   state.driver.stats;
+
 export const selectPendingRequests = (state: { driver: DriverState }) =>
   state.driver.pendingRequests;
+
 export const selectCurrentRide = (state: { driver: DriverState }) =>
   state.driver.currentRide;
+
 export const selectIsOnline = (state: { driver: DriverState }) =>
   state.driver.isOnline;
+
 export const selectDriverLoading = (state: { driver: DriverState }) =>
   state.driver.isLoading;
+
 export const selectDriverError = (state: { driver: DriverState }) =>
   state.driver.error;
+
 export const selectDriverId = (state: { driver: DriverState }) =>
   state.driver.driverId;
+
+// NEW: Add availability selector
+export const selectAvailability = (state: { driver: DriverState }) =>
+  state.driver.availability;
+
+// NEW: Check if driver has availability
+export const selectHasAvailability = (state: { driver: DriverState }) =>
+  state.driver.availability !== null;

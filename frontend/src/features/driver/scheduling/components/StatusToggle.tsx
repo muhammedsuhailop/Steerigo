@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaHourglassHalf, FaRegCircle } from "react-icons/fa";
 
 type DriverStatus = "Available" | "Busy" | "Offline";
@@ -7,6 +7,8 @@ interface StatusToggleProps {
   currentStatus: DriverStatus;
   onStatusChange: (status: DriverStatus) => void;
   isLoading?: boolean;
+  hasAvailability?: boolean;
+  onDisabledClick?: () => void;
 }
 
 const statusOptions = [
@@ -52,11 +54,25 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
   currentStatus,
   onStatusChange,
   isLoading = false,
+  hasAvailability = true,
+  onDisabledClick,
 }) => {
   const [selectedStatus, setSelectedStatus] =
     useState<DriverStatus>(currentStatus);
 
+  // Sync local state when prop changes
+  useEffect(() => {
+    setSelectedStatus(currentStatus);
+  }, [currentStatus]);
+
   const handleStatusClick = (status: DriverStatus) => {
+    if (!hasAvailability) {
+      if (onDisabledClick) {
+        onDisabledClick();
+      }
+      return;
+    }
+
     if (!isLoading && status !== selectedStatus) {
       setSelectedStatus(status);
       onStatusChange(status);
@@ -69,7 +85,6 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Header with Status Badge */}
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-base font-semibold text-gray-900">
           Current Status
@@ -86,16 +101,16 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
         )}
       </div>
 
-      {/* Status Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {statusOptions.map((option) => {
           const isSelected = selectedStatus === option.value;
+          const isDisabled = !hasAvailability || isLoading;
 
           return (
             <button
               key={option.value}
               type="button"
-              disabled={isLoading}
+              disabled={isDisabled}
               onClick={() => handleStatusClick(option.value)}
               aria-pressed={isSelected}
               className={`
@@ -108,13 +123,22 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
                 ${
                   isSelected
                     ? `${option.activeBorder} scale-[1.02] shadow-sm`
-                    : `border-transparent ${option.hoverBg} hover:scale-[1.01]`
+                    : `border-transparent ${
+                        isDisabled ? "" : option.hoverBg + " hover:scale-[1.01]"
+                      }`
                 }
                 ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
                 }
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300
               `}
+              title={
+                !hasAvailability
+                  ? "Create an availability schedule first"
+                  : undefined
+              }
             >
               <span className={option.iconColor}>{option.icon}</span>
               <span>{option.label}</span>
@@ -123,7 +147,6 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
         })}
       </div>
 
-      {/* Loading Indicator */}
       {isLoading && (
         <div className="flex items-center justify-center gap-2 text-sm text-gray-600 py-2">
           <FaHourglassHalf className="w-4 h-4 animate-spin text-amber-500" />

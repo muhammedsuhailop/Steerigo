@@ -194,6 +194,7 @@ export const authApi = createApi({
         } finally {
           // clear client auth state
           dispatch(logoutAction());
+          clearAuthStorage();
         }
       },
     }),
@@ -207,6 +208,21 @@ export const authApi = createApi({
     }),
   }),
 });
+
+function clearAuthStorage() {
+  const keysToRemove = [
+    "accessToken",
+    "refreshToken",
+    "user",
+    "driverId",
+    "userId",
+    // Add keys to remove
+  ];
+
+  keysToRemove.forEach((key) => {
+    localStorage.removeItem(key);
+  });
+}
 
 export const {
   useLoginMutation,
