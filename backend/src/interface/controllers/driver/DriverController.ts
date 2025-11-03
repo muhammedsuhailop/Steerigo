@@ -15,6 +15,10 @@ import { TYPES } from "@shared/constants/DITypes";
 import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
+import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
+import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
 
 interface DriverRegistrationRequestBody {
   // User profile data
@@ -38,7 +42,7 @@ interface DriverRegistrationRequestBody {
   idType: DocumentType;
   idNumber: string;
   idIssueDate: string;
-  idExpiryDate: string ;
+  idExpiryDate: string;
 
   // Document images
   licenseFrontImage: string;
@@ -56,7 +60,7 @@ interface DriverProfileUpdateRequestBody {
   state?: string;
   pin?: string;
   address?: string;
-  
+
   // Driver license data
   eligibleGearTypes?: GearType[];
   eligibleBodyTypes?: BodyType[];
@@ -64,13 +68,13 @@ interface DriverProfileUpdateRequestBody {
   licenseNumber?: string;
   licenseIssueDate?: string;
   licenseExpiryDate?: string;
-  
+
   // ID document data
   idType?: DocumentType;
   idNumber?: string;
   idIssueDate?: string;
   idExpiryDate?: string;
-  
+
   // Document images
   licenseFrontImage?: string;
   licenseBackImage?: string;
@@ -101,7 +105,11 @@ export class DriverController {
     @inject(TYPES.SubmitKYCUseCase)
     private submitKYCUseCase: SubmitKYCUseCase,
     @inject(TYPES.GetKYCStatusUseCase)
-    private getKYCStatusUseCase: GetKYCStatusUseCase
+    private getKYCStatusUseCase: GetKYCStatusUseCase,
+    @inject(TYPES.GetDriverDashboardUseCase)
+    private getDashboardUseCase: GetDriverDashboardUseCase,
+    @inject(TYPES.GetDriverStatusUseCase)
+    private getStatusUseCase: GetDriverStatusUseCase,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -372,6 +380,92 @@ export class DriverController {
         success: false,
         message: "Internal server error",
       });
+    }
+  }
+
+  async getDashboard(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
+        return;
+      }
+
+      // Create DTO
+      const dto = new GetDriverDashboardDto(userId);
+
+      // Execute use case
+      const result = await this.getDashboardUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_dashboard"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const dashboardResponse = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json(dashboardResponse);
+
+      Logger.info("Driver dashboard returned successfully", { userId });
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_dashboard"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getStatus(req: Request, res: Response): Promise<void> {
+    try {
+      // Extract userId from authenticated request
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: "Unauthorized - User ID not found",
+        });
+        return;
+      }
+
+      Logger.info("Getting driver status", { userId });
+
+      // Execute use case
+      const result = await this.getStatusUseCase.execute(userId);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_status"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const statusResponse = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: "Driver status retrieved successfully",
+        data: statusResponse,
+      });
+
+      Logger.info("Driver status returned successfully", { userId });
+    } catch (error) {
+      Logger.error("Get driver status controller error", { error });
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_status"
+      );
+      res.status(statusCode).json(response);
     }
   }
 }

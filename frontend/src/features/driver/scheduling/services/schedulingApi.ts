@@ -6,8 +6,6 @@ import type {
   UpdateStatusPayload,
 } from "../types/scheduling.types";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ;
-
 export const schedulingApi = createApi({
   reducerPath: "schedulingApi",
   baseQuery: axiosBaseQuery(),

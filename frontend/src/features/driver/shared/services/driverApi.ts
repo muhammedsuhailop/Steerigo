@@ -5,12 +5,15 @@ import type {
   RideRequest,
   CurrentRide,
   DriverStats,
+  DashboardApiResponse,
+  FullDashboardResponse,
 } from "../types/driver.types";
-
-// MOCK DATA - For Dev
+import type {
+  AvailabilityData,
+  DriverStatusResponse,
+} from "../../scheduling/types/scheduling.types";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const mockSuccess = <T>(data: T) => ({ data: { data } });
 
 const MOCK_DRIVER: Driver = {
@@ -46,19 +49,15 @@ const MOCK_DRIVER: Driver = {
   },
   createdAt: new Date("2024-01-15").toISOString(),
   updatedAt: new Date().toISOString(),
-};
-
-const MOCK_DRIVER_STATS: DriverStats = {
-  totalRides: 156,
-  completedRides: 148,
-  scheduledRides: 3,
-  todayEarnings: 125.0,
-  weeklyEarnings: 520.0,
-  monthlyEarnings: 2100.0,
-  totalEarnings: 4280.5,
-  rating: 4.7,
-  acceptanceRate: 92,
-  completionRate: 95,
+  userId: "user-001",
+  licenseNumber: "DL123456789",
+  licenceCategory: "Commercial",
+  licenseIssueDate: "2020-01-15",
+  licenseExpiryDate: "2025-01-15",
+  kycStatus: "Approved",
+  status: "Active",
+  eligibleGearTypes: ["Manual", "Automatic"],
+  eligibleBodyTypes: ["Sedan", "SUV"],
 };
 
 const MOCK_PENDING_REQUESTS: RideRequest[] = [
@@ -134,85 +133,140 @@ const MOCK_PENDING_REQUESTS: RideRequest[] = [
   },
 ];
 
-// Mock state management
 let mockDriverState = { ...MOCK_DRIVER };
-let mockDriverStatsState = { ...MOCK_DRIVER_STATS };
 let mockRequestsState = [...MOCK_PENDING_REQUESTS];
 let mockCurrentRideState: CurrentRide | null = null;
-
-// API CONFIGURATION
 
 export const driverApi = createApi({
   reducerPath: "driverApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["Driver", "DriverStats", "RideRequests", "CurrentRide"],
+  tagTypes: [
+    "Driver",
+    "DriverStats",
+    "RideRequests",
+    "CurrentRide",
+    "DriverStatus",
+  ],
   endpoints: (builder) => ({
-    // Driver Profile Endpoints
-
     getDriverProfile: builder.query<{ data: Driver }, void>({
-      // Dev
       queryFn: async () => {
-        await delay(300);
+        await delay(400);
         return mockSuccess(mockDriverState);
       },
-      // Prod
       // query: () => ({
       //   url: "/driver/profile",
       //   method: "GET",
       // }),
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
       providesTags: ["Driver"],
     }),
 
-    updateDriverProfile: builder.mutation<{ data: Driver }, Partial<Driver>>({
-      // Dev
-      queryFn: async (updates) => {
-        await delay(400);
-        mockDriverState = {
-          ...mockDriverState,
-          ...updates,
-          updatedAt: new Date().toISOString(),
+    getDriverStatus: builder.query<DriverStatusResponse, void>({
+      query: () => ({
+        url: "/driver/status",
+        method: "GET",
+      }),
+      transformResponse: (response: DriverStatusResponse) => {
+        return response;
+      },
+      providesTags: ["DriverStatus"],
+    }),
+
+    getDriverStats: builder.query<{ data: FullDashboardResponse }, void>({
+      query: () => ({
+        url: "/driver/dashboard",
+        method: "GET",
+      }),
+      transformResponse: (response: DashboardApiResponse) => {
+        const {
+          driver,
+          statistics,
+          performance,
+          availability,
+          currentRide,
+          pendingRequests,
+          meta,
+        } = response.data;
+
+        const transformedDriver: Driver = {
+          id: driver.driverId,
+          driverId: driver.driverId,
+          userId: driver.userId,
+          name: driver.name,
+          email: driver.email.value,
+          mobile: driver.mobile,
+          profileImage: undefined,
+          currentStatus:
+            availability?.status === "Available" ? "Available" : "Offline",
+          rating: performance.averageRating,
+          totalRides: statistics.ridesCompleted + statistics.ridesCancelled,
+          completedRides: statistics.ridesCompleted,
+          scheduledRides: statistics.scheduledRides,
+          totalEarnings: statistics.totalEarnings,
+          todayEarnings: statistics.totalEarnings,
+          weeklyEarnings: 0,
+          monthlyEarnings: 0,
+          licenseNumber: driver.licenseNumber,
+          licenceCategory: driver.licenceCategory,
+          licenseIssueDate: driver.licenseIssueDate,
+          licenseExpiryDate: driver.licenseExpiryDate,
+          kycStatus: driver.kycStatus,
+          status: driver.status,
+          eligibleGearTypes: driver.eligibleGearTypes,
+          eligibleBodyTypes: driver.eligibleBodyTypes,
+          location: availability?.currentLocation || {
+            latitude: 0,
+            longitude: 0,
+            address: "Location not available",
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: meta.lastUpdated,
         };
-        console.log("Updated driver profile:", updates);
-        return mockSuccess(mockDriverState);
+
+        const transformedStats: DriverStats = {
+          totalRides: statistics.ridesCompleted + statistics.ridesCancelled,
+          completedRides: statistics.ridesCompleted,
+          ridesCancelled: statistics.ridesCancelled,
+          scheduledRides: statistics.scheduledRides,
+          todayEarnings: statistics.totalEarnings,
+          weeklyEarnings: 0,
+          monthlyEarnings: 0,
+          totalEarnings: statistics.totalEarnings,
+          currency: statistics.currency,
+          rating: performance.averageRating,
+          acceptanceRate: performance.acceptanceRate,
+          cancellationRate: performance.cancellationRate,
+          completionRate: 100 - performance.cancellationRate,
+        };
+
+        const fullResponse: FullDashboardResponse = {
+          driver: transformedDriver,
+          stats: transformedStats,
+          availability: availability,
+          currentRide: currentRide,
+          pendingRequests: pendingRequests || [],
+          meta: meta,
+        };
+
+        return { data: fullResponse };
       },
-      // Prod
-      // query: (updates) => ({
-      //   url: "/driver/profile",
-      //   method: "PUT",
-      //   data: updates,
-      // }),
-      invalidatesTags: ["Driver"],
+      providesTags: ["Driver", "DriverStats"],
     }),
-
-    // Driver Stats Endpoints
-
-    getDriverStats: builder.query<{ data: DriverStats }, void>({
-      // Dev
-      queryFn: async () => {
-        await delay(250);
-        return mockSuccess(mockDriverStatsState);
-      },
-      // Prod
-      // query: () => ({
-      //   url: "/driver/stats",
-      //   method: "GET",
-      // }),
-      providesTags: ["DriverStats"],
-    }),
-
-    // Ride Request Endpoints
 
     getPendingRequests: builder.query<{ data: RideRequest[] }, void>({
-      // Dev
       queryFn: async () => {
-        await delay(300);
+        await delay(400);
         return mockSuccess(mockRequestsState);
       },
-      // Prod
       // query: () => ({
-      //   url: "/driver/requests/pending",
+      //   url: "/driver/ride-requests/pending",
       //   method: "GET",
       // }),
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
       providesTags: (result) =>
         result
           ? [
@@ -220,20 +274,81 @@ export const driverApi = createApi({
                 type: "RideRequests" as const,
                 id,
               })),
-              { type: "RideRequests", id: "LIST" },
+              { type: "RideRequests" as const, id: "LIST" },
             ]
-          : [{ type: "RideRequests", id: "LIST" }],
+          : [{ type: "RideRequests" as const, id: "LIST" }],
+    }),
+
+    getCurrentRide: builder.query<{ data: CurrentRide }, void>({
+      queryFn: async () => {
+        await delay(400);
+        if (!mockCurrentRideState) {
+          return {
+            error: {
+              status: 404,
+              data: { message: "No active ride" },
+            },
+          };
+        }
+        return mockSuccess(mockCurrentRideState);
+      },
+      // query: () => ({
+      //   url: "/driver/ride/current",
+      //   method: "GET",
+      // }),
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      providesTags: ["CurrentRide"],
+    }),
+
+    updateDriverProfile: builder.mutation<{ data: Driver }, Partial<Driver>>({
+      queryFn: async (updates) => {
+        await delay(400);
+        mockDriverState = {
+          ...mockDriverState,
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+        return mockSuccess(mockDriverState);
+      },
+      // query: (updates) => ({
+      //   url: "/driver/profile",
+      //   method: "PUT",
+      //   data: updates,
+      // }),
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      invalidatesTags: ["Driver"],
+    }),
+
+    setDriverOnlineStatus: builder.mutation<{ data: Driver }, boolean>({
+      queryFn: async (isOnline) => {
+        await delay(400);
+        mockDriverState = {
+          ...mockDriverState,
+          currentStatus: isOnline ? "Available" : "Offline",
+          updatedAt: new Date().toISOString(),
+        };
+        return mockSuccess(mockDriverState);
+      },
+      // query: (isOnline) => ({
+      //   url: "/driver/online-status",
+      //   method: "PUT",
+      //   data: { isOnline },
+      // }),
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      invalidatesTags: ["Driver", "DriverStatus"],
     }),
 
     acceptRideRequest: builder.mutation<{ data: CurrentRide }, string>({
-      // Dev
       queryFn: async (requestId) => {
-        await delay(500);
-        const acceptedRequest = mockRequestsState.find(
-          (r) => r.id === requestId
-        );
-
-        if (!acceptedRequest) {
+        await delay(400);
+        const request = mockRequestsState.find((r) => r.id === requestId);
+        if (!request) {
           return {
             error: {
               status: 404,
@@ -241,87 +356,81 @@ export const driverApi = createApi({
             },
           };
         }
-
         mockRequestsState = mockRequestsState.filter((r) => r.id !== requestId);
-
         mockCurrentRideState = {
           id: `ride-${Date.now()}`,
-          passengerId: acceptedRequest.passengerId,
-          passengerName: acceptedRequest.passengerName,
-          passengerPhone: acceptedRequest.passengerPhone,
-          pickupLocation: acceptedRequest.pickupLocation,
-          dropoffLocation: acceptedRequest.dropoffLocation,
-          fare: acceptedRequest.estimatedFare,
-          distance: acceptedRequest.distance,
-          duration: acceptedRequest.estimatedDuration,
+          passengerId: request.passengerId,
+          passengerName: request.passengerName,
+          passengerPhone: request.passengerPhone,
+          passengerRating: request.passengerRating,
+          pickupLocation: request.pickupLocation,
+          dropoffLocation: request.dropoffLocation,
+          fare: request.estimatedFare,
+          distance: request.distance,
+          duration: request.estimatedDuration,
+          rideType: request.rideType,
           status: "accepted",
           startTime: new Date().toISOString(),
-          estimatedArrival: new Date(
-            Date.now() + acceptedRequest.estimatedDuration * 60000
-          ).toISOString(),
-          paymentMethod: acceptedRequest.paymentMethod,
-          paymentStatus: "pending",
+          acceptedAt: new Date().toISOString(),
+          paymentMethod: request.paymentMethod,
         };
-
-        console.log(
-          `Accepted ride ${requestId}, remaining requests: ${mockRequestsState.length}`
-        );
         return mockSuccess(mockCurrentRideState);
       },
-      // Prod
       // query: (requestId) => ({
-      //   url: `/driver/requests/${requestId}/accept`,
+      //   url: `/driver/ride-requests/${requestId}/accept`,
       //   method: "POST",
       // }),
-      invalidatesTags: [
-        { type: "RideRequests", id: "LIST" },
-        { type: "CurrentRide", id: "CURRENT" },
-      ],
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      invalidatesTags: ["RideRequests", "CurrentRide"],
     }),
 
-    rejectRideRequest: builder.mutation<{ success: boolean }, string>({
-      // Dev
-      queryFn: async (requestId) => {
-        await delay(300);
+    rejectRideRequest: builder.mutation<
+      { data: any },
+      { requestId: string; reason?: string }
+    >({
+      queryFn: async ({ requestId, reason }) => {
+        await delay(400);
+        const request = mockRequestsState.find((r) => r.id === requestId);
+        if (!request) {
+          return {
+            error: {
+              status: 404,
+              data: { message: "Request not found" },
+            },
+          };
+        }
         mockRequestsState = mockRequestsState.filter((r) => r.id !== requestId);
-        console.log(
-          `Rejected ride ${requestId}, remaining requests: ${mockRequestsState.length}`
-        );
-        return { data: { success: true } };
+        return mockSuccess({ rejected: true });
       },
-      // Prod
-      // query: (requestId) => ({
-      //   url: `/driver/requests/${requestId}/reject`,
+      // query: ({ requestId, reason }) => ({
+      //   url: `/driver/ride-requests/${requestId}/reject`,
       //   method: "POST",
+      //   data: { reason },
       // }),
-      invalidatesTags: [{ type: "RideRequests", id: "LIST" }],
-    }),
-
-    // Current Ride Endpoints
-
-    getCurrentRide: builder.query<{ data: CurrentRide | null }, void>({
-      // Dev
-      queryFn: async () => {
-        await delay(250);
-        return mockSuccess(mockCurrentRideState); // Can be null
-      },
-      // Prod
-      // query: () => ({
-      //   url: "/driver/rides/current",
-      //   method: "GET",
-      // }),
-      providesTags: [{ type: "CurrentRide", id: "CURRENT" }],
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      invalidatesTags: ["RideRequests"],
     }),
 
     updateRideStatus: builder.mutation<
       { data: CurrentRide },
-      { rideId: string; status: CurrentRide["status"] }
+      {
+        rideId: string;
+        status:
+          | "accepted"
+          | "pickup"
+          | "ongoing"
+          | "completed"
+          | "cancelled"
+          | "rejected";
+      }
     >({
-      // Dev
       queryFn: async ({ rideId, status }) => {
         await delay(400);
-
-        if (!mockCurrentRideState || mockCurrentRideState.id !== rideId) {
+        if (!mockCurrentRideState) {
           return {
             error: {
               status: 404,
@@ -329,114 +438,46 @@ export const driverApi = createApi({
             },
           };
         }
-
-        mockCurrentRideState = { ...mockCurrentRideState, status };
-
-        // Update timestamps based on status
-        if (status === "pickup") {
-          mockCurrentRideState.actualPickupTime = new Date().toISOString();
-        } else if (status === "ongoing") {
-          mockCurrentRideState.actualPickupTime =
-            mockCurrentRideState.actualPickupTime || new Date().toISOString();
-        } else if (status === "completed") {
-          mockCurrentRideState.actualDropoffTime = new Date().toISOString();
-          mockCurrentRideState.paymentStatus = "completed";
-
-          // Update stats
-          mockDriverStatsState.completedRides += 1;
-          mockDriverStatsState.totalRides += 1;
-          mockDriverStatsState.totalEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.todayEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.weeklyEarnings += mockCurrentRideState.fare;
-          mockDriverStatsState.monthlyEarnings += mockCurrentRideState.fare;
-
-          // Update driver
-          mockDriverState.completedRides += 1;
-          mockDriverState.totalRides += 1;
-          mockDriverState.totalEarnings += mockCurrentRideState.fare;
-          mockDriverState.todayEarnings += mockCurrentRideState.fare;
-          mockDriverState.weeklyEarnings += mockCurrentRideState.fare;
-          mockDriverState.monthlyEarnings += mockCurrentRideState.fare;
-          mockDriverState.currentStatus = "Available";
-
-          const completedRide = { ...mockCurrentRideState };
-          mockCurrentRideState = null;
-
-          console.log(`Ride completed: ${rideId}`);
-          return mockSuccess(completedRide);
-        }
-
-        console.log(`Updated ride status to: ${status}`);
+        mockCurrentRideState = {
+          ...mockCurrentRideState,
+          status: status as any,
+        };
         return mockSuccess(mockCurrentRideState);
       },
-      // Prod
       // query: ({ rideId, status }) => ({
-      //   url: `/driver/rides/${rideId}/status`,
+      //   url: `/driver/ride/${rideId}/status`,
       //   method: "PUT",
       //   data: { status },
       // }),
-      invalidatesTags: [
-        { type: "CurrentRide", id: "CURRENT" },
-        { type: "DriverStats" },
-        { type: "Driver" },
-      ],
+      // transformResponse: (response: any) => {
+      //   return { data: response.data };
+      // },
+      invalidatesTags: ["CurrentRide"],
     }),
 
-    // Driver Status Endpoints
-
-    setDriverOnlineStatus: builder.mutation<{ success: boolean }, boolean>({
-      // Dev
-      queryFn: async (isOnline) => {
-        await delay(200);
-        mockDriverState.currentStatus = isOnline ? "Available" : "Offline";
-        mockDriverState.updatedAt = new Date().toISOString();
-        console.log(`📡 Driver status: ${mockDriverState.currentStatus}`);
-        return { data: { success: true } };
+    endRide: builder.mutation<{ data: CurrentRide }, string>({
+      query: (rideId) => ({
+        url: `/driver/ride/${rideId}/complete`,
+        method: "POST",
+      }),
+      transformResponse: (response: any) => {
+        return { data: response.data };
       },
-      // Prod
-      // query: (isOnline) => ({
-      //   url: "/driver/status",
-      //   method: "PUT",
-      //   data: { isOnline },
-      // }),
-      invalidatesTags: ["Driver"],
-    }),
-
-    updateDriverLocation: builder.mutation<
-      { success: boolean },
-      { latitude: number; longitude: number }
-    >({
-      // Dev
-      queryFn: async (location) => {
-        await delay(100);
-        mockDriverState.location = {
-          ...mockDriverState.location,
-          latitude: location.latitude,
-          longitude: location.longitude,
-        };
-        return { data: { success: true } };
-      },
-      // Prod
-      // query: (location) => ({
-      //   url: "/driver/location",
-      //   method: "PUT",
-      //   data: location,
-      // }),
+      invalidatesTags: ["CurrentRide"],
     }),
   }),
 });
 
-// Export Hooks
-
 export const {
   useGetDriverProfileQuery,
-  useUpdateDriverProfileMutation,
+  useGetDriverStatusQuery,
   useGetDriverStatsQuery,
   useGetPendingRequestsQuery,
+  useGetCurrentRideQuery,
+  useUpdateDriverProfileMutation,
+  useSetDriverOnlineStatusMutation,
   useAcceptRideRequestMutation,
   useRejectRideRequestMutation,
-  useGetCurrentRideQuery,
   useUpdateRideStatusMutation,
-  useSetDriverOnlineStatusMutation,
-  useUpdateDriverLocationMutation,
+  useEndRideMutation,
 } = driverApi;

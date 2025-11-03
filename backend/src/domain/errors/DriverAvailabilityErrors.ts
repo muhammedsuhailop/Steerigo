@@ -31,3 +31,10 @@ export class ExpiredAvailabilityError extends DomainError {
     super("Cannot perform operation on expired availability record");
   }
 }
+
+export class DriverProfileNotFoundError extends DomainError {
+  constructor(userId: string) {
+    super(`Driver profile not found for user ID: ${userId}`);
+    this.name = "DriverProfileNotFoundError";
+  }
+}

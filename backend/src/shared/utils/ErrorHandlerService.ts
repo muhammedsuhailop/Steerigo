@@ -14,6 +14,9 @@ import {
 import {
   DriverAlreadyAvailableError,
   InvalidStatusTransitionError,
+  DriverAvailabilityNotFoundError,
+  DriverProfileNotFoundError,
+  ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
 
 export enum ErrorType {
@@ -24,6 +27,8 @@ export enum ErrorType {
   NETWORK_ERROR = "NETWORK_ERROR",
   DATABASE_ERROR = "DATABASE_ERROR",
   AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
+  NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
+  CONFLICT_ERROR = "CONFLICT_ERROR",
 }
 
 export interface ErrorDetails {
@@ -48,13 +53,13 @@ export class ErrorHandlerService {
       },
     ],
 
-    // Client Errors
+    // Client Errors - Duplicates/Conflicts
     [
       UserAlreadyExistsError.name,
       {
         statusCode: 409,
         message: "An account with this email already exists",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: false,
         isOperational: true,
       },
@@ -65,7 +70,7 @@ export class ErrorHandlerService {
       {
         statusCode: 409,
         message: "This mobile number is already registered",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: false,
         isOperational: true,
       },
@@ -104,13 +109,13 @@ export class ErrorHandlerService {
       },
     ],
 
-    //Driver Avaialbility
+    // Driver Availability Errors
     [
       DriverAlreadyAvailableError.name,
       {
         statusCode: 409,
         message: "Driver already has an active availability record",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: false,
         isOperational: true,
       },
@@ -121,6 +126,39 @@ export class ErrorHandlerService {
       {
         statusCode: 409,
         message: "Invalid status transition",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      DriverAvailabilityNotFoundError.name,
+      {
+        statusCode: 404,
+        message: "Driver availability not found",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      DriverProfileNotFoundError.name,
+      {
+        statusCode: 404,
+        message: "Driver profile not found",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      ExpiredAvailabilityError.name,
+      {
+        statusCode: 400,
+        message: "Availability period has expired",
         type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
@@ -160,10 +198,12 @@ export class ErrorHandlerService {
     [ErrorType.VALIDATION_ERROR]: "Invalid input provided",
     [ErrorType.CLIENT_ERROR]: "Bad request",
     [ErrorType.AUTHENTICATION_ERROR]: "Authentication failed",
+    [ErrorType.AUTHORIZATION_ERROR]: "Access forbidden",
+    [ErrorType.NOT_FOUND_ERROR]: "Resource not found",
+    [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
   };
 
   // Main error handling method - converts any error to standardized API response
-
   static handleError(
     error: any,
     context?: string
@@ -187,7 +227,6 @@ export class ErrorHandlerService {
   }
 
   // Handle validation errors from express-validator
-
   static handleValidationErrors(errors: any[]): {
     response: ApiResponse;
     statusCode: number;
@@ -203,7 +242,6 @@ export class ErrorHandlerService {
   }
 
   // Classify error type and determine appropriate response
-
   private static classifyError(error: any): ErrorDetails {
     // Check if it's a known domain error
     if (this.ERROR_MAP.has(error.constructor.name)) {
@@ -260,7 +298,6 @@ export class ErrorHandlerService {
   }
 
   // Check if error is database-related
-
   private static isDatabaseError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
     const code = String(error.code ?? "").toLowerCase();
@@ -300,7 +337,7 @@ export class ErrorHandlerService {
       return {
         statusCode: 409,
         message: "This mobile number is already registered",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: false,
         isOperational: true,
       };
@@ -308,7 +345,7 @@ export class ErrorHandlerService {
       return {
         statusCode: 409,
         message: "An account with this email already exists",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: false,
         isOperational: true,
       };
@@ -316,15 +353,14 @@ export class ErrorHandlerService {
       return {
         statusCode: 409,
         message: "This information is already registered",
-        type: ErrorType.CLIENT_ERROR,
+        type: ErrorType.CONFLICT_ERROR,
         shouldLog: true,
         isOperational: true,
       };
     }
   }
 
-  //Check if error is network/SSL related
-
+  // Check if error is network/SSL related
   private static isNetworkError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
 
@@ -345,7 +381,6 @@ export class ErrorHandlerService {
   }
 
   // Check if error is validation-related
-
   private static isValidationError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
     return (
@@ -354,8 +389,7 @@ export class ErrorHandlerService {
     );
   }
 
-  //Log error with appropriate level
-
+  // Log error with appropriate level
   private static logError(
     error: any,
     context?: string,
@@ -380,7 +414,6 @@ export class ErrorHandlerService {
   }
 
   // Check if error is operational (expected) vs programming error
-
   static isOperationalError(error: any): boolean {
     if (error instanceof DomainError) return true;
 

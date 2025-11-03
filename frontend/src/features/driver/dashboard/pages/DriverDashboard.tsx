@@ -20,37 +20,50 @@ import {
   CurrentRide,
 } from "../components";
 import { Footer } from "@/features/public/components";
+import { useDispatch } from "react-redux";
+import { setDriverId } from "../../shared/store/driverSlice";
+import type {
+  Driver,
+  DriverStats as DriverStatsType,
+} from "../../shared/types/driver.types";
 
 const DriverDashboard: React.FC = () => {
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Single dashboard query returns everything
   const {
-    data: driverData,
+    data: dashboardData,
+    isLoading: isDashboardLoading,
+    error: dashboardError,
+    refetch: refetchDashboard,
+  } = useGetDriverStatsQuery();
+
+  // Separate profile query
+  const {
+    data: driverProfileData,
     isLoading: isDriverLoading,
     error: driverError,
     refetch: refetchDriver,
   } = useGetDriverProfileQuery();
 
-  const {
-    data: statsData,
-    isLoading: isStatsLoading,
-    refetch: refetchStats,
-  } = useGetDriverStatsQuery();
-
+  // Pending requests
   const {
     data: requestsData,
     isLoading: isRequestsLoading,
     refetch: refetchRequests,
   } = useGetPendingRequestsQuery();
 
+  // Current ride
   const {
     data: currentRideData,
     isLoading: isRideLoading,
     refetch: refetchCurrentRide,
   } = useGetCurrentRideQuery();
 
+  // Mutations
   const [setOnlineStatus, { isLoading: isTogglingStatus }] =
     useSetDriverOnlineStatusMutation();
 
@@ -63,16 +76,27 @@ const DriverDashboard: React.FC = () => {
   const [updateStatus, { isLoading: isUpdatingStatus }] =
     useUpdateRideStatusMutation();
 
-  // Extract data from responses
-  const driver = driverData?.data;
-  const stats = statsData?.data;
-  const pendingRequests = requestsData?.data || [];
-  const currentRide = currentRideData?.data;
+  // Extract data from dashboard response
+  const dashboard = dashboardData?.data;
+
+  // Get driver from dashboard or profile
+  const driver: Driver | undefined =
+    dashboard?.driver || driverProfileData?.data;
+
+  // Get stats from dashboard
+  const stats: DriverStatsType | undefined = dashboard?.stats;
+
+  // Get pending requests from dashboard or separate query
+  const pendingRequests =
+    dashboard?.pendingRequests || requestsData?.data || [];
+
+  // Get current ride from dashboard or separate query
+  const currentRide = dashboard?.currentRide || currentRideData?.data;
 
   // Compute loading states
   const isLoading =
+    isDashboardLoading ||
     isDriverLoading ||
-    isStatsLoading ||
     isRequestsLoading ||
     isRideLoading ||
     isTogglingStatus ||
@@ -82,6 +106,7 @@ const DriverDashboard: React.FC = () => {
 
   const isOnline = driver?.currentStatus === "Available";
 
+  // Handle responsive design
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024;
@@ -96,12 +121,24 @@ const DriverDashboard: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Dispatch driver ID to store
+  useEffect(() => {
+    if (driver?.driverId) {
+      dispatch(setDriverId(driver.driverId));
+    }
+    console.log("driverId", driver?.driverId);
+  }, [driver?.driverId, dispatch]);
+
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
+  // Handler functions
   const handleToggleOnlineStatus = async () => {
     try {
       await setOnlineStatus(!isOnline).unwrap();
+      console.log(
+        `Driver status changed to: ${!isOnline ? "Online" : "Offline"}`
+      );
     } catch (error) {
       console.error("Failed to toggle online status:", error);
       // TODO: Show error toast/notification
@@ -111,16 +148,20 @@ const DriverDashboard: React.FC = () => {
   const handleAcceptRideRequest = async (requestId: string) => {
     try {
       await acceptRide(requestId).unwrap();
+      console.log(`Ride ${requestId} accepted`);
     } catch (error) {
       console.error("Failed to accept ride:", error);
+      // TODO
     }
   };
 
   const handleRejectRideRequest = async (requestId: string) => {
     try {
-      await rejectRide(requestId).unwrap();
+      await rejectRide({ requestId }).unwrap();
+      console.log(`Ride ${requestId} rejected`);
     } catch (error) {
       console.error("Failed to reject ride:", error);
+      // TODO
     }
   };
 
@@ -136,27 +177,35 @@ const DriverDashboard: React.FC = () => {
   ) => {
     try {
       await updateStatus({ rideId, status }).unwrap();
+      console.log(`Ride ${rideId} status updated to: ${status}`);
     } catch (error) {
       console.error("Failed to update ride status:", error);
+      // TODO
     }
   };
 
   const handleScheduleAvailability = () => {
     console.log("Schedule booking clicked");
+    // TODO: Navigate to scheduling page
   };
 
   const handleViewEarnings = () => {
     console.log("View earnings clicked");
+    // TODO: Navigate to earnings page
   };
 
+  // Refresh all data
   const refreshData = () => {
+    refetchDashboard();
     refetchDriver();
-    refetchStats();
     refetchRequests();
     refetchCurrentRide();
   };
 
-  if (isDriverLoading && !driver) {
+  // Determine primary error
+  const error = dashboardError || driverError;
+
+  if (isDashboardLoading && !dashboard) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -167,7 +216,7 @@ const DriverDashboard: React.FC = () => {
     );
   }
 
-  if (driverError) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
@@ -191,8 +240,7 @@ const DriverDashboard: React.FC = () => {
               Error Loading Dashboard
             </h3>
             <p className="text-gray-600 mb-4">
-              {(driverError as any)?.data?.message ||
-                "Failed to load dashboard data"}
+              {(error as any)?.data?.message || "Failed to load dashboard data"}
             </p>
             <button
               onClick={refreshData}
@@ -207,7 +255,19 @@ const DriverDashboard: React.FC = () => {
   }
 
   if (!driver || !stats) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+          <p className="text-gray-600">No driver data available</p>
+          <button
+            onClick={refreshData}
+            className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -223,6 +283,7 @@ const DriverDashboard: React.FC = () => {
       >
         <DriverTopbar onToggleSidebar={toggleSidebar} title="Dashboard" />
         <main className="flex-1 px-6 py-8 space-y-8">
+          {/* Welcome Section */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -245,13 +306,19 @@ const DriverDashboard: React.FC = () => {
               {isLoading ? "Refreshing..." : "Refresh"}
             </button>
           </div>
+
+          {/* Driver Profile Card */}
           <DriverProfile
             driver={driver}
             isOnline={isOnline}
             onToggleStatus={handleToggleOnlineStatus}
             loading={isTogglingStatus}
           />
-          <DriverStats stats={stats} loading={isStatsLoading} />
+
+          {/* Driver Stats Card */}
+          {stats && <DriverStats stats={stats} loading={isDashboardLoading} />}
+
+          {/* Driver Actions Card */}
           <DriverActions
             isOnline={isOnline}
             onGoOnline={handleToggleOnlineStatus}
@@ -259,12 +326,18 @@ const DriverDashboard: React.FC = () => {
             onViewEarnings={handleViewEarnings}
             loading={isTogglingStatus}
           />
-          <PendingRequests
-            requests={pendingRequests}
-            onAccept={handleAcceptRideRequest}
-            onReject={handleRejectRideRequest}
-            loading={isAccepting || isRejecting}
-          />
+
+          {/* Pending Requests Section */}
+          {pendingRequests && pendingRequests.length > 0 && (
+            <PendingRequests
+              requests={pendingRequests}
+              onAccept={handleAcceptRideRequest}
+              onReject={handleRejectRideRequest}
+              loading={isAccepting || isRejecting}
+            />
+          )}
+
+          {/* Current Ride Section */}
           {currentRide && (
             <CurrentRide
               ride={currentRide}
@@ -275,6 +348,8 @@ const DriverDashboard: React.FC = () => {
         </main>
         <Footer />
       </div>
+
+      {/* Mobile Sidebar Overlay */}
       {isMobile && !sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"

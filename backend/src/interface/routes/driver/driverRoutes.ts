@@ -30,6 +30,14 @@ router.use((req, res, next) => {
 router.use(authMiddleware);
 router.use(requireRole(["Driver"]));
 
+// GET /api/driver/dashboard
+router.get("/dashboard", (req, res) => driverController.getDashboard(req, res));
+
+// GET /api/driver/status
+router.get("/status", (req, res) =>
+  driverController.getStatus(req, res)
+);
+
 // POST /api/driver/register - Register as driver
 router.post("/register", validateSchema(driverRegistrationSchema), (req, res) =>
   driverController.register(req, res)
