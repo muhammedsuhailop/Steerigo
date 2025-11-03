@@ -12,130 +12,14 @@ import type {
   AvailabilityData,
   DriverStatusResponse,
 } from "../../scheduling/types/scheduling.types";
+import {
+  mockStateManager,
+  MOCK_DRIVER,
+  MOCK_PENDING_REQUESTS,
+} from "../mocks/driver.mock";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const mockSuccess = <T>(data: T) => ({ data: { data } });
-
-const MOCK_DRIVER: Driver = {
-  id: "driver-001",
-  driverId: "DRV-001",
-  name: "John Doe",
-  email: "john.doe@example.com",
-  mobile: "+1234567890",
-  profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-  currentStatus: "Available",
-  rating: 4.7,
-  totalRides: 156,
-  completedRides: 148,
-  scheduledRides: 3,
-  totalEarnings: 4280.5,
-  todayEarnings: 125.0,
-  weeklyEarnings: 520.0,
-  monthlyEarnings: 2100.0,
-  vehicleInfo: {
-    id: "vehicle-001",
-    make: "Toyota",
-    model: "Camry",
-    year: 2022,
-    color: "Silver",
-    plateNumber: "ABC-1234",
-    type: "sedan",
-    fuelType: "hybrid",
-  },
-  location: {
-    latitude: 40.7128,
-    longitude: -74.006,
-    address: "Manhattan, New York, NY",
-  },
-  createdAt: new Date("2024-01-15").toISOString(),
-  updatedAt: new Date().toISOString(),
-  userId: "user-001",
-  licenseNumber: "DL123456789",
-  licenceCategory: "Commercial",
-  licenseIssueDate: "2020-01-15",
-  licenseExpiryDate: "2025-01-15",
-  kycStatus: "Approved",
-  status: "Active",
-  eligibleGearTypes: ["Manual", "Automatic"],
-  eligibleBodyTypes: ["Sedan", "SUV"],
-};
-
-const MOCK_PENDING_REQUESTS: RideRequest[] = [
-  {
-    id: "req-001",
-    passengerId: "user-101",
-    passengerName: "Alice Smith",
-    passengerPhone: "+9134567891",
-    passengerRating: 4.8,
-    pickupLocation: {
-      address: "Times Square, New York, NY",
-      latitude: 40.758,
-      longitude: -73.9855,
-    },
-    dropoffLocation: {
-      address: "Grand Central Terminal, New York, NY",
-      latitude: 40.7489,
-      longitude: -73.968,
-    },
-    estimatedFare: 15.5,
-    distance: 2.3,
-    estimatedDuration: 12,
-    rideType: "oneway",
-    requestTime: new Date().toISOString(),
-    paymentMethod: "card",
-  },
-  {
-    id: "req-002",
-    passengerId: "user-102",
-    passengerName: "Bob Johnson",
-    passengerPhone: "+1234567892",
-    passengerRating: 4.5,
-    pickupLocation: {
-      address: "Central Park South, New York, NY",
-      latitude: 40.7614,
-      longitude: -73.9776,
-    },
-    dropoffLocation: {
-      address: "Upper East Side, New York, NY",
-      latitude: 40.7812,
-      longitude: -73.9665,
-    },
-    estimatedFare: 12.0,
-    distance: 1.8,
-    estimatedDuration: 8,
-    rideType: "oneway",
-    requestTime: new Date().toISOString(),
-    paymentMethod: "cash",
-  },
-  {
-    id: "req-003",
-    passengerId: "user-103",
-    passengerName: "Carol White",
-    passengerPhone: "+1234567893",
-    passengerRating: 4.9,
-    pickupLocation: {
-      address: "Brooklyn Bridge, Brooklyn, NY",
-      latitude: 40.7061,
-      longitude: -73.9969,
-    },
-    dropoffLocation: {
-      address: "Wall Street, New York, NY",
-      latitude: 40.7074,
-      longitude: -74.0113,
-    },
-    estimatedFare: 18.0,
-    distance: 3.2,
-    estimatedDuration: 15,
-    rideType: "oneway",
-    requestTime: new Date().toISOString(),
-    specialRequests: "Please call on arrival",
-    paymentMethod: "wallet",
-  },
-];
-
-let mockDriverState = { ...MOCK_DRIVER };
-let mockRequestsState = [...MOCK_PENDING_REQUESTS];
-let mockCurrentRideState: CurrentRide | null = null;
 
 export const driverApi = createApi({
   reducerPath: "driverApi",
@@ -151,7 +35,7 @@ export const driverApi = createApi({
     getDriverProfile: builder.query<{ data: Driver }, void>({
       queryFn: async () => {
         await delay(400);
-        return mockSuccess(mockDriverState);
+        return mockSuccess(mockStateManager.getDriver());
       },
       // query: () => ({
       //   url: "/driver/profile",
@@ -258,7 +142,7 @@ export const driverApi = createApi({
     getPendingRequests: builder.query<{ data: RideRequest[] }, void>({
       queryFn: async () => {
         await delay(400);
-        return mockSuccess(mockRequestsState);
+        return mockSuccess(mockStateManager.getRequests());
       },
       // query: () => ({
       //   url: "/driver/ride-requests/pending",
@@ -282,7 +166,8 @@ export const driverApi = createApi({
     getCurrentRide: builder.query<{ data: CurrentRide }, void>({
       queryFn: async () => {
         await delay(400);
-        if (!mockCurrentRideState) {
+        const currentRide = mockStateManager.getCurrentRide();
+        if (!currentRide) {
           return {
             error: {
               status: 404,
@@ -290,7 +175,7 @@ export const driverApi = createApi({
             },
           };
         }
-        return mockSuccess(mockCurrentRideState);
+        return mockSuccess(currentRide);
       },
       // query: () => ({
       //   url: "/driver/ride/current",
@@ -305,12 +190,8 @@ export const driverApi = createApi({
     updateDriverProfile: builder.mutation<{ data: Driver }, Partial<Driver>>({
       queryFn: async (updates) => {
         await delay(400);
-        mockDriverState = {
-          ...mockDriverState,
-          ...updates,
-          updatedAt: new Date().toISOString(),
-        };
-        return mockSuccess(mockDriverState);
+        const updated = mockStateManager.updateDriver(updates);
+        return mockSuccess(updated);
       },
       // query: (updates) => ({
       //   url: "/driver/profile",
@@ -326,12 +207,8 @@ export const driverApi = createApi({
     setDriverOnlineStatus: builder.mutation<{ data: Driver }, boolean>({
       queryFn: async (isOnline) => {
         await delay(400);
-        mockDriverState = {
-          ...mockDriverState,
-          currentStatus: isOnline ? "Available" : "Offline",
-          updatedAt: new Date().toISOString(),
-        };
-        return mockSuccess(mockDriverState);
+        const updated = mockStateManager.setOnlineStatus(isOnline);
+        return mockSuccess(updated);
       },
       // query: (isOnline) => ({
       //   url: "/driver/online-status",
@@ -347,8 +224,8 @@ export const driverApi = createApi({
     acceptRideRequest: builder.mutation<{ data: CurrentRide }, string>({
       queryFn: async (requestId) => {
         await delay(400);
-        const request = mockRequestsState.find((r) => r.id === requestId);
-        if (!request) {
+        const ride = mockStateManager.acceptRideRequest(requestId);
+        if (!ride) {
           return {
             error: {
               status: 404,
@@ -356,25 +233,7 @@ export const driverApi = createApi({
             },
           };
         }
-        mockRequestsState = mockRequestsState.filter((r) => r.id !== requestId);
-        mockCurrentRideState = {
-          id: `ride-${Date.now()}`,
-          passengerId: request.passengerId,
-          passengerName: request.passengerName,
-          passengerPhone: request.passengerPhone,
-          passengerRating: request.passengerRating,
-          pickupLocation: request.pickupLocation,
-          dropoffLocation: request.dropoffLocation,
-          fare: request.estimatedFare,
-          distance: request.distance,
-          duration: request.estimatedDuration,
-          rideType: request.rideType,
-          status: "accepted",
-          startTime: new Date().toISOString(),
-          acceptedAt: new Date().toISOString(),
-          paymentMethod: request.paymentMethod,
-        };
-        return mockSuccess(mockCurrentRideState);
+        return mockSuccess(ride);
       },
       // query: (requestId) => ({
       //   url: `/driver/ride-requests/${requestId}/accept`,
@@ -392,8 +251,8 @@ export const driverApi = createApi({
     >({
       queryFn: async ({ requestId, reason }) => {
         await delay(400);
-        const request = mockRequestsState.find((r) => r.id === requestId);
-        if (!request) {
+        const rejected = mockStateManager.rejectRideRequest(requestId);
+        if (!rejected) {
           return {
             error: {
               status: 404,
@@ -401,7 +260,6 @@ export const driverApi = createApi({
             },
           };
         }
-        mockRequestsState = mockRequestsState.filter((r) => r.id !== requestId);
         return mockSuccess({ rejected: true });
       },
       // query: ({ requestId, reason }) => ({
@@ -430,7 +288,8 @@ export const driverApi = createApi({
     >({
       queryFn: async ({ rideId, status }) => {
         await delay(400);
-        if (!mockCurrentRideState) {
+        const updated = mockStateManager.updateRideStatus(rideId, status);
+        if (!updated) {
           return {
             error: {
               status: 404,
@@ -438,11 +297,7 @@ export const driverApi = createApi({
             },
           };
         }
-        mockCurrentRideState = {
-          ...mockCurrentRideState,
-          status: status as any,
-        };
-        return mockSuccess(mockCurrentRideState);
+        return mockSuccess(updated);
       },
       // query: ({ rideId, status }) => ({
       //   url: `/driver/ride/${rideId}/status`,
