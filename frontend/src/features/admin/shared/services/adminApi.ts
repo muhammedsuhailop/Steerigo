@@ -1,126 +1,13 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
-
-// TYPE DEFINITIONS
-export interface AdminUser {
-  id: string;
-  userId?: string;
-  name: string;
-  email: string;
-  mobile?: string;
-  status:
-    | "Active"
-    | "Inactive"
-    | "Suspended"
-    | "Pending Verification"
-    | "Blocked";
-  role: string;
-  totalBookings: number;
-  totalSpent: number;
-  lastBooked?: string;
-  createdAt: string;
-  updatedAt: string;
-  avatar?: string;
-}
-
-export interface AdminDriver {
-  id: string;
-  driverId?: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userMobile: string;
-  status: string;
-  kycStatus: string;
-  licenceCategory: string;
-  eligibleGearTypes: string[];
-  eligibleBodyTypes: string[];
-  licenseIssueDate: string;
-  licenseExpiryDate: string;
-  totalRides: number;
-  totalEarnings: number;
-  rating: number;
-  lastRideDate: string | null;
-  profileImage?: string;
-  createdAt: string;
-}
-
-// KYC TYPES
-export interface KYCDocument {
-  id: string;
-  docType: string;
-  docNumber: string;
-  issueDate: string;
-  expiryDate: string | null;
-  verificationStatus: "InReview" | "Approved" | "Rejected";
-  docImageUrlsFront: string[];
-  docImageUrlsBack: string[];
-  createdAt: string;
-  updatedAt: string;
-  isExpired: boolean;
-  rejectionReason?: string;
-  reviewedBy?: string;
-  reviewedAt?: string;
-}
-
-export interface KYCDriver {
-  driverId: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userMobile: string;
-  driverStatus: "Active" | "Inactive" | "Suspended";
-}
-
-export interface KYCRequest {
-  kyc: KYCDocument;
-  driver: KYCDriver;
-}
-
-export interface KYCPagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage?: boolean;
-  hasPrevPage?: boolean;
-}
-
-export interface KYCListResponse {
-  success: boolean;
-  message: string;
-  data: {
-    kycDocuments: KYCRequest[];
-    pagination: KYCPagination;
-  };
-}
-
-export interface KYCDetailResponse {
-  success: boolean;
-  message: string;
-  data: KYCRequest;
-}
-
-export interface KYCUpdateResponse {
-  success: boolean;
-  message: string;
-  data?: KYCRequest;
-}
-
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-  pageSize?: number;
-}
-
-interface PaginationResponse {
-  totalItems: number;
-  totalPages: number;
-  page: number;
-  pageSize: number;
-}
-
-// API DEFINITION
+import { KYCDetailResponseData } from "../types/kyc.interfaces";
+import {
+  AdminDriver,
+  AdminUser,
+  KYCListResponse,
+  KYCUpdateResponse,
+  PaginationResponse,
+} from "../types/admin.interfaces";
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
@@ -303,7 +190,7 @@ export const adminApi = createApi({
       providesTags: [{ type: "AdminStats", id: "DRIVER_STATS" }],
     }),
 
-    // KYC MANAGEMENT 
+    // KYC MANAGEMENT
 
     getKYCRequests: builder.query<
       KYCListResponse,
@@ -348,7 +235,7 @@ export const adminApi = createApi({
           : [{ type: "KYCRequests", id: "LIST" }],
     }),
 
-    getKYCById: builder.query<KYCDetailResponse, string>({
+    getKYCById: builder.query<KYCDetailResponseData, string>({
       query: (requestId) => ({
         url: `/admin/drivers/kyc-requests/${requestId}`,
         method: "GET",
@@ -362,18 +249,18 @@ export const adminApi = createApi({
       KYCUpdateResponse,
       {
         requestId: string;
-        action: "approve" | "reject";
+        action: "Approved" | "Rejected" | "Expired";
         status?: "approved" | "rejected";
         reason?: string;
       }
     >({
       query: ({ requestId, action, status, reason }) => ({
-        url: `/admin/kyc-requests/${requestId}/status`,
+        url: `/admin/drivers/kyc-requests/${requestId}/status`,
         method: "PATCH",
         data: {
-          action,
-          status: status || (action === "approve" ? "approved" : "rejected"),
-          reason,
+          verificationStatus: action,
+          status: status || (action === "Approved" ? "approved" : "rejected"),
+          comments: reason,
         },
       }),
       invalidatesTags: (result, error, { requestId }) => [
