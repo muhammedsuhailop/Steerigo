@@ -91,6 +91,50 @@ export type KYCDocType =
 
 export type DriverStatus = "Active" | "Inactive" | "Suspended";
 
+export interface KYCDocumentDetail {
+  id: string;
+  docType: string;
+  docNumber: string;
+  issueDate: string;
+  expiryDate: string | null;
+  verificationStatus: "InReview" | "Approved" | "Rejected";
+  docImageUrlsFront: string[];
+  docImageUrlsBack: string[];
+  createdAt: string;
+  updatedAt: string;
+  isExpired: boolean;
+  rejectionReason?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+}
+
+export interface KYCDriverDetail {
+  driverId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userMobile: string;
+  driverStatus: "Active" | "Inactive" | "Suspended";
+}
+
+export interface KYCDetailRequest {
+  kyc: KYCDocumentDetail;
+  driver: KYCDriverDetail;
+}
+
+export interface KYCDetailResponseData {
+  success: boolean;
+  message: string;
+  data: KYCDetailRequest;
+}
+
+export interface KYCActionPayload {
+  requestId: string;
+  action: "Approved" | "Rejected";
+  reason?: string;
+  status?: "approved" | "rejected";
+}
+
 // Filter options for UI components
 export const KYC_STATUS_OPTIONS = [
   { value: "", label: "All Status" },

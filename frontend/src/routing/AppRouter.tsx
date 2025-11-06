@@ -18,6 +18,8 @@ import DriverProfilePage from "@/features/admin/driver/view-profile/pages/Driver
 import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/AdminKYCLayout";
 import { UserProfileLayout } from "@/features/user";
 import DriverScheduling from "@/features/driver/scheduling/pages/DriverScheduling";
+import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailComponent/pages/KYCRequestDetailPage";
+import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -130,6 +132,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <KYCRequestsLayout />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/kyc-requests/:requestId"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <KYCRequestDetailPage />
           </ProtectedRoute>
         }
       />

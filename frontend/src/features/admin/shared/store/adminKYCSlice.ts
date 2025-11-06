@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { KYCFilters } from "../types";
+import type { KYCDetailRequest, KYCFilters } from "../types";
 
 // Local state management for admin KYC feature
 // API calls are handled by adminApi (RTK Query)
@@ -9,6 +9,8 @@ interface AdminKYCState {
   filters: KYCFilters;
   page: number;
   limit: number;
+  selectedKYC: KYCDetailRequest | null; 
+  viewModalOpen: boolean;
 }
 
 const initialState: AdminKYCState = {
@@ -22,6 +24,8 @@ const initialState: AdminKYCState = {
   },
   page: 1,
   limit: 10,
+  selectedKYC: null, 
+  viewModalOpen: false, 
 };
 
 const adminKYCSlice = createSlice({
@@ -43,11 +47,28 @@ const adminKYCSlice = createSlice({
       state.filters = initialState.filters;
       state.page = 1;
     },
+    setSelectedKYC: (state, action: PayloadAction<KYCDetailRequest | null>) => {
+      state.selectedKYC = action.payload;
+    },
+    setViewModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.viewModalOpen = action.payload;
+    },
+    clearSelectedKYC: (state) => {
+      state.selectedKYC = null;
+      state.viewModalOpen = false;
+    },
   },
 });
 
-export const { setFilters, setPage, setLimit, resetFilters } =
-  adminKYCSlice.actions;
+export const {
+  setFilters,
+  setPage,
+  setLimit,
+  resetFilters,
+  setSelectedKYC, 
+  setViewModalOpen,
+  clearSelectedKYC,
+} = adminKYCSlice.actions;
 export default adminKYCSlice.reducer;
 
 // Selectors
@@ -57,3 +78,8 @@ export const selectPage = (state: { adminKYC: AdminKYCState }) =>
   state.adminKYC.page;
 export const selectLimit = (state: { adminKYC: AdminKYCState }) =>
   state.adminKYC.limit;
+export const selectSelectedKYC = (state: { adminKYC: AdminKYCState }) =>
+  state.adminKYC.selectedKYC;
+
+export const selectViewModalOpen = (state: { adminKYC: AdminKYCState }) =>
+  state.adminKYC.viewModalOpen;
