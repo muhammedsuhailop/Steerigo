@@ -34,9 +34,7 @@ router.use(requireRole(["Driver"]));
 router.get("/dashboard", (req, res) => driverController.getDashboard(req, res));
 
 // GET /api/driver/status
-router.get("/status", (req, res) =>
-  driverController.getStatus(req, res)
-);
+router.get("/status", (req, res) => driverController.getStatus(req, res));
 
 // POST /api/driver/register - Register as driver
 router.post("/register", validateSchema(driverRegistrationSchema), (req, res) =>
@@ -44,7 +42,9 @@ router.post("/register", validateSchema(driverRegistrationSchema), (req, res) =>
 );
 
 // GET /api/driver/profile - Get driver profile
-// router.get("/profile", (req, res) => driverController.getProfile(req, res));
+router.get("/profile", (req, res) =>
+  driverController.getDetailedProfile(req, res)
+);
 
 // PUT /api/driver/profile - Update driver profile
 router.put("/profile", validateSchema(driverUpdateSchema), (req, res) =>

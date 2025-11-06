@@ -53,12 +53,12 @@ export const TYPES = {
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
-  // GetDriverProfileUseCase: Symbol.for("GetDriverProfileUseCase"),
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
   SubmitKYCUseCase: Symbol.for("SubmitKYCUseCase"),
   GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
   GetDriverDashboardUseCase: Symbol.for("GetDriverDashboardUseCase"),
   GetDriverStatusUseCase: Symbol.for("GetDriverStatusUseCase"),
+  GetDriverDetailedProfileUseCase: Symbol.for("GetDriverDetailedProfileUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

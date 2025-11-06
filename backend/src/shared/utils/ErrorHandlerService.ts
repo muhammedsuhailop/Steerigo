@@ -18,6 +18,12 @@ import {
   DriverProfileNotFoundError,
   ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
+import {
+  DriverAccessDeniedError,
+  KycDocumentNotFoundError,
+  ResourceNotFoundError,
+  UserNotFoundError,
+} from "@domain/errors/DriverProfileErrors";
 
 export enum ErrorType {
   CLIENT_ERROR = "CLIENT_ERROR",
@@ -160,6 +166,63 @@ export class ErrorHandlerService {
         statusCode: 400,
         message: "Availability period has expired",
         type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    // Profile-Related Errors
+    [
+      UserNotFoundError.name,
+      {
+        statusCode: 404,
+        message: "User not found. Please check the user ID and try again",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      DriverProfileNotFoundError.name,
+      {
+        statusCode: 404,
+        message:
+          "Driver profile not found. Please complete driver registration first",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      KycDocumentNotFoundError.name,
+      {
+        statusCode: 404,
+        message: "KYC document not found. Please upload the required documents",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      ResourceNotFoundError.name,
+      {
+        statusCode: 404,
+        message: "Requested resource not found",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      DriverAccessDeniedError.name,
+      {
+        statusCode: 403,
+        message: "Access denied. Your driver account is not active",
+        type: ErrorType.AUTHORIZATION_ERROR,
         shouldLog: false,
         isOperational: true,
       },

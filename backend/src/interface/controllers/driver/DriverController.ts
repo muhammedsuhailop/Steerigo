@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
 import { DriverRegistrationUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
-import { GetDriverProfileUseCase } from "@application/use-cases/driver/GetDriverProfileUseCase";
 import { UpdateDriverProfileUseCase } from "@application/use-cases/driver/UpdateDriverProfileUseCase";
 import { SubmitKYCUseCase } from "@application/use-cases/driver/SubmitKYCUseCase";
 import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusUseCase";
@@ -19,6 +18,8 @@ import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriv
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
+import { GetDriverDetailedProfileUseCase } from "@application/use-cases/driver/GetDriverDetailedProfileUseCase";
+import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
 
 interface DriverRegistrationRequestBody {
   // User profile data
@@ -96,10 +97,8 @@ export class DriverController {
   constructor(
     @inject(TYPES.RegisterDriverUseCase)
     private registerDriverUseCase: DriverRegistrationUseCase,
-    // @inject(TYPES.RegisterDriverUseCase)
-    // private RegisterDriverUseCase: RegisterDriverUseCase,
-    // private getDriverProfileUseCase: GetDriverProfileUseCase,
-    // @inject(TYPES.UpdateDriverProfileUseCase)
+    @inject(TYPES.GetDriverDetailedProfileUseCase)
+    private getDetailedProfileUseCase: GetDriverDetailedProfileUseCase,
     @inject(TYPES.UpdateDriverProfileUseCase)
     private updateDriverProfileUseCase: UpdateDriverProfileUseCase,
     @inject(TYPES.SubmitKYCUseCase)
@@ -109,7 +108,7 @@ export class DriverController {
     @inject(TYPES.GetDriverDashboardUseCase)
     private getDashboardUseCase: GetDriverDashboardUseCase,
     @inject(TYPES.GetDriverStatusUseCase)
-    private getStatusUseCase: GetDriverStatusUseCase,
+    private getStatusUseCase: GetDriverStatusUseCase
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -393,10 +392,8 @@ export class DriverController {
         return;
       }
 
-      // Create DTO
       const dto = new GetDriverDashboardDto(userId);
 
-      // Execute use case
       const result = await this.getDashboardUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -425,7 +422,6 @@ export class DriverController {
 
   async getStatus(req: Request, res: Response): Promise<void> {
     try {
-      // Extract userId from authenticated request
       const userId = this.getUserId(req);
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
@@ -437,7 +433,6 @@ export class DriverController {
 
       Logger.info("Getting driver status", { userId });
 
-      // Execute use case
       const result = await this.getStatusUseCase.execute(userId);
 
       if (result.isFailure()) {
@@ -465,6 +460,73 @@ export class DriverController {
         error,
         "get_driver_status"
       );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getDetailedProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      if (!userId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: "Unauthorized" });
+        return;
+      }
+
+      Logger.info("Get detailed driver profile request", {
+        userId,
+        ip: req.ip,
+        timestamp: new Date().toISOString(),
+      });
+
+      const dto = new GetDriverProfileRequestDto(userId);
+
+      const result = await this.getDetailedProfileUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+
+        Logger.warn("Driver profile fetch failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_detailed_profile"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const profileResponse = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json({
+        success: profileResponse.success,
+        message: profileResponse.message,
+        data: profileResponse.data,
+      });
+
+      Logger.info("Driver detailed profile returned successfully", {
+        userId,
+        driverId: profileResponse.data.driverId,
+        responseSize: JSON.stringify(profileResponse.data).length,
+      });
+    } catch (error) {
+      Logger.error("Get detailed driver profile controller error", {
+        userId: req.params.userId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_detailed_profile"
+      );
+
       res.status(statusCode).json(response);
     }
   }
