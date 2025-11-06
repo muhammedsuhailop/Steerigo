@@ -8,6 +8,8 @@ import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
+import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class AdminUserController {
@@ -35,11 +37,11 @@ export class AdminUserController {
 
       const response: ApiResponse = {
         success: true,
-        message: "Users fetched successfully",
+        message: ADMIN_MESSAGES.USER.USERS_FETCHED,
         data: result.getValue(),
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -72,14 +74,14 @@ export class AdminUserController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: data.message,
+        message: data.message || ADMIN_MESSAGES.USER.USER_STATUS_UPDATED,
         data: {
           userId: data.userId,
           newStatus: data.newStatus,
         },
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,

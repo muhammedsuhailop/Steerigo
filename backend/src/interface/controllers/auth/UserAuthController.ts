@@ -10,6 +10,7 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { CookieHelper } from "@shared/utils/CookieHelper";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { AuthMessages } from "@shared/constants/AuthConstants";
 
 @injectable()
 export class UserAuthController {
@@ -50,7 +51,7 @@ export class UserAuthController {
 
       const response: ApiResponse = {
         success: true,
-        message: "Login successful",
+        message: AuthMessages.LOGIN_SUCCESS,
         data: dataWithoutRefreshToken,
       };
 
@@ -73,7 +74,7 @@ export class UserAuthController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: AuthMessages.UNAUTHORIZED });
         return;
       }
 
@@ -94,7 +95,7 @@ export class UserAuthController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "User retrieved successfully",
+        message: AuthMessages.USER_RETRIEVED,
         data,
       };
 

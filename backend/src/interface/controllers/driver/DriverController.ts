@@ -20,9 +20,9 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
 import { GetDriverDetailedProfileUseCase } from "@application/use-cases/driver/GetDriverDetailedProfileUseCase";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
+import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 interface DriverRegistrationRequestBody {
-  // User profile data
   name: string;
   mobile: string;
   dob: string;
@@ -31,7 +31,6 @@ interface DriverRegistrationRequestBody {
   pin: string;
   address: string;
 
-  // License data
   licenseCategory: LicenseCategory;
   licenseNumber: string;
   licenseBodyTypes: BodyType[];
@@ -39,13 +38,11 @@ interface DriverRegistrationRequestBody {
   licenseIssueDate: string;
   licenseExpiryDate: string;
 
-  // ID document data
   idType: DocumentType;
   idNumber: string;
   idIssueDate: string;
   idExpiryDate: string;
 
-  // Document images
   licenseFrontImage: string;
   licenseBackImage: string;
   idFrontImage: string;
@@ -53,7 +50,6 @@ interface DriverRegistrationRequestBody {
 }
 
 interface DriverProfileUpdateRequestBody {
-  // User profile data
   name?: string;
   mobile?: string;
   dob?: string;
@@ -62,7 +58,6 @@ interface DriverProfileUpdateRequestBody {
   pin?: string;
   address?: string;
 
-  // Driver license data
   eligibleGearTypes?: GearType[];
   eligibleBodyTypes?: BodyType[];
   licenceCategory?: LicenseCategory;
@@ -70,13 +65,11 @@ interface DriverProfileUpdateRequestBody {
   licenseIssueDate?: string;
   licenseExpiryDate?: string;
 
-  // ID document data
   idType?: DocumentType;
   idNumber?: string;
   idIssueDate?: string;
   idExpiryDate?: string;
 
-  // Document images
   licenseFrontImage?: string;
   licenseBackImage?: string;
   idFrontImage?: string;
@@ -122,7 +115,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -159,7 +152,8 @@ export class DriverController {
       if (missingFields.length > 0) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: `Missing required fields: ${missingFields.join(", ")}`,
+          message:
+            DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "),
         });
         return;
       }
@@ -195,8 +189,7 @@ export class DriverController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
           success: true,
-          message:
-            "Driver registration successful with profile update and KYC documents created",
+          message: DRIVER_MESSAGES.DRIVER_REGISTRATION_SUCCESS,
           data: result.getValue(),
         });
       } else {
@@ -211,7 +204,7 @@ export class DriverController {
       });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -222,14 +215,13 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
       const body = req.body as DriverProfileUpdateRequestBody;
 
       const dto = new DriverProfileUpdateDto(
-        // User profile data
         body.name,
         body.mobile,
         body.dob ? new Date(body.dob) : undefined,
@@ -237,22 +229,16 @@ export class DriverController {
         body.state,
         body.pin,
         body.address,
-
-        // Driver license data
         body.eligibleGearTypes,
         body.eligibleBodyTypes,
         body.licenceCategory,
         body.licenseNumber,
         body.licenseIssueDate ? new Date(body.licenseIssueDate) : undefined,
         body.licenseExpiryDate ? new Date(body.licenseExpiryDate) : undefined,
-
-        // ID document data
         body.idType,
         body.idNumber,
         body.idIssueDate ? new Date(body.idIssueDate) : undefined,
         body.idExpiryDate ? new Date(body.idExpiryDate) : undefined,
-
-        // Document images
         body.licenseFrontImage,
         body.licenseBackImage,
         body.idFrontImage,
@@ -265,7 +251,7 @@ export class DriverController {
         const responseData = result.getValue();
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "Driver profile updated successfully",
+          message: DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
           data: responseData.driver,
           updateSummary: {
             userUpdated: responseData.userUpdated,
@@ -284,7 +270,7 @@ export class DriverController {
       Logger.error("Update driver profile controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -295,7 +281,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -312,7 +298,7 @@ export class DriverController {
       if (!docType || !docNumber) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Document type and number are required",
+          message: DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + "docType, docNumber",
         });
         return;
       }
@@ -331,7 +317,7 @@ export class DriverController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
           success: true,
-          message: "KYC document submitted successfully",
+          message: DRIVER_MESSAGES.KYC_SUBMIT_SUCCESS,
           data: result.getValue(),
         });
       } else {
@@ -344,7 +330,7 @@ export class DriverController {
       Logger.error("Submit KYC controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -355,7 +341,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -364,7 +350,7 @@ export class DriverController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "KYC status retrieved successfully",
+          message: DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
           data: result.getValue(),
         });
       } else {
@@ -377,7 +363,7 @@ export class DriverController {
       Logger.error("Get KYC status controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -388,7 +374,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -410,7 +396,7 @@ export class DriverController {
 
       res.status(HttpStatusCodes.OK).json(dashboardResponse);
 
-      Logger.info("Driver dashboard returned successfully", { userId });
+      Logger.info(DRIVER_MESSAGES.DRIVER_DASHBOARD_RETURNED, { userId });
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -426,7 +412,7 @@ export class DriverController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized - User ID not found",
+          message: DRIVER_MESSAGES.STATUS_USERID_NOT_FOUND,
         });
         return;
       }
@@ -449,7 +435,7 @@ export class DriverController {
 
       res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "Driver status retrieved successfully",
+        message: DRIVER_MESSAGES.DRIVER_STATUS_RETRIEVED,
         data: statusResponse,
       });
 
@@ -471,7 +457,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -488,7 +474,7 @@ export class DriverController {
       if (result.isFailure()) {
         const error = result.getError();
 
-        Logger.warn("Driver profile fetch failed", {
+        Logger.warn(DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_FETCH_FAILED, {
           userId,
           error: error.message,
         });
@@ -510,7 +496,7 @@ export class DriverController {
         data: profileResponse.data,
       });
 
-      Logger.info("Driver detailed profile returned successfully", {
+      Logger.info(DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED, {
         userId,
         driverId: profileResponse.data.driverId,
         responseSize: JSON.stringify(profileResponse.data).length,

@@ -14,6 +14,7 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 @injectable()
 export class DriverAvailabilityController {
@@ -40,7 +41,7 @@ export class DriverAvailabilityController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Driver authentication required",
+          message: DRIVER_MESSAGES.DRIVER_AUTH_REQUIRED,
         });
         return;
       }
@@ -64,7 +65,7 @@ export class DriverAvailabilityController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Availability scheduled successfully",
+        message: DRIVER_MESSAGES.AVAILABILITY_SCHEDULED,
         data,
       };
 
@@ -107,7 +108,7 @@ export class DriverAvailabilityController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Availability status updated successfully",
+        message: DRIVER_MESSAGES.AVAILABILITY_STATUS_UPDATED,
         data,
       };
 
@@ -154,7 +155,7 @@ export class DriverAvailabilityController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Driver location updated successfully",
+        message: DRIVER_MESSAGES.DRIVER_LOCATION_UPDATED,
         data,
       };
 

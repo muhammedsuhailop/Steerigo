@@ -10,6 +10,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { RegisterAsDriverRequestDto } from "@application/dto/user";
 import { RegisterUserAsDriverUseCase } from "@application/use-cases/user/RegisterUserAsDriverUseCase";
+import { USER_MESSAGES } from "@shared/constants/UserMessages";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -40,9 +41,10 @@ export class UserProfileController {
     try {
       const currentUserId = this.getUserId(req);
       if (!currentUserId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
+        });
         return;
       }
 
@@ -52,7 +54,7 @@ export class UserProfileController {
       if (userId !== currentUserId && currentUser?.role !== "Admin") {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
-          message: "Access denied. You can only view your own profile.",
+          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_VIEW,
         });
         return;
       }
@@ -63,7 +65,7 @@ export class UserProfileController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "User profile fetched successfully",
+          message: USER_MESSAGES.PROFILE.PROFILE_FETCHED,
           data: result.getValue(),
         });
       } else {
@@ -76,7 +78,7 @@ export class UserProfileController {
       Logger.error("Get user profile controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: USER_MESSAGES.PROFILE.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -85,9 +87,10 @@ export class UserProfileController {
     try {
       const currentUserId = this.getUserId(req);
       if (!currentUserId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
+        });
         return;
       }
 
@@ -97,7 +100,7 @@ export class UserProfileController {
       if (userId !== currentUserId && currentUser?.role !== "Admin") {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
-          message: "Access denied. You can only update your own profile.",
+          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_UPDATE,
         });
         return;
       }
@@ -111,7 +114,7 @@ export class UserProfileController {
         const responseData = result.getValue();
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "User profile updated successfully",
+          message: USER_MESSAGES.PROFILE.PROFILE_UPDATED,
           data: responseData.user,
           updateSummary: {
             updatedFields: responseData.updatedFields,
@@ -127,7 +130,7 @@ export class UserProfileController {
       Logger.error("Update user profile controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: USER_MESSAGES.PROFILE.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -136,9 +139,10 @@ export class UserProfileController {
     try {
       const currentUserId = this.getUserId(req);
       if (!currentUserId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
+        });
         return;
       }
 
@@ -154,7 +158,7 @@ export class UserProfileController {
         });
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
-          message: "Access denied. You can only register yourself as a driver.",
+          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_REGISTER_DRIVER,
         });
         return;
       }
@@ -198,7 +202,7 @@ export class UserProfileController {
       });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: USER_MESSAGES.PROFILE.INTERNAL_SERVER_ERROR,
       });
     }
   }
