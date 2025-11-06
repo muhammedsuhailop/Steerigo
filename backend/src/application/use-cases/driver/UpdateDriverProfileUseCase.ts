@@ -5,7 +5,6 @@ import { KYCRepository } from "@application/repositories/KYCRepository";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { DriverResponseDto } from "@application/dto/driver/DriverResponseDto";
 import { Result } from "@shared/utils/Result";
-import { Driver } from "@domain/entities/Driver";
 import { KYC } from "@domain/entities/KYC";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
@@ -38,11 +37,13 @@ export class UpdateDriverProfileUseCase {
 
       const user = await this.userRepository.findById(userId);
       if (!user) {
+        Logger.warn("User not found", { userId });
         return Result.failure(new DomainError("User not found"));
       }
 
       const driver = await this.driverRepository.findByUserId(userId);
       if (!driver) {
+        Logger.warn("Driver profile not found", { userId });
         return Result.failure(new DomainError("Driver profile not found"));
       }
 
@@ -63,28 +64,47 @@ export class UpdateDriverProfileUseCase {
         });
       }
 
+      let driverChanged = false;
+
       if (dto.hasDriverLicenseUpdates()) {
+        // Update eligible vehicles
         if (dto.getEligibleGearTypes() && dto.getEligibleBodyTypes()) {
           driver.updateEligibleVehicles(
             dto.getEligibleGearTypes()!,
             dto.getEligibleBodyTypes()!
           );
           updatedFields.push("eligibleVehicles");
+          driverChanged = true;
+          Logger.info("Eligible vehicles updated", {
+            userId,
+            gearTypes: dto.getEligibleGearTypes(),
+            bodyTypes: dto.getEligibleBodyTypes(),
+          });
         }
 
+        // Update license info
         if (
           dto.getLicenceCategory() &&
           dto.getLicenseIssueDate() &&
           dto.getLicenseExpiryDate()
         ) {
           const now = new Date();
+
           if (dto.getLicenseExpiryDate()! <= now) {
+            Logger.warn("License expiry date in past", {
+              userId,
+              expiryDate: dto.getLicenseExpiryDate(),
+            });
             return Result.failure(
               new DomainError("License expiry date must be in the future")
             );
           }
 
           if (dto.getLicenseIssueDate()! > now) {
+            Logger.warn("License issue date in future", {
+              userId,
+              issueDate: dto.getLicenseIssueDate(),
+            });
             return Result.failure(
               new DomainError("License issue date cannot be in the future")
             );
@@ -96,10 +116,22 @@ export class UpdateDriverProfileUseCase {
             dto.getLicenseExpiryDate()!
           );
           updatedFields.push("licenseInfo");
+          driverChanged = true;
+          Logger.info("License information updated", {
+            userId,
+            licenceCategory: dto.getLicenceCategory(),
+          });
         }
 
-        await this.driverRepository.save(driver);
-        Logger.info("Driver license information updated", { userId });
+        if (driverChanged) {
+          await this.driverRepository.save(driver);
+          Logger.info("Driver information persisted to database", {
+            userId,
+            fields: updatedFields.filter(
+              (f) => f === "eligibleVehicles" || f === "licenseInfo"
+            ),
+          });
+        }
       }
 
       if (
@@ -121,6 +153,7 @@ export class UpdateDriverProfileUseCase {
               dto.getLicenseIssueDate(),
               dto.getLicenseExpiryDate()
             );
+            Logger.info("License KYC document updated", { userId });
           }
 
           if (dto.getLicenseFrontImage() || dto.getLicenseBackImage()) {
@@ -130,14 +163,15 @@ export class UpdateDriverProfileUseCase {
             const backUrls = dto.getLicenseBackImage()
               ? [dto.getLicenseBackImage()!]
               : existingLicenseKyc.getDocImageUrlsBack();
-
             existingLicenseKyc.updateDocumentImages(frontUrls, backUrls);
+            Logger.info("License KYC images updated", { userId });
           }
 
           await this.kycRepository.save(existingLicenseKyc);
           licenseKycUpdated = true;
           updatedFields.push("licenseKyc");
         } else if (dto.getLicenseNumber()) {
+          // Create new license KYC
           const licenseKycId = new Types.ObjectId().toString();
           const licenseKyc = KYC.create(
             licenseKycId,
@@ -149,13 +183,11 @@ export class UpdateDriverProfileUseCase {
             dto.getLicenseFrontImage() ? [dto.getLicenseFrontImage()!] : [],
             dto.getLicenseBackImage() ? [dto.getLicenseBackImage()!] : []
           );
-
           await this.kycRepository.save(licenseKyc);
           licenseKycUpdated = true;
           updatedFields.push("newLicenseKyc");
+          Logger.info("New license KYC created", { userId });
         }
-
-        Logger.info("License KYC updated", { userId });
       }
 
       if (
@@ -167,17 +199,20 @@ export class UpdateDriverProfileUseCase {
         const existingIdKycs = await this.kycRepository.findByDriverId(
           driver.getId()
         );
+
         const existingIdKyc = existingIdKycs.find(
           (kyc) => kyc.getDocType() !== DocumentType.LICENSE
         );
 
         if (existingIdKyc && dto.getIdNumber() && dto.getIdType()) {
+          // Update existing ID KYC
           existingIdKyc.updateDocument(
             dto.getIdType()!,
             dto.getIdNumber()!,
             dto.getIdIssueDate(),
             dto.getIdExpiryDate()
           );
+          Logger.info("ID KYC document updated", { userId });
 
           if (dto.getIdFrontImage() || dto.getIdBackImage()) {
             const frontUrls = dto.getIdFrontImage()
@@ -186,14 +221,15 @@ export class UpdateDriverProfileUseCase {
             const backUrls = dto.getIdBackImage()
               ? [dto.getIdBackImage()!]
               : existingIdKyc.getDocImageUrlsBack();
-
             existingIdKyc.updateDocumentImages(frontUrls, backUrls);
+            Logger.info("ID KYC images updated", { userId });
           }
 
           await this.kycRepository.save(existingIdKyc);
           idKycUpdated = true;
           updatedFields.push("idKyc");
         } else if (dto.getIdNumber() && dto.getIdType()) {
+          // Create new ID KYC
           const idKycId = new Types.ObjectId().toString();
           const idKyc = KYC.create(
             idKycId,
@@ -205,17 +241,16 @@ export class UpdateDriverProfileUseCase {
             dto.getIdFrontImage() ? [dto.getIdFrontImage()!] : [],
             dto.getIdBackImage() ? [dto.getIdBackImage()!] : []
           );
-
           await this.kycRepository.save(idKyc);
           idKycUpdated = true;
           updatedFields.push("newIdKyc");
+          Logger.info("New ID KYC created", { userId });
         }
-
-        Logger.info("ID KYC updated", { userId });
       }
 
       const updatedDriver = await this.driverRepository.findByUserId(userId);
       if (!updatedDriver) {
+        Logger.error("Failed to retrieve updated driver", { userId });
         return Result.failure(
           new DomainError("Failed to retrieve updated driver")
         );
@@ -244,12 +279,22 @@ export class UpdateDriverProfileUseCase {
       Logger.info("Driver profile update successful", {
         userId,
         updatedFields,
+        totalFields: updatedFields.length,
       });
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("Driver profile update failed", { userId, error });
-      return Result.failure(error as Error);
+      Logger.error("Driver profile update failed", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return Result.failure(
+        error instanceof DomainError
+          ? error
+          : new DomainError(
+              "Failed to update driver profile. Please try again later"
+            )
+      );
     }
   }
 }
