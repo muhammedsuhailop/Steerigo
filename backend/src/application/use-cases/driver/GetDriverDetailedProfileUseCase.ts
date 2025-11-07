@@ -89,7 +89,7 @@ export class GetDriverDetailedProfileUseCase {
           verificationStatus: kyc.getVerificationStatus?.() ?? "Pending",
           createdAt: kyc.getCreatedAt(),
           updatedAt: kyc.getUpdatedAt(),
-          commets:kyc.getComments(),
+          comments: kyc.getComments(),
         })),
       };
 

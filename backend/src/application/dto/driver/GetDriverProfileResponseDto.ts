@@ -17,7 +17,7 @@ export interface KycDocument {
   verificationStatus: string;
   createdAt: Date;
   updatedAt: Date;
-  commets?: string;
+  comments?: string;
 }
 
 export interface KycInfo {
