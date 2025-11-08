@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/shared/components/ui/Card";
 import { Input, Select } from "@/shared/components/ui";
-import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
 import { useDriverProfile } from "../hooks/useDriverProfile";
 import { FaSave, FaTimes, FaPencilAlt } from "react-icons/fa";
@@ -168,7 +167,7 @@ export const DriverProfileDetails: React.FC<
                   disabled={isLoading || isUpdating}
                   className={`rounded-lg border ${
                     formErrors.name ? "border-rose-500" : "border-gray-200"
-                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500`}
                 />
                 {formErrors.name && (
                   <p className="text-rose-500 text-xs mt-1">
@@ -186,12 +185,8 @@ export const DriverProfileDetails: React.FC<
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter email"
-                  disabled={isLoading || isUpdating}
-                  className={`rounded-lg border ${
-                    formErrors.email ? "border-rose-500" : "border-gray-200"
-                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  readOnly
+                  className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm bg-gray-50 text-gray-600 cursor-not-allowed"
                 />
                 {formErrors.email && (
                   <p className="text-rose-500 text-xs mt-1">
@@ -214,7 +209,7 @@ export const DriverProfileDetails: React.FC<
                   disabled={isLoading || isUpdating}
                   className={`rounded-lg border ${
                     formErrors.mobile ? "border-rose-500" : "border-gray-200"
-                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500`}
                 />
                 {formErrors.mobile && (
                   <p className="text-rose-500 text-xs mt-1">
@@ -236,7 +231,7 @@ export const DriverProfileDetails: React.FC<
                   disabled={isLoading || isUpdating}
                   className={`rounded-lg border ${
                     formErrors.dob ? "border-rose-500" : "border-gray-200"
-                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500`}
                 />
                 {formErrors.dob && (
                   <p className="text-rose-500 text-xs mt-1">{formErrors.dob}</p>
@@ -254,7 +249,7 @@ export const DriverProfileDetails: React.FC<
                   onChange={handleInputChange}
                   disabled={isLoading || isUpdating}
                   options={genderOptions}
-                  className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
                 />
               </div>
             </div>
@@ -273,7 +268,7 @@ export const DriverProfileDetails: React.FC<
                 disabled={isLoading || isUpdating}
                 className={`rounded-lg border ${
                   formErrors.address ? "border-rose-500" : "border-gray-200"
-                } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                } px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500`}
               />
               {formErrors.address && (
                 <p className="text-rose-500 text-xs mt-1">
@@ -284,23 +279,23 @@ export const DriverProfileDetails: React.FC<
 
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end pt-6 border-t border-gray-100">
-              <Button
-                variant="outline"
+              <button
                 onClick={handleCancel}
                 disabled={isUpdating}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <FaTimes size={16} />
                 Cancel
-              </Button>
-              <Button
+              </button>
+
+              <button
                 onClick={handleSave}
                 disabled={isUpdating || !isDirty}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
               >
                 <FaSave size={16} />
                 {isUpdating ? "Saving..." : "Save Changes"}
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
