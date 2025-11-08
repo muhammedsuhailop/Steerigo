@@ -245,23 +245,25 @@ export const driverUpdateSchema = z.object({
   body: driverUpdateBodySchema,
 });
 
-export const kycSubmissionSchema = z.object({
+const kycSubmissionBodySchema = z.object({
   docType: z.enum(VALID_DOC_TYPES as [DocumentType, ...DocumentType[]]),
+
   docNumber: z
     .string()
     .trim()
     .min(5, { message: "Document number must be at least 5 characters" })
     .max(50, { message: "Document number must not exceed 50 characters" }),
+
   issueDate: z
     .preprocess(
       (arg) =>
         typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
       z.date()
     )
-    .refine((d) => d > new Date(), {
-      message: "Expiry date must be in the future",
-    })
-    .optional(),
+    .refine((d) => d <= new Date(), {
+      message: "Issue date must be in the past or today",
+    }),
+
   expiryDate: z
     .preprocess(
       (arg) =>
@@ -271,11 +273,24 @@ export const kycSubmissionSchema = z.object({
     .refine((d) => d > new Date(), {
       message: "Expiry date must be in the future",
     })
-    .optional(),
+    .optional()
+    .nullable(),
+
   frontImageUrls: z
-    .array(z.string().url())
-    .min(1, { message: "At least one front image is required" }),
+    .array(z.string().url({ message: "Invalid URL format" }))
+    .min(1, { message: "At least one front image URL is required" })
+    .refine((urls) => urls.length > 0, {
+      message: "Front images cannot be empty",
+    }),
+
   backImageUrls: z
-    .array(z.string().url())
-    .min(1, { message: "At least one back image is required" }),
+    .array(z.string().url({ message: "Invalid URL format" }))
+    .min(1, { message: "At least one back image URL is required" })
+    .refine((urls) => urls.length > 0, {
+      message: "Back images cannot be empty",
+    }),
+});
+
+export const kycSubmissionSchema = z.object({
+  body: kycSubmissionBodySchema,
 });

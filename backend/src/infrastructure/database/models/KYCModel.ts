@@ -64,7 +64,4 @@ kycSchema.index({ docType: 1 });
 kycSchema.index({ verificationStatus: 1 });
 kycSchema.index({ createdAt: -1 });
 
-// Compound index for driver's documents
-kycSchema.index({ driverId: 1, docType: 1 }, { unique: true });
-
 export const KYCModel = model<IKYCModel>("KYC", kycSchema);

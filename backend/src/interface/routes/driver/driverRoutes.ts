@@ -52,7 +52,7 @@ router.put("/profile", validateSchema(driverUpdateSchema), (req, res) =>
 );
 
 // POST /api/driver/kyc - Submit KYC document
-router.post("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
+router.put("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
   driverController.submitKYC(req, res)
 );
 

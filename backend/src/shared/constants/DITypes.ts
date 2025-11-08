@@ -50,6 +50,7 @@ export const TYPES = {
   GetKycRequestsUseCase: Symbol.for("GetKycRequestsUseCase"),
   UpdateKycStatusUseCase: Symbol.for("UpdateKycStatusUseCase"),
   GetKycRequestByIdUseCase: Symbol.for("GetKycRequestByIdUseCase"),
+  KycSubmissionUseCase: Symbol.for("KycSubmissionUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -58,7 +59,9 @@ export const TYPES = {
   GetKYCStatusUseCase: Symbol.for("GetKYCStatusUseCase"),
   GetDriverDashboardUseCase: Symbol.for("GetDriverDashboardUseCase"),
   GetDriverStatusUseCase: Symbol.for("GetDriverStatusUseCase"),
-  GetDriverDetailedProfileUseCase: Symbol.for("GetDriverDetailedProfileUseCase"),
+  GetDriverDetailedProfileUseCase: Symbol.for(
+    "GetDriverDetailedProfileUseCase"
+  ),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

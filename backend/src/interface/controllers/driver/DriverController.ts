@@ -95,7 +95,7 @@ export class DriverController {
     @inject(TYPES.UpdateDriverProfileUseCase)
     private updateDriverProfileUseCase: UpdateDriverProfileUseCase,
     @inject(TYPES.SubmitKYCUseCase)
-    private submitKYCUseCase: SubmitKYCUseCase,
+    private SubmitKYCUseCase: SubmitKYCUseCase,
     @inject(TYPES.GetKYCStatusUseCase)
     private getKYCStatusUseCase: GetKYCStatusUseCase,
     @inject(TYPES.GetDriverDashboardUseCase)
@@ -279,60 +279,139 @@ export class DriverController {
     try {
       const userId = this.getUserId(req);
       if (!userId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
-        return;
-      }
-
-      const body = req.body as KYCSubmissionRequestBody;
-      const {
-        docType,
-        docNumber,
-        issueDate,
-        expiryDate,
-        frontImageUrls,
-        backImageUrls,
-      } = body;
-
-      if (!docType || !docNumber) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + "docType, docNumber",
+          message: "Unauthorized - User ID not found",
         });
         return;
       }
 
-      const dto = new KYCSubmissionRequestDto(
+      const docType = req.body.docType;
+
+      const VALID_DOC_TYPES = [
+        "License",
+        "Aadhaar",
+        "PAN",
+        "Passport",
+        "Voter_ID",
+      ];
+      if (!docType || !VALID_DOC_TYPES.includes(docType)) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: `Invalid or missing document type. Accepted: ${VALID_DOC_TYPES.join(", ")}`,
+        });
+        return;
+      }
+
+      Logger.info("KYC submission request received", {
+        userId,
         docType,
-        docNumber,
-        issueDate ? new Date(issueDate) : undefined,
-        expiryDate ? new Date(expiryDate) : undefined,
-        frontImageUrls || [],
-        backImageUrls || []
+        body: Object.keys(req.body),
+      });
+
+      const dto = this.createKYCDtoFromDocType(req.body, docType);
+
+      Logger.info("KYC submission DTO created", {
+        userId,
+        docType,
+        hasLicense: dto.hasLicenseUpdate(),
+        hasId: dto.hasIdUpdate(),
+        hasImages: dto.hasImages(),
+      });
+
+      const result = await this.SubmitKYCUseCase.execute(userId, dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("KYC submission failed", {
+          userId,
+          docType,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "submit_kyc"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const response = result.getValue();
+
+      Logger.info("KYC submission successful", {
+        userId,
+        docType,
+        licenseUpdated: response.licenseUpdated,
+        idUpdated: response.idUpdated,
+        driverUpdated: response.driverUpdated,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: response.message,
+        data: {
+          kycDocuments: response.kycDocuments,
+          licenseUpdated: response.licenseUpdated,
+          idUpdated: response.idUpdated,
+          driverUpdated: response.driverUpdated,
+        },
+      });
+    } catch (error) {
+      Logger.error("KYC submission controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "submit_kyc"
       );
 
-      const result = await this.submitKYCUseCase.execute(userId, dto);
-
-      if (result.isSuccessful()) {
-        res.status(HttpStatusCodes.CREATED).json({
-          success: true,
-          message: DRIVER_MESSAGES.KYC_SUBMIT_SUCCESS,
-          data: result.getValue(),
-        });
-      } else {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: result.getError().message,
-        });
-      }
-    } catch (error) {
-      Logger.error("Submit KYC controller error", { error });
-      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
-      });
+      res.status(statusCode).json(response);
     }
+  }
+
+  private createKYCDtoFromDocType(
+    body: any,
+    docType: string
+  ): KYCSubmissionRequestDto {
+    if (docType === "License") {
+      return new KYCSubmissionRequestDto(
+        body.licenseCategory as LicenseCategory,
+        body.docNumber,
+        body.eligibleBodyTypes || undefined,
+        body.eligibleGearTypes || undefined,
+        body.issueDate ? new Date(body.issueDate) : undefined,
+        body.expiryDate ? new Date(body.expiryDate) : undefined,
+        body.frontImageUrls?.[0] || undefined,
+        body.backImageUrls?.[0] || undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      );
+    }
+
+    return new KYCSubmissionRequestDto(
+      undefined, // licenseCategory
+      undefined, // licenseNumber
+      undefined, // licenseBodyTypes
+      undefined, // licenseGearTypes
+      undefined, // licenseIssueDate
+      undefined, // licenseExpiryDate
+      undefined, // licenseFrontImage
+      undefined, // licenseBackImage
+      docType as DocumentType,
+      body.docNumber,
+      body.issueDate ? new Date(body.issueDate) : undefined,
+      body.expiryDate ? new Date(body.expiryDate) : undefined,
+      body.frontImageUrls?.[0] || undefined,
+      body.backImageUrls?.[0] || undefined
+    );
   }
 
   async getKYCStatus(req: Request, res: Response): Promise<void> {
