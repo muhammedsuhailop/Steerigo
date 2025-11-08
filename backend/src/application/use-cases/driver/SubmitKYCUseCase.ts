@@ -159,12 +159,6 @@ export class SubmitKYCUseCase {
             kycId: idKyc.getId(),
             idType: dto.getIdType(),
           });
-
-          if (!licenseUpdated) {
-            driver.updateKycStatus(KYCStatus.IN_REVIEW);
-            await this.driverRepository.save(driver);
-            driverUpdated = true;
-          }
         }
       }
 
