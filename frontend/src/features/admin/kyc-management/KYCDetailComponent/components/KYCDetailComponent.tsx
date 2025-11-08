@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,6 +12,7 @@ import {
 import type { RootState } from "@/app/store";
 
 import { LoadingSpinner } from "@/shared/components/ui";
+import { Alert } from "@/shared/components/ui/Alert";
 import DocumentInfo from "./DocumentInfo";
 import ImageGallery from "./ImageGallery";
 import ActionButtons from "./ActionButtons";
@@ -41,11 +42,24 @@ const KYCDetailComponent: React.FC<KYCDetailComponentProps> = ({
   const [updateKYCStatus, { isLoading: isUpdating }] =
     useUpdateKYCStatusMutation();
 
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const navTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (kycData?.data) {
       dispatch(setSelectedKYC(kycData.data));
     }
   }, [kycData, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      if (navTimeout.current) {
+        clearTimeout(navTimeout.current);
+      }
+    };
+  }, []);
 
   const handleKYCAction = async (
     action: "Approved" | "Rejected" | "Expired",
@@ -60,12 +74,17 @@ const KYCDetailComponent: React.FC<KYCDetailComponentProps> = ({
 
       await refetch();
 
-      setTimeout(() => {
+      setSuccessMsg("KYC status updated successfully.");
+
+      navTimeout.current = setTimeout(() => {
+        setSuccessMsg(null);
         navigate("/admin/kyc-requests");
-      }, 1500);
+      }, 1200);
     } catch (err: any) {
       console.error("KYC action failed:", err);
-      alert(err?.data?.message || "Failed to update KYC status");
+      const msg =
+        err?.data?.message || err?.message || "Failed to update KYC status";
+      setErrorMsg(msg);
     }
   };
 
@@ -92,6 +111,26 @@ const KYCDetailComponent: React.FC<KYCDetailComponentProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Alerts (success / error) */}
+      <div className="max-w-3xl">
+        {successMsg && (
+          <Alert
+            type="success"
+            message={successMsg}
+            onClose={() => setSuccessMsg(null)}
+            className="mb-4"
+          />
+        )}
+        {errorMsg && (
+          <Alert
+            type="danger"
+            message={errorMsg}
+            onClose={() => setErrorMsg(null)}
+            className="mb-4"
+          />
+        )}
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
