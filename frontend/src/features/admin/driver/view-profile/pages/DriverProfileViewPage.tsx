@@ -15,7 +15,7 @@ import { VehicleDetails } from "../components/VehicleDetails/VehicleDetails";
 import { DriverProfileKYC } from "../components/DriverProfileKYC/DriverProfileKYC";
 import { RiCheckLine, RiCloseLine } from "react-icons/ri";
 
-const DriverProfilePage: React.FC = () => {
+const DriverProfileViewPage: React.FC = () => {
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -193,4 +193,4 @@ const DriverProfilePage: React.FC = () => {
   );
 };
 
-export default DriverProfilePage;
+export default DriverProfileViewPage;
