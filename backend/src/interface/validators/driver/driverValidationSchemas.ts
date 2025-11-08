@@ -217,22 +217,10 @@ const driverUpdateBodySchema = z
       )
       .optional(),
 
-    licenseFrontImage: z
-      .string()
-      .url({ message: "License front image must be a valid URL" })
-      .optional(),
-    licenseBackImage: z
-      .string()
-      .url({ message: "License back image must be a valid URL" })
-      .optional(),
-    idFrontImage: z
-      .string()
-      .url({ message: "ID front image must be a valid URL" })
-      .optional(),
-    idBackImage: z
-      .string()
-      .url({ message: "ID back image must be a valid URL" })
-      .optional(),
+    licenseFrontImage: z.string().optional(),
+    licenseBackImage: z.string().optional(),
+    idFrontImage: z.string().optional(),
+    idBackImage: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -277,14 +265,14 @@ const kycSubmissionBodySchema = z.object({
     .nullable(),
 
   frontImageUrls: z
-    .array(z.string().url({ message: "Invalid URL format" }))
+    .array(z.string())
     .min(1, { message: "At least one front image URL is required" })
     .refine((urls) => urls.length > 0, {
       message: "Front images cannot be empty",
     }),
 
   backImageUrls: z
-    .array(z.string().url({ message: "Invalid URL format" }))
+    .array(z.string())
     .min(1, { message: "At least one back image URL is required" })
     .refine((urls) => urls.length > 0, {
       message: "Back images cannot be empty",
