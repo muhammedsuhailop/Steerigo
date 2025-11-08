@@ -6,6 +6,7 @@ import type {
   DriverProfile,
   KYCDocument,
   LicenseInfo,
+  KYCPayload,
 } from "../types/driverProfile.types";
 
 interface ApiResponse<T> {
@@ -46,8 +47,23 @@ export const driverProfileApi = createApi({
       },
       invalidatesTags: ["DriverProfile"],
     }),
+
+    // Add KYC Document
+    addKYCDocument: builder.mutation<KYCDocument, KYCPayload>({
+      query: (payload) => ({
+        url: "/driver/kyc",
+        method: "PUT",
+        data: payload,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetDriverProfileQuery, useUpdateDriverProfileMutation } =
-  driverProfileApi;
+export const {
+  useGetDriverProfileQuery,
+  useUpdateDriverProfileMutation,
+  useAddKYCDocumentMutation,
+} = driverProfileApi;

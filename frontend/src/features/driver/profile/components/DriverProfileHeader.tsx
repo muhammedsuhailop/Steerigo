@@ -124,7 +124,7 @@ export const DriverProfileHeader: React.FC<DriverProfileHeaderProps> = ({
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  kycStatus === "Verified"
+                  kycStatus === "Approved"
                     ? "bg-green-500"
                     : kycStatus === "InReview"
                     ? "bg-blue-500"

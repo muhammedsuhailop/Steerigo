@@ -10,6 +10,7 @@ import { DriverLicenseInfo } from "../components/DriverLicenseInfo";
 import { Alert } from "@/shared/components/ui/Alert";
 import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
 import { EligibilitySection } from "../components/EligibilitySection";
+import { AddKYCModal } from "../components/AddKYCModal";
 
 const DriverProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -27,6 +28,9 @@ const DriverProfilePage: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  // Modal state
+  const [isAddKYCModalOpen, setIsAddKYCModalOpen] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024;
@@ -42,11 +46,7 @@ const DriverProfilePage: React.FC = () => {
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
-  const handleRefresh = () => {
-    refetch();
-    console.log("Profile data refreshed");
-  };
-
+  // Initial loading (no profile yet)
   if (isLoading && !profile) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -70,6 +70,7 @@ const DriverProfilePage: React.FC = () => {
     );
   }
 
+  // Error (no profile)
   if (error && !profile) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -86,14 +87,14 @@ const DriverProfilePage: React.FC = () => {
           <DriverTopbar onToggleSidebar={toggleSidebar} />
 
           <main className="flex-1 px-6 py-8 max-w-4xl mx-auto w-full">
-            <Alert type="error" message={error} onClose={clearError} />
+            <Alert type="danger" message={error} onClose={clearError} />
           </main>
         </div>
       </div>
     );
   }
 
-  // No profile found
+  // No profile at all (fallback)
   if (!profile) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -133,11 +134,14 @@ const DriverProfilePage: React.FC = () => {
         className="flex-1 flex flex-col min-h-screen transition-all duration-300"
         style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
       >
+        {/* Topbar */}
         <DriverTopbar onToggleSidebar={toggleSidebar} title="Profile" />
 
-        {/* Alert Banner */}
+        {/* Alert Banner (matches desired layout) */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
-          {error && <Alert type="error" message={error} onClose={clearError} />}
+          {error && (
+            <Alert type="danger" message={error} onClose={clearError} />
+          )}
           {success && (
             <Alert type="success" message={success} onClose={clearSuccess} />
           )}
@@ -177,7 +181,12 @@ const DriverProfilePage: React.FC = () => {
 
             {/* KYC Status */}
             <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200/60 shadow-sm w-full">
-              <DriverKYCStatus kyc={profile.kyc} isLoading={isLoading} />
+              <DriverKYCStatus
+                kyc={profile.kyc}
+                isLoading={isLoading}
+                onDocumentAdded={() => refetch()}
+                onAddKYCClick={() => setIsAddKYCModalOpen(true)}
+              />
             </div>
 
             {/* Eligibility Section */}
@@ -185,6 +194,7 @@ const DriverProfilePage: React.FC = () => {
               <EligibilitySection
                 gearTypes={profile.eligibleGearTypes}
                 bodyTypes={profile.eligibleBodyTypes}
+                onUpdate={() => refetch()}
               />
             </div>
           </div>
@@ -201,6 +211,16 @@ const DriverProfilePage: React.FC = () => {
           onClick={toggleSidebar}
         />
       )}
+
+      {/* Add KYC Modal */}
+      <AddKYCModal
+        isOpen={isAddKYCModalOpen}
+        onClose={() => setIsAddKYCModalOpen(false)}
+        onSuccess={() => {
+          setIsAddKYCModalOpen(false);
+          refetch();
+        }}
+      />
     </div>
   );
 };

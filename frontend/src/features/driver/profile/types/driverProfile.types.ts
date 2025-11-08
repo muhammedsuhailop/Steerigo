@@ -21,7 +21,7 @@ export interface KYCDocument {
 }
 
 export interface KYCInfo {
-  overallStatus: "Pending" | "InReview" | "Verified" | "Rejected";
+  overallStatus: "Pending" | "InReview" | "Verified" | "Rejected" | "Approved";
   docs: KYCDocument[];
 }
 
@@ -86,4 +86,35 @@ export interface DriverProfileDetailsProps {
 export interface DriverKYCStatusProps {
   kyc: KYCInfo;
   isLoading?: boolean;
+}
+
+export interface KYCPayload {
+  docType: string;
+  docNumber: string;
+  licenseCategory?: string;
+  issueDate: string;
+  expiryDate?: string;
+  frontImageUrls: string[];
+  backImageUrls: string[];
+}
+
+export interface AddKYCResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface AddKYCModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export interface ImageData {
+  url: string;
+  publicId: string;
+}
+
+export interface DriverKYCStatusExtendedProps extends DriverKYCStatusProps {
+  onDocumentAdded?: () => void;
+  onAddKYCClick?: () => void;
 }
