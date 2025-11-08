@@ -1,33 +1,12 @@
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { GearType, BodyType } from "@domain/value-objects/VehicleType";
-import { DocumentType } from "@domain/value-objects/DocumentType";
-
 export class DriverProfileUpdateDto {
   constructor(
     private readonly name?: string,
     private readonly mobile?: string,
     private readonly dob?: Date,
     private readonly gender?: "Male" | "Female" | "Other",
-    private readonly state?: string,
-    private readonly pin?: string,
     private readonly address?: string,
-
-    private readonly eligibleGearTypes?: GearType[],
-    private readonly eligibleBodyTypes?: BodyType[],
-    private readonly licenceCategory?: LicenseCategory,
-    private readonly licenseNumber?: string,
-    private readonly licenseIssueDate?: Date,
-    private readonly licenseExpiryDate?: Date,
-
-    private readonly idType?: DocumentType,
-    private readonly idNumber?: string,
-    private readonly idIssueDate?: Date,
-    private readonly idExpiryDate?: Date,
-
-    private readonly licenseFrontImage?: string,
-    private readonly licenseBackImage?: string,
-    private readonly idFrontImage?: string,
-    private readonly idBackImage?: string
+    private readonly eligibleGearTypes?: string[],
+    private readonly eligibleBodyTypes?: string[]
   ) {}
 
   getName(): string | undefined {
@@ -46,79 +25,16 @@ export class DriverProfileUpdateDto {
     return this.gender;
   }
 
-  getState(): string | undefined {
-    return this.state;
-  }
-
-  getPin(): string | undefined {
-    return this.pin;
-  }
-
   getAddress(): string | undefined {
     return this.address;
   }
 
-  getFullAddress(): string | undefined {
-    if (!this.address || !this.state || !this.pin) {
-      return undefined;
-    }
-    return `${this.address}, ${this.state}, ${this.pin}`;
-  }
-
-  getEligibleGearTypes(): GearType[] | undefined {
+  getEligibleGearTypes(): string[] | undefined {
     return this.eligibleGearTypes;
   }
 
-  getEligibleBodyTypes(): BodyType[] | undefined {
+  getEligibleBodyTypes(): string[] | undefined {
     return this.eligibleBodyTypes;
-  }
-
-  getLicenceCategory(): LicenseCategory | undefined {
-    return this.licenceCategory;
-  }
-
-  getLicenseNumber(): string | undefined {
-    return this.licenseNumber;
-  }
-
-  getLicenseIssueDate(): Date | undefined {
-    return this.licenseIssueDate;
-  }
-
-  getLicenseExpiryDate(): Date | undefined {
-    return this.licenseExpiryDate;
-  }
-
-  getIdType(): DocumentType | undefined {
-    return this.idType;
-  }
-
-  getIdNumber(): string | undefined {
-    return this.idNumber;
-  }
-
-  getIdIssueDate(): Date | undefined {
-    return this.idIssueDate;
-  }
-
-  getIdExpiryDate(): Date | undefined {
-    return this.idExpiryDate;
-  }
-
-  getLicenseFrontImage(): string | undefined {
-    return this.licenseFrontImage;
-  }
-
-  getLicenseBackImage(): string | undefined {
-    return this.licenseBackImage;
-  }
-
-  getIdFrontImage(): string | undefined {
-    return this.idFrontImage;
-  }
-
-  getIdBackImage(): string | undefined {
-    return this.idBackImage;
   }
 
   hasUserProfileUpdates(): boolean {
@@ -127,34 +43,12 @@ export class DriverProfileUpdateDto {
       this.mobile ||
       this.dob ||
       this.gender ||
-      this.state ||
-      this.pin ||
       this.address
     );
   }
 
-  hasDriverLicenseUpdates(): boolean {
-    return !!(
-      this.eligibleGearTypes ||
-      this.eligibleBodyTypes ||
-      this.licenceCategory ||
-      this.licenseNumber ||
-      this.licenseIssueDate ||
-      this.licenseExpiryDate
-    );
-  }
-
-  hasKycDocumentUpdates(): boolean {
-    return !!(
-      this.idType ||
-      this.idNumber ||
-      this.idIssueDate ||
-      this.idExpiryDate ||
-      this.licenseFrontImage ||
-      this.licenseBackImage ||
-      this.idFrontImage ||
-      this.idBackImage
-    );
+  hasVehicleTypeUpdates(): boolean {
+    return !!(this.eligibleGearTypes || this.eligibleBodyTypes);
   }
 
   getUserProfileUpdates(): {
@@ -169,7 +63,30 @@ export class DriverProfileUpdateDto {
     if (this.mobile) updates.mobile = this.mobile;
     if (this.dob) updates.dob = this.dob;
     if (this.gender) updates.gender = this.gender;
-    if (this.getFullAddress()) updates.address = this.getFullAddress();
+    if (this.address) updates.address = this.address;
     return updates;
+  }
+
+  validate(): string[] {
+    const errors: string[] = [];
+
+    if (
+      (this.eligibleGearTypes && !this.eligibleBodyTypes) ||
+      (!this.eligibleGearTypes && this.eligibleBodyTypes)
+    ) {
+      errors.push(
+        "Both eligibleGearTypes and eligibleBodyTypes must be provided together"
+      );
+    }
+
+    if (this.eligibleGearTypes && this.eligibleGearTypes.length === 0) {
+      errors.push("eligibleGearTypes array cannot be empty");
+    }
+
+    if (this.eligibleBodyTypes && this.eligibleBodyTypes.length === 0) {
+      errors.push("eligibleBodyTypes array cannot be empty");
+    }
+
+    return errors;
   }
 }

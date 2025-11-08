@@ -17,4 +17,5 @@ export const DRIVER_MESSAGES = {
   AVAILABILITY_SCHEDULED: "Availability scheduled successfully",
   AVAILABILITY_STATUS_UPDATED: "Availability status updated successfully",
   DRIVER_LOCATION_UPDATED: "Driver location updated successfully",
+  INVALID_MISSING_DOC_TYPE: "Invalid or missing document type",
 };

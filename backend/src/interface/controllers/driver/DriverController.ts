@@ -7,7 +7,6 @@ import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusU
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
-import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -47,42 +46,6 @@ interface DriverRegistrationRequestBody {
   licenseBackImage: string;
   idFrontImage: string;
   idBackImage: string;
-}
-
-interface DriverProfileUpdateRequestBody {
-  name?: string;
-  mobile?: string;
-  dob?: string;
-  gender?: "Male" | "Female" | "Other";
-  state?: string;
-  pin?: string;
-  address?: string;
-
-  eligibleGearTypes?: GearType[];
-  eligibleBodyTypes?: BodyType[];
-  licenceCategory?: LicenseCategory;
-  licenseNumber?: string;
-  licenseIssueDate?: string;
-  licenseExpiryDate?: string;
-
-  idType?: DocumentType;
-  idNumber?: string;
-  idIssueDate?: string;
-  idExpiryDate?: string;
-
-  licenseFrontImage?: string;
-  licenseBackImage?: string;
-  idFrontImage?: string;
-  idBackImage?: string;
-}
-
-interface KYCSubmissionRequestBody {
-  docType: DocumentType;
-  docNumber: string;
-  issueDate?: string;
-  expiryDate?: string;
-  frontImageUrls?: string[];
-  backImageUrls?: string[];
 }
 
 @injectable()
@@ -219,59 +182,81 @@ export class DriverController {
         return;
       }
 
-      const body = req.body as DriverProfileUpdateRequestBody;
+      const body = req.body;
+
+      Logger.info("Driver profile update request received", {
+        userId,
+        fields: Object.keys(body || {}),
+      });
 
       const dto = new DriverProfileUpdateDto(
         body.name,
         body.mobile,
         body.dob ? new Date(body.dob) : undefined,
         body.gender,
-        body.state,
-        body.pin,
         body.address,
         body.eligibleGearTypes,
-        body.eligibleBodyTypes,
-        body.licenceCategory,
-        body.licenseNumber,
-        body.licenseIssueDate ? new Date(body.licenseIssueDate) : undefined,
-        body.licenseExpiryDate ? new Date(body.licenseExpiryDate) : undefined,
-        body.idType,
-        body.idNumber,
-        body.idIssueDate ? new Date(body.idIssueDate) : undefined,
-        body.idExpiryDate ? new Date(body.idExpiryDate) : undefined,
-        body.licenseFrontImage,
-        body.licenseBackImage,
-        body.idFrontImage,
-        body.idBackImage
+        body.eligibleBodyTypes
       );
+
+      Logger.info("Driver profile update DTO created", {
+        userId,
+        hasUserUpdates: dto.hasUserProfileUpdates(),
+        hasVehicleUpdates: dto.hasVehicleTypeUpdates(),
+      });
 
       const result = await this.updateDriverProfileUseCase.execute(userId, dto);
 
-      if (result.isSuccessful()) {
-        const responseData = result.getValue();
-        res.status(HttpStatusCodes.OK).json({
-          success: true,
-          message: DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
-          data: responseData.driver,
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Driver profile update failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "update_driver_profile"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+
+      Logger.info("Driver profile update successful", {
+        userId,
+        userUpdated: responseData.userUpdated,
+        vehiclesUpdated: responseData.vehiclesUpdated,
+        kycStatusUpdated: responseData.kycStatusUpdated,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
+        data: {
+          driver: responseData.driver,
           updateSummary: {
             userUpdated: responseData.userUpdated,
-            licenseKycUpdated: responseData.licenseKycUpdated,
-            idKycUpdated: responseData.idKycUpdated,
+            vehiclesUpdated: responseData.vehiclesUpdated,
+            kycStatusUpdated: responseData.kycStatusUpdated,
             updatedFields: responseData.updatedFields,
           },
-        });
-      } else {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: result.getError().message,
-        });
-      }
-    } catch (error) {
-      Logger.error("Update driver profile controller error", { error });
-      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
+        },
       });
+    } catch (error) {
+      Logger.error("Update driver profile controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "update_driver_profile"
+      );
+
+      res.status(statusCode).json(response);
     }
   }
 
@@ -281,7 +266,7 @@ export class DriverController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized - User ID not found",
+          message: DRIVER_MESSAGES.STATUS_USERID_NOT_FOUND,
         });
         return;
       }
@@ -298,7 +283,7 @@ export class DriverController {
       if (!docType || !VALID_DOC_TYPES.includes(docType)) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: `Invalid or missing document type. Accepted: ${VALID_DOC_TYPES.join(", ")}`,
+          message: `${DRIVER_MESSAGES.INVALID_MISSING_DOC_TYPE} Accepted: ${VALID_DOC_TYPES.join(", ")}`,
         });
         return;
       }
