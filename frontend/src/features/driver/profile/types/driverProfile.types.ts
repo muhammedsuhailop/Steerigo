@@ -118,3 +118,10 @@ export interface DriverKYCStatusExtendedProps extends DriverKYCStatusProps {
   onDocumentAdded?: () => void;
   onAddKYCClick?: () => void;
 }
+
+export interface ImageModalState {
+  isOpen: boolean;
+  imageUrl: string;
+  imageType: "Front" | "Back";
+  title: string;
+}

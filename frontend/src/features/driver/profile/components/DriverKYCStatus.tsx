@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/shared/components/ui/Badge";
 import { Button } from "@/shared/components/ui/Button";
+import { Modal } from "@/shared/components/ui/Modal";
 import {
   FaCheckCircle,
   FaHourglass,
   FaTimesCircle,
   FaClock,
   FaPlus,
+  FaTimes,
 } from "react-icons/fa";
 import { URLS } from "@/shared/constants";
 import type {
   DriverKYCStatusExtendedProps,
   DriverKYCStatusProps,
+  ImageModalState,
 } from "../types/driverProfile.types";
 
 const STATUS_VARIANT: Record<
@@ -81,18 +84,47 @@ export const DriverKYCStatus: React.FC<DriverKYCStatusExtendedProps> = ({
 }) => {
   const overallStatus = kyc?.overallStatus || "Pending";
 
+  const [imageModal, setImageModal] = useState<ImageModalState>({
+    isOpen: false,
+    imageUrl: "",
+    imageType: "Front",
+    title: "",
+  });
+
+  const handleOpenImageModal = (
+    imageUrl: string,
+    imageType: "Front" | "Back",
+    title?: string
+  ) => {
+    setImageModal({
+      isOpen: true,
+      imageUrl: getFullImageUrl(imageUrl),
+      imageType,
+      title: title || `${imageType} Image`,
+    });
+  };
+
+  const handleCloseImageModal = () => {
+    setImageModal({
+      isOpen: false,
+      imageUrl: "",
+      imageType: "Front",
+      title: "",
+    });
+  };
+
   return (
     <div className="p-6 sm:p-8">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-gray-900">KYC Status</h3>
-        <Button
+        <button
           onClick={onAddKYCClick}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-all"
         >
           <FaPlus size={16} />
-          <span>Add Document</span>
-        </Button>
+          <span>Add / Update KYC</span>
+        </button>
       </div>
 
       {/* Overall Status */}
@@ -109,9 +141,11 @@ export const DriverKYCStatus: React.FC<DriverKYCStatusExtendedProps> = ({
             >
               {overallStatus}
             </Badge>
-            <p className="text-xs opacity-80 mt-1">
-              {getStatusMessage(overallStatus)}
-            </p>
+            {overallStatus !== "Approved" && (
+              <p className="text-xs opacity-80 mt-1">
+                {getStatusMessage(overallStatus)}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -192,19 +226,23 @@ export const DriverKYCStatus: React.FC<DriverKYCStatusExtendedProps> = ({
                         key={`front-${idx}`}
                         className="flex flex-col items-center"
                       >
-                        <a
-                          href={getFullImageUrl(url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-20 h-14 rounded-lg overflow-hidden border border-blue-200 bg-blue-50 shadow hover:shadow-md transition"
-                          title="Preview: Front"
+                        <button
+                          onClick={() =>
+                            handleOpenImageModal(
+                              url,
+                              "Front",
+                              getDocumentTypeDisplay(doc.docType)
+                            )
+                          }
+                          className="block w-20 h-14 rounded-lg overflow-hidden border border-blue-200 bg-blue-50 shadow hover:shadow-md transition cursor-pointer hover:scale-105 transform"
+                          title="Click to view full image"
                         >
                           <img
                             src={getFullImageUrl(url)}
                             alt="KYC Front"
                             className="w-full h-full object-cover"
                           />
-                        </a>
+                        </button>
                         <Badge
                           variant="info"
                           size="sm"
@@ -221,19 +259,23 @@ export const DriverKYCStatus: React.FC<DriverKYCStatusExtendedProps> = ({
                         key={`back-${idx}`}
                         className="flex flex-col items-center"
                       >
-                        <a
-                          href={getFullImageUrl(url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-20 h-14 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50 shadow hover:shadow-md transition"
-                          title="Preview: Back"
+                        <button
+                          onClick={() =>
+                            handleOpenImageModal(
+                              url,
+                              "Back",
+                              getDocumentTypeDisplay(doc.docType)
+                            )
+                          }
+                          className="block w-20 h-14 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50 shadow hover:shadow-md transition cursor-pointer hover:scale-105 transform"
+                          title="Click to view full image"
                         >
                           <img
                             src={getFullImageUrl(url)}
                             alt="KYC Back"
                             className="w-full h-full object-cover"
                           />
-                        </a>
+                        </button>
                         <Badge
                           variant="success"
                           size="sm"
@@ -262,6 +304,34 @@ export const DriverKYCStatus: React.FC<DriverKYCStatusExtendedProps> = ({
           </div>
         )}
       </div>
+
+      {/* Image Modal */}
+      <Modal
+        isOpen={imageModal.isOpen}
+        onClose={handleCloseImageModal}
+        title={`${imageModal.title} ${imageModal.imageType}`}
+        size="lg"
+      >
+        <div className="space-y-4">
+          {/* Image Display */}
+          <div className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden min-h-[300px]">
+            <img
+              src={imageModal.imageUrl}
+              alt={`${imageModal.imageType} Image`}
+              className="max-w-full max-h-96 object-contain"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-4 border-t border-gray-200">
+            <button
+              onClick={handleCloseImageModal}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
