@@ -8,14 +8,24 @@ import {
   KYCUpdateResponse,
   PaginationResponse,
 } from "../types/admin.interfaces";
+import {
+  AdminDriverProfileResponse,
+  DriverProfileAction,
+  KYCVerificationStatus,
+} from "../types/adminDriverProfile.types";
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["AdminUsers", "AdminDrivers", "KYCRequests", "AdminStats"],
+  tagTypes: [
+    "AdminUsers",
+    "AdminDrivers",
+    "KYCRequests",
+    "AdminStats",
+    "DriverProfile",
+  ],
   endpoints: (builder) => ({
     // USER MANAGEMENT
-
     getAllUsers: builder.query<
       {
         success: boolean;
@@ -66,7 +76,7 @@ export const adminApi = createApi({
       { success: boolean; message: string; data?: AdminUser },
       {
         userId: string;
-        action: "activate" | "deactivate" | "suspend" | "block" | "verify";
+        action: "Active" | "Inactive" | "Suspended";
       }
     >({
       query: ({ userId, action }) => ({
@@ -81,7 +91,6 @@ export const adminApi = createApi({
     }),
 
     // DRIVER MANAGEMENT
-
     getAllDrivers: builder.query<
       {
         success: boolean;
@@ -132,30 +141,24 @@ export const adminApi = createApi({
           : [{ type: "AdminDrivers", id: "LIST" }],
     }),
 
-    getDriverById: builder.query<
-      { success: boolean; data: AdminDriver },
-      string
-    >({
-      query: (driverId) => ({
-        url: `/admin/drivers/${driverId}/profile`,
-        method: "GET",
-      }),
+    getDriverById: builder.query<AdminDriverProfileResponse, string>({
+      query: (driverId) => {
+        return {
+          url: `/admin/drivers/${driverId}/profile`,
+          method: "GET",
+        };
+      },
       providesTags: (result, error, driverId) => [
+        { type: "DriverProfile", id: driverId },
         { type: "AdminDrivers", id: driverId },
       ],
     }),
 
     updateDriverStatus: builder.mutation<
-      { success: boolean; message: string; data: AdminDriver },
+      { success: boolean; message: string; data: any },
       {
         driverId: string;
-        action:
-          | "activate"
-          | "deactivate"
-          | "suspend"
-          | "block"
-          | "approve"
-          | "reject";
+        action: DriverProfileAction;
         reason?: string;
       }
     >({
@@ -165,6 +168,7 @@ export const adminApi = createApi({
         data: { action, reason },
       }),
       invalidatesTags: (result, error, { driverId }) => [
+        { type: "DriverProfile", id: driverId },
         { type: "AdminDrivers", id: driverId },
         { type: "AdminDrivers", id: "LIST" },
         { type: "KYCRequests", id: "LIST" },
@@ -191,7 +195,6 @@ export const adminApi = createApi({
     }),
 
     // KYC MANAGEMENT
-
     getKYCRequests: builder.query<
       KYCListResponse,
       {
@@ -272,7 +275,7 @@ export const adminApi = createApi({
   }),
 });
 
-// Export hooks for usage in components
+// Export hooks
 export const {
   // User Management
   useGetAllUsersQuery,
@@ -287,3 +290,14 @@ export const {
   useGetKYCByIdQuery,
   useUpdateKYCStatusMutation,
 } = adminApi;
+
+export type {
+  AdminDriver,
+  AdminUser,
+  PaginationResponse,
+} from "../types/admin.interfaces";
+export type {
+  AdminDriverProfileResponse,
+  DriverProfileAction,
+  KYCVerificationStatus,
+} from "../types/adminDriverProfile.types";

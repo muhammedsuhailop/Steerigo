@@ -1,23 +1,23 @@
 import { useCallback, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import {
   useGetDriverByIdQuery,
   useUpdateDriverStatusMutation,
 } from "@/features/admin/shared/services/adminApi";
+import type {
+  DriverProfileAction,
+  KYCVerificationStatus,
+  AdminDriverProfileResponse,
+} from "../../../shared/types/adminDriverProfile.types";
 
-type DriverProfileAction =
-  | "activate"
-  | "deactivate"
-  | "suspend"
-  | "block"
-  | "approve"
-  | "reject";
+export const useDriverProfile = () => {
+  const { driverId } = useParams<{ driverId: string }>();
 
-export const useDriverProfile = (driverId: string | undefined) => {
-  const [updateDriverStatus, { isLoading: isUpdating }] =
+  const [updateDriverStatus, { isLoading: isUpdatingStatus }] =
     useUpdateDriverStatusMutation();
 
   const {
-    data: driverData,
+    data: driverProfileResponse,
     isLoading,
     isFetching,
     error,
@@ -27,8 +27,8 @@ export const useDriverProfile = (driverId: string | undefined) => {
   });
 
   const driverProfile = useMemo(() => {
-    return driverData?.data || null;
-  }, [driverData]);
+    return driverProfileResponse?.data || null;
+  }, [driverProfileResponse]);
 
   const handleDriverAction = useCallback(
     async (action: DriverProfileAction, reason?: string) => {
@@ -43,16 +43,15 @@ export const useDriverProfile = (driverId: string | undefined) => {
           reason,
         }).unwrap();
 
-        console.log("✅ Driver profile action successful:", result.message);
-        refetch();
-
+        console.log("Driver action successful:", result.message);
+        await refetch();
         return { success: true, message: result.message };
       } catch (error: any) {
         const errorMessage =
           error?.data?.message ||
           error?.message ||
           "Failed to update driver status";
-        console.error("Driver profile action failed:", errorMessage);
+        console.error("Driver action failed:", errorMessage);
         throw new Error(errorMessage);
       }
     },
@@ -64,21 +63,18 @@ export const useDriverProfile = (driverId: string | undefined) => {
   }, [refetch]);
 
   const getAvailableActions = useCallback(
-    (status: string): DriverProfileAction[] => {
-      switch (status?.toLowerCase()) {
-        case "pending":
-        case "in_review":
-          return ["approve", "reject"];
-        case "active":
-          return ["suspend", "deactivate", "block"];
-        case "inactive":
-          return ["activate", "block"];
-        case "suspended":
-          return ["activate", "deactivate", "block"];
-        case "blocked":
-          return ["activate"];
-        case "rejected":
-          return ["approve"];
+    (
+      status: "Pending Verification" | "Active" | "Suspended" | "Inactive"
+    ): DriverProfileAction[] => {
+      switch (status) {
+        case "Pending Verification":
+          return ["Active", "Suspended"];
+        case "Active":
+          return ["Suspended"];
+        case "Suspended":
+          return ["Active"];
+        case "Inactive":
+          return ["Active"];
         default:
           return [];
       }
@@ -87,15 +83,15 @@ export const useDriverProfile = (driverId: string | undefined) => {
   );
 
   const availableActions = useMemo(() => {
-    if (!driverProfile?.status) return [];
-    return getAvailableActions(driverProfile.status);
-  }, [driverProfile?.status, getAvailableActions]);
+    if (!driverProfile?.driver?.status) return [];
+    return getAvailableActions(driverProfile.driver.status);
+  }, [driverProfile?.driver?.status, getAvailableActions]);
 
   return {
     driverProfile,
     isLoading,
     isFetching,
-    isUpdating,
+    isUpdating: isUpdatingStatus,
     error,
     handleDriverAction,
     refreshProfile,
