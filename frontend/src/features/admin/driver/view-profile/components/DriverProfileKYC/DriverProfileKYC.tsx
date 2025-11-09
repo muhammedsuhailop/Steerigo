@@ -3,13 +3,19 @@ import Card from "@/shared/components/ui/Card";
 import { Badge } from "@/shared/components/ui";
 import type {
   DriverProfileKYCProps,
+  KYCStatus,
   KYCVerificationStatus,
 } from "../../../../shared/types/adminDriverProfile.types";
 
-export const DriverProfileKYC: React.FC<DriverProfileKYCProps> = ({
+interface ExtendedDriverProfileKYCProps extends DriverProfileKYCProps {
+  overallStatus?: KYCStatus;
+}
+
+export const DriverProfileKYC: React.FC<ExtendedDriverProfileKYCProps> = ({
   kycDocuments,
+  overallStatus,
 }) => {
-  const getBadgeVariant = (status: KYCVerificationStatus) => {
+  const getBadgeVariant = (status: KYCVerificationStatus | KYCStatus) => {
     const variantMap = {
       Approved: "success" as const,
       InReview: "warning" as const,
@@ -35,6 +41,17 @@ export const DriverProfileKYC: React.FC<DriverProfileKYCProps> = ({
       <Card>
         <Card.Header title="KYC Documents" />
         <Card.Body>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-700 font-medium">
+              Total Documents: <span className="font-semibold">0</span>
+            </p>
+            {overallStatus && (
+              <Badge variant={getBadgeVariant(overallStatus)}>
+                {overallStatus}
+              </Badge>
+            )}
+          </div>
+
           <p className="text-gray-500 text-center py-8">
             No KYC documents found
           </p>
@@ -45,8 +62,21 @@ export const DriverProfileKYC: React.FC<DriverProfileKYCProps> = ({
 
   return (
     <Card>
-      <Card.Header title={`KYC Documents (${kycDocuments.length})`} />
+      <Card.Header title="KYC Documents" />
       <Card.Body>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-700 font-medium">
+            Total Documents:{" "}
+            <span className="font-semibold">{kycDocuments.length}</span>
+          </p>
+          {overallStatus && (
+            <Badge variant={getBadgeVariant(overallStatus)}>
+              {overallStatus}
+            </Badge>
+          )}
+        </div>
+
+        {/* Document Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {kycDocuments.map((doc) => (
             <Card key={doc.id} className="border border-gray-200">

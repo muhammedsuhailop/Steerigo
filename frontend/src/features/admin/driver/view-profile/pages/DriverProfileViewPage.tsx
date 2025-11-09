@@ -57,7 +57,7 @@ const DriverProfileViewPage: React.FC = () => {
     useState<DriverProfileAction | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  // Alert messages (showed in-app)
+  // Alert messages
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -74,7 +74,7 @@ const DriverProfileViewPage: React.FC = () => {
     try {
       const result = await handleDriverAction(confirmAction);
       const label = actionButtonConfig[confirmAction]?.label ?? confirmAction;
-      // show both toast (existing) and in-app Alert
+
       toast.success(result.message || `${label} successful`);
       setSuccessMsg(result.message || `${label} successful`);
       setErrorMsg(null);
@@ -165,7 +165,7 @@ const DriverProfileViewPage: React.FC = () => {
           <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
           <main className="flex-1 overflow-auto bg-gray-50 p-6">
             <div className="max-w-4xl mx-auto">
-              <Alert variant="danger">
+              <Alert type="danger">
                 <p className="font-semibold">Error Loading Driver Profile</p>
                 <p>
                   {(error as any)?.data?.message ||
@@ -203,7 +203,7 @@ const DriverProfileViewPage: React.FC = () => {
           <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
           <main className="flex-1 overflow-auto bg-gray-50 p-6">
             <div className="max-w-4xl mx-auto">
-              <Alert variant="danger">
+              <Alert type="danger">
                 <p>No driver profile found</p>
                 <Button
                   onClick={() => navigate("/admin/drivers")}
@@ -220,6 +220,21 @@ const DriverProfileViewPage: React.FC = () => {
   }
 
   const { driver, user, stats, kycDocuments } = driverProfile;
+
+  const getStatusBadgeClasses = (status?: string) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-800";
+      case "Suspended":
+        return "bg-red-100 text-red-800";
+      case "Inactive":
+        return "bg-gray-100 text-gray-800";
+      case "Pending Verification":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <div className="flex h-screen">
@@ -238,85 +253,110 @@ const DriverProfileViewPage: React.FC = () => {
         <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
         <main className="flex-1 overflow-auto bg-gray-50 p-6">
           <div className="max-w-7xl mx-auto">
-            {/* Inline Alerts */}
-            <div className="mb-4">
+            {/* Alerts (success / error) */}
+            <div className="max-w-3xl mb-4">
               {successMsg && (
                 <Alert
                   type="success"
+                  message={successMsg}
                   onClose={() => setSuccessMsg(null)}
                   className="mb-4"
-                >
-                  <div className="font-medium">{successMsg}</div>
-                </Alert>
+                />
               )}
               {errorMsg && (
                 <Alert
                   type="danger"
+                  message={errorMsg}
                   onClose={() => setErrorMsg(null)}
                   className="mb-4"
-                >
-                  <div className="font-medium">{errorMsg}</div>
-                </Alert>
+                />
               )}
             </div>
 
-            {/* Header Section */}
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="secondary"
-                  size="sm"
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <button
                   onClick={() => navigate("/admin/drivers")}
+                  className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
                 >
-                  <RiArrowLeftLine className="mr-1" />
-                  Back
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {user.name}
-                  </h1>
-                  <p className="text-sm text-gray-600">Driver Profile</p>
-                </div>
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  Back to Drivers
+                </button>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {user.name}
+                </h1>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={refreshProfile}
-                  disabled={isFetching}
-                >
-                  {isFetching ? "Refreshing..." : "Refresh"}
-                </Button>
 
-                {availableActions.map((action) => {
-                  const cfg = actionButtonConfig[action];
-                  return (
-                    <Button
-                      key={action}
-                      variant={cfg?.variant ?? "secondary"}
-                      size="sm"
-                      onClick={() => openConfirm(action)}
-                      disabled={isUpdating}
-                    >
-                      {cfg?.label ?? action}
-                    </Button>
-                  );
-                })}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={refreshProfile}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? "Refreshing..." : "Refresh"}
+                  </Button>
+
+                  {availableActions.map((action) => {
+                    const cfg = actionButtonConfig[action];
+                    return (
+                      <Button
+                        key={action}
+                        variant={cfg?.variant ?? "secondary"}
+                        size="sm"
+                        onClick={() => openConfirm(action)}
+                        disabled={isUpdating}
+                      >
+                        {cfg?.label ?? action}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                {/* status badge */}
+                <div>
+                  <span
+                    className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClasses(
+                      driver?.status
+                    )}`}
+                  >
+                    {driver?.status}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Driver Details & Stats */}
-              <div className="lg:col-span-1">
+            {/* Main Content */}
+            <div className="grid grid-cols-1 gap-6 mt-6">
+              {/* Driver Details */}
+              <div className="w-full bg-white rounded-lg shadow-md p-6">
                 <DriverDetails driver={driver} user={user} stats={stats} />
               </div>
 
-              {/* Right Column - Vehicle & KYC */}
-              <div className="lg:col-span-2 space-y-6">
+              {/* Vehicle Details*/}
+              <div className="w-full bg-white rounded-lg shadow-md p-6">
                 <VehicleDetails driver={driver} />
+              </div>
+
+              {/* KYC */}
+              <div className="w-full bg-white rounded-lg shadow-md p-6">
                 <DriverProfileKYC
                   kycDocuments={kycDocuments}
+                  overallStatus={driver.kycStatus}
                   isUpdating={isUpdating}
                 />
               </div>

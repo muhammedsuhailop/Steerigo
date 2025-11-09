@@ -56,30 +56,70 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({
 
   return (
     <>
-      {/* Personal Information Card */}
-      <Card className="mb-4">
-        <Card.Header title="Personal Information" />
-        <Card.Body>
-          <div className="space-y-3">
-            <Detail label="Driver ID" value={driver.id ?? "N/A"} />
-            <Detail label="Name" value={user.name ?? "N/A"} />
-            <Detail label="Email" value={user.email ?? "N/A"} />
-            <Detail label="Mobile" value={user.mobile ?? "N/A"} />
-            <StatusRow label="Status" badge={getStatusBadge(driver.status)} />
-            <StatusRow
-              label="KYC Status"
-              badge={getKYCStatusBadge(driver.kycStatus)}
-            />
-            <Detail label="Member Since" value={formatDate(driver.createdAt)} />
-          </div>
-        </Card.Body>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+        {/* Personal Information */}
+        <div>
+          <Card className="h-full">
+            <Card.Header title="Personal Information" />
+            <Card.Body>
+              <div className="space-y-3">
+                <Detail label="Driver ID" value={driver.id ?? "N/A"} />
+                <Detail label="Name" value={user.name ?? "N/A"} />
+                <Detail label="Email" value={user.email ?? "N/A"} />
+                <Detail label="Mobile" value={user.mobile ?? "N/A"} />
+                <StatusRow
+                  label="Status"
+                  badge={getStatusBadge(driver.status)}
+                />
+                <StatusRow
+                  label="KYC Status"
+                  badge={getKYCStatusBadge(driver.kycStatus)}
+                />
+                <Detail
+                  label="Member Since"
+                  value={formatDate(driver.createdAt)}
+                />
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
 
-      {/* Driver Statistics Card */}
+        {/* License Information */}
+        <div>
+          <Card className="h-full">
+            <Card.Header title="License Information" />
+            <Card.Body>
+              <div className="space-y-3">
+                <Detail
+                  label="License Category"
+                  value={driver.licenceCategory ?? "N/A"}
+                />
+                <Detail
+                  label="License Issue Date"
+                  value={formatDate(driver.licenseIssueDate)}
+                />
+                <Detail
+                  label="License Expiry Date"
+                  value={formatDate(driver.licenseExpiryDate)}
+                />
+                <div className="pt-2">
+                  {isLicenseExpired(driver.licenseExpiryDate) ? (
+                    <Badge variant="danger">License Expired</Badge>
+                  ) : (
+                    <Badge variant="success">License Valid</Badge>
+                  )}
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+
+      {/* Driver Statistics */}
       <Card className="mb-4">
         <Card.Header title="Driver Statistics" />
         <Card.Body>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatItem
               label="Total Rides"
               value={String(stats.totalRides ?? 0)}
@@ -106,34 +146,6 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({
                   : "No rides yet"
               }
             />
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* License Information Card */}
-      <Card>
-        <Card.Header title="License Information" />
-        <Card.Body>
-          <div className="space-y-3">
-            <Detail
-              label="License Category"
-              value={driver.licenceCategory ?? "N/A"}
-            />
-            <Detail
-              label="License Issue Date"
-              value={formatDate(driver.licenseIssueDate)}
-            />
-            <Detail
-              label="License Expiry Date"
-              value={formatDate(driver.licenseExpiryDate)}
-            />
-            <div className="pt-2">
-              {isLicenseExpired(driver.licenseExpiryDate) ? (
-                <Badge variant="danger">License Expired</Badge>
-              ) : (
-                <Badge variant="success">License Valid</Badge>
-              )}
-            </div>
           </div>
         </Card.Body>
       </Card>
