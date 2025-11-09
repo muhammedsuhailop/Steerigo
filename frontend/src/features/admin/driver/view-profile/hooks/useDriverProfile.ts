@@ -6,7 +6,6 @@ import {
 } from "@/features/admin/shared/services/adminApi";
 import type {
   DriverProfileAction,
-  KYCVerificationStatus,
   AdminDriverProfileResponse,
 } from "../../../shared/types/adminDriverProfile.types";
 
@@ -26,8 +25,10 @@ export const useDriverProfile = () => {
     skip: !driverId,
   });
 
-  const driverProfile = useMemo(() => {
-    return driverProfileResponse?.data || null;
+  const driverProfile = useMemo<
+    AdminDriverProfileResponse["data"] | null
+  >(() => {
+    return driverProfileResponse?.data ?? null;
   }, [driverProfileResponse]);
 
   const handleDriverAction = useCallback(
@@ -43,7 +44,6 @@ export const useDriverProfile = () => {
           reason,
         }).unwrap();
 
-        console.log("Driver action successful:", result.message);
         await refetch();
         return { success: true, message: result.message };
       } catch (error: any) {
@@ -51,7 +51,6 @@ export const useDriverProfile = () => {
           error?.data?.message ||
           error?.message ||
           "Failed to update driver status";
-        console.error("Driver action failed:", errorMessage);
         throw new Error(errorMessage);
       }
     },
@@ -63,18 +62,18 @@ export const useDriverProfile = () => {
   }, [refetch]);
 
   const getAvailableActions = useCallback(
-    (
-      status: "Pending Verification" | "Active" | "Suspended" | "Inactive"
-    ): DriverProfileAction[] => {
+    (status?: string): DriverProfileAction[] => {
+      if (!status) return [];
+
       switch (status) {
         case "Pending Verification":
-          return ["Active", "Suspended"];
+          return ["activate"];
         case "Active":
-          return ["Suspended"];
+          return ["suspend", "block"];
         case "Suspended":
-          return ["Active"];
-        case "Inactive":
-          return ["Active"];
+          return ["activate", "block"];
+        case "Blocked":
+          return ["activate"];
         default:
           return [];
       }
@@ -82,10 +81,11 @@ export const useDriverProfile = () => {
     []
   );
 
-  const availableActions = useMemo(() => {
-    if (!driverProfile?.driver?.status) return [];
-    return getAvailableActions(driverProfile.driver.status);
-  }, [driverProfile?.driver?.status, getAvailableActions]);
+  const availableActions = useMemo<DriverProfileAction[]>(() => {
+    const drv = driverProfile?.driver;
+    if (!drv || !drv.status) return [];
+    return getAvailableActions(drv.status);
+  }, [driverProfile, getAvailableActions]);
 
   return {
     driverProfile,

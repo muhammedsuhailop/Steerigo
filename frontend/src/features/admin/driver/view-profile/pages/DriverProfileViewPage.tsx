@@ -16,6 +16,7 @@ import { VehicleDetails } from "../components/VehicleDetails/VehicleDetails";
 import { DriverProfileKYC } from "../components/DriverProfileKYC/DriverProfileKYC";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { toast } from "react-toastify";
+import type { DriverProfileAction } from "../../../shared/types/adminDriverProfile.types";
 
 const DriverProfileViewPage: React.FC = () => {
   // Sidebar state
@@ -52,11 +53,16 @@ const DriverProfileViewPage: React.FC = () => {
 
   // Confirmation modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] =
+    useState<DriverProfileAction | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // Alert messages (showed in-app)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   // open modal
-  const openConfirm = (action: string) => {
+  const openConfirm = (action: DriverProfileAction) => {
     setConfirmAction(action);
     setConfirmOpen(true);
   };
@@ -66,37 +72,53 @@ const DriverProfileViewPage: React.FC = () => {
     if (!confirmAction) return;
     setConfirmLoading(true);
     try {
-      const result = await handleDriverAction(confirmAction as any);
-      toast.success(result.message || `Driver ${confirmAction}d successfully`);
+      const result = await handleDriverAction(confirmAction);
+      const label = actionButtonConfig[confirmAction]?.label ?? confirmAction;
+      // show both toast (existing) and in-app Alert
+      toast.success(result.message || `${label} successful`);
+      setSuccessMsg(result.message || `${label} successful`);
+      setErrorMsg(null);
+
       setConfirmOpen(false);
+      setConfirmAction(null);
+      refreshProfile();
     } catch (err: any) {
-      toast.error(err?.message || `Failed to ${confirmAction} driver`);
+      const label = confirmAction
+        ? actionButtonConfig[confirmAction]?.label
+        : "Action";
+      const msg = err?.message || `${label} failed`;
+      toast.error(msg);
+      setErrorMsg(msg);
+      setSuccessMsg(null);
+
       setConfirmOpen(false);
+      setConfirmAction(null);
     } finally {
       setConfirmLoading(false);
     }
   };
 
-  const statusButtonConfig: Record<
-    "Pending Verification" | "Active" | "Suspended" | "Inactive",
+  // auto-dismiss alerts after a timeout 4s
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | null = null;
+    if (successMsg || errorMsg) {
+      t = setTimeout(() => {
+        setSuccessMsg(null);
+        setErrorMsg(null);
+      }, 4000);
+    }
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [successMsg, errorMsg]);
+
+  const actionButtonConfig: Record<
+    DriverProfileAction,
     { label: string; variant: "success" | "danger" | "secondary" }
   > = {
-    "Pending Verification": {
-      label: "Mark Pending Verification",
-      variant: "secondary",
-    },
-    Active: {
-      label: "Activate Driver",
-      variant: "success",
-    },
-    Suspended: {
-      label: "Suspend Driver",
-      variant: "danger",
-    },
-    Inactive: {
-      label: "Set Inactive",
-      variant: "danger",
-    },
+    activate: { label: "Activate Driver", variant: "success" },
+    suspend: { label: "Suspend Driver", variant: "danger" },
+    block: { label: "Block Driver", variant: "danger" },
   };
 
   if (isLoading) {
@@ -216,6 +238,28 @@ const DriverProfileViewPage: React.FC = () => {
         <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
         <main className="flex-1 overflow-auto bg-gray-50 p-6">
           <div className="max-w-7xl mx-auto">
+            {/* Inline Alerts */}
+            <div className="mb-4">
+              {successMsg && (
+                <Alert
+                  type="success"
+                  onClose={() => setSuccessMsg(null)}
+                  className="mb-4"
+                >
+                  <div className="font-medium">{successMsg}</div>
+                </Alert>
+              )}
+              {errorMsg && (
+                <Alert
+                  type="danger"
+                  onClose={() => setErrorMsg(null)}
+                  className="mb-4"
+                >
+                  <div className="font-medium">{errorMsg}</div>
+                </Alert>
+              )}
+            </div>
+
             {/* Header Section */}
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -243,25 +287,18 @@ const DriverProfileViewPage: React.FC = () => {
                 >
                   {isFetching ? "Refreshing..." : "Refresh"}
                 </Button>
-                {availableActions.map((status) => {
-                  const cfg =
-                    statusButtonConfig[
-                      status as
-                        | "Pending Verification"
-                        | "Active"
-                        | "Suspended"
-                        | "Inactive"
-                    ];
 
+                {availableActions.map((action) => {
+                  const cfg = actionButtonConfig[action];
                   return (
                     <Button
-                      key={status}
+                      key={action}
                       variant={cfg?.variant ?? "secondary"}
                       size="sm"
-                      onClick={() => openConfirm(status)}
+                      onClick={() => openConfirm(action)}
                       disabled={isUpdating}
                     >
-                      {cfg?.label ?? status}
+                      {cfg?.label ?? action}
                     </Button>
                   );
                 })}
@@ -298,10 +335,16 @@ const DriverProfileViewPage: React.FC = () => {
           }
         }}
         onConfirm={performConfirmedAction}
-        title={`Confirm ${confirmAction ? confirmAction : ""}`}
-        message={`Are you sure you want to ${
-          confirmAction ? confirmAction : ""
-        } this driver? `}
+        title={
+          confirmAction ? actionButtonConfig[confirmAction].label : "Confirm"
+        }
+        message={
+          confirmAction
+            ? `Are you sure you want to ${actionButtonConfig[
+                confirmAction
+              ].label.toLowerCase()}?`
+            : "Are you sure?"
+        }
         confirmText={confirmLoading ? "Processing..." : "Yes, proceed"}
         cancelText="Cancel"
         variant="question"

@@ -66,12 +66,7 @@ export type KYCVerificationStatus =
   | "Expired";
 export type KYCDocType = "License" | "Aadhaar" | "PAN" | "Passport";
 
-// Action types for driver management
-export type DriverProfileAction =
-  | "Pending Verification"
-  | "Active"
-  | "Suspended"
-  | "Inactive";
+export type DriverProfileAction = "activate" | "suspend" | "block";
 
 // Props for components
 export interface DriverDetailsProps {
