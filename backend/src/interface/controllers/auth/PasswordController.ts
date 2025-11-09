@@ -11,6 +11,7 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class PasswordController {
@@ -43,16 +44,16 @@ export class PasswordController {
         message: AuthMessages.PASSWORD_RESET_REQUEST_SUCCESS,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Forgot password request completed successfully", {
         email: dto.getEmail(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "forgot_password_request"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Forgot password request controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -76,16 +77,16 @@ export class PasswordController {
         message: AuthMessages.PASSWORD_RESET_SUCCESS,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Forgot password verify completed successfully", {
         email: dto.getEmail(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "forgot_password_verify"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Forgot password verify controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -115,16 +116,16 @@ export class PasswordController {
         message: AuthMessages.PASSWORD_UPDATE_SUCCESS,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Update password completed successfully", {
         userId: dto.getUserId(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_password"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Update password controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }

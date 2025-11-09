@@ -2,13 +2,24 @@ import { injectable, inject } from "inversify";
 import { DriverRepository } from "@application/repositories/DriverRepository";
 import { KYCRepository } from "@application/repositories/KYCRepository";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
-import { KYCResponseDto } from "@application/dto/driver/KYCResponseDto";
 import { Result } from "@shared/utils/Result";
 import { KYC } from "@domain/entities/KYC";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { v4 as uuidv4 } from "uuid";
+import { DocumentType } from "@domain/value-objects/DocumentType";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { Types } from "mongoose";
+
+export interface UpdateKycSubmissionResult {
+  message: string;
+  kycDocuments: {
+    [key: string]: string;
+  };
+  licenseUpdated: boolean;
+  idUpdated: boolean;
+  driverUpdated: boolean;
+}
 
 @injectable()
 export class SubmitKYCUseCase {
@@ -20,84 +31,240 @@ export class SubmitKYCUseCase {
   async execute(
     userId: string,
     dto: KYCSubmissionRequestDto
-  ): Promise<Result<KYCResponseDto>> {
+  ): Promise<Result<UpdateKycSubmissionResult>> {
     try {
-      Logger.info("KYC submission started", {
-        userId,
-        docType: dto.getDocType(),
-      });
+      const validationErrors = dto.validate();
+      if (validationErrors.length > 0) {
+        Logger.warn("KYC submission validation failed", {
+          userId,
+          errors: validationErrors,
+        });
+        return Result.failure(new DomainError(validationErrors.join(", ")));
+      }
 
-      // Validate driver exists
       const driver = await this.driverRepository.findByUserId(userId);
       if (!driver) {
+        Logger.warn("Driver profile not found for KYC update", { userId });
         return Result.failure(new DomainError("Driver profile not found"));
       }
 
-      // Check if KYC for this document type already exists
-      const existingKYC = await this.kycRepository.findByDriverAndDocType(
-        driver.getId(),
-        dto.getDocType()
-      );
-
-      let kyc: KYC;
-      if (existingKYC) {
-        // Update existing KYC document
-        existingKYC.updateDocument(
-          dto.getDocType(),
-          dto.getDocNumber(),
-          dto.getIssueDate(),
-          dto.getExpiryDate()
-        );
-        existingKYC.updateDocumentImages(
-          dto.getFrontImageUrls(),
-          dto.getBackImageUrls()
-        );
-        kyc = existingKYC;
-      } else {
-        // Create new KYC document
-        kyc = KYC.create(
-          uuidv4(),
-          driver.getId(),
-          dto.getDocType(),
-          dto.getDocNumber(),
-          dto.getIssueDate(),
-          dto.getExpiryDate(),
-          dto.getFrontImageUrls(),
-          dto.getBackImageUrls()
-        );
-      }
-
-      const savedKYC = await this.kycRepository.save(kyc);
-
-      if (!savedKYC) {
-        return Result.failure(new DomainError("Failed to save KYC"));
-      }
-
-      const response: KYCResponseDto = {
-        id: savedKYC.getId(),
-        driverId: savedKYC.getDriverId(),
-        docType: savedKYC.getDocType(),
-        docNumber: savedKYC.getDocNumber(),
-        issueDate: savedKYC.getIssueDate(),
-        expiryDate: savedKYC.getExpiryDate(),
-        verificationStatus: savedKYC.getVerificationStatus(),
-        comments: savedKYC.getComments(),
-        docImageUrlsFront: savedKYC.getDocImageUrlsFront(),
-        docImageUrlsBack: savedKYC.getDocImageUrlsBack(),
-        createdAt: savedKYC.getCreatedAt(),
-        updatedAt: savedKYC.getUpdatedAt(),
-      };
-
-      Logger.info("KYC submission successful", {
+      Logger.info("KYC submission started", {
         userId,
         driverId: driver.getId(),
-        kycId: savedKYC.getId(),
+        hasLicense: dto.hasLicenseUpdate(),
+        hasId: dto.hasIdUpdate(),
+      });
+
+      const now = new Date();
+
+      if (dto.getLicenseExpiryDate()) {
+        if (dto.getLicenseExpiryDate()! <= now) {
+          Logger.warn("License expiry date in past", { userId });
+          return Result.failure(
+            new DomainError("License expiry date must be in the future")
+          );
+        }
+      }
+
+      if (dto.getLicenseIssueDate()) {
+        if (dto.getLicenseIssueDate()! > now) {
+          Logger.warn("License issue date in future", { userId });
+          return Result.failure(
+            new DomainError("License issue date cannot be in the future")
+          );
+        }
+      }
+
+      if (
+        dto.getIdExpiryDate() !== undefined &&
+        dto.getIdExpiryDate() !== null
+      ) {
+        if (dto.getIdExpiryDate()! <= now) {
+          Logger.warn("ID expiry date in past", { userId });
+          return Result.failure(
+            new DomainError("ID expiry date must be in the future")
+          );
+        }
+      }
+
+      if (dto.getIdIssueDate()) {
+        if (dto.getIdIssueDate()! > now) {
+          Logger.warn("ID issue date in future", { userId });
+          return Result.failure(
+            new DomainError("ID issue date cannot be in the future")
+          );
+        }
+      }
+
+      const kycDocuments: { [key: string]: string } = {};
+      let licenseUpdated = false;
+      let idUpdated = false;
+      let driverUpdated = false;
+
+      if (dto.hasLicenseUpdate()) {
+        const licenseKyc = await this.createNewLicenseKyc(driver.getId(), dto);
+
+        if (licenseKyc) {
+          kycDocuments.license = licenseKyc.getId();
+          licenseUpdated = true;
+
+          Logger.info("New license KYC created", {
+            userId,
+            driverId: driver.getId(),
+            kycId: licenseKyc.getId(),
+            licenseNumber: dto.getLicenseNumber(),
+          });
+
+          driver.updateLicenseInfo(
+            dto.getLicenseCategory()!,
+            dto.getLicenseIssueDate()!,
+            dto.getLicenseExpiryDate()!
+          );
+
+          const gearTypes = dto.getEligibleGearTypes();
+          const bodyTypes = dto.getEligibleBodyTypes();
+
+          if (gearTypes && bodyTypes) {
+            driver.updateEligibleVehicles(gearTypes, bodyTypes);
+            Logger.info("Driver eligible vehicles updated", {
+              userId,
+              gearTypes,
+              bodyTypes,
+            });
+          }
+
+          driver.updateKycStatus(KYCStatus.IN_REVIEW);
+
+          await this.driverRepository.save(driver);
+          driverUpdated = true;
+
+          Logger.info("Driver license information updated", {
+            userId,
+            driverId: driver.getId(),
+            kycStatusSet: KYCStatus.IN_REVIEW,
+          });
+        }
+      }
+
+      if (dto.hasIdUpdate()) {
+        const idKyc = await this.createNewIdKyc(driver.getId(), dto);
+
+        if (idKyc) {
+          kycDocuments.id = idKyc.getId();
+          idUpdated = true;
+
+          Logger.info("New ID KYC created", {
+            userId,
+            driverId: driver.getId(),
+            kycId: idKyc.getId(),
+            idType: dto.getIdType(),
+          });
+        }
+      }
+
+      const response: UpdateKycSubmissionResult = {
+        message: "KYC documents submitted successfully",
+        kycDocuments,
+        licenseUpdated,
+        idUpdated,
+        driverUpdated,
+      };
+
+      Logger.info("KYC submission completed successfully", {
+        userId,
+        driverId: driver.getId(),
+        kycDocuments,
+        driverUpdated,
       });
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("KYC submission failed", { userId, error });
+      Logger.error("KYC submission failed", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return Result.failure(error as Error);
+    }
+  }
+
+  private async createNewLicenseKyc(
+    driverId: string,
+    dto: KYCSubmissionRequestDto
+  ): Promise<KYC | null> {
+    try {
+      const licenseId = new Types.ObjectId().toString();
+
+      const licenseImages = dto.getLicenseImageUrls() || {
+        front: [],
+        back: [],
+      };
+
+      const licenseKyc = KYC.create(
+        licenseId,
+        driverId,
+        DocumentType.LICENSE,
+        dto.getLicenseNumber()!,
+        dto.getLicenseIssueDate(),
+        dto.getLicenseExpiryDate(),
+        licenseImages.front,
+        licenseImages.back
+      );
+
+      const savedKyc = await this.kycRepository.save(licenseKyc);
+
+      Logger.info("New license KYC saved to DB", {
+        driverId,
+        kycId: savedKyc.getId(),
+      });
+
+      return savedKyc;
+    } catch (error) {
+      Logger.error("Failed to create new license KYC", {
+        driverId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  private async createNewIdKyc(
+    driverId: string,
+    dto: KYCSubmissionRequestDto
+  ): Promise<KYC | null> {
+    try {
+      const idId = new Types.ObjectId().toString();
+
+      const idImages = dto.getIdImageUrls() || {
+        front: [],
+        back: [],
+      };
+
+      const idKyc = KYC.create(
+        idId,
+        driverId,
+        dto.getIdType()!,
+        dto.getIdNumber()!,
+        dto.getIdIssueDate(),
+        dto.getIdExpiryDate() ?? undefined,
+        idImages.front,
+        idImages.back
+      );
+
+      const savedKyc = await this.kycRepository.save(idKyc);
+
+      Logger.info("New ID KYC saved to DB", {
+        driverId,
+        kycId: savedKyc.getId(),
+        idType: dto.getIdType(),
+      });
+
+      return savedKyc;
+    } catch (error) {
+      Logger.error("Failed to create new ID KYC", {
+        driverId,
+        error,
+      });
+      throw error;
     }
   }
 }

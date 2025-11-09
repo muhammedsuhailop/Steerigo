@@ -21,9 +21,9 @@ export interface AdminDriverQuery {
 export interface AdminDriverSummary {
   driverId: string;
   userId: string;
-  userName: string; // From User entity
-  userEmail: string; // From User entity
-  userMobile: string; // From User entity
+  userName: string;
+  userEmail: string;
+  userMobile: string;
   status: string;
   kycStatus: string;
   licenceCategory: string;
@@ -41,6 +41,8 @@ export interface AdminDriverSummary {
 export interface AdminDriverRepository
   extends ReadOnlyRepository<Driver>,
     QueryableRepository<Driver> {
+  save(driver: Driver): Promise<Driver>;
+
   findDriversWithSummary(
     filters: AdminDriverQuery,
     pagination: { page: number; pageSize: number }

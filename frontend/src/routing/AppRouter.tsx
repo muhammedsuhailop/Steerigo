@@ -14,12 +14,13 @@ import AdminUsersLayout from "@/features/admin/user-management/pages/AdminUsersL
 import { NotFoundPage } from "@/features/public/pages";
 import { DriverRegistrationPage } from "@/features/driver/driver-registration/pages";
 import DriverManagementLayout from "@/features/admin/driver-management/pages/DriverManagementLayout";
-import DriverProfilePage from "@/features/admin/driver/view-profile/pages/DriverProfilePage";
+import DriverProfileViewPage from "@/features/admin/driver/view-profile/pages/DriverProfileViewPage";
 import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/AdminKYCLayout";
 import { UserProfileLayout } from "@/features/user";
 import DriverScheduling from "@/features/driver/scheduling/pages/DriverScheduling";
 import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailComponent/pages/KYCRequestDetailPage";
 import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
+import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -122,7 +123,7 @@ export const AppRouter: React.FC = () => {
         path="/admin/drivers/:id"
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
-            <DriverProfilePage />
+            <DriverProfileViewPage />
           </ProtectedRoute>
         }
       />
@@ -177,6 +178,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <DriverScheduling />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/driver/profile"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <DriverProfilePage />
           </ProtectedRoute>
         }
       />

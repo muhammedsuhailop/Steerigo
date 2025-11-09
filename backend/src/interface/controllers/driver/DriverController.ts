@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
 import { DriverRegistrationUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
-import { GetDriverProfileUseCase } from "@application/use-cases/driver/GetDriverProfileUseCase";
 import { UpdateDriverProfileUseCase } from "@application/use-cases/driver/UpdateDriverProfileUseCase";
 import { SubmitKYCUseCase } from "@application/use-cases/driver/SubmitKYCUseCase";
 import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusUseCase";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
-import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -19,9 +17,11 @@ import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriv
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
+import { GetDriverDetailedProfileUseCase } from "@application/use-cases/driver/GetDriverDetailedProfileUseCase";
+import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
+import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 interface DriverRegistrationRequestBody {
-  // User profile data
   name: string;
   mobile: string;
   dob: string;
@@ -30,7 +30,6 @@ interface DriverRegistrationRequestBody {
   pin: string;
   address: string;
 
-  // License data
   licenseCategory: LicenseCategory;
   licenseNumber: string;
   licenseBodyTypes: BodyType[];
@@ -38,57 +37,15 @@ interface DriverRegistrationRequestBody {
   licenseIssueDate: string;
   licenseExpiryDate: string;
 
-  // ID document data
   idType: DocumentType;
   idNumber: string;
   idIssueDate: string;
   idExpiryDate: string;
 
-  // Document images
   licenseFrontImage: string;
   licenseBackImage: string;
   idFrontImage: string;
   idBackImage: string;
-}
-
-interface DriverProfileUpdateRequestBody {
-  // User profile data
-  name?: string;
-  mobile?: string;
-  dob?: string;
-  gender?: "Male" | "Female" | "Other";
-  state?: string;
-  pin?: string;
-  address?: string;
-
-  // Driver license data
-  eligibleGearTypes?: GearType[];
-  eligibleBodyTypes?: BodyType[];
-  licenceCategory?: LicenseCategory;
-  licenseNumber?: string;
-  licenseIssueDate?: string;
-  licenseExpiryDate?: string;
-
-  // ID document data
-  idType?: DocumentType;
-  idNumber?: string;
-  idIssueDate?: string;
-  idExpiryDate?: string;
-
-  // Document images
-  licenseFrontImage?: string;
-  licenseBackImage?: string;
-  idFrontImage?: string;
-  idBackImage?: string;
-}
-
-interface KYCSubmissionRequestBody {
-  docType: DocumentType;
-  docNumber: string;
-  issueDate?: string;
-  expiryDate?: string;
-  frontImageUrls?: string[];
-  backImageUrls?: string[];
 }
 
 @injectable()
@@ -96,20 +53,18 @@ export class DriverController {
   constructor(
     @inject(TYPES.RegisterDriverUseCase)
     private registerDriverUseCase: DriverRegistrationUseCase,
-    // @inject(TYPES.RegisterDriverUseCase)
-    // private RegisterDriverUseCase: RegisterDriverUseCase,
-    // private getDriverProfileUseCase: GetDriverProfileUseCase,
-    // @inject(TYPES.UpdateDriverProfileUseCase)
+    @inject(TYPES.GetDriverDetailedProfileUseCase)
+    private getDetailedProfileUseCase: GetDriverDetailedProfileUseCase,
     @inject(TYPES.UpdateDriverProfileUseCase)
     private updateDriverProfileUseCase: UpdateDriverProfileUseCase,
     @inject(TYPES.SubmitKYCUseCase)
-    private submitKYCUseCase: SubmitKYCUseCase,
+    private SubmitKYCUseCase: SubmitKYCUseCase,
     @inject(TYPES.GetKYCStatusUseCase)
     private getKYCStatusUseCase: GetKYCStatusUseCase,
     @inject(TYPES.GetDriverDashboardUseCase)
     private getDashboardUseCase: GetDriverDashboardUseCase,
     @inject(TYPES.GetDriverStatusUseCase)
-    private getStatusUseCase: GetDriverStatusUseCase,
+    private getStatusUseCase: GetDriverStatusUseCase
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -123,7 +78,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -160,7 +115,8 @@ export class DriverController {
       if (missingFields.length > 0) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: `Missing required fields: ${missingFields.join(", ")}`,
+          message:
+            DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "),
         });
         return;
       }
@@ -196,8 +152,7 @@ export class DriverController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
           success: true,
-          message:
-            "Driver registration successful with profile update and KYC documents created",
+          message: DRIVER_MESSAGES.DRIVER_REGISTRATION_SUCCESS,
           data: result.getValue(),
         });
       } else {
@@ -212,7 +167,7 @@ export class DriverController {
       });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -223,70 +178,85 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
-      const body = req.body as DriverProfileUpdateRequestBody;
+      const body = req.body;
+
+      Logger.info("Driver profile update request received", {
+        userId,
+        fields: Object.keys(body || {}),
+      });
 
       const dto = new DriverProfileUpdateDto(
-        // User profile data
         body.name,
         body.mobile,
         body.dob ? new Date(body.dob) : undefined,
         body.gender,
-        body.state,
-        body.pin,
         body.address,
-
-        // Driver license data
         body.eligibleGearTypes,
-        body.eligibleBodyTypes,
-        body.licenceCategory,
-        body.licenseNumber,
-        body.licenseIssueDate ? new Date(body.licenseIssueDate) : undefined,
-        body.licenseExpiryDate ? new Date(body.licenseExpiryDate) : undefined,
-
-        // ID document data
-        body.idType,
-        body.idNumber,
-        body.idIssueDate ? new Date(body.idIssueDate) : undefined,
-        body.idExpiryDate ? new Date(body.idExpiryDate) : undefined,
-
-        // Document images
-        body.licenseFrontImage,
-        body.licenseBackImage,
-        body.idFrontImage,
-        body.idBackImage
+        body.eligibleBodyTypes
       );
+
+      Logger.info("Driver profile update DTO created", {
+        userId,
+        hasUserUpdates: dto.hasUserProfileUpdates(),
+        hasVehicleUpdates: dto.hasVehicleTypeUpdates(),
+      });
 
       const result = await this.updateDriverProfileUseCase.execute(userId, dto);
 
-      if (result.isSuccessful()) {
-        const responseData = result.getValue();
-        res.status(HttpStatusCodes.OK).json({
-          success: true,
-          message: "Driver profile updated successfully",
-          data: responseData.driver,
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Driver profile update failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "update_driver_profile"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+
+      Logger.info("Driver profile update successful", {
+        userId,
+        userUpdated: responseData.userUpdated,
+        vehiclesUpdated: responseData.vehiclesUpdated,
+        kycStatusUpdated: responseData.kycStatusUpdated,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
+        data: {
+          driver: responseData.driver,
           updateSummary: {
             userUpdated: responseData.userUpdated,
-            licenseKycUpdated: responseData.licenseKycUpdated,
-            idKycUpdated: responseData.idKycUpdated,
+            vehiclesUpdated: responseData.vehiclesUpdated,
+            kycStatusUpdated: responseData.kycStatusUpdated,
             updatedFields: responseData.updatedFields,
           },
-        });
-      } else {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: result.getError().message,
-        });
-      }
-    } catch (error) {
-      Logger.error("Update driver profile controller error", { error });
-      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Internal server error",
+        },
       });
+    } catch (error) {
+      Logger.error("Update driver profile controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "update_driver_profile"
+      );
+
+      res.status(statusCode).json(response);
     }
   }
 
@@ -294,60 +264,139 @@ export class DriverController {
     try {
       const userId = this.getUserId(req);
       if (!userId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
-        return;
-      }
-
-      const body = req.body as KYCSubmissionRequestBody;
-      const {
-        docType,
-        docNumber,
-        issueDate,
-        expiryDate,
-        frontImageUrls,
-        backImageUrls,
-      } = body;
-
-      if (!docType || !docNumber) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Document type and number are required",
+          message: DRIVER_MESSAGES.STATUS_USERID_NOT_FOUND,
         });
         return;
       }
 
-      const dto = new KYCSubmissionRequestDto(
+      const docType = req.body.docType;
+
+      const VALID_DOC_TYPES = [
+        "License",
+        "Aadhaar",
+        "PAN",
+        "Passport",
+        "Voter_ID",
+      ];
+      if (!docType || !VALID_DOC_TYPES.includes(docType)) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: `${DRIVER_MESSAGES.INVALID_MISSING_DOC_TYPE} Accepted: ${VALID_DOC_TYPES.join(", ")}`,
+        });
+        return;
+      }
+
+      Logger.info("KYC submission request received", {
+        userId,
         docType,
-        docNumber,
-        issueDate ? new Date(issueDate) : undefined,
-        expiryDate ? new Date(expiryDate) : undefined,
-        frontImageUrls || [],
-        backImageUrls || []
+        body: Object.keys(req.body),
+      });
+
+      const dto = this.createKYCDtoFromDocType(req.body, docType);
+
+      Logger.info("KYC submission DTO created", {
+        userId,
+        docType,
+        hasLicense: dto.hasLicenseUpdate(),
+        hasId: dto.hasIdUpdate(),
+        hasImages: dto.hasImages(),
+      });
+
+      const result = await this.SubmitKYCUseCase.execute(userId, dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("KYC submission failed", {
+          userId,
+          docType,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "submit_kyc"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const response = result.getValue();
+
+      Logger.info("KYC submission successful", {
+        userId,
+        docType,
+        licenseUpdated: response.licenseUpdated,
+        idUpdated: response.idUpdated,
+        driverUpdated: response.driverUpdated,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: response.message,
+        data: {
+          kycDocuments: response.kycDocuments,
+          licenseUpdated: response.licenseUpdated,
+          idUpdated: response.idUpdated,
+          driverUpdated: response.driverUpdated,
+        },
+      });
+    } catch (error) {
+      Logger.error("KYC submission controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "submit_kyc"
       );
 
-      const result = await this.submitKYCUseCase.execute(userId, dto);
-
-      if (result.isSuccessful()) {
-        res.status(HttpStatusCodes.CREATED).json({
-          success: true,
-          message: "KYC document submitted successfully",
-          data: result.getValue(),
-        });
-      } else {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: result.getError().message,
-        });
-      }
-    } catch (error) {
-      Logger.error("Submit KYC controller error", { error });
-      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Internal server error",
-      });
+      res.status(statusCode).json(response);
     }
+  }
+
+  private createKYCDtoFromDocType(
+    body: any,
+    docType: string
+  ): KYCSubmissionRequestDto {
+    if (docType === "License") {
+      return new KYCSubmissionRequestDto(
+        body.licenseCategory as LicenseCategory,
+        body.docNumber,
+        body.eligibleBodyTypes || undefined,
+        body.eligibleGearTypes || undefined,
+        body.issueDate ? new Date(body.issueDate) : undefined,
+        body.expiryDate ? new Date(body.expiryDate) : undefined,
+        body.frontImageUrls?.[0] || undefined,
+        body.backImageUrls?.[0] || undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      );
+    }
+
+    return new KYCSubmissionRequestDto(
+      undefined, // licenseCategory
+      undefined, // licenseNumber
+      undefined, // licenseBodyTypes
+      undefined, // licenseGearTypes
+      undefined, // licenseIssueDate
+      undefined, // licenseExpiryDate
+      undefined, // licenseFrontImage
+      undefined, // licenseBackImage
+      docType as DocumentType,
+      body.docNumber,
+      body.issueDate ? new Date(body.issueDate) : undefined,
+      body.expiryDate ? new Date(body.expiryDate) : undefined,
+      body.frontImageUrls?.[0] || undefined,
+      body.backImageUrls?.[0] || undefined
+    );
   }
 
   async getKYCStatus(req: Request, res: Response): Promise<void> {
@@ -356,7 +405,7 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
@@ -365,7 +414,7 @@ export class DriverController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "KYC status retrieved successfully",
+          message: DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
           data: result.getValue(),
         });
       } else {
@@ -378,7 +427,7 @@ export class DriverController {
       Logger.error("Get KYC status controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -389,14 +438,12 @@ export class DriverController {
       if (!userId) {
         res
           .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
         return;
       }
 
-      // Create DTO
       const dto = new GetDriverDashboardDto(userId);
 
-      // Execute use case
       const result = await this.getDashboardUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -413,7 +460,7 @@ export class DriverController {
 
       res.status(HttpStatusCodes.OK).json(dashboardResponse);
 
-      Logger.info("Driver dashboard returned successfully", { userId });
+      Logger.info(DRIVER_MESSAGES.DRIVER_DASHBOARD_RETURNED, { userId });
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -425,19 +472,17 @@ export class DriverController {
 
   async getStatus(req: Request, res: Response): Promise<void> {
     try {
-      // Extract userId from authenticated request
       const userId = this.getUserId(req);
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized - User ID not found",
+          message: DRIVER_MESSAGES.STATUS_USERID_NOT_FOUND,
         });
         return;
       }
 
       Logger.info("Getting driver status", { userId });
 
-      // Execute use case
       const result = await this.getStatusUseCase.execute(userId);
 
       if (result.isFailure()) {
@@ -454,7 +499,7 @@ export class DriverController {
 
       res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "Driver status retrieved successfully",
+        message: DRIVER_MESSAGES.DRIVER_STATUS_RETRIEVED,
         data: statusResponse,
       });
 
@@ -465,6 +510,73 @@ export class DriverController {
         error,
         "get_driver_status"
       );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getDetailedProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      if (!userId) {
+        res
+          .status(HttpStatusCodes.UNAUTHORIZED)
+          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
+        return;
+      }
+
+      Logger.info("Get detailed driver profile request", {
+        userId,
+        ip: req.ip,
+        timestamp: new Date().toISOString(),
+      });
+
+      const dto = new GetDriverProfileRequestDto(userId);
+
+      const result = await this.getDetailedProfileUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+
+        Logger.warn(DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_FETCH_FAILED, {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_detailed_profile"
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const profileResponse = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json({
+        success: profileResponse.success,
+        message: profileResponse.message,
+        data: profileResponse.data,
+      });
+
+      Logger.info(DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED, {
+        userId,
+        driverId: profileResponse.data.driverId,
+        responseSize: JSON.stringify(profileResponse.data).length,
+      });
+    } catch (error) {
+      Logger.error("Get detailed driver profile controller error", {
+        userId: req.params.userId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_detailed_profile"
+      );
+
       res.status(statusCode).json(response);
     }
   }

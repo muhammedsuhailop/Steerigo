@@ -8,6 +8,7 @@ import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { FILE_MESSAGES } from "@shared/constants/FileConstants";
 
 type MulterRequest = Request & { file?: Express.Multer.File };
 
@@ -30,7 +31,7 @@ export class FileController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized",
+          message: FILE_MESSAGES.UNAUTHORIZED,
         });
         return;
       }
@@ -38,7 +39,7 @@ export class FileController {
       if (!req.file) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "File is required",
+          message: FILE_MESSAGES.FILE_REQUIRED,
         });
         return;
       }
@@ -46,7 +47,7 @@ export class FileController {
       if (!req.body.purpose) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Purpose is required",
+          message: FILE_MESSAGES.PURPOSE_REQUIRED,
         });
         return;
       }
@@ -61,7 +62,7 @@ export class FileController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
           success: true,
-          message: "File uploaded successfully",
+          message: FILE_MESSAGES.FILE_UPLOADED,
           data: result.getValue(),
         });
       } else {
@@ -74,7 +75,7 @@ export class FileController {
       Logger.error("Upload file controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: FILE_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -85,7 +86,7 @@ export class FileController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized",
+          message: FILE_MESSAGES.UNAUTHORIZED,
         });
         return;
       }
@@ -95,7 +96,7 @@ export class FileController {
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: "Files retrieved successfully",
+          message: FILE_MESSAGES.FILES_RETRIEVED,
           data: result.getValue(),
         });
       } else {
@@ -108,7 +109,7 @@ export class FileController {
       Logger.error("Get user files controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: FILE_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }
@@ -119,7 +120,7 @@ export class FileController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized",
+          message: FILE_MESSAGES.UNAUTHORIZED,
         });
         return;
       }
@@ -128,7 +129,7 @@ export class FileController {
       if (!publicId) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Public ID is required",
+          message: FILE_MESSAGES.PUBLIC_ID_REQUIRED,
         });
         return;
       }
@@ -151,7 +152,7 @@ export class FileController {
       Logger.error("Delete file controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Internal server error",
+        message: FILE_MESSAGES.INTERNAL_SERVER_ERROR,
       });
     }
   }

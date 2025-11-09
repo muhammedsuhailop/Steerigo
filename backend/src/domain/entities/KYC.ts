@@ -113,6 +113,14 @@ export class KYC {
     return [...this.docImageUrlsBack];
   }
 
+  getDocumentType(): string {
+    return this.docType;
+  }
+
+  getDocumentNumber(): string {
+    return this.docNumber;
+  }
+
   // Business methods
   approve(comments?: string): void {
     if (this.verificationStatus === KYCStatus.APPROVED) {

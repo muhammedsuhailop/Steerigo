@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/shared/components/ui";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
+import { ConfirmationModal } from "@/shared/components/ui/ConfirmationModal";
+import { Alert } from "@/shared/components/ui/Alert";
 
 interface ActionButtonsProps {
   kycId: string;
@@ -28,26 +30,47 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     reason: "",
   });
 
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+
+  const [localError, setLocalError] = useState<string | null>(null);
+
   const isPending = verificationStatus === "InReview";
 
-  const handleApprove = async () => {
-    if (!window.confirm("Are you sure you want to approve this KYC?")) {
-      return;
+  const handleApproveClick = () => {
+    setApproveModalOpen(true);
+  };
+
+  const handleConfirmApprove = async () => {
+    try {
+      await onAction("Approved");
+      setApproveModalOpen(false);
+    } catch (err: any) {
+      setLocalError(
+        err?.data?.message || err?.message || "Failed to approve KYC"
+      );
+      setApproveModalOpen(false);
     }
-    await onAction("Approved");
   };
 
   const handleRejectClick = () => {
+    setLocalError(null);
     setRejectModal({ isOpen: true, reason: "" });
   };
 
   const handleConfirmReject = async () => {
     if (!rejectModal.reason.trim()) {
-      alert("Please provide a reason for rejection");
+      setLocalError("Please provide a reason for rejection");
       return;
     }
-    await onAction("Rejected", rejectModal.reason);
-    setRejectModal({ isOpen: false, reason: "" });
+    try {
+      await onAction("Rejected", rejectModal.reason.trim());
+      setRejectModal({ isOpen: false, reason: "" });
+      setLocalError(null);
+    } catch (err: any) {
+      setLocalError(
+        err?.data?.message || err?.message || "Failed to reject KYC"
+      );
+    }
   };
 
   if (!isPending) {
@@ -72,13 +95,14 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         </h2>
         <div className="flex gap-3">
           <Button
-            onClick={handleApprove}
+            onClick={handleApproveClick}
             disabled={isLoading}
             leftIcon={<MdCheckCircle />}
             className="bg-green-600 hover:bg-green-700 flex-1"
           >
             {isLoading ? "Processing..." : "Approve KYC"}
           </Button>
+
           <Button
             onClick={handleRejectClick}
             disabled={isLoading}
@@ -90,14 +114,37 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         </div>
       </div>
 
-      {/* Reject Modal */}
+      <ConfirmationModal
+        isOpen={approveModalOpen}
+        onClose={() => setApproveModalOpen(false)}
+        onConfirm={handleConfirmApprove}
+        title="Approve KYC Request"
+        message="Are you sure you want to approve this KYC request?"
+        confirmText="Approve"
+        cancelText="Cancel"
+        variant="success"
+        isLoading={isLoading}
+        size="md"
+      />
+
       {rejectModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Reject KYC Request
             </h3>
-            <p className="text-gray-600 mb-4">
+
+            {localError && (
+              <div className="mb-4">
+                <Alert
+                  type="danger"
+                  message={localError}
+                  onClose={() => setLocalError(null)}
+                />
+              </div>
+            )}
+
+            <p className="text-gray-600 mb-2">
               Please provide a reason for rejection:
             </p>
             <textarea
@@ -109,13 +156,18 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
               placeholder="Enter rejection reason..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
             />
+
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setRejectModal({ isOpen: false, reason: "" })}
+                onClick={() => {
+                  setRejectModal({ isOpen: false, reason: "" });
+                  setLocalError(null);
+                }}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleConfirmReject}
                 disabled={isLoading || !rejectModal.reason.trim()}

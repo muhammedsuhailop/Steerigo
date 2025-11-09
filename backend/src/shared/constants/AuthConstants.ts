@@ -18,6 +18,8 @@ export enum UserStatus {
 }
 
 export const AuthMessages = {
+  UNAUTHORIZED: "Unauthorized",
+  INTERNAL_SERVER_ERROR: "Internal server error",
   LOGIN_SUCCESS: "Login successful",
   LOGOUT_SUCCESS: "Logged out successfully",
   TOKEN_REFRESH_SUCCESS: "Tokens refreshed successfully",
@@ -43,7 +45,9 @@ export const AuthMessages = {
   PASSWORD_RESET_SUCCESS: "Password reset successfully",
   PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
   GOOGLE_AUTH_SUCCESS: "Google authentication successful",
-  USER_PROFILE_SUCCESS: "User profile retrieved successfully",
+  USER_PROFILE_SUCCESS: "User profile fetched  successfully",
+  TOKENS_REFRESHED: "Tokens refreshed successfully",
+  USER_RETRIEVED: "User fetched successfully",
 } as const;
 
 export const AuthValidationMessages = {

@@ -105,7 +105,7 @@ export class UpdateKycStatusUseCase {
 
           if (driver.getKycStatus() !== overallKycStatus) {
             driver.updateKycStatus(overallKycStatus);
-            // Update driver in database (you may need to implement this method)
+            await this.adminDriverRepository.save(driver);
             driverKycStatusUpdated = true;
             Logger.info("Driver KYC status updated", {
               driverId: driver.getId(),

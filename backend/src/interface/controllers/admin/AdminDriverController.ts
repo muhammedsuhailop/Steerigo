@@ -16,6 +16,8 @@ import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
+import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class AdminDriverController {
@@ -46,9 +48,9 @@ export class AdminDriverController {
         res.status(statusCode).json(response);
         return;
       }
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "Drivers fetched successfully",
+        message: ADMIN_MESSAGES.DRIVER.DRIVERS_FETCHED,
         data: result.getValue(),
       } as ApiResponse<any>);
     } catch (error) {
@@ -77,7 +79,7 @@ export class AdminDriverController {
         return;
       }
       const data = result.getValue();
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
         message: data.message,
         data: {
@@ -108,9 +110,9 @@ export class AdminDriverController {
         res.status(statusCode).json(response);
         return;
       }
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "Driver profile fetched successfully",
+        message: ADMIN_MESSAGES.DRIVER.DRIVER_PROFILE_FETCHED,
         data: result.getValue(),
       } as ApiResponse<any>);
     } catch (error) {
@@ -134,9 +136,9 @@ export class AdminDriverController {
         res.status(statusCode).json(response);
         return;
       }
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "KYC requests fetched successfully",
+        message: ADMIN_MESSAGES.DRIVER.KYC_REQUESTS_FETCHED,
         data: result.getValue(),
       } as ApiResponse<any>);
     } catch (error) {
@@ -167,7 +169,7 @@ export class AdminDriverController {
         return;
       }
       const data = result.getValue();
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
         message: data.message,
         data: {
@@ -196,9 +198,9 @@ export class AdminDriverController {
         res.status(statusCode).json(response);
         return;
       }
-      res.status(200).json({
+      res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "KYC document fetched successfully",
+        message: ADMIN_MESSAGES.DRIVER.KYC_DOCUMENT_FETCHED,
         data: result.getValue(),
       } as ApiResponse<any>);
     } catch (error) {

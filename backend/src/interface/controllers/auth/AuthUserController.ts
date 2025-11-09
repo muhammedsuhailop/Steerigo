@@ -7,6 +7,7 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class AuthUserController {
@@ -17,7 +18,17 @@ export class AuthUserController {
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId; 
+      const userId = (req as any).user?.userId;
+
+      // Handle missing auth user
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: AuthMessages.UNAUTHORIZED,
+        });
+        return;
+      }
+
       const dto = new GetCurrentUserDto({ userId });
       const result = await this.getCurrentUserUseCase.execute(dto);
 
@@ -38,16 +49,17 @@ export class AuthUserController {
         data,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Get current user completed successfully", {
         userId: dto.getUserId(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_current_user"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Get current user controller error", { error });
+
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }

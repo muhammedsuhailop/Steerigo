@@ -1,13 +1,6 @@
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
-
-/**
- * Mapper for DriverAvailability entity to DriverStatusResponseDto
- */
 export class DriverStatusMapper {
-  /**
-   * Map DriverAvailability entity to response DTO
-   */
   static toResponseDto(
     driverId: string,
     availability: DriverAvailability

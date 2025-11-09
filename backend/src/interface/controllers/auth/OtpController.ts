@@ -7,6 +7,7 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 @injectable()
 export class OtpController {
@@ -37,16 +38,17 @@ export class OtpController {
         data,
       };
 
-      res.status(200).json(response);
+      res.status(HttpStatusCodes.OK).json(response);
+
       Logger.info("Resend OTP completed successfully", {
         email: dto.getEmail(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "resend_otp"
-      );
-      res.status(statusCode).json(response);
+      Logger.error("Resend OTP controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }

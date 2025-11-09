@@ -16,7 +16,7 @@ interface FileUploadComponentProps {
   required?: boolean;
   currentFile?: File | string | null;
   onFileSelect: (file: File, fieldName: string) => void;
-  onFileUpload?: (url: string, fieldName: string) => void;
+  onFileUpload?: (url: string, fieldName: string, fullResponse?: any) => void; 
   onFileRemove?: (fieldName: string) => void;
   error?: string;
   isUploading?: boolean;
@@ -53,7 +53,7 @@ export const FileUploadComponent: React.FC<FileUploadComponentProps> = ({
     maxSize,
     onSuccess: (result) => {
       setUploadSuccess(true);
-      onFileUpload?.(result.data.url, fieldName);
+      onFileUpload?.(result.data.url, fieldName, result.data);
       setTimeout(() => setUploadSuccess(false), 3000);
     },
     onError: (error) => {
@@ -71,7 +71,6 @@ export const FileUploadComponent: React.FC<FileUploadComponentProps> = ({
 
       if (validation.isValid) {
         onFileSelect(file, fieldName);
-
         await uploadToBackend(file, fieldName);
       }
     }

@@ -9,6 +9,7 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { AuthMessages } from "@shared/constants/AuthConstants";
 
 @injectable()
 export class TokenController {
@@ -34,7 +35,7 @@ export class TokenController {
       if (!refreshToken) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "No refresh token provided",
+          message: AuthMessages.REFRESH_TOKEN_REQUIRED,
         });
         return;
       }
@@ -62,7 +63,7 @@ export class TokenController {
 
       const response: ApiResponse = {
         success: true,
-        message: "Logged out successfully",
+        message: AuthMessages.LOGOUT_SUCCESS,
       };
 
       res.status(HttpStatusCodes.OK).json(response);
@@ -86,13 +87,12 @@ export class TokenController {
         return;
       }
 
-      // Get refresh token from httpOnly cookie
       const refreshToken = req.cookies.refreshToken;
 
       if (!refreshToken) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "No refresh token provided",
+          message: AuthMessages.REFRESH_TOKEN_REQUIRED,
         });
         return;
       }
@@ -120,7 +120,6 @@ export class TokenController {
 
       const data = result.getValue();
 
-      // Set new refresh token as httpOnly cookie
       res.cookie("refreshToken", data.refreshToken, {
         httpOnly: true, // Cannot be accessed by JavaScript
         secure: process.env.NODE_ENV === "production", // HTTPS only in production
@@ -132,7 +131,7 @@ export class TokenController {
       // Send access token in response body
       const response: ApiResponse = {
         success: true,
-        message: "Tokens refreshed successfully",
+        message: AuthMessages.TOKENS_REFRESHED,
         data: {
           accessToken: data.accessToken,
         },
