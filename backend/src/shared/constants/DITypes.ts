@@ -72,6 +72,7 @@ export const TYPES = {
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
   GetUserFilesUseCase: Symbol.for("GetUserFilesUseCase"),
   DeleteFileUseCase: Symbol.for("DeleteFileUseCase"),
+  UpdateProfilePictureUseCase: Symbol.for("UpdateProfilePictureUseCase"),
 
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),

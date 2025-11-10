@@ -40,4 +40,13 @@ router.delete(
   fileController.deleteFile.bind(fileController)
 );
 
+// POST /api/file/profile-picture/:userId - Update Profile Picture
+router.post(
+  "/profile-picture/:userId",
+  authMiddleware,
+  uploadSingle,
+  handleMulterError,
+  fileController.updateProfilePicture.bind(fileController)
+);
+
 export { router as fileRoutes };
