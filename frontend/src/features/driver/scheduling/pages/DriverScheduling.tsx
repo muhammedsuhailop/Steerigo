@@ -98,7 +98,9 @@ const DriverScheduling: React.FC = () => {
       });
 
       // Set current status
-      setCurrentStatus(availability.status as "Available" | "Busy" | "Offline");
+      setCurrentStatus(
+        availability.availabilityStatus as "Available" | "Busy" | "Offline"
+      );
 
       // Set selected location for map
       setSelectedLocation(availability.currentLocation);
