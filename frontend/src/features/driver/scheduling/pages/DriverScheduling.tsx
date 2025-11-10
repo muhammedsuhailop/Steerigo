@@ -45,6 +45,9 @@ const DriverScheduling: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
+
+  const [driverId, setDriverId] = useState<string | null>(null);
+
   const [currentStatus, setCurrentStatus] = useState<
     "Available" | "Busy" | "Offline"
   >("Offline");
@@ -75,8 +78,6 @@ const DriverScheduling: React.FC = () => {
   const { data: driverStatusResponse, isLoading: isStatusLoading1 } =
     useGetDriverStatusQuery();
 
-  const driverId = useSelector(selectDriverId);
-
   // Initialize form data from API response or use defaults
   const [defaultFormData, setDefaultFormData] = useState<{
     availableFrom: Date | null;
@@ -104,6 +105,9 @@ const DriverScheduling: React.FC = () => {
         availableTill: new Date(availability.availableTill),
         location: availability.currentLocation,
       });
+
+      //Set DriverId locally
+      setDriverId(availability.driverId);
 
       //Aavailability data for StatusCard
       setAvailabilityData({
