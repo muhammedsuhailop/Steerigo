@@ -270,9 +270,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       </div>
 
       <p className="text-xs text-gray-600">
-        Tip: Search, click on the map, or use your device location. Click{" "}
-        <strong>Update</strong> to confirm the currently selected position
-        before saving.
+        Search, click on the map, or use your device location. Click{" "}
+        <strong>Update Location</strong> to confirm the currently selected location.
       </p>
     </div>
   );

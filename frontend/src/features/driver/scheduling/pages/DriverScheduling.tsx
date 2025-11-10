@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  IoArrowBack,
-  IoInformationCircleOutline,
-  IoSaveOutline,
-} from "react-icons/io5";
+import { IoArrowBack, IoInformationCircleOutline } from "react-icons/io5";
+import { FaLocationArrow } from "react-icons/fa";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import LocationPicker from "../components/LocationPicker";
 import ScheduleForm from "../components/ScheduleForm";
@@ -188,6 +185,12 @@ const DriverScheduling: React.FC = () => {
         driverId: driverId || "",
         currentLocation: selectedLocation,
       }).unwrap();
+
+      setAvailabilityData((prev) => ({
+        ...prev,
+        currentLocation: selectedLocation,
+      }));
+
       showAlert("Location saved successfully!", "success");
     } catch (error: any) {
       console.error("Failed to save location:", error);
@@ -350,15 +353,24 @@ const DriverScheduling: React.FC = () => {
               {/*Button to toggle schedule form */}
               <button
                 onClick={() => setShowScheduleForm((prev) => !prev)}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all duration-200 active:scale-[0.98] shadow-sm"
+                className={`
+                  w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-base transition-all duration-200 ease-out
+                  ${
+                    showScheduleForm
+                      ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                      : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  } active:scale-[0.98] focus:outline-none `}
               >
-                {showScheduleForm
-                  ? "Hide Schedule Form"
-                  : "Add / Update Schedule"}
                 {showScheduleForm ? (
-                  <FaCaretUp size={18} />
+                  <>
+                    <FaCaretUp size={18} />
+                    <span>Hide Schedule Form</span>
+                  </>
                 ) : (
-                  <FaCaretDown size={18} />
+                  <>
+                    <FaCaretDown size={18} />
+                    <span>Add / Update Schedule</span>
+                  </>
                 )}
               </button>
 
@@ -401,8 +413,8 @@ const DriverScheduling: React.FC = () => {
                       : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                   }`}
                 >
-                  <IoSaveOutline size={20} />
-                  {isLocationSaving ? "Saving..." : "Save Location"}
+                  <FaLocationArrow size={20} />
+                  {isLocationSaving ? "Saving..." : "Update Location"}
                 </button>
               </div>
             </div>
