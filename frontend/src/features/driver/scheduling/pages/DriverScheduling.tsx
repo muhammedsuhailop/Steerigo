@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack, IoInformationCircleOutline } from "react-icons/io5";
 import { FaLocationArrow } from "react-icons/fa";
@@ -72,8 +72,12 @@ const DriverScheduling: React.FC = () => {
     useUpdateStatusMutation();
 
   // Get driver status to preload availability
-  const { data: driverStatusResponse, isLoading: isStatusLoading1 } =
-    useGetDriverStatusQuery();
+  const {
+    data: driverStatusResponse,
+    isLoading: isStatusLoading1,
+    isError: isDriverStatusError,
+    error: driverStatusError,
+  } = useGetDriverStatusQuery();
 
   // Initialize form data from API response or use defaults
   const [defaultFormData, setDefaultFormData] = useState<{
@@ -87,6 +91,7 @@ const DriverScheduling: React.FC = () => {
   });
 
   const [hasAvailability, setHasAvailability] = useState(false);
+  const didRedirectRef = useRef(false);
 
   // Load availability data on component mount
   useEffect(() => {
@@ -103,10 +108,10 @@ const DriverScheduling: React.FC = () => {
         location: availability.currentLocation,
       });
 
-      //Set DriverId locally
+      // Set DriverId locally
       setDriverId(availability.driverId);
 
-      //Aavailability data for StatusCard
+      // Availability data for StatusCard
       setAvailabilityData({
         availableFrom: availability.availableFrom,
         availableTill: availability.availableTill,
@@ -122,11 +127,25 @@ const DriverScheduling: React.FC = () => {
       setSelectedLocation(availability.currentLocation);
 
       setHasAvailability(true);
-    } else if (driverStatusResponse?.type === "NOT_FOUND_ERROR") {
-      // Handle 404 - Use default values
-      setHasAvailability(false);
+      return; // done
+    }
 
-      // Set default to current time + 30 min and +8 hours
+    // Errors
+    const err: any = driverStatusError;
+
+    const serverMessage =
+      err?.data?.message || driverStatusResponse?.message || err?.message || "";
+
+    const is404ByStatus = Boolean(
+      err && (err.status === 404 || err?.data?.status === 404)
+    );
+
+    if (is404ByStatus) {
+      // Clear availability state
+      setHasAvailability(false);
+      setAvailabilityData({});
+
+      // Default times (now +30min to +8h)
       const now = new Date();
       now.setMinutes(now.getMinutes() + 30);
       const endTime = new Date(now);
@@ -138,16 +157,28 @@ const DriverScheduling: React.FC = () => {
         location: null,
       });
 
-      // Clear availability data on 404
-      setAvailabilityData({});
-
-      // Show info message
-      showAlert(
-        "No existing availability found. Please create a new schedule.",
-        "success"
-      );
+      // show the server-provided message if present
+      const friendly =
+        serverMessage ||
+        "No existing availability found. Please create a new schedule.";
+      showAlert(friendly, "success");
+      return;
     }
-  }, [driverStatusResponse, dispatch]);
+
+    if (isDriverStatusError) {
+      const msg =
+        err?.data?.message ||
+        err?.message ||
+        "Unable to load availability. Please try again later.";
+      showAlert(msg, "danger");
+    }
+  }, [
+    driverStatusResponse,
+    driverStatusError,
+    isDriverStatusError,
+    dispatch,
+    navigate,
+  ]);
 
   const showAlert = (message: string, type: "success" | "danger") => {
     setAlert({ show: true, message, type });
