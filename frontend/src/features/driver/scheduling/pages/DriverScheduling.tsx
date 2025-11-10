@@ -5,9 +5,11 @@ import {
   IoInformationCircleOutline,
   IoSaveOutline,
 } from "react-icons/io5";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import LocationPicker from "../components/LocationPicker";
 import ScheduleForm from "../components/ScheduleForm";
 import StatusToggle from "../components/StatusToggle";
+import StatusCard from "../components/StatusCard";
 import { Alert } from "@/shared/components/ui/Alert";
 import {
   useUpdateLocationMutation,
@@ -47,7 +49,14 @@ const DriverScheduling: React.FC = () => {
     "Available" | "Busy" | "Offline"
   >("Offline");
 
-  // Alert state
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+
+  const [availabilityData, setAvailabilityData] = useState<{
+    availableFrom?: string;
+    availableTill?: string;
+    currentLocation?: Location;
+  }>({});
+
   const [alert, setAlert] = useState<AlertState>({
     show: false,
     message: "",
@@ -85,7 +94,6 @@ const DriverScheduling: React.FC = () => {
   useEffect(() => {
     if (driverStatusResponse?.data) {
       const availability = driverStatusResponse.data;
-      console.log("-------availability", availability);
 
       // Store availability in Redux
       dispatch(setAvailability(availability));
@@ -95,6 +103,13 @@ const DriverScheduling: React.FC = () => {
         availableFrom: new Date(availability.availableFrom),
         availableTill: new Date(availability.availableTill),
         location: availability.currentLocation,
+      });
+
+      //Aavailability data for StatusCard
+      setAvailabilityData({
+        availableFrom: availability.availableFrom,
+        availableTill: availability.availableTill,
+        currentLocation: availability.currentLocation,
       });
 
       // Set current status
@@ -121,6 +136,9 @@ const DriverScheduling: React.FC = () => {
         availableTill: endTime,
         location: null,
       });
+
+      // Clear availability data on 404
+      setAvailabilityData({});
 
       // Show info message
       showAlert(
@@ -197,6 +215,16 @@ const DriverScheduling: React.FC = () => {
       // Update local state
       setHasAvailability(true);
       setDefaultFormData(data);
+
+      // Update availability data for StatusCard
+      setAvailabilityData({
+        availableFrom: data.availableFrom.toISOString(),
+        availableTill: data.availableTill.toISOString(),
+        currentLocation: data.location,
+      });
+
+      // Hide form after successful submission
+      setShowScheduleForm(false);
 
       showAlert("Schedule updated successfully!", "success");
     } catch (error: any) {
@@ -279,6 +307,14 @@ const DriverScheduling: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column - Status and Form */}
             <div className="space-y-6">
+              {/* Status Card */}
+              <StatusCard
+                availabilityStatus={currentStatus}
+                availableFrom={availabilityData.availableFrom}
+                availableTill={availabilityData.availableTill}
+                currentLocation={availabilityData.currentLocation}
+              />
+
               {/* Status Toggle */}
               <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
                 <StatusToggle
@@ -307,19 +343,36 @@ const DriverScheduling: React.FC = () => {
                 </div>
               )}
 
+              {/*Button to toggle schedule form */}
+              <button
+                onClick={() => setShowScheduleForm((prev) => !prev)}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all duration-200 active:scale-[0.98] shadow-sm"
+              >
+                {showScheduleForm
+                  ? "Hide Schedule Form"
+                  : "Add / Update Schedule"}
+                {showScheduleForm ? (
+                  <FaCaretUp size={18} />
+                ) : (
+                  <FaCaretDown size={18} />
+                )}
+              </button>
+
               {/* Schedule Form */}
-              <ScheduleForm
-                onSubmit={handleScheduleSubmit}
-                selectedLocation={selectedLocation}
-                isLoading={isScheduleLoading}
-                defaultAvailableFrom={
-                  defaultFormData.availableFrom || undefined
-                }
-                defaultAvailableTill={
-                  defaultFormData.availableTill || undefined
-                }
-                defaultLocation={defaultFormData.location || undefined}
-              />
+              {showScheduleForm && (
+                <ScheduleForm
+                  onSubmit={handleScheduleSubmit}
+                  selectedLocation={selectedLocation}
+                  isLoading={isScheduleLoading}
+                  defaultAvailableFrom={
+                    defaultFormData.availableFrom || undefined
+                  }
+                  defaultAvailableTill={
+                    defaultFormData.availableTill || undefined
+                  }
+                  defaultLocation={defaultFormData.location || undefined}
+                />
+              )}
             </div>
 
             {/* Right Column - Location Picker */}
