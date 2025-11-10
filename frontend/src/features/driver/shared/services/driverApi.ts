@@ -17,6 +17,16 @@ import {
   MOCK_DRIVER,
   MOCK_PENDING_REQUESTS,
 } from "../mocks/driver.mock";
+import {
+  DriverProfile,
+  DriverProfileResponse,
+} from "../../profile/types/driverProfile.types";
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const mockSuccess = <T>(data: T) => ({ data: { data } });
@@ -32,18 +42,14 @@ export const driverApi = createApi({
     "DriverStatus",
   ],
   endpoints: (builder) => ({
-    getDriverProfile: builder.query<{ data: Driver }, void>({
-      queryFn: async () => {
-        await delay(400);
-        return mockSuccess(mockStateManager.getDriver());
+    getDriverProfile: builder.query<DriverProfileResponse, void>({
+      query: () => ({
+        url: "/driver/profile",
+        method: "GET",
+      }),
+      transformResponse: (response: ApiResponse<DriverProfile>) => {
+        return response.data;
       },
-      // query: () => ({
-      //   url: "/driver/profile",
-      //   method: "GET",
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
       providesTags: ["Driver"],
     }),
 

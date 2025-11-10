@@ -17,7 +17,7 @@ const initialState: DriverState = {
   error: null,
   isOnline: false,
   driverId: null,
-  availability: null,
+  availabilityStatus: null,
 };
 
 const driverSlice = createSlice({
@@ -60,7 +60,7 @@ const driverSlice = createSlice({
       state,
       action: PayloadAction<AvailabilityData | null>
     ) => {
-      state.availability = action.payload;
+      state.availabilityStatus = action.payload;
     },
     addPendingRequest: (state, action: PayloadAction<RideRequest>) => {
       state.pendingRequests.unshift(action.payload);
@@ -142,10 +142,8 @@ export const selectDriverError = (state: { driver: DriverState }) =>
 export const selectDriverId = (state: { driver: DriverState }) =>
   state.driver.driverId;
 
-// NEW: Add availability selector
 export const selectAvailability = (state: { driver: DriverState }) =>
-  state.driver.availability;
+  state.driver.availabilityStatus;
 
-// NEW: Check if driver has availability
 export const selectHasAvailability = (state: { driver: DriverState }) =>
-  state.driver.availability !== null;
+  state.driver.availabilityStatus !== null;

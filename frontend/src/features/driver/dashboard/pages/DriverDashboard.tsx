@@ -83,7 +83,7 @@ const DriverDashboard: React.FC = () => {
 
   // Get driver from dashboard or profile
   const driver: Driver | undefined =
-    dashboard?.driver || driverProfileData?.data;
+    dashboard?.driver ;
 
   // Get stats from dashboard
   const stats: DriverStatsType | undefined = dashboard?.stats;
@@ -144,7 +144,6 @@ const DriverDashboard: React.FC = () => {
     if (driver?.driverId) {
       dispatch(setDriverId(driver.driverId));
     }
-    console.log("driverId", driver?.driverId);
   }, [driver?.driverId, dispatch]);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);

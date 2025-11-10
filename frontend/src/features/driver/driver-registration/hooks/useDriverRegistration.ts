@@ -80,7 +80,6 @@ export const useDriverRegistration = () => {
 
   useEffect(() => {
     if (currentUser) {
-      console.log(currentUser);
       dispatch(
         updateFormData({
           name: currentUser.name || "",
@@ -202,7 +201,6 @@ export const useDriverRegistration = () => {
 
   // Registration submission
   const handleSubmitRegistration = useCallback(async () => {
-    console.log("handleSubmitRegistration called");
     const validation = driverValidationService.validateAll(
       formData as DriverRegistrationData
     );
