@@ -383,7 +383,11 @@ const DriverScheduling: React.FC = () => {
             <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
               <LocationPicker
                 onLocationSelect={handleLocationSelect}
-                initialLocation={selectedLocation || undefined}
+                initialLocation={
+                  availabilityData.currentLocation ||
+                  selectedLocation ||
+                  undefined
+                }
               />
 
               {/* Save Location Button */}
