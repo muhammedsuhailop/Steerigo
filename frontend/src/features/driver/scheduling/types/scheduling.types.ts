@@ -38,7 +38,7 @@ export interface GeocodeResult {
 export interface AvailabilityData {
   id: string;
   driverId: string;
-  status: "Available" | "Busy" | "Offline";
+  availabilityStatus: "Available" | "Busy" | "Offline";
   availableFrom: string;
   availableTill: string;
   currentLocation: Location;
@@ -64,5 +64,5 @@ export interface SchedulingState {
   isLoading: boolean;
   error: string | null;
   statusCode: number | null;
-  hasAvailability: boolean; 
+  hasAvailability: boolean;
 }

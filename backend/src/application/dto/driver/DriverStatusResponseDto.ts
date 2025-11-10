@@ -1,7 +1,7 @@
 export class DriverStatusResponseDto {
   readonly id: string;
   readonly driverId: string;
-  readonly status: string;
+  readonly availabilityStatus: string;
   readonly availableFrom: Date;
   readonly availableTill: Date | null;
   readonly currentLocation: {
@@ -14,7 +14,7 @@ export class DriverStatusResponseDto {
   constructor(
     id: string,
     driverId: string,
-    status: string,
+    availabilityStatus: string,
     availableFrom: Date,
     availableTill: Date | null,
     currentLocation: {
@@ -26,7 +26,7 @@ export class DriverStatusResponseDto {
   ) {
     this.id = id;
     this.driverId = driverId;
-    this.status = status;
+    this.availabilityStatus = availabilityStatus;
     this.availableFrom = availableFrom;
     this.availableTill = availableTill;
     this.currentLocation = currentLocation;

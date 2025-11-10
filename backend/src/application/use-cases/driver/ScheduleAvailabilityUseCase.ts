@@ -27,7 +27,7 @@ export class ScheduleAvailabilityUseCase {
     Result<{
       id: string;
       driverId: string;
-      status: string;
+      availabilityStatus: string;
       availableFrom: string;
       availableTill: string;
       currentLocation: {
@@ -96,7 +96,7 @@ export class ScheduleAvailabilityUseCase {
       const response = {
         id: savedAvailability.getId(),
         driverId: savedAvailability.getDriverId(),
-        status: savedAvailability.getStatus(),
+        availabilityStatus: savedAvailability.getStatus(),
         availableFrom: savedAvailability.getAvailableFrom().toISOString(),
         availableTill: savedAvailability.getAvailableTill().toISOString(),
         currentLocation: savedAvailability
