@@ -24,6 +24,7 @@ import {
   ResourceNotFoundError,
   UserNotFoundError,
 } from "@domain/errors/DriverProfileErrors";
+import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 
 export enum ErrorType {
   CLIENT_ERROR = "CLIENT_ERROR",
@@ -166,6 +167,19 @@ export class ErrorHandlerService {
         statusCode: 400,
         message: "Availability period has expired",
         type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    //Driver
+    [
+      DriverNotFoundError.name,
+      {
+        statusCode: 404,
+        message:
+          "Driver profile not found. Please complete driver registration first",
+        type: ErrorType.NOT_FOUND_ERROR,
         shouldLog: false,
         isOperational: true,
       },

@@ -10,6 +10,7 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 
 @injectable()
 export class GetDriverDashboardUseCase {
@@ -29,13 +30,10 @@ export class GetDriverDashboardUseCase {
       const userId = dto.getUserId();
 
       const driver = await this.driverRepository.findByUserId(userId);
-      if (!driver) {
-        return Result.failure(new DomainError("Driver profile not found"));
-      }
 
       if (!driver) {
         Logger.warn("Driver not found for userId: ", { userId });
-        return Result.failure(new DomainError("Driver not found"));
+        return Result.failure(new DriverNotFoundError(userId));
       }
 
       const driverUser = await this.userRepository.findById(driver.getUserId());
