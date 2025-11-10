@@ -3,3 +3,4 @@ export * from "./CardBody";
 export * from "./CardFooter";
 export * from "./CardHeader";
 export * from "./Card.types";
+export { default } from "./Card";

@@ -13,7 +13,7 @@ import {
 } from "@/features/admin/shared/services/adminApi";
 import type { AppDispatch } from "@/app/store";
 
-type KYCAction = "approve" | "reject";
+type KYCAction = "Approved" | "Rejected" | "Expired";
 
 interface KYCFilters {
   search: string;
@@ -57,7 +57,7 @@ export const useKYCOperations = () => {
           requestId,
           action,
           reason,
-          status: action === "approve" ? "approved" : "rejected",
+          status: action === "Approved" ? "approved" : "rejected",
         }).unwrap();
 
         console.log("KYC action successful:", result.message);

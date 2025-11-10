@@ -1,68 +1,71 @@
 import React from "react";
-import { Card, CardHeader, CardBody, Badge } from "@/shared/components/ui";
-import type { Driver } from "@/features/admin/shared/types";
-
-interface VehicleDetailsProps {
-  driver: Driver;
-}
+import Card from "@/shared/components/ui/Card";
+import { Badge } from "@/shared/components/ui";
+import type { VehicleDetailsProps } from "../../../../shared/types/adminDriverProfile.types";
 
 export const VehicleDetails: React.FC<VehicleDetailsProps> = ({ driver }) => {
   return (
     <Card>
-      <CardHeader
-        title="License Details & Vehicle Eligibility"
-        className="bg-gray-100"
-      />
-      <CardBody className="space-y-4 text-sm">
-        <DetailRow label="License Number" value={driver.licenseNumber} />
-        <DetailRow
-          label="Date of Issue"
-          value={new Date(driver.licenseIssueDate).toLocaleDateString()}
-        />
-        <DetailRow
-          label="Date of Expiry"
-          value={new Date(driver.licenseExpiryDate).toLocaleDateString()}
-        />
+      <Card.Header title="Eligible Vehicle Information" />
+      <Card.Body>
+        <div className="space-y-4">
+          {/* Eligible Body Types */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Preffered Body Types:
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {driver?.eligibleBodyTypes &&
+              driver.eligibleBodyTypes.length > 0 ? (
+                driver.eligibleBodyTypes.map((type, index) => (
+                  <Badge key={index} variant="info">
+                    {type}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-gray-500">
+                  No body types specified
+                </span>
+              )}
+            </div>
+          </div>
 
-        <div>
-          <span className="text-gray-500">Eligible Vehicle Categories :</span>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {driver.eligibleVehicleType.length > 0 ? (
-              driver.eligibleVehicleType.map((type) => (
-                <Badge key={type} variant="outline" size="sm">
-                  {type}
-                </Badge>
-              ))
-            ) : (
-              <span className="font-medium">-</span>
-            )}
+          {/* Eligible Gear Types */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Preffered Gear Types:
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {driver?.eligibleGearTypes &&
+              driver.eligibleGearTypes.length > 0 ? (
+                driver.eligibleGearTypes.map((type, index) => (
+                  <Badge key={index} variant="info">
+                    {type}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-gray-500">
+                  No gear types specified
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* License Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              License Category:
+            </label>
+            <div>
+              {driver?.licenceCategory ? (
+                <Badge variant="success">{driver.licenceCategory}</Badge>
+              ) : (
+                <span className="text-sm text-gray-500">N/A</span>
+              )}
+            </div>
           </div>
         </div>
-
-        <div>
-          <span className="text-gray-500">Eligible Transmission Types :</span>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {driver.eligibleGearType.length > 0 ? (
-              driver.eligibleGearType.map((type) => (
-                <Badge key={type} variant="outline" size="sm">
-                  {type}
-                </Badge>
-              ))
-            ) : (
-              <span className="font-medium">-</span>
-            )}
-          </div>
-        </div>
-      </CardBody>
+      </Card.Body>
     </Card>
   );
 };
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between">
-      <span className="text-gray-500">{label}:</span>
-      <span className="font-medium">{value || "-"}</span>
-    </div>
-  );
-}

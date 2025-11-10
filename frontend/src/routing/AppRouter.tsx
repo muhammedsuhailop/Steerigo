@@ -120,7 +120,7 @@ export const AppRouter: React.FC = () => {
       />
 
       <Route
-        path="/admin/drivers/:id"
+        path="/admin/drivers/:driverId"
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <DriverProfileViewPage />

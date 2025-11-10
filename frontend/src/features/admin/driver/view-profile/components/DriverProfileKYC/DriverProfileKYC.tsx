@@ -1,134 +1,129 @@
-import React, { useState } from "react";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Button,
-  Badge,
-  Modal,
-} from "@/shared/components/ui";
-import type { DriverProfileKYCProps } from "@/features/admin/shared/types";
-import { EXTERNAL_API } from "@/shared";
-import { LuMaximize2 } from "react-icons/lu";
+import React from "react";
+import Card from "@/shared/components/ui/Card";
+import { Badge } from "@/shared/components/ui";
+import type {
+  DriverProfileKYCProps,
+  KYCStatus,
+  KYCVerificationStatus,
+} from "../../../../shared/types/adminDriverProfile.types";
 
-export const DriverProfileKYC: React.FC<DriverProfileKYCProps> = ({
-  items,
-  onAction,
+interface ExtendedDriverProfileKYCProps extends DriverProfileKYCProps {
+  overallStatus?: KYCStatus;
+}
+
+export const DriverProfileKYC: React.FC<ExtendedDriverProfileKYCProps> = ({
+  kycDocuments,
+  overallStatus,
 }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState("");
-
-  const openModal = (url: string) => {
-    setModalImage(url);
-    setModalOpen(true);
+  const getBadgeVariant = (status: KYCVerificationStatus | KYCStatus) => {
+    const variantMap = {
+      Approved: "success" as const,
+      InReview: "warning" as const,
+      Rejected: "danger" as const,
+      Expired: "secondary" as const,
+    };
+    return (variantMap as any)[status] || "secondary";
   };
-  const closeModal = () => setModalOpen(false);
+
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return "N/A";
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (!kycDocuments || kycDocuments.length === 0) {
+    return (
+      <Card>
+        <Card.Header title="KYC Documents" />
+        <Card.Body>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-700 font-medium">
+              Total Documents: <span className="font-semibold">0</span>
+            </p>
+            {overallStatus && (
+              <Badge variant={getBadgeVariant(overallStatus)}>
+                {overallStatus}
+              </Badge>
+            )}
+          </div>
+
+          <p className="text-gray-500 text-center py-8">
+            No KYC documents found
+          </p>
+        </Card.Body>
+      </Card>
+    );
+  }
 
   return (
-    <>
-      <h2 className="text-xl font-semibold mb-4">License & ID Verification</h2>
-      {/* grid with 2 columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {items.map((item) => {
-          const badgeVariant = item.isVerified ? "success" : "warning";
-          const badgeText = item.isVerified ? "Verified" : "Not Verified";
+    <Card>
+      <Card.Header title="KYC Documents" />
+      <Card.Body>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-700 font-medium">
+            Total Documents:{" "}
+            <span className="font-semibold">{kycDocuments.length}</span>
+          </p>
+          {overallStatus && (
+            <Badge variant={getBadgeVariant(overallStatus)}>
+              {overallStatus}
+            </Badge>
+          )}
+        </div>
 
-          return (
-            <Card key={item.id} className="border rounded-lg">
-              <CardHeader
-                title={item.documentType}
-                badge={{ text: badgeText, variant: badgeVariant }}
-                className="bg-gray-100"
-              />
-              <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                {/* Left  */}
-                <div className="space-y-2 text-sm">
-                  <Detail label="Document No" value={item.documentNumber} />
-                  <Detail
-                    label="Date of Issue "
-                    value={new Date(item.issueDate).toLocaleDateString()}
-                  />
-                  <Detail
-                    label="Date of Expiry "
-                    value={new Date(item.expiryDate).toLocaleDateString()}
-                  />
-                  <Detail
-                    label="Submitted On"
-                    value={new Date(item.submittedAt).toLocaleString()}
-                  />
-                </div>
+        {/* Document Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {kycDocuments.map((doc) => (
+            <Card key={doc.id} className="border border-gray-200">
+              <Card.Header className="bg-gray-50" title={doc.docType}>
+                <Badge variant={getBadgeVariant(doc.verificationStatus)}>
+                  {doc.verificationStatus}
+                </Badge>
+              </Card.Header>
 
-                {/* Right */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <ImagePreview url={item.urlFront} onEnlarge={openModal} />
-                    <ImagePreview url={item.urlBack} onEnlarge={openModal} />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="danger"
-                      onClick={() => onAction(item.id, "Reject")}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      variant="success"
-                      onClick={() => onAction(item.id, "Approve")}
-                    >
-                      Approve
-                    </Button>
-                  </div>
+              <Card.Body>
+                <div className="space-y-2">
+                  <Detail
+                    label="Document Number"
+                    value={doc.docNumber ?? "N/A"}
+                  />
+                  <Detail
+                    label="Issue Date"
+                    value={formatDate(doc.issueDate)}
+                  />
+                  <Detail
+                    label="Expiry Date"
+                    value={formatDate(doc.expiryDate)}
+                  />
+                  <Detail
+                    label="Uploaded On"
+                    value={formatDate(doc.createdAt)}
+                  />
+                  {doc.isExpired && (
+                    <div className="pt-2">
+                      <Badge variant="danger">Expired</Badge>
+                    </div>
+                  )}
                 </div>
-              </CardBody>
+              </Card.Body>
             </Card>
-          );
-        })}
-      </div>
-
-      <Modal isOpen={modalOpen} onClose={closeModal} size="xl">
-        <img
-          src={modalImage}
-          alt="Full view"
-          className="w-full h-auto object-contain"
-        />
-      </Modal>
-    </>
+          ))}
+        </div>
+      </Card.Body>
+    </Card>
   );
 };
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <span className="text-gray-500">{label}:</span>{" "}
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
-interface ImagePreviewProps {
-  url: string;
-  onEnlarge: (url: string) => void;
-}
-
-function ImagePreview({ url, onEnlarge }: ImagePreviewProps) {
-  const cloudUrl = url.startsWith("http")
-    ? url
-    : `${EXTERNAL_API.CLOUDINARY_BASE}/${url}`;
-
-  return (
-    <div className="relative w-full pb-[75%] overflow-hidden rounded-lg bg-gray-50">
-      <img
-        src={cloudUrl}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <button
-        onClick={() => onEnlarge(cloudUrl)}
-        className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded"
-      >
-        <LuMaximize2 />
-      </button>
+    <div className="flex justify-between items-start py-1 text-sm">
+      <span className="font-medium text-gray-600">{label}:</span>
+      <span className="text-gray-900 text-right">{value}</span>
     </div>
   );
 }
