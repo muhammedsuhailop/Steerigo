@@ -4,10 +4,16 @@ import { UserProfileController } from "@interface/controllers/user/UserProfileCo
 import { authMiddleware } from "@interface/middleware/auth/AuthMiddleware";
 import { TYPES } from "@shared/constants/DITypes";
 import { getUserProfileValidation } from "@interface/validators";
+import { handleValidationErrors } from "@interface/middleware/errorHandler";
+import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 
 const router = Router();
 const userProfileController = container.get<UserProfileController>(
   TYPES.UserProfileController
+);
+
+const driverSearchController = container.get<DriverSearchController>(
+  TYPES.DriverSearchController
 );
 
 router.use(authMiddleware);
@@ -28,6 +34,14 @@ router.post(
   getUserProfileValidation,
   (req: Request, res: Response) =>
     userProfileController.registerAsDriver(req, res)
+);
+
+//POST /api/drivers/search/nearby
+router.post(
+  "/search/nearby",
+  handleValidationErrors,
+  (req: Request, res: Response) =>
+    driverSearchController.findNearbyDrivers(req, res)
 );
 
 export { router as userRoutes };

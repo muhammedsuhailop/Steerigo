@@ -8,7 +8,8 @@ import { SignupController } from "@interface/controllers/auth/SignupController";
 import { PasswordController } from "@interface/controllers/auth/PasswordController";
 import { OtpController } from "@interface/controllers/auth/OtpController";
 import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
-import { AuthUserController } from "@interface/controllers/auth/AuthUserController"; 
+import { AuthUserController } from "@interface/controllers/auth/AuthUserController";
+import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 
 export class ControllerFactory {
   static register(container: Container): void {
@@ -19,5 +20,6 @@ export class ControllerFactory {
     container.bind(TYPES.PasswordController).to(PasswordController);
     container.bind(TYPES.OtpController).to(OtpController);
     container.bind(TYPES.SocialAuthController).to(SocialAuthController);
+    container.bind(TYPES.DriverSearchController).to(DriverSearchController);
   }
 }

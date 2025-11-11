@@ -67,6 +67,7 @@ export const TYPES = {
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
   UpdateUserProfileUseCase: Symbol.for("UpdateUserProfileUseCase"),
   RegisterUserAsDriverUseCase: Symbol.for("RegisterUserAsDriverUseCase"),
+  FindNearbyDriversUseCase: Symbol.for("FindNearbyDriversUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
@@ -96,4 +97,5 @@ export const TYPES = {
   UserProfileController: Symbol.for("UserProfileController"),
   FileController: Symbol.for("FileController"),
   DriverAvailabilityController: Symbol.for("DriverAvailabilityController"),
+  DriverSearchController: Symbol.for("DriverSearchController"),
 };

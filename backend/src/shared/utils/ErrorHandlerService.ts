@@ -25,6 +25,13 @@ import {
   UserNotFoundError,
 } from "@domain/errors/DriverProfileErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
+import {
+  DriverFilterNotMatchError,
+  InvalidLocationError,
+  InvalidSearchDateError,
+  LocationServiceError,
+  NoDriversAvailableError,
+} from "@domain/errors/DriverSearchErrors";
 
 export enum ErrorType {
   CLIENT_ERROR = "CLIENT_ERROR",
@@ -169,6 +176,62 @@ export class ErrorHandlerService {
         type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
+      },
+    ],
+
+    // Search Drivers Errors
+    [
+      NoDriversAvailableError.name,
+      {
+        statusCode: 404,
+        message: "No drivers available in the specified area",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      InvalidLocationError.name,
+      {
+        statusCode: 400,
+        message: "Invalid location coordinates provided",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      InvalidSearchDateError.name,
+      {
+        statusCode: 400,
+        message: "Invalid search date provided",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      DriverFilterNotMatchError.name,
+      {
+        statusCode: 404,
+        message: "No drivers match your vehicle type preferences",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    [
+      LocationServiceError.name,
+      {
+        statusCode: 503,
+        message: "Location service temporarily unavailable",
+        type: ErrorType.NETWORK_ERROR,
+        shouldLog: true,
+        isOperational: false,
       },
     ],
 
