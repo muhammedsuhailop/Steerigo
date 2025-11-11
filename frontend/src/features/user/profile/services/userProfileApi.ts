@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import type {
+  ProfilePictureData,
   UserProfile,
   UserProfileFormData,
   UserStats,
@@ -57,15 +58,15 @@ export const userProfileApi = createApi({
 
     // Upload profile picture
     uploadProfilePicture: builder.mutation<
-      ApiResponse<{ profilePictureUrl: string }>,
+      ApiResponse<ProfilePictureData>,
       { userId: string; file: File }
     >({
       query: ({ userId, file }) => {
         const formData = new FormData();
-        formData.append("profilePicture", file);
+        formData.append("file", file);
 
         return {
-          url: `/user/profile/${userId}/upload-picture`,
+          url: `/file/profile-picture/${userId}`,
           method: "POST",
           data: formData,
           headers: {
@@ -92,7 +93,7 @@ export const userProfileApi = createApi({
         { type: "UserStats", id: userId },
       ],
     }),
-    
+
     // Register as driver
     registerAsDriver: builder.mutation<
       { success: boolean; message: string; data: UserProfile },
