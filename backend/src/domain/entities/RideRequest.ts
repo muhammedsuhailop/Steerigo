@@ -16,7 +16,7 @@ export class RideRequest {
     private status: RideRequestStatus,
     private readonly pickupETA: string,
     private readonly createdAt: Date = new Date(),
-    private readonly updatedAt: Date = new Date()
+    private updatedAt: Date = new Date()
   ) {}
 
   static create(
@@ -34,6 +34,7 @@ export class RideRequest {
     if (fare < 0) {
       throw new Error("Fare cannot be negative");
     }
+
     return new RideRequest(
       id,
       requestId,
@@ -81,6 +82,7 @@ export class RideRequest {
     );
   }
 
+  // Getters
   getId(): string {
     return this.id;
   }
@@ -133,7 +135,45 @@ export class RideRequest {
     return this.updatedAt;
   }
 
+  // Status check methods
   isPending(): boolean {
     return this.status === RideRequestStatus.PENDING;
+  }
+
+  isAccepted(): boolean {
+    return this.status === RideRequestStatus.ACCEPTED;
+  }
+
+  isRejected(): boolean {
+    return this.status === RideRequestStatus.REJECTED;
+  }
+
+  isExpired(): boolean {
+    return this.status === RideRequestStatus.EXPIRED;
+  }
+
+  // Status mutation methods
+  markAsAccepted(): void {
+    if (!this.isPending()) {
+      throw new Error("Only pending requests can be accepted");
+    }
+    this.status = RideRequestStatus.ACCEPTED;
+    this.updatedAt = new Date();
+  }
+
+  markAsRejected(): void {
+    if (!this.isPending()) {
+      throw new Error("Only pending requests can be rejected");
+    }
+    this.status = RideRequestStatus.REJECTED;
+    this.updatedAt = new Date();
+  }
+
+  markAsExpired(): void {
+    if (!this.isPending()) {
+      throw new Error("Only pending requests can be expired");
+    }
+    this.status = RideRequestStatus.EXPIRED;
+    this.updatedAt = new Date();
   }
 }

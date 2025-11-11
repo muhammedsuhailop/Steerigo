@@ -1,4 +1,4 @@
-import { injectable, inject } from "inversify";
+import { injectable } from "inversify";
 import {
   DriverAvailabilityRepository,
   DriverAvailabilityFilters,
@@ -146,6 +146,7 @@ export class DriverAvailabilityRepositoryImpl
       .exec();
 
     const data = docs.map(DriverAvailabilityMapper.toDomain);
+
     return { data, total, page, limit, totalPages };
   }
 
@@ -230,7 +231,6 @@ export class DriverAvailabilityRepositoryImpl
     options?: QueryOptions
   ): Promise<DriverAvailability[]> {
     const now = new Date();
-
     try {
       const query = DriverAvailabilityModel.find({
         status: AvailabilityStatus.AVAILABLE,
@@ -253,7 +253,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  // Location-based queries
+  // Enhanced location-based queries with Haversine distance calculation
   async findNearLocation(
     latitude: number,
     longitude: number,
@@ -261,25 +261,47 @@ export class DriverAvailabilityRepositoryImpl
     options?: QueryOptions
   ): Promise<DriverAvailability[]> {
     try {
-      const radiusInRadians = radiusKm / 6371; // Earth's radius in km
+      const now = new Date();
 
+      // Get all available drivers with their locations
       const query = DriverAvailabilityModel.find({
-        "currentLocation.latitude": {
-          $gte: latitude - (radiusInRadians * 180) / Math.PI,
-          $lte: latitude + (radiusInRadians * 180) / Math.PI,
-        },
-        "currentLocation.longitude": {
-          $gte: longitude - (radiusInRadians * 180) / Math.PI,
-          $lte: longitude + (radiusInRadians * 180) / Math.PI,
-        },
         status: AvailabilityStatus.AVAILABLE,
+        availableFrom: { $lte: now },
+        availableTill: { $gte: now },
       });
 
-      if (options?.limit) query.limit(options.limit);
-      if (options?.offset) query.skip(options.offset);
-
       const docs = await query.exec();
-      return docs.map(DriverAvailabilityMapper.toDomain);
+
+      // Calculate distances using Haversine formula and filter
+      const driversWithDistance = docs
+        .map((doc) => {
+          const distance = this.calculateHaversineDistance(
+            latitude,
+            longitude,
+            doc.currentLocation.latitude,
+            doc.currentLocation.longitude
+          );
+
+          return {
+            doc,
+            distance,
+          };
+        })
+        .filter((item) => item.distance <= radiusKm)
+        .sort((a, b) => a.distance - b.distance);
+
+      // Apply pagination if needed
+      let filteredDrivers = driversWithDistance;
+      if (options?.offset) {
+        filteredDrivers = filteredDrivers.slice(options.offset);
+      }
+      if (options?.limit) {
+        filteredDrivers = filteredDrivers.slice(0, options.limit);
+      }
+
+      return filteredDrivers.map((item) =>
+        DriverAvailabilityMapper.toDomain(item.doc)
+      );
     } catch (error) {
       Logger.error("Error finding drivers near location", {
         latitude,
@@ -289,6 +311,101 @@ export class DriverAvailabilityRepositoryImpl
       });
       throw error;
     }
+  }
+
+  async findNearbyAvailableDrivers(
+    latitude: number,
+    longitude: number,
+    radiusKm: number = 10,
+    limit: number = 20
+  ): Promise<
+    Array<{
+      driver: DriverAvailability;
+      distanceKm: number;
+      etaMinutes: number;
+    }>
+  > {
+    try {
+      const now = new Date();
+
+      // Get all available drivers
+      const docs = await DriverAvailabilityModel.find({
+        status: AvailabilityStatus.AVAILABLE,
+        availableFrom: { $lte: now },
+        availableTill: { $gte: now },
+      }).exec();
+
+      Logger.info("Found drivers to check proximity", { count: docs.length });
+
+      // Calculate distances and ETAs
+      const driversWithDetails = docs
+        .map((doc) => {
+          const distanceKm = this.calculateHaversineDistance(
+            latitude,
+            longitude,
+            doc.currentLocation.latitude,
+            doc.currentLocation.longitude
+          );
+
+          // Calculate ETA (assuming average speed of 30 km/h )
+          const etaMinutes = Math.ceil((distanceKm / 30) * 60);
+
+          return {
+            driver: DriverAvailabilityMapper.toDomain(doc),
+            distanceKm: Math.round(distanceKm * 100) / 100, // Round to 2 decimal places
+            etaMinutes,
+          };
+        })
+        .filter((item) => item.distanceKm <= radiusKm)
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+        .slice(0, limit);
+
+      Logger.info("Filtered nearby available drivers", {
+        totalFound: docs.length,
+        withinRadius: driversWithDetails.length,
+        radiusKm,
+      });
+
+      return driversWithDetails;
+    } catch (error) {
+      Logger.error("Error finding nearby available drivers", {
+        latitude,
+        longitude,
+        radiusKm,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  // Calculate distance between two coordinates using Haversine formula
+  // Returns distance in kilometers
+
+  private calculateHaversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   // Time-based queries
@@ -317,6 +434,7 @@ export class DriverAvailabilityRepositoryImpl
       Logger.info("Cleaned up expired availability records", {
         deletedCount: result.deletedCount,
       });
+
       return result.deletedCount || 0;
     } catch (error) {
       Logger.error("Error cleaning up expired records", { error });
@@ -344,6 +462,7 @@ export class DriverAvailabilityRepositoryImpl
       Logger.info("Deactivated expired availabilities", {
         modifiedCount: result.modifiedCount,
       });
+
       return result.modifiedCount || 0;
     } catch (error) {
       Logger.error("Error deactivating expired availabilities", { error });
@@ -395,6 +514,7 @@ export class DriverAvailabilityRepositoryImpl
         const location = updates.getCurrentLocation();
         updateData.currentLocation = location.getCoordinates();
       }
+
       updateData.updatedAt = new Date();
 
       const result = await DriverAvailabilityModel.updateMany(mongoFilter, {
@@ -405,6 +525,7 @@ export class DriverAvailabilityRepositoryImpl
         matchedCount: result.matchedCount,
         modifiedCount: result.modifiedCount,
       });
+
       return result.modifiedCount || 0;
     } catch (error) {
       Logger.error("Error updating multiple driver availabilities", {
@@ -423,6 +544,7 @@ export class DriverAvailabilityRepositoryImpl
       Logger.info("Multiple driver availabilities deleted", {
         count: result.deletedCount,
       });
+
       return result.deletedCount ?? 0;
     } catch (error) {
       Logger.error("Error deleting multiple driver availabilities", {
@@ -458,19 +580,8 @@ export class DriverAvailabilityRepositoryImpl
       query.availableFrom = dateFilter;
     }
 
-    if (filters.nearLocation) {
-      const { latitude, longitude, radiusKm = 10 } = filters.nearLocation;
-      const radiusInRadians = radiusKm / 6371;
-
-      query["currentLocation.latitude"] = {
-        $gte: latitude - (radiusInRadians * 180) / Math.PI,
-        $lte: latitude + (radiusInRadians * 180) / Math.PI,
-      };
-      query["currentLocation.longitude"] = {
-        $gte: longitude - (radiusInRadians * 180) / Math.PI,
-        $lte: longitude + (radiusInRadians * 180) / Math.PI,
-      };
-    }
+    // Note: nearLocation filtering is handled separately in findNearLocation
+    // because it requires Haversine distance calculation
 
     return query;
   }

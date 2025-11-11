@@ -18,16 +18,19 @@ export interface DriverAvailabilityFilters
 
 export interface DriverAvailabilityRepository
   extends BaseRepository<DriverAvailability, string> {
+  // Driver-specific queries
   findByDriverId(driverId: string): Promise<DriverAvailability | null>;
   findActiveByDriverId(driverId: string): Promise<DriverAvailability | null>;
   existsActiveForDriver(driverId: string): Promise<boolean>;
 
+  // Status-based queries
   findByStatus(
     status: AvailabilityStatus,
     options?: QueryOptions
   ): Promise<DriverAvailability[]>;
   findAvailableDrivers(options?: QueryOptions): Promise<DriverAvailability[]>;
 
+  // Location-based queries
   findNearLocation(
     latitude: number,
     longitude: number,
@@ -35,10 +38,25 @@ export interface DriverAvailabilityRepository
     options?: QueryOptions
   ): Promise<DriverAvailability[]>;
 
+  findNearbyAvailableDrivers(
+    latitude: number,
+    longitude: number,
+    radiusKm?: number,
+    limit?: number
+  ): Promise<
+    Array<{
+      driver: DriverAvailability;
+      distanceKm: number;
+      etaMinutes: number;
+    }>
+  >;
+
+  // Time-based queries
   findExpiredAvailabilities(): Promise<DriverAvailability[]>;
   cleanupExpiredRecords(): Promise<number>;
-
   deactivateExpiredAvailabilities(): Promise<number>;
+
+  // Schedule management
   findConflictingSchedule(
     driverId: string,
     availableFrom: Date,
