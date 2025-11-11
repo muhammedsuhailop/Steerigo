@@ -49,7 +49,7 @@ export class InvalidSearchDateRangeError extends ValidationError {
 
 export class InvalidTimeRequiredError extends ValidationError {
   constructor(
-    message: string = "Time required must be between 1 and 240 minutes"
+    message: string = "Time required must be between 1 and 480 minutes"
   ) {
     super(message, "timeRequired");
     this.name = "InvalidTimeRequiredError";
