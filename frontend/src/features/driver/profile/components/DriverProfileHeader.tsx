@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Badge, BadgeProps } from "@/shared/components/ui/Badge";
 import { Card } from "@/shared/components/ui/Card";
 import { FaEdit, FaCalendarAlt } from "react-icons/fa";
-import { MdVerified, MdEmail, MdPhone, MdUploadFile } from "react-icons/md";
+import { MdVerified, MdEmail, MdPhone } from "react-icons/md";
+import { Alert } from "@/shared/components/ui/Alert";
 import { ProfilePictureUpload } from "@/shared/components/ProfilePictureUpload/ProfilePictureUpload";
 import { useUploadDriverProfilePictureMutation } from "../services/driverProfileApi";
 import type { DriverProfileHeaderProps } from "../types/driverProfile.types";
@@ -17,12 +18,19 @@ export const DriverProfileHeader: React.FC<DriverProfileHeaderProps> = ({
   const [profileImageUrl, setProfileImageUrl] = useState<string>(
     profile?.profileImageUrl || ""
   );
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const userId = useMemo(() => {
     try {
       const u = JSON.parse(localStorage.getItem("user") || "null");
-      return u?.id || "";
+      const extractedId = u?.id || "";
+      if (!extractedId) {
+        console.warn("User ID not found in localStorage");
+      }
+      return extractedId;
     } catch {
+      console.error("Error parsing user from localStorage");
       return "";
     }
   }, []);
@@ -30,6 +38,20 @@ export const DriverProfileHeader: React.FC<DriverProfileHeaderProps> = ({
   useEffect(() => {
     setProfileImageUrl(profile?.profileImageUrl || "");
   }, [profile?.profileImageUrl]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const formatMemberSince = useMemo(
     () => (dateString?: string) => {
@@ -71,51 +93,88 @@ export const DriverProfileHeader: React.FC<DriverProfileHeaderProps> = ({
 
   const kycStatus = profile?.kyc?.overallStatus || "Pending";
 
-  const handleProfilePictureUpload = async (file: File) => {
-    try {
-      const resp = await uploadDriverProfilePicture({ userId, file }).unwrap();
-      if (resp?.data?.profilePictureUrl) {
-        setProfileImageUrl(resp.data.profilePictureUrl);
+  const handleProfilePictureUpload = useCallback(
+    async (file: File) => {
+      if (!userId) {
+        throw new Error("User ID not found. Please logout and login again.");
       }
-    } catch (err: any) {
-      throw new Error(err?.data?.message || "Failed to upload profile picture");
-    }
-  };
+
+      try {
+        console.log("Starting driver profile picture upload...", {
+          userId,
+          fileName: file.name,
+        });
+
+        const resp = await uploadDriverProfilePicture({
+          userId,
+          file,
+        }).unwrap();
+
+        console.log("Upload response:", resp);
+
+        let pictureUrl: string | null = null;
+
+        if (resp?.data?.profilePictureUrl) {
+          pictureUrl = resp.data.profilePictureUrl;
+        }
+
+        if (pictureUrl) {
+          console.log("Setting profile image URL:", pictureUrl);
+          setProfileImageUrl(pictureUrl);
+        } else {
+          console.error("No picture URL in response:", resp);
+          throw new Error(
+            resp?.message || "Failed to get image URL from server"
+          );
+        }
+      } catch (err: any) {
+        console.error("Profile picture upload error:", err);
+        const errorMessage =
+          err?.data?.message ||
+          err?.message ||
+          "Failed to upload profile picture";
+        throw new Error(errorMessage);
+      }
+    },
+    [userId, uploadDriverProfilePicture]
+  );
+
+  const handleUploadSuccess = useCallback(() => {
+    setSuccess("Profile picture updated successfully");
+  }, []);
+
+  const handleUploadError = useCallback((errorMessage: string) => {
+    setError(errorMessage);
+  }, []);
 
   return (
     <Card className="bg-white rounded-xl shadow-sm p-5 sm:p-6">
+      <div className="mb-3 space-y-2">
+        {error && (
+          <Alert type="error" message={error} onClose={() => setError(null)} />
+        )}
+        {success && (
+          <Alert
+            type="success"
+            message={success}
+            onClose={() => setSuccess(null)}
+          />
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
         {/* Avatar */}
         <div className="sm:col-span-2 flex justify-center sm:justify-start">
-          <div className="relative group w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-1 ring-slate-100 shadow-sm transform transition-transform duration-200 hover:scale-105">
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-1 ring-slate-100 shadow-sm transform transition-transform duration-200 hover:scale-105">
             <ProfilePictureUpload
               currentImage={profileImageUrl}
               initials={getInitials(profile?.name || "")}
               onUpload={handleProfilePictureUpload}
               isLoading={isUploadingProfilePic}
               disabled={isLoading}
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={handleUploadError}
             />
-
-            {/* overlay for upload affordance */}
-            <div
-              className="absolute inset-0 bg-black/25 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center rounded-full"
-              aria-hidden
-            >
-              <div className="flex flex-col items-center gap-1">
-                {isUploadingProfilePic ? (
-                  <div className="animate-spin text-white">
-                    <MdUploadFile size={18} />
-                  </div>
-                ) : (
-                  <>
-                    <FaEdit className="text-white" />
-                    <span className="text-xs text-white drop-shadow">
-                      Change
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
