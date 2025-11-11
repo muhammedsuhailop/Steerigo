@@ -1,37 +1,6 @@
+import { DomainError } from "@domain/errors";
 import { ApiResponse } from "@shared/types/Common";
-import { Logger } from "@shared/utils/Logger";
-import {
-  DomainError,
-  InvalidCredentialsError,
-  UserAlreadyExistsError,
-  MaxOtpAttemptsError,
-  OtpExpiredError,
-  RefreshTokenExpiredError,
-  RefreshTokenRevokedError,
-  AccountStatusError,
-  MobileAlreadyExistsError,
-} from "@domain/errors";
-import {
-  DriverAlreadyAvailableError,
-  InvalidStatusTransitionError,
-  DriverAvailabilityNotFoundError,
-  DriverProfileNotFoundError,
-  ExpiredAvailabilityError,
-} from "@domain/errors/DriverAvailabilityErrors";
-import {
-  DriverAccessDeniedError,
-  KycDocumentNotFoundError,
-  ResourceNotFoundError,
-  UserNotFoundError,
-} from "@domain/errors/DriverProfileErrors";
-import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import {
-  DriverFilterNotMatchError,
-  InvalidLocationError,
-  InvalidSearchDateError,
-  LocationServiceError,
-  NoDriversAvailableError,
-} from "@domain/errors/DriverSearchErrors";
+import { Logger } from "./Logger";
 
 export enum ErrorType {
   CLIENT_ERROR = "CLIENT_ERROR",
@@ -55,133 +24,111 @@ export interface ErrorDetails {
 
 export class ErrorHandlerService {
   private static readonly ERROR_MAP = new Map<string, ErrorDetails>([
-    // Authentication Errors
+    // ===== VALIDATION ERRORS (400) =====
     [
-      InvalidCredentialsError.name,
-      {
-        statusCode: 401,
-        message: "Invalid credentials provided",
-        type: ErrorType.AUTHENTICATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // Client Errors - Duplicates/Conflicts
-    [
-      UserAlreadyExistsError.name,
-      {
-        statusCode: 409,
-        message: "An account with this email already exists",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      MobileAlreadyExistsError.name,
-      {
-        statusCode: 409,
-        message: "This mobile number is already registered",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      AccountStatusError.name,
-      {
-        statusCode: 403,
-        message: "Account access restricted",
-        type: ErrorType.AUTHORIZATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      MaxOtpAttemptsError.name,
-      {
-        statusCode: 429,
-        message: "Maximum OTP attempts exceeded. Please request a new OTP",
-        type: ErrorType.CLIENT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      OtpExpiredError.name,
+      "ValidationError",
       {
         statusCode: 400,
-        message: "OTP has expired. Please request a new one",
-        type: ErrorType.CLIENT_ERROR,
+        message: "Validation failed",
+        type: ErrorType.VALIDATION_ERROR,
         shouldLog: false,
         isOperational: true,
       },
     ],
-
-    // Driver Availability Errors
     [
-      DriverAlreadyAvailableError.name,
-      {
-        statusCode: 409,
-        message: "Driver already has an active availability record",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      InvalidStatusTransitionError.name,
-      {
-        statusCode: 409,
-        message: "Invalid status transition",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      DriverAvailabilityNotFoundError.name,
-      {
-        statusCode: 404,
-        message: "Driver availability not found",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      DriverProfileNotFoundError.name,
-      {
-        statusCode: 404,
-        message: "Driver profile not found",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    [
-      ExpiredAvailabilityError.name,
+      "InvalidLatitudeError",
       {
         statusCode: 400,
-        message: "Availability period has expired",
-        type: ErrorType.CLIENT_ERROR,
+        message: "Latitude must be a number between -90 and 90",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidLongitudeError",
+      {
+        statusCode: 400,
+        message: "Longitude must be a number between -180 and 180",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidSearchDateFormatError",
+      {
+        statusCode: 400,
+        message: "Search date must be a valid date",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidSearchDateRangeError",
+      {
+        statusCode: 400,
+        message: "Search date must be in the future or current",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidTimeRequiredError",
+      {
+        statusCode: 400,
+        message: "Time required must be between 1 and 240 minutes",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidRadiusError",
+      {
+        statusCode: 400,
+        message: "Radius must be between 0 and 50 km",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidLimitError",
+      {
+        statusCode: 400,
+        message: "Limit must be between 1 and 100",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidGearTypeError",
+      {
+        statusCode: 400,
+        message: "Invalid gear type provided",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidBodyTypeError",
+      {
+        statusCode: 400,
+        message: "Invalid body type provided",
+        type: ErrorType.VALIDATION_ERROR,
         shouldLog: false,
         isOperational: true,
       },
     ],
 
-    // Search Drivers Errors
+    // ===== SEARCH ERRORS (400/404) =====
     [
-      NoDriversAvailableError.name,
+      "NoDriversAvailableError",
       {
         statusCode: 404,
         message: "No drivers available in the specified area",
@@ -190,9 +137,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      InvalidLocationError.name,
+      "InvalidLocationError",
       {
         statusCode: 400,
         message: "Invalid location coordinates provided",
@@ -201,9 +147,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      InvalidSearchDateError.name,
+      "InvalidSearchDateError",
       {
         statusCode: 400,
         message: "Invalid search date provided",
@@ -212,9 +157,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      DriverFilterNotMatchError.name,
+      "DriverFilterNotMatchError",
       {
         statusCode: 404,
         message: "No drivers match your vehicle type preferences",
@@ -223,9 +167,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      LocationServiceError.name,
+      "LocationServiceError",
       {
         statusCode: 503,
         message: "Location service temporarily unavailable",
@@ -235,22 +178,83 @@ export class ErrorHandlerService {
       },
     ],
 
-    //Driver
+    // ===== AUTHENTICATION ERRORS (401) =====
     [
-      DriverNotFoundError.name,
+      "InvalidCredentialsError",
       {
-        statusCode: 404,
-        message:
-          "Driver profile not found. Please complete driver registration first",
-        type: ErrorType.NOT_FOUND_ERROR,
+        statusCode: 401,
+        message: "Invalid credentials provided",
+        type: ErrorType.AUTHENTICATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "RefreshTokenExpiredError",
+      {
+        statusCode: 401,
+        message: "Session expired. Please log in again",
+        type: ErrorType.AUTHENTICATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "RefreshTokenRevokedError",
+      {
+        statusCode: 401,
+        message: "Session expired. Please log in again",
+        type: ErrorType.AUTHENTICATION_ERROR,
         shouldLog: false,
         isOperational: true,
       },
     ],
 
-    // Profile-Related Errors
+    // ===== CONFLICT ERRORS (409) =====
     [
-      UserNotFoundError.name,
+      "UserAlreadyExistsError",
+      {
+        statusCode: 409,
+        message: "An account with this email already exists",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "MobileAlreadyExistsError",
+      {
+        statusCode: 409,
+        message: "This mobile number is already registered",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "DriverAlreadyAvailableError",
+      {
+        statusCode: 409,
+        message: "Driver already has an active availability record",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidStatusTransitionError",
+      {
+        statusCode: 409,
+        message: "Invalid status transition",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    // ===== NOT FOUND ERRORS (404) =====
+    [
+      "UserNotFoundError",
       {
         statusCode: 404,
         message: "User not found. Please check the user ID and try again",
@@ -259,9 +263,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      DriverProfileNotFoundError.name,
+      "DriverNotFoundError",
       {
         statusCode: 404,
         message:
@@ -271,9 +274,29 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      KycDocumentNotFoundError.name,
+      "DriverProfileNotFoundError",
+      {
+        statusCode: 404,
+        message:
+          "Driver profile not found. Please complete driver registration first",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "DriverAvailabilityNotFoundError",
+      {
+        statusCode: 404,
+        message: "Driver availability not found",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "KycDocumentNotFoundError",
       {
         statusCode: 404,
         message: "KYC document not found. Please upload the required documents",
@@ -282,9 +305,8 @@ export class ErrorHandlerService {
         isOperational: true,
       },
     ],
-
     [
-      ResourceNotFoundError.name,
+      "ResourceNotFoundError",
       {
         statusCode: 404,
         message: "Requested resource not found",
@@ -294,8 +316,19 @@ export class ErrorHandlerService {
       },
     ],
 
+    // ===== AUTHORIZATION ERRORS (403) =====
     [
-      DriverAccessDeniedError.name,
+      "AccountStatusError",
+      {
+        statusCode: 403,
+        message: "Account access restricted",
+        type: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "DriverAccessDeniedError",
       {
         statusCode: 403,
         message: "Access denied. Your driver account is not active",
@@ -305,24 +338,33 @@ export class ErrorHandlerService {
       },
     ],
 
-    // Token Errors
+    // ===== RATE LIMITING (429) =====
     [
-      RefreshTokenExpiredError.name,
+      "MaxOtpAttemptsError",
       {
-        statusCode: 401,
-        message: "Session expired. Please log in again",
-        type: ErrorType.AUTHENTICATION_ERROR,
+        statusCode: 429,
+        message: "Maximum OTP attempts exceeded. Please request a new OTP",
+        type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
       },
     ],
-
     [
-      RefreshTokenRevokedError.name,
+      "OtpExpiredError",
       {
-        statusCode: 401,
-        message: "Session expired. Please log in again",
-        type: ErrorType.AUTHENTICATION_ERROR,
+        statusCode: 400,
+        message: "OTP has expired. Please request a new one",
+        type: ErrorType.CLIENT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "ExpiredAvailabilityError",
+      {
+        statusCode: 400,
+        message: "Availability period has expired",
+        type: ErrorType.CLIENT_ERROR,
         shouldLog: false,
         isOperational: true,
       },
@@ -343,7 +385,8 @@ export class ErrorHandlerService {
     [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
   };
 
-  // Main error handling method - converts any error to standardized API response
+  //  Main error handling method - converts any error to standardized API response
+  //  Preserves original error message from domain errors
   static handleError(
     error: any,
     context?: string
@@ -354,12 +397,19 @@ export class ErrorHandlerService {
       this.logError(error, context, errorDetails);
     }
 
+    // Use original error message from domain errors
+    const message =
+      error instanceof DomainError && error.message
+        ? error.message
+        : errorDetails.message;
+
     // Create standardized response
     const response: ApiResponse = {
       success: false,
-      message: errorDetails.message,
+      message,
       ...(process.env.NODE_ENV === "development" && {
-        error: error.message, // Include technical details only in development
+        error: error.message,
+        field: (error as any).field, // Include field info for validation errors
       }),
     };
 
@@ -381,11 +431,13 @@ export class ErrorHandlerService {
     return { response, statusCode: 400 };
   }
 
-  // Classify error type and determine appropriate response
+  //  Classify error type and determine appropriate response
+
   private static classifyError(error: any): ErrorDetails {
-    // Check if it's a known domain error
-    if (this.ERROR_MAP.has(error.constructor.name)) {
-      return this.ERROR_MAP.get(error.constructor.name)!;
+    // Check if it's a known domain error by exact name match
+    const errorName = error.constructor.name;
+    if (this.ERROR_MAP.has(errorName)) {
+      return this.ERROR_MAP.get(errorName)!;
     }
 
     // Handle MongoDB duplicate key errors
@@ -437,7 +489,6 @@ export class ErrorHandlerService {
     };
   }
 
-  // Check if error is database-related
   private static isDatabaseError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
     const code = String(error.code ?? "").toLowerCase();
@@ -459,7 +510,6 @@ export class ErrorHandlerService {
     );
   }
 
-  // Detect MongoDB duplicate key errors
   private static isMongoDbDuplicateKeyError(error: any): boolean {
     return (
       error.code === 11000 ||
@@ -468,11 +518,9 @@ export class ErrorHandlerService {
     );
   }
 
-  // Handle duplicate key errors gracefully
   private static handleDuplicateKeyError(error: any): ErrorDetails {
     const message = error.message?.toLowerCase() || "";
 
-    // Check which field is duplicated
     if (message.includes("mobile")) {
       return {
         statusCode: 409,
@@ -500,7 +548,6 @@ export class ErrorHandlerService {
     }
   }
 
-  // Check if error is network/SSL related
   private static isNetworkError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
 
@@ -520,7 +567,6 @@ export class ErrorHandlerService {
     return networkPatterns.some((pattern) => message.includes(pattern));
   }
 
-  // Check if error is validation-related
   private static isValidationError(error: any): boolean {
     const message = error.message?.toLowerCase() || "";
     return (
@@ -529,7 +575,6 @@ export class ErrorHandlerService {
     );
   }
 
-  // Log error with appropriate level
   private static logError(
     error: any,
     context?: string,
@@ -553,7 +598,6 @@ export class ErrorHandlerService {
     }
   }
 
-  // Check if error is operational (expected) vs programming error
   static isOperationalError(error: any): boolean {
     if (error instanceof DomainError) return true;
 

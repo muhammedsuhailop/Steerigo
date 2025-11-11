@@ -13,7 +13,6 @@ import { DriverRepository } from "@application/repositories/DriverRepository";
 import { UserRepository } from "@application/repositories/UserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
-import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 
 export interface DriverSearchResult {
   driverId: string;
@@ -40,15 +39,17 @@ export class FindNearbyDriversUseCase {
       Logger.info("Find nearby drivers use case started", {
         latitude: requestDto.latitude,
         longitude: requestDto.longitude,
+        searchDate: requestDto.searchDate,
         radiusKm: requestDto.radiusKm,
         timeRequired: requestDto.timeRequired,
         gearType: requestDto.gearType,
         bodyType: requestDto.bodyType,
       });
 
-      const validationErrors = requestDto.validate();
-      if (validationErrors.length > 0) {
-        return Result.failure(new DomainError(validationErrors.join(", ")));
+      try {
+        requestDto.validate();
+      } catch (validationError) {
+        throw validationError;
       }
 
       const searchCriteria = SearchCriteria.create(
@@ -67,7 +68,9 @@ export class FindNearbyDriversUseCase {
         await this.driverAvailabilityRepository.findNearbyAvailableDrivers(
           searchCriteria.getLatitude(),
           searchCriteria.getLongitude(),
+          searchCriteria.getSearchDate(),
           searchCriteria.getRadiusKm(),
+          searchCriteria.getTimeRequiredMinutes(),
           requestDto.limit
         );
 
@@ -269,6 +272,14 @@ export class FindNearbyDriversUseCase {
 
       return Result.success(responseDto);
     } catch (error) {
+      if (error instanceof DomainError) {
+        Logger.warn("Find nearby drivers validation failed", {
+          errorName: error.constructor.name,
+          message: error.message,
+        });
+        return Result.failure(error);
+      }
+
       Logger.error("Find nearby drivers use case failed", { error });
       return Result.failure(error as Error);
     }

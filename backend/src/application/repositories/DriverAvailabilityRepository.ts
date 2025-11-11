@@ -41,7 +41,9 @@ export interface DriverAvailabilityRepository
   findNearbyAvailableDrivers(
     latitude: number,
     longitude: number,
+    searchDate: Date,
     radiusKm?: number,
+    timeRequiredMinutes?: number,
     limit?: number
   ): Promise<
     Array<{

@@ -69,9 +69,9 @@ export class DriverAvailability {
       throw new Error("Available till time must be after available from time");
     }
 
-    const maxDuration = 48 * 60 * 60 * 1000; // 24 hours
+    const maxDuration = 168 * 60 * 60 * 1000; // 24 hours
     if (availableTill.getTime() - availableFrom.getTime() > maxDuration) {
-      throw new Error("Availability duration cannot exceed 48 hours");
+      throw new Error("Availability duration cannot exceed 7 days");
     }
   }
 

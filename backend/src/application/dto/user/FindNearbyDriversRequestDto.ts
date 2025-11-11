@@ -1,3 +1,15 @@
+import {
+  InvalidLatitudeError,
+  InvalidLongitudeError,
+  InvalidSearchDateFormatError,
+  InvalidSearchDateRangeError,
+  InvalidTimeRequiredError,
+  InvalidRadiusError,
+  InvalidLimitError,
+  InvalidGearTypeError,
+  InvalidBodyTypeError,
+} from "@domain/errors/ValidationErrors";
+
 export class FindNearbyDriversRequestDto {
   constructor(
     readonly latitude: number,
@@ -10,40 +22,42 @@ export class FindNearbyDriversRequestDto {
     readonly limit: number = 20
   ) {}
 
-  validate(): string[] {
-    const errors: string[] = [];
-
+  validate(): void {
+    // Validate latitude
     if (
       typeof this.latitude !== "number" ||
       this.latitude < -90 ||
       this.latitude > 90
     ) {
-      errors.push("Latitude must be a number between -90 and 90");
+      throw new InvalidLatitudeError();
     }
 
+    // Validate longitude
     if (
       typeof this.longitude !== "number" ||
       this.longitude < -180 ||
       this.longitude > 180
     ) {
-      errors.push("Longitude must be a number between -180 and 180");
+      throw new InvalidLongitudeError();
     }
 
+    // Validate search date format
     if (!this.searchDate || !(this.searchDate instanceof Date)) {
-      errors.push("Search date must be a valid date");
+      throw new InvalidSearchDateFormatError();
     }
 
-    // Check if search date is in future (allow 5 minutes past)
+    // Validate search date is in future (allow 5 minutes past for clock skew)
     if (this.searchDate < new Date(Date.now() - 5 * 60 * 1000)) {
-      errors.push("Search date must be in the future or current");
+      throw new InvalidSearchDateRangeError();
     }
 
+    // Validate time required
     if (
       typeof this.timeRequired !== "number" ||
       this.timeRequired <= 0 ||
-      this.timeRequired > 240
+      this.timeRequired > 480
     ) {
-      errors.push("Time required must be between 1 and 240 minutes");
+      throw new InvalidTimeRequiredError();
     }
 
     // Validate radius
@@ -52,41 +66,33 @@ export class FindNearbyDriversRequestDto {
       this.radiusKm <= 0 ||
       this.radiusKm > 50
     ) {
-      errors.push("Radius must be between 0 and 50 km");
+      throw new InvalidRadiusError();
     }
 
     // Validate limit
     if (typeof this.limit !== "number" || this.limit <= 0 || this.limit > 100) {
-      errors.push("Limit must be between 1 and 100");
+      throw new InvalidLimitError();
     }
 
-    // Validate gear type
+    // Validate gear type 
     if (this.gearType && this.gearType.trim()) {
-      const validGearTypes = ["Manual", "Automatic", "CVT", "Electric"];
+      const validGearTypes = ["Manual", "Automatic"];
       if (!validGearTypes.includes(this.gearType)) {
-        errors.push(
+        throw new InvalidGearTypeError(
           `Invalid gear type: ${this.gearType}. Valid options: ${validGearTypes.join(", ")}`
         );
       }
     }
 
+    // Validate body type
     if (this.bodyType && this.bodyType.trim()) {
-      const validBodyTypes = [
-        "Sedan",
-        "SUV",
-        "Hatchback",
-        "MPV",
-        "Coupe",
-        "Convertible",
-      ];
+      const validBodyTypes = ["Sedan", "SUV", "Hatchback"];
       if (!validBodyTypes.includes(this.bodyType)) {
-        errors.push(
+        throw new InvalidBodyTypeError(
           `Invalid body type: ${this.bodyType}. Valid options: ${validBodyTypes.join(", ")}`
         );
       }
     }
-
-    return errors;
   }
 
   // Calculate search window based on timeRequired

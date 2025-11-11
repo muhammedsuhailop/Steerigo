@@ -267,10 +267,12 @@ const DriverScheduling: React.FC = () => {
       showAlert("Schedule updated successfully!", "success");
     } catch (error: any) {
       console.error("Failed to update schedule:", error);
-      showAlert(
-        error?.data?.message || "Failed to update schedule. Please try again.",
-        "danger"
-      );
+      const serverError =
+        error?.data?.errors?.[0]?.message ||
+        error?.data?.message ||
+        "Failed to update schedule. Please try again.";
+
+      showAlert(serverError, "danger");
     }
   };
 

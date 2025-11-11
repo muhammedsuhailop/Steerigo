@@ -316,7 +316,9 @@ export class DriverAvailabilityRepositoryImpl
   async findNearbyAvailableDrivers(
     latitude: number,
     longitude: number,
+    searchDate?: Date,
     radiusKm: number = 10,
+    timeRequiredMinutes: number = 60,
     limit: number = 20
   ): Promise<
     Array<{
@@ -326,13 +328,25 @@ export class DriverAvailabilityRepositoryImpl
     }>
   > {
     try {
-      const now = new Date();
+      const rideStart = searchDate ? new Date(searchDate) : new Date();
+      const rideEnd = new Date(
+        rideStart.getTime() + timeRequiredMinutes * 60 * 1000
+      );
+
+      Logger.debug("findNearbyAvailableDrivers called", {
+        latitude,
+        longitude,
+        radiusKm,
+        limit,
+        searchDate: rideStart.toISOString(),
+        timeRequiredMinutes,
+      });
 
       // Get all available drivers
       const docs = await DriverAvailabilityModel.find({
         status: AvailabilityStatus.AVAILABLE,
-        availableFrom: { $lte: now },
-        availableTill: { $gte: now },
+        availableFrom: { $lte: rideStart },
+        availableTill: { $gte: rideEnd },
       }).exec();
 
       Logger.info("Found drivers to check proximity", { count: docs.length });
@@ -579,9 +593,6 @@ export class DriverAvailabilityRepositoryImpl
       }
       query.availableFrom = dateFilter;
     }
-
-    // Note: nearLocation filtering is handled separately in findNearLocation
-    // because it requires Haversine distance calculation
 
     return query;
   }

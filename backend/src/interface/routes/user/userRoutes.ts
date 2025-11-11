@@ -6,6 +6,8 @@ import { TYPES } from "@shared/constants/DITypes";
 import { getUserProfileValidation } from "@interface/validators";
 import { handleValidationErrors } from "@interface/middleware/errorHandler";
 import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
+import { validateSchema } from "@interface/middleware";
+import { findNearbyDriversSearchSchema } from "@interface/validators/user/driverSearchValidators";
 
 const router = Router();
 const userProfileController = container.get<UserProfileController>(
@@ -39,6 +41,7 @@ router.post(
 //POST /api/drivers/search/nearby
 router.post(
   "/search/nearby",
+  validateSchema(findNearbyDriversSearchSchema),
   handleValidationErrors,
   (req: Request, res: Response) =>
     driverSearchController.findNearbyDrivers(req, res)

@@ -46,6 +46,7 @@ export class DriverSearchController {
         userId,
         latitude,
         longitude,
+        searchDate,
         radiusKm,
         timeRequired,
         gearType,

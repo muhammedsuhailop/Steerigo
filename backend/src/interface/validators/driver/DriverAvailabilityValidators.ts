@@ -47,11 +47,11 @@ export const scheduleAvailabilitySchema = z.object({
       (data) => {
         const availableFrom = new Date(data.availableFrom);
         const availableTill = new Date(data.availableTill);
-        const maxDuration = 24 * 60 * 60 * 1000; // 24 hours
+        const maxDuration = 168 * 60 * 60 * 1000; //7 days
         return availableTill.getTime() - availableFrom.getTime() <= maxDuration;
       },
       {
-        message: "Availability duration cannot exceed 24 hours",
+        message: "Availability duration cannot exceed 7 Days",
         path: ["availableTill"],
       }
     ),
