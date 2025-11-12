@@ -8,6 +8,7 @@ import { RegisterUserAsDriverUseCase } from "@application/use-cases/user/Registe
 
 // User Controllers
 import { UserProfileController } from "@interface/controllers/user/UserProfileController";
+import { FindNearbyDriversUseCase } from "@application/use-cases/user/FindNearbyDriversUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -19,6 +20,8 @@ export class UserFactory {
     container
       .bind(TYPES.RegisterUserAsDriverUseCase)
       .to(RegisterUserAsDriverUseCase);
+
+    container.bind(TYPES.FindNearbyDriversUseCase).to(FindNearbyDriversUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

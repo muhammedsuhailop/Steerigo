@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  IoArrowBack,
-  IoInformationCircleOutline,
-  IoSaveOutline,
-} from "react-icons/io5";
+import { IoArrowBack, IoInformationCircleOutline } from "react-icons/io5";
+import { FaLocationArrow } from "react-icons/fa";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import LocationPicker from "../components/LocationPicker";
 import ScheduleForm from "../components/ScheduleForm";
 import StatusToggle from "../components/StatusToggle";
+import StatusCard from "../components/StatusCard";
 import { Alert } from "@/shared/components/ui/Alert";
 import {
   useUpdateLocationMutation,
@@ -43,11 +42,21 @@ const DriverScheduling: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
+
+  const [driverId, setDriverId] = useState<string | null>(null);
+
   const [currentStatus, setCurrentStatus] = useState<
     "Available" | "Busy" | "Offline"
   >("Offline");
 
-  // Alert state
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+
+  const [availabilityData, setAvailabilityData] = useState<{
+    availableFrom?: string;
+    availableTill?: string;
+    currentLocation?: Location;
+  }>({});
+
   const [alert, setAlert] = useState<AlertState>({
     show: false,
     message: "",
@@ -63,10 +72,12 @@ const DriverScheduling: React.FC = () => {
     useUpdateStatusMutation();
 
   // Get driver status to preload availability
-  const { data: driverStatusResponse, isLoading: isStatusLoading1 } =
-    useGetDriverStatusQuery();
-
-  const driverId = useSelector(selectDriverId);
+  const {
+    data: driverStatusResponse,
+    isLoading: isStatusLoading1,
+    isError: isDriverStatusError,
+    error: driverStatusError,
+  } = useGetDriverStatusQuery();
 
   // Initialize form data from API response or use defaults
   const [defaultFormData, setDefaultFormData] = useState<{
@@ -80,12 +91,12 @@ const DriverScheduling: React.FC = () => {
   });
 
   const [hasAvailability, setHasAvailability] = useState(false);
+  const didRedirectRef = useRef(false);
 
   // Load availability data on component mount
   useEffect(() => {
     if (driverStatusResponse?.data) {
       const availability = driverStatusResponse.data;
-      console.log("-------availability", availability);
 
       // Store availability in Redux
       dispatch(setAvailability(availability));
@@ -97,6 +108,16 @@ const DriverScheduling: React.FC = () => {
         location: availability.currentLocation,
       });
 
+      // Set DriverId locally
+      setDriverId(availability.driverId);
+
+      // Availability data for StatusCard
+      setAvailabilityData({
+        availableFrom: availability.availableFrom,
+        availableTill: availability.availableTill,
+        currentLocation: availability.currentLocation,
+      });
+
       // Set current status
       setCurrentStatus(
         availability.availabilityStatus as "Available" | "Busy" | "Offline"
@@ -106,11 +127,25 @@ const DriverScheduling: React.FC = () => {
       setSelectedLocation(availability.currentLocation);
 
       setHasAvailability(true);
-    } else if (driverStatusResponse?.type === "NOT_FOUND_ERROR") {
-      // Handle 404 - Use default values
-      setHasAvailability(false);
+      return; // done
+    }
 
-      // Set default to current time + 30 min and +8 hours
+    // Errors
+    const err: any = driverStatusError;
+
+    const serverMessage =
+      err?.data?.message || driverStatusResponse?.message || err?.message || "";
+
+    const is404ByStatus = Boolean(
+      err && (err.status === 404 || err?.data?.status === 404)
+    );
+
+    if (is404ByStatus) {
+      // Clear availability state
+      setHasAvailability(false);
+      setAvailabilityData({});
+
+      // Default times (now +30min to +8h)
       const now = new Date();
       now.setMinutes(now.getMinutes() + 30);
       const endTime = new Date(now);
@@ -122,13 +157,28 @@ const DriverScheduling: React.FC = () => {
         location: null,
       });
 
-      // Show info message
-      showAlert(
-        "No existing availability found. Please create a new schedule.",
-        "success"
-      );
+      // show the server-provided message if present
+      const friendly =
+        serverMessage ||
+        "No existing availability found. Please create a new schedule.";
+      showAlert(friendly, "success");
+      return;
     }
-  }, [driverStatusResponse, dispatch]);
+
+    if (isDriverStatusError) {
+      const msg =
+        err?.data?.message ||
+        err?.message ||
+        "Unable to load availability. Please try again later.";
+      showAlert(msg, "danger");
+    }
+  }, [
+    driverStatusResponse,
+    driverStatusError,
+    isDriverStatusError,
+    dispatch,
+    navigate,
+  ]);
 
   const showAlert = (message: string, type: "success" | "danger") => {
     setAlert({ show: true, message, type });
@@ -166,6 +216,12 @@ const DriverScheduling: React.FC = () => {
         driverId: driverId || "",
         currentLocation: selectedLocation,
       }).unwrap();
+
+      setAvailabilityData((prev) => ({
+        ...prev,
+        currentLocation: selectedLocation,
+      }));
+
       showAlert("Location saved successfully!", "success");
     } catch (error: any) {
       console.error("Failed to save location:", error);
@@ -198,13 +254,25 @@ const DriverScheduling: React.FC = () => {
       setHasAvailability(true);
       setDefaultFormData(data);
 
+      // Update availability data for StatusCard
+      setAvailabilityData({
+        availableFrom: data.availableFrom.toISOString(),
+        availableTill: data.availableTill.toISOString(),
+        currentLocation: data.location,
+      });
+
+      // Hide form after successful submission
+      setShowScheduleForm(false);
+
       showAlert("Schedule updated successfully!", "success");
     } catch (error: any) {
       console.error("Failed to update schedule:", error);
-      showAlert(
-        error?.data?.message || "Failed to update schedule. Please try again.",
-        "danger"
-      );
+      const serverError =
+        error?.data?.errors?.[0]?.message ||
+        error?.data?.message ||
+        "Failed to update schedule. Please try again.";
+
+      showAlert(serverError, "danger");
     }
   };
 
@@ -279,6 +347,14 @@ const DriverScheduling: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column - Status and Form */}
             <div className="space-y-6">
+              {/* Status Card */}
+              <StatusCard
+                availabilityStatus={currentStatus}
+                availableFrom={availabilityData.availableFrom}
+                availableTill={availabilityData.availableTill}
+                currentLocation={availabilityData.currentLocation}
+              />
+
               {/* Status Toggle */}
               <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
                 <StatusToggle
@@ -307,26 +383,56 @@ const DriverScheduling: React.FC = () => {
                 </div>
               )}
 
+              {/*Button to toggle schedule form */}
+              <button
+                onClick={() => setShowScheduleForm((prev) => !prev)}
+                className={`
+                  w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-base transition-all duration-200 ease-out
+                  ${
+                    showScheduleForm
+                      ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                      : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  } active:scale-[0.98] focus:outline-none `}
+              >
+                {showScheduleForm ? (
+                  <>
+                    <FaCaretUp size={18} />
+                    <span>Hide Schedule Form</span>
+                  </>
+                ) : (
+                  <>
+                    <FaCaretDown size={18} />
+                    <span>Add / Update Schedule</span>
+                  </>
+                )}
+              </button>
+
               {/* Schedule Form */}
-              <ScheduleForm
-                onSubmit={handleScheduleSubmit}
-                selectedLocation={selectedLocation}
-                isLoading={isScheduleLoading}
-                defaultAvailableFrom={
-                  defaultFormData.availableFrom || undefined
-                }
-                defaultAvailableTill={
-                  defaultFormData.availableTill || undefined
-                }
-                defaultLocation={defaultFormData.location || undefined}
-              />
+              {showScheduleForm && (
+                <ScheduleForm
+                  onSubmit={handleScheduleSubmit}
+                  selectedLocation={selectedLocation}
+                  isLoading={isScheduleLoading}
+                  defaultAvailableFrom={
+                    defaultFormData.availableFrom || undefined
+                  }
+                  defaultAvailableTill={
+                    defaultFormData.availableTill || undefined
+                  }
+                  defaultLocation={defaultFormData.location || undefined}
+                />
+              )}
             </div>
 
             {/* Right Column - Location Picker */}
             <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
               <LocationPicker
                 onLocationSelect={handleLocationSelect}
-                initialLocation={selectedLocation || undefined}
+                initialLocation={
+                  availabilityData.currentLocation ||
+                  selectedLocation ||
+                  undefined
+                }
               />
 
               {/* Save Location Button */}
@@ -340,8 +446,8 @@ const DriverScheduling: React.FC = () => {
                       : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                   }`}
                 >
-                  <IoSaveOutline size={20} />
-                  {isLocationSaving ? "Saving..." : "Save Location"}
+                  <FaLocationArrow size={20} />
+                  {isLocationSaving ? "Saving..." : "Update Location"}
                 </button>
               </div>
             </div>

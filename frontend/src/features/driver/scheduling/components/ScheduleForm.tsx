@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { ScheduleFormData, Location } from "../types/scheduling.types";
 
 interface ScheduleFormProps {
@@ -18,7 +18,35 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
   defaultAvailableTill,
   defaultLocation,
 }) => {
-  const [formData, setFormData] = useState({
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  // convert Date -> "YYYY-MM-DDTHH:MM" in LOCAL time (for datetime-local)
+  const toDateTimeLocal = (date: Date | null) => {
+    if (!date) return "";
+    const y = date.getFullYear();
+    const m = pad(date.getMonth() + 1);
+    const d = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    return `${y}-${m}-${d}T${hh}:${mm}`;
+  };
+
+  // parse "YYYY-MM-DDTHH:MM" into a Date in LOCAL time
+  const parseDateTimeLocal = (value: string) => {
+    if (!value) return null;
+    const [datePart, timePart] = value.split("T");
+    if (!datePart || !timePart) return null;
+    const [y, m, d] = datePart.split("-").map(Number);
+    const [hh, mm] = timePart.split(":").map(Number);
+    return new Date(y, m - 1, d, hh ?? 0, mm ?? 0, 0, 0);
+  };
+
+  // initial form data
+  const [formData, setFormData] = useState<{
+    availableFrom: Date | null;
+    availableTill: Date | null;
+    location: Location | null;
+  }>({
     availableFrom: defaultAvailableFrom || null,
     availableTill: defaultAvailableTill || null,
     location: defaultLocation || null,
@@ -29,6 +57,16 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     availableTill?: string;
     location?: string;
   }>({});
+
+  // sync defaults when parent props change
+  useEffect(() => {
+    setFormData({
+      availableFrom: defaultAvailableFrom || null,
+      availableTill: defaultAvailableTill || null,
+      location: defaultLocation || null,
+    });
+    setErrors({});
+  }, [defaultAvailableFrom, defaultAvailableTill, defaultLocation]);
 
   // Update form data when selected location changes
   useEffect(() => {
@@ -71,7 +109,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit(formData as ScheduleFormData);
     }
   };
 
@@ -79,7 +117,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     field: "availableFrom" | "availableTill",
     value: string
   ) => {
-    const date = value ? new Date(value) : null;
+    const date = parseDateTimeLocal(value);
     setFormData((prev) => ({
       ...prev,
       [field]: date,
@@ -96,24 +134,19 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
   const getMinDateTime = () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 5);
-    return now.toISOString().slice(0, 16);
+    return toDateTimeLocal(now);
   };
 
   const getMinEndDateTime = () => {
     if (formData.availableFrom) {
       const minEnd = new Date(formData.availableFrom);
       minEnd.setMinutes(minEnd.getMinutes() + 30);
-      return minEnd.toISOString().slice(0, 16);
+      return toDateTimeLocal(minEnd);
     }
-
     return getMinDateTime();
   };
 
-  // Convert Date to input datetime-local format
-  const dateToInputFormat = (date: Date | null) => {
-    if (!date) return "";
-    return date.toISOString().slice(0, 16);
-  };
+  const dateToInputFormat = (date: Date | null) => toDateTimeLocal(date);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">

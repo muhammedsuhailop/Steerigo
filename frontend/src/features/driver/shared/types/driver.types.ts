@@ -1,3 +1,5 @@
+import { AvailabilityData } from "../../scheduling/types/scheduling.types";
+
 export interface Driver {
   id: string;
   driverId: string;
@@ -202,7 +204,7 @@ export interface DriverState {
   stats: DriverStats | null;
   pendingRequests: RideRequest[];
   currentRide: CurrentRide | null;
-  availability: Availability | null;
+  availabilityStatus: AvailabilityData | null;
   isLoading: boolean;
   error: string | null;
   isOnline: boolean;

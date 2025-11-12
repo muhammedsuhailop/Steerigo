@@ -70,3 +70,10 @@ export interface ProfileStatsProps {
   stats: UserStats;
   isLoading?: boolean;
 }
+
+export interface ProfilePictureData {
+  profilePictureUrl: string;
+  publicId: string;
+  userId: string;
+  updatedAt: string;
+}

@@ -26,10 +26,12 @@ import type {
   Driver,
   DriverStats as DriverStatsType,
 } from "../../shared/types/driver.types";
+import { useNavigate } from "react-router-dom";
 
 const DriverDashboard: React.FC = () => {
   const { user } = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -81,7 +83,7 @@ const DriverDashboard: React.FC = () => {
 
   // Get driver from dashboard or profile
   const driver: Driver | undefined =
-    dashboard?.driver || driverProfileData?.data;
+    dashboard?.driver ;
 
   // Get stats from dashboard
   const stats: DriverStatsType | undefined = dashboard?.stats;
@@ -121,12 +123,27 @@ const DriverDashboard: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    if (dashboardError) {
+      const errorStatus = (dashboardError as any)?.status;
+      const errorMessage = (dashboardError as any)?.data?.message || "";
+
+      // Check for 404
+      if (
+        errorStatus === 404 ||
+        errorMessage.toLowerCase().includes("driver not found")
+      ) {
+        console.warn("Driver not found - redirecting to registration");
+        navigate("/driver/register", { replace: true });
+      }
+    }
+  }, [dashboardError, navigate]);
+
   // Dispatch driver ID to store
   useEffect(() => {
     if (driver?.driverId) {
       dispatch(setDriverId(driver.driverId));
     }
-    console.log("driverId", driver?.driverId);
   }, [driver?.driverId, dispatch]);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);

@@ -53,9 +53,9 @@ export class ScheduleAvailabilityRequestDto {
       errors.push("Available till time must be after available from time");
     }
 
-    const maxDuration = 24 * 60 * 60 * 1000; // 24 hours
+    const maxDuration = 168 * 60 * 60 * 1000; // 7 days
     if (availableTill.getTime() - availableFrom.getTime() > maxDuration) {
-      errors.push("Availability duration cannot exceed 24 hours");
+      errors.push("Availability duration cannot exceed 7 days");
     }
 
     return errors;

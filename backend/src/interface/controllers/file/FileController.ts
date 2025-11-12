@@ -9,6 +9,8 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { FILE_MESSAGES } from "@shared/constants/FileConstants";
+import { UpdateProfilePictureDto } from "@application/dto/file/UpdateProfilePictureDto";
+import { UpdateProfilePictureUseCase } from "@application/use-cases/file/UpdateProfilePictureUseCase";
 
 type MulterRequest = Request & { file?: Express.Multer.File };
 
@@ -17,7 +19,9 @@ export class FileController {
   constructor(
     @inject(TYPES.UploadFileUseCase) private uploadUc: UploadFileUseCase,
     @inject(TYPES.GetUserFilesUseCase) private listUc: GetUserFilesUseCase,
-    @inject(TYPES.DeleteFileUseCase) private deleteUc: DeleteFileUseCase
+    @inject(TYPES.DeleteFileUseCase) private deleteUc: DeleteFileUseCase,
+    @inject(TYPES.UpdateProfilePictureUseCase)
+    private updateProfileUc: UpdateProfilePictureUseCase
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -150,6 +154,70 @@ export class FileController {
       }
     } catch (error) {
       Logger.error("Delete file controller error", { error });
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: FILE_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  async updateProfilePicture(req: MulterRequest, res: Response): Promise<void> {
+    try {
+      const currentUserId = this.getUserId(req);
+      if (!currentUserId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: FILE_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      const { userId } = req.params;
+
+      const currentUser = (req as any).user;
+      if (userId !== currentUserId && currentUser?.role !== "Admin") {
+        res.status(HttpStatusCodes.FORBIDDEN).json({
+          success: false,
+          message: FILE_MESSAGES.PROFILE_PICTURE_UPDATE_FORBIDDEN,
+        });
+        return;
+      }
+
+      if (!req.file) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: FILE_MESSAGES.FILE_REQUIRED,
+        });
+        return;
+      }
+
+      const dto = new UpdateProfilePictureDto({
+        userId,
+        file: req.file,
+      });
+
+      const result = await this.updateProfileUc.execute(dto);
+
+      if (result.isSuccessful()) {
+        const data = result.getValue();
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: FILE_MESSAGES.PROFILE_PICTURE_UPDATE_SUCCESS,
+          data: {
+            profilePictureUrl: data.profilePictureUrl,
+            publicId: data.publicId,
+            userId: data.userId,
+            updatedAt: data.updatedAt,
+          },
+        });
+      } else {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: result.getError().message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Update profile picture controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: FILE_MESSAGES.INTERNAL_SERVER_ERROR,

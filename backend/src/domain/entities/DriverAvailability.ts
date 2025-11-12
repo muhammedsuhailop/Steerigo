@@ -69,9 +69,9 @@ export class DriverAvailability {
       throw new Error("Available till time must be after available from time");
     }
 
-    const maxDuration = 24 * 60 * 60 * 1000; // 24 hours
+    const maxDuration = 168 * 60 * 60 * 1000; // 24 hours
     if (availableTill.getTime() - availableFrom.getTime() > maxDuration) {
-      throw new Error("Availability duration cannot exceed 24 hours");
+      throw new Error("Availability duration cannot exceed 7 days");
     }
   }
 
@@ -123,10 +123,6 @@ export class DriverAvailability {
   }
 
   updateLocation(newLocation: Location): void {
-    if (this.currentLocation.equals(newLocation)) {
-      throw new Error("Location is already up to date");
-    }
-
     this.currentLocation = newLocation;
     this.updatedAt = new Date();
   }

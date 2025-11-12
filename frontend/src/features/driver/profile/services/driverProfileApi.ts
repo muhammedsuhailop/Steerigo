@@ -7,6 +7,7 @@ import type {
   KYCDocument,
   LicenseInfo,
   KYCPayload,
+  ProfilePictureData,
 } from "../types/driverProfile.types";
 
 interface ApiResponse<T> {
@@ -48,6 +49,28 @@ export const driverProfileApi = createApi({
       invalidatesTags: ["DriverProfile"],
     }),
 
+    uploadDriverProfilePicture: builder.mutation<
+      ApiResponse<ProfilePictureData>,
+      { userId: string; file: File }
+    >({
+      query: ({ userId, file }) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        return {
+          url: `/file/profile-picture/${userId}`,
+          method: "POST",
+          data: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        };
+      },
+      invalidatesTags: (result, error, { userId }) => [
+        { type: "DriverProfile", id: userId },
+      ],
+    }),
+
     // Add KYC Document
     addKYCDocument: builder.mutation<KYCDocument, KYCPayload>({
       query: (payload) => ({
@@ -65,5 +88,6 @@ export const driverProfileApi = createApi({
 export const {
   useGetDriverProfileQuery,
   useUpdateDriverProfileMutation,
+  useUploadDriverProfilePictureMutation,
   useAddKYCDocumentMutation,
 } = driverProfileApi;

@@ -125,3 +125,10 @@ export interface ImageModalState {
   imageType: "Front" | "Back";
   title: string;
 }
+
+export interface ProfilePictureData {
+  profilePictureUrl: string;
+  publicId: string;
+  userId: string;
+  updatedAt: string;
+}

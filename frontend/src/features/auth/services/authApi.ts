@@ -14,6 +14,12 @@ import type {
   UpdatePasswordRequest,
   User,
 } from "../types";
+import { adminApi } from "@/features/admin/shared/services";
+import { driverRegistrationApi } from "@/features/driver/driver-registration";
+import { driverProfileApi } from "@/features/driver/profile/services/driverProfileApi";
+import { schedulingApi } from "@/features/driver/scheduling/services/schedulingApi";
+import { driverApi } from "@/features/driver";
+import { userProfileApi } from "@/features/user";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -194,6 +200,13 @@ export const authApi = createApi({
         } finally {
           // clear client auth state
           dispatch(logoutAction());
+          dispatch(authApi.util.resetApiState());
+          dispatch(adminApi.util.resetApiState());
+          dispatch(driverRegistrationApi.util.resetApiState());
+          dispatch(driverProfileApi.util.resetApiState());
+          dispatch(schedulingApi.util.resetApiState());
+          dispatch(driverApi.util.resetApiState());
+          dispatch(userProfileApi.util.resetApiState());
           clearAuthStorage();
         }
       },

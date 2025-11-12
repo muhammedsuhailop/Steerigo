@@ -60,7 +60,6 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
   const [selectedStatus, setSelectedStatus] =
     useState<DriverStatus>(currentStatus);
 
-  // Sync local state when prop changes
   useEffect(() => {
     setSelectedStatus(currentStatus);
   }, [currentStatus]);
@@ -86,19 +85,7 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-semibold text-gray-900">
-          Current Status
-        </h3>
-
-        {activeOption && (
-          <div
-            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-full border-2 transition-all
-              ${activeOption.activeBg} ${activeOption.activeBorder} ${activeOption.activeText}`}
-          >
-            <span className={activeOption.iconColor}>{activeOption.icon}</span>
-            <span className="text-sm font-semibold">{activeOption.label}</span>
-          </div>
-        )}
+        <h3 className="text-base font-semibold text-gray-900">Change Status</h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
