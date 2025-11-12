@@ -7,6 +7,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { ApiResponse } from "@shared/types/Common";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { USER_MESSAGES } from "@shared/constants/UserMessages";
 
 @injectable()
 export class DriverSearchController {
@@ -26,7 +27,7 @@ export class DriverSearchController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "Unauthorized: User not authenticated",
+          message: USER_MESSAGES.DRIVER_SEARCH.UNAUTHORIZED,
         } as ApiResponse);
         return;
       }
@@ -56,7 +57,7 @@ export class DriverSearchController {
       const dto = new FindNearbyDriversRequestDto(
         latitude,
         longitude,
-        new Date(searchDate),
+        searchDate ? new Date(searchDate) : new Date(),
         timeRequired,
         radiusKm || 10,
         gearType || "",
@@ -68,10 +69,14 @@ export class DriverSearchController {
 
       if (result.isSuccessful()) {
         const responseData = result.getValue();
+        const count = responseData.drivers.length;
 
         res.status(HttpStatusCodes.OK).json({
           success: true,
-          message: `Found ${responseData.drivers.length} available drivers`,
+          message:
+            count > 0
+              ? USER_MESSAGES.DRIVER_SEARCH.FOUND_DRIVERS(count)
+              : USER_MESSAGES.DRIVER_SEARCH.NO_DRIVERS_FOUND,
           data: {
             drivers: responseData.drivers,
             summary: {
@@ -84,7 +89,7 @@ export class DriverSearchController {
 
         Logger.info("Find nearby drivers request successful", {
           userId,
-          driversFound: responseData.drivers.length,
+          driversFound: count,
         });
       } else {
         const error = result.getError();
@@ -97,7 +102,7 @@ export class DriverSearchController {
 
         Logger.warn("Find nearby drivers request failed", {
           userId,
-          error: error.message,
+          error: error?.message,
         });
       }
     } catch (error) {
