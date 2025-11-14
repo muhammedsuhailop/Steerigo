@@ -10,4 +10,13 @@ export const USER_MESSAGES = {
       "Access denied. You can only register yourself as a driver.",
     INTERNAL_SERVER_ERROR: "Internal server error",
   },
+  DRIVER_SEARCH: {
+    UNAUTHORIZED: "Unauthorized: User not authenticated",
+    INVALID_INPUT: "Invalid search parameters",
+    NO_DRIVERS_FOUND: "No available drivers found for the given criteria",
+    FOUND_DRIVERS: (count: number) => `Found ${count} available drivers`,
+    INTERNAL_SERVER_ERROR:
+      "An internal server error occurred while searching for drivers",
+    SEARCH_FAILED: "Failed to find nearby drivers",
+  },
 } as const;

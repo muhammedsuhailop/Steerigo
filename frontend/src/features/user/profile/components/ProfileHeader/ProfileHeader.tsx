@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FaEdit, FaCar, FaCalendarAlt } from "react-icons/fa";
-import { MdVerified, MdEmail, MdPhone, MdUploadFile } from "react-icons/md";
+import { MdVerified, MdEmail, MdPhone } from "react-icons/md";
 import { Button } from "@/shared/components/ui/Button";
 import { Badge } from "@/shared/components/ui/Badge";
 import { Card } from "@/shared/components/ui/Card";
@@ -34,10 +34,18 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
   const userId = useMemo(() => {
     try {
       const userJson = localStorage.getItem("user");
-      if (!userJson) return "";
+      if (!userJson) {
+        console.warn("No user data in localStorage");
+        return "";
+      }
       const user = JSON.parse(userJson);
-      return user?.id || "";
-    } catch {
+      const extractedId = user?.id || "";
+      if (!extractedId) {
+        console.warn("User ID not found in localStorage");
+      }
+      return extractedId;
+    } catch (err) {
+      console.error("Error parsing user from localStorage:", err);
       return "";
     }
   }, []);
@@ -68,11 +76,27 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
   );
 
   useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
     if (success && onRegistrationSuccess) {
       const timer = setTimeout(async () => {
         try {
           await onRegistrationSuccess();
-        } catch {}
+        } catch (err) {
+          console.error("Error in onRegistrationSuccess:", err);
+        }
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -107,24 +131,59 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
     }
   };
 
-  const handleProfilePictureUpload = async (file: File) => {
-    try {
-      const response = await uploadProfilePicture({
-        userId,
-        file,
-      }).unwrap();
-
-      if (response?.data?.profilePictureUrl) {
-        setProfileImageUrl(response.data.profilePictureUrl);
-        setSuccess("Profile picture updated");
-        setTimeout(() => setSuccess(null), 2200);
-      } else {
-        setError(response?.message || "Failed to upload profile picture");
+  const handleProfilePictureUpload = useCallback(
+    async (file: File) => {
+      if (!userId) {
+        throw new Error("User ID not found. Please logout and login again.");
       }
-    } catch (err: any) {
-      setError(err?.data?.message || "Failed to upload profile picture");
-    }
-  };
+
+      try {
+        console.log("Starting profile picture upload...", {
+          userId,
+          fileName: file.name,
+        });
+
+        const response = await uploadProfilePicture({
+          userId,
+          file,
+        }).unwrap();
+
+        console.log("Upload response:", response);
+
+        let pictureUrl: string | null = null;
+
+        if (response?.data?.profilePictureUrl) {
+          pictureUrl = response.data.profilePictureUrl;
+        }
+
+        if (pictureUrl) {
+          console.log("Setting profile image URL:", pictureUrl);
+          setProfileImageUrl(pictureUrl);
+        } else {
+          console.error("No picture URL in response:", response);
+          throw new Error(
+            response?.message || "Failed to get image URL from server"
+          );
+        }
+      } catch (err: any) {
+        console.error("Profile picture upload error:", err);
+        const errorMessage =
+          err?.data?.message ||
+          err?.message ||
+          "Failed to upload profile picture";
+        throw new Error(errorMessage);
+      }
+    },
+    [userId, uploadProfilePicture]
+  );
+
+  const handleUploadSuccess = useCallback(() => {
+    setSuccess("Profile picture updated successfully");
+  }, []);
+
+  const handleUploadError = useCallback((errorMessage: string) => {
+    setError(errorMessage);
+  }, []);
 
   return (
     <Card className="bg-white rounded-xl shadow-sm p-6 sm:p-8">
@@ -145,32 +204,16 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
         {/* Avatar */}
         <div className="sm:col-span-2 flex justify-center sm:justify-start">
-          <div className="relative group w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden ring-1 ring-slate-100 shadow-sm transform transition-transform duration-200 hover:scale-105">
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden ring-1 ring-slate-100 shadow-sm transform transition-transform duration-200 hover:scale-105">
             <ProfilePictureUpload
               currentImage={profileImageUrl}
               initials={getInitials(profile?.name)}
               onUpload={handleProfilePictureUpload}
               isLoading={isUploadingProfilePic}
               disabled={isLoading || isRegisteringDriver}
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={handleUploadError}
             />
-
-            {/* overlay */}
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center rounded-full">
-              <div className="flex flex-col items-center gap-1">
-                {isUploadingProfilePic ? (
-                  <div className="animate-spin text-white">
-                    <MdUploadFile size={20} />
-                  </div>
-                ) : (
-                  <>
-                    <FaEdit className="text-white" />
-                    <span className="text-xs text-white drop-shadow">
-                      Change
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -197,7 +240,6 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
               </p>
             </div>
 
-            {/* small spacer on mobile */}
             <div className="hidden sm:block sm:flex-1" />
           </div>
 

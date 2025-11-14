@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { MdUploadFile, MdEdit } from "react-icons/md";
 import { Alert } from "@/shared/components/ui/Alert";
 
@@ -9,6 +9,8 @@ interface ProfilePictureUploadProps {
   isLoading?: boolean;
   disabled?: boolean;
   className?: string;
+  onUploadSuccess?: () => void;
+  onUploadError?: (error: string) => void;
 }
 
 export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
@@ -18,11 +20,20 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   isLoading = false,
   disabled = false,
   className = "",
+  onUploadSuccess,
+  onUploadError,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const validateFile = (file: File): boolean => {
     const maxSize = 2 * 1024 * 1024; // 2MB
@@ -46,9 +57,10 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     if (!file) return;
 
     setError(null);
-    setSuccess(null);
+    setIsUploading(true);
 
     if (!validateFile(file)) {
+      setIsUploading(false);
       return;
     }
 
@@ -61,24 +73,41 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
     try {
       await onUpload(file);
-      setSuccess("Profile picture updated successfully");
-      setPreviewUrl(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+
+      if (onUploadSuccess) {
+        onUploadSuccess();
       }
+
+      setTimeout(() => {
+        setPreviewUrl(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }, 500);
     } catch (err: any) {
-      setError(err?.message || "Failed to upload profile picture");
+      console.error("Upload error:", err);
+
+      const errorMessage = err?.message || "Failed to upload profile picture";
+      if (onUploadError) {
+        onUploadError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
+
       setPreviewUrl(null);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleClick = () => {
-    if (!disabled && !isLoading) {
+    if (!disabled && !isLoading && !isUploading) {
       fileInputRef.current?.click();
     }
   };
 
   const displayImage = previewUrl || currentImage;
+  const isUploadingNow = isUploading || isLoading;
 
   return (
     <div className={`flex flex-col items-center gap-3 ${className}`}>
@@ -86,23 +115,32 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         <Alert type="error" message={error} onClose={() => setError(null)} />
       )}
 
-      {success && (
-        <Alert
-          type="success"
-          message={success}
-          onClose={() => setSuccess(null)}
-        />
-      )}
-
       <div
-        className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden cursor-pointer group bg-gray-200"
+        className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-200 ${
+          !isUploadingNow && !disabled ? "cursor-pointer" : "cursor-not-allowed"
+        } group`}
         onClick={handleClick}
+        role="button"
+        tabIndex={!isUploadingNow && !disabled ? 0 : -1}
+        onKeyDown={(e) => {
+          if (
+            (e.key === "Enter" || e.key === " ") &&
+            !isUploadingNow &&
+            !disabled
+          ) {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        aria-label="Upload profile picture"
       >
+        {/* Image or Initials */}
         {displayImage ? (
           <img
             src={displayImage}
             alt="Profile"
             className="w-full h-full object-cover"
+            draggable={false}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600 text-white text-2xl font-semibold">
@@ -110,27 +148,27 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
           </div>
         )}
 
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full overflow-hidden">
-          <div className="flex flex-col items-center text-white gap-1">
-            {isLoading ? (
-              <div className="animate-spin">
-                <MdUploadFile size={24} />
-              </div>
-            ) : (
-              <>
-                <MdEdit size={24} />
-                <span className="text-xs text-gray-900 font-medium drop-shadow-sm">
-                  Change Photo
-                </span>
-              </>
-            )}
+        {/* Overlay on hover  */}
+        {!isUploadingNow && (
+          <div
+            className="absolute inset-0 bg-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full overflow-hidden pointer-events-none"
+            aria-hidden="true"
+          >
+            <div className="flex flex-col items-center text-white gap-1">
+              <MdEdit size={24} />
+              <span className="text-xs text-gray-900 font-medium drop-shadow-sm">
+                Change Photo
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Loading spinner */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        {/* Loading spinner - show only during upload */}
+        {isUploadingNow && (
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full"
+            aria-hidden="true"
+          >
             <div className="animate-spin">
               <MdUploadFile size={24} className="text-white" />
             </div>
@@ -144,7 +182,8 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
-        disabled={isLoading || disabled}
+        disabled={isUploadingNow || disabled}
+        aria-label="Upload profile picture"
       />
     </div>
   );
