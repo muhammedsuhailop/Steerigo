@@ -67,3 +67,18 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* CSS for Custom Markers  */
+.custom-leaflet-marker {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.custom-leaflet-marker:hover {
+  transform: scale(1.1);
+}
+
+.leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
