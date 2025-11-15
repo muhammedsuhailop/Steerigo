@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoArrowBack, IoInformationCircleOutline } from "react-icons/io5";
+import { IoInformationCircleOutline } from "react-icons/io5";
 import { FaLocationArrow } from "react-icons/fa";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import LocationPicker from "../components/LocationPicker";
 import ScheduleForm from "../components/ScheduleForm";
 import StatusToggle from "../components/StatusToggle";
 import StatusCard from "../components/StatusCard";
@@ -25,6 +24,7 @@ import {
   selectDriverId,
   setAvailability,
 } from "../../shared/store/driverSlice";
+import LeafletMarker from "../components/LeafletMarker";
 
 interface AlertState {
   show: boolean;
@@ -426,7 +426,7 @@ const DriverScheduling: React.FC = () => {
 
             {/* Right Column - Location Picker */}
             <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-              <LocationPicker
+              <LeafletMarker
                 onLocationSelect={handleLocationSelect}
                 initialLocation={
                   availabilityData.currentLocation ||
