@@ -14,6 +14,8 @@ import { userProfileReducer } from "@/features/user/profile";
 import { adminApi } from "@/features/admin/shared/services/adminApi";
 import { schedulingApi } from "@/features/driver/scheduling/services/schedulingApi";
 import { driverProfileApi } from "@/features/driver/profile/services/driverProfileApi";
+import { driverSearchApi } from "@/features/user/driver-search/services/driverSearchApi";
+import driverSearchReducer from "@/features/user/driver-search/store/driverSearchSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,8 +32,8 @@ export const store = configureStore({
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
-
     [driverProfileApi.reducerPath]: driverProfileApi.reducer,
+    [driverSearchApi.reducerPath]: driverSearchApi.reducer,
 
     // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
@@ -40,6 +42,7 @@ export const store = configureStore({
     adminDrivers: adminDriverReducer,
     adminKYC: adminKYCReducer,
     userProfile: userProfileReducer,
+    driverSearch: driverSearchReducer,
 
     // Global error handling
     error: errorReducer,
@@ -57,7 +60,8 @@ export const store = configureStore({
       userProfileApi.middleware,
       adminApi.middleware,
       schedulingApi.middleware,
-      driverProfileApi.middleware
+      driverProfileApi.middleware,
+      driverSearchApi.middleware
     ),
   devTools: import.meta.env.DEV,
 });
