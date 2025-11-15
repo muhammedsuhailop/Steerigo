@@ -21,7 +21,7 @@ import DriverScheduling from "@/features/driver/scheduling/pages/DriverSchedulin
 import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailComponent/pages/KYCRequestDetailPage";
 import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
-import DriverSearchResultsPage from "@/features/user/driver-search/pages/DriverSearchResultsPage";
+import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -144,7 +144,7 @@ export const AppRouter: React.FC = () => {
         path="/search"
         element={
           <ProtectedRoute allowedRoles={["Rider"]}>
-            <DriverSearchResultsPage />
+            <DriverSearchPage />
           </ProtectedRoute>
         }
       />

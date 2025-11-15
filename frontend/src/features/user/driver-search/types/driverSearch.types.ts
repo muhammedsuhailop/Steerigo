@@ -31,17 +31,13 @@ export interface Driver {
 }
 
 export interface SearchCriteria {
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  radiusKm: number;
-  searchDate: string;
-  timeRequiredMinutes: number;
-  filters: {
-    gearType?: string;
-    bodyType?: string;
-  };
+  tripType: "oneway" | "roundtrip";
+  pickupLocation: Location;
+  dropLocation?: Location; // Only for oneway
+  rideStartDateTime: string;
+  searchRadiusKm: number;
+  gearType: string;
+  bodyType: string;
 }
 
 export interface DriverSearchSummary {
@@ -79,9 +75,13 @@ export interface DriverSearchState {
   searchedAt: string | null;
 }
 
-export interface SearchFormFilters {
-  radiusKm: number;
+export interface TripFormData {
+  tripType: "oneway" | "roundtrip";
+  pickupLocation: Location | null;
+  dropLocation: Location | null;
+  rideStartDate: string;
+  rideStartTime: string;
+  searchRadiusKm: number;
   gearType: string;
   bodyType: string;
-  timeRequired: number;
 }
