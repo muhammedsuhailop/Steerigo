@@ -71,8 +71,6 @@ const DriverSearchPage: React.FC = () => {
         gearType: formData.gearType,
         bodyType: formData.bodyType,
         limit: 10,
-        // include trip type if your backend supports it
-        // rideType: formData.tripType,
       };
 
       // Call API
@@ -93,19 +91,11 @@ const DriverSearchPage: React.FC = () => {
           })
         );
 
-        // support both response shapes (summary or data.summary)
-        const total =
-          response.data?.summary?.totalFound ?? response.data?.totalFound ?? 0;
-        const searchedAt =
-          response.data?.summary?.searchedAt ??
-          response.data?.searchedAt ??
-          null;
+        const total = response.data?.summary?.totalFound ?? 0;
+        const searchedAt = response.data?.summary?.searchedAt ?? null;
 
         dispatch(setTotalFound(total));
         if (searchedAt) dispatch(setSearchedAt(searchedAt));
-
-        // Navigate to results page (keeps deep-link capability)
-        navigate("/search/results");
       } else {
         const msg = response?.message ?? "No drivers found";
         dispatch(setError(msg));

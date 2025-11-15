@@ -24,7 +24,10 @@ export const driverSearchSlice = createSlice({
     },
 
     // Set search criteria
-    setSearchCriteria: (state, action: PayloadAction<SearchCriteria>) => {
+    setSearchCriteria: (
+      state,
+      action: PayloadAction<SearchCriteria | null>
+    ) => {
       state.searchCriteria = action.payload;
     },
 

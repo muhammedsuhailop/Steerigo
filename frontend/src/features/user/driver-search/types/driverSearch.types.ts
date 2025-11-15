@@ -30,14 +30,21 @@ export interface Driver {
   availabilityStatus: string;
 }
 
+export interface SearchFormFilters {
+  radiusKm: number;
+  gearType: string;
+  bodyType: string;
+  timeRequired: number;
+}
+
 export interface SearchCriteria {
   tripType: "oneway" | "roundtrip";
   pickupLocation: Location;
-  dropLocation?: Location; // Only for oneway
+  dropLocation?: Location;
   rideStartDateTime: string;
   searchRadiusKm: number;
-  gearType: string;
-  bodyType: string;
+  gearType: string; 
+  bodyType: string; 
 }
 
 export interface DriverSearchSummary {
