@@ -66,7 +66,7 @@ const DriverSearchPage: React.FC = () => {
         latitude: formData.pickupLocation.latitude,
         longitude: formData.pickupLocation.longitude,
         searchDate: rideDateTime,
-        timeRequired: 60, // Default time required
+        timeRequired: formData.timeRequired * 60,
         radiusKm: formData.searchRadiusKm,
         gearType: formData.gearType,
         bodyType: formData.bodyType,

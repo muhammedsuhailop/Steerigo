@@ -43,8 +43,8 @@ export interface SearchCriteria {
   dropLocation?: Location;
   rideStartDateTime: string;
   searchRadiusKm: number;
-  gearType: string; 
-  bodyType: string; 
+  gearType: string;
+  bodyType: string;
 }
 
 export interface DriverSearchSummary {
@@ -91,4 +91,5 @@ export interface TripFormData {
   searchRadiusKm: number;
   gearType: string;
   bodyType: string;
+  timeRequired: number;
 }

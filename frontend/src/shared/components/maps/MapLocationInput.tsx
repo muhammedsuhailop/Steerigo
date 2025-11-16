@@ -21,7 +21,7 @@ L.Icon.Default.mergeOptions({
 interface MapLocationInputProps {
   label: string;
   value: Location | null;
-  onChange: (location: Location) => void;
+  onChange: (location: Location | null) => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -103,6 +103,10 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
   });
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // geolocation related
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   // Handle map click
   const handleMapClick = useCallback(
@@ -202,6 +206,60 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Use browser geolocation & reverse geocode then call onChange(location)
+  const handleUseCurrentLocation = async () => {
+    setGeoError(null);
+
+    if (!navigator.geolocation) {
+      setGeoError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setGeoLoading(true);
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          try {
+            const address = await getAddressFromCoordinates(lat, lng);
+            const loc: Location = {
+              latitude: lat,
+              longitude: lng,
+              address,
+            };
+            onChange(loc);
+            setMapPosition({ lat, lng });
+            setShowMap(false);
+          } catch (err) {
+            console.error("Reverse geocoding failed:", err);
+            // still set coordinates with fallback label
+            onChange({
+              latitude: lat,
+              longitude: lng,
+              address: "Current location (approx)",
+            });
+            setMapPosition({ lat, lng });
+            setShowMap(false);
+          } finally {
+            setGeoLoading(false);
+          }
+        },
+        (err) => {
+          console.error("Geolocation error:", err);
+          setGeoError(err.message || "Unable to get current location");
+          setGeoLoading(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60 * 1000 }
+      );
+    } catch (err) {
+      console.error(err);
+      setGeoError("Unable to get current location");
+      setGeoLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-semibold text-gray-700">
@@ -224,7 +282,7 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
           {!disabled && (
             <button
               type="button"
-              onClick={() => onChange(null as any)}
+              onClick={() => onChange(null)}
               className="text-gray-400 hover:text-red-500 transition"
             >
               <FaTimes />
@@ -277,15 +335,29 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
         </div>
       )}
 
-      {/* Map toggle button */}
+      {/* small action row: Select on map + Use current location (matches your requested placement) */}
       {!disabled && (
-        <button
-          type="button"
-          onClick={() => setShowMap(!showMap)}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          {showMap ? "Hide Map" : "Select on Map"}
-        </button>
+        <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+          <button
+            type="button"
+            onClick={() => setShowMap((s) => !s)}
+            className="underline"
+          >
+            {showMap ? "Hide Map" : "Select on map"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleUseCurrentLocation}
+            disabled={geoLoading}
+            className="underline"
+          >
+            {geoLoading ? "Locating..." : "Use current location"}
+          </button>
+
+          {/* small inline geo error */}
+          {geoError && <span className="text-rose-500">{geoError}</span>}
+        </div>
       )}
 
       {/* Map modal */}
