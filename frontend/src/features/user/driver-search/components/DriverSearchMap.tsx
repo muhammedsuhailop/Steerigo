@@ -1,9 +1,8 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaMapMarkerAlt, FaStar, FaPhone } from "react-icons/fa";
-import { GiDuration } from "react-icons/gi";
 import type { Driver, Location } from "../types/driverSearch.types";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -25,10 +24,10 @@ interface DriverSearchMapProps {
   onDriverSelect?: (driver: Driver) => void;
 }
 
-// Custom user location marker icon
+// Custom user location marker icon (gray)
 const createUserLocationIcon = () => {
   return L.divIcon({
-    html: `<div class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg">
+    html: `<div class="flex items-center justify-center w-8 h-8 bg-gray-700 rounded-full border-2 border-white shadow-lg">
       <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd"/>
       </svg>
@@ -39,24 +38,19 @@ const createUserLocationIcon = () => {
   });
 };
 
-// Custom driver marker icon
+// Custom driver marker icon (neutral gray with rating label)
 const createDriverMarkerIcon = (rating: number) => {
-  const ratingColor =
-    rating >= 4.5
-      ? "#10b981"
-      : rating >= 4
-      ? "#3b82f6"
-      : rating >= 3.5
-      ? "#f59e0b"
-      : "#ef4444";
+  // choose neutral gray shades for the marker body; keep rating visible
+  const bodyColor = "#6B7280"; // gray-500
+  const badgeBg = "#374151"; // gray-700
 
   return L.divIcon({
     html: `<div class="flex flex-col items-center">
       <div class="relative">
-        <svg class="w-8 h-8" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2))" fill="${ratingColor}" viewBox="0 0 24 24">
+        <svg class="w-8 h-8" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12))" fill="${bodyColor}" viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
         </svg>
-        <span class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full border border-white">
+        <span class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white" style="background:${badgeBg}; border:2px solid white; border-radius:999px;">
           ${rating.toFixed(1)}
         </span>
       </div>
@@ -79,7 +73,7 @@ const MapController: React.FC<{
   useEffect(() => {
     map.setView(center, 14);
     onMapReady?.();
-  }, [map, center, onMapReady]);
+  }, [map, center, onMapReady, radius]);
 
   return null;
 };
@@ -124,7 +118,9 @@ const DriverSearchMap: React.FC<DriverSearchMapProps> = ({
           title="Your Location"
         >
           <Popup>
-            <div className="text-sm font-semibold">Your Search Location</div>
+            <div className="text-sm font-semibold text-gray-900">
+              Your Search Location
+            </div>
             <div className="text-xs text-gray-600">{userLocation.address}</div>
           </Popup>
         </Marker>
@@ -151,7 +147,7 @@ const DriverSearchMap: React.FC<DriverSearchMapProps> = ({
                     {driver.name}
                   </h3>
                   <div className="flex items-center gap-1">
-                    <FaStar className="text-yellow-400 w-3 h-3" />
+                    <FaStar className="text-gray-500 w-3 h-3" />
                     <span className="text-sm font-semibold text-gray-700">
                       {driver.rating.toFixed(1)}
                     </span>
@@ -168,13 +164,13 @@ const DriverSearchMap: React.FC<DriverSearchMapProps> = ({
 
                 {/* Distance and ETA */}
                 <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
-                  <div className="bg-blue-50 p-2 rounded">
+                  <div className="bg-gray-50 p-2 rounded border border-gray-200">
                     <div className="text-gray-600">Distance</div>
                     <div className="font-semibold text-gray-900">
                       {driver.distance.value.toFixed(1)} {driver.distance.unit}
                     </div>
                   </div>
-                  <div className="bg-green-50 p-2 rounded">
+                  <div className="bg-gray-50 p-2 rounded border border-gray-200">
                     <div className="text-gray-600">ETA</div>
                     <div className="font-semibold text-gray-900">
                       {driver.eta.value} {driver.eta.unit}
@@ -185,10 +181,10 @@ const DriverSearchMap: React.FC<DriverSearchMapProps> = ({
                 {/* Status Badge */}
                 <div className="mb-2">
                   <span
-                    className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
+                    className={`inline-block px-2 py-1 text-xs font-semibold rounded-full border ${
                       driver.availabilityStatus === "Available"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
+                        ? "bg-gray-100 text-gray-800 border-gray-300"
+                        : "bg-gray-50 text-gray-700 border-gray-300"
                     }`}
                   >
                     {driver.availabilityStatus}
@@ -198,7 +194,7 @@ const DriverSearchMap: React.FC<DriverSearchMapProps> = ({
                 {/* Contact and Book Button */}
                 <button
                   onClick={() => onDriverSelect?.(driver)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 rounded transition"
+                  className="w-full bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold py-1.5 rounded transition"
                 >
                   Select Driver
                 </button>

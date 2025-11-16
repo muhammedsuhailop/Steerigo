@@ -24,6 +24,16 @@ import {
   selectIsLoading,
 } from "../store/driverSearchSlice";
 
+// react-icons (all gray themed)
+import {
+  FaMapMarkerAlt,
+  FaClock,
+  FaMap,
+  FaUsers,
+  FaSearch,
+  FaCar as FaCarIcon,
+} from "react-icons/fa";
+
 const DriverSearchPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,18 +42,23 @@ const DriverSearchPage: React.FC = () => {
   const [searchNearbyDrivers, { isLoading: mutationLoading }] =
     useSearchNearbyDriversMutation();
 
-  // local state to preview trip on the small map
+  // Local state to preview trip on the map in REAL-TIME
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
     null
   );
 
-  // read results from redux so DriverSearchResults can be reused
+  // read results from redux
   const drivers = useSelector(selectDrivers) ?? [];
   const searchCriteria = useSelector(selectSearchCriteria);
   const totalFound = useSelector(selectTotalFound) ?? 0;
   const isLoading = useSelector(selectIsLoading) ?? mutationLoading;
 
-  // Handle form submission
+  // Called on every form change for live preview
+  const handleFormChange = (formData: TripFormData) => {
+    setCurrentFormData(formData);
+  };
+
+  // Handle form submission (search button click)
   const handleFormSubmit = async (formData: TripFormData) => {
     setCurrentFormData(formData);
 
@@ -56,7 +71,7 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setLoading(true));
       dispatch(setError(null));
 
-      // Combine date and time into ISO string (safe)
+      // Combine date and time into ISO string
       const rideDateTime = new Date(
         `${formData.rideStartDate}T${formData.rideStartTime}`
       ).toISOString();
@@ -66,7 +81,7 @@ const DriverSearchPage: React.FC = () => {
         latitude: formData.pickupLocation.latitude,
         longitude: formData.pickupLocation.longitude,
         searchDate: rideDateTime,
-        timeRequired: formData.timeRequired * 60,
+        timeRequired: formData.timeRequired * 60, // Convert hours to minutes
         radiusKm: formData.searchRadiusKm,
         gearType: formData.gearType,
         bodyType: formData.bodyType,
@@ -93,7 +108,6 @@ const DriverSearchPage: React.FC = () => {
 
         const total = response.data?.summary?.totalFound ?? 0;
         const searchedAt = response.data?.summary?.searchedAt ?? null;
-
         dispatch(setTotalFound(total));
         if (searchedAt) dispatch(setSearchedAt(searchedAt));
       } else {
@@ -112,77 +126,54 @@ const DriverSearchPage: React.FC = () => {
     }
   };
 
-  // Optional handler when user selects a driver from inline results
-  const handleDriverSelect = (driver: any) => {
-    console.log("Selected driver (inline):", driver);
-  };
-
-  const handleDriverCall = (driver: any) => {
-    window.location.href = `tel:${driver.mobile}`;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Find Your Perfect Driver
-          </h1>
-          <p className="text-gray-600">
-            Search for available drivers based on your trip requirements
-          </p>
-        </div>
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <FaCarIcon className="text-gray-700" />
+          <span>Find Your Perfect Driver</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Search for available drivers based on your trip requirements
+        </p>
+      </div>
 
-        {/* Main Content  */}
+      <div className="max-w-7xl mx-auto">
+        {/* Main Layout: Form (3/4) + Map Sidebar (1/4) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Form Section */}
+          {/* Form Section - 3/4 width */}
           <div className="lg:col-span-3">
             <DriverSearchForm
               onSubmit={handleFormSubmit}
+              onChange={handleFormChange}
               isLoading={isLoading}
             />
           </div>
 
-          {/* Map Section  */}
+          {/* Map Sidebar Section - 1/4 width */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-4 sticky top-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Trip Overview
+            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 h-fit border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FaMap className="text-gray-600" />
+                <span>Trip Preview</span>
               </h3>
 
+              {/* Live Map Display */}
               {currentFormData?.pickupLocation ||
               currentFormData?.dropLocation ? (
-                <div className="h-96">
+                <div className="h-80 rounded-lg overflow-hidden mb-4 border border-gray-200">
                   <TripLocationMap
-                    pickupLocation={currentFormData?.pickupLocation ?? null}
-                    dropLocation={currentFormData?.dropLocation ?? null}
-                    tripType={currentFormData?.tripType ?? "oneway"}
+                    pickupLocation={currentFormData?.pickupLocation || null}
+                    dropLocation={currentFormData?.dropLocation || null}
+                    tripType={currentFormData?.tripType || "oneway"}
                   />
                 </div>
               ) : (
-                <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-gray-500 p-4">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400 mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <p className="text-sm">
+                <div className="h-80 bg-gray-100 rounded-lg flex items-center justify-center mb-4 border border-dashed border-gray-300">
+                  <div className="text-center">
+                    <FaMapMarkerAlt className="mx-auto text-gray-400 mb-2 text-3xl" />
+                    <p className="text-sm text-gray-600 font-medium">
                       Select locations to see them on the map
                     </p>
                   </div>
@@ -191,10 +182,10 @@ const DriverSearchPage: React.FC = () => {
 
               {/* Trip Details Summary */}
               {currentFormData && (
-                <div className="mt-4 space-y-2 text-sm">
+                <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between py-2 border-t border-gray-200">
-                    <span className="text-gray-600">Trip Type:</span>
-                    <span className="font-medium text-gray-900 capitalize">
+                    <span className="text-gray-600 font-medium">Trip:</span>
+                    <span className="font-bold text-gray-900">
                       {currentFormData.tripType === "oneway"
                         ? "One Way"
                         : "Round Trip"}
@@ -203,35 +194,61 @@ const DriverSearchPage: React.FC = () => {
 
                   {currentFormData.pickupLocation && (
                     <div className="py-2 border-t border-gray-200">
-                      <span className="text-gray-600 block mb-1">Pickup:</span>
-                      <span className="font-medium text-gray-900 text-xs block">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FaMapMarkerAlt className="text-gray-600" />
+                        <span className="text-gray-600 font-medium">
+                          Pickup
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-700 break-words">
                         {currentFormData.pickupLocation.address}
-                      </span>
+                      </p>
                     </div>
                   )}
 
                   {currentFormData.tripType === "oneway" &&
                     currentFormData.dropLocation && (
                       <div className="py-2 border-t border-gray-200">
-                        <span className="text-gray-600 block mb-1">Drop:</span>
-                        <span className="font-medium text-gray-900 text-xs block">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FaMapMarkerAlt className="text-gray-600" />
+                          <span className="text-gray-600 font-medium">
+                            Drop
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-700 break-words">
                           {currentFormData.dropLocation.address}
-                        </span>
+                        </p>
                       </div>
                     )}
 
                   <div className="flex items-center justify-between py-2 border-t border-gray-200">
-                    <span className="text-gray-600">Search Radius:</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-gray-600 font-medium">Radius:</span>
+                    <span className="font-bold text-gray-900">
                       {currentFormData.searchRadiusKm} km
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between py-2 border-t border-gray-200">
-                    <span className="text-gray-600">Vehicle:</span>
-                    <span className="font-medium text-gray-900">
+                  <div className="py-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaUsers className="text-gray-600" />
+                      <span className="text-gray-600 font-medium">Vehicle</span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-900">
                       {currentFormData.bodyType} ({currentFormData.gearType})
-                    </span>
+                    </p>
+                  </div>
+
+                  <div className="py-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaClock className="text-gray-600" />
+                      <span className="text-gray-600 font-medium">
+                        Date & Time
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-900">
+                      {currentFormData.rideStartDate}{" "}
+                      {currentFormData.rideStartTime}
+                    </p>
                   </div>
                 </div>
               )}
@@ -239,34 +256,19 @@ const DriverSearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Results*/}
-        <div className="mt-8">
-          <DriverSearchResults
-            drivers={drivers}
-            isLoading={isLoading}
-            totalFound={totalFound}
-            searchCriteria={
-              searchCriteria
-                ? {
-                    location: searchCriteria.pickupLocation,
-                    radiusKm: searchCriteria.searchRadiusKm,
-                    filters: {
-                      gearType: searchCriteria.gearType,
-                      bodyType: searchCriteria.bodyType,
-                    },
-                  }
-                : null
-            }
-            onDriverSelect={handleDriverSelect}
-            onDriverCall={handleDriverCall}
-            onClearSearch={() => {
-              dispatch(setDrivers([]));
-              dispatch(setSearchCriteria(null));
-              dispatch(setTotalFound(0));
-            }}
-            initialViewMode="map"
-          />
-        </div>
+        {/* Results Section - Below form */}
+        {searchCriteria && (
+          <div className="mt-12">
+            <DriverSearchResults
+              onClearSearch={() => {
+                dispatch(setDrivers([]));
+                dispatch(setSearchCriteria(null));
+                dispatch(setTotalFound(0));
+              }}
+              initialViewMode="map"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

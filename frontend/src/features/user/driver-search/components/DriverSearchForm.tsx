@@ -12,22 +12,23 @@ import { TripFormData, Location } from "../types/driverSearch.types";
 
 interface DriverSearchFormProps {
   onSubmit: (formData: TripFormData) => void;
+  onChange?: (formData: TripFormData) => void;
   isLoading?: boolean;
 }
 
-const Pill: React.FC<React.PropsWithChildren<{ active?: boolean }>> = ({
+const Pill: React.FC<{ children: React.ReactNode; active: boolean }> = ({
   children,
   active,
 }) => (
-  <div
-    className={`px-4 py-2 rounded-full text-sm font-medium transition-shadow transition-colors select-none whitespace-nowrap ${
+  <button
+    className={`px-6 py-2 rounded-full font-semibold transition ${
       active
-        ? "bg-gradient-to-r from-gray-400 to-gray-700 text-white shadow-lg"
-        : "bg-white/60 text-gray-700 hover:shadow-sm"
+        ? "bg-gray-800 text-white"
+        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
     }`}
   >
     {children}
-  </div>
+  </button>
 );
 
 const LocationPreview: React.FC<{
@@ -37,27 +38,21 @@ const LocationPreview: React.FC<{
   onClear: () => void;
 }> = ({ label, location, onEdit, onClear }) => {
   return (
-    <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-gray-100 bg-white">
-      <div>
-        <div className="text-xs font-medium text-gray-500">{label}</div>
-        <div className="text-sm font-medium text-gray-800 mt-1 max-w-xs truncate">
-          {location?.address || "Selected location"}
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end gap-2">
+    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+      <p className="text-xs font-medium text-gray-700 mb-1">{label}</p>
+      <p className="text-sm font-bold text-gray-900 mb-2">
+        {location?.address || "Selected location"}
+      </p>
+      <div className="flex gap-2">
         <button
-          type="button"
           onClick={onEdit}
-          className="text-xs px-3 py-1 rounded-md border border-gray-200 bg-white text-gray-700"
+          className="flex-1 px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800 transition font-medium"
         >
           Change
         </button>
         <button
-          type="button"
           onClick={onClear}
-          aria-label={`Clear ${label} location`}
-          className="text-xs px-3 py-1 rounded-md bg-rose-50 text-rose-600 border border-rose-100"
+          className="flex-1 px-3 py-1 text-xs bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition font-medium"
         >
           Clear
         </button>
@@ -68,6 +63,7 @@ const LocationPreview: React.FC<{
 
 const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   onSubmit,
+  onChange,
   isLoading = false,
 }) => {
   const [formData, setFormData] = useState<TripFormData>({
@@ -84,6 +80,7 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Set default date and time
   useEffect(() => {
     const now = new Date();
     const dateOnly = now.toISOString().slice(0, 10);
@@ -95,8 +92,14 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     }));
   }, []);
 
+  // Notify parent of changes in real-time
+  useEffect(() => {
+    onChange?.(formData);
+  }, [formData, onChange]);
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
+
     if (!formData.pickupLocation)
       newErrors.pickupLocation = "Pickup location is required";
     if (formData.tripType === "oneway" && !formData.dropLocation)
@@ -111,6 +114,7 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
       formData.timeRequired > 24
     )
       newErrors.timeRequired = "Please select required hours (1–24)";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,264 +143,269 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-md w-full bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-100"
-    >
-      <header className="flex items-center gap-3 mb-4">
-        <div className="p-3 rounded-xl bg-gradient-to-tr from-gray-50 to-gray-100">
+    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-2">
           <FaCar className="text-gray-700" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            Find Your Driver
-          </h3>
-        </div>
-      </header>
-
-      {/* Trip Type */}
-      <div className="mb-4">
-        <label className="text-xs font-medium text-gray-600 flex items-center gap-2 mb-3">
-          <FaRoute /> Trip Type
-        </label>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setTripType("oneway")}
-            aria-pressed={formData.tripType === "oneway"}
-            className="flex-1"
-          >
-            <Pill active={formData.tripType === "oneway"}>One Way</Pill>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setTripType("roundtrip")}
-            aria-pressed={formData.tripType === "roundtrip"}
-            className="flex-1"
-          >
-            <Pill active={formData.tripType === "roundtrip"}>Round Trip</Pill>
-          </button>
-        </div>
+          Find Your Driver
+        </h2>
+        <p className="text-sm text-gray-600">
+          Fill in the details to search for available drivers
+        </p>
       </div>
 
-      {/* Pickup */}
-      <div className="mb-4">
-        {formData.pickupLocation ? (
-          <LocationPreview
-            label="Pickup"
-            location={formData.pickupLocation}
-            onEdit={() => setFormData((p) => ({ ...p, pickupLocation: null }))}
-            onClear={() => setFormData((p) => ({ ...p, pickupLocation: null }))}
-          />
-        ) : (
-          <div>
-            <MapLocationInput
-              label="Pickup"
-              value={formData.pickupLocation}
-              onChange={handlePickupLocationChange}
-              placeholder="Where from..."
-              required
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Trip Type */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <FaRoute className="inline mr-2 text-gray-600" />
+            Trip Type
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setTripType("oneway")}
+              className={`px-4 py-3 rounded-lg border-2 font-bold transition ${
+                formData.tripType === "oneway"
+                  ? "border-gray-700 bg-gray-50 text-gray-800"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+              }`}
+            >
+              One Way
+            </button>
+            <button
+              type="button"
+              onClick={() => setTripType("roundtrip")}
+              className={`px-4 py-3 rounded-lg border-2 font-bold transition ${
+                formData.tripType === "roundtrip"
+                  ? "border-gray-700 bg-gray-50 text-gray-800"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+              }`}
+            >
+              Round Trip
+            </button>
+          </div>
+        </div>
+
+        {/* Pickup Location */}
+        <div>
+          {formData.pickupLocation ? (
+            <LocationPreview
+              label="Pickup Location"
+              location={formData.pickupLocation}
+              onEdit={() => handlePickupLocationChange(formData.pickupLocation)}
+              onClear={() => handlePickupLocationChange(null)}
             />
-            {errors.pickupLocation && (
-              <p className="text-rose-500 text-xs mt-1">
-                {errors.pickupLocation}
-              </p>
+          ) : (
+            <>
+              <MapLocationInput
+                label="Pickup Location"
+                value={formData.pickupLocation}
+                onChange={handlePickupLocationChange}
+                placeholder="Search for pickup location"
+                required
+              />
+              {errors.pickupLocation && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.pickupLocation}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Drop Location (Only for One Way) */}
+        {formData.tripType === "oneway" && (
+          <div>
+            {formData.dropLocation ? (
+              <LocationPreview
+                label="Drop Location"
+                location={formData.dropLocation}
+                onEdit={() => handleDropLocationChange(formData.dropLocation)}
+                onClear={() => handleDropLocationChange(null)}
+              />
+            ) : (
+              <>
+                <MapLocationInput
+                  label="Drop Location"
+                  value={formData.dropLocation}
+                  onChange={handleDropLocationChange}
+                  placeholder="Search for drop location"
+                  required
+                />
+                {errors.dropLocation && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.dropLocation}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
-      </div>
 
-      {/* Drop (only for oneway) */}
-      {formData.tripType === "oneway" && (
-        <div className="mb-4">
-          {formData.dropLocation ? (
-            <LocationPreview
-              label="Drop"
-              location={formData.dropLocation}
-              onEdit={() => setFormData((p) => ({ ...p, dropLocation: null }))}
-              onClear={() => setFormData((p) => ({ ...p, dropLocation: null }))}
+        {/* Date and Time in one row */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Date */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaCalendarAlt className="inline mr-2 text-gray-600" />
+              Date
+            </label>
+            <input
+              type="date"
+              value={formData.rideStartDate}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, rideStartDate: e.target.value }))
+              }
+              min={new Date().toISOString().slice(0, 10)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
-          ) : (
-            <div>
-              <MapLocationInput
-                label="Drop"
-                value={formData.dropLocation}
-                onChange={handleDropLocationChange}
-                placeholder="Where to..."
-                required
-              />
-              {errors.dropLocation && (
-                <p className="text-rose-500 text-xs mt-1">
-                  {errors.dropLocation}
-                </p>
-              )}
-            </div>
+            {errors.rideStartDate && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.rideStartDate}
+              </p>
+            )}
+          </div>
+
+          {/* Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaClock className="inline mr-2 text-gray-600" />
+              Time
+            </label>
+            <input
+              type="time"
+              value={formData.rideStartTime}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, rideStartTime: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+            {errors.rideStartTime && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.rideStartTime}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Required time */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <FaClock className="inline mr-2 text-gray-600" />
+            Required Time
+          </label>
+          <select
+            value={formData.timeRequired}
+            onChange={(e) =>
+              setFormData((p) => ({
+                ...p,
+                timeRequired: Number(e.target.value),
+              }))
+            }
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+          >
+            {Array.from({ length: 24 }, (_, i) => i + 1).map((h) => (
+              <option key={h} value={h}>
+                {h} {h === 1 ? "hour" : "hours"}
+              </option>
+            ))}
+          </select>
+          {errors.timeRequired && (
+            <p className="text-red-500 text-xs mt-1">{errors.timeRequired}</p>
           )}
         </div>
-      )}
 
-      {/* Date / Time / TimeRequired */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        {/* Date */}
+        {/* Search Radius */}
         <div>
-          <label className="text-xs font-medium text-gray-600 flex items-center gap-2 mb-2">
-            <FaCalendarAlt /> Date
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Search Radius: {formData.searchRadiusKm} km
           </label>
           <input
-            type="date"
-            value={formData.rideStartDate}
+            type="range"
+            min="5"
+            max="50"
+            step="5"
+            value={formData.searchRadiusKm}
             onChange={(e) =>
-              setFormData((p) => ({ ...p, rideStartDate: e.target.value }))
+              setFormData((p) => ({
+                ...p,
+                searchRadiusKm: Number(e.target.value),
+              }))
             }
-            min={new Date().toISOString().slice(0, 10)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-gray-600"
           />
-          {errors.rideStartDate && (
-            <p className="text-rose-500 text-xs mt-1">{errors.rideStartDate}</p>
-          )}
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>5 km</span>
+            <span>50 km</span>
+          </div>
         </div>
 
-        {/* Time */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 flex items-center gap-2 mb-2">
-            <FaClock /> Time
-          </label>
-          <input
-            type="time"
-            value={formData.rideStartTime}
-            onChange={(e) =>
-              setFormData((p) => ({ ...p, rideStartTime: e.target.value }))
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-          />
-          {errors.rideStartTime && (
-            <p className="text-rose-500 text-xs mt-1">{errors.rideStartTime}</p>
-          )}
-        </div>
-      </div>
+        {/* Gear and Body Type */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Gear Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaCog className="inline mr-2 text-gray-600" />
+              Gear Type
+            </label>
+            <select
+              value={formData.gearType}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, gearType: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+            >
+              <option value="Manual">Manual</option>
+              <option value="Automatic">Automatic</option>
+            </select>
+          </div>
 
-      {/* Time required (1-24 hrs) — placed below date/time */}
-      <div className="mb-4">
-        <label className="text-xs font-medium text-gray-600 mb-2">
-          Required time
-        </label>
-        <select
-          value={formData.timeRequired}
-          onChange={(e) =>
-            setFormData((p) => ({ ...p, timeRequired: Number(e.target.value) }))
-          }
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white text-sm"
+          {/* Body Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaCar className="inline mr-2 text-gray-600" />
+              Body Type
+            </label>
+            <select
+              value={formData.bodyType}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, bodyType: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+            >
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Hatchback">Hatchback</option>
+              <option value="Premium">Premium</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full py-3 rounded-lg font-bold text-white transition flex items-center justify-center gap-2 ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-gray-600 to-gray-800 hover:opacity-95"
+          }`}
         >
-          {Array.from({ length: 24 }, (_, i) => i + 1).map((h) => (
-            <option key={h} value={h}>
-              {h} {h === 1 ? "hour" : "hours"}
-            </option>
-          ))}
-        </select>
-        {errors.timeRequired && (
-          <p className="text-rose-500 text-xs mt-1">{errors.timeRequired}</p>
-        )}
-      </div>
-
-      {/* Radius */}
-      <div className="mb-4">
-        <label className="text-xs font-medium text-gray-600 mb-2">
-          Search radius — {formData.searchRadiusKm} km
-        </label>
-        <input
-          aria-label="Search radius"
-          type="range"
-          min={5}
-          max={50}
-          step={5}
-          value={formData.searchRadiusKm}
-          onChange={(e) =>
-            setFormData((p) => ({
-              ...p,
-              searchRadiusKm: Number(e.target.value),
-            }))
-          }
-          className="w-full h-2 appearance-none rounded-full"
-        />
-        <div className="flex justify-between text-xs text-gray-400 mt-1">
-          <span>5 km</span>
-          <span>50 km</span>
-        </div>
-      </div>
-
-      {/* Gear / Body */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-2">
-            <FaCog /> Gear
-          </label>
-          <select
-            value={formData.gearType}
-            onChange={(e) =>
-              setFormData((p) => ({ ...p, gearType: e.target.value }))
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-          >
-            <option>Manual</option>
-            <option>Automatic</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-2">
-            <FaCar /> Body
-          </label>
-          <select
-            value={formData.bodyType}
-            onChange={(e) =>
-              setFormData((p) => ({ ...p, bodyType: e.target.value }))
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-          >
-            <option>Sedan</option>
-            <option>SUV</option>
-            <option>Hatchback</option>
-            <option>Premium</option>
-          </select>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={`w-full flex items-center justify-center gap-3 py-3 rounded-xl font-semibold text-white transition ${
-          isLoading
-            ? "bg-gray-300 cursor-not-allowed"
-            : "bg-gradient-to-r from-gray-600 to-gray-800 hover:opacity-95"
-        }`}
-      >
-        {isLoading ? (
-          <>
-            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="white"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="white"
-                d="M4 12a8 8 0 018-8v8z"
-              ></path>
-            </svg>
-            Searching...
-          </>
-        ) : (
-          <>
-            <FaSearch /> Search Drivers
-          </>
-        )}
-      </button>
-    </form>
+          {isLoading ? (
+            <>
+              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+              Searching...
+            </>
+          ) : (
+            <>
+              <FaSearch />
+              Search Drivers
+            </>
+          )}
+        </button>
+      </form>
+    </div>
   );
 };
 
