@@ -249,6 +249,26 @@ export const adminApi = createApi({
         { type: "AdminDrivers", id: "LIST" },
       ],
     }),
+
+    updateDriverKYCStatus: builder.mutation<
+      { success: boolean; message: string; data?: any },
+      {
+        driverId: string;
+        kycStatus: "Approved" | "InReview" | "Rejected" | "InReview";
+      }
+    >({
+      query: ({ driverId, kycStatus }) => ({
+        url: `/admin/drivers/${driverId}/kyc-status/update`,
+        method: "PATCH",
+        data: { kycStatus },
+      }),
+      invalidatesTags: (result, error, { driverId }) => [
+        { type: "DriverProfile", id: driverId },
+        { type: "AdminDrivers", id: driverId },
+        { type: "AdminDrivers", id: "LIST" },
+        { type: "KYCRequests", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -266,6 +286,7 @@ export const {
   useGetKYCRequestsQuery,
   useGetKYCByIdQuery,
   useUpdateKYCStatusMutation,
+  useUpdateDriverKYCStatusMutation,
 } = adminApi;
 
 export type {

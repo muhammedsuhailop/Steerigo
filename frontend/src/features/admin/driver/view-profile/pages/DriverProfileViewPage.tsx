@@ -44,8 +44,10 @@ const DriverProfileViewPage: React.FC = () => {
     isLoading,
     isFetching,
     isUpdating,
+    isUpdatingKYC,
     error,
     handleDriverAction,
+    handleKYCStatusUpdate,
     refreshProfile,
     availableActions,
     driverId,
@@ -57,6 +59,10 @@ const DriverProfileViewPage: React.FC = () => {
     useState<DriverProfileAction | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // KYC Approval confirmation modal state
+  const [kycConfirmOpen, setKycConfirmOpen] = useState(false);
+  const [kycConfirmLoading, setKycConfirmLoading] = useState(false);
+
   // Alert messages
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -65,6 +71,11 @@ const DriverProfileViewPage: React.FC = () => {
   const openConfirm = (action: DriverProfileAction) => {
     setConfirmAction(action);
     setConfirmOpen(true);
+  };
+
+  // Open KYC approval confirmation
+  const openKYCConfirm = () => {
+    setKycConfirmOpen(true);
   };
 
   // actually perform action after confirm
@@ -98,14 +109,35 @@ const DriverProfileViewPage: React.FC = () => {
     }
   };
 
-  // auto-dismiss alerts after a timeout 4s
+  // Handle KYC approval confirmation
+  const performKYCApproval = async () => {
+    setKycConfirmLoading(true);
+    try {
+      const result = await handleKYCStatusUpdate("Approved");
+      toast.success(result.message || "KYC status updated to Approved");
+      setSuccessMsg(result.message || "KYC status updated to Approved");
+      setErrorMsg(null);
+      setKycConfirmOpen(false);
+      refreshProfile();
+    } catch (err: any) {
+      const msg = err?.message || "Failed to update KYC status";
+      toast.error(msg);
+      setErrorMsg(msg);
+      setSuccessMsg(null);
+      setKycConfirmOpen(false);
+    } finally {
+      setKycConfirmLoading(false);
+    }
+  };
+
+  // auto-dismiss alerts after a timeout 10s
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | null = null;
     if (successMsg || errorMsg) {
       t = setTimeout(() => {
         setSuccessMsg(null);
         setErrorMsg(null);
-      }, 4000);
+      }, 10000);
     }
     return () => {
       if (t) clearTimeout(t);
@@ -280,19 +312,7 @@ const DriverProfileViewPage: React.FC = () => {
                   onClick={() => navigate("/admin/drivers")}
                   className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
                 >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
+                  <RiArrowLeftLine className="w-5 h-5 mr-2" />
                   Back to Drivers
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900">
@@ -352,12 +372,13 @@ const DriverProfileViewPage: React.FC = () => {
                 <VehicleDetails driver={driver} />
               </div>
 
-              {/* KYC */}
+              {/* KYC  */}
               <div className="w-full bg-white rounded-lg shadow-md p-6">
                 <DriverProfileKYC
                   kycDocuments={kycDocuments}
                   overallStatus={driver.kycStatus}
-                  isUpdating={isUpdating}
+                  onMarkAsApproved={openKYCConfirm}
+                  isUpdatingKYC={isUpdatingKYC}
                 />
               </div>
             </div>
@@ -389,6 +410,24 @@ const DriverProfileViewPage: React.FC = () => {
         cancelText="Cancel"
         variant="question"
         isLoading={confirmLoading}
+        size="md"
+      />
+
+      {/* KYC Approval Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={kycConfirmOpen}
+        onClose={() => {
+          if (!kycConfirmLoading) {
+            setKycConfirmOpen(false);
+          }
+        }}
+        onConfirm={performKYCApproval}
+        title="Mark KYC as Approved"
+        message="Are you sure you want to mark this driver's overall KYC status as Approved? This will update the driver's KYC status in the system."
+        confirmText={kycConfirmLoading ? "Updating..." : "Yes, Approve"}
+        cancelText="Cancel"
+        variant="question"
+        isLoading={kycConfirmLoading}
         size="md"
       />
     </div>
