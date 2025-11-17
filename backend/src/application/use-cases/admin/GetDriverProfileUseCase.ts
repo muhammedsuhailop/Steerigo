@@ -2,9 +2,17 @@ import { injectable, inject } from "inversify";
 import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
 import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
+import {
+  AdminGetDriverProfileResponseDto,
+  AdminDriverInfo,
+  AdminUserInfo,
+  AdminKycDocument,
+  DriverStatistics,
+} from "@application/dto/admin/GetDriverProfileResponseDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { DomainError } from "@domain/errors/DomainError";
 
 @injectable()
 export class GetDriverProfileUseCase {
@@ -15,7 +23,9 @@ export class GetDriverProfileUseCase {
     private kycRepository: KYCRepository
   ) {}
 
-  async execute(dto: GetDriverProfileRequestDto): Promise<Result<any>> {
+  async execute(
+    dto: GetDriverProfileRequestDto
+  ): Promise<Result<AdminGetDriverProfileResponseDto>> {
     try {
       Logger.info("Executing GetDriverProfileUseCase", {
         driverId: dto.getDriverId(),
@@ -26,67 +36,85 @@ export class GetDriverProfileUseCase {
       );
 
       if (!driverProfile) {
-        return Result.failure(new Error("Driver not found"));
+        Logger.warn("Driver profile not found", {
+          driverId: dto.getDriverId(),
+        });
+        return Result.failure(new DomainError("Driver not found"));
       }
 
-      // Get KYC documents
       const kycDocuments = await this.kycRepository.findByDriverId(
         dto.getDriverId()
       );
 
-      const response = {
-        driver: {
-          id: driverProfile.driver.getId(),
-          userId: driverProfile.driver.getUserId(),
-          status: driverProfile.driver.getStatus(),
-          kycStatus: driverProfile.driver.getKycStatus(),
-          licenceCategory: driverProfile.driver.getLicenceCategory(),
-          eligibleGearTypes: driverProfile.driver.getEligibleGearTypes(),
-          eligibleBodyTypes: driverProfile.driver.getEligibleBodyTypes(),
-          licenseIssueDate: driverProfile.driver
-            .getLicenseIssueDate()
-            .toISOString(),
-          licenseExpiryDate: driverProfile.driver
-            .getLicenseExpiryDate()
-            .toISOString(),
-          createdAt: driverProfile.driver.getCreatedAt().toISOString(),
-          updatedAt: driverProfile.driver.getUpdatedAt().toISOString(),
-        },
-        user: {
-          id: driverProfile.user.id,
-          name: driverProfile.user.name,
-          email: driverProfile.user.email,
-          mobile: driverProfile.user.mobile,
-        },
-        stats: {
-          totalRides: driverProfile.stats.totalRides,
-          totalEarnings: driverProfile.stats.totalEarnings,
-          rating: driverProfile.stats.rating,
-          lastRideDate: driverProfile.stats.lastRideDate?.toISOString() || null,
-        },
-        kycDocuments: kycDocuments.map((kyc) => ({
-          id: kyc.getId(),
-          docType: kyc.getDocType(),
-          docNumber: kyc.getDocNumber(),
-          issueDate: kyc.getIssueDate()?.toISOString() || null,
-          expiryDate: kyc.getExpiryDate()?.toISOString() || null,
-          verificationStatus: kyc.getVerificationStatus(),
-          comments: kyc.getComments(),
-          isExpired: kyc.isExpired(),
-          createdAt: kyc.getCreatedAt().toISOString(),
-          updatedAt: kyc.getUpdatedAt().toISOString(),
-        })),
-      };
+      const driverInfo = new AdminDriverInfo(
+        driverProfile.driver.getId(),
+        driverProfile.driver.getUserId(),
+        driverProfile.driver.getStatus(),
+        driverProfile.driver.getKycStatus(),
+        driverProfile.driver.getLicenceCategory(),
+        driverProfile.driver.getEligibleGearTypes(),
+        driverProfile.driver.getEligibleBodyTypes(),
+        driverProfile.driver.getLicenseIssueDate(),
+        driverProfile.driver.getLicenseExpiryDate(),
+        driverProfile.driver.getCreatedAt(),
+        driverProfile.driver.getUpdatedAt()
+      );
 
-      Logger.info("Driver profile fetched successfully", {
+      const userInfo = new AdminUserInfo(
+        driverProfile.user.id,
+        driverProfile.user.name,
+        driverProfile.user.email,
+        driverProfile.user.mobile,
+        driverProfile.user.profilePicture
+      );
+
+      const stats = new DriverStatistics(
+        driverProfile.stats.totalRides,
+        driverProfile.stats.totalEarnings,
+        driverProfile.stats.rating,
+        driverProfile.stats.lastRideDate || null
+      );
+
+      const mappedKycDocuments: AdminKycDocument[] = kycDocuments.map(
+        (kyc) =>
+          new AdminKycDocument(
+            kyc.getId(),
+            kyc.getDocType(),
+            kyc.getDocNumber(),
+            kyc.getIssueDate() || null,
+            kyc.getExpiryDate() || null,
+            kyc.getVerificationStatus(),
+            kyc.getComments() || null,
+            kyc.isExpired(),
+            kyc.getCreatedAt(),
+            kyc.getUpdatedAt()
+          )
+      );
+
+      const response = new AdminGetDriverProfileResponseDto(
+        driverInfo,
+        userInfo,
+        stats,
+        mappedKycDocuments
+      );
+
+      Logger.info("Admin driver profile fetched successfully", {
         driverId: dto.getDriverId(),
         kycDocumentsCount: kycDocuments.length,
       });
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("Error fetching driver profile", error);
-      return Result.failure(error as Error);
+      Logger.error("Error fetching admin driver profile", {
+        driverId: dto.getDriverId(),
+        error,
+      });
+
+      return Result.failure(
+        error instanceof DomainError
+          ? error
+          : new DomainError("Failed to fetch driver profile")
+      );
     }
   }
 }
