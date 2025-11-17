@@ -62,6 +62,24 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({
           <Card className="h-full">
             <Card.Header title="Personal Information" />
             <Card.Body>
+              <div className="flex items-center gap-4 pb-4 border-b border-gray-100 mb-4">
+                <Avatar
+                  src={user?.profilePicture}
+                  alt={user?.name ?? "Driver"}
+                />
+
+                {user?.profilePicture && (
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      {user?.name ?? "N/A"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {user?.email ?? "N/A"}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3">
                 <Detail label="Driver ID" value={driver.id ?? "N/A"} />
                 <Detail label="Name" value={user.name ?? "N/A"} />
@@ -183,5 +201,42 @@ function StatItem({ label, value }: { label: string; value: string }) {
       <div className="text-xs text-gray-500 mb-1">{label}</div>
       <div className="text-lg font-semibold text-gray-900">{value}</div>
     </div>
+  );
+}
+
+function Avatar({ src, alt }: { src?: string | null; alt?: string }) {
+  const fallbackIcon = (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 border border-yellow-400">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-8 w-8 text-yellow-600"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+        </svg>
+      </div>
+      <div>
+        <div className="text-sm font-semibold text-red-900">
+          Profile picture not updated
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!src) return fallbackIcon;
+
+  return (
+    <img
+      src={src}
+      alt={alt ?? "avatar"}
+      className="w-16 h-16 rounded-full object-cover border"
+      onError={(e) => {
+        const parent = e.currentTarget.parentElement;
+        if (parent) parent.innerHTML = "";
+        e.currentTarget.replaceWith(fallbackIcon as unknown as Node);
+      }}
+    />
   );
 }

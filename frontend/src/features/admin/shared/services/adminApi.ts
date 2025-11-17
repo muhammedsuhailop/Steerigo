@@ -14,6 +14,33 @@ import {
   KYCVerificationStatus,
 } from "../types/adminDriverProfile.types";
 
+type QueryParams = Record<string, any> | undefined;
+
+const buildParams = (params?: QueryParams) => {
+  if (!params) return undefined;
+  const out: Record<string, any> = {};
+
+  if (params.page) out.page = params.page;
+  if (params.limit) out.pageSize = params.limit;
+  if (params.pageSize && !params.limit) out.pageSize = params.pageSize;
+
+  [
+    "status",
+    "kycStatus",
+    "search",
+    "vehicleType",
+    "sortBy",
+    "sortOrder",
+    "dateFrom",
+    "dateTo",
+  ].forEach((k) => {
+    if (params[k] !== undefined && params[k] !== null && params[k] !== "")
+      out[k] = params[k];
+  });
+
+  return Object.keys(out).length ? out : undefined;
+};
+
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: axiosBaseQuery(),
@@ -43,29 +70,17 @@ export const adminApi = createApi({
         dateTo?: string;
       }
     >({
-      query: (params) => {
-        const queryParams: any = {};
-        if (params.page) queryParams.page = params.page;
-        if (params.limit) queryParams.pageSize = params.limit;
-        if (params.pageSize) queryParams.pageSize = params.pageSize;
-        if (params.status) queryParams.status = params.status;
-        if (params.search) queryParams.search = params.search;
-        if (params.sortBy) queryParams.sortBy = params.sortBy;
-        if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
-        if (params.dateFrom) queryParams.dateFrom = params.dateFrom;
-        if (params.dateTo) queryParams.dateTo = params.dateTo;
-        return {
-          url: "/admin/users",
-          method: "GET",
-          params: queryParams,
-        };
-      },
+      query: (params) => ({
+        url: "/admin/users",
+        method: "GET",
+        params: buildParams(params),
+      }),
       providesTags: (result) =>
         result
           ? [
-              ...result.data.users.map(({ id, userId }) => ({
+              ...result.data.users.map((u) => ({
                 type: "AdminUsers" as const,
-                id: userId || id,
+                id: u.userId ?? u.id,
               })),
               { type: "AdminUsers", id: "LIST" },
             ]
@@ -74,10 +89,7 @@ export const adminApi = createApi({
 
     updateUserStatus: builder.mutation<
       { success: boolean; message: string; data?: AdminUser },
-      {
-        userId: string;
-        action: "Active" | "Inactive" | "Suspended";
-      }
+      { userId: string; action: "Active" | "Inactive" | "Suspended" }
     >({
       query: ({ userId, action }) => ({
         url: `/admin/users/${userId}/action`,
@@ -110,31 +122,17 @@ export const adminApi = createApi({
         dateTo?: string;
       }
     >({
-      query: (params) => {
-        const queryParams: any = {};
-        if (params.page) queryParams.page = params.page;
-        if (params.limit) queryParams.pageSize = params.limit;
-        if (params.pageSize) queryParams.pageSize = params.pageSize;
-        if (params.status) queryParams.status = params.status;
-        if (params.kycStatus) queryParams.kycStatus = params.kycStatus;
-        if (params.search) queryParams.search = params.search;
-        if (params.vehicleType) queryParams.vehicleType = params.vehicleType;
-        if (params.sortBy) queryParams.sortBy = params.sortBy;
-        if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
-        if (params.dateFrom) queryParams.dateFrom = params.dateFrom;
-        if (params.dateTo) queryParams.dateTo = params.dateTo;
-        return {
-          url: "/admin/drivers",
-          method: "GET",
-          params: queryParams,
-        };
-      },
+      query: (params) => ({
+        url: "/admin/drivers",
+        method: "GET",
+        params: buildParams(params),
+      }),
       providesTags: (result) =>
         result
           ? [
-              ...result.data.drivers.map(({ id, driverId }) => ({
+              ...result.data.drivers.map((d) => ({
                 type: "AdminDrivers" as const,
-                id: driverId || id,
+                id: d.driverId ?? d.id,
               })),
               { type: "AdminDrivers", id: "LIST" },
             ]
@@ -142,12 +140,10 @@ export const adminApi = createApi({
     }),
 
     getDriverById: builder.query<AdminDriverProfileResponse, string>({
-      query: (driverId) => {
-        return {
-          url: `/admin/drivers/${driverId}/profile`,
-          method: "GET",
-        };
-      },
+      query: (driverId) => ({
+        url: `/admin/drivers/${driverId}/profile`,
+        method: "GET",
+      }),
       providesTags: (result, error, driverId) => [
         { type: "DriverProfile", id: driverId },
         { type: "AdminDrivers", id: driverId },
@@ -156,11 +152,7 @@ export const adminApi = createApi({
 
     updateDriverStatus: builder.mutation<
       { success: boolean; message: string; data: any },
-      {
-        driverId: string;
-        action: DriverProfileAction;
-        reason?: string;
-      }
+      { driverId: string; action: DriverProfileAction; reason?: string }
     >({
       query: ({ driverId, action, reason }) => ({
         url: `/admin/drivers/${driverId}/action`,
@@ -187,10 +179,7 @@ export const adminApi = createApi({
       },
       void
     >({
-      query: () => ({
-        url: "/admin/drivers/stats",
-        method: "GET",
-      }),
+      query: () => ({ url: "/admin/drivers/stats", method: "GET" }),
       providesTags: [{ type: "AdminStats", id: "DRIVER_STATS" }],
     }),
 
@@ -209,29 +198,17 @@ export const adminApi = createApi({
         dateTo?: string;
       }
     >({
-      query: (params) => {
-        const queryParams: any = {};
-        if (params.page) queryParams.page = params.page;
-        if (params.limit) queryParams.pageSize = params.limit;
-        if (params.pageSize) queryParams.pageSize = params.pageSize;
-        if (params.status) queryParams.status = params.status;
-        if (params.search) queryParams.search = params.search;
-        if (params.sortBy) queryParams.sortBy = params.sortBy;
-        if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
-        if (params.dateFrom) queryParams.dateFrom = params.dateFrom;
-        if (params.dateTo) queryParams.dateTo = params.dateTo;
-        return {
-          url: "/admin/drivers/kyc-requests",
-          method: "GET",
-          params: queryParams,
-        };
-      },
+      query: (params) => ({
+        url: "/admin/drivers/kyc-requests",
+        method: "GET",
+        params: buildParams(params),
+      }),
       providesTags: (result) =>
         result
           ? [
-              ...result.data.kycDocuments.map(({ kyc }) => ({
+              ...result.data.kycDocuments.map((doc) => ({
                 type: "KYCRequests" as const,
-                id: kyc.id,
+                id: doc.kyc.id,
               })),
               { type: "KYCRequests", id: "LIST" },
             ]
@@ -262,7 +239,7 @@ export const adminApi = createApi({
         method: "PATCH",
         data: {
           verificationStatus: action,
-          status: status || (action === "Approved" ? "approved" : "rejected"),
+          status: status ?? (action === "Approved" ? "approved" : "rejected"),
           comments: reason,
         },
       }),
