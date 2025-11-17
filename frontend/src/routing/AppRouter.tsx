@@ -22,6 +22,7 @@ import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailCompo
 import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
 import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
+import HelpPage from "@/features/public/pages/Help";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -82,6 +83,7 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
+      <Route path="/help" element={<HelpPage />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       {/* Protected */}
       <Route
