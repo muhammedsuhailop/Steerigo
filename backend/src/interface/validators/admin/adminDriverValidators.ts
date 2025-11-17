@@ -50,7 +50,7 @@ const driverActionSchema = z.object({
   }),
   body: z.object({
     action: z.enum(["block", "suspend", "activate"], {
-        message: "Action must be one of: block, suspend, activate",
+      message: "Action must be one of: block, suspend, activate",
     }),
     reason: z
       .string()
@@ -100,8 +100,27 @@ const updateKycStatusSchema = z.object({
   }),
   body: z.object({
     verificationStatus: z.enum(["Approved", "Rejected", "Expired"], {
-        message:
-          "Verification status must be one of: Approved, Rejected, Expired",
+      message:
+        "Verification status must be one of: Approved, Rejected, Expired",
+    }),
+    comments: z
+      .string()
+      .min(1, "Comments must be at least 1 character")
+      .max(1000, "Comments cannot exceed 1000 characters")
+      .optional(),
+  }),
+});
+
+const updateDriverKycStatusSchema = z.object({
+  params: z.object({
+    driverId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
+  }),
+  body: z.object({
+    kycStatus: z.enum(["InReview", "Rejected", "Approved", "Expired"], {
+      message:
+        "KYC status must be one of: InReview, Rejected, Approved, Expired",
     }),
     comments: z
       .string()
@@ -328,6 +347,52 @@ export const validateGetKycRequestByIdRequest = (
       res.status(HttpStatusCodes.BAD_REQUEST).json(response);
       return;
     }
+    next(error);
+  }
+};
+
+export const validateUpdateDriverKycStatusRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const validatedData = updateDriverKycStatusSchema.parse({
+      params: req.params,
+      body: req.body,
+    });
+    req.params = validatedData.params;
+    req.body = validatedData.body;
+
+    if (req.body.kycStatus === "Rejected" && !req.body.comments) {
+      const response: ApiResponse = {
+        success: false,
+        message: "Comments are required when rejecting driver KYC status",
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+
+    next();
+  } catch (error) {
+    Logger.warn("Update driver KYC status validation failed", {
+      driverId: req.params?.driverId,
+      body: req.body,
+      error: error instanceof z.ZodError ? error.issues : error,
+    });
+
+    if (error instanceof z.ZodError) {
+      const messages = error.issues
+        .map((err: z.ZodIssue) => err.message)
+        .join(", ");
+      const response: ApiResponse = {
+        success: false,
+        message: `Validation failed: ${messages}`,
+      };
+      res.status(HttpStatusCodes.BAD_REQUEST).json(response);
+      return;
+    }
+
     next(error);
   }
 };

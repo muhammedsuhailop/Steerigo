@@ -19,6 +19,7 @@ import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycReq
 
 // Admin Driver Controllers
 import { AdminDriverController } from "@interface/controllers/admin/AdminDriverController";
+import { UpdateDriverKycStatusUseCase } from "@application/use-cases/admin/UpdateDriverKycStatusUseCase";
 
 export class AdminDriverFactory {
   static register(container: Container): void {
@@ -47,6 +48,9 @@ export class AdminDriverFactory {
     container.bind(TYPES.GetKycRequestsUseCase).to(GetKycRequestsUseCase);
     container.bind(TYPES.UpdateKycStatusUseCase).to(UpdateKycStatusUseCase);
     container.bind(TYPES.GetKycRequestByIdUseCase).to(GetKycRequestByIdUseCase);
+    container
+      .bind(TYPES.UpdateDriverKycStatusUseCase)
+      .to(UpdateDriverKycStatusUseCase);
 
     // Controller bindings
     container.bind(TYPES.AdminDriverController).to(AdminDriverController);

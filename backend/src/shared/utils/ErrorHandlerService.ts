@@ -126,6 +126,60 @@ export class ErrorHandlerService {
       },
     ],
 
+    // ===== KYC VALIDATION ERRORS (400) =====
+    [
+      "KYCNotFoundError",
+      {
+        statusCode: 400,
+        message: "No KYC documents found for this driver",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "ProfilePictureNotUploadedError",
+      {
+        statusCode: 400,
+        message: "Driver must upload a profile picture before KYC approval",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "LicenseNotApprovedError",
+      {
+        statusCode: 400,
+        message:
+          "Latest license must be approved before updating driver KYC status",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "NonLicenseKYCNotApprovedError",
+      {
+        statusCode: 400,
+        message:
+          "At least one non-license KYC document (Aadhaar, PAN, or Passport) must be approved",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "InvalidKYCStatusTransitionError",
+      {
+        statusCode: 400,
+        message: "Invalid KYC status transition",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
     // ===== SEARCH ERRORS (400/404) =====
     [
       "NoDriversAvailableError",

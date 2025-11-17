@@ -51,6 +51,7 @@ export const TYPES = {
   UpdateKycStatusUseCase: Symbol.for("UpdateKycStatusUseCase"),
   GetKycRequestByIdUseCase: Symbol.for("GetKycRequestByIdUseCase"),
   KycSubmissionUseCase: Symbol.for("KycSubmissionUseCase"),
+  UpdateDriverKycStatusUseCase: Symbol.for("UpdateDriverKycStatusUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),

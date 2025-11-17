@@ -8,6 +8,7 @@ import {
   validateGetKycRequestsRequest,
   validateUpdateKycStatusRequest,
   validateGetKycRequestByIdRequest,
+  validateUpdateDriverKycStatusRequest,
 } from "@interface/validators/admin/adminDriverValidators";
 import { authMiddleware } from "@interface/middleware/auth/AuthMiddleware";
 import { requireRole } from "@interface/middleware/auth/AuthMiddleware";
@@ -24,38 +25,45 @@ const adminDriverController = container.get<AdminDriverController>(
 router.use(authMiddleware);
 router.use(requireRole(["Admin"]));
 
-// GET /admin/drivers
+// GET /api/admin/drivers
 router.get("/", validateGetDriversRequest, (req, res) =>
   adminDriverController.getDrivers(req, res)
 );
 
-// PUT /admin/drivers/:driverId/action
+// PUT /api/admin/drivers/:driverId/action
 router.put("/:driverId/action", validateDriverActionRequest, (req, res) =>
   adminDriverController.driverAction(req, res)
 );
 
-// GET /admin/drivers/:driverId/profile
+// GET /api/admin/drivers/:driverId/profile
 router.get("/:driverId/profile", validateGetDriverProfileRequest, (req, res) =>
   adminDriverController.getDriverProfile(req, res)
 );
 
-// GET /admin/drivers/kyc-requests
+// GET /api/admin/drivers/kyc-requests
 router.get("/kyc-requests", validateGetKycRequestsRequest, (req, res) =>
   adminDriverController.getKycRequests(req, res)
 );
 
-// PATCH /admin/drivers/kyc-requests/:kycId/status
+// PATCH /api/admin/drivers/kyc-requests/:kycId/status
 router.patch(
   "/kyc-requests/:kycId/status",
   validateUpdateKycStatusRequest,
   (req, res) => adminDriverController.updateKycStatus(req, res)
 );
 
-// GET /admin/drivers/kyc-requests/:kycId
+// GET /api/admin/drivers/kyc-requests/:kycId
 router.get(
   "/kyc-requests/:kycId",
   validateGetKycRequestByIdRequest,
   (req, res) => adminDriverController.getKycRequestById(req, res)
+);
+
+// PATCH /api/admin/drivers/:driverId/kyc-status/update
+router.patch(
+  "/:driverId/kyc-status/update",
+  validateUpdateDriverKycStatusRequest,
+  (req, res) => adminDriverController.updateDriverKycStatus(req, res)
 );
 
 export { router as adminDriverRoutes };
