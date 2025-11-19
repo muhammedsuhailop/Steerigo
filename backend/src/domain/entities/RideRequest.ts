@@ -5,7 +5,6 @@ import { RideType } from "@domain/value-objects/RideType";
 export class RideRequest {
   private constructor(
     private readonly id: string,
-    private readonly requestId: string,
     private readonly driverId: string,
     private readonly riderId: string,
     private readonly pickup: Location,
@@ -21,7 +20,6 @@ export class RideRequest {
 
   static create(
     id: string,
-    requestId: string,
     driverId: string,
     riderId: string,
     pickup: Location,
@@ -37,7 +35,6 @@ export class RideRequest {
 
     return new RideRequest(
       id,
-      requestId,
       driverId,
       riderId,
       pickup,
@@ -52,7 +49,7 @@ export class RideRequest {
 
   static fromData(data: {
     id: string;
-    requestId: string;
+    // requestId: string;
     driverId: string;
     riderId: string;
     pickup: Location;
@@ -67,7 +64,6 @@ export class RideRequest {
   }): RideRequest {
     return new RideRequest(
       data.id,
-      data.requestId,
       data.driverId,
       data.riderId,
       data.pickup,
@@ -88,7 +84,7 @@ export class RideRequest {
   }
 
   getRequestId(): string {
-    return this.requestId;
+    return this.id;
   }
 
   getDriverId(): string {

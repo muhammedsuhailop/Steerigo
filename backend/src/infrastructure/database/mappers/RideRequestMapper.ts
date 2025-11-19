@@ -3,6 +3,7 @@ import { Location } from "@domain/value-objects/Location";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { RideType } from "@domain/value-objects/RideType";
 import { IRideRequestDocument } from "../models/RideRequestModel";
+import { Types } from "mongoose";
 
 export class RideRequestMapper {
   static toDomain(doc: IRideRequestDocument): RideRequest {
@@ -20,7 +21,6 @@ export class RideRequestMapper {
 
     return RideRequest.fromData({
       id: doc.id.toString(),
-      requestId: doc.requestId,
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       pickup,
@@ -38,9 +38,8 @@ export class RideRequestMapper {
   static toPersistence(entity: RideRequest): any {
     return {
       _id: entity.getId(),
-      requestId: entity.getRequestId(),
-      driverId: entity.getDriverId(),
-      riderId: entity.getRiderId(),
+      driverId: new Types.ObjectId(entity.getDriverId()),
+      riderId: new Types.ObjectId(entity.getRiderId()),
       pickup: {
         latitude: entity.getPickup().getLatitude(),
         longitude: entity.getPickup().getLongitude(),

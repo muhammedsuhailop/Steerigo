@@ -1,7 +1,7 @@
 import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRideRequestDocument extends Document {
-  requestId: string;
+  _id: string;
   driverId: Types.ObjectId;
   riderId: Types.ObjectId;
 
@@ -33,7 +33,7 @@ export interface IRideRequestDocument extends Document {
  // RideRequest Schema Definition
 const rideRequestSchema = new Schema<IRideRequestDocument>(
   {
-    requestId: {
+    _id: {
       type: String,
       required: true,
       unique: true,

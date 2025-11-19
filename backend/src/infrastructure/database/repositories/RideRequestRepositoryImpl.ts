@@ -39,12 +39,18 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
 
   async save(request: RideRequest): Promise<RideRequest> {
     try {
-      const requestData = RideRequestMapper.toPersistence(request);
       const requestId = request.getId();
+      const requestData = RideRequestMapper.toPersistence(request);
 
-      const savedDoc = await RideRequestModel.findByIdAndUpdate(
-        requestId,
-        requestData,
+      const now = new Date();
+      const defaultExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+      const savedDoc = await RideRequestModel.findOneAndUpdate(
+        { _id: requestId },
+        {
+          $set: requestData,
+          $setOnInsert: { createdAt: now, expiresAt: defaultExpiresAt },
+        },
         {
           new: true,
           upsert: true,
@@ -52,15 +58,12 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
         }
       );
 
-      if (!savedDoc) {
+      if (!savedDoc)
         throw new Error(`Failed to save ride request: ${requestId}`);
-      }
-
       Logger.info("Ride request saved successfully", {
         requestId: request.getRequestId(),
         driverId: request.getDriverId(),
       });
-
       return RideRequestMapper.toDomain(savedDoc);
     } catch (error) {
       Logger.error("Error saving ride request", {
@@ -281,7 +284,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
   // Specialized operations
   async findByRequestId(requestId: string): Promise<RideRequest | null> {
     try {
-      const doc = await RideRequestModel.findOne({ requestId });
+      const doc = await RideRequestModel.findById(requestId);
       return doc ? RideRequestMapper.toDomain(doc) : null;
     } catch (error) {
       Logger.error("Error finding ride request by requestId", {
@@ -345,7 +348,12 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
         return {
           updateOne: {
             filter: { _id: request.getId() },
-            update: { $set: requestData },
+            update: {
+              $set: requestData,
+              $setOnInsert: {
+                expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+              },
+            },
             upsert: true,
           },
         };
