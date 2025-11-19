@@ -19,6 +19,7 @@ export interface Driver {
   userId: string;
   name: string;
   mobile: string;
+  profilePicture?: string;
   rating: number;
   totalRides: number;
   status: string;
@@ -47,6 +48,29 @@ export interface SearchCriteria {
   bodyType: string;
 }
 
+export interface MoneyAmount {
+  amount: number;
+  currency: string;
+}
+
+export interface TaxInfo {
+  name: string;
+  rate: number;
+  amount: MoneyAmount;
+}
+
+export interface EstimatedFare {
+  baseFare: MoneyAmount;
+  platformFee: MoneyAmount;
+  taxes: {
+    fare: TaxInfo;
+    platformFee: TaxInfo;
+  };
+  totalFare: MoneyAmount;
+  durationHours: number;
+  calculatedAt: string;
+}
+
 export interface DriverSearchSummary {
   totalFound: number;
   searchedAt: string;
@@ -58,6 +82,7 @@ export interface DriverSearchResponse {
   message: string;
   data: {
     drivers: Driver[];
+    estimatedFare: EstimatedFare;
     summary: DriverSearchSummary;
   };
 }
@@ -75,6 +100,7 @@ export interface SearchNearbyDriversPayload {
 
 export interface DriverSearchState {
   drivers: Driver[];
+  estimatedFare: EstimatedFare | null;
   searchCriteria: SearchCriteria | null;
   isLoading: boolean;
   error: string | null;
@@ -88,6 +114,8 @@ export interface TripFormData {
   dropLocation: Location | null;
   rideStartDate: string;
   rideStartTime: string;
+  rideEndDate: string;
+  rideEndTime: string;
   searchRadiusKm: number;
   gearType: string;
   bodyType: string;

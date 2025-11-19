@@ -72,25 +72,65 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     dropLocation: null,
     rideStartDate: "",
     rideStartTime: "",
+    rideEndDate: "",
+    rideEndTime: "",
     searchRadiusKm: 25,
     gearType: "Manual",
     bodyType: "Sedan",
-    timeRequired: 1,
+    timeRequired: 1, // hours
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [autoComputeEnd, setAutoComputeEnd] = useState<boolean>(true);
+
   // Set default date and time
   useEffect(() => {
     const now = new Date();
-    const dateOnly = now.toISOString().slice(0, 10);
-    const timeStr = now.toTimeString().slice(0, 5);
+    const dateOnly = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const timeStr = now.toTimeString().slice(0, 5); // HH:MM
     setFormData((p) => ({
       ...p,
       rideStartDate: dateOnly,
       rideStartTime: timeStr,
     }));
   }, []);
+
+  // Auto-calc end date/time whenever start/timeRequired changes (only when autoComputeEnd is true)
+  useEffect(() => {
+    if (
+      !autoComputeEnd ||
+      !formData.rideStartDate ||
+      !formData.rideStartTime ||
+      !formData.timeRequired
+    )
+      return;
+
+    // combine start date & time to a Date object
+    // ensure interpret local date/time correctly
+    const startISO = `${formData.rideStartDate}T${formData.rideStartTime}:00`;
+    const startDate = new Date(startISO);
+
+    if (Number.isNaN(startDate.getTime())) return;
+
+    // timeRequired is in hours — convert to milliseconds
+    const ms = formData.timeRequired * 60 * 60 * 1000;
+    const endDate = new Date(startDate.getTime() + ms);
+
+    const endDateStr = endDate.toISOString().slice(0, 10);
+    const endTimeStr = endDate.toTimeString().slice(0, 5); /* HH:MM */
+
+    setFormData((p) => ({
+      ...p,
+      rideEndDate: endDateStr,
+      rideEndTime: endTimeStr,
+    }));
+  }, [
+    formData.rideStartDate,
+    formData.rideStartTime,
+    formData.timeRequired,
+    autoComputeEnd,
+  ]);
 
   // Notify parent of changes in real-time
   useEffect(() => {
@@ -114,6 +154,17 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
       formData.timeRequired > 24
     )
       newErrors.timeRequired = "Please select required hours (1–24)";
+
+    if (formData.rideEndDate && formData.rideEndTime) {
+      const start = new Date(
+        `${formData.rideStartDate}T${formData.rideStartTime}:00`
+      );
+      const end = new Date(
+        `${formData.rideEndDate}T${formData.rideEndTime}:00`
+      );
+      if (end.getTime() < start.getTime())
+        newErrors.rideEndDate = "End date/time must be after start date/time";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -142,12 +193,25 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     }));
   };
 
+  const onChangeRideEndDate = (value: string) => {
+    setAutoComputeEnd(false);
+    setFormData((p) => ({ ...p, rideEndDate: value }));
+  };
+  const onChangeRideEndTime = (value: string) => {
+    setAutoComputeEnd(false);
+    setFormData((p) => ({ ...p, rideEndTime: value }));
+  };
+
+  const enableAutoComputeEnd = () => {
+    setAutoComputeEnd(true);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-2">
           <FaCar className="text-gray-700" />
-          Find Your Driver
+          Find Your Nearest Driver
         </h2>
         <p className="text-sm text-gray-600">
           Fill in the details to search for available drivers
@@ -243,13 +307,13 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
           </div>
         )}
 
-        {/* Date and Time in one row */}
+        {/* Date and Time row (start + end) */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Date */}
+          {/* Start - Date */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               <FaCalendarAlt className="inline mr-2 text-gray-600" />
-              Date
+              Start Date
             </label>
             <input
               type="date"
@@ -267,11 +331,11 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             )}
           </div>
 
-          {/* Time */}
+          {/* Start - Time */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               <FaClock className="inline mr-2 text-gray-600" />
-              Time
+              Start Time
             </label>
             <input
               type="time"
@@ -285,6 +349,56 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
               <p className="text-red-500 text-xs mt-1">
                 {errors.rideStartTime}
               </p>
+            )}
+          </div>
+        </div>
+
+        {/* End Date & Time (editable, auto-filled unless user edits) */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* End - Date */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaCalendarAlt className="inline mr-2 text-gray-600" />
+              End Date
+            </label>
+            <input
+              type="date"
+              value={formData.rideEndDate}
+              onChange={(e) => onChangeRideEndDate(e.target.value)}
+              min={
+                formData.rideStartDate || new Date().toISOString().slice(0, 10)
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+            {/* small helper to re-enable auto compute */}
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                id="auto-end"
+                type="checkbox"
+                checked={autoComputeEnd}
+                onChange={(e) => setAutoComputeEnd(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <label htmlFor="auto-end" className="text-xs text-gray-500">
+                Auto-calc end time
+              </label>
+            </div>
+          </div>
+
+          {/* End - Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaClock className="inline mr-2 text-gray-600" />
+              End Time
+            </label>
+            <input
+              type="time"
+              value={formData.rideEndTime}
+              onChange={(e) => onChangeRideEndTime(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+            {errors.rideEndDate && (
+              <p className="text-red-500 text-xs mt-1">{errors.rideEndDate}</p>
             )}
           </div>
         </div>

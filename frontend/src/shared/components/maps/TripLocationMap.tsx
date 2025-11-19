@@ -134,7 +134,7 @@ const TripLocationMap: React.FC<TripLocationMapProps> = ({
     : [11.2815, 75.8436];
 
   return (
-    <div className="h-full w-full">
+    <div className="relative h-full w-full">
       <MapContainer
         center={center}
         zoom={13}
