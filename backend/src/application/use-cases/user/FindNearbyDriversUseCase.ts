@@ -13,6 +13,7 @@ import { DriverRepository } from "@application/repositories/DriverRepository";
 import { UserRepository } from "@application/repositories/UserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
+import { FareCalculationService } from "@application/services/FareCalculationService";
 
 export interface DriverSearchResult {
   driverId: string;
@@ -29,7 +30,9 @@ export class FindNearbyDriversUseCase {
     @inject(TYPES.DriverRepository)
     private driverRepository: DriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    @inject(TYPES.FareCalculationService)
+    private fareCalculationService: FareCalculationService
   ) {}
 
   async execute(
@@ -64,6 +67,11 @@ export class FindNearbyDriversUseCase {
         requestDto.bodyType
       );
 
+      const fareBreakdown = await this.fareCalculationService.calculateFare({
+        durationMinutes: requestDto.timeRequired,
+        searchDate: requestDto.searchDate,
+      });
+
       const nearbyAvailabilities =
         await this.driverAvailabilityRepository.findNearbyAvailableDrivers(
           searchCriteria.getLatitude(),
@@ -85,21 +93,31 @@ export class FindNearbyDriversUseCase {
 
       if (nearbyAvailabilities.length === 0) {
         return Result.success(
-          FindNearbyDriversResponseDto.create([], 0, {
-            location: {
-              latitude: searchCriteria.getLatitude(),
-              longitude: searchCriteria.getLongitude(),
+          FindNearbyDriversResponseDto.create(
+            [],
+            0,
+            {
+              location: {
+                latitude: searchCriteria.getLatitude(),
+                longitude: searchCriteria.getLongitude(),
+              },
+              radiusKm: searchCriteria.getRadiusKm(),
+              searchDate: searchCriteria.getSearchDate(),
+              timeRequiredMinutes: searchCriteria.getTimeRequiredMinutes(),
+              filters: {
+                gearType: searchFilter.getGearType(),
+                bodyType: searchFilter.getBodyType(),
+              },
             },
-            radiusKm: searchCriteria.getRadiusKm(),
-            searchDate: searchCriteria.getSearchDate(),
-            timeRequiredMinutes: searchCriteria.getTimeRequiredMinutes(),
-            filters: {
-              gearType: searchFilter.getGearType(),
-              bodyType: searchFilter.getBodyType(),
-            },
-          })
+            fareBreakdown
+          )
         );
       }
+
+      Logger.info("Fare calculated for driver search", {
+        durationMinutes: requestDto.timeRequired,
+        totalFare: fareBreakdown.getTotalFare().getAmount(),
+      });
 
       const driverResponses = await Promise.all(
         nearbyAvailabilities.map(async (availability, index) => {
@@ -263,7 +281,8 @@ export class FindNearbyDriversUseCase {
                 bodyType: searchFilter.getBodyType(),
               }
             : undefined,
-        }
+        },
+        fareBreakdown
       );
 
       Logger.info("Find nearby drivers use case completed successfully", {

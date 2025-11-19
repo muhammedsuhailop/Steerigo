@@ -144,9 +144,10 @@ export class Ride {
     return this.updatedAt;
   }
 
+  // ✅ FIX: Extract numeric amount from Money object
   // Convenience getters for fare
   getFare(): number {
-    return this.fareBreakdown.getTotalFare();
+    return this.fareBreakdown.getTotalFare().getAmount(); // ✅ CHANGED: Added .getAmount()
   }
 
   // Status check methods

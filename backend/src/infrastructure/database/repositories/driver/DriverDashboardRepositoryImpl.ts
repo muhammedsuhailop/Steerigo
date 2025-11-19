@@ -14,7 +14,11 @@ import { DriverDashboardStatistics } from "@domain/value-objects/DriverDashboard
 import { DriverDashboardPerformance } from "@domain/value-objects/DriverDashboardPerformance";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import {
+  FareBreakdown,
+  TaxBreakdown,
+} from "@domain/value-objects/FareBreakdown";
+import { Money } from "@domain/value-objects/Money";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { RideType } from "@domain/value-objects/RideType";
 
@@ -252,14 +256,65 @@ export class DriverDashboardRepositoryImpl
       address: doc.drop.address,
     });
 
-    // Reconstruct FareBreakdown from document
-    const fareBreakdown = new FareBreakdown(
-      doc.fareBreakdown?.baseFare || 0,
-      doc.fareBreakdown?.distanceFare || 0,
-      doc.fareBreakdown?.timeFare || 0,
-      doc.fareBreakdown?.tax || 0,
-      doc.fareBreakdown?.surgeMultiplier || 1
-    );
+    let fareBreakdown: FareBreakdown;
+
+    try {
+      // Calculate total fare from components
+      const baseFare = doc.fareBreakdown?.baseFare || 0;
+      const distanceFare = doc.fareBreakdown?.distanceFare || 0;
+      const timeFare = doc.fareBreakdown?.timeFare || 0;
+      const taxAmount = doc.fareBreakdown?.tax || 0;
+
+      const platformFeeAmount = baseFare * 0.02;
+
+      fareBreakdown = FareBreakdown.create({
+        baseFare: Money.create(baseFare + distanceFare + timeFare),
+        platformFee: Money.create(platformFeeAmount),
+        fareTax: {
+          name: "GST on Fare",
+          rate: 5,
+          amount: Money.create(taxAmount),
+        } as TaxBreakdown,
+        platformFeeTax: {
+          name: "GST on Platform Fee",
+          rate: 18,
+          amount: Money.create(platformFeeAmount * 0.18),
+        } as TaxBreakdown,
+        totalFare: Money.create(
+          baseFare +
+            distanceFare +
+            timeFare +
+            taxAmount +
+            platformFeeAmount +
+            platformFeeAmount * 0.18
+        ),
+        durationHours: 1,
+      });
+    } catch (error) {
+      Logger.warn("Failed to create FareBreakdown, using default values", {
+        documentId: doc.id,
+        error,
+      });
+
+      // Fallback: create minimal fare breakdown
+      const totalFare = doc.fareBreakdown?.baseFare || 0;
+      fareBreakdown = FareBreakdown.create({
+        baseFare: Money.create(totalFare),
+        platformFee: Money.create(0),
+        fareTax: {
+          name: "GST on Fare",
+          rate: 5,
+          amount: Money.create(0),
+        } as TaxBreakdown,
+        platformFeeTax: {
+          name: "GST on Platform Fee",
+          rate: 18,
+          amount: Money.create(0),
+        } as TaxBreakdown,
+        totalFare: Money.create(totalFare),
+        durationHours: 1,
+      });
+    }
 
     // Reconstruct RideTimeline from document
     const timeline = RideTimeline.fromData({
@@ -303,8 +358,7 @@ export class DriverDashboardRepositoryImpl
     const rideTypeValue = this.parseRideType(doc.rideType);
 
     return RideRequest.fromData({
-      id: doc.id.toString(),
-      requestId: doc.requestId,
+      id: doc._id.toString(),
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       pickup,

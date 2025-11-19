@@ -36,8 +36,6 @@ const rideRequestSchema = new Schema<IRideRequestDocument>(
     _id: {
       type: String,
       required: true,
-      unique: true,
-      index: true,
     },
 
     driverId: {

@@ -12,6 +12,7 @@ export const TYPES = {
   DriverRepository: Symbol.for("DriverRepository"),
   DriverAvailabilityRepository: Symbol.for("DriverAvailabilityRepository"),
   DriverDashboardRepository: Symbol.for("DriverDashboardRepository"),
+  FareConfigurationRepository: Symbol.for("FareConfigurationRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -21,6 +22,7 @@ export const TYPES = {
   GoogleAuthService: Symbol.for("GoogleAuthService"),
   FileUploadService: Symbol.for("FileUploadService"),
   TokenManagementService: Symbol.for("TokenManagementService"),
+  FareCalculationService: Symbol.for("FareCalculationService"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
