@@ -13,6 +13,7 @@ export const TYPES = {
   DriverAvailabilityRepository: Symbol.for("DriverAvailabilityRepository"),
   DriverDashboardRepository: Symbol.for("DriverDashboardRepository"),
   FareConfigurationRepository: Symbol.for("FareConfigurationRepository"),
+  RideRequestRepository: Symbol.for("RideRequestRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -65,6 +66,7 @@ export const TYPES = {
   GetDriverDetailedProfileUseCase: Symbol.for(
     "GetDriverDetailedProfileUseCase"
   ),
+  SendRideRequestUseCase: Symbol.for("SendRideRequestUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -101,4 +103,5 @@ export const TYPES = {
   FileController: Symbol.for("FileController"),
   DriverAvailabilityController: Symbol.for("DriverAvailabilityController"),
   DriverSearchController: Symbol.for("DriverSearchController"),
+  RideController: Symbol.for("RideController"),
 };
