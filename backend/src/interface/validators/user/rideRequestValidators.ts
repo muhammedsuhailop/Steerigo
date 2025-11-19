@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const VALID_RIDE_TYPES = ["One Way", "Round Trip"] as const;
 
-// Location schema
 export const locationSchema = z.object({
   latitude: z
     .number()
@@ -18,6 +17,33 @@ export const locationSchema = z.object({
       message: "Address must be a string with maximum 500 characters",
     })
     .optional(),
+});
+
+const moneySchema = z.object({
+  amount: z.number().min(0, { message: "Amount must be non-negative" }),
+  currency: z.string().default("INR"),
+});
+
+const taxBreakdownSchema = z.object({
+  name: z.string().min(1, { message: "Tax name is required" }),
+  rate: z
+    .number()
+    .min(0, { message: "Tax rate must be non-negative" })
+    .max(100, { message: "Tax rate cannot exceed 100%" }),
+  amount: moneySchema,
+});
+
+const fareBreakdownSchema = z.object({
+  baseFare: moneySchema,
+  platformFee: moneySchema,
+  taxes: z.object({
+    fare: taxBreakdownSchema,
+    platformFee: taxBreakdownSchema,
+  }),
+  totalFare: moneySchema,
+  durationHours: z
+    .number()
+    .min(0, { message: "Duration must be non-negative" }),
 });
 
 // Send Ride Request Schema
@@ -55,11 +81,7 @@ export const sendRideRequestSchema = z.object({
       rideType: z.enum(VALID_RIDE_TYPES, {
         message: "Ride type must be either 'One Way' or 'Round Trip'",
       }),
-      fare: z
-        .number()
-        .positive({ message: "Fare must be a positive number" })
-        .min(0.01, { message: "Fare must be at least 0.01" })
-        .max(999999, { message: "Fare cannot exceed 999999" }),
+      fareBreakdown: fareBreakdownSchema,
       pickupETA: z
         .string()
         .min(1, { message: "Pickup ETA is required" })

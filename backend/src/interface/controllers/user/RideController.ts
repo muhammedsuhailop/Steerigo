@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
 import { SendRideRequestUseCase } from "@application/use-cases/user/SendRideRequestUseCase";
 import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
+import {
+  FareBreakdown,
+  TaxBreakdown,
+} from "@domain/value-objects/FareBreakdown";
+import { Money } from "@domain/value-objects/Money";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -32,18 +37,67 @@ export class RideController {
         return;
       }
 
-      const { driverId, pickup, drop, pickupTime, rideType, fare, pickupETA } =
-        req.body;
+      const {
+        driverId,
+        pickup,
+        drop,
+        pickupTime,
+        rideType,
+        fareBreakdown: fareBreakdownData, 
+        pickupETA,
+      } = req.body;
 
       Logger.info("Send ride request received", {
         riderId,
         driverId,
         pickupTime,
         rideType,
-        fare,
+        totalFare: fareBreakdownData?.totalFare?.amount,
       });
 
-      // Create DTO
+      const baseFare = Money.create(
+        fareBreakdownData.baseFare.amount,
+        fareBreakdownData.baseFare.currency
+      );
+
+      const platformFee = Money.create(
+        fareBreakdownData.platformFee.amount,
+        fareBreakdownData.platformFee.currency
+      );
+
+      const fareTax: TaxBreakdown = {
+        name: fareBreakdownData.taxes.fare.name,
+        rate: fareBreakdownData.taxes.fare.rate,
+        amount: Money.create(
+          fareBreakdownData.taxes.fare.amount.amount,
+          fareBreakdownData.taxes.fare.amount.currency
+        ),
+      };
+
+      const platformFeeTax: TaxBreakdown = {
+        name: fareBreakdownData.taxes.platformFee.name,
+        rate: fareBreakdownData.taxes.platformFee.rate,
+        amount: Money.create(
+          fareBreakdownData.taxes.platformFee.amount.amount,
+          fareBreakdownData.taxes.platformFee.amount.currency
+        ),
+      };
+
+      const totalFare = Money.create(
+        fareBreakdownData.totalFare.amount,
+        fareBreakdownData.totalFare.currency
+      );
+
+      const fareBreakdown = FareBreakdown.create({
+        baseFare,
+        platformFee,
+        fareTax,
+        platformFeeTax,
+        totalFare,
+        durationHours: fareBreakdownData.durationHours,
+      });
+
+      // Create DTO with fareBreakdown
       const dto = new SendRideRequestDto(
         riderId,
         driverId,
@@ -55,7 +109,7 @@ export class RideController {
         drop.address,
         new Date(pickupTime),
         rideType,
-        fare,
+        fareBreakdown, 
         pickupETA
       );
 

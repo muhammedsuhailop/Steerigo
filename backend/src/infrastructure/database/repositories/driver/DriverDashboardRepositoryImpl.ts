@@ -357,6 +357,79 @@ export class DriverDashboardRepositoryImpl
 
     const rideTypeValue = this.parseRideType(doc.rideType);
 
+    // Create FareBreakdown from document
+    let fareBreakdown: FareBreakdown;
+
+    try {
+      const baseFare = Money.create(
+        doc.fareBreakdown.baseFare.amount,
+        doc.fareBreakdown.baseFare.currency
+      );
+
+      const platformFee = Money.create(
+        doc.fareBreakdown.platformFee.amount,
+        doc.fareBreakdown.platformFee.currency
+      );
+
+      const fareTax: TaxBreakdown = {
+        name: doc.fareBreakdown.taxes.fare.name,
+        rate: doc.fareBreakdown.taxes.fare.rate,
+        amount: Money.create(
+          doc.fareBreakdown.taxes.fare.amount.amount,
+          doc.fareBreakdown.taxes.fare.amount.currency
+        ),
+      };
+
+      const platformFeeTax: TaxBreakdown = {
+        name: doc.fareBreakdown.taxes.platformFee.name,
+        rate: doc.fareBreakdown.taxes.platformFee.rate,
+        amount: Money.create(
+          doc.fareBreakdown.taxes.platformFee.amount.amount,
+          doc.fareBreakdown.taxes.platformFee.amount.currency
+        ),
+      };
+
+      const totalFare = Money.create(
+        doc.fareBreakdown.totalFare.amount,
+        doc.fareBreakdown.totalFare.currency
+      );
+
+      fareBreakdown = FareBreakdown.create({
+        baseFare,
+        platformFee,
+        fareTax,
+        platformFeeTax,
+        totalFare,
+        durationHours: doc.fareBreakdown.durationHours,
+      });
+    } catch (error) {
+      Logger.warn(
+        "Failed to create FareBreakdown from RideRequest, using default values",
+        {
+          documentId: doc._id,
+          error,
+        }
+      );
+
+      // Fallback
+      fareBreakdown = FareBreakdown.create({
+        baseFare: Money.create(0),
+        platformFee: Money.create(0),
+        fareTax: {
+          name: "GST on Fare",
+          rate: 5,
+          amount: Money.create(0),
+        } as TaxBreakdown,
+        platformFeeTax: {
+          name: "GST on Platform Fee",
+          rate: 18,
+          amount: Money.create(0),
+        } as TaxBreakdown,
+        totalFare: Money.create(0),
+        durationHours: 0,
+      });
+    }
+
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
@@ -365,7 +438,7 @@ export class DriverDashboardRepositoryImpl
       drop,
       pickupTime: doc.pickupTime,
       rideType: rideTypeValue,
-      fare: doc.fare,
+      fareBreakdown,
       status: doc.status as RideRequestStatus,
       pickupETA: doc.pickupETA,
       createdAt: doc.createdAt,

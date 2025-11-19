@@ -126,6 +126,104 @@ export class ErrorHandlerService {
       },
     ],
 
+    // ===== RIDE REQUEST VALIDATION ERRORS (400) =====
+    [
+      "INVALID_FARE",
+      {
+        statusCode: 400,
+        message: "Invalid fare amount. Fare must be positive",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "INVALID_PICKUP_TIME",
+      {
+        statusCode: 400,
+        message: "Invalid pickup time. Pickup time must be in the future",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "INVALID_LOCATION",
+      {
+        statusCode: 400,
+        message: "Invalid location coordinates",
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "INVALID_RIDE_TYPE",
+      {
+        statusCode: 400,
+        message: 'Invalid ride type. Must be "One Way" or "Round Trip"',
+        type: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    // ===== RIDE REQUEST NOT FOUND ERRORS (404) =====
+    [
+      "DRIVER_NOT_FOUND",
+      {
+        statusCode: 404,
+        message: "Driver not found or no longer available",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "USER_NOT_FOUND",
+      {
+        statusCode: 404,
+        message: "User not found. Please check the user ID and try again",
+        type: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    // ===== RIDE REQUEST CONFLICT ERRORS (409) =====
+    [
+      "DRIVER_NOT_AVAILABLE",
+      {
+        statusCode: 409,
+        message: "Driver is currently not available for ride requests",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+    [
+      "DUPLICATE_RIDE_REQUEST",
+      {
+        statusCode: 409,
+        message: "You already have a pending request to this driver",
+        type: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+      },
+    ],
+
+    // ===== RIDE REQUEST CREATION ERRORS (500) =====
+    [
+      "RIDE_REQUEST_CREATION_FAILED",
+      {
+        statusCode: 500,
+        message: "Failed to create ride request. Please try again",
+        type: ErrorType.SERVER_ERROR,
+        shouldLog: true,
+        isOperational: false,
+      },
+    ],
+
     // ===== KYC VALIDATION ERRORS (400) =====
     [
       "KYCNotFoundError",
@@ -439,8 +537,8 @@ export class ErrorHandlerService {
     [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
   };
 
-  //  Main error handling method - converts any error to standardized API response
-  //  Preserves original error message from domain errors
+  // Main error handling method - converts any error to standardized API response
+  // Preserves original error message from domain errors
   static handleError(
     error: any,
     context?: string
@@ -463,6 +561,7 @@ export class ErrorHandlerService {
       message,
       ...(process.env.NODE_ENV === "development" && {
         error: error.message,
+        errorCode: (error as any).code, // Include error code for debugging
         field: (error as any).field, // Include field info for validation errors
       }),
     };
@@ -485,9 +584,16 @@ export class ErrorHandlerService {
     return { response, statusCode: 400 };
   }
 
-  //  Classify error type and determine appropriate response
-
+  // Classify error type and determine appropriate response
   private static classifyError(error: any): ErrorDetails {
+    // Check for DomainError with code property (for RideRequestErrors)
+    if (error instanceof DomainError && error.code) {
+      const errorByCode = this.ERROR_MAP.get(error.code);
+      if (errorByCode) {
+        return errorByCode;
+      }
+    }
+
     // Check if it's a known domain error by exact name match
     const errorName = error.constructor.name;
     if (this.ERROR_MAP.has(errorName)) {
@@ -636,6 +742,7 @@ export class ErrorHandlerService {
   ): void {
     const logData = {
       error: error.message,
+      errorCode: (error as any).code, 
       stack: error.stack,
       type: details?.type,
       context,

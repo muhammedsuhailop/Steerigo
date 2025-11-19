@@ -8,7 +8,6 @@ import { SendRideRequestResponseDto } from "@application/dto/user/SendRideReques
 import { RideRequest } from "@domain/entities/RideRequest";
 import { Location } from "@domain/value-objects/Location";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
-import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { Logger } from "@shared/utils/Logger";
 import { v4 as uuidv4 } from "uuid";
 import { Result } from "@shared/utils/Result";
@@ -42,6 +41,7 @@ export class SendRideRequestUseCase {
         if (validationError instanceof DomainError) {
           return Result.failure(validationError);
         }
+
         return Result.failure(
           RideRequestErrors.rideRequestCreationFailed(
             (validationError as Error)?.message || "Validation failed"
@@ -52,6 +52,7 @@ export class SendRideRequestUseCase {
       Logger.info("SendRideRequestUseCase: Starting execution", {
         riderId: dto.riderId,
         driverId: dto.driverId,
+        totalFare: dto.fareBreakdown.getTotalFare().getAmount(),
       });
 
       // Verify rider exists
@@ -72,7 +73,7 @@ export class SendRideRequestUseCase {
         return Result.failure(RideRequestErrors.driverNotFound(dto.driverId));
       }
 
-      // Verify driver is available
+      //Verify driver is available
       if (!driver.getisAvailable()) {
         Logger.warn("SendRideRequestUseCase: Driver not available", {
           driverId: dto.driverId,
@@ -117,9 +118,8 @@ export class SendRideRequestUseCase {
         address: dto.dropAddress,
       });
 
-      // Create ride request entity
+      //Create ride request entity with fareBreakdown
       const requestId = uuidv4();
-
       const rideRequest = RideRequest.create(
         requestId,
         dto.driverId,
@@ -128,11 +128,11 @@ export class SendRideRequestUseCase {
         drop,
         dto.pickupTime,
         dto.rideType as RideType,
-        dto.fare,
+        dto.fareBreakdown,
         dto.pickupETA
       );
 
-      // Save ride request
+      //  Save ride request
       const savedRequest = await this.rideRequestRepository.save(rideRequest);
 
       if (!savedRequest) {
@@ -153,9 +153,10 @@ export class SendRideRequestUseCase {
         riderId: dto.riderId,
         driverId: dto.driverId,
         status: savedRequest.getStatus(),
+        totalFare: savedRequest.getFare(),
       });
 
-      // 8. Return success response DTO
+      // Return success response DTO
       const responseDto = SendRideRequestResponseDto.fromDomain(savedRequest);
       return Result.success(responseDto);
     } catch (error) {

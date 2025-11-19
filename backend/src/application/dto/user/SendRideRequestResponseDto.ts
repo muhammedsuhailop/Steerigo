@@ -1,5 +1,40 @@
 import { RideRequest } from "@domain/entities/RideRequest";
 
+export interface FareBreakdownDto {
+  baseFare: {
+    amount: number;
+    currency: string;
+  };
+  platformFee: {
+    amount: number;
+    currency: string;
+  };
+  taxes: {
+    fare: {
+      name: string;
+      rate: number;
+      amount: {
+        amount: number;
+        currency: string;
+      };
+    };
+    platformFee: {
+      name: string;
+      rate: number;
+      amount: {
+        amount: number;
+        currency: string;
+      };
+    };
+  };
+  totalFare: {
+    amount: number;
+    currency: string;
+  };
+  durationHours: number;
+  calculatedAt: Date;
+}
+
 export interface RideRequestDto {
   requestId: string;
   driverId: string;
@@ -16,7 +51,7 @@ export interface RideRequestDto {
   };
   pickupTime: Date;
   rideType: string;
-  fare: number;
+  fareBreakdown: FareBreakdownDto;
   status: string;
   pickupETA: string;
   createdAt: Date;
@@ -38,6 +73,8 @@ export class SendRideRequestResponseDto {
       Math.floor((expiresAt.getTime() - Date.now()) / 1000)
     );
 
+    const fareBreakdown = rideRequest.getFareBreakdown();
+
     const rideRequestDto: RideRequestDto = {
       requestId: rideRequest.getRequestId(),
       driverId: rideRequest.getDriverId(),
@@ -54,7 +91,41 @@ export class SendRideRequestResponseDto {
       },
       pickupTime: rideRequest.getPickupTime(),
       rideType: rideRequest.getRideType(),
-      fare: rideRequest.getFare(),
+
+      fareBreakdown: {
+        baseFare: {
+          amount: fareBreakdown.getBaseFare().getAmount(),
+          currency: fareBreakdown.getBaseFare().getCurrency(),
+        },
+        platformFee: {
+          amount: fareBreakdown.getPlatformFee().getAmount(),
+          currency: fareBreakdown.getPlatformFee().getCurrency(),
+        },
+        taxes: {
+          fare: {
+            name: fareBreakdown.getFareTax().name,
+            rate: fareBreakdown.getFareTax().rate,
+            amount: {
+              amount: fareBreakdown.getFareTax().amount.getAmount(),
+              currency: fareBreakdown.getFareTax().amount.getCurrency(),
+            },
+          },
+          platformFee: {
+            name: fareBreakdown.getPlatformFeeTax().name,
+            rate: fareBreakdown.getPlatformFeeTax().rate,
+            amount: {
+              amount: fareBreakdown.getPlatformFeeTax().amount.getAmount(),
+              currency: fareBreakdown.getPlatformFeeTax().amount.getCurrency(),
+            },
+          },
+        },
+        totalFare: {
+          amount: fareBreakdown.getTotalFare().getAmount(),
+          currency: fareBreakdown.getTotalFare().getCurrency(),
+        },
+        durationHours: fareBreakdown.getDurationHours(),
+        calculatedAt: fareBreakdown.getCalculatedAt(),
+      },
       status: rideRequest.getStatus(),
       pickupETA: rideRequest.getPickupETA(),
       createdAt: rideRequest.getCreatedAt(),

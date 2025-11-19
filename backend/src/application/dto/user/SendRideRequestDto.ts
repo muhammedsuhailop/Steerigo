@@ -1,3 +1,5 @@
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+
 export class SendRideRequestDto {
   constructor(
     public readonly riderId: string,
@@ -10,7 +12,7 @@ export class SendRideRequestDto {
     public readonly dropAddress: string | undefined,
     public readonly pickupTime: Date,
     public readonly rideType: string,
-    public readonly fare: number,
+    public readonly fareBreakdown: FareBreakdown, 
     public readonly pickupETA: string
   ) {}
 
@@ -23,8 +25,12 @@ export class SendRideRequestDto {
       throw new Error("Driver ID is required");
     }
 
-    if (this.fare <= 0) {
-      throw new Error("Fare must be positive");
+    if (!this.fareBreakdown) {
+      throw new Error("Fare breakdown is required");
+    }
+
+    if (this.fareBreakdown.getTotalFare().getAmount() <= 0) {
+      throw new Error("Total fare must be positive");
     }
 
     if (
