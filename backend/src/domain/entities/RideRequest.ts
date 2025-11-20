@@ -1,18 +1,18 @@
 import { Location } from "@domain/value-objects/Location";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { RideType } from "@domain/value-objects/RideType";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 
 export class RideRequest {
   private constructor(
     private readonly id: string,
-    private readonly requestId: string,
     private readonly driverId: string,
     private readonly riderId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly pickupTime: Date,
     private readonly rideType: RideType,
-    private readonly fare: number,
+    private readonly fareBreakdown: FareBreakdown,
     private status: RideRequestStatus,
     private readonly pickupETA: string,
     private readonly createdAt: Date = new Date(),
@@ -21,30 +21,29 @@ export class RideRequest {
 
   static create(
     id: string,
-    requestId: string,
     driverId: string,
     riderId: string,
     pickup: Location,
     drop: Location,
     pickupTime: Date,
     rideType: RideType,
-    fare: number,
+    fareBreakdown: FareBreakdown,
     pickupETA: string
   ): RideRequest {
-    if (fare < 0) {
-      throw new Error("Fare cannot be negative");
+    // Validate fare breakdown has positive total
+    if (fareBreakdown.getTotalFare().getAmount() <= 0) {
+      throw new Error("Total fare must be positive");
     }
 
     return new RideRequest(
       id,
-      requestId,
       driverId,
       riderId,
       pickup,
       drop,
       pickupTime,
       rideType,
-      fare,
+      fareBreakdown,
       RideRequestStatus.PENDING,
       pickupETA
     );
@@ -52,14 +51,13 @@ export class RideRequest {
 
   static fromData(data: {
     id: string;
-    requestId: string;
     driverId: string;
     riderId: string;
     pickup: Location;
     drop: Location;
     pickupTime: Date;
     rideType: RideType;
-    fare: number;
+    fareBreakdown: FareBreakdown;
     status: RideRequestStatus;
     pickupETA: string;
     createdAt: Date;
@@ -67,14 +65,13 @@ export class RideRequest {
   }): RideRequest {
     return new RideRequest(
       data.id,
-      data.requestId,
       data.driverId,
       data.riderId,
       data.pickup,
       data.drop,
       data.pickupTime,
       data.rideType,
-      data.fare,
+      data.fareBreakdown,
       data.status,
       data.pickupETA,
       data.createdAt,
@@ -88,7 +85,7 @@ export class RideRequest {
   }
 
   getRequestId(): string {
-    return this.requestId;
+    return this.id;
   }
 
   getDriverId(): string {
@@ -115,8 +112,12 @@ export class RideRequest {
     return this.rideType;
   }
 
+  getFareBreakdown(): FareBreakdown {
+    return this.fareBreakdown;
+  }
+
   getFare(): number {
-    return this.fare;
+    return this.fareBreakdown.getTotalFare().getAmount();
   }
 
   getStatus(): RideRequestStatus {

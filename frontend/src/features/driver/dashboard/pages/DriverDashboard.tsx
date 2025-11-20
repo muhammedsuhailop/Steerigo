@@ -82,8 +82,7 @@ const DriverDashboard: React.FC = () => {
   const dashboard = dashboardData?.data;
 
   // Get driver from dashboard or profile
-  const driver: Driver | undefined =
-    dashboard?.driver ;
+  const driver: Driver | undefined = dashboard?.driver;
 
   // Get stats from dashboard
   const stats: DriverStatsType | undefined = dashboard?.stats;

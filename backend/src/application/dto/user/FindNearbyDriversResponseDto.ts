@@ -1,3 +1,5 @@
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+
 export interface DriverInfoResponse {
   id: string;
   userId: string;
@@ -40,19 +42,22 @@ export class FindNearbyDriversResponseDto {
         gearType?: string;
         bodyType?: string;
       };
-    }
+    },
+    readonly estimatedFare?: FareBreakdown 
   ) {}
 
   static create(
     drivers: DriverInfoResponse[],
     totalFound: number,
-    searchCriteria: any
+    searchCriteria: any,
+    fareBreakdown?: FareBreakdown
   ): FindNearbyDriversResponseDto {
     return new FindNearbyDriversResponseDto(
       drivers,
       totalFound,
       new Date(),
-      searchCriteria
+      searchCriteria,
+      fareBreakdown
     );
   }
 }

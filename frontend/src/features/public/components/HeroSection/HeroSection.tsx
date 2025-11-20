@@ -55,14 +55,14 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
           </div>
 
           {/* Sub Content - Driver Search Form for authenticated riders */}
-          <div>
+          {/* <div>
             {isAuthenticated && user?.role === 'Rider' && (
               <DriverSearchForm 
                 onSearch={handleDriverSearch}
                 isLoading={false}
               />
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

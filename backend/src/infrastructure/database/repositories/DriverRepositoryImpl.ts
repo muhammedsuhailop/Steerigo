@@ -504,6 +504,7 @@ export class DriverRepositoryImpl
       name: string;
       email: string;
       mobile: string;
+      profilePicture: string;
     };
     stats: {
       totalRides: number;
@@ -553,6 +554,7 @@ export class DriverRepositoryImpl
         name: result.user.name,
         email: result.user.email,
         mobile: result.user.mobile,
+        profilePicture: result.user.profilePicture ?? "",
       },
       stats: {
         totalRides: result.totalRides ?? 0,

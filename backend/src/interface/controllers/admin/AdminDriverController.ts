@@ -18,6 +18,8 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { UpdateDriverKycStatusUseCase } from "@application/use-cases/admin/UpdateDriverKycStatusUseCase";
+import { UpdateDriverKycStatusRequestDto } from "@application/dto/admin/UpdateDriverKycStatusRequestDto";
 
 @injectable()
 export class AdminDriverController {
@@ -33,7 +35,9 @@ export class AdminDriverController {
     @inject(TYPES.UpdateKycStatusUseCase)
     private updateKycStatusUseCase: UpdateKycStatusUseCase,
     @inject(TYPES.GetKycRequestByIdUseCase)
-    private getKycRequestByIdUseCase: GetKycRequestByIdUseCase
+    private getKycRequestByIdUseCase: GetKycRequestByIdUseCase,
+    @inject(TYPES.UpdateDriverKycStatusUseCase)
+    private updateDriverKycStatusUseCase: UpdateDriverKycStatusUseCase
   ) {}
 
   async getDrivers(req: Request, res: Response): Promise<void> {
@@ -207,6 +211,44 @@ export class AdminDriverController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "get_kyc_request_by_id"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async updateDriverKycStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const dto = new UpdateDriverKycStatusRequestDto({
+        driverId: req.params.driverId,
+        kycStatus: req.body.kycStatus,
+        comments: req.body.comments,
+      });
+
+      const result = await this.updateDriverKycStatusUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "update_driver_kyc_status"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: data.message,
+        data: {
+          driverId: data.driverId,
+          previousKycStatus: data.previousKycStatus,
+          newKycStatus: data.newKycStatus,
+        },
+      } as ApiResponse);
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "update_driver_kyc_status"
       );
       res.status(statusCode).json(response);
     }

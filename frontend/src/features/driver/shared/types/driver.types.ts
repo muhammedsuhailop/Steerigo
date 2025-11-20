@@ -1,78 +1,21 @@
 import { AvailabilityData } from "../../scheduling/types/scheduling.types";
 
-export interface Driver {
-  id: string;
-  driverId: string;
-  userId: string;
-  name: string;
-  email: string;
-  mobile: string;
-  profileImage?: string;
-  currentStatus: "Available" | "Busy" | "Offline";
-  rating: number;
-  totalRides: number;
-  completedRides: number;
-  scheduledRides: number;
-  totalEarnings: number;
-  todayEarnings: number;
-  weeklyEarnings: number;
-  monthlyEarnings: number;
-
-  // Add driver license info
-  licenseNumber: string;
-  licenceCategory: string;
-  licenseIssueDate: string;
-  licenseExpiryDate: string;
-  kycStatus: string;
-  status: string;
-  eligibleGearTypes: string[];
-  eligibleBodyTypes: string[];
-
-  vehicleInfo?: VehicleInfo;
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface VehicleInfo {
-  id: string;
-  make: string;
-  model: string;
-  year: number;
-  color: string;
-  plateNumber: string;
-  type: "sedan" | "suv" | "hatchback" | "luxury";
-  fuelType: "petrol" | "diesel" | "electric" | "hybrid";
+export interface Location {
+  latitude: number;
+  longitude: number;
+  address?: string;
 }
 
 export interface RideRequest {
-  id: string;
-  passengerId: string;
-  passengerName: string;
-  passengerPhone: string;
-  passengerRating: number;
-  pickupLocation: {
-    address: string;
-    latitude: number;
-    longitude: number;
-  };
-  dropoffLocation: {
-    address: string;
-    latitude: number;
-    longitude: number;
-  };
-  estimatedFare: number;
-  distance: number;
-  estimatedDuration: number;
-  rideType: "oneway" | "roundtrip";
-  requestTime: string;
-  scheduledTime?: string;
-  specialRequests?: string;
-  paymentMethod: "cash" | "card" | "wallet";
+  requestId: string;
+  pickup: Location;
+  drop: Location;
+  pickupTime: string;
+  rideType: string;
+  fare: number;
+  userName: string;
+  status: string;
+  pickupETA: string;
 }
 
 export interface CurrentRide {
@@ -110,93 +53,149 @@ export interface CurrentRide {
   paymentMethod: "cash" | "card" | "wallet";
 }
 
-// Extended DriverStats with all fields
-export interface DriverStats {
-  // Basic stats
-  totalRides: number;
-  completedRides: number;
-  ridesCancelled: number;
-  scheduledRides: number;
-
-  // Earnings
-  todayEarnings: number;
-  weeklyEarnings: number;
-  monthlyEarnings: number;
-  totalEarnings: number;
-  currency: string;
-
-  // Performance metrics
-  rating: number;
-  acceptanceRate: number;
-  cancellationRate: number;
-  completionRate: number;
-}
-
-export interface Availability {
+export interface DriverAvailability {
   id: string;
   status: string;
   availableFrom: string;
   availableTill: string;
-  currentLocation: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
+  currentLocation: Location;
   updatedAt: string;
 }
 
-export interface DashboardMeta {
-  lastUpdated: string;
-  serverTime: string;
+export interface DriverStatistics {
+  ridesCompleted: number;
+  ridesCancelled: number;
+  scheduledRides: number;
+  totalEarnings: number;
+  currency: string;
+}
+
+export interface DriverPerformance {
+  acceptanceRate: number;
+  cancellationRate: number;
+  averageRating: number;
+}
+
+export interface DriverStats extends DriverStatistics {
+  totalRides: number;
+  todayEarnings: number;
+  weeklyEarnings: number;
+  monthlyEarnings: number;
+  rating: number;
+  completionRate: number;
+}
+
+export interface DriverLicense {
+  licenseNumber: string;
+  licenceCategory: string;
+  licenseIssueDate: string;
+  licenseExpiryDate: string;
+  licenseVerified: boolean;
+}
+
+export interface KYCDocument {
+  docId: string;
+  docType: string;
+  docNumberMasked: string;
+  issueDate: string;
+  expiryDate: string | null;
+  docImageUrlsFront: string[];
+  docImageUrlsBack: string[];
+  verificationStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DriverKYC {
+  overallStatus: string;
+  docs: KYCDocument[];
+}
+
+export interface DriverProfile {
+  driverId: string;
+  userId: string;
+  name: string;
+  profileImageUrl?: string;
+  email: string;
+  mobile: string;
+  dob: string;
+  gender: string;
+  address: string;
+  role: string;
+  status: string;
+  isVerified: boolean;
+  authProvider: string;
+  createdAt: string;
+  updatedAt: string;
+  license: DriverLicense;
+  kyc: DriverKYC;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  meta: {
+    lastUpdated: string;
+    serverTime: string;
+  };
+}
+
+export interface Driver {
+  driverId: string;
+  userId: string;
+  name: string;
+  email: { value: string };
+  mobile: string;
+  licenseNumber: string;
+  licenceCategory: string;
+  licenseIssueDate: string;
+  licenseExpiryDate: string;
+  kycStatus: string;
+  status: string;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  profileImageUrl?: string;
+  currentStatus?: string;
+  id?: string;
+  rating?: number;
+  totalRides?: number;
+  completedRides?: number;
+  scheduledRides?: number;
+  totalEarnings?: number;
+  todayEarnings?: number;
+  weeklyEarnings?: number;
+  monthlyEarnings?: number;
+  location?: Location;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DashboardData {
+  driver: Driver;
+  availability: DriverAvailability | null;
+  currentRide: CurrentRide | null;
+  pendingRequests: RideRequest[];
+  statistics: DriverStatistics;
+  performance: DriverPerformance;
+  meta: { lastUpdated: string; serverTime: string };
 }
 
 export interface DashboardApiResponse {
-  data: {
-    driver: {
-      driverId: string;
-      userId: string;
-      name: string;
-      email: {
-        value: string;
-      };
-      mobile: string;
-      licenseNumber: string;
-      licenceCategory: string;
-      licenseIssueDate: string;
-      licenseExpiryDate: string;
-      kycStatus: string;
-      status: string;
-      eligibleGearTypes: string[];
-      eligibleBodyTypes: string[];
-    };
-    availability: Availability | null;
-    currentRide: CurrentRide | null;
-    pendingRequests: RideRequest[];
-    statistics: {
-      ridesCompleted: number;
-      ridesCancelled: number;
-      scheduledRides: number;
-      totalEarnings: number;
-      currency: string;
-    };
-    performance: {
-      acceptanceRate: number;
-      cancellationRate: number;
-      averageRating: number;
-    };
-    meta: DashboardMeta;
-  };
   success: boolean;
   message: string;
+  data: DashboardData;
 }
 
 export interface FullDashboardResponse {
   driver: Driver;
   stats: DriverStats;
-  availability: Availability | null;
+  availability: DriverAvailability | null;
   currentRide: CurrentRide | null;
   pendingRequests: RideRequest[];
-  meta: DashboardMeta;
+  meta: { lastUpdated: string; serverTime: string };
+}
+
+export interface DriverProfileResponse {
+  success: boolean;
+  message: string;
+  data: DriverProfile;
 }
 
 export interface DriverState {

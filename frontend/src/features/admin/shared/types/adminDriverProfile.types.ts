@@ -30,6 +30,7 @@ export interface UserInfo {
   name: string;
   email: string;
   mobile: string;
+  profilePicture?: string;
 }
 
 export interface DriverStats {
@@ -43,9 +44,10 @@ export interface KYCDocument {
   id: string;
   docType: KYCDocType;
   docNumber: string;
-  issueDate: string;
+  issueDate: string | null;
   expiryDate: string | null;
   verificationStatus: KYCVerificationStatus;
+  comments: string | null;
   isExpired: boolean;
   createdAt: string;
   updatedAt: string;
@@ -59,6 +61,7 @@ export type DriverStatus =
   | "Suspended"
   | "Inactive";
 export type KYCStatus = "Approved" | "Pending" | "Rejected" | "InReview";
+
 export type KYCVerificationStatus =
   | "Approved"
   | "InReview"

@@ -10,116 +10,118 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   onReject,
   loading = false,
 }) => {
-  const [expired, setExpired] = useState(false);
-  const handleExpire = () => {
-    setExpired(true);
-    onReject(request.id);
-  };
-
-  if (expired) {
-    return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 opacity-60 text-center">
-        <p className="text-gray-500">Request Expired</p>
-      </div>
-    );
-  }
-
-  const fare = `₹${request.estimatedFare}`;
+  const fare = `₹${request.fare || 0}`;
   const typeBadge =
-    request.rideType === "oneway" ? (
-      <Badge variant="outline" size="sm">
+    request.rideType?.toLowerCase() === "one way" ? (
+      <Badge variant="info" size="sm">
         One Way
       </Badge>
     ) : (
-      <Badge variant="outline" size="sm">
+      <Badge variant="secondary" size="sm">
         Round Trip
       </Badge>
     );
 
+  const getInitials = (name: string | undefined) => {
+    if (!name) return "??";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 hover:shadow-md transition">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
       {/* Header: Timer, Fare & Type */}
-      <div className="flex items-center justify-between mb-4">
-        <RequestTimer initialTime={30} onTimeUp={handleExpire} />
-        <div className="flex items-center space-x-3">
-          <div className="text-lg font-bold text-gray-900">{fare}</div>
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {fare}
+          </span>
           {typeBadge}
         </div>
       </div>
 
-      {/* Passenger & Actions */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center ring-2 ring-blue-50">
-            <span className="text-blue-700 font-semibold">
-              {request.passengerName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </span>
+      {/* Passenger Info */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-600 dark:text-primary-400 font-semibold">
+            {getInitials(request.userName)}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">
-              {request.passengerName}
-            </h3>
-            <p className="text-sm text-gray-600">{request.passengerPhone}</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">
+              {request.userName || "Unknown User"}
+            </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={() => console.log("Call", request.passengerPhone)}
-            variant="outline"
-            size="icon"
-          >
-            <FiPhone className="w-5 h-5 text-gray-600" />
-          </Button>
 
+        {/* Action Icons - Disabled since we don't have phone */}
+        <div className="flex items-center gap-2">
           <Button
-            onClick={() => console.log("Message", request.id)}
+            onClick={() => console.log("Call feature coming soon")}
             variant="outline"
             size="icon"
+            disabled
+            className="opacity-50"
           >
-            <FiMessageSquare className="w-5 h-5 text-gray-600" />
+            <FiPhone className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={() => console.log("Message", request.requestId)}
+            variant="outline"
+            size="icon"
+            disabled
+            className="opacity-50"
+          >
+            <FiMessageSquare className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {/* Combined Route & ETAs */}
-      <div className="space-y-4 mb-6">
+      {/* Route Information */}
+      <div className="px-4 py-3 space-y-3">
         {/* Pickup */}
-        <div className="flex items-start space-x-3">
-          <span className="w-3 h-3 bg-emerald-400 rounded-full mt-1 ring-2 ring-emerald-100 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-gray-900">Pickup</p>
-            <p className="text-sm text-gray-600">
-              {request.pickupLocation.address}
+        <div className="flex gap-3">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+              Pickup
             </p>
-            <p className="text-xs text-gray-400">
-              ETA: {request.estimatedDuration} min ({request.distance} km)
+            <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+              {request.pickup?.address || "Address not available"}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              ETA: {request.pickupETA || "N/A"}
             </p>
           </div>
         </div>
+
         {/* Connector */}
-        <div className="ml-2 border-l-2 border-dashed border-gray-300 h-4" />
+        <div className="ml-4 border-l-2 border-dashed border-gray-300 dark:border-gray-600 h-4"></div>
+
         {/* Drop-off */}
-        <div className="flex items-start space-x-3">
-          <span className="w-3 h-3 bg-red-400 rounded-full mt-1 ring-2 ring-red-100 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-gray-900">Drop-off</p>
-            <p className="text-sm text-gray-600">
-              {request.dropoffLocation.address}
+        <div className="flex gap-3">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+              Drop-off
             </p>
-            <p className="text-xs text-gray-400">
-              Arrive in ~{request.estimatedDuration + 5} min
+            <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+              {request.drop?.address || "Address not available"}
             </p>
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex space-x-4">
+      <div className="flex gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
         <Button
-          onClick={() => onReject(request.id)}
+          onClick={() => onReject(request.requestId)}
           disabled={loading}
           variant="danger"
           size="md"
@@ -128,7 +130,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           Decline
         </Button>
         <Button
-          onClick={() => onAccept(request.id)}
+          onClick={() => onAccept(request.requestId)}
           disabled={loading}
           variant="success"
           size="md"

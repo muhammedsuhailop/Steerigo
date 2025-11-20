@@ -21,6 +21,8 @@ import DriverScheduling from "@/features/driver/scheduling/pages/DriverSchedulin
 import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailComponent/pages/KYCRequestDetailPage";
 import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
+import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
+import HelpPage from "@/features/public/pages/Help";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -81,8 +83,8 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
+      <Route path="/help" element={<HelpPage />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-
       {/* Protected */}
       <Route
         path="/update-password"
@@ -100,7 +102,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/users"
         element={
@@ -109,7 +110,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/drivers"
         element={
@@ -118,7 +118,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/drivers/:driverId"
         element={
@@ -127,7 +126,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/kyc-requests"
         element={
@@ -136,7 +134,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/kyc-requests/:requestId"
         element={
@@ -145,7 +142,14 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
+      <Route
+        path="/search"
+        element={
+          <ProtectedRoute allowedRoles={["Rider"]}>
+            <DriverSearchPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/profile"
         element={
@@ -163,7 +167,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/driver/register"
         element={
@@ -172,7 +175,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/driver/schedule"
         element={
@@ -181,7 +183,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/driver/profile"
         element={
@@ -190,7 +191,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/dashboard"
         element={
@@ -199,7 +199,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       {/* Catch-all */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

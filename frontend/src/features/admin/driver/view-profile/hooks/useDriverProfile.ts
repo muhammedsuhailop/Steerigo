@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   useGetDriverByIdQuery,
   useUpdateDriverStatusMutation,
+  useUpdateDriverKYCStatusMutation,
 } from "@/features/admin/shared/services/adminApi";
 import type {
   DriverProfileAction,
@@ -14,6 +15,9 @@ export const useDriverProfile = () => {
 
   const [updateDriverStatus, { isLoading: isUpdatingStatus }] =
     useUpdateDriverStatusMutation();
+
+  const [updateKYCStatus, { isLoading: isUpdatingKYCStatus }] =
+    useUpdateDriverKYCStatusMutation();
 
   const {
     data: driverProfileResponse,
@@ -43,7 +47,6 @@ export const useDriverProfile = () => {
           action,
           reason,
         }).unwrap();
-
         await refetch();
         return { success: true, message: result.message };
       } catch (error: any) {
@@ -57,6 +60,33 @@ export const useDriverProfile = () => {
     [driverId, updateDriverStatus, refetch]
   );
 
+  const handleKYCStatusUpdate = useCallback(
+    async (kycStatus: "Approved" | "InReview" | "Rejected" | "InReview") => {
+      if (!driverId) {
+        throw new Error("Driver ID is required");
+      }
+
+      try {
+        const result = await updateKYCStatus({
+          driverId,
+          kycStatus,
+        }).unwrap();
+        await refetch();
+        return {
+          success: true,
+          message: result.message || "KYC status updated successfully",
+        };
+      } catch (error: any) {
+        const errorMessage =
+          error?.data?.message ||
+          error?.message ||
+          "Failed to update KYC status";
+        throw new Error(errorMessage);
+      }
+    },
+    [driverId, updateKYCStatus, refetch]
+  );
+
   const refreshProfile = useCallback(() => {
     refetch();
   }, [refetch]);
@@ -64,7 +94,6 @@ export const useDriverProfile = () => {
   const getAvailableActions = useCallback(
     (status?: string): DriverProfileAction[] => {
       if (!status) return [];
-
       switch (status) {
         case "Pending Verification":
           return ["activate"];
@@ -81,7 +110,7 @@ export const useDriverProfile = () => {
     []
   );
 
-  const availableActions = useMemo<DriverProfileAction[]>(() => {
+  const availableActions = useMemo(() => {
     const drv = driverProfile?.driver;
     if (!drv || !drv.status) return [];
     return getAvailableActions(drv.status);
@@ -92,8 +121,10 @@ export const useDriverProfile = () => {
     isLoading,
     isFetching,
     isUpdating: isUpdatingStatus,
+    isUpdatingKYC: isUpdatingKYCStatus,
     error,
     handleDriverAction,
+    handleKYCStatusUpdate,
     refreshProfile,
     availableActions,
     driverId,

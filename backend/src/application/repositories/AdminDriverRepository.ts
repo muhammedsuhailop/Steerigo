@@ -78,6 +78,7 @@ export interface AdminDriverRepository
       name: string;
       email: string;
       mobile: string;
+      profilePicture?: string | undefined;
     };
     stats: {
       totalRides: number;

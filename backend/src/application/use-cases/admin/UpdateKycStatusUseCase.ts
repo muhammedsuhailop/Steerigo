@@ -1,11 +1,13 @@
 import { injectable, inject } from "inversify";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
 import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { UserRepository } from "@application/repositories/UserRepository";
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { DocumentType } from "@domain/value-objects/DocumentType";
 
 @injectable()
 export class UpdateKycStatusUseCase {
@@ -13,7 +15,9 @@ export class UpdateKycStatusUseCase {
     @inject(TYPES.KYCRepository)
     private kycRepository: KYCRepository,
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository
+    private adminDriverRepository: AdminDriverRepository,
+    @inject(TYPES.UserRepository)
+    private userRepository: UserRepository
   ) {}
 
   async execute(dto: UpdateKycStatusRequestDto): Promise<
@@ -44,7 +48,7 @@ export class UpdateKycStatusUseCase {
         currentStatus: kycDocument.getVerificationStatus(),
       });
 
-      // Update KYC status based on the action
+      // Persist per-document change
       switch (dto.getVerificationStatus()) {
         case "Approved":
           kycDocument.approve(dto.getComments());
@@ -59,7 +63,6 @@ export class UpdateKycStatusUseCase {
           return Result.failure(new Error("Invalid verification status"));
       }
 
-      // Update KYC in database
       const kycUpdateSuccess =
         await this.kycRepository.updateVerificationStatus(
           dto.getKycId(),
@@ -73,50 +76,98 @@ export class UpdateKycStatusUseCase {
 
       let driverKycStatusUpdated = false;
 
-      // Update driver's overall KYC status based on all their documents
       try {
         const driver = await this.adminDriverRepository.findById(
           kycWithDriver.driverInfo.driverId
         );
+
         if (driver) {
-          const allDriverKycs = await this.kycRepository.findByDriverId(
-            driver.getId()
-          );
-
-          // Determine overall KYC status
-          const hasApprovedDocs = allDriverKycs.some((kyc) => kyc.isApproved());
-          const hasRejectedDocs = allDriverKycs.some((kyc) => kyc.isRejected());
-          const hasExpiredDocs = allDriverKycs.some(
-            (kyc) =>
-              kyc.getVerificationStatus() === KYCStatus.EXPIRED ||
-              kyc.isExpired()
-          );
-
-          let overallKycStatus: KYCStatus;
-          if (hasExpiredDocs) {
-            overallKycStatus = KYCStatus.EXPIRED;
-          } else if (hasApprovedDocs && !hasRejectedDocs) {
-            overallKycStatus = KYCStatus.APPROVED;
-          } else if (hasRejectedDocs) {
-            overallKycStatus = KYCStatus.REJECTED;
+          // If the current doc was set to Expired, set overall to EXPIRED
+          if (dto.getVerificationStatus() === "Expired") {
+            if (driver.getKycStatus() !== KYCStatus.EXPIRED) {
+              driver.updateKycStatus(KYCStatus.EXPIRED);
+              await this.adminDriverRepository.save(driver);
+              driverKycStatusUpdated = true;
+              Logger.info(
+                "Driver overall KYC set to EXPIRED because updated document status is Expired",
+                {
+                  driverId: driver.getId(),
+                  kycId: dto.getKycId(),
+                }
+              );
+            }
           } else {
-            overallKycStatus = KYCStatus.IN_REVIEW;
-          }
+            const allDriverKycs = await this.kycRepository.findByDriverId(
+              driver.getId()
+            );
 
-          if (driver.getKycStatus() !== overallKycStatus) {
-            driver.updateKycStatus(overallKycStatus);
-            await this.adminDriverRepository.save(driver);
-            driverKycStatusUpdated = true;
-            Logger.info("Driver KYC status updated", {
-              driverId: driver.getId(),
-              newKycStatus: overallKycStatus,
-            });
+            const anyRejected = allDriverKycs.some((k) => k.isRejected());
+
+            const licenseDocs = allDriverKycs.filter(
+              (k) => k.getDocumentType() === DocumentType.LICENSE
+            );
+            const nonLicenseDocs = allDriverKycs.filter(
+              (k) =>
+                k.getDocumentType() === DocumentType.AADHAAR ||
+                k.getDocumentType() === DocumentType.PAN ||
+                k.getDocumentType() === DocumentType.PASSPORT
+            );
+
+            const latestLicense = licenseDocs.length
+              ? [...licenseDocs].sort(
+                  (a, b) =>
+                    b.getCreatedAt().getTime() - a.getCreatedAt().getTime()
+                )[0]
+              : undefined;
+
+            const licenseOk = !!latestLicense && latestLicense.isApproved();
+
+            const nonLicenseOk = nonLicenseDocs.some((k) => k.isApproved());
+
+            // Profile picture check
+            const user = await this.userRepository.findById(driver.getUserId());
+            const profilePicturePresent = !!(
+              user && user.getProfilePicture()?.trim()
+            );
+
+            const approvedCondition =
+              licenseOk &&
+              nonLicenseOk &&
+              !anyRejected &&
+              profilePicturePresent;
+
+            if (approvedCondition) {
+              if (driver.getKycStatus() !== KYCStatus.APPROVED) {
+                driver.updateKycStatus(KYCStatus.APPROVED);
+                await this.adminDriverRepository.save(driver);
+                driverKycStatusUpdated = true;
+                Logger.info("Driver overall KYC set to APPROVED", {
+                  driverId: driver.getId(),
+                });
+              }
+            } else if (dto.getVerificationStatus() === "Rejected") {
+              if (driver.getKycStatus() !== KYCStatus.REJECTED) {
+                driver.updateKycStatus(KYCStatus.REJECTED);
+                await this.adminDriverRepository.save(driver);
+                driverKycStatusUpdated = true;
+                Logger.info("Driver overall KYC set to REJECTED ", {
+                  driverId: driver.getId(),
+                });
+              }
+            } else {
+              Logger.info(
+                "Approval conditions not met and current update not Rejected; leaving overall status unchanged",
+                {
+                  driverId: driver.getId(),
+                }
+              );
+            }
           }
         }
-      } catch (error) {
-        Logger.warn("Failed to update driver KYC status", {
+      } catch (err) {
+        Logger.warn("Failed to evaluate/apply overall driver KYC status", {
           driverId: kycWithDriver.driverInfo.driverId,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         });
       }
 

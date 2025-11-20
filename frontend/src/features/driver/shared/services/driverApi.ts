@@ -81,13 +81,10 @@ export const driverApi = createApi({
         } = response.data;
 
         const transformedDriver: Driver = {
+          ...driver,
           id: driver.driverId,
-          driverId: driver.driverId,
-          userId: driver.userId,
-          name: driver.name,
-          email: driver.email.value,
-          mobile: driver.mobile,
-          profileImage: undefined,
+          profileImageUrl: driver.profileImageUrl,
+          email: driver.email || { value: "" },
           currentStatus:
             availability?.status === "Available" ? "Available" : "Offline",
           rating: performance.averageRating,
@@ -95,29 +92,22 @@ export const driverApi = createApi({
           completedRides: statistics.ridesCompleted,
           scheduledRides: statistics.scheduledRides,
           totalEarnings: statistics.totalEarnings,
-          todayEarnings: statistics.totalEarnings,
-          weeklyEarnings: 0,
-          monthlyEarnings: 0,
-          licenseNumber: driver.licenseNumber,
-          licenceCategory: driver.licenceCategory,
-          licenseIssueDate: driver.licenseIssueDate,
-          licenseExpiryDate: driver.licenseExpiryDate,
-          kycStatus: driver.kycStatus,
-          status: driver.status,
-          eligibleGearTypes: driver.eligibleGearTypes,
-          eligibleBodyTypes: driver.eligibleBodyTypes,
+          todayEarnings: statistics.totalEarnings, // Using total as today
+          weeklyEarnings: 0, // Not provided by backend
+          monthlyEarnings: 0, // Not provided by backend
           location: availability?.currentLocation || {
             latitude: 0,
             longitude: 0,
             address: "Location not available",
           },
-          createdAt: new Date().toISOString(),
+          createdAt: meta.lastUpdated,
           updatedAt: meta.lastUpdated,
         };
 
+        // Transform stats data
         const transformedStats: DriverStats = {
           totalRides: statistics.ridesCompleted + statistics.ridesCancelled,
-          completedRides: statistics.ridesCompleted,
+          ridesCompleted: statistics.ridesCompleted,
           ridesCancelled: statistics.ridesCancelled,
           scheduledRides: statistics.scheduledRides,
           todayEarnings: statistics.totalEarnings,
@@ -126,8 +116,6 @@ export const driverApi = createApi({
           totalEarnings: statistics.totalEarnings,
           currency: statistics.currency,
           rating: performance.averageRating,
-          acceptanceRate: performance.acceptanceRate,
-          cancellationRate: performance.cancellationRate,
           completionRate: 100 - performance.cancellationRate,
         };
 
@@ -160,9 +148,9 @@ export const driverApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ id }) => ({
+              ...result.data.map(({ requestId }) => ({
                 type: "RideRequests" as const,
-                id,
+                requestId,
               })),
               { type: "RideRequests" as const, id: "LIST" },
             ]

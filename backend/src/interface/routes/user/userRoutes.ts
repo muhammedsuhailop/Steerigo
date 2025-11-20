@@ -8,6 +8,8 @@ import { handleValidationErrors } from "@interface/middleware/errorHandler";
 import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 import { validateSchema } from "@interface/middleware";
 import { findNearbyDriversSearchSchema } from "@interface/validators/user/driverSearchValidators";
+import { sendRideRequestSchema } from "@interface/validators/user/rideRequestValidators";
+import { RideController } from "@interface/controllers/user/RideController";
 
 const router = Router();
 const userProfileController = container.get<UserProfileController>(
@@ -16,6 +18,10 @@ const userProfileController = container.get<UserProfileController>(
 
 const driverSearchController = container.get<DriverSearchController>(
   TYPES.DriverSearchController
+);
+
+const rideRequestController = container.get<RideController>(
+  TYPES.RideController
 );
 
 router.use(authMiddleware);
@@ -45,6 +51,15 @@ router.post(
   handleValidationErrors,
   (req: Request, res: Response) =>
     driverSearchController.findNearbyDrivers(req, res)
+);
+
+//POST /api/users/ride/request-send
+router.post(
+  "/ride/request-send",
+  validateSchema(sendRideRequestSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) =>
+    rideRequestController.sendRideRequest(req, res)
 );
 
 export { router as userRoutes };

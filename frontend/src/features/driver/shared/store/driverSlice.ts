@@ -67,7 +67,7 @@ const driverSlice = createSlice({
     },
     removePendingRequest: (state, action: PayloadAction<string>) => {
       state.pendingRequests = state.pendingRequests.filter(
-        (req) => req.id !== action.payload
+        (req) => req.requestId !== action.payload
       );
     },
     updateRideStatus: (
@@ -82,10 +82,8 @@ const driverSlice = createSlice({
           state.stats
         ) {
           // Update stats when ride is completed
-          state.stats.completedRides += 1;
-          state.stats.todayEarnings += state.currentRide.fare;
-          state.driver.completedRides += 1;
-          state.driver.todayEarnings += state.currentRide.fare;
+          state.stats.ridesCompleted += 1;
+          state.stats.totalEarnings += state.currentRide.fare;
         }
       }
     },
@@ -107,7 +105,7 @@ export const {
   setPendingRequests,
   setCurrentRide,
   setOnlineStatus,
-  setAvailability, 
+  setAvailability,
   addPendingRequest,
   removePendingRequest,
   updateRideStatus,

@@ -106,6 +106,9 @@ export class Driver {
   getStatus(): DriverStatus {
     return this.status;
   }
+  getisAvailable():boolean{
+    return this.status=== DriverStatus.ACTIVE;
+  }
   getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -169,6 +172,6 @@ export class Driver {
   }
 
   canBeActioned(): boolean {
-    return true; 
+    return true;
   }
 }

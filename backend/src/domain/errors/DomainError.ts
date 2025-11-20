@@ -1,6 +1,10 @@
 export class DomainError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'DomainError';
-    }
+  public readonly code?: string;
+
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = "DomainError";
+    this.code = code;
+    Object.setPrototypeOf(this, DomainError.prototype);
+  }
 }

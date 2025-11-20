@@ -79,6 +79,7 @@ export class DriverSearchController {
               : USER_MESSAGES.DRIVER_SEARCH.NO_DRIVERS_FOUND,
           data: {
             drivers: responseData.drivers,
+            estimatedFare: responseData.estimatedFare?.toJSON(),
             summary: {
               totalFound: responseData.totalFound,
               searchedAt: responseData.searchedAt,
