@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DriverSearchForm from "../components/DriverSearchForm";
 import DriverSearchResults from "../components/DriverSearchResults";
@@ -20,11 +20,13 @@ import {
   selectTotalFound,
 } from "../store/driverSearchSlice";
 import type { TripFormData, Driver } from "../types/driverSearch.types";
+import { useRideRequest } from "../hooks/useRideRequest";
+import { Alert } from "@/shared/components/ui/Alert";
+import type { RideRequestError } from "../types/rideRequest.types";
 
 import {
   FaMap,
   FaMapMarkerAlt,
-  FaUsers,
   FaClock,
   FaCalendarAlt,
   FaCar,
@@ -47,6 +49,37 @@ const DriverSearchPage: React.FC = () => {
     null
   );
   const [hasSearched, setHasSearched] = useState(false);
+
+  // Ride request state
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedDriverForRequest, setSelectedDriverForRequest] =
+    useState<Driver | null>(null);
+
+  // Ride request hook
+  const {
+    sendRequest,
+    isLoading: isRequestLoading,
+    error: requestError,
+    reset: resetRequest,
+  } = useRideRequest({
+    formData: currentFormData,
+    estimatedFare,
+    onSuccess: (requestId: string) => {
+      if (selectedDriverForRequest) {
+        setSuccessMessage(
+          `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`
+        );
+        setSelectedDriverForRequest(null);
+
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 8000);
+      }
+    },
+    onError: (error: RideRequestError) => {
+      console.error("Ride request error:", error);
+    },
+  });
 
   const handleFormChange = (formData: TripFormData) => {
     setCurrentFormData(formData);
@@ -107,16 +140,33 @@ const DriverSearchPage: React.FC = () => {
     }
   };
 
-  const handleDriverSelect = (driver: Driver) => {
-    console.log("Selected driver:", driver);
-    // TODO
-    alert(`Selected driver: ${driver.name}`);
-  };
+  const handleDriverSelect = useCallback(
+    async (driver: Driver) => {
+      setSelectedDriverForRequest(driver);
+      await sendRequest(driver);
+    },
+    [sendRequest]
+  );
 
   const handleDriverCall = (driver: Driver) => {
-    // TODO
     window.location.href = `tel:${driver.mobile}`;
   };
+
+  const handleDismissSuccess = useCallback(() => {
+    setSuccessMessage(null);
+    resetRequest();
+  }, [resetRequest]);
+
+  const handleDismissError = useCallback(() => {
+    resetRequest();
+    setSelectedDriverForRequest(null);
+  }, [resetRequest]);
+
+  const handleRetryRequest = useCallback(() => {
+    if (selectedDriverForRequest) {
+      sendRequest(selectedDriverForRequest);
+    }
+  }, [selectedDriverForRequest, sendRequest]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,6 +184,38 @@ const DriverSearchPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Success Alert */}
+        {successMessage && (
+          <div className="mb-6">
+            <Alert type="success" onClose={handleDismissSuccess}>
+              <div className="space-y-2">
+                <p className="font-semibold">Request Sent!</p>
+                <p className="text-sm">{successMessage}</p>
+              </div>
+            </Alert>
+          </div>
+        )}
+
+        {/* Error Alert for Ride Request */}
+        {requestError && (
+          <div className="mb-6">
+            <Alert type="danger" onClose={handleDismissError}>
+              <div className="space-y-2">
+                <p className="font-semibold">Request Failed</p>
+                <p className="text-sm">{requestError.message}</p>
+                {selectedDriverForRequest && (
+                  <button
+                    onClick={handleRetryRequest}
+                    className="mt-2 text-sm bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors font-medium"
+                  >
+                    Try Again
+                  </button>
+                )}
+              </div>
+            </Alert>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
@@ -143,7 +225,7 @@ const DriverSearchPage: React.FC = () => {
               <DriverSearchForm
                 onSubmit={handleFormSubmit}
                 onChange={handleFormChange}
-                isLoading={isLoading}
+                isLoading={isLoading || isRequestLoading}
               />
             </div>
 
@@ -193,7 +275,7 @@ const DriverSearchPage: React.FC = () => {
                 totalFound={totalFound}
                 searchRadius={searchCriteria?.searchRadiusKm || 0}
                 pickupAddress={
-                  searchCriteria?.pickupLocation.address || "Unknown location"
+                  searchCriteria?.pickupLocation?.address || "Unknown location"
                 }
                 error={error}
                 onDriverSelect={handleDriverSelect}
@@ -336,6 +418,18 @@ const DriverSearchPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Request Loading Overlay */}
+      {isRequestLoading && (
+        <div className="fixed inset-0 bg-black/5 backdrop-blur-[1px] flex items-center justify-center z-50">
+          <div className="bg-white/90 rounded-lg p-6 shadow-xl">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+              <p className="text-gray-900 font-medium">Sending request...</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

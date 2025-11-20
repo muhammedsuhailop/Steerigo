@@ -4,6 +4,10 @@ import type {
   DriverSearchResponse,
   SearchNearbyDriversPayload,
 } from "../types/driverSearch.types";
+import {
+  RideRequestPayload,
+  RideRequestResponse,
+} from "../types/rideRequest.types";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -14,7 +18,7 @@ interface ApiResponse<T> {
 export const driverSearchApi = createApi({
   reducerPath: "driverSearchApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["DriverSearch"],
+  tagTypes: ["DriverSearch", "RideRequest"],
   endpoints: (builder) => ({
     // Search nearby drivers
     searchNearbyDrivers: builder.mutation<
@@ -28,7 +32,18 @@ export const driverSearchApi = createApi({
       }),
       invalidatesTags: ["DriverSearch"],
     }),
+
+    // Send ride request
+    sendRideRequest: builder.mutation<RideRequestResponse, RideRequestPayload>({
+      query: (payload) => ({
+        url: `/user/ride/request-send`,
+        method: "POST",
+        data: payload,
+      }),
+      invalidatesTags: ["RideRequest"],
+    }),
   }),
 });
 
-export const { useSearchNearbyDriversMutation } = driverSearchApi;
+export const { useSearchNearbyDriversMutation, useSendRideRequestMutation } =
+  driverSearchApi;

@@ -8,6 +8,7 @@ import {
   FaRoad,
   FaClock,
   FaCheckCircle,
+  FaPaperPlane,
 } from "react-icons/fa";
 import type { Driver } from "../types/driverSearch.types";
 
@@ -15,17 +16,17 @@ interface DriverDetailModalProps {
   driver: Driver;
   onClose: () => void;
   onCall?: (driver: Driver) => void;
-  onSelectDriver?: (driver: Driver) => void;
+  onSendRequest?: (driver: Driver) => void;
 }
 
 const DriverDetailModal: React.FC<DriverDetailModalProps> = ({
   driver,
   onClose,
   onCall,
-  onSelectDriver,
+  onSendRequest,
 }) => {
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4 ">
+    <div className="fixed inset-0 bg-black/5 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl
             [scrollbar-width:none] [-ms-overflow-style:none]
@@ -152,10 +153,12 @@ const DriverDetailModal: React.FC<DriverDetailModalProps> = ({
             Call Driver
           </button>
           <button
-            onClick={() => onSelectDriver?.(driver)}
-            className="flex-1 bg-gray-900 text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors"
+            onClick={() => onSendRequest?.(driver)}
+            className="flex-1 bg-gray-900 text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+            aria-label="Request Ride"
           >
-            Select Driver
+            <FaPaperPlane className="w-4 h-4" />
+            <span className="text-sm">Request Ride</span>
           </button>
         </div>
       </div>

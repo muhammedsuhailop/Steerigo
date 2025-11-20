@@ -36,7 +36,7 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
     setSelectedDriver(null);
   };
 
-  const handleSelectDriver = (driver: Driver) => {
+  const handleSendRequest = (driver: Driver) => {
     onDriverSelect?.(driver);
     handleCloseModal();
   };
@@ -113,6 +113,7 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
               key={driver.id}
               driver={driver}
               onViewDetails={handleViewDetails}
+              onSendRequest={handleSendRequest}
             />
           ))}
         </div>
@@ -124,7 +125,7 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
           driver={selectedDriver}
           onClose={handleCloseModal}
           onCall={handleCallDriver}
-          onSelectDriver={handleSelectDriver}
+          onSendRequest={handleSendRequest}
         />
       )}
     </div>
