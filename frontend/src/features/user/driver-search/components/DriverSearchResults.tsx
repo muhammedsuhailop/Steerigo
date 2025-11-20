@@ -14,6 +14,7 @@ interface DriverSearchResultsProps {
   error?: string | null;
   onDriverSelect?: (driver: Driver) => void;
   onDriverCall?: (driver: Driver) => void;
+  requestedDriverIds?: Set<string>;
 }
 
 const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
@@ -25,6 +26,7 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
   error,
   onDriverSelect,
   onDriverCall,
+  requestedDriverIds = new Set(),
 }) => {
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
 
@@ -48,15 +50,15 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
   // Error State
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-        <FaExclamationCircle className="text-red-500 text-4xl mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-red-900 mb-2">
-          Search Error
-        </h3>
-        <p className="text-red-700 mb-4">{error}</p>
-        <p className="text-sm text-red-600">
-          Try adjusting your search radius or filters
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="flex flex-col items-center text-center">
+          <FaExclamationCircle className="text-red-500 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Search Error</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-500">
+            Try adjusting your search radius or filters
+          </p>
+        </div>
       </div>
     );
   }
@@ -64,17 +66,20 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
   // No Results State
   if (drivers.length === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
-        <FaCar className="text-gray-300 text-5xl mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          No Drivers Found
-        </h3>
-        <p className="text-gray-600 mb-4">
-          No available drivers found within {searchRadius} km of your location.
-        </p>
-        <p className="text-sm text-gray-500">
-          Try increasing your search radius or adjusting your filters.
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="flex flex-col items-center text-center">
+          <FaCar className="text-gray-400 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            No Drivers Found
+          </h3>
+          <p className="text-gray-600 mb-2">
+            No available drivers found within {searchRadius} km of your
+            location.
+          </p>
+          <p className="text-sm text-gray-500">
+            Try increasing your search radius or adjusting your filters.
+          </p>
+        </div>
       </div>
     );
   }
@@ -82,19 +87,19 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
   return (
     <div className="space-y-6">
       {/* Search Summary Header */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-gray-100 p-3 rounded-lg">
-            <FaMapMarkerAlt className="text-gray-700 text-xl" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">
               {totalFound} Driver{totalFound !== 1 ? "s" : ""} Found
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mt-1">
               Within {searchRadius} km of pickup location
             </p>
-            <p className="text-xs text-gray-500 mt-1">{pickupAddress}</p>
+            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+              <FaMapMarkerAlt className="text-gray-400" />
+              <span>{pickupAddress}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -103,22 +108,22 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
       {estimatedFare && <FareBreakdown fare={estimatedFare} />}
 
       {/* Driver Cards Grid */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
           Available Drivers
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {drivers.map((driver) => (
             <DriverCard
               key={driver.id}
               driver={driver}
               onViewDetails={handleViewDetails}
               onSendRequest={handleSendRequest}
+              isRequested={requestedDriverIds.has(driver.id)}
             />
           ))}
         </div>
       </div>
-
       {/* Driver Detail Modal */}
       {selectedDriver && (
         <DriverDetailModal
@@ -126,6 +131,7 @@ const DriverSearchResults: React.FC<DriverSearchResultsProps> = ({
           onClose={handleCloseModal}
           onCall={handleCallDriver}
           onSendRequest={handleSendRequest}
+          isRequested={requestedDriverIds.has(selectedDriver.id)}
         />
       )}
     </div>

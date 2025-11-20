@@ -55,6 +55,11 @@ const DriverSearchPage: React.FC = () => {
   const [selectedDriverForRequest, setSelectedDriverForRequest] =
     useState<Driver | null>(null);
 
+  // Track requested driver IDs
+  const [requestedDriverIds, setRequestedDriverIds] = useState<Set<string>>(
+    new Set()
+  );
+
   // Ride request hook
   const {
     sendRequest,
@@ -66,14 +71,20 @@ const DriverSearchPage: React.FC = () => {
     estimatedFare,
     onSuccess: (requestId: string) => {
       if (selectedDriverForRequest) {
+        // Add driver ID to requested set
+        setRequestedDriverIds((prev) =>
+          new Set(prev).add(selectedDriverForRequest.id)
+        );
+
         setSuccessMessage(
           `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`
         );
         setSelectedDriverForRequest(null);
 
+        // Auto-dismiss success message after 5 seconds
         setTimeout(() => {
           setSuccessMessage(null);
-        }, 8000);
+        }, 5000);
       }
     },
     onError: (error: RideRequestError) => {
@@ -99,6 +110,9 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setLoading(true));
       dispatch(setError(null));
       setHasSearched(true);
+
+      // Clear requested drivers when doing a new search
+      setRequestedDriverIds(new Set());
 
       // Combine date and time
       const rideStartDateTime = `${formData.rideStartDate}T${formData.rideStartTime}:00.000Z`;
@@ -142,10 +156,15 @@ const DriverSearchPage: React.FC = () => {
 
   const handleDriverSelect = useCallback(
     async (driver: Driver) => {
+      // Don't allow requesting the same driver again
+      if (requestedDriverIds.has(driver.id)) {
+        return;
+      }
+
       setSelectedDriverForRequest(driver);
       await sendRequest(driver);
     },
-    [sendRequest]
+    [sendRequest, requestedDriverIds]
   );
 
   const handleDriverCall = (driver: Driver) => {
@@ -280,6 +299,7 @@ const DriverSearchPage: React.FC = () => {
                 error={error}
                 onDriverSelect={handleDriverSelect}
                 onDriverCall={handleDriverCall}
+                requestedDriverIds={requestedDriverIds}
               />
             )}
           </div>
@@ -421,8 +441,8 @@ const DriverSearchPage: React.FC = () => {
 
       {/* Request Loading Overlay */}
       {isRequestLoading && (
-        <div className="fixed inset-0 bg-black/5 backdrop-blur-[1px] flex items-center justify-center z-50">
-          <div className="bg-white/90 rounded-lg p-6 shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl">
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
               <p className="text-gray-900 font-medium">Sending request...</p>

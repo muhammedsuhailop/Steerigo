@@ -1,22 +1,30 @@
 import React, { useState } from "react";
-import { FaStar, FaCar, FaEye, FaPaperPlane } from "react-icons/fa";
+import {
+  FaStar,
+  FaCar,
+  FaEye,
+  FaPaperPlane,
+  FaCheckCircle,
+} from "react-icons/fa";
 import type { Driver } from "../types/driverSearch.types";
 
 interface DriverCardProps {
   driver: Driver;
   onViewDetails?: (driver: Driver) => void;
   onSendRequest?: (driver: Driver) => void | Promise<void>;
+  isRequested?: boolean;
 }
 
 const DriverCard: React.FC<DriverCardProps> = ({
   driver,
   onViewDetails,
   onSendRequest,
+  isRequested = false,
 }) => {
   const [isSending, setIsSending] = useState(false);
 
-  const handleSendRequest = async (): Promise<void> => {
-    if (!onSendRequest) return;
+  const handleSendRequest = async () => {
+    if (!onSendRequest || isRequested) return;
 
     try {
       setIsSending(true);
@@ -79,34 +87,42 @@ const DriverCard: React.FC<DriverCardProps> = ({
 
       {/* Action Buttons */}
       <div className="mt-auto grid grid-cols-2 gap-2 pt-2">
+        {/* View */}
         <button
           onClick={() => onViewDetails?.(driver)}
           className="flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 
                text-gray-800 font-medium py-1.5 px-2 text-xs rounded-md 
                transition-colors duration-200"
-          aria-label={`View details for ${driver.name}`}
         >
           <FaEye className="text-[10px]" />
-          <span>View</span>
+          View
         </button>
 
-        <button
-          onClick={handleSendRequest}
-          disabled={isSending}
-          className={`flex items-center justify-center gap-1.5 
-            text-white font-medium py-1.5 px-2 text-xs rounded-md 
-            transition-colors duration-200
-            ${
-              isSending
-                ? "bg-gray-700 opacity-70 cursor-not-allowed"
-                : "bg-gray-900 hover:bg-gray-800"
-            }
-          `}
-          aria-label={`Request ride from ${driver.name}`}
-        >
-          <FaPaperPlane className="text-[10px]" />
-          <span>{isSending ? "Sending..." : "Request Ride"}</span>
-        </button>
+        {isRequested ? (
+          <button
+            disabled
+            className="flex items-center justify-center gap-1.5 bg-green-500 text-white font-medium 
+              py-1.5 px-2 text-xs rounded-md opacity-90 cursor-not-allowed"
+          >
+            <FaCheckCircle className="text-[10px]" />
+            Requested
+          </button>
+        ) : (
+          <button
+            onClick={handleSendRequest}
+            disabled={isSending}
+            className={`flex items-center justify-center gap-1.5 text-white font-medium py-1.5 px-2 
+              text-xs rounded-md transition-colors duration-200
+              ${
+                isSending
+                  ? "bg-gray-700 opacity-70 cursor-not-allowed"
+                  : "bg-gray-900 hover:bg-gray-800"
+              }`}
+          >
+            <FaPaperPlane className="text-[10px]" />
+            {isSending ? "Sending..." : "Request Ride"}
+          </button>
+        )}
       </div>
     </div>
   );
