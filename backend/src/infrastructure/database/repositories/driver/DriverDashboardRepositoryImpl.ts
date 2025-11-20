@@ -214,7 +214,6 @@ export class DriverDashboardRepositoryImpl
         driverId,
         status: RideRequestStatus.PENDING,
       })
-        .populate("riderId", "name")
         .sort({ pickupTime: 1 })
         .exec();
 
@@ -357,7 +356,6 @@ export class DriverDashboardRepositoryImpl
 
     const rideTypeValue = this.parseRideType(doc.rideType);
 
-    // Create FareBreakdown from document
     let fareBreakdown: FareBreakdown;
 
     try {
@@ -411,7 +409,7 @@ export class DriverDashboardRepositoryImpl
         }
       );
 
-      // Fallback
+      // Fallback: create minimal fare breakdown
       fareBreakdown = FareBreakdown.create({
         baseFare: Money.create(0),
         platformFee: Money.create(0),
@@ -433,7 +431,7 @@ export class DriverDashboardRepositoryImpl
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
-      riderId: doc.riderId.toString(),
+      riderId: doc.riderId.toString(), 
       pickup,
       drop,
       pickupTime: doc.pickupTime,
