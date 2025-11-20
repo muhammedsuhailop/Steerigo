@@ -12,25 +12,31 @@ export const PendingRequests: React.FC<PendingRequestsProps> = ({
   if (!requests.length) {
     return (
       <div
-        className={`bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center ${className}`}
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 ${className}`}
       >
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
           Pending Requests
         </h2>
-        <p className="text-gray-500">
-          No pending requests. Stay online to receive rides.
-        </p>
+        <div className="text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400">
+            No pending requests. Stay online to receive rides.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      <h2 className="text-xl font-semibold text-gray-900">Pending Requests</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 ${className}`}
+    >
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+        Pending Requests
+      </h2>
+      <div className="space-y-4">
         {requests.map((req) => (
           <RequestCard
-            key={req.id}
+            key={req.requestId}
             request={req}
             onAccept={onAccept}
             onReject={onReject}
