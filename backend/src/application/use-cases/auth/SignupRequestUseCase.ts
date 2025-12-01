@@ -12,9 +12,12 @@ import { PasswordService } from "@application/services/PasswordService";
 import { OtpService } from "@application/services/OtpService";
 import { Logger } from "@shared/utils/Logger";
 import { Password } from "@domain/value-objects/Password";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SignupRequestUseCase {
+export class SignupRequestUseCase
+  implements IUseCase<SignupRequestDto, Promise<Result<void>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService,

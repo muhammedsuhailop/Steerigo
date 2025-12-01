@@ -7,9 +7,13 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { UserNotFoundError } from "@domain/errors";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetCurrentUserUseCase {
+export class GetCurrentUserUseCase
+  implements
+    IUseCase<GetCurrentUserDto, Promise<Result<GetCurrentUserResponseDto>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}

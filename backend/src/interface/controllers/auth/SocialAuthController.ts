@@ -1,23 +1,29 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
-import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
 import { GoogleLoginRequestDto } from "@application/dto/auth/GoogleLoginRequestDto";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
 import { CookieHelper } from "@shared/utils/CookieHelper";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import { SignupVerifyResponseDto } from "@application/dto/auth";
 
 @injectable()
 export class SocialAuthController {
   constructor(
     @inject(TYPES.GetGoogleAuthUrlUseCase)
-    private getGoogleAuthUrlUseCase: GetGoogleAuthUrlUseCase,
+    private getGoogleAuthUrlUseCase: IUseCase<
+      void,
+      Promise<Result<{ authUrl: string }>>
+    >,
     @inject(TYPES.GoogleLoginUseCase)
-    private googleLoginUseCase: GoogleLoginUseCase
+    private googleLoginUseCase: IUseCase<
+      GoogleLoginRequestDto,
+      Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>>
+    >
   ) {}
 
   async getGoogleAuthUrl(req: Request, res: Response): Promise<void> {

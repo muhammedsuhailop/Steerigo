@@ -1,6 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { ResendOtpUseCase } from "@application/use-cases/auth/ResendOtpUseCase";
 import { ResendOtpDto } from "@application/dto/auth/ResendOtpDto";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -8,12 +7,17 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class OtpController {
   constructor(
     @inject(TYPES.ResendOtpUseCase)
-    private resendOtpUseCase: ResendOtpUseCase
+    private resendOtpUseCase: IUseCase<
+      ResendOtpDto,
+      Promise<Result<{ expiresAt: Date }>>
+    >
   ) {}
 
   async resendOtp(req: Request, res: Response): Promise<void> {

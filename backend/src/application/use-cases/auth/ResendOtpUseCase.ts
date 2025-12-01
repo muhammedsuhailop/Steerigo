@@ -12,9 +12,12 @@ import {
 } from "@shared/constants/AuthConstants";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { UserNotFoundError, DomainError } from "@domain/errors";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class ResendOtpUseCase {
+export class ResendOtpUseCase
+  implements IUseCase<ResendOtpDto, Promise<Result<{ expiresAt: Date }>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.OtpService) private otpService: OtpService,

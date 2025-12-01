@@ -19,9 +19,12 @@ import {
   PasswordResetError,
 } from "@domain/errors";
 import { Password } from "@domain/value-objects/Password";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class ForgotPasswordVerifyUseCase {
+export class ForgotPasswordVerifyUseCase
+  implements IUseCase<ForgotPasswordVerifyDto, Promise<Result<void>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService,

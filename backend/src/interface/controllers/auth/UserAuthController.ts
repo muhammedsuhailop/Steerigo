@@ -1,9 +1,12 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { LoginUseCase } from "@application/use-cases/auth/LoginUseCase";
-import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
-import { GetCurrentUserDto, LoginRequestDto } from "@application/dto/auth";
+import {
+  GetCurrentUserDto,
+  GetCurrentUserResponseDto,
+  LoginRequestDto,
+  LoginResponseDto,
+} from "@application/dto/auth";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
@@ -11,13 +14,22 @@ import { TYPES } from "@shared/constants/DITypes";
 import { CookieHelper } from "@shared/utils/CookieHelper";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { AuthMessages } from "@shared/constants/AuthConstants";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class UserAuthController {
   constructor(
-    @inject(TYPES.LoginUseCase) private loginUseCase: LoginUseCase,
+    @inject(TYPES.LoginUseCase)
+    private loginUseCase: IUseCase<
+      LoginRequestDto,
+      Promise<Result<LoginResponseDto, Error>>
+    >,
     @inject(TYPES.GetCurrentUserUseCase)
-    private getCurrentUserUseCase: GetCurrentUserUseCase
+    private getCurrentUserUseCase: IUseCase<
+      GetCurrentUserDto,
+      Promise<Result<GetCurrentUserResponseDto>>
+    >
   ) {}
 
   async login(req: Request, res: Response): Promise<void> {

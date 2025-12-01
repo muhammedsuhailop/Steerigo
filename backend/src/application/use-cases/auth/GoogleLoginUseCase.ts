@@ -17,9 +17,16 @@ import {
 } from "@shared/constants/AuthConstants";
 import { DomainError, EmailNotVerifiedError } from "@domain/errors";
 import { v4 as uuid } from "uuid";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GoogleLoginUseCase {
+export class GoogleLoginUseCase
+  implements
+    IUseCase<
+      GoogleLoginRequestDto,
+      Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>>
+    >
+{
   constructor(
     @inject(TYPES.GoogleAuthService)
     private googleAuthService: GoogleAuthService,

@@ -16,11 +16,17 @@ import { RefreshToken } from "@domain/entities/RefreshToken";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { AuthMessages, AuthErrorMessages } from "@shared/constants/AuthConstants";
+import {
+  AuthMessages,
+  AuthErrorMessages,
+} from "@shared/constants/AuthConstants";
 import { v4 as uuid } from "uuid";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SignupVerifyUseCase {
+export class SignupVerifyUseCase
+  implements IUseCase<SignupVerifyDto, Promise<Result<SignupVerifyResponseDto>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.RefreshTokenRepository)

@@ -16,9 +16,12 @@ import {
   PasswordResetError,
 } from "@domain/errors";
 import { Password } from "@domain/value-objects/Password";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UpdatePasswordUseCase {
+export class UpdatePasswordUseCase
+  implements IUseCase<UpdatePasswordDto, Promise<Result<void>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService

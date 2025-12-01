@@ -13,9 +13,12 @@ import {
 } from "@shared/constants/AuthConstants";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { UserNotFoundError, DomainError } from "@domain/errors";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class ForgotPasswordRequestUseCase {
+export class ForgotPasswordRequestUseCase
+  implements IUseCase<ForgotPasswordRequestDto, Promise<Result<void>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService,
