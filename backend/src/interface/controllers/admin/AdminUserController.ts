@@ -1,7 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { GetUsersUseCase } from "@application/use-cases/admin/GetUsersUseCase";
-import { UpdateUserStatusUseCase } from "@application/use-cases/admin/UpdateUserStatusUseCase";
 import { GetUsersRequestDto } from "@application/dto/admin/GetUsersRequestDto";
 import { UpdateUserStatusRequestDto } from "@application/dto/admin/UpdateUserStatusRequestDto";
 import { ApiResponse } from "@shared/types/Common";
@@ -10,14 +8,26 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import {
+  GetUsersResponseDto,
+  UpdateUserStatusResponseDto,
+} from "@application/dto/admin";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class AdminUserController {
   constructor(
     @inject(TYPES.GetUsersUseCase)
-    private getUsersUseCase: GetUsersUseCase,
+    private getUsersUseCase: IUseCase<
+      GetUsersRequestDto,
+      Promise<Result<GetUsersResponseDto>>
+    >,
     @inject(TYPES.UpdateUserStatusUseCase)
-    private updateUserStatusUseCase: UpdateUserStatusUseCase
+    private updateUserStatusUseCase: IUseCase<
+      UpdateUserStatusRequestDto,
+      Promise<Result<UpdateUserStatusResponseDto>>
+    >
   ) {}
 
   async getUsers(req: Request, res: Response): Promise<void> {

@@ -7,15 +7,34 @@ import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsR
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
+import {
+  GetKycRequestsResponseDto,
+  KycDocumentSummaryDto,
+  KycDriverInfoDto,
+  KycRequestListItemDto,
+  PaginationDto,
+  KycRequestsAppliedFiltersDto,
+} from "@application/dto/admin/GetKycRequestsResponseDto";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { DocumentType } from "@domain/value-objects/DocumentType";
 
 @injectable()
-export class GetKycRequestsUseCase {
+export class GetKycRequestsUseCase
+  implements
+    IUseCase<
+      GetKycRequestsRequestDto,
+      Promise<Result<GetKycRequestsResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.KYCRepository)
     private kycRepository: KYCRepository
   ) {}
 
-  async execute(dto: GetKycRequestsRequestDto): Promise<Result<any>> {
+  async execute(
+    dto: GetKycRequestsRequestDto
+  ): Promise<Result<GetKycRequestsResponseDto>> {
     try {
       const dateFrom = dto.getDateFrom();
       const dateTo = dto.getDateTo();
@@ -55,42 +74,56 @@ export class GetKycRequestsUseCase {
         pagination
       );
 
-      const response = {
-        kycDocuments: result.data.map((item) => ({
-          kyc: {
-            id: item.kycDocument.getId(),
-            docType: item.kycDocument.getDocType(),
-            docNumber: item.kycDocument.getDocNumber(),
-            issueDate: item.kycDocument.getIssueDate()?.toISOString() || null,
-            expiryDate: item.kycDocument.getExpiryDate()?.toISOString() || null,
-            verificationStatus: item.kycDocument.getVerificationStatus(),
-            comments: item.kycDocument.getComments(),
-            docImageUrlsFront: item.kycDocument.getDocImageUrlsFront(),
-            docImageUrlsBack: item.kycDocument.getDocImageUrlsBack(),
-            createdAt: item.kycDocument.getCreatedAt().toISOString(),
-            updatedAt: item.kycDocument.getUpdatedAt().toISOString(),
-            isExpired: item.kycDocument.isExpired(),
-          },
-          driver: {
-            driverId: item.driverInfo.driverId,
-            userId: item.driverInfo.userId,
-            userName: item.driverInfo.userName,
-            userEmail: item.driverInfo.userEmail,
-            userMobile: item.driverInfo.userMobile,
-            driverStatus: item.driverInfo.driverStatus,
-          },
-        })),
-        pagination: result.pagination,
-        appliedFilters: {
-          sortBy: dto.getSortBy(),
-          sortOrder: dto.getSortOrder(),
-          verificationStatus: dto.getVerificationStatus() || null,
-          docType: dto.getDocType() || null,
-          driverId: dto.getDriverId() || null,
-          dateFrom: dto.getDateFrom()?.toISOString() || null,
-          dateTo: dto.getDateTo()?.toISOString() || null,
-        },
-      };
+      const kycDocuments: KycRequestListItemDto[] = result.data.map(
+        (item) =>
+          new KycRequestListItemDto(
+            new KycDocumentSummaryDto(
+              item.kycDocument.getId(),
+              item.kycDocument.getDocType(),
+              item.kycDocument.getDocNumber(),
+              item.kycDocument.getIssueDate()?.toISOString() || null,
+              item.kycDocument.getExpiryDate()?.toISOString() || null,
+              item.kycDocument.getVerificationStatus(),
+              item.kycDocument.getComments() || null,
+              item.kycDocument.getDocImageUrlsFront(),
+              item.kycDocument.getDocImageUrlsBack(),
+              item.kycDocument.getCreatedAt().toISOString(),
+              item.kycDocument.getUpdatedAt().toISOString(),
+              item.kycDocument.isExpired()
+            ),
+            new KycDriverInfoDto(
+              item.driverInfo.driverId,
+              item.driverInfo.userId,
+              item.driverInfo.userName,
+              item.driverInfo.userEmail,
+              item.driverInfo.userMobile,
+              item.driverInfo.driverStatus
+            )
+          )
+      );
+
+      const paginationDto = new PaginationDto(
+        result.pagination.currentPage,
+        result.pagination.pageSize,
+        result.pagination.totalItems,
+        result.pagination.totalPages
+      );
+
+      const appliedFiltersDto = new KycRequestsAppliedFiltersDto(
+        dto.getSortBy(),
+        dto.getSortOrder(),
+        (dto.getVerificationStatus() as KYCStatus) || null,
+        (dto.getDocType() as DocumentType) || null,
+        dto.getDriverId() || null,
+        dateFrom?.toISOString() || null,
+        dateTo?.toISOString() || null
+      );
+
+      const response = new GetKycRequestsResponseDto(
+        kycDocuments,
+        paginationDto,
+        appliedFiltersDto
+      );
 
       Logger.info("KYC documents fetched successfully", {
         totalItems: result.pagination.totalItems,

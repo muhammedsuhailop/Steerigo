@@ -1,11 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
-import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
-import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
-import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycRequestsUseCase";
-import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
-import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycRequestByIdUseCase";
 import { GetDriversRequestDto } from "@application/dto/admin/GetDriversRequestDto";
 import { DriverActionRequestDto } from "@application/dto/admin/DriverActionRequestDto";
 import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
@@ -18,26 +12,67 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
-import { UpdateDriverKycStatusUseCase } from "@application/use-cases/admin/UpdateDriverKycStatusUseCase";
 import { UpdateDriverKycStatusRequestDto } from "@application/dto/admin/UpdateDriverKycStatusRequestDto";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import {
+  AdminGetDriverProfileResponseDto,
+  GetDriversResponseDto,
+} from "@application/dto/admin";
+import { GetKycRequestByIdResponseDto } from "@application/dto/admin/GetKycRequestByIdResponseDto";
+import { GetKycRequestsResponseDto } from "@application/dto/admin/GetKycRequestsResponseDto";
+import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateDriverKycStatusResponseDto";
 
 @injectable()
 export class AdminDriverController {
   constructor(
     @inject(TYPES.GetDriversUseCase)
-    private getDriversUseCase: GetDriversUseCase,
+    private getDriversUseCase: IUseCase<
+      GetDriversRequestDto,
+      Promise<Result<GetDriversResponseDto>>
+    >,
     @inject(TYPES.DriverActionUseCase)
-    private driverActionUseCase: DriverActionUseCase,
+    private driverActionUseCase: IUseCase<
+      DriverActionRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          driverId: string;
+          newStatus: string;
+        }>
+      >
+    >,
     @inject(TYPES.GetDriverProfileUseCase)
-    private getDriverProfileUseCase: GetDriverProfileUseCase,
+    private getDriverProfileUseCase: IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<AdminGetDriverProfileResponseDto>>
+    >,
     @inject(TYPES.GetKycRequestsUseCase)
-    private getKycRequestsUseCase: GetKycRequestsUseCase,
+    private getKycRequestsUseCase: IUseCase<
+      GetKycRequestsRequestDto,
+      Promise<Result<GetKycRequestsResponseDto>>
+    >,
     @inject(TYPES.UpdateKycStatusUseCase)
-    private updateKycStatusUseCase: UpdateKycStatusUseCase,
+    private updateKycStatusUseCase: IUseCase<
+      UpdateKycStatusRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          kycDocument: any;
+          driverKycStatusUpdated: boolean;
+        }>
+      >
+    >,
     @inject(TYPES.GetKycRequestByIdUseCase)
-    private getKycRequestByIdUseCase: GetKycRequestByIdUseCase,
+    private getKycRequestByIdUseCase: IUseCase<
+      GetKycRequestByIdRequestDto,
+      Promise<Result<GetKycRequestByIdResponseDto>>
+    >,
     @inject(TYPES.UpdateDriverKycStatusUseCase)
-    private updateDriverKycStatusUseCase: UpdateDriverKycStatusUseCase
+    private updateDriverKycStatusUseCase: IUseCase<
+      UpdateDriverKycStatusRequestDto,
+      Promise<Result<UpdateDriverKycStatusResponseDto>>
+    >
   ) {}
 
   async getDrivers(req: Request, res: Response): Promise<void> {

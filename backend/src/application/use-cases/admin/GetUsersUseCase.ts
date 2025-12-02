@@ -7,17 +7,25 @@ import {
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
+import {
+  GetUsersResponseDto,
+  AdminUserSummaryDto,
+  AdminUsersPaginationDto,
+  AdminUsersAppliedFiltersDto,
+} from "@application/dto/admin/GetUsersResponseDto";
 
 @injectable()
-export class GetUsersUseCase {
+export class GetUsersUseCase
+  implements IUseCase<GetUsersRequestDto, Promise<Result<GetUsersResponseDto>>>
+{
   constructor(
     @inject(TYPES.AdminUserRepository)
     private adminUserRepository: AdminUserRepository
   ) {}
 
-  async execute(dto: GetUsersRequestDto): Promise<Result<any>> {
+  async execute(dto: GetUsersRequestDto): Promise<Result<GetUsersResponseDto>> {
     try {
-
       const dateFrom = dto.getDateFrom();
       const dateTo = dto.getDateTo();
 
@@ -55,29 +63,43 @@ export class GetUsersUseCase {
         pagination
       );
 
-      const response = {
-        users: result.data.map((user) => ({
-          userId: user.userId,
-          name: user.name,
-          email: user.email,
-          mobile: user.mobile,
-          status: user.status,
-          totalBookings: user.totalBookings,
-          totalSpent: user.totalSpent,
-          lastBooked: user.lastBooked?.toISOString() || null,
-          createdAt: user.createdAt.toISOString(),
-          isVerified: user.isVerified,
-        })),
-        pagination: result.pagination,
-        appliedFilters: {
-          sortBy: dto.getSortBy(),
-          sortOrder: dto.getSortOrder(),
-          search: dto.getSearch() || null,
-          status: dto.getStatus() || null,
-          dateFrom: dto.getDateFrom()?.toISOString() || null,
-          dateTo: dto.getDateTo()?.toISOString() || null,
-        },
-      };
+      const users: AdminUserSummaryDto[] = result.data.map(
+        (user) =>
+          new AdminUserSummaryDto(
+            user.userId,
+            user.name,
+            user.email,
+            user.mobile,
+            user.status,
+            user.totalBookings,
+            user.totalSpent,
+            user.lastBooked?.toISOString() || null,
+            user.createdAt.toISOString(),
+            user.isVerified
+          )
+      );
+
+      const paginationDto = new AdminUsersPaginationDto(
+        result.pagination.currentPage,
+        result.pagination.pageSize,
+        result.pagination.totalItems,
+        result.pagination.totalPages
+      );
+
+      const appliedFiltersDto = new AdminUsersAppliedFiltersDto(
+        dto.getSortBy(),
+        dto.getSortOrder(),
+        dto.getSearch() || null,
+        dto.getStatus() || null,
+        dateFrom?.toISOString() || null,
+        dateTo?.toISOString() || null
+      );
+
+      const response = new GetUsersResponseDto(
+        users,
+        paginationDto,
+        appliedFiltersDto
+      );
 
       Logger.info("Users fetched successfully", {
         totalItems: result.pagination.totalItems,

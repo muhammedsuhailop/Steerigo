@@ -13,9 +13,16 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DomainError } from "@domain/errors/DomainError";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverProfileUseCase {
+export class GetDriverProfileUseCase
+  implements
+    IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<AdminGetDriverProfileResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
     private adminDriverRepository: AdminDriverRepository,

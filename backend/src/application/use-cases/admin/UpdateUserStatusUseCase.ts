@@ -9,15 +9,26 @@ import {
   AdminUnauthorizedActionError,
 } from "@domain/errors/AdminErrors";
 import { AdminUserAction } from "@domain/value-objects/AdminAction";
+import { IUseCase } from "../interfaces/IUseCase";
+import { UpdateUserStatusResponseDto } from "@application/dto/admin/UpdateUserStatusResponseDto";
+import { User } from "@domain/entities/User";
 
 @injectable()
-export class UpdateUserStatusUseCase {
+export class UpdateUserStatusUseCase
+  implements
+    IUseCase<
+      UpdateUserStatusRequestDto,
+      Promise<Result<UpdateUserStatusResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.AdminUserRepository)
     private adminUserRepository: AdminUserRepository
   ) {}
 
-  async execute(dto: UpdateUserStatusRequestDto): Promise<Result<any>> {
+  async execute(
+    dto: UpdateUserStatusRequestDto
+  ): Promise<Result<UpdateUserStatusResponseDto>> {
     try {
       Logger.info("Executing UpdateUserStatusUseCase", {
         userId: dto.getUserId(),
@@ -33,7 +44,7 @@ export class UpdateUserStatusUseCase {
       // Validate action based on current user state
       const validationResult = this.validateAction(user, dto.getAction());
       if (validationResult.isFailure()) {
-        return validationResult;
+        return validationResult as Result<UpdateUserStatusResponseDto>;
       }
 
       // Determine new status based on action
@@ -57,19 +68,21 @@ export class UpdateUserStatusUseCase {
         action: dto.getAction(),
       });
 
-      return Result.success({
-        message: `User ${dto.getAction()}d successfully`,
-        userId: dto.getUserId(),
-        newStatus,
-      });
+      const response = new UpdateUserStatusResponseDto(
+        `User ${dto.getAction()}d successfully`,
+        dto.getUserId(),
+        newStatus
+      );
+
+      return Result.success(response);
     } catch (error) {
       Logger.error("Error updating user status", error);
       return Result.failure(error as Error);
     }
   }
 
-  private validateAction(user: any, action: AdminUserAction): Result<void> {
-    const currentStatus = user.getStatus();
+  private validateAction(user: User, action: AdminUserAction): Result<void> {
+    const currentStatus = user.getStatus() as string;
 
     switch (action) {
       case AdminUserAction.ACTIVATE:
@@ -79,6 +92,7 @@ export class UpdateUserStatusUseCase {
           );
         }
         break;
+
       case AdminUserAction.DEACTIVATE:
         if (currentStatus === "Inactive") {
           return Result.failure(
@@ -86,6 +100,7 @@ export class UpdateUserStatusUseCase {
           );
         }
         break;
+
       case AdminUserAction.SUSPEND:
         if (currentStatus === "Suspended") {
           return Result.failure(
@@ -96,6 +111,7 @@ export class UpdateUserStatusUseCase {
           );
         }
         break;
+
       case AdminUserAction.DELETE:
         if (currentStatus === "Deleted") {
           return Result.failure(

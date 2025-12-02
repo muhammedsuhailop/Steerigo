@@ -13,20 +13,19 @@ import {
   ProfilePictureNotUploadedError,
   LicenseNotApprovedError,
   NonLicenseKYCNotApprovedError,
-  InvalidKYCStatusTransitionError,
 } from "@domain/errors/KYCValidationErrors";
 import { DomainError } from "@domain/errors/DomainError";
-import { KYC } from "@domain/entities/KYC";
-
-interface UpdateDriverKycStatusResponse {
-  message: string;
-  driverId: string;
-  previousKycStatus: string;
-  newKycStatus: string;
-}
+import { IUseCase } from "../interfaces/IUseCase";
+import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateDriverKycStatusResponseDto";
 
 @injectable()
-export class UpdateDriverKycStatusUseCase {
+export class UpdateDriverKycStatusUseCase
+  implements
+    IUseCase<
+      UpdateDriverKycStatusRequestDto,
+      Promise<Result<UpdateDriverKycStatusResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
     private adminDriverRepository: AdminDriverRepository,
@@ -38,7 +37,7 @@ export class UpdateDriverKycStatusUseCase {
 
   async execute(
     dto: UpdateDriverKycStatusRequestDto
-  ): Promise<Result<UpdateDriverKycStatusResponse>> {
+  ): Promise<Result<UpdateDriverKycStatusResponseDto>> {
     try {
       Logger.info("Executing UpdateDriverKycStatusUseCase", {
         driverId: dto.getDriverId(),
@@ -171,12 +170,14 @@ export class UpdateDriverKycStatusUseCase {
         newKycStatus,
       });
 
-      return Result.success({
-        message: `Driver KYC status updated to ${newKycStatus} successfully`,
-        driverId: dto.getDriverId(),
+      const response = new UpdateDriverKycStatusResponseDto(
+        `Driver KYC status updated to ${newKycStatus} successfully`,
+        dto.getDriverId(),
         previousKycStatus,
-        newKycStatus,
-      });
+        newKycStatus
+      );
+
+      return Result.success(response);
     } catch (error) {
       Logger.error("Error updating driver KYC status", {
         driverId: dto.getDriverId(),

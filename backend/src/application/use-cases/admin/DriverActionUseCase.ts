@@ -5,9 +5,22 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class DriverActionUseCase {
+export class DriverActionUseCase
+  implements
+    IUseCase<
+      DriverActionRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          driverId: string;
+          newStatus: string;
+        }>
+      >
+    >
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
     private adminDriverRepository: AdminDriverRepository

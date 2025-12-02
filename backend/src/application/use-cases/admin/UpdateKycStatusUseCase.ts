@@ -8,9 +8,22 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UpdateKycStatusUseCase {
+export class UpdateKycStatusUseCase
+  implements
+    IUseCase<
+      UpdateKycStatusRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          kycDocument: any;
+          driverKycStatusUpdated: boolean;
+        }>
+      >
+    >
+{
   constructor(
     @inject(TYPES.KYCRepository)
     private kycRepository: KYCRepository,
