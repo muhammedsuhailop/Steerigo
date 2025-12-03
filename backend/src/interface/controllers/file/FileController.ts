@@ -1,27 +1,42 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
-import { UploadFileUseCase } from "@application/use-cases/file/UploadFileUseCase";
-import { GetUserFilesUseCase } from "@application/use-cases/file/GetUserFilesUseCase";
-import { DeleteFileUseCase } from "@application/use-cases/file/DeleteFileUseCase";
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
-import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { FILE_MESSAGES } from "@shared/constants/FileConstants";
 import { UpdateProfilePictureDto } from "@application/dto/file/UpdateProfilePictureDto";
-import { UpdateProfilePictureUseCase } from "@application/use-cases/file/UpdateProfilePictureUseCase";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import { FileUploadResponseDto } from "@application/dto/file/FileUploadResponseDto";
+import { GetUserFilesResponseDto } from "@application/dto/file/GetUserFilesResponseDto";
+import { UpdateProfilePictureResponseDto } from "@application/dto/file/UpdateProfilePictureResponseDto";
 
 type MulterRequest = Request & { file?: Express.Multer.File };
 
 @injectable()
 export class FileController {
   constructor(
-    @inject(TYPES.UploadFileUseCase) private uploadUc: UploadFileUseCase,
-    @inject(TYPES.GetUserFilesUseCase) private listUc: GetUserFilesUseCase,
-    @inject(TYPES.DeleteFileUseCase) private deleteUc: DeleteFileUseCase,
+    @inject(TYPES.UploadFileUseCase)
+    private _uploadUc: IUseCase<
+      FileUploadDto,
+      Promise<Result<FileUploadResponseDto, Error>>
+    >,
+    @inject(TYPES.GetUserFilesUseCase)
+    private _listUc: IUseCase<
+      string,
+      Promise<Result<GetUserFilesResponseDto, Error>>
+    >,
+    @inject(TYPES.DeleteFileUseCase)
+    private _deleteUc: IUseCase<
+      string,
+      Promise<Result<{ message: string }, Error>>
+    >,
     @inject(TYPES.UpdateProfilePictureUseCase)
-    private updateProfileUc: UpdateProfilePictureUseCase
+    private _updateProfileUc: IUseCase<
+      UpdateProfilePictureDto,
+      Promise<Result<UpdateProfilePictureResponseDto>>
+    >
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -57,11 +72,12 @@ export class FileController {
       }
 
       const dto = new FileUploadDto({
+        userId,
         purpose: req.body.purpose,
         file: req.file,
       });
 
-      const result = await this.uploadUc.execute(dto, userId);
+      const result = await this._uploadUc.execute(dto);
 
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
@@ -95,7 +111,7 @@ export class FileController {
         return;
       }
 
-      const result = await this.listUc.execute(userId);
+      const result = await this._listUc.execute(userId);
 
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.OK).json({
@@ -138,7 +154,7 @@ export class FileController {
         return;
       }
 
-      const result = await this.deleteUc.execute(publicId);
+      const result = await this._deleteUc.execute(publicId);
 
       if (result.isSuccessful()) {
         const data = result.getValue();
@@ -196,7 +212,7 @@ export class FileController {
         file: req.file,
       });
 
-      const result = await this.updateProfileUc.execute(dto);
+      const result = await this._updateProfileUc.execute(dto);
 
       if (result.isSuccessful()) {
         const data = result.getValue();

@@ -1,10 +1,16 @@
 import { FilePurpose } from "@domain/value-objects/FilePurpose";
 
 export class FileUploadDto {
+  public readonly userId: string;
   public readonly purpose: FilePurpose;
   public readonly file: Express.Multer.File;
 
-  constructor(data: { purpose: string; file: Express.Multer.File }) {
+  constructor(data: {
+    userId: string;
+    purpose: string;
+    file: Express.Multer.File;
+  }) {
+    this.userId = data.userId;
     this.purpose = FilePurpose.create(data.purpose);
     this.file = data.file;
   }
@@ -32,6 +38,10 @@ export class FileUploadDto {
     }
 
     return errors;
+  }
+
+  getUserId(): string {
+    return this.userId;
   }
 
   private getAllowedMimeTypesForPurpose(): string[] {

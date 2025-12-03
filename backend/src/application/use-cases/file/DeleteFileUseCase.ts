@@ -3,9 +3,12 @@ import { FileUploadService } from "@application/services/FileUploadService";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class DeleteFileUseCase {
+export class DeleteFileUseCase
+  implements IUseCase<string, Promise<Result<{ message: string }, Error>>>
+{
   constructor(
     @inject(TYPES.FileUploadService)
     private fileUploadService: FileUploadService

@@ -1,31 +1,24 @@
-// backend/src/application/use-cases/file/GetUserFilesUseCase.ts
-
 import { injectable, inject } from "inversify";
 import { FileUploadService } from "@application/services/FileUploadService";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-
-export interface CloudinaryResource {
-  public_id: string;
-  secure_url: string;
-  format: string;
-  bytes: number;
-  created_at: string;
-}
-
-export interface FileListResponse {
-  resources: CloudinaryResource[];
-}
+import { GetUserFilesResponseDto } from "@application/dto/file/GetUserFilesResponseDto";
+import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetUserFilesUseCase {
+export class GetUserFilesUseCase
+  implements IUseCase<string, Promise<Result<GetUserFilesResponseDto, Error>>>
+{
   constructor(
     @inject(TYPES.FileUploadService)
     private fileUploadService: FileUploadService
   ) {}
 
-  async execute(userId: string): Promise<Result<FileListResponse, Error>> {
+  async execute(
+    userId: string
+  ): Promise<Result<GetUserFilesResponseDto, Error>> {
     try {
       Logger.info("Listing user files", { userId });
 
@@ -33,7 +26,18 @@ export class GetUserFilesUseCase {
         `steerigo/${userId}_`
       );
 
-      return Result.success({ resources });
+      const resourceDtos = resources.map(
+        (r) =>
+          new CloudinaryResourceDto(
+            r.public_id,
+            r.secure_url,
+            r.format,
+            r.bytes,
+            r.created_at
+          )
+      );
+
+      return Result.success(new GetUserFilesResponseDto(resourceDtos));
     } catch (err) {
       Logger.error("GetUserFilesUseCase failed", {
         error: (err as Error).message,

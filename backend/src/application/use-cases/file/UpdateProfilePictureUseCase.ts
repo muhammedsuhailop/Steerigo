@@ -5,26 +5,27 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { inject, injectable } from "inversify";
-
-export interface UpdateProfilePictureResponse {
-  profilePictureUrl: string;
-  publicId: string;
-  userId: string;
-  updatedAt: string;
-}
+import { UpdateProfilePictureResponseDto } from "@application/dto/file/UpdateProfilePictureResponseDto";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UpdateProfilePictureUseCase {
+export class UpdateProfilePictureUseCase
+  implements
+    IUseCase<
+      UpdateProfilePictureDto,
+      Promise<Result<UpdateProfilePictureResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.FileUploadService)
-    private fileUploadService: FileUploadService,
+    private _fileUploadService: FileUploadService,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository
+    private _userRepository: UserRepository
   ) {}
 
   async execute(
     dto: UpdateProfilePictureDto
-  ): Promise<Result<UpdateProfilePictureResponse>> {
+  ): Promise<Result<UpdateProfilePictureResponseDto>> {
     try {
       Logger.info("Updating profile picture", { userId: dto.userId });
 
@@ -35,19 +36,19 @@ export class UpdateProfilePictureUseCase {
         );
       }
 
-      const user = await this.userRepository.findById(dto.userId);
+      const user = await this._userRepository.findById(dto.userId);
       if (!user) {
         return Result.failure(new Error("User not found"));
       }
 
-      const { url, publicId } = await this.fileUploadService.upload(
+      const { url, publicId } = await this._fileUploadService.upload(
         dto.file.buffer,
         dto.userId,
         dto.purpose.getValue(),
         dto.file.originalname
       );
 
-      await this.userRepository.updateById(dto.userId, {
+      await this._userRepository.updateById(dto.userId, {
         profilePicture: url,
       });
 
@@ -59,12 +60,14 @@ export class UpdateProfilePictureUseCase {
         url,
       });
 
-      return Result.success({
-        profilePictureUrl: url,
+      const response = new UpdateProfilePictureResponseDto(
+        url,
         publicId,
-        userId: dto.userId,
-        updatedAt: new Date().toISOString(),
-      });
+        dto.userId,
+        new Date().toISOString()
+      );
+
+      return Result.success(response);
     } catch (err) {
       Logger.error("UpdateProfilePictureUseCase failed", {
         userId: dto.userId,
