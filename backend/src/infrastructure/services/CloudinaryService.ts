@@ -7,8 +7,8 @@ import {
 } from "@application/services/FileUploadService";
 import { Logger } from "@shared/utils/Logger";
 import streamifier from "streamifier";
-import { CloudinaryResource } from "@application/use-cases/file/GetUserFilesUseCase";
 import { UploadApiResponse } from "cloudinary";
+import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 
 @injectable()
 export class CloudinaryService implements FileUploadService {
@@ -176,7 +176,7 @@ export class CloudinaryService implements FileUploadService {
     }
   }
 
-  async listByPrefix(prefix: string): Promise<CloudinaryResource[]> {
+  async listByPrefix(prefix: string): Promise<CloudinaryResourceDto[]> {
     const response = await cloudinary.api.resources({
       type: "upload",
       prefix,

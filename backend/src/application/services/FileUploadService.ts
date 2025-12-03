@@ -1,4 +1,4 @@
-import { CloudinaryResource } from "@application/use-cases/file/GetUserFilesUseCase";
+import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 
 export interface FileUploadResult {
   url: string;
@@ -21,5 +21,5 @@ export interface FileUploadService {
   delete(publicId: string): Promise<DeleteResult>;
   generateSignedUrl(publicId: string, expiresIn?: number): Promise<string>;
   validateFile(file: Express.Multer.File, purpose: string): Promise<boolean>;
-  listByPrefix(prefix: string): Promise<CloudinaryResource[]>;
+  listByPrefix(prefix: string): Promise<CloudinaryResourceDto[]>;
 }
