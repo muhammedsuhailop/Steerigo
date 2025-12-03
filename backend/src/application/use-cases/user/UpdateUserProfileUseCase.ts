@@ -1,26 +1,28 @@
 import { injectable, inject } from "inversify";
 import { UserRepository } from "@application/repositories/UserRepository";
 import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
-import { UserResponseDto } from "@application/dto/user/UserResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-
-export interface UserProfileUpdateResponse {
-  user: UserResponseDto;
-  updatedFields: string[];
-}
+import { UserProfileUpdateResponseDto } from "@application/dto/user/UserProfileUpdateResponseDto";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UpdateUserProfileUseCase {
+export class UpdateUserProfileUseCase
+  implements
+    IUseCase<
+      UpdateUserProfileDto,
+      Promise<Result<UserProfileUpdateResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}
 
   async execute(
     dto: UpdateUserProfileDto
-  ): Promise<Result<UserProfileUpdateResponse>> {
+  ): Promise<Result<UserProfileUpdateResponseDto>> {
     try {
       Logger.info("Update user profile started", { userId: dto.userId });
 
@@ -76,7 +78,7 @@ export class UpdateUserProfileUseCase {
         );
       }
 
-      const response: UserProfileUpdateResponse = {
+      const response: UserProfileUpdateResponseDto = {
         user: {
           id: updatedUser.getId(),
           name: updatedUser.getName(),

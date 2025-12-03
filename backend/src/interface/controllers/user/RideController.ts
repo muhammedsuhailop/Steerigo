@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
-import { SendRideRequestUseCase } from "@application/use-cases/user/SendRideRequestUseCase";
 import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
 import {
   FareBreakdown,
@@ -12,12 +11,18 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { ApiResponse } from "@shared/types/Common";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
 
 @injectable()
 export class RideController {
   constructor(
     @inject(TYPES.SendRideRequestUseCase)
-    private sendRideRequestUseCase: SendRideRequestUseCase
+    private sendRideRequestUseCase: IUseCase<
+      SendRideRequestDto,
+      Promise<Result<SendRideRequestResponseDto>>
+    >
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -43,7 +48,7 @@ export class RideController {
         drop,
         pickupTime,
         rideType,
-        fareBreakdown: fareBreakdownData, 
+        fareBreakdown: fareBreakdownData,
         pickupETA,
       } = req.body;
 
@@ -109,7 +114,7 @@ export class RideController {
         drop.address,
         new Date(pickupTime),
         rideType,
-        fareBreakdown, 
+        fareBreakdown,
         pickupETA
       );
 

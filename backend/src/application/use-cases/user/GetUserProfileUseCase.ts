@@ -6,9 +6,12 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetUserProfileUseCase {
+export class GetUserProfileUseCase
+  implements IUseCase<GetUserProfileDto, Promise<Result<UserResponseDto>>>
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}

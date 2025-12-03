@@ -13,9 +13,13 @@ import { v4 as uuidv4 } from "uuid";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { RideType } from "@domain/value-objects/RideType";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SendRideRequestUseCase {
+export class SendRideRequestUseCase
+  implements
+    IUseCase<SendRideRequestDto, Promise<Result<SendRideRequestResponseDto>>>
+{
   constructor(
     @inject(TYPES.RideRequestRepository)
     private rideRequestRepository: RideRequestRepository,
@@ -29,7 +33,6 @@ export class SendRideRequestUseCase {
     dto: SendRideRequestDto
   ): Promise<Result<SendRideRequestResponseDto>> {
     try {
-      // Validate DTO and return failure if validation/domain error occurs
       try {
         dto.validate();
       } catch (validationError) {

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
-import { FindNearbyDriversUseCase } from "@application/use-cases/user/FindNearbyDriversUseCase";
 import { FindNearbyDriversRequestDto } from "@application/dto/user/FindNearbyDriversRequestDto";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
@@ -8,12 +7,18 @@ import { TYPES } from "@shared/constants/DITypes";
 import { ApiResponse } from "@shared/types/Common";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { FindNearbyDriversResponseDto } from "@application/dto/user/FindNearbyDriversResponseDto";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class DriverSearchController {
   constructor(
     @inject(TYPES.FindNearbyDriversUseCase)
-    private findNearbyDriversUseCase: FindNearbyDriversUseCase
+    private findNearbyDriversUseCase: IUseCase<
+      FindNearbyDriversRequestDto,
+      Promise<Result<FindNearbyDriversResponseDto>>
+    >
   ) {}
 
   private getUserId(req: Request): string | null {

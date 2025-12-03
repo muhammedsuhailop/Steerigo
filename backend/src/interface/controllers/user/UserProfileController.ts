@@ -1,16 +1,19 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
-import { GetUserProfileUseCase } from "@application/use-cases/user/GetUserProfileUseCase";
-import { UpdateUserProfileUseCase } from "@application/use-cases/user/UpdateUserProfileUseCase";
 import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
 import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
-import { ApiResponse } from "@shared/types/Common";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { RegisterAsDriverRequestDto } from "@application/dto/user";
-import { RegisterUserAsDriverUseCase } from "@application/use-cases/user/RegisterUserAsDriverUseCase";
+import {
+  RegisterAsDriverRequestDto,
+  RegisterAsDriverResponseDto,
+  UserProfileUpdateResponseDto,
+  UserResponseDto,
+} from "@application/dto/user";
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -25,11 +28,20 @@ interface UserProfileRequestBody {
 export class UserProfileController {
   constructor(
     @inject(TYPES.GetUserProfileUseCase)
-    private getUserProfileUseCase: GetUserProfileUseCase,
+    private getUserProfileUseCase: IUseCase<
+      GetUserProfileDto,
+      Promise<Result<UserResponseDto>>
+    >,
     @inject(TYPES.UpdateUserProfileUseCase)
-    private updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private updateUserProfileUseCase: IUseCase<
+      UpdateUserProfileDto,
+      Promise<Result<UserProfileUpdateResponseDto>>
+    >,
     @inject(TYPES.RegisterUserAsDriverUseCase)
-    private registerUserAsDriverUseCase: RegisterUserAsDriverUseCase
+    private registerUserAsDriverUseCase: IUseCase<
+      RegisterAsDriverRequestDto,
+      Promise<Result<RegisterAsDriverResponseDto>>
+    >
   ) {}
 
   private getUserId(req: Request): string | null {

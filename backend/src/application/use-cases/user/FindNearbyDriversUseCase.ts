@@ -14,16 +14,16 @@ import { UserRepository } from "@application/repositories/UserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
 import { FareCalculationService } from "@application/services/FareCalculationService";
-
-export interface DriverSearchResult {
-  driverId: string;
-  userId: string;
-  distance: number;
-  eta: number;
-}
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class FindNearbyDriversUseCase {
+export class FindNearbyDriversUseCase
+  implements
+    IUseCase<
+      FindNearbyDriversRequestDto,
+      Promise<Result<FindNearbyDriversResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
     private driverAvailabilityRepository: DriverAvailabilityRepository,

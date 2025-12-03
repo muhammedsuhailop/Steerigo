@@ -7,15 +7,16 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { Driver } from "@domain/entities/Driver";
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
-import { DriverStatus } from "@domain/value-objects/DriverStatus";
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { BodyType, GearType } from "@domain/value-objects/VehicleType";
-import { Types } from "mongoose";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class RegisterUserAsDriverUseCase {
+export class RegisterUserAsDriverUseCase
+  implements
+    IUseCase<
+      RegisterAsDriverRequestDto,
+      Promise<Result<RegisterAsDriverResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.UserRepository) private userRepository: UserRepository,
     @inject(TYPES.DriverRepository) private driverRepository: DriverRepository
