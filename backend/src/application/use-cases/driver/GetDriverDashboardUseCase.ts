@@ -11,9 +11,13 @@ import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverDashboardUseCase {
+export class GetDriverDashboardUseCase
+  implements
+    IUseCase<GetDriverDashboardDto, Promise<Result<DriverDashboardResponseDto>>>
+{
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)

@@ -6,9 +6,12 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetKYCStatusUseCase {
+export class GetKYCStatusUseCase
+  implements IUseCase<string, Promise<Result<KYCResponseDto[]>>>
+{
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
     @inject(TYPES.KYCRepository) private kycRepository: KYCRepository

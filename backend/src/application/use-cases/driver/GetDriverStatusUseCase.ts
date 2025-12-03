@@ -10,11 +10,15 @@ import {
 } from "@domain/errors/DriverAvailabilityErrors";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverStatusUseCase {
+export class GetDriverStatusUseCase
+  implements IUseCase<string, Promise<Result<DriverStatusResponseDto>>>
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
+    @inject(TYPES.DriverRepository)
+    private driverRepository: DriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
     private availabilityRepository: DriverAvailabilityRepository
   ) {}
@@ -42,7 +46,6 @@ export class GetDriverStatusUseCase {
         return Result.failure(new DriverAvailabilityNotFoundError(driverId));
       }
 
-      // Map to response DTO
       const response = new DriverStatusResponseDto(
         availability.getId(),
         driverId,

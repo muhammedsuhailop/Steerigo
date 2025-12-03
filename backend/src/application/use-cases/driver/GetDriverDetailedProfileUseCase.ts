@@ -18,9 +18,16 @@ import {
   UserNotFoundError,
 } from "@domain/errors/DriverProfileErrors";
 import { KYC } from "@domain/entities/KYC";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverDetailedProfileUseCase {
+export class GetDriverDetailedProfileUseCase
+  implements
+    IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<GetDriverProfileResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
     @inject(TYPES.UserRepository) private userRepository: UserRepository,

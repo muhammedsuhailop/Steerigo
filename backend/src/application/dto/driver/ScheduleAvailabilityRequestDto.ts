@@ -17,10 +17,16 @@ const scheduleAvailabilitySchema = z.object({
 type ScheduleAvailabilityData = z.infer<typeof scheduleAvailabilitySchema>;
 
 export class ScheduleAvailabilityRequestDto {
+  private readonly userId: string;
   private readonly data: ScheduleAvailabilityData;
 
-  constructor(requestData: any) {
+  constructor(userId: string, requestData: unknown) {
+    this.userId = userId;
     this.data = scheduleAvailabilitySchema.parse(requestData);
+  }
+
+  getUserId(): string {
+    return this.userId;
   }
 
   getAvailableFrom(): Date {

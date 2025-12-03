@@ -1,5 +1,6 @@
 export class DriverProfileUpdateDto {
   constructor(
+    private readonly userId:string,
     private readonly name?: string,
     private readonly mobile?: string,
     private readonly dob?: Date,
@@ -9,6 +10,10 @@ export class DriverProfileUpdateDto {
     private readonly eligibleBodyTypes?: string[]
   ) {}
 
+  getUserId():string{
+    return this.userId;
+  }
+  
   getName(): string | undefined {
     return this.name;
   }

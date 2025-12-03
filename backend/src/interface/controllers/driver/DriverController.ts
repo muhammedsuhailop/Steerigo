@@ -1,9 +1,5 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "inversify";
-import { DriverRegistrationUseCase } from "@application/use-cases/driver/RegisterDriverUseCase";
-import { UpdateDriverProfileUseCase } from "@application/use-cases/driver/UpdateDriverProfileUseCase";
-import { SubmitKYCUseCase } from "@application/use-cases/driver/SubmitKYCUseCase";
-import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusUseCase";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
@@ -13,13 +9,19 @@ import { TYPES } from "@shared/constants/DITypes";
 import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { DocumentType } from "@domain/value-objects/DocumentType";
-import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
-import { GetDriverDetailedProfileUseCase } from "@application/use-cases/driver/GetDriverDetailedProfileUseCase";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
 import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import { GetDriverProfileResponseDto } from "@application/dto/driver/GetDriverProfileResponseDto";
+import { UpdateDriverProfileResponseDto } from "@application/dto/driver/UpdateDriverProfileResponseDto";
+import { SubmitKYCResponseDto } from "@application/dto/driver/SubmitKYCResponseDto";
+import { KYCResponseDto } from "@application/dto/driver/KYCResponseDto";
+import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashboardResponseDto";
+import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
+import { RegisterDriverResult } from "@application/use-cases/driver/RegisterDriverUseCase";
 
 interface DriverRegistrationRequestBody {
   name: string;
@@ -52,19 +54,40 @@ interface DriverRegistrationRequestBody {
 export class DriverController {
   constructor(
     @inject(TYPES.RegisterDriverUseCase)
-    private registerDriverUseCase: DriverRegistrationUseCase,
+    private registerDriverUseCase: IUseCase<
+      DriverRegistrationRequestDto,
+      Promise<Result<RegisterDriverResult>>
+    >,
     @inject(TYPES.GetDriverDetailedProfileUseCase)
-    private getDetailedProfileUseCase: GetDriverDetailedProfileUseCase,
+    private getDetailedProfileUseCase: IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<GetDriverProfileResponseDto>>
+    >,
     @inject(TYPES.UpdateDriverProfileUseCase)
-    private updateDriverProfileUseCase: UpdateDriverProfileUseCase,
+    private updateDriverProfileUseCase: IUseCase<
+      DriverProfileUpdateDto,
+      Promise<Result<UpdateDriverProfileResponseDto>>
+    >,
     @inject(TYPES.SubmitKYCUseCase)
-    private SubmitKYCUseCase: SubmitKYCUseCase,
+    private SubmitKYCUseCase: IUseCase<
+      KYCSubmissionRequestDto,
+      Promise<Result<SubmitKYCResponseDto>>
+    >,
     @inject(TYPES.GetKYCStatusUseCase)
-    private getKYCStatusUseCase: GetKYCStatusUseCase,
+    private getKYCStatusUseCase: IUseCase<
+      string,
+      Promise<Result<KYCResponseDto[]>>
+    >,
     @inject(TYPES.GetDriverDashboardUseCase)
-    private getDashboardUseCase: GetDriverDashboardUseCase,
+    private getDashboardUseCase: IUseCase<
+      GetDriverDashboardDto,
+      Promise<Result<DriverDashboardResponseDto>>
+    >,
     @inject(TYPES.GetDriverStatusUseCase)
-    private getStatusUseCase: GetDriverStatusUseCase
+    private getStatusUseCase: IUseCase<
+      string,
+      Promise<Result<DriverStatusResponseDto>>
+    >
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -122,6 +145,7 @@ export class DriverController {
       }
 
       const dto = new DriverRegistrationRequestDto(
+        userId,
         body.name,
         body.mobile,
         new Date(body.dob),
@@ -147,7 +171,7 @@ export class DriverController {
         body.idBackImage
       );
 
-      const result = await this.registerDriverUseCase.execute(userId, dto);
+      const result = await this.registerDriverUseCase.execute(dto);
 
       if (result.isSuccessful()) {
         res.status(HttpStatusCodes.CREATED).json({
@@ -190,6 +214,7 @@ export class DriverController {
       });
 
       const dto = new DriverProfileUpdateDto(
+        userId,
         body.name,
         body.mobile,
         body.dob ? new Date(body.dob) : undefined,
@@ -205,7 +230,7 @@ export class DriverController {
         hasVehicleUpdates: dto.hasVehicleTypeUpdates(),
       });
 
-      const result = await this.updateDriverProfileUseCase.execute(userId, dto);
+      const result = await this.updateDriverProfileUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
@@ -294,7 +319,7 @@ export class DriverController {
         body: Object.keys(req.body),
       });
 
-      const dto = this.createKYCDtoFromDocType(req.body, docType);
+      const dto = this.createKYCDtoFromDocType(userId, req.body, docType);
 
       Logger.info("KYC submission DTO created", {
         userId,
@@ -304,7 +329,7 @@ export class DriverController {
         hasImages: dto.hasImages(),
       });
 
-      const result = await this.SubmitKYCUseCase.execute(userId, dto);
+      const result = await this.SubmitKYCUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
@@ -359,11 +384,13 @@ export class DriverController {
   }
 
   private createKYCDtoFromDocType(
+    userId: string,
     body: any,
     docType: string
   ): KYCSubmissionRequestDto {
     if (docType === "License") {
       return new KYCSubmissionRequestDto(
+        userId,
         body.licenseCategory as LicenseCategory,
         body.docNumber,
         body.eligibleBodyTypes || undefined,
@@ -382,6 +409,7 @@ export class DriverController {
     }
 
     return new KYCSubmissionRequestDto(
+      userId,
       undefined, // licenseCategory
       undefined, // licenseNumber
       undefined, // licenseBodyTypes

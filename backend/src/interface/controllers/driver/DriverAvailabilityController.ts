@@ -1,9 +1,6 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { ScheduleAvailabilityUseCase } from "@application/use-cases/driver/ScheduleAvailabilityUseCase";
-import { UpdateAvailabilityStatusUseCase } from "@application/use-cases/driver/UpdateAvailabilityStatusUseCase";
-import { UpdateDriverLocationUseCase } from "@application/use-cases/driver/UpdateDriverLocationUseCase";
 import {
   ScheduleAvailabilityRequestDto,
   UpdateStatusRequestDto,
@@ -15,16 +12,30 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import { DriverAvailabilityResponseDto } from "@application/dto/driver/DriverAvailabilityResponseDto";
+import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/UpdateAvailabilityStatusResponseDto";
+import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";
 
 @injectable()
 export class DriverAvailabilityController {
   constructor(
     @inject(TYPES.ScheduleAvailabilityUseCase)
-    private scheduleAvailabilityUseCase: ScheduleAvailabilityUseCase,
+    private scheduleAvailabilityUseCase: IUseCase<
+      ScheduleAvailabilityRequestDto,
+      Promise<Result<DriverAvailabilityResponseDto>>
+    >,
     @inject(TYPES.UpdateAvailabilityStatusUseCase)
-    private updateStatusUseCase: UpdateAvailabilityStatusUseCase,
+    private updateStatusUseCase: IUseCase<
+      UpdateStatusRequestDto,
+      Promise<Result<UpdateAvailabilityStatusResponseDto>>
+    >,
     @inject(TYPES.UpdateDriverLocationUseCase)
-    private updateLocationUseCase: UpdateDriverLocationUseCase
+    private updateLocationUseCase: IUseCase<
+      UpdateLocationRequestDto,
+      Promise<Result<UpdateDriverLocationResponseDto>>
+    >
   ) {}
 
   async scheduleAvailability(req: Request, res: Response): Promise<void> {
@@ -46,11 +57,8 @@ export class DriverAvailabilityController {
         return;
       }
 
-      const dto = new ScheduleAvailabilityRequestDto(req.body);
-      const result = await this.scheduleAvailabilityUseCase.execute(
-        userId,
-        dto
-      );
+      const dto = new ScheduleAvailabilityRequestDto(userId, req.body);
+      const result = await this.scheduleAvailabilityUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
@@ -93,7 +101,7 @@ export class DriverAvailabilityController {
       const dto = new UpdateStatusRequestDto(req.body);
 
       const driverId = dto.getDriverId();
-      const result = await this.updateStatusUseCase.execute(driverId, dto);
+      const result = await this.updateStatusUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
@@ -140,7 +148,7 @@ export class DriverAvailabilityController {
 
       const driverId = dto.getDriverId();
 
-      const result = await this.updateLocationUseCase.execute(driverId, dto);
+      const result = await this.updateLocationUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();

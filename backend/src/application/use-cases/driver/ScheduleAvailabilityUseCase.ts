@@ -10,9 +10,17 @@ import { TYPES } from "@shared/constants/DITypes";
 import { InvalidAvailabilityScheduleError } from "@domain/errors/DriverAvailabilityErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
+import { IUseCase } from "../interfaces/IUseCase";
+import { DriverAvailabilityResponseDto } from "@application/dto/driver/DriverAvailabilityResponseDto";
 
 @injectable()
-export class ScheduleAvailabilityUseCase {
+export class ScheduleAvailabilityUseCase
+  implements
+    IUseCase<
+      ScheduleAvailabilityRequestDto,
+      Promise<Result<DriverAvailabilityResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
     private availabilityRepository: DriverAvailabilityRepository,
@@ -21,25 +29,10 @@ export class ScheduleAvailabilityUseCase {
   ) {}
 
   async execute(
-    userId: string,
     dto: ScheduleAvailabilityRequestDto
-  ): Promise<
-    Result<{
-      id: string;
-      driverId: string;
-      availabilityStatus: string;
-      availableFrom: string;
-      availableTill: string;
-      currentLocation: {
-        latitude: number;
-        longitude: number;
-        address?: string;
-      };
-      createdAt: string;
-    }>
-  > {
+  ): Promise<Result<DriverAvailabilityResponseDto>> {
     try {
-      Logger.info("Scheduling driver availability", { userId });
+      Logger.info("Scheduling driver availability", dto.getUserId());
 
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
@@ -48,9 +41,9 @@ export class ScheduleAvailabilityUseCase {
         );
       }
 
-      const driver = await this.driverRepository.findByUserId(userId);
+      const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
-        return Result.failure(new DriverNotFoundError(userId));
+        return Result.failure(new DriverNotFoundError(dto.getUserId()));
       }
 
       const driverId = driver.getId();
@@ -108,7 +101,7 @@ export class ScheduleAvailabilityUseCase {
       return Result.success(response);
     } catch (error) {
       Logger.error("Error scheduling driver availability", {
-        userId,
+        userId: dto.getUserId(),
         error: error instanceof Error ? error.message : String(error),
       });
       return Result.failure(error as Error);
