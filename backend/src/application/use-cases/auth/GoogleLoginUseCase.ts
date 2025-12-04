@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { GoogleAuthService } from "@application/services/GoogleAuthService";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { TokenService } from "@application/services/TokenService";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { EmailService } from "@application/services/EmailService";
 import { User } from "@domain/entities/User";
 import { GoogleLoginRequestDto } from "../../dto/auth/GoogleLoginRequestDto";
@@ -30,10 +30,10 @@ export class GoogleLoginUseCase
   constructor(
     @inject(TYPES.GoogleAuthService)
     private googleAuthService: GoogleAuthService,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.TokenService) private tokenService: TokenService,
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository,
+    private refreshTokenRepository: IRefreshTokenRepository,
     @inject(TYPES.EmailService) private emailService: EmailService
   ) {}
 

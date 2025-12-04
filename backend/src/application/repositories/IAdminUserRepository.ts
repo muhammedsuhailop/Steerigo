@@ -1,9 +1,9 @@
 import { FilterOptions, QueryOptions } from "@shared/types/Repository";
 import { User } from "@domain/entities/User";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
 
-export interface AdminUsersQuery {
+export interface IAdminUsersQuery {
   status?: string;
   search?: string;
   dateFrom?: Date;
@@ -12,7 +12,7 @@ export interface AdminUsersQuery {
   sortOrder?: "asc" | "desc";
 }
 
-export interface AdminUserSummary {
+export interface IAdminUserSummary {
   userId: string;
   name: string;
   email: string;
@@ -25,14 +25,14 @@ export interface AdminUserSummary {
   createdAt: Date;
 }
 
-export interface AdminUserRepository
-  extends ReadOnlyRepository<User>,
-    QueryableRepository<User> {
+export interface IAdminUserRepository
+  extends IReadOnlyRepository<User>,
+    IQueryableRepository<User> {
   findUsersWithSummary(
-    filters: AdminUsersQuery,
+    filters: IAdminUsersQuery,
     pagination: { page: number; pageSize: number }
   ): Promise<{
-    data: AdminUserSummary[];
+    data: IAdminUserSummary[];
     pagination: {
       currentPage: number;
       pageSize: number;

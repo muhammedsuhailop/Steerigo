@@ -4,10 +4,10 @@ import {
   PaginatedResult,
 } from "@shared/types/Repository";
 import { KYC } from "@domain/entities/KYC";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
 
-export interface KYCQuery {
+export interface IKYCQuery {
   verificationStatus?: string;
   docType?: string;
   driverId?: string;
@@ -17,7 +17,7 @@ export interface KYCQuery {
   sortOrder?: "asc" | "desc";
 }
 
-export interface KYCWithDriverInfo {
+export interface IKYCWithDriverInfo {
   kycDocument: KYC;
   driverInfo: {
     driverId: string;
@@ -29,14 +29,14 @@ export interface KYCWithDriverInfo {
   };
 }
 
-export interface KYCRepository
-  extends ReadOnlyRepository<KYC>,
-    QueryableRepository<KYC> {
+export interface IKYCRepository
+  extends IReadOnlyRepository<KYC>,
+    IQueryableRepository<KYC> {
   findKYCDocumentsWithDriverInfo(
-    filters: KYCQuery,
+    filters: IKYCQuery,
     pagination: { page: number; pageSize: number }
   ): Promise<{
-    data: KYCWithDriverInfo[];
+    data: IKYCWithDriverInfo[];
     pagination: {
       currentPage: number;
       pageSize: number;
@@ -58,5 +58,5 @@ export interface KYCRepository
     comments?: string
   ): Promise<boolean>;
 
-  findKYCWithDriverInfo(kycId: string): Promise<KYCWithDriverInfo | null>;
+  findKYCWithDriverInfo(kycId: string): Promise<IKYCWithDriverInfo | null>;
 }

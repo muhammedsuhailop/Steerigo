@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import {
-  KYCRepository,
-  KYCQuery,
-} from "@application/repositories/AdminDriverKYCRepository";
+  IKYCRepository,
+  IKYCQuery,
+} from "@application/repositories/IAdminDriverKYCRepository";
 import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -29,7 +29,7 @@ export class GetKycRequestsUseCase
 {
   constructor(
     @inject(TYPES.KYCRepository)
-    private kycRepository: KYCRepository
+    private kycRepository: IKYCRepository
   ) {}
 
   async execute(
@@ -47,7 +47,7 @@ export class GetKycRequestsUseCase
         );
       }
 
-      const filters: KYCQuery = {
+      const filters: IKYCQuery = {
         verificationStatus: dto.getVerificationStatus(),
         docType: dto.getDocType(),
         driverId: dto.getDriverId(),

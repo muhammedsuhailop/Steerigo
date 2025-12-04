@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -21,7 +21,7 @@ export class GetKycRequestByIdUseCase
 {
   constructor(
     @inject(TYPES.KYCRepository)
-    private kycRepository: KYCRepository
+    private kycRepository: IKYCRepository
   ) {}
 
   async execute(

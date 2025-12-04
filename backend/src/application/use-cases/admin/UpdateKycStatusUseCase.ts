@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -26,11 +26,11 @@ export class UpdateKycStatusUseCase
 {
   constructor(
     @inject(TYPES.KYCRepository)
-    private kycRepository: KYCRepository,
+    private kycRepository: IKYCRepository,
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository,
+    private adminDriverRepository: IAdminDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository
+    private userRepository: IUserRepository
   ) {}
 
   async execute(dto: UpdateKycStatusRequestDto): Promise<

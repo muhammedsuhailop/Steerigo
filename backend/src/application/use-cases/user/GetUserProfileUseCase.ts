@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { UserResponseDto } from "@application/dto/user/UserResponseDto";
 import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
 import { Result } from "@shared/utils/Result";
@@ -13,7 +13,7 @@ export class GetUserProfileUseCase
   implements IUseCase<GetUserProfileDto, Promise<Result<UserResponseDto>>>
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(dto: GetUserProfileDto): Promise<Result<UserResponseDto>> {

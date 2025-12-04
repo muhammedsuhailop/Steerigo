@@ -1,10 +1,10 @@
 import { User } from "@domain/entities/User";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { WriteOnlyRepository } from "./interfaces/WriteOnlyRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
 
-export interface UserProfileRepository
-  extends ReadOnlyRepository<User, string>,
-    WriteOnlyRepository<User, string> {
+export interface IUserProfileRepository
+  extends IReadOnlyRepository<User, string>,
+    IWriteOnlyRepository<User, string> {
   findByIdForProfile(userId: string): Promise<User | null>;
   updateProfile(
     userId: string,

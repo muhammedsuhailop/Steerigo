@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { OtpService } from "@application/services/OtpService";
 import { EmailService } from "@application/services/EmailService";
 import { ResendOtpDto } from "../../dto/auth/ResendOtpDto";
@@ -19,7 +19,7 @@ export class ResendOtpUseCase
   implements IUseCase<ResendOtpDto, Promise<Result<{ expiresAt: Date }>>>
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.OtpService) private otpService: OtpService,
     @inject(TYPES.EmailService) private emailService: EmailService
   ) {}

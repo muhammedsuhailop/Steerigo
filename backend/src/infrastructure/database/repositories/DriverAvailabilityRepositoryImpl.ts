@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import {
-  DriverAvailabilityRepository,
-  DriverAvailabilityFilters,
-} from "@application/repositories/DriverAvailabilityRepository";
+  IDriverAvailabilityRepository,
+  IDriverAvailabilityFilters,
+} from "@application/repositories/IDriverAvailabilityRepository";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import {
@@ -16,7 +16,7 @@ import { SortOrder, Types } from "mongoose";
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
-  implements DriverAvailabilityRepository
+  implements IDriverAvailabilityRepository
 {
   // Basic Repository Operations
   async findById(id: string): Promise<DriverAvailability | null> {
@@ -109,7 +109,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  async count(filters?: DriverAvailabilityFilters): Promise<number> {
+  async count(filters?: IDriverAvailabilityFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters || {});
       return await DriverAvailabilityModel.countDocuments(mongoFilter);
@@ -120,7 +120,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: DriverAvailabilityFilters }
+    options: QueryOptions & { filters?: IDriverAvailabilityFilters }
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,
@@ -515,7 +515,7 @@ export class DriverAvailabilityRepositoryImpl
 
   // Batch Operations
   async updateMany(
-    filters: DriverAvailabilityFilters,
+    filters: IDriverAvailabilityFilters,
     updates: Partial<DriverAvailability>
   ): Promise<number> {
     try {
@@ -550,7 +550,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  async deleteMany(filters: DriverAvailabilityFilters): Promise<number> {
+  async deleteMany(filters: IDriverAvailabilityFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
       const result = await DriverAvailabilityModel.deleteMany(mongoFilter);
@@ -571,7 +571,7 @@ export class DriverAvailabilityRepositoryImpl
 
   // Helper methods
   private buildFilterQuery(
-    filters: DriverAvailabilityFilters
+    filters: IDriverAvailabilityFilters
   ): Record<string, any> {
     const query: Record<string, any> = {};
 
@@ -598,7 +598,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   // Base repository interface methods
-  async existsByFilter(filters: DriverAvailabilityFilters): Promise<boolean> {
+  async existsByFilter(filters: IDriverAvailabilityFilters): Promise<boolean> {
     const mongoFilter = this.buildFilterQuery(filters);
     return (await DriverAvailabilityModel.countDocuments(mongoFilter)) > 0;
   }

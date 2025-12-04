@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { DriverDashboardRepository } from "@application/repositories/DriverDashboardRepository";
+import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
 import { Logger } from "@shared/utils/Logger";
 import { Types } from "mongoose";
 import { RideModel, IRideDocument } from "../../models/RideModel";
@@ -33,7 +33,7 @@ interface RatingResult {
 
 @injectable()
 export class DriverDashboardRepositoryImpl
-  implements DriverDashboardRepository
+  implements IDriverDashboardRepository
 {
   private parseRideType(rideTypeValue: string): RideType {
     const normalizedValue = rideTypeValue?.trim().toLowerCase() ?? "";

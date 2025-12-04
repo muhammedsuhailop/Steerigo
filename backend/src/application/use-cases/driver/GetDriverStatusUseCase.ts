@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
@@ -18,9 +18,9 @@ export class GetDriverStatusUseCase
 {
   constructor(
     @inject(TYPES.DriverRepository)
-    private driverRepository: DriverRepository,
+    private driverRepository: IDriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository
+    private availabilityRepository: IDriverAvailabilityRepository
   ) {}
 
   async execute(userId: string): Promise<Result<DriverStatusResponseDto>> {

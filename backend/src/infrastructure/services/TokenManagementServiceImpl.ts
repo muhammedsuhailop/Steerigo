@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { TokenManagementService } from "@application/services/TokenManagementService";
 import { TokenService } from "@application/services/TokenService";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { RefreshToken } from "@domain/entities/RefreshToken";
 import { v4 as uuid } from "uuid";
 import { TYPES } from "@shared/constants/DITypes";
@@ -12,7 +12,7 @@ export class TokenManagementServiceImpl implements TokenManagementService {
   constructor(
     @inject(TYPES.TokenService) private tokenService: TokenService,
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository
+    private refreshTokenRepository: IRefreshTokenRepository
   ) {}
 
   generateAccessToken(payload: { userId: string; role: UserRole }): string {

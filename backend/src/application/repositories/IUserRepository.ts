@@ -1,16 +1,16 @@
 import { QueryOptions } from "@shared/types/Repository";
 import { User } from "../../domain/entities/User";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { WriteOnlyRepository } from "./interfaces/WriteOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
-import { BatchRepository } from "./interfaces/BatchRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IBatchRepository } from "./interfaces/IBatchRepository";
 import { AuthProvider } from "@shared/constants/AuthConstants";
 
-export interface UserRepository
-  extends ReadOnlyRepository<User>,
-    WriteOnlyRepository<User>,
-    QueryableRepository<User>,
-    BatchRepository<User> {
+export interface IUserRepository
+  extends IReadOnlyRepository<User>,
+    IWriteOnlyRepository<User>,
+    IQueryableRepository<User>,
+    IBatchRepository<User> {
   // User-specific query methods
   findByEmail(email: string): Promise<User | null>;
   findByEmailAndProvider(

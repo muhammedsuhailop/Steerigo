@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { UpdateStatusRequestDto } from "@application/dto/driver/UpdateStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -22,7 +22,7 @@ export class UpdateAvailabilityStatusUseCase
 {
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository
+    private availabilityRepository: IDriverAvailabilityRepository
   ) {}
 
   async execute(

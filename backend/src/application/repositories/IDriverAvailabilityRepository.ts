@@ -1,9 +1,9 @@
-import { BaseRepository } from "./BaseRepository";
+import { IBaseRepository } from "./IBaseRepository";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { QueryOptions, FilterOptions } from "@shared/types/Repository";
 
-export interface DriverAvailabilityFilters
+export interface IDriverAvailabilityFilters
   extends FilterOptions<DriverAvailability> {
   status?: AvailabilityStatus;
   driverId?: string;
@@ -16,8 +16,8 @@ export interface DriverAvailabilityFilters
   };
 }
 
-export interface DriverAvailabilityRepository
-  extends BaseRepository<DriverAvailability, string> {
+export interface IDriverAvailabilityRepository
+  extends IBaseRepository<DriverAvailability, string> {
   // Driver-specific queries
   findByDriverId(driverId: string): Promise<DriverAvailability | null>;
   findActiveByDriverId(driverId: string): Promise<DriverAvailability | null>;

@@ -1,20 +1,20 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { UserRepositoryImpl } from "@infrastructure/database/repositories/UserRepositoryImpl";
 import { RefreshTokenRepositoryImpl } from "@infrastructure/database/repositories/RefreshTokenRepositoryImpl";
 import { RideRequestRepositoryImpl } from "@infrastructure/database/repositories/RideRequestRepositoryImpl";
-import { RideRequestRepository } from "@application/repositories/RideRequestRepository";
+import { IRideRequestRepository } from "@application/repositories/IRideRequestRepository";
 
 export class RepositoryFactory {
   static register(container: Container): void {
-    container.bind<UserRepository>(TYPES.UserRepository).to(UserRepositoryImpl);
+    container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepositoryImpl);
     container
-      .bind<RefreshTokenRepository>(TYPES.RefreshTokenRepository)
+      .bind<IRefreshTokenRepository>(TYPES.RefreshTokenRepository)
       .to(RefreshTokenRepositoryImpl);
     container
-      .bind<RideRequestRepository>(TYPES.RideRequestRepository)
+      .bind<IRideRequestRepository>(TYPES.RideRequestRepository)
       .to(RideRequestRepositoryImpl);
   }
 }

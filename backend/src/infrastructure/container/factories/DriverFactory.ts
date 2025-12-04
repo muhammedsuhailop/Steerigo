@@ -14,7 +14,7 @@ import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusU
 
 // Driver Controllers
 import { DriverController } from "@interface/controllers/driver/DriverController";
-import { DriverDashboardRepository } from "@application/repositories/DriverDashboardRepository";
+import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
 import { DriverDashboardRepositoryImpl } from "@infrastructure/database/repositories/driver/DriverDashboardRepositoryImpl";
 import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
 import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";
@@ -36,7 +36,7 @@ import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverPro
 export class DriverFactory {
   static register(container: Container): void {
     container
-      .bind<DriverDashboardRepository>(TYPES.DriverDashboardRepository)
+      .bind<IDriverDashboardRepository>(TYPES.DriverDashboardRepository)
       .to(DriverDashboardRepositoryImpl)
       .inSingletonScope();
     // Use case bindings

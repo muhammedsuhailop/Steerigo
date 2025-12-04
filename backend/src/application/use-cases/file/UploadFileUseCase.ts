@@ -1,6 +1,6 @@
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
 import { FileUploadService } from "@application/services/FileUploadService";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -16,7 +16,7 @@ export class UploadFileUseCase
   constructor(
     @inject(TYPES.FileUploadService)
     private _fileUploadService: FileUploadService,
-    @inject(TYPES.UserRepository) private _userRepository: UserRepository
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository
   ) {}
 
   async execute(

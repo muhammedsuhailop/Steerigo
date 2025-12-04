@@ -1,9 +1,9 @@
-import { BaseRepository } from "./BaseRepository";
+import { IBaseRepository } from "./IBaseRepository";
 import { RideRequest } from "@domain/entities/RideRequest";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { QueryOptions, FilterOptions } from "@shared/types/Repository";
 
-export interface RideRequestFilters extends FilterOptions<RideRequest> {
+export interface IRideRequestFilters extends FilterOptions<RideRequest> {
   status?: RideRequestStatus;
   driverId?: string;
   riderId?: string;
@@ -13,8 +13,8 @@ export interface RideRequestFilters extends FilterOptions<RideRequest> {
   createdBefore?: Date;
 }
 
-export interface RideRequestRepository
-  extends BaseRepository<RideRequest, string> {
+export interface IRideRequestRepository
+  extends IBaseRepository<RideRequest, string> {
   // Driver-specific queries
   findByDriverId(
     driverId: string,

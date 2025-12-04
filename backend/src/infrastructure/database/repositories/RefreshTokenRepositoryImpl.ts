@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { RefreshToken } from "@domain/entities/RefreshToken";
 import {
   RefreshTokenModel,
@@ -9,7 +9,7 @@ import { Logger } from "@shared/utils/Logger";
 import { FilterOptions, QueryOptions } from "@shared/types/Repository";
 
 @injectable()
-export class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
+export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
   async findByToken(token: string): Promise<RefreshToken | null> {
     try {
       const tokenDoc = await RefreshTokenModel.findOne({ token });

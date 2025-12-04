@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { KYCRepository } from "@application/repositories/KYCRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
 import { Result } from "@shared/utils/Result";
 import { KYC } from "@domain/entities/KYC";
@@ -19,8 +19,8 @@ export class SubmitKYCUseCase
     IUseCase<KYCSubmissionRequestDto, Promise<Result<SubmitKYCResponseDto>>>
 {
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
   ) {}
 
   async execute(

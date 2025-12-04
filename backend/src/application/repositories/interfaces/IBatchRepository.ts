@@ -1,6 +1,6 @@
 import { BaseEntity, FilterOptions } from "@shared/types/Repository";
 
-export interface BatchRepository<T extends BaseEntity> {
+export interface IBatchRepository<T extends BaseEntity> {
   updateMany(filters: FilterOptions<T>, updates: Partial<T>): Promise<number>;
   deleteMany(filters: FilterOptions<T>): Promise<number>;
 }

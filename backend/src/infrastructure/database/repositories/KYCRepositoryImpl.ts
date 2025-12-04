@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { KYCRepository } from "@application/repositories/KYCRepository";
-import { KYCRepository as AdminKYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
+import { IKYCRepository as IAdminKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { KYC } from "@domain/entities/KYC";
 import { KYCModel } from "../models/KYCModel";
 import { KYCMapper } from "../mappers/KYCMapper";
@@ -14,14 +14,14 @@ import { DocumentType } from "@domain/value-objects/DocumentType";
 import { Logger } from "@shared/utils/Logger";
 import { SortOrder, PipelineStage, Types } from "mongoose";
 import {
-  KYCQuery,
-  KYCWithDriverInfo,
-} from "@application/repositories/AdminDriverKYCRepository";
+  IKYCQuery,
+  IKYCWithDriverInfo,
+} from "@application/repositories/IAdminDriverKYCRepository";
 
-type UnifiedKYCFilterOptions = FilterOptions<KYC> & KYCQuery;
+type UnifiedKYCFilterOptions = FilterOptions<KYC> & IKYCQuery;
 
 @injectable()
-export class KYCRepositoryImpl implements KYCRepository, AdminKYCRepository {
+export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
   //   Basic Repository Operations
 
   async findById(id: string): Promise<KYC | null> {
@@ -317,10 +317,10 @@ export class KYCRepositoryImpl implements KYCRepository, AdminKYCRepository {
   //   Admin-Specific Operations
 
   async findKYCDocumentsWithDriverInfo(
-    filters: KYCQuery,
+    filters: IKYCQuery,
     pagination: { page: number; pageSize: number }
   ): Promise<{
-    data: KYCWithDriverInfo[];
+    data: IKYCWithDriverInfo[];
     pagination: {
       currentPage: number;
       pageSize: number;
@@ -433,7 +433,7 @@ export class KYCRepositoryImpl implements KYCRepository, AdminKYCRepository {
 
   async findKYCWithDriverInfo(
     kycId: string
-  ): Promise<KYCWithDriverInfo | null> {
+  ): Promise<IKYCWithDriverInfo | null> {
     const objectId = new Types.ObjectId(kycId);
     const pipeline = [
       { $match: { _id: objectId } },

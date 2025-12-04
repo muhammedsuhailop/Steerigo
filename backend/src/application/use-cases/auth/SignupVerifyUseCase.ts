@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { OtpService } from "@application/services/OtpService";
 import { TokenService } from "@application/services/TokenService";
 import { EmailService } from "@application/services/EmailService";
@@ -28,9 +28,9 @@ export class SignupVerifyUseCase
   implements IUseCase<SignupVerifyDto, Promise<Result<SignupVerifyResponseDto>>>
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository,
+    private refreshTokenRepository: IRefreshTokenRepository,
     @inject(TYPES.OtpService) private otpService: OtpService,
     @inject(TYPES.TokenService) private tokenService: TokenService,
     @inject(TYPES.EmailService) private emailService: EmailService

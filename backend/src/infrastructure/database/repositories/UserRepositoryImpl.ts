@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel, IUserDocument } from "../models/UserModel";
 import { AuthProvider } from "@shared/constants/AuthConstants";
@@ -13,7 +13,7 @@ import { UserDomainMapper } from "../mappers/UserDomainMapper";
 import { UserQueryService } from "../services/UserQueryService";
 
 @injectable()
-export class UserRepositoryImpl implements UserRepository {
+export class UserRepositoryImpl implements IUserRepository {
   private queryService = new UserQueryService();
 
   async findById(id: string): Promise<User | null> {

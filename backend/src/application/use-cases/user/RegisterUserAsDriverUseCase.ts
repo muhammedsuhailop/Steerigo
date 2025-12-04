@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
 import { RegisterAsDriverRequestDto } from "@application/dto/user/RegisterAsDriverRequestDto";
 import { RegisterAsDriverResponseDto } from "@application/dto/user/RegisterAsDriverResponseDto";
 import { Result } from "@shared/utils/Result";
@@ -18,8 +18,8 @@ export class RegisterUserAsDriverUseCase
     >
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository
   ) {}
 
   async execute(

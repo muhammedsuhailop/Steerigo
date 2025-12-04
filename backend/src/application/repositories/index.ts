@@ -1,2 +1,2 @@
-export * from "./UserRepository";
-export * from "./RefreshTokenRepository";
+export * from "./IUserRepository";
+export * from "./IRefreshTokenRepository";

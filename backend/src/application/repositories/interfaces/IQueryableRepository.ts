@@ -5,7 +5,7 @@ import {
   FilterOptions,
 } from "@shared/types/Repository";
 
-export interface QueryableRepository<T extends BaseEntity, ID = string> {
+export interface IQueryableRepository<T extends BaseEntity, ID = string> {
   findAll(options?: QueryOptions<T>): Promise<T[]>;
   findPaginated(options: QueryOptions<T>): Promise<PaginatedResult<T>>;
   count(filters?: FilterOptions<T>): Promise<number>;

@@ -8,9 +8,9 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
 import { FareCalculationService } from "@application/services/FareCalculationService";
@@ -26,11 +26,11 @@ export class FindNearbyDriversUseCase
 {
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private driverAvailabilityRepository: DriverAvailabilityRepository,
+    private driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: DriverRepository,
+    private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository,
+    private userRepository: IUserRepository,
     @inject(TYPES.FareCalculationService)
     private fareCalculationService: FareCalculationService
   ) {}

@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { KYCRepository } from "@application/repositories/KYCRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { KYCResponseDto } from "@application/dto/driver/KYCResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
@@ -13,8 +13,8 @@ export class GetKYCStatusUseCase
   implements IUseCase<string, Promise<Result<KYCResponseDto[]>>>
 {
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
   ) {}
 
   async execute(userId: string): Promise<Result<KYCResponseDto[]>> {

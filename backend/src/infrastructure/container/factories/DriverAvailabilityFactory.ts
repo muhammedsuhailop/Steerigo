@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Repository
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { DriverAvailabilityRepositoryImpl } from "@infrastructure/database/repositories/DriverAvailabilityRepositoryImpl";
 
 // Use Cases
@@ -27,7 +27,7 @@ export class DriverAvailabilityFactory {
   static register(container: Container): void {
     // Repository
     container
-      .bind<DriverAvailabilityRepository>(TYPES.DriverAvailabilityRepository)
+      .bind<IDriverAvailabilityRepository>(TYPES.DriverAvailabilityRepository)
       .to(DriverAvailabilityRepositoryImpl);
 
     // Use Cases

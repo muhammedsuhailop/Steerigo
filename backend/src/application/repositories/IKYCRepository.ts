@@ -1,17 +1,17 @@
 import { QueryOptions } from "@shared/types/Repository";
 import { KYC } from "@domain/entities/KYC";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { WriteOnlyRepository } from "./interfaces/WriteOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
-import { BatchRepository } from "./interfaces/BatchRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IBatchRepository } from "./interfaces/IBatchRepository";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 
-export interface KYCRepository
-  extends ReadOnlyRepository<KYC, string>,
-    WriteOnlyRepository<KYC, string>,
-    QueryableRepository<KYC>,
-    BatchRepository<KYC> {
+export interface IKYCRepository
+  extends IReadOnlyRepository<KYC, string>,
+    IWriteOnlyRepository<KYC, string>,
+    IQueryableRepository<KYC>,
+    IBatchRepository<KYC> {
   // KYC-specific query methods
   findByDriverId(driverId: string): Promise<KYC[]>;
   findByDriverAndDocType(

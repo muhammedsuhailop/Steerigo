@@ -1,18 +1,18 @@
 import { QueryOptions } from "@shared/types/Repository";
 import { Driver } from "@domain/entities/Driver";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { WriteOnlyRepository } from "./interfaces/WriteOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
-import { BatchRepository } from "./interfaces/BatchRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IBatchRepository } from "./interfaces/IBatchRepository";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 
-export interface DriverRepository
-  extends ReadOnlyRepository<Driver, string>,
-    WriteOnlyRepository<Driver, string>,
-    QueryableRepository<Driver>,
-    BatchRepository<Driver> {
+export interface IDriverRepository
+  extends IReadOnlyRepository<Driver, string>,
+    IWriteOnlyRepository<Driver, string>,
+    IQueryableRepository<Driver>,
+    IBatchRepository<Driver> {
   // Driver-specific query methods
   findByUserId(userId: string): Promise<Driver | null>;
   existsByUserId(userId: string): Promise<boolean>;

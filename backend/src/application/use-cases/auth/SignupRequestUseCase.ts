@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { User } from "@domain/entities/User";
 import { UserAlreadyExistsError } from "@domain/errors";
 import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";
@@ -19,7 +19,7 @@ export class SignupRequestUseCase
   implements IUseCase<SignupRequestDto, Promise<Result<void>>>
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService,
     @inject(TYPES.EmailService) private emailService: EmailService,
     @inject(TYPES.OtpService) private otpService: OtpService

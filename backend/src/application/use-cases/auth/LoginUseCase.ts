@@ -4,7 +4,7 @@ import { LoginRequestDto } from "../../dto/auth/LoginRequestDto";
 import { LoginResponseDto } from "../../dto/auth/LoginResponseDto";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { PasswordService } from "@application/services/PasswordService";
 import { TokenManagementService } from "@application/services/TokenManagementService";
 import { InvalidCredentialsError, AccountStatusError } from "@domain/errors";
@@ -16,7 +16,7 @@ export class LoginUseCase
   implements IUseCase<LoginRequestDto, Promise<Result<LoginResponseDto, Error>>>
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.PasswordService) private passwordService: PasswordService,
     @inject(TYPES.TokenManagementService)
     private tokenManagementService: TokenManagementService

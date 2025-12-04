@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Admin Repositories
-import { AdminUserRepository } from "@application/repositories/AdminUserRepository";
+import { IAdminUserRepository } from "@application/repositories/IAdminUserRepository";
 import { AdminUserRepositoryImpl } from "@infrastructure/database/repositories/AdminUserRepositoryImpl";
 
 // Admin Use Cases
@@ -22,7 +22,7 @@ export class AdminFactory {
   static register(container: Container): void {
     // Repository bindings
     container
-      .bind<AdminUserRepository>(TYPES.AdminUserRepository)
+      .bind<IAdminUserRepository>(TYPES.AdminUserRepository)
       .to(AdminUserRepositoryImpl);
 
     // Use case bindings

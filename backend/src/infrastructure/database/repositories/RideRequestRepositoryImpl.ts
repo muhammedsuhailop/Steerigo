@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import {
-  RideRequestRepository,
-  RideRequestFilters,
-} from "@application/repositories/RideRequestRepository";
+  IRideRequestRepository,
+  IRideRequestFilters,
+} from "@application/repositories/IRideRequestRepository";
 import { RideRequest } from "@domain/entities/RideRequest";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import {
@@ -15,7 +15,7 @@ import { Logger } from "@shared/utils/Logger";
 import { SortOrder, Types } from "mongoose";
 
 @injectable()
-export class RideRequestRepositoryImpl implements RideRequestRepository {
+export class RideRequestRepositoryImpl implements IRideRequestRepository {
   // Basic Repository Operations
   async findById(id: string): Promise<RideRequest | null> {
     try {
@@ -104,7 +104,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
     }
   }
 
-  async count(filters?: RideRequestFilters): Promise<number> {
+  async count(filters?: IRideRequestFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters || {});
       return await RideRequestModel.countDocuments(mongoFilter);
@@ -115,7 +115,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: RideRequestFilters }
+    options: QueryOptions & { filters?: IRideRequestFilters }
   ): Promise<PaginatedResult<RideRequest>> {
     const {
       page = 1,
@@ -374,7 +374,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
   }
 
   async updateMany(
-    filters: RideRequestFilters,
+    filters: IRideRequestFilters,
     updates: Partial<RideRequest>
   ): Promise<number> {
     try {
@@ -400,7 +400,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
     }
   }
 
-  async deleteMany(filters: RideRequestFilters): Promise<number> {
+  async deleteMany(filters: IRideRequestFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
       const result = await RideRequestModel.deleteMany(mongoFilter);
@@ -417,7 +417,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
   }
 
   // Base repository interface methods
-  async existsByFilter(filters: RideRequestFilters): Promise<boolean> {
+  async existsByFilter(filters: IRideRequestFilters): Promise<boolean> {
     const mongoFilter = this.buildFilterQuery(filters);
     return (await RideRequestModel.countDocuments(mongoFilter)) > 0;
   }
@@ -428,7 +428,7 @@ export class RideRequestRepositoryImpl implements RideRequestRepository {
   }
 
   // Helper methods
-  private buildFilterQuery(filters: RideRequestFilters): Record<string, any> {
+  private buildFilterQuery(filters: IRideRequestFilters): Record<string, any> {
     const query: Record<string, any> = {};
 
     if (filters.status) {

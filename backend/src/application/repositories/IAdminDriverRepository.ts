@@ -4,10 +4,10 @@ import {
   PaginatedResult,
 } from "@shared/types/Repository";
 import { Driver } from "@domain/entities/Driver";
-import { ReadOnlyRepository } from "./interfaces/ReadOnlyRepository";
-import { QueryableRepository } from "./interfaces/QueryableRepository";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
 
-export interface AdminDriverQuery {
+export interface IAdminDriverQuery {
   status?: string;
   kycStatus?: string;
   licenceCategory?: string;
@@ -18,7 +18,7 @@ export interface AdminDriverQuery {
   sortOrder?: "asc" | "desc";
 }
 
-export interface AdminDriverSummary {
+export interface IAdminDriverSummary {
   driverId: string;
   userId: string;
   userName: string;
@@ -38,16 +38,16 @@ export interface AdminDriverSummary {
   createdAt: Date;
 }
 
-export interface AdminDriverRepository
-  extends ReadOnlyRepository<Driver>,
-    QueryableRepository<Driver> {
+export interface IAdminDriverRepository
+  extends IReadOnlyRepository<Driver>,
+    IQueryableRepository<Driver> {
   save(driver: Driver): Promise<Driver>;
 
   findDriversWithSummary(
-    filters: AdminDriverQuery,
+    filters: IAdminDriverQuery,
     pagination: { page: number; pageSize: number }
   ): Promise<{
-    data: AdminDriverSummary[];
+    data: IAdminDriverSummary[];
     pagination: {
       currentPage: number;
       pageSize: number;

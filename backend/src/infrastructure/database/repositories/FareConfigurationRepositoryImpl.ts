@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { FareConfigurationRepository } from "@application/repositories/FareConfigurationRepository";
+import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
 import { FareConfiguration } from "@domain/entities/FareConfiguration";
 import {
   FareConfigurationModel,
@@ -10,7 +10,7 @@ import { Logger } from "@shared/utils/Logger";
 
 @injectable()
 export class FareConfigurationRepositoryImpl
-  implements FareConfigurationRepository
+  implements IFareConfigurationRepository
 {
   async findById(id: string): Promise<FareConfiguration | null> {
     try {

@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
 import { ScheduleAvailabilityRequestDto } from "@application/dto/driver/ScheduleAvailabilityRequestDto";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { Location } from "@domain/value-objects/Location";
@@ -23,9 +23,9 @@ export class ScheduleAvailabilityUseCase
 {
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository,
+    private availabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: DriverRepository
+    private driverRepository: IDriverRepository
   ) {}
 
   async execute(

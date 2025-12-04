@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel, IDriverModel } from "../models/DriverModel";
 import { DriverMapper } from "../mappers/DriverMapper";
@@ -15,15 +15,15 @@ import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { Logger } from "@shared/utils/Logger";
 import { PipelineStage, SortOrder, Types } from "mongoose";
 import {
-  AdminDriverQuery,
-  AdminDriverSummary,
-} from "@application/repositories/AdminDriverRepository";
+  IAdminDriverQuery,
+  IAdminDriverSummary,
+} from "@application/repositories/IAdminDriverRepository";
 
-type UnifiedDriverFilterOptions = FilterOptions<Driver> & AdminDriverQuery;
+type UnifiedDriverFilterOptions = FilterOptions<Driver> & IAdminDriverQuery;
 
 @injectable()
 export class DriverRepositoryImpl
-  implements DriverRepository, AdminDriverRepository
+  implements IDriverRepository, IAdminDriverRepository
 {
   //  Basic Repository Operations
 
@@ -329,12 +329,12 @@ export class DriverRepositoryImpl
   // Admin-Specific Operations
 
   async findDriversWithSummary(
-    filters: AdminDriverQuery,
+    filters: IAdminDriverQuery,
     pagination: { page: number; pageSize: number },
     sortBy?: string,
     sortOrder?: "asc" | "desc"
   ): Promise<{
-    data: AdminDriverSummary[];
+    data: IAdminDriverSummary[];
     pagination: {
       currentPage: number;
       pageSize: number;

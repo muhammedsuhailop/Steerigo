@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import {
-  AdminUserRepository,
-  AdminUserSummary,
-} from "@application/repositories/AdminUserRepository";
+  IAdminUserRepository,
+  IAdminUserSummary,
+} from "@application/repositories/IAdminUserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel } from "../models/UserModel";
 import { UserDomainMapper } from "../mappers/UserDomainMapper";
@@ -21,7 +21,7 @@ type AdminFilterOptions = FilterOptions<User> & {
 };
 
 @injectable()
-export class AdminUserRepositoryImpl implements AdminUserRepository {
+export class AdminUserRepositoryImpl implements IAdminUserRepository {
   async findById(id: string): Promise<User | null> {
     const doc = await UserModel.findById(id);
     return doc ? UserDomainMapper.toDomain(doc) : null;
@@ -90,7 +90,7 @@ export class AdminUserRepositoryImpl implements AdminUserRepository {
     sortBy?: string,
     sortOrder?: "asc" | "desc"
   ): Promise<{
-    data: AdminUserSummary[];
+    data: IAdminUserSummary[];
     pagination: {
       currentPage: number;
       pageSize: number;

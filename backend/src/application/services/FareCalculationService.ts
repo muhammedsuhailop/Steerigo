@@ -7,7 +7,7 @@ import {
 } from "@domain/value-objects/FareBreakdown";
 import { Money } from "@domain/value-objects/Money";
 import { TYPES } from "@shared/constants/DITypes";
-import { FareConfigurationRepository } from "@application/repositories/FareConfigurationRepository";
+import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
 import { Logger } from "@shared/utils/Logger";
 
 export interface FareCalculationParams {
@@ -19,7 +19,7 @@ export interface FareCalculationParams {
 export class FareCalculationService {
   constructor(
     @inject(TYPES.FareConfigurationRepository)
-    private fareConfigRepository: FareConfigurationRepository
+    private fareConfigRepository: IFareConfigurationRepository
   ) {}
 
   async calculateFare(params: FareCalculationParams): Promise<FareBreakdown> {

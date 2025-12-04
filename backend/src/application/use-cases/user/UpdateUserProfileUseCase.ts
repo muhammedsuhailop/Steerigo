@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
@@ -17,7 +17,7 @@ export class UpdateUserProfileUseCase
     >
 {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(

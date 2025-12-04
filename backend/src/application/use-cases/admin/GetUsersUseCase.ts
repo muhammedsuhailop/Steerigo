@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { AdminUserRepository } from "@application/repositories/AdminUserRepository";
+import { IAdminUserRepository } from "@application/repositories/IAdminUserRepository";
 import {
   AdminUsersQuery,
   GetUsersRequestDto,
@@ -21,7 +21,7 @@ export class GetUsersUseCase
 {
   constructor(
     @inject(TYPES.AdminUserRepository)
-    private adminUserRepository: AdminUserRepository
+    private adminUserRepository: IAdminUserRepository
   ) {}
 
   async execute(dto: GetUsersRequestDto): Promise<Result<GetUsersResponseDto>> {

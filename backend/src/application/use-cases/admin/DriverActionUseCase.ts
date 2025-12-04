@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import { DriverActionRequestDto } from "@application/dto/admin/DriverActionRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -23,7 +23,7 @@ export class DriverActionUseCase
 {
   constructor(
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository
+    private adminDriverRepository: IAdminDriverRepository
   ) {}
 
   async execute(dto: DriverActionRequestDto): Promise<

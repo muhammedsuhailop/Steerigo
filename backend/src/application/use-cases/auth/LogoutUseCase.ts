@@ -1,7 +1,7 @@
 // src/application/use-cases/auth/LogoutUseCase.ts
 
 import { injectable, inject } from "inversify";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
@@ -22,7 +22,7 @@ export class LogoutUseCase
 {
   constructor(
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository
+    private refreshTokenRepository: IRefreshTokenRepository
   ) {}
 
   async execute(dto: RefreshTokenDto): Promise<Result<void, Error>> {

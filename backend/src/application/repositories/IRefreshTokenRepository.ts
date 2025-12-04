@@ -1,8 +1,8 @@
 import { RefreshToken } from "@domain/entities/RefreshToken";
-import { BaseRepository } from "./BaseRepository";
+import { IBaseRepository } from "./IBaseRepository";
 
-export interface RefreshTokenRepository
-  extends BaseRepository<RefreshToken, string> {
+export interface IRefreshTokenRepository
+  extends IBaseRepository<RefreshToken, string> {
   findByToken(token: string): Promise<RefreshToken | null>;
   findByUserId(userId: string): Promise<RefreshToken[]>;
   deleteByToken(token: string): Promise<void>;

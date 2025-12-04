@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { TokenService } from "@application/services/TokenService";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { Result } from "@shared/utils/Result";
@@ -24,9 +24,9 @@ export class RefreshTokenUseCase
 {
   constructor(
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository,
+    private refreshTokenRepository: IRefreshTokenRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository,
+    private userRepository: IUserRepository,
     @inject(TYPES.TokenService)
     private tokenService: TokenService
   ) {}

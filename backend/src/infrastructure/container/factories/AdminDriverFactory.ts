@@ -1,12 +1,12 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import { DriverRepositoryImpl } from "@infrastructure/database/repositories/DriverRepositoryImpl";
 
-import { KYCRepository } from "@application/repositories/KYCRepository";
-import { KYCRepository as AdminKYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
+import { IKYCRepository as AdminKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { KYCRepositoryImpl } from "@infrastructure/database/repositories/KYCRepositoryImpl";
 
 // Admin Driver Use Cases
@@ -40,16 +40,16 @@ import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateD
 export class AdminDriverFactory {
   static register(container: Container): void {
     container
-      .bind<DriverRepository>(TYPES.DriverRepository)
+      .bind<IDriverRepository>(TYPES.DriverRepository)
       .to(DriverRepositoryImpl)
       .inSingletonScope();
 
     container
-      .bind<AdminDriverRepository>(TYPES.AdminDriverRepository)
+      .bind<IAdminDriverRepository>(TYPES.AdminDriverRepository)
       .toService(TYPES.DriverRepository);
 
     container
-      .bind<KYCRepository>(TYPES.KYCRepository)
+      .bind<IKYCRepository>(TYPES.KYCRepository)
       .to(KYCRepositoryImpl)
       .inSingletonScope();
 
