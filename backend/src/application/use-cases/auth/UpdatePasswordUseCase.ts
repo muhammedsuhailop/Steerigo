@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { PasswordService } from "@application/services/PasswordService";
+import { IPasswordService } from "@application/services/IPasswordService";
 import { UpdatePasswordDto } from "../../dto/auth/UpdatePasswordDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -24,7 +24,7 @@ export class UpdatePasswordUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService
   ) {}
 
   async execute(dto: UpdatePasswordDto): Promise<Result<void>> {

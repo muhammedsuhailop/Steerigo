@@ -13,7 +13,7 @@ import { IDriverRepository } from "@application/repositories/IDriverRepository";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
-import { FareCalculationService } from "@application/services/FareCalculationService";
+import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
@@ -32,7 +32,7 @@ export class FindNearbyDriversUseCase
     @inject(TYPES.UserRepository)
     private userRepository: IUserRepository,
     @inject(TYPES.FareCalculationService)
-    private fareCalculationService: FareCalculationService
+    private fareCalculationService: IFareCalculationService
   ) {}
 
   async execute(

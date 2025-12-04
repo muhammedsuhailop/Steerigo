@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
-import { GoogleAuthService } from "@application/services/GoogleAuthService";
+import { IGoogleAuthService } from "@application/services/IGoogleAuthService";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { TokenService } from "@application/services/TokenService";
+import { ITokenService } from "@application/services/ITokenService";
 import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
-import { EmailService } from "@application/services/EmailService";
+import { IEmailService } from "@application/services/IEmailService";
 import { User } from "@domain/entities/User";
 import { GoogleLoginRequestDto } from "../../dto/auth/GoogleLoginRequestDto";
 import { SignupVerifyResponseDto } from "../../dto/auth/SignupVerifyResponseDto";
@@ -29,12 +29,12 @@ export class GoogleLoginUseCase
 {
   constructor(
     @inject(TYPES.GoogleAuthService)
-    private googleAuthService: GoogleAuthService,
+    private googleAuthService: IGoogleAuthService,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.TokenService) private tokenService: TokenService,
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
     @inject(TYPES.RefreshTokenRepository)
     private refreshTokenRepository: IRefreshTokenRepository,
-    @inject(TYPES.EmailService) private emailService: EmailService
+    @inject(TYPES.EmailService) private emailService: IEmailService
   ) {}
 
   async execute(

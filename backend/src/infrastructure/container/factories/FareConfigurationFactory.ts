@@ -1,5 +1,5 @@
 import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
-import { FareCalculationService } from "@application/services/FareCalculationService";
+import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { FareConfigurationRepositoryImpl } from "@infrastructure/database/repositories/FareConfigurationRepositoryImpl";
 import { TYPES } from "@shared/constants/DITypes";
 import { Container } from "inversify";
@@ -12,8 +12,8 @@ export class FareCalculationFactory {
       .inSingletonScope();
 
     container
-      .bind<FareCalculationService>(TYPES.FareCalculationService)
-      .to(FareCalculationService)
+      .bind<IFareCalculationService>(TYPES.FareCalculationService)
+      .to(IFareCalculationService)
       .inSingletonScope();
   }
 }

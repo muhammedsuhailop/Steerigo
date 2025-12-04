@@ -1,6 +1,6 @@
 import { RefreshToken } from "@domain/entities/RefreshToken";
 
-export interface TokenManagementService {
+export interface ITokenManagementService {
   generateAccessToken(payload: { userId: string; role: string }): string;
   generateRefreshToken(): string;
   createRefreshTokenEntity(

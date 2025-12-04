@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { PasswordService } from "@application/services/PasswordService";
-import { EmailService } from "@application/services/EmailService";
-import { OtpService } from "@application/services/OtpService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IOtpService } from "@application/services/IOtpService";
 import { ForgotPasswordRequestDto } from "../../dto/auth/ForgotPasswordRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -21,9 +21,9 @@ export class ForgotPasswordRequestUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService,
-    @inject(TYPES.EmailService) private emailService: EmailService,
-    @inject(TYPES.OtpService) private otpService: OtpService
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
+    @inject(TYPES.EmailService) private emailService: IEmailService,
+    @inject(TYPES.OtpService) private otpService: IOtpService
   ) {}
 
   async execute(dto: ForgotPasswordRequestDto): Promise<Result<void>> {

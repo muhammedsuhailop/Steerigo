@@ -7,9 +7,9 @@ import { Result } from "@shared/utils/Result";
 import { v4 as uuid } from "uuid";
 import { Email } from "@domain/value-objects/Email";
 import { TYPES } from "@shared/constants/DITypes";
-import { EmailService } from "@application/services/EmailService";
-import { PasswordService } from "@application/services/PasswordService";
-import { OtpService } from "@application/services/OtpService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { IOtpService } from "@application/services/IOtpService";
 import { Logger } from "@shared/utils/Logger";
 import { Password } from "@domain/value-objects/Password";
 import { IUseCase } from "../interfaces/IUseCase";
@@ -20,9 +20,9 @@ export class SignupRequestUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService,
-    @inject(TYPES.EmailService) private emailService: EmailService,
-    @inject(TYPES.OtpService) private otpService: OtpService
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
+    @inject(TYPES.EmailService) private emailService: IEmailService,
+    @inject(TYPES.OtpService) private otpService: IOtpService
   ) {}
 
   async execute(dto: SignupRequestDto): Promise<Result<void>> {

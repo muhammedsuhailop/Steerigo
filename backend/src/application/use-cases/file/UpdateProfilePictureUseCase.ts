@@ -1,5 +1,5 @@
 import { UpdateProfilePictureDto } from "@application/dto/file/UpdateProfilePictureDto";
-import { FileUploadService } from "@application/services/FileUploadService";
+import { IFileUploadService } from "@application/services/IFileUploadService";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -18,7 +18,7 @@ export class UpdateProfilePictureUseCase
 {
   constructor(
     @inject(TYPES.FileUploadService)
-    private _fileUploadService: FileUploadService,
+    private _fileUploadService: IFileUploadService,
     @inject(TYPES.UserRepository)
     private _userRepository: IUserRepository
   ) {}

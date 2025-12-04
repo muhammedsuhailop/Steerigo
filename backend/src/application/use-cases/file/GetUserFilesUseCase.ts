@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { FileUploadService } from "@application/services/FileUploadService";
+import { IFileUploadService } from "@application/services/IFileUploadService";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -13,7 +13,7 @@ export class GetUserFilesUseCase
 {
   constructor(
     @inject(TYPES.FileUploadService)
-    private fileUploadService: FileUploadService
+    private fileUploadService: IFileUploadService
   ) {}
 
   async execute(

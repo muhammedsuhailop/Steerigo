@@ -1,14 +1,14 @@
 import { injectable } from "inversify";
 import { google, Auth } from "googleapis";
 import {
-  GoogleAuthService,
-  GoogleTokens,
-  GoogleUserProfile,
-} from "@application/services/GoogleAuthService";
+  IGoogleAuthService,
+  IGoogleTokens,
+  IGoogleUserProfile,
+} from "@application/services/IGoogleAuthService";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class GoogleAuthServiceImpl implements GoogleAuthService {
+export class GoogleAuthServiceImpl implements IGoogleAuthService {
   private oauth2Client: Auth.OAuth2Client;
 
   constructor() {
@@ -49,7 +49,7 @@ export class GoogleAuthServiceImpl implements GoogleAuthService {
     }
   }
 
-  async exchangeCodeForTokens(code: string): Promise<GoogleTokens> {
+  async exchangeCodeForTokens(code: string): Promise<IGoogleTokens> {
     try {
       const { tokens } = await this.oauth2Client.getToken(code);
       if (!tokens.access_token) {
@@ -68,7 +68,7 @@ export class GoogleAuthServiceImpl implements GoogleAuthService {
     }
   }
 
-  async getUserProfile(accessToken: string): Promise<GoogleUserProfile> {
+  async getUserProfile(accessToken: string): Promise<IGoogleUserProfile> {
     try {
       this.oauth2Client.setCredentials({ access_token: accessToken });
       const oauth2 = google.oauth2({

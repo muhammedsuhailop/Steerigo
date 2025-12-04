@@ -1,11 +1,11 @@
 import { injectable } from "inversify";
 import nodemailer, { Transporter } from "nodemailer";
-import { EmailService } from "@application/services/EmailService";
+import { IEmailService } from "@application/services/IEmailService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class EmailServiceImpl implements EmailService {
+export class EmailServiceImpl implements IEmailService {
   private transporter: Transporter;
 
   constructor() {

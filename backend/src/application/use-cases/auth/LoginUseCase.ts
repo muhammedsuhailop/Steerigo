@@ -5,8 +5,8 @@ import { LoginResponseDto } from "../../dto/auth/LoginResponseDto";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { PasswordService } from "@application/services/PasswordService";
-import { TokenManagementService } from "@application/services/TokenManagementService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { ITokenManagementService } from "@application/services/ITokenManagementService";
 import { InvalidCredentialsError, AccountStatusError } from "@domain/errors";
 import { Logger } from "@shared/utils/Logger";
 import { AccountStatusErrorFactory } from "@domain/errors/strategies/AccountStatusErrorFactory";
@@ -17,9 +17,9 @@ export class LoginUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService,
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
     @inject(TYPES.TokenManagementService)
-    private tokenManagementService: TokenManagementService
+    private tokenManagementService: ITokenManagementService
   ) {}
 
   async execute(

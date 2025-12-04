@@ -1,17 +1,17 @@
 import { injectable } from "inversify";
 import { v2 as cloudinary } from "cloudinary";
 import {
-  FileUploadService,
-  FileUploadResult,
-  DeleteResult,
-} from "@application/services/FileUploadService";
+  IFileUploadService,
+  IFileUploadResult,
+  IDeleteResult,
+} from "@application/services/IFileUploadService";
 import { Logger } from "@shared/utils/Logger";
 import streamifier from "streamifier";
 import { UploadApiResponse } from "cloudinary";
 import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 
 @injectable()
-export class CloudinaryService implements FileUploadService {
+export class CloudinaryService implements IFileUploadService {
   constructor() {
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -25,7 +25,7 @@ export class CloudinaryService implements FileUploadService {
     userId: string,
     purpose: string,
     originalName: string
-  ): Promise<FileUploadResult> {
+  ): Promise<IFileUploadResult> {
     try {
       const timestamp = Date.now();
       const sanitizedOriginalName = originalName.replace(
@@ -91,7 +91,7 @@ export class CloudinaryService implements FileUploadService {
     }
   }
 
-  async delete(publicId: string): Promise<DeleteResult> {
+  async delete(publicId: string): Promise<IDeleteResult> {
     try {
       if (!publicId || publicId.trim() === "") {
         throw new Error("Public ID is required for deletion");

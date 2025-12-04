@@ -1,12 +1,12 @@
 import { injectable } from "inversify";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcrypt";
-import { OtpService } from "@application/services/OtpService";
+import { IOtpService } from "@application/services/IOtpService";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class OtpServiceImpl implements OtpService {
+export class OtpServiceImpl implements IOtpService {
   generate(): string {
     try {
       const otp = otpGenerator.generate(AppConstants.OTP_LENGTH, {

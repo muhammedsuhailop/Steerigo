@@ -1,12 +1,12 @@
 import { injectable, inject } from "inversify";
-import { PasswordService } from "@application/services/PasswordService";
+import { IPasswordService } from "@application/services/IPasswordService";
 import { CryptoAdapter } from "@infrastructure/adapters/CryptoAdapter";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
-export class PasswordServiceImpl implements PasswordService {
+export class PasswordServiceImpl implements IPasswordService {
   constructor(
     @inject(TYPES.CryptoAdapter) private cryptoAdapter: CryptoAdapter
   ) {}

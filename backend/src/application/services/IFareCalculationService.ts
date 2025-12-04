@@ -1,4 +1,3 @@
-// src/application/services/FareCalculationService.ts
 import { injectable, inject } from "inversify";
 import { FareConfiguration } from "@domain/entities/FareConfiguration";
 import {
@@ -10,19 +9,19 @@ import { TYPES } from "@shared/constants/DITypes";
 import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
 import { Logger } from "@shared/utils/Logger";
 
-export interface FareCalculationParams {
+export interface IFareCalculationParams {
   durationMinutes: number;
   searchDate?: Date;
 }
 
 @injectable()
-export class FareCalculationService {
+export class IFareCalculationService {
   constructor(
     @inject(TYPES.FareConfigurationRepository)
     private fareConfigRepository: IFareConfigurationRepository
   ) {}
 
-  async calculateFare(params: FareCalculationParams): Promise<FareBreakdown> {
+  async calculateFare(params: IFareCalculationParams): Promise<FareBreakdown> {
     const searchDate = params.searchDate || new Date();
 
     // Get active fare configuration

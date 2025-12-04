@@ -1,24 +1,24 @@
 import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 
-export interface FileUploadResult {
+export interface IFileUploadResult {
   url: string;
   publicId: string;
   filename: string;
   size: number;
 }
 
-export interface DeleteResult {
+export interface IDeleteResult {
   result: "ok" | "not found" | string;
 }
 
-export interface FileUploadService {
+export interface IFileUploadService {
   upload(
     fileBuffer: Buffer,
     userId: string,
     purpose: string,
     originalName: string
-  ): Promise<FileUploadResult>;
-  delete(publicId: string): Promise<DeleteResult>;
+  ): Promise<IFileUploadResult>;
+  delete(publicId: string): Promise<IDeleteResult>;
   generateSignedUrl(publicId: string, expiresIn?: number): Promise<string>;
   validateFile(file: Express.Multer.File, purpose: string): Promise<boolean>;
   listByPrefix(prefix: string): Promise<CloudinaryResourceDto[]>;

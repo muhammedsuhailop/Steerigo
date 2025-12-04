@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { PasswordService } from "@application/services/PasswordService";
-import { EmailService } from "@application/services/EmailService";
-import { OtpService } from "@application/services/OtpService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IOtpService } from "@application/services/IOtpService";
 import { ForgotPasswordVerifyDto } from "../../dto/auth/ForgotPasswordVerifyDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -27,9 +27,9 @@ export class ForgotPasswordVerifyUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService,
-    @inject(TYPES.EmailService) private emailService: EmailService,
-    @inject(TYPES.OtpService) private otpService: OtpService
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
+    @inject(TYPES.EmailService) private emailService: IEmailService,
+    @inject(TYPES.OtpService) private otpService: IOtpService
   ) {}
 
   async execute(dto: ForgotPasswordVerifyDto): Promise<Result<void>> {

@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { TokenManagementService } from "@application/services/TokenManagementService";
-import { TokenService } from "@application/services/TokenService";
+import { ITokenManagementService } from "@application/services/ITokenManagementService";
+import { ITokenService } from "@application/services/ITokenService";
 import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { RefreshToken } from "@domain/entities/RefreshToken";
 import { v4 as uuid } from "uuid";
@@ -8,9 +8,9 @@ import { TYPES } from "@shared/constants/DITypes";
 import { UserRole } from "@shared/constants/AuthConstants";
 
 @injectable()
-export class TokenManagementServiceImpl implements TokenManagementService {
+export class TokenManagementServiceImpl implements ITokenManagementService {
   constructor(
-    @inject(TYPES.TokenService) private tokenService: TokenService,
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
     @inject(TYPES.RefreshTokenRepository)
     private refreshTokenRepository: IRefreshTokenRepository
   ) {}

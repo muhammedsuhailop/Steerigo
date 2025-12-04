@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
-import { OtpService } from "@application/services/OtpService";
-import { TokenService } from "@application/services/TokenService";
-import { EmailService } from "@application/services/EmailService";
+import { IOtpService } from "@application/services/IOtpService";
+import { ITokenService } from "@application/services/ITokenService";
+import { IEmailService } from "@application/services/IEmailService";
 import {
   OtpExpiredError,
   MaxOtpAttemptsError,
@@ -31,9 +31,9 @@ export class SignupVerifyUseCase
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.RefreshTokenRepository)
     private refreshTokenRepository: IRefreshTokenRepository,
-    @inject(TYPES.OtpService) private otpService: OtpService,
-    @inject(TYPES.TokenService) private tokenService: TokenService,
-    @inject(TYPES.EmailService) private emailService: EmailService
+    @inject(TYPES.OtpService) private otpService: IOtpService,
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
+    @inject(TYPES.EmailService) private emailService: IEmailService
   ) {}
 
   async execute(

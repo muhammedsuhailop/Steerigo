@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
 import { IUserRepository } from "@application/repositories/IUserRepository";
-import { TokenService } from "@application/services/TokenService";
+import { ITokenService } from "@application/services/ITokenService";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { Result } from "@shared/utils/Result";
 import {
@@ -28,7 +28,7 @@ export class RefreshTokenUseCase
     @inject(TYPES.UserRepository)
     private userRepository: IUserRepository,
     @inject(TYPES.TokenService)
-    private tokenService: TokenService
+    private tokenService: ITokenService
   ) {}
 
   async execute(

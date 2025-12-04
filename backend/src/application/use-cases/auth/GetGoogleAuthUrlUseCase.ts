@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { GoogleAuthService } from "../../services/GoogleAuthService";
+import { IGoogleAuthService } from "../../services/IGoogleAuthService";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
 import { IUseCase } from "../interfaces/IUseCase";
@@ -10,7 +10,7 @@ export class GetGoogleAuthUrlUseCase
 {
   constructor(
     @inject(TYPES.GoogleAuthService)
-    private googleAuthService: GoogleAuthService
+    private googleAuthService: IGoogleAuthService
   ) {}
 
   async execute(): Promise<Result<{ authUrl: string }>> {

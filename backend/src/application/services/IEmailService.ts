@@ -1,4 +1,4 @@
-export interface EmailService {
+export interface IEmailService {
   sendVerificationOtp(
     email: string,
     otp: string,

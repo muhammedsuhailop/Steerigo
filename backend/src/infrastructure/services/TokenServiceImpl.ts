@@ -2,16 +2,16 @@ import { injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import {
-  TokenService,
-  TokenPayload,
-  TokenPair,
-} from "@application/services/TokenService";
+  ITokenService,
+  ITokenPayload,
+  ITokenPair,
+} from "@application/services/ITokenService";
 import { TokenConfig } from "@shared/constants/AuthConstants";
 import { UserRole } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class TokenServiceImpl implements TokenService {
+export class TokenServiceImpl implements ITokenService {
   private readonly jwtSecret: string;
   private readonly refreshTokenSecret: string;
 
@@ -64,7 +64,7 @@ export class TokenServiceImpl implements TokenService {
     }
   }
 
-  verifyAccessToken(token: string): TokenPayload | null {
+  verifyAccessToken(token: string): ITokenPayload | null {
     try {
       const decoded = jwt.verify(token, this.jwtSecret, {
         issuer: TokenConfig.JWT_ISSUER,
@@ -116,7 +116,7 @@ export class TokenServiceImpl implements TokenService {
     }
   }
 
-  generateTokenPair(payload: { userId: string; role: UserRole }): TokenPair {
+  generateTokenPair(payload: { userId: string; role: UserRole }): ITokenPair {
     const accessToken = this.generateAccessToken(payload);
     const refreshToken = this.generateRefreshToken();
 

@@ -2,12 +2,12 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Application Service Interfaces
-import { PasswordService } from "@application/services/PasswordService";
-import { TokenService } from "@application/services/TokenService";
-import { EmailService } from "@application/services/EmailService";
-import { OtpService } from "@application/services/OtpService";
-import { GoogleAuthService } from "@application/services/GoogleAuthService";
-import { TokenManagementService } from "@application/services/TokenManagementService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { ITokenService } from "@application/services/ITokenService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IOtpService } from "@application/services/IOtpService";
+import { IGoogleAuthService } from "@application/services/IGoogleAuthService";
+import { ITokenManagementService } from "@application/services/ITokenManagementService";
 
 // Infrastructure Service Implementations
 import { PasswordServiceImpl } from "@infrastructure/services/PasswordServiceImpl";
@@ -20,30 +20,30 @@ import {
   BcryptAdapter,
   CryptoAdapter,
 } from "@infrastructure/adapters/CryptoAdapter";
-import { FileUploadService } from "@application/services/FileUploadService";
+import { IFileUploadService } from "@application/services/IFileUploadService";
 import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
 
 export class ServiceFactory {
   static register(container: Container): void {
     // Bind Service Interfaces to Implementations
     container
-      .bind<PasswordService>(TYPES.PasswordService)
+      .bind<IPasswordService>(TYPES.PasswordService)
       .to(PasswordServiceImpl);
-    container.bind<TokenService>(TYPES.TokenService).to(TokenServiceImpl);
-    container.bind<EmailService>(TYPES.EmailService).to(EmailServiceImpl);
-    container.bind<OtpService>(TYPES.OtpService).to(OtpServiceImpl);
+    container.bind<ITokenService>(TYPES.TokenService).to(TokenServiceImpl);
+    container.bind<IEmailService>(TYPES.EmailService).to(EmailServiceImpl);
+    container.bind<IOtpService>(TYPES.OtpService).to(OtpServiceImpl);
     container
-      .bind<GoogleAuthService>(TYPES.GoogleAuthService)
+      .bind<IGoogleAuthService>(TYPES.GoogleAuthService)
       .to(GoogleAuthServiceImpl);
     container
-      .bind<TokenManagementService>(TYPES.TokenManagementService)
+      .bind<ITokenManagementService>(TYPES.TokenManagementService)
       .to(TokenManagementServiceImpl);
     container
       .bind<CryptoAdapter>(TYPES.CryptoAdapter)
       .to(BcryptAdapter)
       .inSingletonScope();
     container
-      .bind<FileUploadService>(TYPES.FileUploadService)
+      .bind<IFileUploadService>(TYPES.FileUploadService)
       .to(CloudinaryService)
       .inSingletonScope();
   }

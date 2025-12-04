@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { container } from "@infrastructure/container/DIContainer";
 import { TYPES } from "@shared/constants/DITypes";
-import { TokenService } from "@application/services/TokenService";
+import { ITokenService } from "@application/services/ITokenService";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
@@ -38,7 +38,7 @@ export const authMiddleware = async (
     }
 
     const token = authHeader.substring(7);
-    const tokenService = container.get<TokenService>(TYPES.TokenService);
+    const tokenService = container.get<ITokenService>(TYPES.TokenService);
 
     const payload = tokenService.verifyAccessToken(token);
     if (!payload) {
