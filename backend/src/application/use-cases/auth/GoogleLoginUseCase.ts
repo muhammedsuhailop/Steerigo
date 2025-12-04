@@ -11,10 +11,6 @@ import { RefreshToken } from "@domain/entities/RefreshToken";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  AuthMessages,
-  AuthErrorMessages,
-} from "@shared/constants/AuthConstants";
 import { DomainError, EmailNotVerifiedError } from "@domain/errors";
 import { v4 as uuid } from "uuid";
 import { IUseCase } from "../interfaces/IUseCase";

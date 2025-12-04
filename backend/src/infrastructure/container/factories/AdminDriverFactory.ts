@@ -36,6 +36,7 @@ import { GetKycRequestsResponseDto } from "@application/dto/admin/GetKycRequests
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { UpdateDriverKycStatusRequestDto } from "@application/dto/admin/UpdateDriverKycStatusRequestDto";
 import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateDriverKycStatusResponseDto";
+import { KycDocumentResponseDto } from "@application/dto/admin/KycDocumentResponseDto";
 
 export class AdminDriverFactory {
   static register(container: Container): void {
@@ -100,7 +101,7 @@ export class AdminDriverFactory {
           Promise<
             Result<{
               message: string;
-              kycDocument: any;
+              kycDocument: KycDocumentResponseDto;
               driverKycStatusUpdated: boolean;
             }>
           >

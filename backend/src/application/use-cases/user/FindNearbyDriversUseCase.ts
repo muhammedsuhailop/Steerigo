@@ -15,6 +15,7 @@ import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { IUseCase } from "../interfaces/IUseCase";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 
 @injectable()
 export class FindNearbyDriversUseCase
@@ -49,11 +50,7 @@ export class FindNearbyDriversUseCase
         bodyType: requestDto.bodyType,
       });
 
-      try {
-        requestDto.validate();
-      } catch (validationError) {
-        throw validationError;
-      }
+      requestDto.validate();
 
       const searchCriteria = SearchCriteria.create(
         { latitude: requestDto.latitude, longitude: requestDto.longitude },
@@ -305,7 +302,7 @@ export class FindNearbyDriversUseCase
   }
 
   private isDriverAvailableForDuration(
-    driverAvailability: any,
+    driverAvailability: DriverAvailability,
     searchDate: Date,
     timeRequiredMinutes: number
   ): boolean {

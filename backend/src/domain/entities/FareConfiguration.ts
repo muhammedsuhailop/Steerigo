@@ -1,5 +1,3 @@
-import { Money } from "../value-objects/Money";
-
 export interface FareRule {
   maxHours: number | null;
   ratePerHour: number;

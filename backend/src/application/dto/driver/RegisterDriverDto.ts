@@ -1,3 +1,34 @@
+export interface RegisterDriverInput {
+  // Personal Information
+  name?: string;
+  mobile?: string;
+  dob?: string;
+  gender?: string;
+  state?: string;
+  pin?: string;
+  address?: string;
+
+  // License Information
+  bodyTypes?: string[] | string;
+  gearTypes?: string[] | string;
+  licenseNumber?: string;
+  licenseCategory?: string[] | string;
+  licenseIssueDate?: string;
+  licenseExpiryDate?: string;
+
+  // ID Information
+  idType?: "PAN" | "Aadhaar" | "DrivingLicense" | "Passport";
+  idNumber?: string;
+  idIssueDate?: string;
+  idExpiryDate?: string;
+
+  // Document Images
+  licenseFrontImage?: string;
+  licenseBackImage?: string;
+  idFrontImage?: string;
+  idBackImage?: string;
+}
+
 export class RegisterDriverDto {
   // Personal Information
   public readonly name: string;
@@ -28,38 +59,49 @@ export class RegisterDriverDto {
   public readonly idFrontImage: string;
   public readonly idBackImage: string;
 
-  constructor(data: any) {
-    this.name = data.name;
-    this.mobile = data.mobile;
-    this.dob = data.dob;
-    this.gender = data.gender;
-    this.state = data.state;
-    this.pin = data.pin;
-    this.address = data.address;
+  constructor(data: unknown) {
+    const input = (data ?? {}) as RegisterDriverInput;
 
-    // Handle arrays
-    this.bodyTypes = Array.isArray(data.bodyTypes)
-      ? data.bodyTypes
-      : JSON.parse(data.bodyTypes || "[]");
-    this.gearTypes = Array.isArray(data.gearTypes)
-      ? data.gearTypes
-      : JSON.parse(data.gearTypes || "[]");
-    this.licenseCategory = Array.isArray(data.licenseCategory)
-      ? data.licenseCategory
-      : JSON.parse(data.licenseCategory || "[]");
-    this.licenseNumber = data.licenseNumber;
-    this.licenseIssueDate = data.licenseIssueDate;
-    this.licenseExpiryDate = data.licenseExpiryDate;
+    // Basic information
+    this.name = input.name ?? "";
+    this.mobile = input.mobile ?? "";
+    this.dob = input.dob ?? "";
+    this.gender = input.gender ?? "";
+    this.state = input.state ?? "";
+    this.pin = input.pin ?? "";
+    this.address = input.address ?? "";
 
-    this.idType = data.idType;
-    this.idNumber = data.idNumber;
-    this.idIssueDate = data.idIssueDate;
-    this.idExpiryDate = data.idExpiryDate;
+    // Array parsing helper
+    const parseArray = (value: string[] | string | undefined): string[] => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    };
 
-    this.licenseFrontImage = data.licenseFrontImage;
-    this.licenseBackImage = data.licenseBackImage;
-    this.idFrontImage = data.idFrontImage;
-    this.idBackImage = data.idBackImage;
+    // Handle JSON/array fields
+    this.bodyTypes = parseArray(input.bodyTypes);
+    this.gearTypes = parseArray(input.gearTypes);
+    this.licenseCategory = parseArray(input.licenseCategory);
+
+    this.licenseNumber = input.licenseNumber ?? "";
+    this.licenseIssueDate = input.licenseIssueDate ?? "";
+    this.licenseExpiryDate = input.licenseExpiryDate ?? "";
+
+    this.idType = input.idType ?? "DrivingLicense"; 
+    this.idNumber = input.idNumber ?? "";
+    this.idIssueDate = input.idIssueDate ?? "";
+    this.idExpiryDate = input.idExpiryDate ?? "";
+
+    this.licenseFrontImage = input.licenseFrontImage ?? "";
+    this.licenseBackImage = input.licenseBackImage ?? "";
+    this.idFrontImage = input.idFrontImage ?? "";
+    this.idBackImage = input.idBackImage ?? "";
   }
 
   public getFullAddress(): string {

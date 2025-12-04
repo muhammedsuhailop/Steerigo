@@ -7,7 +7,6 @@ import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsR
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { ApiResponse } from "@shared/types/Common";
-import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
@@ -22,6 +21,7 @@ import {
 import { GetKycRequestByIdResponseDto } from "@application/dto/admin/GetKycRequestByIdResponseDto";
 import { GetKycRequestsResponseDto } from "@application/dto/admin/GetKycRequestsResponseDto";
 import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateDriverKycStatusResponseDto";
+import { KycDocumentResponseDto } from "@application/dto/admin/KycDocumentResponseDto";
 
 @injectable()
 export class AdminDriverController {
@@ -58,7 +58,7 @@ export class AdminDriverController {
       Promise<
         Result<{
           message: string;
-          kycDocument: any;
+          kycDocument: KycDocumentResponseDto;
           driverKycStatusUpdated: boolean;
         }>
       >

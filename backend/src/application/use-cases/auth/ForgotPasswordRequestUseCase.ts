@@ -8,7 +8,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import {
-  AuthMessages,
   AuthErrorMessages,
 } from "@shared/constants/AuthConstants";
 import { AppConstants } from "@shared/constants/AppConstants";

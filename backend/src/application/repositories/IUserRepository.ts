@@ -23,5 +23,5 @@ export interface IUserRepository
   findByMobile(mobile: string): Promise<User | null>;
   findActiveUsers(options?: QueryOptions): Promise<User[]>;
   findByRole(role: string, options?: QueryOptions): Promise<User[]>;
-  updateById(id: string, updates: Partial<Record<string, any>>): Promise<void>;
+  updateById(id: string, updates: Partial<Record<string, unknown>>): Promise<void>;
 }

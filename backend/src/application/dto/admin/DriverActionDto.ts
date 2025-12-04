@@ -1,10 +1,18 @@
+export interface DriverActionInput {
+  driverId: string;
+  action: "block" | "unblock" | "inreview";
+  reason?:string;
+}
+
 export class DriverActionDto {
   public readonly driverId: string;
   public readonly action: "block" | "unblock" | "inreview";
+  public readonly reason?:string;
 
-  constructor(data: any) {
+  constructor(data: DriverActionInput) {
     this.driverId = data.driverId;
     this.action = data.action;
+    this.reason = data.reason;
   }
 
   getStatusFromAction(): "Active" | "Blocked" | "InReview" {

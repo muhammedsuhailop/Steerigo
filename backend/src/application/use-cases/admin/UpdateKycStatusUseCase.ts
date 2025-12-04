@@ -9,6 +9,8 @@ import { TYPES } from "@shared/constants/DITypes";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 import { IUseCase } from "../interfaces/IUseCase";
+import { KycDocumentResponseDto } from "@application/dto/admin/KycDocumentResponseDto";
+import { KYC } from "@domain/entities/KYC";
 
 @injectable()
 export class UpdateKycStatusUseCase
@@ -18,7 +20,7 @@ export class UpdateKycStatusUseCase
       Promise<
         Result<{
           message: string;
-          kycDocument: any;
+          kycDocument: KycDocumentResponseDto;
           driverKycStatusUpdated: boolean;
         }>
       >
@@ -36,7 +38,7 @@ export class UpdateKycStatusUseCase
   async execute(dto: UpdateKycStatusRequestDto): Promise<
     Result<{
       message: string;
-      kycDocument: any;
+      kycDocument: KycDocumentResponseDto;
       driverKycStatusUpdated: boolean;
     }>
   > {
@@ -53,7 +55,7 @@ export class UpdateKycStatusUseCase
         return Result.failure(new Error("KYC document not found"));
       }
 
-      const kycDocument = kycWithDriver.kycDocument;
+      const kycDocument = kycWithDriver.kycDocument as KYC;
 
       Logger.info("Executing UpdateKycStatusUseCase", {
         kycId: dto.getKycId(),
@@ -177,7 +179,7 @@ export class UpdateKycStatusUseCase
             }
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         Logger.warn("Failed to evaluate/apply overall driver KYC status", {
           driverId: kycWithDriver.driverInfo.driverId,
           error: err instanceof Error ? err.message : String(err),
@@ -195,7 +197,7 @@ export class UpdateKycStatusUseCase
           docImageUrlsFront: kycDocument.getDocImageUrlsFront(),
           docImageUrlsBack: kycDocument.getDocImageUrlsBack(),
           updatedAt: kycDocument.getUpdatedAt().toISOString(),
-        },
+        } as KycDocumentResponseDto,
         driverKycStatusUpdated,
       };
 
@@ -206,9 +208,14 @@ export class UpdateKycStatusUseCase
       });
 
       return Result.success(response);
-    } catch (error) {
-      Logger.error("Error updating KYC status", error);
-      return Result.failure(error as Error);
+    } catch (error: unknown) {
+      Logger.error(
+        "Error updating KYC status",
+        error instanceof Error ? error : String(error)
+      );
+      return Result.failure(
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 }

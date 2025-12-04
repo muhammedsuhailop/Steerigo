@@ -34,7 +34,7 @@ type GetKycRequestsRequestData = z.infer<typeof getKycRequestsRequestSchema>;
 export class GetKycRequestsRequestDto {
   private readonly data: GetKycRequestsRequestData;
 
-  constructor(queryParams: any) {
+  constructor(queryParams: unknown) {
     this.data = getKycRequestsRequestSchema.parse(queryParams);
   }
 

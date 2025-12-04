@@ -5,6 +5,7 @@ import {
 } from "@domain/value-objects/AvailabilityStatus";
 
 const updateStatusSchema = z.object({
+  driverId: z.string().min(1, "driverId is required"),
   status: z.enum(VALID_AVAILABILITY_STATUSES as [string, ...string[]], {
     message: `Status must be one of: ${VALID_AVAILABILITY_STATUSES.join(", ")}`,
   }),
@@ -14,11 +15,9 @@ type UpdateStatusData = z.infer<typeof updateStatusSchema>;
 
 export class UpdateStatusRequestDto {
   private readonly data: UpdateStatusData;
-  private readonly driverId: string;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = updateStatusSchema.parse(requestData);
-    this.driverId = requestData.driverId;
   }
 
   getStatus(): AvailabilityStatus {
@@ -26,6 +25,6 @@ export class UpdateStatusRequestDto {
   }
 
   getDriverId(): string {
-    return this.driverId;
+    return this.data.driverId;
   }
 }

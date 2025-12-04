@@ -109,7 +109,6 @@ export class IFareCalculationService {
     // Apply tiered pricing rules
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
-      const nextRule = rules[i + 1];
 
       if (rule.maxHours === null) {
         // Unlimited hours rule (last tier)

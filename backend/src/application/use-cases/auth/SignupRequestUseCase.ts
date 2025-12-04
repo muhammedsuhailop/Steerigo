@@ -5,7 +5,6 @@ import { UserAlreadyExistsError } from "@domain/errors";
 import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";
 import { Result } from "@shared/utils/Result";
 import { v4 as uuid } from "uuid";
-import { Email } from "@domain/value-objects/Email";
 import { TYPES } from "@shared/constants/DITypes";
 import { IEmailService } from "@application/services/IEmailService";
 import { IPasswordService } from "@application/services/IPasswordService";

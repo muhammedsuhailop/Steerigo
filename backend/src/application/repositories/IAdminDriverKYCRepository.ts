@@ -1,8 +1,3 @@
-import {
-  FilterOptions,
-  QueryOptions,
-  PaginatedResult,
-} from "@shared/types/Repository";
 import { KYC } from "@domain/entities/KYC";
 import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
 import { IQueryableRepository } from "./interfaces/IQueryableRepository";

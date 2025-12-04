@@ -19,7 +19,7 @@ type UpdateDriverKycStatusData = z.infer<typeof updateDriverKycStatusSchema>;
 export class UpdateDriverKycStatusRequestDto {
   private readonly data: UpdateDriverKycStatusData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = updateDriverKycStatusSchema.parse(requestData);
   }
 

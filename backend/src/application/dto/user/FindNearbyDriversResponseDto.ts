@@ -1,4 +1,5 @@
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 
 export interface DriverInfoResponse {
   id: string;
@@ -28,28 +29,30 @@ export interface DriverInfoResponse {
   responseTime?: string;
 }
 
+export interface NearbySearchCriteria {
+  location: { latitude: number; longitude: number };
+  radiusKm: number;
+  searchDate: Date;
+  timeRequiredMinutes: number;
+  filters?: {
+    gearType?: GearType | null;
+    bodyType?: BodyType | null;
+  };
+}
+
 export class FindNearbyDriversResponseDto {
   constructor(
     readonly drivers: DriverInfoResponse[],
     readonly totalFound: number,
     readonly searchedAt: Date,
-    readonly searchCriteria: {
-      location: { latitude: number; longitude: number };
-      radiusKm: number;
-      searchDate: Date;
-      timeRequiredMinutes: number;
-      filters?: {
-        gearType?: string;
-        bodyType?: string;
-      };
-    },
-    readonly estimatedFare?: FareBreakdown 
+    readonly searchCriteria: NearbySearchCriteria,
+    readonly estimatedFare?: FareBreakdown
   ) {}
 
   static create(
     drivers: DriverInfoResponse[],
     totalFound: number,
-    searchCriteria: any,
+    searchCriteria: NearbySearchCriteria,
     fareBreakdown?: FareBreakdown
   ): FindNearbyDriversResponseDto {
     return new FindNearbyDriversResponseDto(

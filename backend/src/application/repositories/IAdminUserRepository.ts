@@ -1,4 +1,3 @@
-import { FilterOptions, QueryOptions } from "@shared/types/Repository";
 import { User } from "@domain/entities/User";
 import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
 import { IQueryableRepository } from "./interfaces/IQueryableRepository";

@@ -1,6 +1,14 @@
+type UserProfileUpdates = Partial<{
+  name: string;
+  mobile: string;
+  dob: Date;
+  gender: "Male" | "Female" | "Other";
+  address: string;
+}>;
+
 export class DriverProfileUpdateDto {
   constructor(
-    private readonly userId:string,
+    private readonly userId: string,
     private readonly name?: string,
     private readonly mobile?: string,
     private readonly dob?: Date,
@@ -10,10 +18,10 @@ export class DriverProfileUpdateDto {
     private readonly eligibleBodyTypes?: string[]
   ) {}
 
-  getUserId():string{
+  getUserId(): string {
     return this.userId;
   }
-  
+
   getName(): string | undefined {
     return this.name;
   }
@@ -56,19 +64,15 @@ export class DriverProfileUpdateDto {
     return !!(this.eligibleGearTypes || this.eligibleBodyTypes);
   }
 
-  getUserProfileUpdates(): {
-    name?: string;
-    mobile?: string;
-    dob?: Date;
-    gender?: string;
-    address?: string;
-  } {
-    const updates: any = {};
+  getUserProfileUpdates(): UserProfileUpdates {
+    const updates: UserProfileUpdates = {};
+
     if (this.name) updates.name = this.name;
     if (this.mobile) updates.mobile = this.mobile;
     if (this.dob) updates.dob = this.dob;
     if (this.gender) updates.gender = this.gender;
     if (this.address) updates.address = this.address;
+
     return updates;
   }
 

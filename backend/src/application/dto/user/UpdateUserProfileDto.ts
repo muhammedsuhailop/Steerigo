@@ -1,3 +1,21 @@
+export interface UpdateUserProfileInput {
+  userId?: string;
+  name?: string;
+  mobile?: string;
+  dob?: string | Date;
+  gender?: "Male" | "Female" | "Other";
+  address?: string;
+  profilePicture?: string;
+}
+
+type UserProfileUpdates = {
+  name: string;
+  mobile: string;
+  dob: Date;
+  gender: "Male" | "Female" | "Other";
+  address: string;
+};
+
 export class UpdateUserProfileDto {
   public readonly userId: string;
   public readonly name?: string;
@@ -7,14 +25,23 @@ export class UpdateUserProfileDto {
   public readonly address?: string;
   public readonly profilePicture?: string;
 
-  constructor(data: any) {
-    this.userId = data.userId;
-    this.name = data.name?.trim();
-    this.mobile = data.mobile?.trim();
-    this.dob = data.dob ? new Date(data.dob) : undefined;
-    this.gender = data.gender;
-    this.address = data.address?.trim();
-    this.profilePicture = data.profilePicture?.trim();
+  constructor(data: unknown) {
+    const input = (data ?? {}) as UpdateUserProfileInput;
+
+    this.userId = input.userId ?? "";
+    this.name = input.name?.trim();
+    this.mobile = input.mobile?.trim();
+
+    this.dob =
+      input.dob instanceof Date
+        ? input.dob
+        : input.dob
+          ? new Date(input.dob)
+          : undefined;
+
+    this.gender = input.gender;
+    this.address = input.address?.trim();
+    this.profilePicture = input.profilePicture?.trim();
   }
 
   validate(): string[] {
@@ -65,14 +92,8 @@ export class UpdateUserProfileDto {
     );
   }
 
-  getUserProfileUpdates(): Partial<{
-    name: string;
-    mobile: string;
-    dob: Date;
-    gender: string;
-    address: string;
-  }> {
-    const updates: any = {};
+  getUserProfileUpdates(): Partial<UserProfileUpdates> {
+    const updates: Partial<UserProfileUpdates> = {};
 
     if (this.name) updates.name = this.name;
     if (this.mobile) updates.mobile = this.mobile;

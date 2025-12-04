@@ -15,7 +15,7 @@ type DriverActionRequestData = z.infer<typeof driverActionRequestSchema>;
 export class DriverActionRequestDto {
   private readonly data: DriverActionRequestData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = driverActionRequestSchema.parse(requestData);
   }
 

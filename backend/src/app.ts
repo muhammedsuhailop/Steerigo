@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import path from "path";
 import express, { Application } from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -52,7 +53,6 @@ class App {
 
     // 2. Serve React build in production
     if (process.env.NODE_ENV === "production") {
-      const path = require("path");
       this.app.use(
         express.static(path.join(__dirname, "..", "client", "build"))
       );
@@ -60,7 +60,6 @@ class App {
 
     // 3. Frontend catch-all: serve index.html for non-API GET requests
     if (process.env.NODE_ENV === "production") {
-      const path = require("path");
       this.app.get("*", (req, res, next) => {
         // Skip API routes
         if (req.path.startsWith("/api/")) return next();

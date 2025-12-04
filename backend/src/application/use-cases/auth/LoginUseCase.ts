@@ -7,9 +7,10 @@ import { TYPES } from "@shared/constants/DITypes";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { IPasswordService } from "@application/services/IPasswordService";
 import { ITokenManagementService } from "@application/services/ITokenManagementService";
-import { InvalidCredentialsError, AccountStatusError } from "@domain/errors";
+import { InvalidCredentialsError } from "@domain/errors";
 import { Logger } from "@shared/utils/Logger";
 import { AccountStatusErrorFactory } from "@domain/errors/strategies/AccountStatusErrorFactory";
+import { User } from "@domain/entities/User"; 
 
 @injectable()
 export class LoginUseCase
@@ -30,7 +31,7 @@ export class LoginUseCase
 
       const userValidationResult = await this.validateUser(dto);
       if (userValidationResult.isFailure()) {
-        return userValidationResult;
+        return userValidationResult as unknown as Result<LoginResponseDto, Error>;
       }
 
       const user = userValidationResult.getValue();
@@ -77,24 +78,26 @@ export class LoginUseCase
       });
 
       return Result.success<LoginResponseDto, Error>(response);
-    } catch (error) {
+    } catch (err: unknown) {
       Logger.error("Login use case error", {
         email: dto.getEmailValue(),
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       });
-      return Result.failure<LoginResponseDto, Error>(error as Error);
+      return Result.failure<LoginResponseDto, Error>(
+        err instanceof Error ? err : new Error(String(err))
+      );
     }
   }
 
   private async validateUser(
     dto: LoginRequestDto
-  ): Promise<Result<any, Error>> {
+  ): Promise<Result<User, Error>> {
     const user = await this.userRepository.findByEmail(dto.getEmailValue());
     if (!user) {
       Logger.warn("Login failed - user not found", {
         email: dto.getEmailValue(),
       });
-      return Result.failure<any, Error>(new InvalidCredentialsError());
+      return Result.failure<User, Error>(new InvalidCredentialsError());
     }
 
     if (!user.canLogin()) {
@@ -107,7 +110,7 @@ export class LoginUseCase
         isVerified: user.getIsVerified(),
         reason,
       });
-      return Result.failure<any, Error>(
+      return Result.failure<User, Error>(
         AccountStatusErrorFactory.createError(user.getStatus())
       );
     }
@@ -122,10 +125,10 @@ export class LoginUseCase
         Logger.warn("Login failed - invalid password", {
           email: dto.getEmailValue(),
         });
-        return Result.failure<any, Error>(new InvalidCredentialsError());
+        return Result.failure<User, Error>(new InvalidCredentialsError());
       }
     }
 
-    return Result.success<any, Error>(user);
+    return Result.success<User, Error>(user);
   }
 }

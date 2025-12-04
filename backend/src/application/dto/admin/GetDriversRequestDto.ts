@@ -47,7 +47,7 @@ type GetDriversRequestData = z.infer<typeof getDriversRequestSchema>;
 export class GetDriversRequestDto {
   private readonly data: GetDriversRequestData;
 
-  constructor(queryParams: any) {
+  constructor(queryParams: unknown) {
     this.data = getDriversRequestSchema.parse(queryParams);
   }
 

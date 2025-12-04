@@ -5,7 +5,6 @@ import { GetCurrentUserResponseDto } from "../../dto/auth/GetCurrentUserResponse
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { AuthMessages } from "@shared/constants/AuthConstants";
 import { UserNotFoundError } from "@domain/errors";
 import { IUseCase } from "../interfaces/IUseCase";
 

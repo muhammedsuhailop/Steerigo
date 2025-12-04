@@ -1,8 +1,3 @@
-import {
-  FilterOptions,
-  QueryOptions,
-  PaginatedResult,
-} from "@shared/types/Repository";
 import { Driver } from "@domain/entities/Driver";
 import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
 import { IQueryableRepository } from "./interfaces/IQueryableRepository";

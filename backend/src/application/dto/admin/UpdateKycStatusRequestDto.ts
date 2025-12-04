@@ -17,7 +17,7 @@ type UpdateKycStatusRequestData = z.infer<typeof updateKycStatusRequestSchema>;
 export class UpdateKycStatusRequestDto {
   private readonly data: UpdateKycStatusRequestData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = updateKycStatusRequestSchema.parse(requestData);
   }
 

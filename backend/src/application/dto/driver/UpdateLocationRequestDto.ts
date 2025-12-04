@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const updateLocationSchema = z.object({
+  driverId: z.string().min(1, "driverId is required"),
   currentLocation: z.object({
     latitude: z
       .number()
@@ -21,11 +22,9 @@ type UpdateLocationData = z.infer<typeof updateLocationSchema>;
 
 export class UpdateLocationRequestDto {
   private readonly data: UpdateLocationData;
-  private readonly driverId: string;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = updateLocationSchema.parse(requestData);
-    this.driverId = requestData.driverId;
   }
 
   getLocationData(): {
@@ -37,6 +36,6 @@ export class UpdateLocationRequestDto {
   }
 
   getDriverId(): string {
-    return this.driverId;
+    return this.data.driverId;
   }
 }
