@@ -8,7 +8,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { UserRole } from "@shared/constants/AuthConstants";
 
 @injectable()
-export class TokenManagementServiceImpl implements ITokenManagementService {
+export class TokenManagementService implements ITokenManagementService {
   constructor(
     @inject(TYPES.TokenService) private tokenService: ITokenService,
     @inject(TYPES.RefreshTokenRepository)

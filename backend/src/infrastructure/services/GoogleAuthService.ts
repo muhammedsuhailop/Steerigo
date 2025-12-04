@@ -2,9 +2,9 @@ import { injectable } from "inversify";
 import { google, Auth } from "googleapis";
 import {
   IGoogleAuthService,
-  GoogleTokens,
-  GoogleUserProfile,
-} from "@domain/services/IGoogleAuthService";
+  IGoogleTokens,
+  IGoogleUserProfile,
+} from "@application/services/IGoogleAuthService";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
@@ -27,8 +27,6 @@ export class GoogleAuthService implements IGoogleAuthService {
     );
   }
 
-  // Google OAuth2 consent screen URL
-
   generateAuthUrl(): string {
     try {
       const scopes = [
@@ -43,7 +41,7 @@ export class GoogleAuthService implements IGoogleAuthService {
         state: "steerigo_auth",
       });
 
-      Logger.info("Generated Google auth URL", authUrl);
+      Logger.info("Generated Google auth URL");
       return authUrl;
     } catch (error) {
       Logger.error("Failed to generate Google auth URL", error);
@@ -51,18 +49,14 @@ export class GoogleAuthService implements IGoogleAuthService {
     }
   }
 
-  // Exchange the authorization code for access/refresh/id tokens
-
-  async exchangeCodeForTokens(code: string): Promise<GoogleTokens> {
+  async exchangeCodeForTokens(code: string): Promise<IGoogleTokens> {
     try {
       const { tokens } = await this.oauth2Client.getToken(code);
-
       if (!tokens.access_token) {
         throw new Error("No access token received from Google");
       }
 
       Logger.info("Successfully exchanged code for tokens");
-
       return {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token || undefined,
@@ -74,17 +68,15 @@ export class GoogleAuthService implements IGoogleAuthService {
     }
   }
 
-  async getUserProfile(accessToken: string): Promise<GoogleUserProfile> {
+  async getUserProfile(accessToken: string): Promise<IGoogleUserProfile> {
     try {
       this.oauth2Client.setCredentials({ access_token: accessToken });
-
       const oauth2 = google.oauth2({
         version: "v2",
         auth: this.oauth2Client,
       });
 
       const { data } = await oauth2.userinfo.get();
-
       if (!data.email || !data.id) {
         throw new Error("Incomplete user data from Google");
       }

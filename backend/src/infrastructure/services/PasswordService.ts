@@ -6,7 +6,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
-export class PasswordServiceImpl implements IPasswordService {
+export class PasswordService implements IPasswordService {
   constructor(
     @inject(TYPES.CryptoAdapter) private cryptoAdapter: CryptoAdapter
   ) {}

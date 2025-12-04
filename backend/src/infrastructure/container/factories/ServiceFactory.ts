@@ -10,12 +10,12 @@ import { IGoogleAuthService } from "@application/services/IGoogleAuthService";
 import { ITokenManagementService } from "@application/services/ITokenManagementService";
 
 // Infrastructure Service Implementations
-import { PasswordServiceImpl } from "@infrastructure/services/PasswordServiceImpl";
-import { TokenServiceImpl } from "@infrastructure/services/TokenServiceImpl";
-import { EmailServiceImpl } from "@infrastructure/services/EmailServiceImpl";
-import { OtpServiceImpl } from "@infrastructure/services/OtpServiceImpl";
-import { GoogleAuthServiceImpl } from "@infrastructure/services/GoogleAuthServiceImpl";
-import { TokenManagementServiceImpl } from "@infrastructure/services/TokenManagementServiceImpl";
+import { PasswordService } from "@infrastructure/services/PasswordService";
+import { TokenService } from "@infrastructure/services/TokenService";
+import { EmailService } from "@infrastructure/services/EmailService";
+import { OtpService } from "@infrastructure/services/OtpService";
+import { GoogleAuthService } from "@infrastructure/services/GoogleAuthService";
+import { TokenManagementService } from "@infrastructure/services/TokenManagementService";
 import {
   BcryptAdapter,
   CryptoAdapter,
@@ -28,16 +28,16 @@ export class ServiceFactory {
     // Bind Service Interfaces to Implementations
     container
       .bind<IPasswordService>(TYPES.PasswordService)
-      .to(PasswordServiceImpl);
-    container.bind<ITokenService>(TYPES.TokenService).to(TokenServiceImpl);
-    container.bind<IEmailService>(TYPES.EmailService).to(EmailServiceImpl);
-    container.bind<IOtpService>(TYPES.OtpService).to(OtpServiceImpl);
+      .to(PasswordService);
+    container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
+    container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
+    container.bind<IOtpService>(TYPES.OtpService).to(OtpService);
     container
       .bind<IGoogleAuthService>(TYPES.GoogleAuthService)
-      .to(GoogleAuthServiceImpl);
+      .to(GoogleAuthService);
     container
       .bind<ITokenManagementService>(TYPES.TokenManagementService)
-      .to(TokenManagementServiceImpl);
+      .to(TokenManagementService);
     container
       .bind<CryptoAdapter>(TYPES.CryptoAdapter)
       .to(BcryptAdapter)

@@ -5,7 +5,7 @@ import { AuthMessages } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class EmailServiceImpl implements IEmailService {
+export class EmailService implements IEmailService {
   private transporter: Transporter;
 
   constructor() {

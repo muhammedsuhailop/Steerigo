@@ -6,7 +6,7 @@ import { AppConstants } from "@shared/constants/AppConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class OtpServiceImpl implements IOtpService {
+export class OtpService implements IOtpService {
   generate(): string {
     try {
       const otp = otpGenerator.generate(AppConstants.OTP_LENGTH, {

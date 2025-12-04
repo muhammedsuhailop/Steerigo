@@ -11,7 +11,7 @@ import { UserRole } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class TokenServiceImpl implements ITokenService {
+export class TokenService implements ITokenService {
   private readonly jwtSecret: string;
   private readonly refreshTokenSecret: string;
 
