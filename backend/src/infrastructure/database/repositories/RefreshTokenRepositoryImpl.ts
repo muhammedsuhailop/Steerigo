@@ -6,7 +6,11 @@ import {
   IRefreshTokenDocument,
 } from "../models/RefreshTokenModel";
 import { Logger } from "@shared/utils/Logger";
-import { FilterOptions, QueryOptions } from "@shared/types/Repository";
+import {
+  FilterOptions,
+  QueryOptions,
+  PaginatedResult,
+} from "@shared/types/Repository";
 
 @injectable()
 export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
@@ -137,7 +141,9 @@ export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
     }
   }
 
-  async findPaginated(options: QueryOptions<RefreshToken>): Promise<any> {
+  async findPaginated(
+    options: QueryOptions<RefreshToken>
+  ): Promise<PaginatedResult<RefreshToken>> {
     try {
       const limit = options.limit || 10;
       const offset = options.offset || 0;

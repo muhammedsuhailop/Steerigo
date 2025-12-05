@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { IUserRepository } from "@application/repositories/IUserRepository";
 import { User } from "@domain/entities/User";
-import { UserModel, IUserDocument } from "../models/UserModel";
+import { UserModel } from "../models/UserModel";
 import { AuthProvider } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 import {

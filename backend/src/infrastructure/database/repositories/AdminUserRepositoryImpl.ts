@@ -223,16 +223,16 @@ export class AdminUserRepositoryImpl implements IAdminUserRepository {
   ): Record<string, unknown> {
     const q: Record<string, unknown> = {};
 
-    if ("status" in filters && typeof (filters as any).status === "string") {
-      q.status = (filters as any).status;
+    if ("status" in filters && typeof filters.status === "string") {
+      q.status = filters.status;
     }
 
     if (
       "search" in filters &&
-      typeof (filters as any).search === "string" &&
-      (filters as any).search.trim() !== ""
+      typeof filters.search === "string" &&
+      filters.search.trim() !== ""
     ) {
-      const s = (filters as any).search.trim();
+      const s = filters.search.trim();
       q.$or = [
         { name: { $regex: s, $options: "i" } },
         { email: { $regex: s, $options: "i" } },
@@ -242,11 +242,11 @@ export class AdminUserRepositoryImpl implements IAdminUserRepository {
 
     if ("dateFrom" in filters || "dateTo" in filters) {
       const d: Record<string, Date> = {};
-      if ("dateFrom" in filters && (filters as any).dateFrom instanceof Date) {
-        d.$gte = (filters as any).dateFrom;
+      if ("dateFrom" in filters && filters.dateFrom instanceof Date) {
+        d.$gte = filters.dateFrom;
       }
-      if ("dateTo" in filters && (filters as any).dateTo instanceof Date) {
-        d.$lte = (filters as any).dateTo;
+      if ("dateTo" in filters && filters.dateTo instanceof Date) {
+        d.$lte = filters.dateTo;
       }
       if (Object.keys(d).length) {
         q.createdAt = d;

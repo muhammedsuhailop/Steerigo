@@ -1,7 +1,6 @@
 import { injectable } from "inversify";
 import nodemailer, { Transporter } from "nodemailer";
 import { IEmailService } from "@application/services/IEmailService";
-import { AuthMessages } from "@shared/constants/AuthConstants";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()

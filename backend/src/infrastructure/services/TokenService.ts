@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import crypto from "crypto";
 import {
   ITokenService,
@@ -69,22 +69,18 @@ export class TokenService implements ITokenService {
       const decoded = jwt.verify(token, this.jwtSecret, {
         issuer: TokenConfig.JWT_ISSUER,
         audience: TokenConfig.JWT_AUDIENCE,
-      }) as any;
+      }) as JwtPayload & { userId: string; role: UserRole; type: string };
 
-      // Ensure it's an access token
       if (decoded.type !== "access") {
         Logger.warn("Invalid token type", { type: decoded.type });
         return null;
       }
 
-      Logger.debug("Access token verified successfully", {
-        userId: decoded.userId,
-      });
       return {
         userId: decoded.userId,
         role: decoded.role,
-        iat: decoded.iat,
-        exp: decoded.exp,
+        iat: decoded.iat!,
+        exp: decoded.exp!,
       };
     } catch (error) {
       Logger.debug("Access token verification failed", error);
@@ -94,8 +90,6 @@ export class TokenService implements ITokenService {
 
   verifyRefreshToken(token: string): boolean {
     try {
-      // For simple refresh tokens, we just check if they exist in database
-      // This method should be enhanced to use JWT-based refresh tokens if needed
       return typeof token === "string" && token.length === 128; // 64 bytes = 128 hex chars
     } catch (error) {
       Logger.error("Error verifying refresh token", error);
@@ -105,10 +99,12 @@ export class TokenService implements ITokenService {
 
   getTokenExpiration(token: string): Date | null {
     try {
-      const decoded = jwt.decode(token) as any;
-      if (!decoded || !decoded.exp) {
+      const decoded = jwt.decode(token);
+
+      if (!decoded || typeof decoded === "string" || !decoded.exp) {
         return null;
       }
+
       return new Date(decoded.exp * 1000);
     } catch (error) {
       Logger.error("Error getting token expiration", error);

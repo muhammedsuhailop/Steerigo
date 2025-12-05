@@ -1,10 +1,7 @@
 import { injectable } from "inversify";
 import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
 import { FareConfiguration } from "@domain/entities/FareConfiguration";
-import {
-  FareConfigurationModel,
-  IFareConfigurationDocument,
-} from "../models/FareConfigurationModel";
+import { FareConfigurationModel } from "../models/FareConfigurationModel";
 import { FareConfigurationMapper } from "../mappers/FareConfigurationMapper";
 import { Logger } from "@shared/utils/Logger";
 

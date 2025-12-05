@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { IKYCRepository as IAdminKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { KYC } from "@domain/entities/KYC";
-import { KYCModel } from "../models/KYCModel";
+import { IKYCModel, KYCModel } from "../models/KYCModel";
 import { KYCMapper } from "../mappers/KYCMapper";
 import {
   FilterOptions,
@@ -12,13 +12,60 @@ import {
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, PipelineStage, Types } from "mongoose";
+import {
+  SortOrder,
+  PipelineStage,
+  Types,
+  FilterQuery,
+  UpdateQuery,
+} from "mongoose";
 import {
   IKYCQuery,
   IKYCWithDriverInfo,
 } from "@application/repositories/IAdminDriverKYCRepository";
 
 type UnifiedKYCFilterOptions = FilterOptions<KYC> & IKYCQuery;
+
+interface IKycUpdateFields {
+  verificationStatus?: KYCStatus;
+  docType?: DocumentType;
+  documentUrl?: string[]; 
+  expiryDate?: Date;
+  verificationNotes?: string;
+  updatedAt?: Date;
+}
+
+interface IKycAggregateRow {
+  _id: Types.ObjectId | string;
+  driverId?: Types.ObjectId | string;
+  docType?: DocumentType;
+  docNumber?: string;
+  issueDate?: Date;
+  expiryDate?: Date;
+  verificationStatus?: KYCStatus;
+  comments?: string;
+  docImageUrlsFront?: string[] | null;
+  docImageUrlsBack?: string[] | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  driver?: {
+    _id: Types.ObjectId;
+    status?: string;
+  };
+  user?: {
+    _id: Types.ObjectId;
+    name?: string;
+    email?: string;
+    mobile?: string;
+  };
+}
+
+interface IKycFilterDoc {
+  verificationStatus?: KYCStatus;
+  docType?: DocumentType;
+  driverId?: string;
+  createdAt?: { $gte?: Date; $lte?: Date };
+}
 
 @injectable()
 export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
@@ -163,27 +210,78 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
     updates: Partial<KYC>
   ): Promise<number> {
     try {
-      const updateData: any = {};
+      const updateData: UpdateQuery<IKycUpdateFields> = {};
 
-      // Map domain fields to database fields
-      if (updates.getVerificationStatus)
-        updateData.verificationStatus = updates.getVerificationStatus();
-      if (updates.getDocType) updateData.docType = updates.getDocType();
-      if (updates.getDocImageUrlsFront)
-        updateData.documentUrl = updates.getDocImageUrlsFront();
-      if (updates.getDocImageUrlsBack)
-        updateData.documentUrl = updates.getDocImageUrlsBack();
-      if (updates.getExpiryDate)
-        updateData.expiryDate = updates.getExpiryDate();
-      if (updates.getComments)
-        updateData.verificationNotes = updates.getComments();
+      const u: unknown = updates;
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getVerificationStatus?: () => KYCStatus })
+          .getVerificationStatus === "function"
+      ) {
+        updateData.verificationStatus = (
+          u as { getVerificationStatus: () => KYCStatus }
+        ).getVerificationStatus();
+      }
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getDocType?: () => DocumentType }).getDocType ===
+          "function"
+      ) {
+        updateData.docType = (
+          u as { getDocType: () => DocumentType }
+        ).getDocType();
+      }
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getDocImageUrlsFront?: () => string[] })
+          .getDocImageUrlsFront === "function"
+      ) {
+        updateData.documentUrl = (updateData.documentUrl ?? []).concat(
+          (u as { getDocImageUrlsFront: () => string[] }).getDocImageUrlsFront()
+        );
+      }
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getDocImageUrlsBack?: () => string[] })
+          .getDocImageUrlsBack === "function"
+      ) {
+        updateData.documentUrl = (updateData.documentUrl ?? []).concat(
+          (u as { getDocImageUrlsBack: () => string[] }).getDocImageUrlsBack()
+        );
+      }
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getExpiryDate?: () => Date }).getExpiryDate ===
+          "function"
+      ) {
+        updateData.expiryDate = (
+          u as { getExpiryDate: () => Date }
+        ).getExpiryDate();
+      }
+      if (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as { getComments?: () => string }).getComments === "function"
+      ) {
+        updateData.verificationNotes = (
+          u as { getComments: () => string }
+        ).getComments();
+      }
 
       updateData.updatedAt = new Date();
 
       const mongoFilter = this.buildFilterQuery(filters);
-      const result = await KYCModel.updateMany(mongoFilter, {
-        $set: updateData,
-      });
+      const result = await KYCModel.updateMany(
+        mongoFilter as FilterQuery<IKycFilterDoc>,
+        {
+          $set: updateData,
+        }
+      );
 
       Logger.info("Multiple KYCs updated", {
         matchedCount: result.matchedCount,
@@ -203,7 +301,9 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
 
   async deleteMany(filters: FilterOptions<KYC>): Promise<number> {
     try {
-      const result = await KYCModel.deleteMany(filters);
+      const result = await KYCModel.deleteMany(
+        filters as FilterQuery<IKycFilterDoc>
+      );
       Logger.info("Multiple KYCs deleted", { count: result.deletedCount });
       return result.deletedCount ?? 0;
     } catch (error) {
@@ -329,7 +429,9 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
     };
   }> {
     const mongoFilter = this.buildFilterQuery(filters);
-    const totalItems = await KYCModel.countDocuments(mongoFilter);
+    const totalItems = await KYCModel.countDocuments(
+      mongoFilter as FilterQuery<IKycFilterDoc>
+    );
     const totalPages = Math.ceil(totalItems / pagination.pageSize);
     const skip = (pagination.page - 1) * pagination.pageSize;
 
@@ -380,11 +482,11 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
       { $limit: pagination.pageSize },
     ];
 
-    const results = await KYCModel.aggregate(pipeline);
+    const results = (await KYCModel.aggregate(pipeline)) as IKycAggregateRow[];
 
     return {
-      data: results.map((r) => ({
-        kycDocument: KYCMapper.toDomain({
+      data: results.map((r) => {
+        const kycDocForMapper = {
           _id: r._id,
           driverId: r.driverId,
           docType: r.docType,
@@ -394,19 +496,23 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
           verificationStatus: r.verificationStatus,
           comments: r.comments,
           createdAt: r.createdAt,
-          docImageUrlsFront: r.docImageUrlsFront || [],
-          docImageUrlsBack: r.docImageUrlsBack || [],
+          docImageUrlsFront: r.docImageUrlsFront ?? [],
+          docImageUrlsBack: r.docImageUrlsBack ?? [],
           updatedAt: r.updatedAt,
-        } as any),
-        driverInfo: {
-          driverId: r.driver._id.toString(),
-          userId: r.user._id.toString(),
-          userName: r.user.name,
-          userEmail: r.user.email,
-          userMobile: r.user.mobile,
-          driverStatus: r.driver.status,
-        },
-      })),
+        };
+
+        return {
+          kycDocument: KYCMapper.toDomain(kycDocForMapper as IKYCModel ),
+          driverInfo: {
+            driverId: String(r.driver?._id),
+            userId: String(r.user?._id),
+            userName: r.user?.name ?? "",
+            userEmail: r.user?.email ?? "",
+            userMobile: r.user?.mobile ?? "",
+            driverStatus: r.driver?.status,
+          },
+        } as IKYCWithDriverInfo;
+      }),
       pagination: {
         currentPage: pagination.page,
         pageSize: pagination.pageSize,
@@ -421,11 +527,11 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
     status: string,
     comments?: string
   ): Promise<boolean> {
-    const update: Partial<any> = {
-      verificationStatus: status,
+    const update: UpdateQuery<Partial<IKycUpdateFields>> = {
+      verificationStatus: status as KYCStatus,
       updatedAt: new Date(),
     };
-    if (comments) update.comments = comments;
+    if (comments) update.verificationNotes = comments;
 
     const res = await KYCModel.updateOne({ _id: kycId }, update);
     return res.modifiedCount > 0;
@@ -435,7 +541,7 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
     kycId: string
   ): Promise<IKYCWithDriverInfo | null> {
     const objectId = new Types.ObjectId(kycId);
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       { $match: { _id: objectId } },
       {
         $lookup: {
@@ -479,31 +585,33 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
       },
     ];
 
-    const [result] = await KYCModel.aggregate(pipeline);
+    const [result] = (await KYCModel.aggregate(pipeline)) as IKycAggregateRow[];
     if (!result) return null;
 
+    const kycDocForMapper = {
+      _id: result._id,
+      driverId: result.driverId,
+      docType: result.docType,
+      docNumber: result.docNumber,
+      issueDate: result.issueDate,
+      expiryDate: result.expiryDate,
+      verificationStatus: result.verificationStatus,
+      comments: result.comments,
+      docImageUrlsFront: result.docImageUrlsFront ?? [],
+      docImageUrlsBack: result.docImageUrlsBack ?? [],
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
+    };
+
     return {
-      kycDocument: KYCMapper.toDomain({
-        _id: result._id,
-        driverId: result.driverId,
-        docType: result.docType,
-        docNumber: result.docNumber,
-        issueDate: result.issueDate,
-        expiryDate: result.expiryDate,
-        verificationStatus: result.verificationStatus,
-        comments: result.comments,
-        docImageUrlsFront: result.docImageUrlsFront || [],
-        docImageUrlsBack: result.docImageUrlsBack || [],
-        createdAt: result.createdAt,
-        updatedAt: result.updatedAt,
-      } as any),
+      kycDocument: KYCMapper.toDomain(kycDocForMapper as IKYCModel),
       driverInfo: {
-        driverId: result.driver._id.toString(),
-        userId: result.user._id.toString(),
-        userName: result.user.name,
-        userEmail: result.user.email,
-        userMobile: result.user.mobile,
-        driverStatus: result.driver.status,
+        driverId: String(result.driver?._id),
+        userId: String(result.user?._id),
+        userName: result.user?.name ?? "",
+        userEmail: result.user?.email ?? "",
+        userMobile: result.user?.mobile ?? "",
+        driverStatus: result.driver?.status ?? "",
       },
     };
   }
@@ -512,40 +620,37 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
 
   private buildFilterQuery(
     filters: UnifiedKYCFilterOptions
-  ): Record<string, any> {
-    const q: Record<string, any> = {};
+  ): FilterQuery<IKycFilterDoc> {
+    const q: IKycFilterDoc = {};
 
     if (
       "verificationStatus" in filters &&
-      typeof (filters as any).verificationStatus === "string"
+      typeof filters.verificationStatus === "string"
     ) {
-      q.verificationStatus = (filters as any).verificationStatus;
+      q.verificationStatus = filters.verificationStatus as KYCStatus;
     }
 
-    if ("docType" in filters && typeof (filters as any).docType === "string") {
-      q.docType = (filters as any).docType;
+    if ("docType" in filters && typeof filters.docType === "string") {
+      q.docType = filters.docType as DocumentType;
     }
 
-    if (
-      "driverId" in filters &&
-      typeof (filters as any).driverId === "string"
-    ) {
-      q.driverId = (filters as any).driverId;
+    if ("driverId" in filters && typeof filters.driverId === "string") {
+      q.driverId = filters.driverId;
     }
 
     if ("dateFrom" in filters || "dateTo" in filters) {
-      const d: Record<string, any> = {};
-      if ("dateFrom" in filters && (filters as any).dateFrom instanceof Date) {
-        d.$gte = (filters as any).dateFrom;
+      const d: { $gte?: Date; $lte?: Date } = {};
+      if ("dateFrom" in filters && filters.dateFrom instanceof Date) {
+        d.$gte = filters.dateFrom;
       }
-      if ("dateTo" in filters && (filters as any).dateTo instanceof Date) {
-        d.$lte = (filters as any).dateTo;
+      if ("dateTo" in filters && filters.dateTo instanceof Date) {
+        d.$lte = filters.dateTo;
       }
       if (Object.keys(d).length) {
         q.createdAt = d;
       }
     }
 
-    return q;
+    return q as FilterQuery<IKycFilterDoc>;
   }
 }

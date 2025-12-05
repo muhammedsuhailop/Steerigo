@@ -12,7 +12,7 @@ import {
 import { DriverAvailabilityMapper } from "../mappers/DriverAvailabilityMapper";
 import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, Types } from "mongoose";
+import { SortOrder, Types, FilterQuery, UpdateQuery } from "mongoose";
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
@@ -516,17 +516,44 @@ export class DriverAvailabilityRepositoryImpl
   // Batch Operations
   async updateMany(
     filters: IDriverAvailabilityFilters,
-    updates: Partial<DriverAvailability>
+    updates:
+      | Partial<DriverAvailability>
+      | Partial<{
+          status?: AvailabilityStatus;
+          currentLocation?: IDriverAvailabilityModel["currentLocation"];
+        }>
   ): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
-      const updateData: any = {};
 
-      // Map domain updates to database fields
-      if (updates.getStatus) updateData.status = updates.getStatus();
-      if (updates.getCurrentLocation) {
-        const location = updates.getCurrentLocation();
-        updateData.currentLocation = location.getCoordinates();
+      const updateData: UpdateQuery<IDriverAvailabilityModel> = {};
+
+      const maybeStatus = (updates as { status?: AvailabilityStatus }).status;
+      if (maybeStatus !== undefined) {
+        updateData.status = maybeStatus;
+      }
+
+      const maybeCurrentLocation = (
+        updates as {
+          currentLocation?: IDriverAvailabilityModel["currentLocation"];
+        }
+      ).currentLocation;
+      if (maybeCurrentLocation !== undefined) {
+        updateData.currentLocation = maybeCurrentLocation;
+      }
+
+      if (hasGetStatus(updates)) {
+        updateData.status = updates.getStatus();
+      }
+
+      if (hasGetCurrentLocation(updates)) {
+        const locObj = updates.getCurrentLocation();
+        const coords = (
+          locObj as {
+            getCoordinates?: () => IDriverAvailabilityModel["currentLocation"];
+          }
+        ).getCoordinates?.();
+        if (coords) updateData.currentLocation = coords;
       }
 
       updateData.updatedAt = new Date();
@@ -572,8 +599,8 @@ export class DriverAvailabilityRepositoryImpl
   // Helper methods
   private buildFilterQuery(
     filters: IDriverAvailabilityFilters
-  ): Record<string, any> {
-    const query: Record<string, any> = {};
+  ): FilterQuery<IDriverAvailabilityModel> {
+    const query: FilterQuery<IDriverAvailabilityModel> = {};
 
     if (filters.status) {
       query.status = filters.status;
@@ -584,7 +611,7 @@ export class DriverAvailabilityRepositoryImpl
     }
 
     if (filters.availableFrom || filters.availableTill) {
-      const dateFilter: Record<string, any> = {};
+      const dateFilter: Partial<{ $gte: Date; $lte: Date }> = {};
       if (filters.availableFrom) {
         dateFilter.$gte = filters.availableFrom;
       }
@@ -607,4 +634,23 @@ export class DriverAvailabilityRepositoryImpl
     const docs = await DriverAvailabilityModel.find({ _id: { $in: ids } });
     return docs.map(DriverAvailabilityMapper.toDomain);
   }
+}
+
+// helper type guards
+function hasGetStatus(
+  u: unknown
+): u is { getStatus: () => AvailabilityStatus } {
+  if (typeof u !== "object" || u === null) return false;
+  const obj = u as Record<string, unknown>;
+  return typeof obj.getStatus === "function";
+}
+
+function hasGetCurrentLocation(u: unknown): u is {
+  getCurrentLocation: () => {
+    getCoordinates: () => IDriverAvailabilityModel["currentLocation"];
+  };
+} {
+  if (typeof u !== "object" || u === null) return false;
+  const obj = u as Record<string, unknown>;
+  return typeof obj.getCurrentLocation === "function";
 }
