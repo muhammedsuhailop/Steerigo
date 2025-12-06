@@ -1,5 +1,3 @@
-import { AuthUserController } from "@interface/controllers/auth/AuthUserController";
-
 // Container Symbols (for better type safety)
 export const TYPES = {
   // Repositories

@@ -59,7 +59,7 @@ export class UserAuthController {
 
       // Set refresh token as httpOnly cookie
       CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
-      const { refreshToken, ...dataWithoutRefreshToken } = data;
+      const { refreshToken: _refreshToken, ...dataWithoutRefreshToken } = data;
 
       const response: ApiResponse = {
         success: true,

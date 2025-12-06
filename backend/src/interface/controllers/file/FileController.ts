@@ -40,7 +40,7 @@ export class FileController {
   ) {}
 
   private getUserId(req: Request): string | null {
-    const user = (req as any).user;
+    const user = req.user;
     return user?.userId ?? null;
   }
 
@@ -190,7 +190,7 @@ export class FileController {
 
       const { userId } = req.params;
 
-      const currentUser = (req as any).user;
+      const currentUser = req.user;
       if (userId !== currentUserId && currentUser?.role !== "Admin") {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,

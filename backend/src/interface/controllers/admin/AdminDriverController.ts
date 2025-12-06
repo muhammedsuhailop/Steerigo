@@ -91,7 +91,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.DRIVERS_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -125,7 +125,7 @@ export class AdminDriverController {
           driverId: data.driverId,
           newStatus: data.newStatus,
         },
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -153,7 +153,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.DRIVER_PROFILE_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -179,7 +179,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.KYC_REQUESTS_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -215,7 +215,7 @@ export class AdminDriverController {
           kycDocument: data.kycDocument,
           driverKycStatusUpdated: data.driverKycStatusUpdated,
         },
-      } as ApiResponse<any>);
+      } as ApiResponse<unknown>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -241,7 +241,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.KYC_DOCUMENT_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,

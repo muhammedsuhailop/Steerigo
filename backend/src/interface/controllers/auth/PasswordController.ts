@@ -100,7 +100,7 @@ export class PasswordController {
 
   async updatePassword(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId; // From auth middleware
+      const userId = req.user?.userId as string; // From auth middleware
       const dto = new UpdatePasswordDto({
         userId,
         currentPassword: req.body.currentPassword,

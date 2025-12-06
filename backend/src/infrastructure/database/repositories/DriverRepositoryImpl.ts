@@ -132,7 +132,7 @@ export class DriverRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: UnifiedDriverFilterOptions }
+    options: QueryOptions<Driver> & { filters?: UnifiedDriverFilterOptions }
   ): Promise<PaginatedResult<Driver>> {
     const {
       page = 1,

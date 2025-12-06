@@ -1,5 +1,5 @@
 import multer from "multer";
-import { Request } from "express";
+import { NextFunction, Request,Response } from "express";
 
 // Memory storage for cloud uploads
 const storage = multer.memoryStorage();
@@ -51,10 +51,10 @@ export const uploadSingle = multer({
 
 // Error handling middleware for multer errors
 export const handleMulterError = (
-  error: any,
+  error: unknown,
   req: Request,
-  res: any,
-  next: any
+  res: Response,
+  next: NextFunction
 ) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
@@ -75,7 +75,7 @@ export const handleMulterError = (
     }
   }
 
-  if (error.message.includes("Invalid file")) {
+  if (error instanceof Error && error.message.includes("Invalid file")) {
     return res.status(400).json({
       success: false,
       message: error.message,

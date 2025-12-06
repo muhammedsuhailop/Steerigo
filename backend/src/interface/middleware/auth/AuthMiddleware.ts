@@ -9,14 +9,12 @@ import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 
 // Extend Request interface to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId: string;
-        role: string;
-      };
-    }
+declare module "express" {
+  interface Request {
+    user?: {
+      userId: string;
+      role: string;
+    };
   }
 }
 

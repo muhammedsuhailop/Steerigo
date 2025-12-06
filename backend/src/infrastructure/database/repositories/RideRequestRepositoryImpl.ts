@@ -117,7 +117,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: IRideRequestFilters }
+    options: QueryOptions<RideRequest> & { filters?: IRideRequestFilters }
   ): Promise<PaginatedResult<RideRequest>> {
     const {
       page = 1,

@@ -29,7 +29,7 @@ type UnifiedKYCFilterOptions = FilterOptions<KYC> & IKYCQuery;
 interface IKycUpdateFields {
   verificationStatus?: KYCStatus;
   docType?: DocumentType;
-  documentUrl?: string[]; 
+  documentUrl?: string[];
   expiryDate?: Date;
   verificationNotes?: string;
   updatedAt?: Date;
@@ -169,7 +169,7 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: UnifiedKYCFilterOptions }
+    options: QueryOptions<KYC> & { filters?: UnifiedKYCFilterOptions }
   ): Promise<PaginatedResult<KYC>> {
     try {
       const {
@@ -502,7 +502,7 @@ export class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
         };
 
         return {
-          kycDocument: KYCMapper.toDomain(kycDocForMapper as IKYCModel ),
+          kycDocument: KYCMapper.toDomain(kycDocForMapper as IKYCModel),
           driverInfo: {
             driverId: String(r.driver?._id),
             userId: String(r.user?._id),

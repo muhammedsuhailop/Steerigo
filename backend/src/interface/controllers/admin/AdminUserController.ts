@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import { GetUsersRequestDto } from "@application/dto/admin/GetUsersRequestDto";
 import { UpdateUserStatusRequestDto } from "@application/dto/admin/UpdateUserStatusRequestDto";
 import { ApiResponse } from "@shared/types/Common";
-import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";

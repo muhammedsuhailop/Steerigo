@@ -23,7 +23,7 @@ export class AuthUserController {
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId;
+      const userId = req .user?.userId;
 
       // Handle missing auth user
       if (!userId) {

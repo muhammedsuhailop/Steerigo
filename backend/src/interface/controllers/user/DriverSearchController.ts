@@ -22,7 +22,7 @@ export class DriverSearchController {
   ) {}
 
   private getUserId(req: Request): string | null {
-    const user = (req as any).user;
+    const user = req.user;
     return user?.userId ?? null;
   }
 

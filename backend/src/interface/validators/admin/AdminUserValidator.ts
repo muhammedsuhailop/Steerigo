@@ -63,7 +63,7 @@ export const validateGetUsersRequest = (
       query: req.query,
     });
 
-    req.query = validatedData.query as any;
+    req.query = validatedData.query as unknown as Request["query"];
     next();
   } catch (error) {
     Logger.warn("Get users validation failed", {

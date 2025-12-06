@@ -81,7 +81,7 @@ export class SignupController {
       const data = result.getValue();
 
       CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
-      const { refreshToken, ...dataWithoutRefreshToken } = data;
+      const { refreshToken: _refreshToken, ...dataWithoutRefreshToken } = data;
 
       const response: ApiResponse = {
         success: true,

@@ -50,6 +50,29 @@ interface DriverRegistrationRequestBody {
   idBackImage: string;
 }
 
+interface LicenseKYCBody {
+  docType: "License";
+  licenseCategory: LicenseCategory;
+  docNumber: string;
+  eligibleBodyTypes?: BodyType[];
+  eligibleGearTypes?: GearType[];
+  issueDate?: string;
+  expiryDate?: string;
+  frontImageUrls?: string[];
+  backImageUrls?: string[];
+}
+
+interface GenericKYCBody {
+  docType: "Aadhaar" | "PAN" | "Passport" | "Voter_ID";
+  docNumber: string;
+  issueDate?: string;
+  expiryDate?: string;
+  frontImageUrls?: string[];
+  backImageUrls?: string[];
+}
+
+type KYCRequestBody = LicenseKYCBody | GenericKYCBody;
+
 @injectable()
 export class DriverController {
   constructor(
@@ -91,7 +114,7 @@ export class DriverController {
   ) {}
 
   private getUserId(req: Request): string | null {
-    const user = (req as any).user;
+    const user = req.user;
     return user?.userId ?? null;
   }
 
@@ -385,20 +408,21 @@ export class DriverController {
 
   private createKYCDtoFromDocType(
     userId: string,
-    body: any,
-    docType: string
+    body: KYCRequestBody,
+    docType: KYCRequestBody["docType"]
   ): KYCSubmissionRequestDto {
     if (docType === "License") {
+      const licenseBody = body as LicenseKYCBody;
       return new KYCSubmissionRequestDto(
         userId,
-        body.licenseCategory as LicenseCategory,
-        body.docNumber,
-        body.eligibleBodyTypes || undefined,
-        body.eligibleGearTypes || undefined,
-        body.issueDate ? new Date(body.issueDate) : undefined,
-        body.expiryDate ? new Date(body.expiryDate) : undefined,
-        body.frontImageUrls?.[0] || undefined,
-        body.backImageUrls?.[0] || undefined,
+        licenseBody.licenseCategory,
+        licenseBody.docNumber,
+        licenseBody.eligibleBodyTypes,
+        licenseBody.eligibleGearTypes,
+        licenseBody.issueDate ? new Date(licenseBody.issueDate) : undefined,
+        licenseBody.expiryDate ? new Date(licenseBody.expiryDate) : undefined,
+        licenseBody.frontImageUrls?.[0],
+        licenseBody.backImageUrls?.[0],
         undefined,
         undefined,
         undefined,
@@ -408,6 +432,7 @@ export class DriverController {
       );
     }
 
+    const genericBody = body as GenericKYCBody;
     return new KYCSubmissionRequestDto(
       userId,
       undefined, // licenseCategory
@@ -419,11 +444,11 @@ export class DriverController {
       undefined, // licenseFrontImage
       undefined, // licenseBackImage
       docType as DocumentType,
-      body.docNumber,
-      body.issueDate ? new Date(body.issueDate) : undefined,
-      body.expiryDate ? new Date(body.expiryDate) : undefined,
-      body.frontImageUrls?.[0] || undefined,
-      body.backImageUrls?.[0] || undefined
+      genericBody.docNumber,
+      genericBody.issueDate ? new Date(genericBody.issueDate) : undefined,
+      genericBody.expiryDate ? new Date(genericBody.expiryDate) : undefined,
+      genericBody.frontImageUrls?.[0],
+      genericBody.backImageUrls?.[0]
     );
   }
 

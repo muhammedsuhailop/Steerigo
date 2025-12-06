@@ -120,7 +120,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: IDriverAvailabilityFilters }
+    options: QueryOptions<DriverAvailability> & { filters?: IDriverAvailabilityFilters }
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,

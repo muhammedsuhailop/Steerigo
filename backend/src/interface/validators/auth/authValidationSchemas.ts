@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { UserRole } from "@shared/constants/AuthConstants";
 
 export const signupRequestSchema = z.object({
   body: z.object({

@@ -45,7 +45,7 @@ export class UserProfileController {
   ) {}
 
   private getUserId(req: Request): string | null {
-    const user = (req as any).user;
+    const user = req.user;
     return user?.userId ?? null;
   }
 
@@ -62,7 +62,7 @@ export class UserProfileController {
 
       const { userId } = req.params;
 
-      const currentUser = (req as any).user;
+      const currentUser = req.user;
       if (userId !== currentUserId && currentUser?.role !== "Admin") {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
@@ -108,7 +108,7 @@ export class UserProfileController {
 
       const { userId } = req.params;
 
-      const currentUser = (req as any).user;
+      const currentUser = req.user;
       if (userId !== currentUserId && currentUser?.role !== "Admin") {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
@@ -166,7 +166,7 @@ export class UserProfileController {
           urlUserId: userId,
           currentUserIdLength: currentUserId?.length,
           urlUserIdLength: userId?.length,
-          tokenUser: (req as any).user,
+          tokenUser: req.user,
         });
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
