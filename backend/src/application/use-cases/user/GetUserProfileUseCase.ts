@@ -1,16 +1,19 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { UserResponseDto } from "@application/dto/user/UserResponseDto";
 import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetUserProfileUseCase {
+export class GetUserProfileUseCase
+  implements IUseCase<GetUserProfileDto, Promise<Result<UserResponseDto>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(dto: GetUserProfileDto): Promise<Result<UserResponseDto>> {

@@ -537,10 +537,43 @@ export class ErrorHandlerService {
     [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
   };
 
+  // Typed helpers
+
+  private static hasProp<T extends string>(
+    obj: unknown,
+    prop: T
+  ): obj is Record<T, unknown> {
+    return typeof obj === "object" && obj !== null && prop in (obj as object);
+  }
+
+  private static getStringProp(obj: unknown, prop: string): string | undefined {
+    if (!this.hasProp(obj, prop)) return undefined;
+    const v = (obj as Record<string, unknown>)[prop];
+    return typeof v === "string" ? v : undefined;
+  }
+
+  private static getNumberProp(obj: unknown, prop: string): number | undefined {
+    if (!this.hasProp(obj, prop)) return undefined;
+    const v = (obj as Record<string, unknown>)[prop];
+    return typeof v === "number" ? v : undefined;
+  }
+
+  private static getStringArray(
+    obj: unknown,
+    prop: string
+  ): string[] | undefined {
+    if (!this.hasProp(obj, prop)) return undefined;
+    const v = (obj as Record<string, unknown>)[prop];
+    if (Array.isArray(v)) {
+      return v.filter((i): i is string => typeof i === "string");
+    }
+    return undefined;
+  }
+
   // Main error handling method - converts any error to standardized API response
   // Preserves original error message from domain errors
   static handleError(
-    error: any,
+    error: unknown,
     context?: string
   ): { response: ApiResponse; statusCode: number } {
     const errorDetails = this.classifyError(error);
@@ -551,8 +584,8 @@ export class ErrorHandlerService {
 
     // Use original error message from domain errors
     const message =
-      error instanceof DomainError && error.message
-        ? error.message
+      error instanceof DomainError && this.getStringProp(error, "message")
+        ? this.getStringProp(error, "message")!
         : errorDetails.message;
 
     // Create standardized response
@@ -560,9 +593,10 @@ export class ErrorHandlerService {
       success: false,
       message,
       ...(process.env.NODE_ENV === "development" && {
-        error: error.message,
-        errorCode: (error as any).code, // Include error code for debugging
-        field: (error as any).field, // Include field info for validation errors
+        // safe property accessors, stay guarded
+        error: this.getStringProp(error, "message"),
+        errorCode: this.getStringProp(error, "code"),
+        field: this.getStringProp(error, "field"),
       }),
     };
 
@@ -570,7 +604,7 @@ export class ErrorHandlerService {
   }
 
   // Handle validation errors from express-validator
-  static handleValidationErrors(errors: any[]): {
+  static handleValidationErrors(errors: Array<{ msg: string }>): {
     response: ApiResponse;
     statusCode: number;
   } {
@@ -585,19 +619,25 @@ export class ErrorHandlerService {
   }
 
   // Classify error type and determine appropriate response
-  private static classifyError(error: any): ErrorDetails {
+  private static classifyError(error: unknown): ErrorDetails {
     // Check for DomainError with code property (for RideRequestErrors)
-    if (error instanceof DomainError && error.code) {
-      const errorByCode = this.ERROR_MAP.get(error.code);
-      if (errorByCode) {
-        return errorByCode;
+    if (error instanceof DomainError && this.hasProp(error, "code")) {
+      const code = this.getStringProp(error, "code");
+      if (code) {
+        const errorByCode = this.ERROR_MAP.get(code);
+        if (errorByCode) {
+          return errorByCode;
+        }
       }
     }
 
     // Check if it's a known domain error by exact name match
-    const errorName = error.constructor.name;
-    if (this.ERROR_MAP.has(errorName)) {
-      return this.ERROR_MAP.get(errorName)!;
+    if (typeof error === "object" && error !== null) {
+      const ctorName = (error as { constructor?: { name?: string } })
+        .constructor?.name;
+      if (ctorName && this.ERROR_MAP.has(ctorName)) {
+        return this.ERROR_MAP.get(ctorName)!;
+      }
     }
 
     // Handle MongoDB duplicate key errors
@@ -632,7 +672,8 @@ export class ErrorHandlerService {
       return {
         statusCode: 400,
         message:
-          error.message || this.GENERIC_MESSAGES[ErrorType.VALIDATION_ERROR],
+          this.getStringProp(error, "message") ||
+          this.GENERIC_MESSAGES[ErrorType.VALIDATION_ERROR],
         type: ErrorType.VALIDATION_ERROR,
         shouldLog: false,
         isOperational: true,
@@ -649,9 +690,9 @@ export class ErrorHandlerService {
     };
   }
 
-  private static isDatabaseError(error: any): boolean {
-    const message = error.message?.toLowerCase() || "";
-    const code = String(error.code ?? "").toLowerCase();
+  private static isDatabaseError(error: unknown): boolean {
+    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
+    const code = String(this.getStringProp(error, "code") ?? "").toLowerCase();
 
     const databasePatterns = [
       "database",
@@ -670,16 +711,18 @@ export class ErrorHandlerService {
     );
   }
 
-  private static isMongoDbDuplicateKeyError(error: any): boolean {
+  private static isMongoDbDuplicateKeyError(error: unknown): boolean {
+    const code = this.getNumberProp(error, "code");
+    const message = this.getStringProp(error, "message") ?? "";
     return (
-      error.code === 11000 ||
-      error.message?.includes("E11000 duplicate key error") ||
-      error.message?.includes("duplicate key error collection")
+      code === 11000 ||
+      message.includes("E11000 duplicate key error") ||
+      message.includes("duplicate key error collection")
     );
   }
 
-  private static handleDuplicateKeyError(error: any): ErrorDetails {
-    const message = error.message?.toLowerCase() || "";
+  private static handleDuplicateKeyError(error: unknown): ErrorDetails {
+    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
 
     if (message.includes("mobile")) {
       return {
@@ -708,8 +751,8 @@ export class ErrorHandlerService {
     }
   }
 
-  private static isNetworkError(error: any): boolean {
-    const message = error.message?.toLowerCase() || "";
+  private static isNetworkError(error: unknown): boolean {
+    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
 
     const networkPatterns = [
       "ssl",
@@ -727,8 +770,8 @@ export class ErrorHandlerService {
     return networkPatterns.some((pattern) => message.includes(pattern));
   }
 
-  private static isValidationError(error: any): boolean {
-    const message = error.message?.toLowerCase() || "";
+  private static isValidationError(error: unknown): boolean {
+    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
     return (
       message.includes("validation") ||
       (message.includes("invalid") && !this.isNetworkError(error))
@@ -736,14 +779,17 @@ export class ErrorHandlerService {
   }
 
   private static logError(
-    error: any,
+    error: unknown,
     context?: string,
     details?: ErrorDetails
   ): void {
-    const logData = {
-      error: error.message,
-      errorCode: (error as any).code, 
-      stack: error.stack,
+    const logData: Record<string, unknown> = {
+      error: this.getStringProp(error, "message"),
+      errorCode: this.getStringProp(error, "code"),
+      stack:
+        typeof error === "object" && error !== null && "stack" in error
+          ? (error as { stack?: unknown }).stack
+          : undefined,
       type: details?.type,
       context,
       timestamp: new Date().toISOString(),
@@ -759,7 +805,7 @@ export class ErrorHandlerService {
     }
   }
 
-  static isOperationalError(error: any): boolean {
+  static isOperationalError(error: unknown): boolean {
     if (error instanceof DomainError) return true;
 
     const errorDetails = this.classifyError(error);

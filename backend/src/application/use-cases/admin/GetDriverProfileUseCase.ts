@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
 import {
   AdminGetDriverProfileResponseDto,
@@ -13,14 +13,21 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DomainError } from "@domain/errors/DomainError";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverProfileUseCase {
+export class GetDriverProfileUseCase
+  implements
+    IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<AdminGetDriverProfileResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository,
+    private adminDriverRepository: IAdminDriverRepository,
     @inject(TYPES.KYCRepository)
-    private kycRepository: KYCRepository
+    private kycRepository: IKYCRepository
   ) {}
 
   async execute(

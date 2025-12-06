@@ -1,14 +1,10 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { PasswordService } from "@application/services/PasswordService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IPasswordService } from "@application/services/IPasswordService";
 import { UpdatePasswordDto } from "../../dto/auth/UpdatePasswordDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  AuthMessages,
-  AuthErrorMessages,
-} from "@shared/constants/AuthConstants";
 import {
   UserNotFoundError,
   InvalidCredentialsError,
@@ -16,12 +12,15 @@ import {
   PasswordResetError,
 } from "@domain/errors";
 import { Password } from "@domain/value-objects/Password";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UpdatePasswordUseCase {
+export class UpdatePasswordUseCase
+  implements IUseCase<UpdatePasswordDto, Promise<Result<void>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService
   ) {}
 
   async execute(dto: UpdatePasswordDto): Promise<Result<void>> {

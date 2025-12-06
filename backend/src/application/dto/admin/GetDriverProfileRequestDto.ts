@@ -13,7 +13,7 @@ type GetDriverProfileRequestData = z.infer<
 export class GetDriverProfileRequestDto {
   private readonly data: GetDriverProfileRequestData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = getDriverProfileRequestSchema.parse(requestData);
   }
 

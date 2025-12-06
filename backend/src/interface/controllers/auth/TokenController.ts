@@ -1,8 +1,6 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { LogoutUseCase } from "@application/use-cases/auth/LogoutUseCase";
-import { RefreshTokenUseCase } from "@application/use-cases/auth/RefreshTokenUseCase";
 import { RefreshTokenDto } from "@application/dto/auth";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -10,13 +8,22 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { AuthMessages } from "@shared/constants/AuthConstants";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class TokenController {
   constructor(
-    @inject(TYPES.LogoutUseCase) private logoutUseCase: LogoutUseCase,
+    @inject(TYPES.LogoutUseCase)
+    private logoutUseCase: IUseCase<
+      RefreshTokenDto,
+      Promise<Result<void, Error>>
+    >,
     @inject(TYPES.RefreshTokenUseCase)
-    private refreshTokenUseCase: RefreshTokenUseCase
+    private refreshTokenUseCase: IUseCase<
+      RefreshTokenDto,
+      Promise<Result<{ accessToken: string; refreshToken: string }, Error>>
+    >
   ) {}
 
   async logout(req: Request, res: Response): Promise<void> {

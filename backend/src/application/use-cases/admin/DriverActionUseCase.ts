@@ -1,16 +1,29 @@
 import { injectable, inject } from "inversify";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import { DriverActionRequestDto } from "@application/dto/admin/DriverActionRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class DriverActionUseCase {
+export class DriverActionUseCase
+  implements
+    IUseCase<
+      DriverActionRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          driverId: string;
+          newStatus: string;
+        }>
+      >
+    >
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository
+    private adminDriverRepository: IAdminDriverRepository
   ) {}
 
   async execute(dto: DriverActionRequestDto): Promise<

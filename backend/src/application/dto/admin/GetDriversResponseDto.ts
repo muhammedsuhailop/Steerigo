@@ -1,0 +1,160 @@
+export class DriverLicenseInfo {
+  readonly licenseIssueDate: Date;
+  readonly licenseExpiryDate: Date;
+
+  constructor(licenseIssueDate: Date, licenseExpiryDate: Date) {
+    this.licenseIssueDate = licenseIssueDate;
+    this.licenseExpiryDate = licenseExpiryDate;
+  }
+}
+
+export class DriverUserSummary {
+  readonly userId: string;
+  readonly userName: string;
+  readonly userEmail: string;
+  readonly userMobile: string;
+
+  constructor(
+    userId: string,
+    userName: string,
+    userEmail: string,
+    userMobile: string
+  ) {
+    this.userId = userId;
+    this.userName = userName;
+    this.userEmail = userEmail;
+    this.userMobile = userMobile;
+  }
+}
+
+export class DriverStatusInfo {
+  readonly status: string;
+  readonly kycStatus: string;
+  readonly licenceCategory: string;
+  readonly eligibleGearTypes: string[];
+  readonly eligibleBodyTypes: string[];
+
+  constructor(
+    status: string,
+    kycStatus: string,
+    licenceCategory: string,
+    eligibleGearTypes: string[],
+    eligibleBodyTypes: string[]
+  ) {
+    this.status = status;
+    this.kycStatus = kycStatus;
+    this.licenceCategory = licenceCategory;
+    this.eligibleGearTypes = eligibleGearTypes;
+    this.eligibleBodyTypes = eligibleBodyTypes;
+  }
+}
+
+export class DriverPerformanceStats {
+  readonly totalRides: number;
+  readonly totalEarnings: number;
+  readonly rating: number;
+  readonly lastRideDate: Date | null;
+
+  constructor(
+    totalRides: number,
+    totalEarnings: number,
+    rating: number,
+    lastRideDate: Date | null
+  ) {
+    this.totalRides = totalRides;
+    this.totalEarnings = totalEarnings;
+    this.rating = rating;
+    this.lastRideDate = lastRideDate;
+  }
+}
+
+export class DriverSummaryDto {
+  readonly driverId: string;
+  readonly user: DriverUserSummary;
+  readonly statusInfo: DriverStatusInfo;
+  readonly license: DriverLicenseInfo;
+  readonly stats: DriverPerformanceStats;
+  readonly createdAt: Date;
+
+  constructor(
+    driverId: string,
+    user: DriverUserSummary,
+    statusInfo: DriverStatusInfo,
+    license: DriverLicenseInfo,
+    stats: DriverPerformanceStats,
+    createdAt: Date
+  ) {
+    this.driverId = driverId;
+    this.user = user;
+    this.statusInfo = statusInfo;
+    this.license = license;
+    this.stats = stats;
+    this.createdAt = createdAt;
+  }
+}
+
+export class PaginationDto {
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly totalItems: number;
+  readonly totalPages?: number;
+
+  constructor(
+    currentPage: number,
+    pageSize: number,
+    totalItems: number,
+    totalPages?: number
+  ) {
+    this.currentPage = currentPage;
+    this.pageSize = pageSize;
+    this.totalItems = totalItems;
+    this.totalPages = totalPages;
+  }
+}
+
+export class AppliedFiltersDto {
+  readonly sortBy: string | null;
+  readonly sortOrder: string | null;
+  readonly search: string | null;
+  readonly status: string | null;
+  readonly kycStatus: string | null;
+  readonly licenceCategory: string | null;
+  readonly dateFrom: string | null;
+  readonly dateTo: string | null;
+
+  constructor(
+    sortBy: string | null,
+    sortOrder: string | null,
+    search: string | null,
+    status: string | null,
+    kycStatus: string | null,
+    licenceCategory: string | null,
+    dateFrom: string | null,
+    dateTo: string | null
+  ) {
+    this.sortBy = sortBy;
+    this.sortOrder = sortOrder;
+    this.search = search;
+    this.status = status;
+    this.kycStatus = kycStatus;
+    this.licenceCategory = licenceCategory;
+    this.dateFrom = dateFrom;
+    this.dateTo = dateTo;
+  }
+}
+
+export class GetDriversResponseDto {
+  readonly drivers: DriverSummaryDto[];
+  readonly pagination: PaginationDto;
+  readonly appliedFilters: AppliedFiltersDto;
+
+  constructor(
+    drivers: DriverSummaryDto[],
+    pagination: PaginationDto,
+    appliedFilters: AppliedFiltersDto
+  ) {
+    this.drivers = drivers;
+    this.pagination = pagination;
+    this.appliedFilters = appliedFilters;
+  }
+}

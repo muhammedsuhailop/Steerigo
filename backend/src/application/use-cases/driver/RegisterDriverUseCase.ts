@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { KYCRepository } from "@application/repositories/KYCRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverResponseDto } from "@application/dto/driver/DriverResponseDto";
 import { Result } from "@shared/utils/Result";
@@ -13,6 +13,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { UserRole } from "@shared/constants/AuthConstants";
 import { Types } from "mongoose";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { IUseCase } from "../interfaces/IUseCase";
 
 export interface RegisterDriverResult {
   driver: DriverResponseDto;
@@ -24,25 +25,32 @@ export interface RegisterDriverResult {
 }
 
 @injectable()
-export class DriverRegistrationUseCase {
+export class DriverRegistrationUseCase
+  implements
+    IUseCase<
+      DriverRegistrationRequestDto,
+      Promise<Result<RegisterDriverResult>>
+    >
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
   ) {}
 
   async execute(
-    userId: string,
     dto: DriverRegistrationRequestDto
   ): Promise<Result<RegisterDriverResult>> {
     try {
-      Logger.info("Comprehensive driver registration started", { userId });
-      const user = await this.userRepository.findById(userId);
+      Logger.info("Comprehensive driver registration started", dto.getUserId());
+      const user = await this.userRepository.findById(dto.getUserId());
       if (!user) {
         return Result.failure(new DomainError("User not found"));
       }
 
-      const existingDriver = await this.driverRepository.findByUserId(userId);
+      const existingDriver = await this.driverRepository.findByUserId(
+        dto.getUserId()
+      );
       if (existingDriver) {
         return Result.failure(
           new DomainError("User is already registered as a driver")
@@ -69,7 +77,6 @@ export class DriverRegistrationUseCase {
         );
       }
 
-
       if (dto.getIdIssueDate() > now) {
         return Result.failure(
           new DomainError("ID issue date cannot be in the future")
@@ -88,7 +95,7 @@ export class DriverRegistrationUseCase {
 
       const driver = Driver.create(
         driverId,
-        userId,
+        dto.getUserId(),
         dto.getEligibleGearTypes(),
         dto.getEligibleBodyTypes(),
         dto.getLicenseNumber(),
@@ -134,7 +141,7 @@ export class DriverRegistrationUseCase {
         await this.kycRepository.save(idKyc);
 
         if (user.getRole() !== UserRole.DRIVER) {
-          Logger.info("User role should be updated to DRIVER", { userId });
+          Logger.info("User role should be updated to DRIVER", dto.getUserId());
         }
 
         const response: RegisterDriverResult = {
@@ -159,7 +166,7 @@ export class DriverRegistrationUseCase {
         };
 
         Logger.info("Comprehensive driver registration successful", {
-          userId,
+          userId: savedDriver.getUserId(),
           driverId: savedDriver.getId(),
           licenseKycId,
           idKycId,
@@ -168,7 +175,7 @@ export class DriverRegistrationUseCase {
         return Result.success(response);
       } catch (saveError) {
         Logger.error("Failed to save driver registration data", {
-          userId,
+          userId: dto.getUserId(),
           error: saveError,
         });
 
@@ -176,7 +183,7 @@ export class DriverRegistrationUseCase {
       }
     } catch (error) {
       Logger.error("Comprehensive driver registration failed", {
-        userId,
+        userId: dto.getUserId(),
         error,
       });
       return Result.failure(error as Error);

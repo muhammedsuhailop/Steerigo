@@ -1,18 +1,32 @@
 import { injectable, inject } from "inversify";
-import { KYCRepository } from "@application/repositories/AdminDriverKYCRepository";
+import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
 import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
+import {
+  GetKycRequestByIdResponseDto,
+  KycDocumentDto,
+  DriverInfoDto,
+} from "@application/dto/admin/GetKycRequestByIdResponseDto";
 
 @injectable()
-export class GetKycRequestByIdUseCase {
+export class GetKycRequestByIdUseCase
+  implements
+    IUseCase<
+      GetKycRequestByIdRequestDto,
+      Promise<Result<GetKycRequestByIdResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.KYCRepository)
-    private kycRepository: KYCRepository
+    private kycRepository: IKYCRepository
   ) {}
 
-  async execute(dto: GetKycRequestByIdRequestDto): Promise<Result<any>> {
+  async execute(
+    dto: GetKycRequestByIdRequestDto
+  ): Promise<Result<GetKycRequestByIdResponseDto>> {
     try {
       Logger.info("Executing GetKycRequestByIdUseCase", {
         kycId: dto.getKycId(),
@@ -26,32 +40,34 @@ export class GetKycRequestByIdUseCase {
         return Result.failure(new Error("KYC document not found"));
       }
 
-      const response = {
-        kyc: {
-          id: kycWithDriver.kycDocument.getId(),
-          docType: kycWithDriver.kycDocument.getDocType(),
-          docNumber: kycWithDriver.kycDocument.getDocNumber(),
-          issueDate:
-            kycWithDriver.kycDocument.getIssueDate()?.toISOString() || null,
-          expiryDate:
-            kycWithDriver.kycDocument.getExpiryDate()?.toISOString() || null,
-          verificationStatus: kycWithDriver.kycDocument.getVerificationStatus(),
-          comments: kycWithDriver.kycDocument.getComments(),
-          docImageUrlsFront: kycWithDriver.kycDocument.getDocImageUrlsFront(),
-          docImageUrlsBack: kycWithDriver.kycDocument.getDocImageUrlsBack(),
-          createdAt: kycWithDriver.kycDocument.getCreatedAt().toISOString(),
-          updatedAt: kycWithDriver.kycDocument.getUpdatedAt().toISOString(),
-          isExpired: kycWithDriver.kycDocument.isExpired(),
-        },
-        driver: {
-          driverId: kycWithDriver.driverInfo.driverId,
-          userId: kycWithDriver.driverInfo.userId,
-          userName: kycWithDriver.driverInfo.userName,
-          userEmail: kycWithDriver.driverInfo.userEmail,
-          userMobile: kycWithDriver.driverInfo.userMobile,
-          driverStatus: kycWithDriver.driverInfo.driverStatus,
-        },
-      };
+      const kycDocumentDto = new KycDocumentDto(
+        kycWithDriver.kycDocument.getId(),
+        kycWithDriver.kycDocument.getDocType(),
+        kycWithDriver.kycDocument.getDocNumber(),
+        kycWithDriver.kycDocument.getIssueDate()?.toISOString() || null,
+        kycWithDriver.kycDocument.getExpiryDate()?.toISOString() || null,
+        kycWithDriver.kycDocument.getVerificationStatus(),
+        kycWithDriver.kycDocument.getComments() || null,
+        kycWithDriver.kycDocument.getDocImageUrlsFront(),
+        kycWithDriver.kycDocument.getDocImageUrlsBack(),
+        kycWithDriver.kycDocument.getCreatedAt().toISOString(),
+        kycWithDriver.kycDocument.getUpdatedAt().toISOString(),
+        kycWithDriver.kycDocument.isExpired()
+      );
+
+      const driverInfoDto = new DriverInfoDto(
+        kycWithDriver.driverInfo.driverId,
+        kycWithDriver.driverInfo.userId,
+        kycWithDriver.driverInfo.userName,
+        kycWithDriver.driverInfo.userEmail,
+        kycWithDriver.driverInfo.userMobile,
+        kycWithDriver.driverInfo.driverStatus
+      );
+
+      const response = new GetKycRequestByIdResponseDto(
+        kycDocumentDto,
+        driverInfoDto
+      );
 
       Logger.info("KYC document fetched successfully", {
         kycId: dto.getKycId(),

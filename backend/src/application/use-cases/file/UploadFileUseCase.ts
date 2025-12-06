@@ -1,40 +1,34 @@
-
-import { injectable, inject } from "inversify";
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
-import { FileUploadService } from "@application/services/FileUploadService";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IFileUploadService } from "@application/services/IFileUploadService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-
-export interface FileUploadResponse {
-  url: string;
-  publicId: string;
-  filename: string;
-  size: number;
-  mimeType: string;
-  uploadedAt: string;
-}
+import { inject, injectable } from "inversify";
+import { FileUploadResponseDto } from "@application/dto/file/FileUploadResponseDto";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class UploadFileUseCase {
+export class UploadFileUseCase
+  implements
+    IUseCase<FileUploadDto, Promise<Result<FileUploadResponseDto, Error>>>
+{
   constructor(
     @inject(TYPES.FileUploadService)
-    private fileUploadService: FileUploadService,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    private _fileUploadService: IFileUploadService,
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository
   ) {}
 
   async execute(
-    dto: FileUploadDto,
-    userId: string
-  ): Promise<Result<FileUploadResponse, Error>> {
+    dto: FileUploadDto
+  ): Promise<Result<FileUploadResponseDto, Error>> {
     try {
       Logger.info("Uploading file", {
-        userId,
+        userId: dto.userId,
         purpose: dto.purpose.toString(),
       });
 
-      const user = await this.userRepository.findById(userId);
+      const user = await this._userRepository.findById(dto.userId);
       if (!user) {
         return Result.failure(new Error("User not found"));
       }
@@ -47,23 +41,25 @@ export class UploadFileUseCase {
       }
 
       const { url, publicId, filename, size } =
-        await this.fileUploadService.upload(
+        await this._fileUploadService.upload(
           dto.file.buffer,
-          userId,
+          dto.userId,
           dto.purpose.toString(),
           dto.file.originalname
         );
 
       Logger.info("File uploaded", { publicId, url });
 
-      return Result.success({
+      const response = new FileUploadResponseDto(
         url,
         publicId,
         filename,
         size,
-        mimeType: dto.file.mimetype,
-        uploadedAt: new Date().toISOString(),
-      });
+        dto.file.mimetype,
+        new Date().toISOString()
+      );
+
+      return Result.success(response);
     } catch (err) {
       Logger.error("UploadFileUseCase failed", {
         error: (err as Error).message,

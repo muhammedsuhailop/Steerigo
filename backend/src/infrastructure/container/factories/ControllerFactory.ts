@@ -8,7 +8,6 @@ import { SignupController } from "@interface/controllers/auth/SignupController";
 import { PasswordController } from "@interface/controllers/auth/PasswordController";
 import { OtpController } from "@interface/controllers/auth/OtpController";
 import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
-import { AuthUserController } from "@interface/controllers/auth/AuthUserController";
 import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 
 export class ControllerFactory {

@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
-import { DriverDashboardRepository } from "@application/repositories/DriverDashboardRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashboardResponseDto";
 import { DriverDashboardMapper } from "@infrastructure/database/mappers/DriverDashboardMapper";
@@ -11,16 +11,20 @@ import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverDashboardUseCase {
+export class GetDriverDashboardUseCase
+  implements
+    IUseCase<GetDriverDashboardDto, Promise<Result<DriverDashboardResponseDto>>>
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository,
+    private availabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverDashboardRepository)
-    private dashboardRepository: DriverDashboardRepository,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    private dashboardRepository: IDriverDashboardRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(

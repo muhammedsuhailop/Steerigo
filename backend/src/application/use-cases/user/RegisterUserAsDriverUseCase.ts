@@ -1,24 +1,25 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
 import { RegisterAsDriverRequestDto } from "@application/dto/user/RegisterAsDriverRequestDto";
 import { RegisterAsDriverResponseDto } from "@application/dto/user/RegisterAsDriverResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { Driver } from "@domain/entities/Driver";
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
-import { DriverStatus } from "@domain/value-objects/DriverStatus";
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { BodyType, GearType } from "@domain/value-objects/VehicleType";
-import { Types } from "mongoose";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class RegisterUserAsDriverUseCase {
+export class RegisterUserAsDriverUseCase
+  implements
+    IUseCase<
+      RegisterAsDriverRequestDto,
+      Promise<Result<RegisterAsDriverResponseDto>>
+    >
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository
   ) {}
 
   async execute(

@@ -11,7 +11,7 @@ export class ErrorHandlerMiddleware {
     err: Error,
     req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
   ): void {
     // Use the centralized error handler service
     const { response, statusCode } = ErrorHandlerService.handleError(
@@ -27,7 +27,7 @@ export class ErrorHandlerMiddleware {
       method: req.method,
       userAgent: req.headers["user-agent"],
       ip: req.ip,
-      userId: (req as any).user?.userId,
+      userId: req.user?.userId,
       ...(process.env.NODE_ENV !== "production" && {
         body: req.body,
         query: req.query,
@@ -93,7 +93,7 @@ export class ErrorHandlerMiddleware {
   // Standard controller error handler
 
   static handleControllerError(
-    error: any,
+    error: unknown,
     context: string
   ): { response: ApiResponse; statusCode: number } {
     return ErrorHandlerService.handleError(error, context);

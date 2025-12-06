@@ -1,14 +1,13 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { PasswordService } from "@application/services/PasswordService";
-import { EmailService } from "@application/services/EmailService";
-import { OtpService } from "@application/services/OtpService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IOtpService } from "@application/services/IOtpService";
 import { ForgotPasswordVerifyDto } from "../../dto/auth/ForgotPasswordVerifyDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import {
-  AuthMessages,
   AuthErrorMessages,
 } from "@shared/constants/AuthConstants";
 import {
@@ -19,14 +18,17 @@ import {
   PasswordResetError,
 } from "@domain/errors";
 import { Password } from "@domain/value-objects/Password";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class ForgotPasswordVerifyUseCase {
+export class ForgotPasswordVerifyUseCase
+  implements IUseCase<ForgotPasswordVerifyDto, Promise<Result<void>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.PasswordService) private passwordService: PasswordService,
-    @inject(TYPES.EmailService) private emailService: EmailService,
-    @inject(TYPES.OtpService) private otpService: OtpService
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
+    @inject(TYPES.EmailService) private emailService: IEmailService,
+    @inject(TYPES.OtpService) private otpService: IOtpService
   ) {}
 
   async execute(dto: ForgotPasswordVerifyDto): Promise<Result<void>> {

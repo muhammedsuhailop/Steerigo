@@ -37,7 +37,7 @@ type GetUsersRequestData = z.infer<typeof getUsersRequestSchema>;
 export class GetUsersRequestDto {
   private readonly data: GetUsersRequestData;
 
-  constructor(queryParams: any) {
+  constructor(queryParams: unknown) {
     this.data = getUsersRequestSchema.parse(queryParams);
   }
 

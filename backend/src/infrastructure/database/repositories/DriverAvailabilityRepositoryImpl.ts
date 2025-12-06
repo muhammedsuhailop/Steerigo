@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import {
-  DriverAvailabilityRepository,
-  DriverAvailabilityFilters,
-} from "@application/repositories/DriverAvailabilityRepository";
+  IDriverAvailabilityRepository,
+  IDriverAvailabilityFilters,
+} from "@application/repositories/IDriverAvailabilityRepository";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import {
@@ -12,11 +12,11 @@ import {
 import { DriverAvailabilityMapper } from "../mappers/DriverAvailabilityMapper";
 import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, Types } from "mongoose";
+import { SortOrder, Types, FilterQuery, UpdateQuery } from "mongoose";
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
-  implements DriverAvailabilityRepository
+  implements IDriverAvailabilityRepository
 {
   // Basic Repository Operations
   async findById(id: string): Promise<DriverAvailability | null> {
@@ -109,7 +109,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  async count(filters?: DriverAvailabilityFilters): Promise<number> {
+  async count(filters?: IDriverAvailabilityFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters || {});
       return await DriverAvailabilityModel.countDocuments(mongoFilter);
@@ -120,7 +120,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: DriverAvailabilityFilters }
+    options: QueryOptions<DriverAvailability> & { filters?: IDriverAvailabilityFilters }
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,
@@ -515,18 +515,45 @@ export class DriverAvailabilityRepositoryImpl
 
   // Batch Operations
   async updateMany(
-    filters: DriverAvailabilityFilters,
-    updates: Partial<DriverAvailability>
+    filters: IDriverAvailabilityFilters,
+    updates:
+      | Partial<DriverAvailability>
+      | Partial<{
+          status?: AvailabilityStatus;
+          currentLocation?: IDriverAvailabilityModel["currentLocation"];
+        }>
   ): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
-      const updateData: any = {};
 
-      // Map domain updates to database fields
-      if (updates.getStatus) updateData.status = updates.getStatus();
-      if (updates.getCurrentLocation) {
-        const location = updates.getCurrentLocation();
-        updateData.currentLocation = location.getCoordinates();
+      const updateData: UpdateQuery<IDriverAvailabilityModel> = {};
+
+      const maybeStatus = (updates as { status?: AvailabilityStatus }).status;
+      if (maybeStatus !== undefined) {
+        updateData.status = maybeStatus;
+      }
+
+      const maybeCurrentLocation = (
+        updates as {
+          currentLocation?: IDriverAvailabilityModel["currentLocation"];
+        }
+      ).currentLocation;
+      if (maybeCurrentLocation !== undefined) {
+        updateData.currentLocation = maybeCurrentLocation;
+      }
+
+      if (hasGetStatus(updates)) {
+        updateData.status = updates.getStatus();
+      }
+
+      if (hasGetCurrentLocation(updates)) {
+        const locObj = updates.getCurrentLocation();
+        const coords = (
+          locObj as {
+            getCoordinates?: () => IDriverAvailabilityModel["currentLocation"];
+          }
+        ).getCoordinates?.();
+        if (coords) updateData.currentLocation = coords;
       }
 
       updateData.updatedAt = new Date();
@@ -550,7 +577,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  async deleteMany(filters: DriverAvailabilityFilters): Promise<number> {
+  async deleteMany(filters: IDriverAvailabilityFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
       const result = await DriverAvailabilityModel.deleteMany(mongoFilter);
@@ -571,9 +598,9 @@ export class DriverAvailabilityRepositoryImpl
 
   // Helper methods
   private buildFilterQuery(
-    filters: DriverAvailabilityFilters
-  ): Record<string, any> {
-    const query: Record<string, any> = {};
+    filters: IDriverAvailabilityFilters
+  ): FilterQuery<IDriverAvailabilityModel> {
+    const query: FilterQuery<IDriverAvailabilityModel> = {};
 
     if (filters.status) {
       query.status = filters.status;
@@ -584,7 +611,7 @@ export class DriverAvailabilityRepositoryImpl
     }
 
     if (filters.availableFrom || filters.availableTill) {
-      const dateFilter: Record<string, any> = {};
+      const dateFilter: Partial<{ $gte: Date; $lte: Date }> = {};
       if (filters.availableFrom) {
         dateFilter.$gte = filters.availableFrom;
       }
@@ -598,7 +625,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   // Base repository interface methods
-  async existsByFilter(filters: DriverAvailabilityFilters): Promise<boolean> {
+  async existsByFilter(filters: IDriverAvailabilityFilters): Promise<boolean> {
     const mongoFilter = this.buildFilterQuery(filters);
     return (await DriverAvailabilityModel.countDocuments(mongoFilter)) > 0;
   }
@@ -607,4 +634,23 @@ export class DriverAvailabilityRepositoryImpl
     const docs = await DriverAvailabilityModel.find({ _id: { $in: ids } });
     return docs.map(DriverAvailabilityMapper.toDomain);
   }
+}
+
+// helper type guards
+function hasGetStatus(
+  u: unknown
+): u is { getStatus: () => AvailabilityStatus } {
+  if (typeof u !== "object" || u === null) return false;
+  const obj = u as Record<string, unknown>;
+  return typeof obj.getStatus === "function";
+}
+
+function hasGetCurrentLocation(u: unknown): u is {
+  getCurrentLocation: () => {
+    getCoordinates: () => IDriverAvailabilityModel["currentLocation"];
+  };
+} {
+  if (typeof u !== "object" || u === null) return false;
+  const obj = u as Record<string, unknown>;
+  return typeof obj.getCurrentLocation === "function";
 }

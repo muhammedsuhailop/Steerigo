@@ -14,24 +14,97 @@ import { ResendOtpUseCase } from "@application/use-cases/auth/ResendOtpUseCase";
 import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
 import { GoogleLoginUseCase } from "@application/use-cases/auth/GoogleLoginUseCase";
 import { GetGoogleAuthUrlUseCase } from "@application/use-cases/auth/GetGoogleAuthUrlUseCase";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import {
+  ForgotPasswordRequestDto,
+  ForgotPasswordVerifyDto,
+  GetCurrentUserDto,
+  GetCurrentUserResponseDto,
+  GoogleLoginRequestDto,
+  LoginRequestDto,
+  LoginResponseDto,
+  RefreshTokenDto,
+  ResendOtpDto,
+  SignupRequestDto,
+  SignupVerifyDto,
+  SignupVerifyResponseDto,
+  UpdatePasswordDto,
+} from "@application/dto/auth";
+import { Result } from "@shared/utils/Result";
 
 export class UseCaseFactory {
   static register(container: Container): void {
-    container.bind(TYPES.LoginUseCase).to(LoginUseCase);
-    container.bind(TYPES.LogoutUseCase).to(LogoutUseCase);
-    container.bind(TYPES.RefreshTokenUseCase).to(RefreshTokenUseCase);
-    container.bind(TYPES.SignupRequestUseCase).to(SignupRequestUseCase);
-    container.bind(TYPES.SignupVerifyUseCase).to(SignupVerifyUseCase);
     container
-      .bind(TYPES.ForgotPasswordRequestUseCase)
+      .bind<
+        IUseCase<LoginRequestDto, Promise<Result<LoginResponseDto, Error>>>
+      >(TYPES.LoginUseCase)
+      .to(LoginUseCase);
+    container
+      .bind<
+        IUseCase<RefreshTokenDto, Promise<Result<void, Error>>>
+      >(TYPES.LogoutUseCase)
+      .to(LogoutUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          RefreshTokenDto,
+          Promise<Result<{ accessToken: string; refreshToken: string }, Error>>
+        >
+      >(TYPES.RefreshTokenUseCase)
+      .to(RefreshTokenUseCase);
+
+    container
+      .bind<
+        IUseCase<SignupRequestDto, Promise<Result<void, Error>>>
+      >(TYPES.SignupRequestUseCase)
+      .to(SignupRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          SignupVerifyDto,
+          Promise<Result<SignupVerifyResponseDto, Error>>
+        >
+      >(TYPES.SignupVerifyUseCase)
+      .to(SignupVerifyUseCase);
+    container
+      .bind<
+        IUseCase<ForgotPasswordRequestDto, Promise<Result<void>>>
+      >(TYPES.ForgotPasswordRequestUseCase)
       .to(ForgotPasswordRequestUseCase);
     container
-      .bind(TYPES.ForgotPasswordVerifyUseCase)
+      .bind<
+        IUseCase<ForgotPasswordVerifyDto, Promise<Result<void>>>
+      >(TYPES.ForgotPasswordVerifyUseCase)
       .to(ForgotPasswordVerifyUseCase);
-    container.bind(TYPES.UpdatePasswordUseCase).to(UpdatePasswordUseCase);
-    container.bind(TYPES.ResendOtpUseCase).to(ResendOtpUseCase);
-    container.bind(TYPES.GetCurrentUserUseCase).to(GetCurrentUserUseCase);
-    container.bind(TYPES.GoogleLoginUseCase).to(GoogleLoginUseCase);
-    container.bind(TYPES.GetGoogleAuthUrlUseCase).to(GetGoogleAuthUrlUseCase);
+    container
+      .bind<
+        IUseCase<UpdatePasswordDto, Promise<Result<void>>>
+      >(TYPES.UpdatePasswordUseCase)
+      .to(UpdatePasswordUseCase);
+    container
+      .bind<
+        IUseCase<ResendOtpDto, Promise<Result<{ expiresAt: Date }>>>
+      >(TYPES.ResendOtpUseCase)
+      .to(ResendOtpUseCase);
+    container
+      .bind<
+        IUseCase<GetCurrentUserDto, Promise<Result<GetCurrentUserResponseDto>>>
+      >(TYPES.GetCurrentUserUseCase)
+      .to(GetCurrentUserUseCase);
+    container
+      .bind<
+        IUseCase<
+          GoogleLoginRequestDto,
+          Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>>
+        >
+      >(TYPES.GoogleLoginUseCase)
+      .to(GoogleLoginUseCase);
+    container
+      .bind<
+        IUseCase<void, Promise<Result<{ authUrl: string }>>>
+      >(TYPES.GetGoogleAuthUrlUseCase)
+      .to(GetGoogleAuthUrlUseCase);
   }
 }

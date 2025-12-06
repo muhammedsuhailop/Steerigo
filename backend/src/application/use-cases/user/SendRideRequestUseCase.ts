@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
-import { RideRequestRepository } from "@application/repositories/RideRequestRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IRideRequestRepository } from "@application/repositories/IRideRequestRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
 import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
 import { RideRequest } from "@domain/entities/RideRequest";
@@ -13,23 +13,26 @@ import { v4 as uuidv4 } from "uuid";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { RideType } from "@domain/value-objects/RideType";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SendRideRequestUseCase {
+export class SendRideRequestUseCase
+  implements
+    IUseCase<SendRideRequestDto, Promise<Result<SendRideRequestResponseDto>>>
+{
   constructor(
     @inject(TYPES.RideRequestRepository)
-    private rideRequestRepository: RideRequestRepository,
+    private rideRequestRepository: IRideRequestRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: DriverRepository,
+    private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository
+    private userRepository: IUserRepository
   ) {}
 
   async execute(
     dto: SendRideRequestDto
   ): Promise<Result<SendRideRequestResponseDto>> {
     try {
-      // Validate DTO and return failure if validation/domain error occurs
       try {
         dto.validate();
       } catch (validationError) {

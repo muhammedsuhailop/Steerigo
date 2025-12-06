@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
-import { OtpService } from "@application/services/OtpService";
-import { TokenService } from "@application/services/TokenService";
-import { EmailService } from "@application/services/EmailService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IOtpService } from "@application/services/IOtpService";
+import { ITokenService } from "@application/services/ITokenService";
+import { IEmailService } from "@application/services/IEmailService";
 import {
   OtpExpiredError,
   MaxOtpAttemptsError,
@@ -16,18 +16,23 @@ import { RefreshToken } from "@domain/entities/RefreshToken";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { AuthMessages, AuthErrorMessages } from "@shared/constants/AuthConstants";
+import {
+  AuthErrorMessages,
+} from "@shared/constants/AuthConstants";
 import { v4 as uuid } from "uuid";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SignupVerifyUseCase {
+export class SignupVerifyUseCase
+  implements IUseCase<SignupVerifyDto, Promise<Result<SignupVerifyResponseDto>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository,
-    @inject(TYPES.OtpService) private otpService: OtpService,
-    @inject(TYPES.TokenService) private tokenService: TokenService,
-    @inject(TYPES.EmailService) private emailService: EmailService
+    private refreshTokenRepository: IRefreshTokenRepository,
+    @inject(TYPES.OtpService) private otpService: IOtpService,
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
+    @inject(TYPES.EmailService) private emailService: IEmailService
   ) {}
 
   async execute(

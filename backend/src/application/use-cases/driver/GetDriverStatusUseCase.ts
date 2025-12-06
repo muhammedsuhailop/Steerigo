@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
@@ -10,13 +10,17 @@ import {
 } from "@domain/errors/DriverAvailabilityErrors";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverStatusUseCase {
+export class GetDriverStatusUseCase
+  implements IUseCase<string, Promise<Result<DriverStatusResponseDto>>>
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
+    @inject(TYPES.DriverRepository)
+    private driverRepository: IDriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository
+    private availabilityRepository: IDriverAvailabilityRepository
   ) {}
 
   async execute(userId: string): Promise<Result<DriverStatusResponseDto>> {
@@ -42,7 +46,6 @@ export class GetDriverStatusUseCase {
         return Result.failure(new DriverAvailabilityNotFoundError(driverId));
       }
 
-      // Map to response DTO
       const response = new DriverStatusResponseDto(
         availability.getId(),
         driverId,

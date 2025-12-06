@@ -2,48 +2,48 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Application Service Interfaces
-import { PasswordService } from "@application/services/PasswordService";
-import { TokenService } from "@application/services/TokenService";
-import { EmailService } from "@application/services/EmailService";
-import { OtpService } from "@application/services/OtpService";
-import { GoogleAuthService } from "@application/services/GoogleAuthService";
-import { TokenManagementService } from "@application/services/TokenManagementService";
+import { IPasswordService } from "@application/services/IPasswordService";
+import { ITokenService } from "@application/services/ITokenService";
+import { IEmailService } from "@application/services/IEmailService";
+import { IOtpService } from "@application/services/IOtpService";
+import { IGoogleAuthService } from "@application/services/IGoogleAuthService";
+import { ITokenManagementService } from "@application/services/ITokenManagementService";
 
 // Infrastructure Service Implementations
-import { PasswordServiceImpl } from "@infrastructure/services/PasswordServiceImpl";
-import { TokenServiceImpl } from "@infrastructure/services/TokenServiceImpl";
-import { EmailServiceImpl } from "@infrastructure/services/EmailServiceImpl";
-import { OtpServiceImpl } from "@infrastructure/services/OtpServiceImpl";
-import { GoogleAuthServiceImpl } from "@infrastructure/services/GoogleAuthServiceImpl";
-import { TokenManagementServiceImpl } from "@infrastructure/services/TokenManagementServiceImpl";
+import { PasswordService } from "@infrastructure/services/PasswordService";
+import { TokenService } from "@infrastructure/services/TokenService";
+import { EmailService } from "@infrastructure/services/EmailService";
+import { OtpService } from "@infrastructure/services/OtpService";
+import { GoogleAuthService } from "@infrastructure/services/GoogleAuthService";
+import { TokenManagementService } from "@infrastructure/services/TokenManagementService";
 import {
   BcryptAdapter,
   CryptoAdapter,
 } from "@infrastructure/adapters/CryptoAdapter";
-import { FileUploadService } from "@application/services/FileUploadService";
+import { IFileUploadService } from "@application/services/IFileUploadService";
 import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
 
 export class ServiceFactory {
   static register(container: Container): void {
     // Bind Service Interfaces to Implementations
     container
-      .bind<PasswordService>(TYPES.PasswordService)
-      .to(PasswordServiceImpl);
-    container.bind<TokenService>(TYPES.TokenService).to(TokenServiceImpl);
-    container.bind<EmailService>(TYPES.EmailService).to(EmailServiceImpl);
-    container.bind<OtpService>(TYPES.OtpService).to(OtpServiceImpl);
+      .bind<IPasswordService>(TYPES.PasswordService)
+      .to(PasswordService);
+    container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
+    container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
+    container.bind<IOtpService>(TYPES.OtpService).to(OtpService);
     container
-      .bind<GoogleAuthService>(TYPES.GoogleAuthService)
-      .to(GoogleAuthServiceImpl);
+      .bind<IGoogleAuthService>(TYPES.GoogleAuthService)
+      .to(GoogleAuthService);
     container
-      .bind<TokenManagementService>(TYPES.TokenManagementService)
-      .to(TokenManagementServiceImpl);
+      .bind<ITokenManagementService>(TYPES.TokenManagementService)
+      .to(TokenManagementService);
     container
       .bind<CryptoAdapter>(TYPES.CryptoAdapter)
       .to(BcryptAdapter)
       .inSingletonScope();
     container
-      .bind<FileUploadService>(TYPES.FileUploadService)
+      .bind<IFileUploadService>(TYPES.FileUploadService)
       .to(CloudinaryService)
       .inSingletonScope();
   }

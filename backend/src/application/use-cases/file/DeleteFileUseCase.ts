@@ -1,14 +1,17 @@
 import { injectable, inject } from "inversify";
-import { FileUploadService } from "@application/services/FileUploadService";
+import { IFileUploadService } from "@application/services/IFileUploadService";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class DeleteFileUseCase {
+export class DeleteFileUseCase
+  implements IUseCase<string, Promise<Result<{ message: string }, Error>>>
+{
   constructor(
     @inject(TYPES.FileUploadService)
-    private fileUploadService: FileUploadService
+    private fileUploadService: IFileUploadService
   ) {}
 
   async execute(publicId: string): Promise<Result<{ message: string }, Error>> {

@@ -156,7 +156,7 @@ export const validateGetDriversRequest = (
     const validatedData = getDriversSchema.parse({
       query: req.query,
     });
-    req.query = validatedData.query as any;
+    req.query = validatedData.query as unknown as Request["query"];
     next();
   } catch (error) {
     Logger.warn("Get drivers validation failed", {
@@ -253,7 +253,7 @@ export const validateGetKycRequestsRequest = (
     const validatedData = getKycRequestsSchema.parse({
       query: req.query,
     });
-    req.query = validatedData.query as any;
+    req.query = validatedData.query as unknown as Request["query"];
     next();
   } catch (error) {
     Logger.warn("Get KYC requests validation failed", {

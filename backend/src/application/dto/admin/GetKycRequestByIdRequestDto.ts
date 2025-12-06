@@ -11,7 +11,7 @@ type GetKycRequestByIdRequestData = z.infer<
 export class GetKycRequestByIdRequestDto {
   private readonly data: GetKycRequestByIdRequestData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = getKycRequestByIdRequestSchema.parse(requestData);
   }
 

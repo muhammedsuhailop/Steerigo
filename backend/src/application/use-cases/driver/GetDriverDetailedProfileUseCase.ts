@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { KYCRepository } from "@application/repositories/KYCRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
 import {
   GetDriverProfileResponseDto,
@@ -18,13 +18,20 @@ import {
   UserNotFoundError,
 } from "@domain/errors/DriverProfileErrors";
 import { KYC } from "@domain/entities/KYC";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetDriverDetailedProfileUseCase {
+export class GetDriverDetailedProfileUseCase
+  implements
+    IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<GetDriverProfileResponseDto>>
+    >
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
   ) {}
 
   async execute(

@@ -1,17 +1,20 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { GetCurrentUserDto } from "../../dto/auth/GetCurrentUserDto";
 import { GetCurrentUserResponseDto } from "../../dto/auth/GetCurrentUserResponseDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { AuthMessages } from "@shared/constants/AuthConstants";
 import { UserNotFoundError } from "@domain/errors";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GetCurrentUserUseCase {
+export class GetCurrentUserUseCase
+  implements
+    IUseCase<GetCurrentUserDto, Promise<Result<GetCurrentUserResponseDto>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(

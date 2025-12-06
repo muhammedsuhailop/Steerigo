@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
@@ -8,69 +8,63 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { BodyType, GearType } from "@domain/value-objects/VehicleType";
-
-export interface DriverProfileUpdateResponse {
-  driver: {
-    id: string;
-    userId: string;
-    eligibleGearTypes: string[];
-    eligibleBodyTypes: string[];
-    kycStatus: string;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  userUpdated: boolean;
-  vehiclesUpdated: boolean;
-  kycStatusUpdated: boolean;
-  updatedFields: string[];
-}
+import { IUseCase } from "../interfaces/IUseCase";
+import {
+  DriverProfileDto,
+  UpdateDriverProfileResponseDto,
+} from "@application/dto/driver/UpdateDriverProfileResponseDto";
 
 @injectable()
-export class UpdateDriverProfileUseCase {
+export class UpdateDriverProfileUseCase
+  implements
+    IUseCase<
+      DriverProfileUpdateDto,
+      Promise<Result<UpdateDriverProfileResponseDto>>
+    >
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository
   ) {}
 
   async execute(
-    userId: string,
     dto: DriverProfileUpdateDto
-  ): Promise<Result<DriverProfileUpdateResponse>> {
+  ): Promise<Result<UpdateDriverProfileResponseDto>> {
     try {
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
         Logger.warn("Profile update validation failed", {
-          userId,
+          userId: dto.getUserId(),
           errors: validationErrors,
         });
         return Result.failure(new DomainError(validationErrors.join(", ")));
       }
+
       const hasUserUpdates = dto.hasUserProfileUpdates();
       const hasVehicleUpdates = dto.hasVehicleTypeUpdates();
 
       if (!hasUserUpdates && !hasVehicleUpdates) {
-        Logger.warn("No updates provided", { userId });
+        Logger.warn("No updates provided", dto.getUserId());
         return Result.failure(
           new DomainError("At least one field must be provided for update")
         );
       }
 
       Logger.info("Driver profile update started", {
-        userId,
+        userId: dto.getUserId(),
         hasUserUpdates,
         hasVehicleUpdates,
       });
 
-      const user = await this.userRepository.findById(userId);
+      const user = await this.userRepository.findById(dto.getUserId());
       if (!user) {
-        Logger.warn("User not found", { userId });
+        Logger.warn("User not found", dto.getUserId());
         return Result.failure(new DomainError("User not found"));
       }
 
-      const driver = await this.driverRepository.findByUserId(userId);
+      const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
-        Logger.warn("Driver profile not found", { userId });
+        Logger.warn("Driver profile not found", dto.getUserId());
         return Result.failure(new DomainError("Driver profile not found"));
       }
 
@@ -87,7 +81,7 @@ export class UpdateDriverProfileUseCase {
         updatedFields.push("userProfile");
 
         Logger.info("User profile updated", {
-          userId,
+          userId: dto.getUserId(),
           updates: Object.keys(userUpdates),
         });
       }
@@ -97,12 +91,15 @@ export class UpdateDriverProfileUseCase {
         const bodyTypes = dto.getEligibleBodyTypes();
 
         if (gearTypes && bodyTypes) {
-          driver.updateEligibleVehicles(gearTypes as GearType[], bodyTypes as BodyType[]);
+          driver.updateEligibleVehicles(
+            gearTypes as GearType[],
+            bodyTypes as BodyType[]
+          );
           vehiclesUpdated = true;
           updatedFields.push("eligibleVehicles");
 
           Logger.info("Eligible vehicles updated", {
-            userId,
+            userId: dto.getUserId(),
             gearTypes,
             bodyTypes,
           });
@@ -112,7 +109,7 @@ export class UpdateDriverProfileUseCase {
           updatedFields.push("kycStatus");
 
           Logger.info("KYC status set to InReview due to vehicle type update", {
-            userId,
+            userId: dto.getUserId(),
             kycStatus: KYCStatus.IN_REVIEW,
           });
         }
@@ -121,40 +118,44 @@ export class UpdateDriverProfileUseCase {
       if (vehiclesUpdated || kycStatusUpdated) {
         await this.driverRepository.save(driver);
         Logger.info("Driver information persisted to database", {
-          userId,
+          userId: dto.getUserId(),
           fields: updatedFields.filter(
             (f) => f === "eligibleVehicles" || f === "kycStatus"
           ),
         });
       }
 
-      const updatedDriver = await this.driverRepository.findByUserId(userId);
+      const updatedDriver = await this.driverRepository.findByUserId(
+        dto.getUserId()
+      );
       if (!updatedDriver) {
-        Logger.error("Failed to retrieve updated driver", { userId });
+        Logger.error("Failed to retrieve updated driver", dto.getUserId());
         return Result.failure(
           new DomainError("Failed to retrieve updated driver")
         );
       }
 
-      const response: DriverProfileUpdateResponse = {
-        driver: {
-          id: updatedDriver.getId(),
-          userId: updatedDriver.getUserId(),
-          eligibleGearTypes: updatedDriver.getEligibleGearTypes(),
-          eligibleBodyTypes: updatedDriver.getEligibleBodyTypes(),
-          kycStatus: updatedDriver.getKycStatus(),
-          status: updatedDriver.getStatus(),
-          createdAt: updatedDriver.getCreatedAt(),
-          updatedAt: updatedDriver.getUpdatedAt(),
-        },
+      const driverProfileDto = new DriverProfileDto(
+        updatedDriver.getId(),
+        updatedDriver.getUserId(),
+        updatedDriver.getEligibleGearTypes(),
+        updatedDriver.getEligibleBodyTypes(),
+        updatedDriver.getKycStatus(),
+        updatedDriver.getStatus(),
+        updatedDriver.getCreatedAt(),
+        updatedDriver.getUpdatedAt()
+      );
+
+      const response = new UpdateDriverProfileResponseDto(
+        driverProfileDto,
         userUpdated,
         vehiclesUpdated,
         kycStatusUpdated,
-        updatedFields,
-      };
+        updatedFields
+      );
 
       Logger.info("Driver profile update successful", {
-        userId,
+        userId: dto.getUserId(),
         updatedFields,
         totalFields: updatedFields.length,
       });
@@ -162,7 +163,7 @@ export class UpdateDriverProfileUseCase {
       return Result.success(response);
     } catch (error) {
       Logger.error("Driver profile update failed", {
-        userId,
+        userId: dto.getUserId(),
         error: error instanceof Error ? error.message : String(error),
       });
 

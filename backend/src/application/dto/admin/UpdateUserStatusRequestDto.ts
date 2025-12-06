@@ -21,7 +21,7 @@ type UpdateUserStatusRequestData = z.infer<
 export class UpdateUserStatusRequestDto {
   private readonly data: UpdateUserStatusRequestData;
 
-  constructor(requestData: any) {
+  constructor(requestData: unknown) {
     this.data = updateUserStatusRequestSchema.parse(requestData);
   }
 

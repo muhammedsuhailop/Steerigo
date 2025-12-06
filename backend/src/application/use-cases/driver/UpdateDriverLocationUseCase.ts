@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { UpdateLocationRequestDto } from "@application/dto/driver/UpdateLocationRequestDto";
 import { Location } from "@domain/value-objects/Location";
 import { Result } from "@shared/utils/Result";
@@ -9,36 +9,36 @@ import {
   DriverAvailabilityNotFoundError,
   ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
+import { IUseCase } from "../interfaces/IUseCase";
+import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";
 
 @injectable()
-export class UpdateDriverLocationUseCase {
+export class UpdateDriverLocationUseCase
+  implements
+    IUseCase<
+      UpdateLocationRequestDto,
+      Promise<Result<UpdateDriverLocationResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository
+    private availabilityRepository: IDriverAvailabilityRepository
   ) {}
 
   async execute(
-    driverId: string,
     dto: UpdateLocationRequestDto
-  ): Promise<
-    Result<{
-      id: string;
-      driverId: string;
-      currentLocation: {
-        latitude: number;
-        longitude: number;
-        address?: string;
-      };
-      updatedAt: string;
-    }>
-  > {
+  ): Promise<Result<UpdateDriverLocationResponseDto>> {
     try {
-      Logger.info("Updating driver location", { driverId });
+      Logger.info("Updating driver location", dto.getDriverId());
 
       const availability =
-        await this.availabilityRepository.findActiveByDriverId(driverId);
+        await this.availabilityRepository.findActiveByDriverId(
+          dto.getDriverId()
+        );
       if (!availability) {
-        return Result.failure(new DriverAvailabilityNotFoundError(driverId));
+        return Result.failure(
+          new DriverAvailabilityNotFoundError(dto.getDriverId())
+        );
       }
 
       if (availability.isExpired()) {
@@ -54,12 +54,12 @@ export class UpdateDriverLocationUseCase {
           error instanceof Error &&
           error.message.includes("already up to date")
         ) {
-          const response = {
-            id: availability.getId(),
-            driverId: availability.getDriverId(),
-            currentLocation: availability.getCurrentLocation().getCoordinates(),
-            updatedAt: availability.getUpdatedAt().toISOString(),
-          };
+          const response = new UpdateDriverLocationResponseDto(
+            availability.getId(),
+            availability.getDriverId(),
+            availability.getCurrentLocation().getCoordinates(),
+            availability.getUpdatedAt().toISOString()
+          );
           return Result.success(response);
         }
         throw error;
@@ -74,24 +74,22 @@ export class UpdateDriverLocationUseCase {
         );
       }
 
-      const response = {
-        id: updatedAvailability.getId(),
-        driverId: updatedAvailability.getDriverId(),
-        currentLocation: updatedAvailability
-          .getCurrentLocation()
-          .getCoordinates(),
-        updatedAt: updatedAvailability.getUpdatedAt().toISOString(),
-      };
+      const response = new UpdateDriverLocationResponseDto(
+        updatedAvailability.getId(),
+        updatedAvailability.getDriverId(),
+        updatedAvailability.getCurrentLocation().getCoordinates(),
+        updatedAvailability.getUpdatedAt().toISOString()
+      );
 
       Logger.info("Driver location updated successfully", {
-        driverId,
+        driverId: dto.getDriverId(),
         availabilityId: updatedAvailability.getId(),
       });
 
       return Result.success(response);
     } catch (error) {
       Logger.error("Error updating driver location", {
-        driverId,
+        driverId: dto.getDriverId(),
         error: error instanceof Error ? error.message : String(error),
       });
       return Result.failure(error as Error);

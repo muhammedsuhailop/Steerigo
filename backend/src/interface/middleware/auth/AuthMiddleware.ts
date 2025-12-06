@@ -1,22 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { container } from "@infrastructure/container/DIContainer";
 import { TYPES } from "@shared/constants/DITypes";
-import { TokenService } from "@application/services/TokenService";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { ITokenService } from "@application/services/ITokenService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 
 // Extend Request interface to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId: string;
-        role: string;
-      };
-    }
+declare module "express" {
+  interface Request {
+    user?: {
+      userId: string;
+      role: string;
+    };
   }
 }
 
@@ -38,7 +36,7 @@ export const authMiddleware = async (
     }
 
     const token = authHeader.substring(7);
-    const tokenService = container.get<TokenService>(TYPES.TokenService);
+    const tokenService = container.get<ITokenService>(TYPES.TokenService);
 
     const payload = tokenService.verifyAccessToken(token);
     if (!payload) {
@@ -51,7 +49,7 @@ export const authMiddleware = async (
     }
 
     // Verify user still exists and is active
-    const userRepository = container.get<UserRepository>(TYPES.UserRepository);
+    const userRepository = container.get<IUserRepository>(TYPES.UserRepository);
     const user = await userRepository.findById(payload.userId);
 
     if (!user || !user.canLogin()) {

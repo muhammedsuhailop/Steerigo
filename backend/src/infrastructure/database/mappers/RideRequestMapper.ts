@@ -8,6 +8,7 @@ import {
 } from "@domain/value-objects/FareBreakdown";
 import { Money } from "@domain/value-objects/Money";
 import { IRideRequestDocument } from "../models/RideRequestModel";
+import { toObjectId } from "@shared/utils/idHelper";
 
 export class RideRequestMapper {
   static toDomain(doc: IRideRequestDocument): RideRequest {
@@ -86,8 +87,8 @@ export class RideRequestMapper {
 
     return {
       _id: entity.getId(),
-      driverId: entity.getDriverId() as any,
-      riderId: entity.getRiderId() as any,
+      driverId: toObjectId(entity.getDriverId()),
+      riderId: toObjectId(entity.getRiderId()),
       pickup: {
         latitude: entity.getPickup().getLatitude(),
         longitude: entity.getPickup().getLongitude(),

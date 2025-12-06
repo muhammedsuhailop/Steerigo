@@ -1,3 +1,15 @@
+export interface GetKycRequestsInput {
+  page?: string;
+  pageSize?: string;
+  docType?: "Aadhaar" | "PAN" | "DrivingLicense" | "Passport";
+  isVerified?: "true" | "false";
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
 export class GetKycRequestsDto {
   public readonly page: number;
   public readonly pageSize: number;
@@ -9,21 +21,38 @@ export class GetKycRequestsDto {
   public readonly sortBy: string;
   public readonly sortOrder: "asc" | "desc";
 
-  constructor(data: any) {
-    this.page = parseInt(data.page) || 1;
-    this.pageSize = Math.min(parseInt(data.pageSize) || 10, 50);
-    this.docType = data.docType;
+  constructor(data: unknown) {
+    const input = (data ?? {}) as GetKycRequestsInput;
+
+    this.page = this.parsePositiveInt(input.page, 1);
+    this.pageSize = Math.min(this.parsePositiveInt(input.pageSize, 10), 50);
+
+    this.docType = input.docType;
+
     this.isVerified =
-      data.isVerified === "true"
+      input.isVerified === "true"
         ? true
-        : data.isVerified === "false"
+        : input.isVerified === "false"
           ? false
           : undefined;
-    this.search = data.search?.trim();
-    this.dateFrom = data.dateFrom;
-    this.dateTo = data.dateTo;
-    this.sortBy = this.validateSortBy(data.sortBy || "createdAt");
-    this.sortOrder = data.sortOrder === "desc" ? "desc" : "asc";
+
+    this.search = input.search?.trim();
+
+    this.dateFrom = input.dateFrom;
+    this.dateTo = input.dateTo;
+
+    this.sortBy = this.validateSortBy(input.sortBy ?? "createdAt");
+
+    this.sortOrder = input.sortOrder === "desc" ? "desc" : "asc";
+  }
+
+  private parsePositiveInt(
+    value: string | undefined,
+    fallback: number
+  ): number {
+    if (!value) return fallback;
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
   }
 
   private validateSortBy(sortBy: string): string {

@@ -117,7 +117,7 @@ export class Driver {
   }
 
   // Business methods
-  block(reason?: string): void {
+  block(_reason?: string): void {
     if (this.status === DriverStatus.BLOCKED) {
       throw new Error("Driver is already blocked");
     }
@@ -125,7 +125,7 @@ export class Driver {
     this.updatedAt = new Date();
   }
 
-  suspend(reason?: string): void {
+  suspend(_reason?: string): void {
     if (this.status === DriverStatus.SUSPENDED) {
       throw new Error("Driver is already suspended");
     }

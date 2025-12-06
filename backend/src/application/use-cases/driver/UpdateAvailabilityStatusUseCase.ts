@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
 import { UpdateStatusRequestDto } from "@application/dto/driver/UpdateStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -9,35 +9,39 @@ import {
   InvalidStatusTransitionError,
   ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
+import { IUseCase } from "../interfaces/IUseCase";
+import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/UpdateAvailabilityStatusResponseDto";
 
 @injectable()
-export class UpdateAvailabilityStatusUseCase {
+export class UpdateAvailabilityStatusUseCase
+  implements
+    IUseCase<
+      UpdateStatusRequestDto,
+      Promise<Result<UpdateAvailabilityStatusResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private availabilityRepository: DriverAvailabilityRepository
+    private availabilityRepository: IDriverAvailabilityRepository
   ) {}
 
   async execute(
-    driverId: string,
     dto: UpdateStatusRequestDto
-  ): Promise<
-    Result<{
-      id: string;
-      driverId: string;
-      status: string;
-      updatedAt: string;
-    }>
-  > {
+  ): Promise<Result<UpdateAvailabilityStatusResponseDto>> {
     try {
       Logger.info("Updating driver availability status", {
-        driverId,
+        driverId: dto.getDriverId(),
         newStatus: dto.getStatus(),
       });
 
       const availability =
-        await this.availabilityRepository.findActiveByDriverId(driverId);
+        await this.availabilityRepository.findActiveByDriverId(
+          dto.getDriverId()
+        );
       if (!availability) {
-        return Result.failure(new DriverAvailabilityNotFoundError(driverId));
+        return Result.failure(
+          new DriverAvailabilityNotFoundError(dto.getDriverId())
+        );
       }
 
       if (availability.isExpired()) {
@@ -61,21 +65,21 @@ export class UpdateAvailabilityStatusUseCase {
       const updatedAvailability =
         await this.availabilityRepository.save(availability);
 
-        if (!updatedAvailability) {
-          return Result.failure(
-            new Error("Failed to update driver availability")
-          );
-        }
+      if (!updatedAvailability) {
+        return Result.failure(
+          new Error("Failed to update driver availability")
+        );
+      }
 
-      const response = {
-        id: updatedAvailability.getId(),
-        driverId: updatedAvailability.getDriverId(),
-        status: updatedAvailability.getStatus(),
-        updatedAt: updatedAvailability.getUpdatedAt().toISOString(),
-      };
+      const response = new UpdateAvailabilityStatusResponseDto(
+        updatedAvailability.getId(),
+        updatedAvailability.getDriverId(),
+        updatedAvailability.getStatus(),
+        updatedAvailability.getUpdatedAt().toISOString()
+      );
 
       Logger.info("Driver availability status updated successfully", {
-        driverId,
+        driverId: dto.getDriverId(),
         availabilityId: updatedAvailability.getId(),
         newStatus: dto.getStatus(),
       });
@@ -83,7 +87,7 @@ export class UpdateAvailabilityStatusUseCase {
       return Result.success(response);
     } catch (error) {
       Logger.error("Error updating driver availability status", {
-        driverId,
+        driverId: dto.getDriverId(),
         newStatus: dto.getStatus(),
         error: error instanceof Error ? error.message : String(error),
       });

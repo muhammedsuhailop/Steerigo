@@ -132,7 +132,7 @@ export const adminApi = createApi({
           ? [
               ...result.data.drivers.map((d) => ({
                 type: "AdminDrivers" as const,
-                id: d.driverId ?? d.id,
+                id: d.driverId,
               })),
               { type: "AdminDrivers", id: "LIST" },
             ]

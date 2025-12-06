@@ -4,6 +4,7 @@ import { DocumentType } from "@domain/value-objects/DocumentType";
 
 export class KYCSubmissionRequestDto {
   constructor(
+    private readonly userId: string,
     private readonly licenseCategory?: LicenseCategory,
     private readonly licenseNumber?: string,
     private readonly licenseBodyTypes?: BodyType[],
@@ -61,6 +62,10 @@ export class KYCSubmissionRequestDto {
     }
 
     return errors;
+  }
+
+  getUserId(): string {
+    return this.userId;
   }
 
   getLicenseCategory(): LicenseCategory | undefined {

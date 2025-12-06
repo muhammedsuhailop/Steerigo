@@ -8,31 +8,32 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { DriverAvailabilityRepository } from "@application/repositories/DriverAvailabilityRepository";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { UserRepository } from "@application/repositories/UserRepository";
+import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IUserRepository } from "@application/repositories/IUserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
-import { FareCalculationService } from "@application/services/FareCalculationService";
-
-export interface DriverSearchResult {
-  driverId: string;
-  userId: string;
-  distance: number;
-  eta: number;
-}
+import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { IUseCase } from "../interfaces/IUseCase";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 
 @injectable()
-export class FindNearbyDriversUseCase {
+export class FindNearbyDriversUseCase
+  implements
+    IUseCase<
+      FindNearbyDriversRequestDto,
+      Promise<Result<FindNearbyDriversResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private driverAvailabilityRepository: DriverAvailabilityRepository,
+    private driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: DriverRepository,
+    private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: UserRepository,
+    private userRepository: IUserRepository,
     @inject(TYPES.FareCalculationService)
-    private fareCalculationService: FareCalculationService
+    private fareCalculationService: IFareCalculationService
   ) {}
 
   async execute(
@@ -49,11 +50,7 @@ export class FindNearbyDriversUseCase {
         bodyType: requestDto.bodyType,
       });
 
-      try {
-        requestDto.validate();
-      } catch (validationError) {
-        throw validationError;
-      }
+      requestDto.validate();
 
       const searchCriteria = SearchCriteria.create(
         { latitude: requestDto.latitude, longitude: requestDto.longitude },
@@ -305,7 +302,7 @@ export class FindNearbyDriversUseCase {
   }
 
   private isDriverAvailableForDuration(
-    driverAvailability: any,
+    driverAvailability: DriverAvailability,
     searchDate: Date,
     timeRequiredMinutes: number
   ): boolean {

@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel, IDriverModel } from "../models/DriverModel";
 import { DriverMapper } from "../mappers/DriverMapper";
@@ -13,17 +13,24 @@ import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { Logger } from "@shared/utils/Logger";
-import { PipelineStage, SortOrder, Types } from "mongoose";
 import {
-  AdminDriverQuery,
-  AdminDriverSummary,
-} from "@application/repositories/AdminDriverRepository";
+  PipelineStage,
+  SortOrder,
+  Types,
+  FilterQuery,
+  UpdateQuery,
+  HydratedDocument,
+} from "mongoose";
+import {
+  IAdminDriverQuery,
+  IAdminDriverSummary,
+} from "@application/repositories/IAdminDriverRepository";
 
-type UnifiedDriverFilterOptions = FilterOptions<Driver> & AdminDriverQuery;
+type UnifiedDriverFilterOptions = FilterOptions<Driver> & IAdminDriverQuery;
 
 @injectable()
 export class DriverRepositoryImpl
-  implements DriverRepository, AdminDriverRepository
+  implements IDriverRepository, IAdminDriverRepository
 {
   //  Basic Repository Operations
 
@@ -53,11 +60,11 @@ export class DriverRepositoryImpl
       const driverId = driver.getId();
       const existingDriver = await DriverModel.findById(driverId);
 
-      let savedDoc: any;
+      let savedDoc: HydratedDocument<IDriverModel>;
       if (existingDriver) {
-        savedDoc = await DriverModel.findByIdAndUpdate(driverId, driverData, {
+        savedDoc = (await DriverModel.findByIdAndUpdate(driverId, driverData, {
           new: true,
-        });
+        })) as HydratedDocument<IDriverModel>;
       } else {
         savedDoc = await DriverModel.create({
           _id: driverId,
@@ -125,7 +132,7 @@ export class DriverRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions & { filters?: UnifiedDriverFilterOptions }
+    options: QueryOptions<Driver> & { filters?: UnifiedDriverFilterOptions }
   ): Promise<PaginatedResult<Driver>> {
     const {
       page = 1,
@@ -160,28 +167,114 @@ export class DriverRepositoryImpl
     filters: FilterOptions<Driver>,
     updates: Partial<Driver>
   ): Promise<number> {
-    try {
-      const updateData: any = {};
+    function hasGetEligibleGearTypes(u: unknown): u is {
+      getEligibleGearTypes: () => IDriverModel["eligibleGearTypes"];
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getEligibleGearTypes ===
+          "function"
+      );
+    }
 
-      // Map domain fields to database fields
-      if (updates.getEligibleGearTypes)
-        updateData.eligibleGearTypes = updates.getEligibleGearTypes();
-      if (updates.getEligibleBodyTypes)
-        updateData.eligibleBodyTypes = updates.getEligibleBodyTypes();
-      if (updates.getLicenceCategory)
-        updateData.licenceCategory = updates.getLicenceCategory();
-      if (updates.getLicenseIssueDate)
-        updateData.licenseIssueDate = updates.getLicenseIssueDate();
-      if (updates.getLicenseExpiryDate)
-        updateData.licenseExpiryDate = updates.getLicenseExpiryDate();
-      if (updates.getKycStatus) updateData.kycStatus = updates.getKycStatus();
-      if (updates.getStatus) updateData.status = updates.getStatus();
+    function hasGetEligibleBodyTypes(u: unknown): u is {
+      getEligibleBodyTypes: () => IDriverModel["eligibleBodyTypes"];
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getEligibleBodyTypes ===
+          "function"
+      );
+    }
+
+    function hasGetLicenceCategory(u: unknown): u is {
+      getLicenceCategory: () => IDriverModel["licenceCategory"];
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getLicenceCategory === "function"
+      );
+    }
+
+    function hasGetLicenseIssueDate(u: unknown): u is {
+      getLicenseIssueDate: () => Date;
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getLicenseIssueDate === "function"
+      );
+    }
+
+    function hasGetLicenseExpiryDate(u: unknown): u is {
+      getLicenseExpiryDate: () => Date;
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getLicenseExpiryDate ===
+          "function"
+      );
+    }
+
+    function hasGetKycStatus(u: unknown): u is {
+      getKycStatus: () => IDriverModel["kycStatus"];
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getKycStatus === "function"
+      );
+    }
+
+    function hasGetStatus(u: unknown): u is {
+      getStatus: () => IDriverModel["status"];
+    } {
+      return (
+        typeof u === "object" &&
+        u !== null &&
+        typeof (u as Record<string, unknown>).getStatus === "function"
+      );
+    }
+
+    try {
+      const updateData: UpdateQuery<IDriverModel> = {};
+
+      const u: unknown = updates;
+
+      if (hasGetEligibleGearTypes(u)) {
+        updateData.eligibleGearTypes = u.getEligibleGearTypes();
+      }
+      if (hasGetEligibleBodyTypes(u)) {
+        updateData.eligibleBodyTypes = u.getEligibleBodyTypes();
+      }
+      if (hasGetLicenceCategory(u)) {
+        updateData.licenceCategory = u.getLicenceCategory();
+      }
+      if (hasGetLicenseIssueDate(u)) {
+        updateData.licenseIssueDate = u.getLicenseIssueDate();
+      }
+      if (hasGetLicenseExpiryDate(u)) {
+        updateData.licenseExpiryDate = u.getLicenseExpiryDate();
+      }
+      if (hasGetKycStatus(u)) {
+        updateData.kycStatus = u.getKycStatus();
+      }
+      if (hasGetStatus(u)) {
+        updateData.status = u.getStatus();
+      }
 
       updateData.updatedAt = new Date();
 
-      const result = await DriverModel.updateMany(filters, {
-        $set: updateData,
-      });
+      const result = await DriverModel.updateMany(
+        filters as FilterQuery<IDriverModel>,
+        {
+          $set: updateData,
+        }
+      );
 
       Logger.info("Multiple drivers updated", {
         matchedCount: result.matchedCount,
@@ -201,7 +294,9 @@ export class DriverRepositoryImpl
 
   async deleteMany(filters: FilterOptions<Driver>): Promise<number> {
     try {
-      const result = await DriverModel.deleteMany(filters);
+      const result = await DriverModel.deleteMany(
+        filters as FilterQuery<IDriverModel>
+      );
       Logger.info("Multiple drivers deleted", { count: result.deletedCount });
       return result.deletedCount ?? 0;
     } catch (error) {
@@ -329,12 +424,12 @@ export class DriverRepositoryImpl
   // Admin-Specific Operations
 
   async findDriversWithSummary(
-    filters: AdminDriverQuery,
+    filters: IAdminDriverQuery,
     pagination: { page: number; pageSize: number },
     sortBy?: string,
     sortOrder?: "asc" | "desc"
   ): Promise<{
-    data: AdminDriverSummary[];
+    data: IAdminDriverSummary[];
     pagination: {
       currentPage: number;
       pageSize: number;
@@ -452,11 +547,11 @@ export class DriverRepositoryImpl
     status: string,
     reason?: string
   ): Promise<boolean> {
-    const update: Partial<IDriverModel> = {
+    const update: UpdateQuery<IDriverModel> & Record<string, unknown> = {
       status,
       updatedAt: new Date(),
     };
-    if (reason) (update as any).statusReason = reason;
+    if (reason) update.statusReason = reason;
 
     const res = await DriverModel.updateOne({ _id: driverId }, update);
     return res.modifiedCount > 0;
@@ -569,46 +664,40 @@ export class DriverRepositoryImpl
 
   private buildFilterQuery(
     filters: UnifiedDriverFilterOptions
-  ): Record<string, any> {
-    const q: Record<string, any> = {};
+  ): FilterQuery<IDriverModel> {
+    const q: FilterQuery<IDriverModel> = {};
 
-    if ("status" in filters && typeof (filters as any).status === "string") {
-      q.status = (filters as any).status;
+    if (typeof filters.status === "string") {
+      q.status = filters.status as unknown as IDriverModel["status"];
     }
 
-    if (
-      "kycStatus" in filters &&
-      typeof (filters as any).kycStatus === "string"
-    ) {
-      q.kycStatus = (filters as any).kycStatus;
+    if (typeof filters.kycStatus === "string") {
+      q.kycStatus = filters.kycStatus as unknown as IDriverModel["kycStatus"];
     }
 
-    if (
-      "licenceCategory" in filters &&
-      typeof (filters as any).licenceCategory === "string"
-    ) {
-      q.licenceCategory = (filters as any).licenceCategory;
+    if (typeof filters.licenceCategory === "string") {
+      q.licenceCategory =
+        filters.licenceCategory as unknown as IDriverModel["licenceCategory"];
     }
 
-    if (
-      "search" in filters &&
-      typeof (filters as any).search === "string" &&
-      (filters as any).search.trim() !== ""
-    ) {
-      const s = (filters as any).search.trim();
-      q.userId = { $regex: s, $options: "i" };
+    if (typeof filters.search === "string" && filters.search.trim() !== "") {
+      const s = filters.search.trim();
+      q.userId = {
+        $regex: s,
+        $options: "i",
+      } as unknown as IDriverModel["userId"];
     }
 
     if ("dateFrom" in filters || "dateTo" in filters) {
-      const d: Record<string, any> = {};
-      if ("dateFrom" in filters && (filters as any).dateFrom instanceof Date) {
-        d.$gte = (filters as any).dateFrom;
+      const d: { $gte?: Date; $lte?: Date } = {};
+      if (filters.dateFrom instanceof Date) {
+        d.$gte = filters.dateFrom;
       }
-      if ("dateTo" in filters && (filters as any).dateTo instanceof Date) {
-        d.$lte = (filters as any).dateTo;
+      if (filters.dateTo instanceof Date) {
+        d.$lte = filters.dateTo;
       }
       if (Object.keys(d).length) {
-        q.createdAt = d;
+        q.createdAt = d as unknown as IDriverModel["createdAt"];
       }
     }
 

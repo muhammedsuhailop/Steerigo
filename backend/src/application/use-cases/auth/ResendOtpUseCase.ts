@@ -1,24 +1,23 @@
 import { injectable, inject } from "inversify";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { OtpService } from "@application/services/OtpService";
-import { EmailService } from "@application/services/EmailService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IOtpService } from "@application/services/IOtpService";
+import { IEmailService } from "@application/services/IEmailService";
 import { ResendOtpDto } from "../../dto/auth/ResendOtpDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  AuthMessages,
-  AuthErrorMessages,
-} from "@shared/constants/AuthConstants";
 import { AppConstants } from "@shared/constants/AppConstants";
-import { UserNotFoundError, DomainError } from "@domain/errors";
+import { UserNotFoundError } from "@domain/errors";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class ResendOtpUseCase {
+export class ResendOtpUseCase
+  implements IUseCase<ResendOtpDto, Promise<Result<{ expiresAt: Date }>>>
+{
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.OtpService) private otpService: OtpService,
-    @inject(TYPES.EmailService) private emailService: EmailService
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.OtpService) private otpService: IOtpService,
+    @inject(TYPES.EmailService) private emailService: IEmailService
   ) {}
 
   async execute(dto: ResendOtpDto): Promise<Result<{ expiresAt: Date }>> {

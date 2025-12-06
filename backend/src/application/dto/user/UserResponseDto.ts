@@ -1,5 +1,3 @@
-import { Email } from "@domain/value-objects/Email";
-
 export interface UserResponseDto {
   id: string;
   name: string;

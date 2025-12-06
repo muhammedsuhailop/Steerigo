@@ -1,0 +1,27 @@
+import { QueryOptions } from "@shared/types/Repository";
+import { User } from "../../domain/entities/User";
+import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
+import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IBatchRepository } from "./interfaces/IBatchRepository";
+import { AuthProvider } from "@shared/constants/AuthConstants";
+
+export interface IUserRepository
+  extends IReadOnlyRepository<User>,
+    IWriteOnlyRepository<User>,
+    IQueryableRepository<User>,
+    IBatchRepository<User> {
+  // User-specific query methods
+  findByEmail(email: string): Promise<User | null>;
+  findByEmailAndProvider(
+    email: string,
+    provider: AuthProvider
+  ): Promise<User | null>;
+  findByGoogleId(googleId: string): Promise<User | null>;
+  existsByEmail(email: string): Promise<boolean>;
+  existsByMobile(mobile: string): Promise<boolean>;
+  findByMobile(mobile: string): Promise<User | null>;
+  findActiveUsers(options?: QueryOptions): Promise<User[]>;
+  findByRole(role: string, options?: QueryOptions): Promise<User[]>;
+  updateById(id: string, updates: Partial<Record<string, unknown>>): Promise<void>;
+}

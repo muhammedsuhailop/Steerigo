@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { AdminDriverRepository } from "@application/repositories/AdminDriverRepository";
+import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
 import {
   AdminDriverQuery,
   GetDriversRequestDto,
@@ -7,15 +7,31 @@ import {
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "../interfaces/IUseCase";
+import {
+  GetDriversResponseDto,
+  DriverSummaryDto,
+  DriverUserSummary,
+  DriverStatusInfo,
+  DriverLicenseInfo,
+  DriverPerformanceStats,
+  PaginationDto,
+  AppliedFiltersDto,
+} from "@application/dto/admin/GetDriversResponseDto";
 
 @injectable()
-export class GetDriversUseCase {
+export class GetDriversUseCase
+  implements
+    IUseCase<GetDriversRequestDto, Promise<Result<GetDriversResponseDto>>>
+{
   constructor(
     @inject(TYPES.AdminDriverRepository)
-    private adminDriverRepository: AdminDriverRepository
+    private adminDriverRepository: IAdminDriverRepository
   ) {}
 
-  async execute(dto: GetDriversRequestDto): Promise<Result<any>> {
+  async execute(
+    dto: GetDriversRequestDto
+  ): Promise<Result<GetDriversResponseDto>> {
     try {
       const dateFrom = dto.getDateFrom();
       const dateTo = dto.getDateTo();
@@ -56,38 +72,60 @@ export class GetDriversUseCase {
         pagination
       );
 
-      const response = {
-        drivers: result.data.map((driver) => ({
-          driverId: driver.driverId,
-          userId: driver.userId,
-          userName: driver.userName,
-          userEmail: driver.userEmail,
-          userMobile: driver.userMobile,
-          status: driver.status,
-          kycStatus: driver.kycStatus,
-          licenceCategory: driver.licenceCategory,
-          eligibleGearTypes: driver.eligibleGearTypes,
-          eligibleBodyTypes: driver.eligibleBodyTypes,
-          licenseIssueDate: driver.licenseIssueDate.toISOString(),
-          licenseExpiryDate: driver.licenseExpiryDate.toISOString(),
-          totalRides: driver.totalRides,
-          totalEarnings: driver.totalEarnings,
-          rating: driver.rating,
-          lastRideDate: driver.lastRideDate?.toISOString() || null,
-          createdAt: driver.createdAt.toISOString(),
-        })),
-        pagination: result.pagination,
-        appliedFilters: {
-          sortBy: dto.getSortBy(),
-          sortOrder: dto.getSortOrder(),
-          search: dto.getSearch() || null,
-          status: dto.getStatus() || null,
-          kycStatus: dto.getKycStatus() || null,
-          licenceCategory: dto.getLicenceCategory() || null,
-          dateFrom: dto.getDateFrom()?.toISOString() || null,
-          dateTo: dto.getDateTo()?.toISOString() || null,
-        },
-      };
+      const drivers: DriverSummaryDto[] = result.data.map(
+        (driver) =>
+          new DriverSummaryDto(
+            driver.driverId,
+            new DriverUserSummary(
+              driver.userId,
+              driver.userName,
+              driver.userEmail,
+              driver.userMobile
+            ),
+            new DriverStatusInfo(
+              driver.status,
+              driver.kycStatus,
+              driver.licenceCategory,
+              driver.eligibleGearTypes,
+              driver.eligibleBodyTypes
+            ),
+            new DriverLicenseInfo(
+              driver.licenseIssueDate,
+              driver.licenseExpiryDate
+            ),
+            new DriverPerformanceStats(
+              driver.totalRides,
+              driver.totalEarnings,
+              driver.rating,
+              driver.lastRideDate || null
+            ),
+            driver.createdAt
+          )
+      );
+
+      const paginationDto = new PaginationDto(
+        result.pagination.currentPage,
+        result.pagination.pageSize,
+        result.pagination.totalItems,
+        result.pagination.totalPages
+      );
+
+      const appliedFiltersDto = new AppliedFiltersDto(
+        dto.getSortBy(),
+        dto.getSortOrder(),
+        dto.getSearch() || null,
+        dto.getStatus() || null,
+        dto.getKycStatus() || null,
+        dto.getLicenceCategory() || null,
+        dateFrom?.toISOString() || null,
+        dateTo?.toISOString() || null
+      );
+
+      const response = new GetDriversResponseDto(
+        drivers,
+        paginationDto,
+        appliedFiltersDto
+      );
 
       Logger.info("Drivers fetched successfully", {
         totalItems: result.pagination.totalItems,

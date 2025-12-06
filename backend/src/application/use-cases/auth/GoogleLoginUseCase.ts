@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
-import { GoogleAuthService } from "@application/services/GoogleAuthService";
-import { UserRepository } from "@application/repositories/UserRepository";
-import { TokenService } from "@application/services/TokenService";
-import { RefreshTokenRepository } from "@application/repositories/RefreshTokenRepository";
-import { EmailService } from "@application/services/EmailService";
+import { IGoogleAuthService } from "@application/services/IGoogleAuthService";
+import { IUserRepository } from "@application/repositories/IUserRepository";
+import { ITokenService } from "@application/services/ITokenService";
+import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IEmailService } from "@application/services/IEmailService";
 import { User } from "@domain/entities/User";
 import { GoogleLoginRequestDto } from "../../dto/auth/GoogleLoginRequestDto";
 import { SignupVerifyResponseDto } from "../../dto/auth/SignupVerifyResponseDto";
@@ -11,23 +11,26 @@ import { RefreshToken } from "@domain/entities/RefreshToken";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  AuthMessages,
-  AuthErrorMessages,
-} from "@shared/constants/AuthConstants";
 import { DomainError, EmailNotVerifiedError } from "@domain/errors";
 import { v4 as uuid } from "uuid";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class GoogleLoginUseCase {
+export class GoogleLoginUseCase
+  implements
+    IUseCase<
+      GoogleLoginRequestDto,
+      Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>>
+    >
+{
   constructor(
     @inject(TYPES.GoogleAuthService)
-    private googleAuthService: GoogleAuthService,
-    @inject(TYPES.UserRepository) private userRepository: UserRepository,
-    @inject(TYPES.TokenService) private tokenService: TokenService,
+    private googleAuthService: IGoogleAuthService,
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
     @inject(TYPES.RefreshTokenRepository)
-    private refreshTokenRepository: RefreshTokenRepository,
-    @inject(TYPES.EmailService) private emailService: EmailService
+    private refreshTokenRepository: IRefreshTokenRepository,
+    @inject(TYPES.EmailService) private emailService: IEmailService
   ) {}
 
   async execute(

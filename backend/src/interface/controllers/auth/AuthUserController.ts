@@ -1,6 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { GetCurrentUserUseCase } from "@application/use-cases/auth/GetCurrentUserUseCase";
 import { GetCurrentUserDto } from "@application/dto/auth/GetCurrentUserDto";
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
@@ -8,17 +7,23 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { GetCurrentUserResponseDto } from "@application/dto/auth";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class AuthUserController {
   constructor(
     @inject(TYPES.GetCurrentUserUseCase)
-    private getCurrentUserUseCase: GetCurrentUserUseCase
+    private getCurrentUserUseCase: IUseCase<
+      GetCurrentUserDto,
+      Promise<Result<GetCurrentUserResponseDto>>
+    >
   ) {}
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId;
+      const userId = req .user?.userId;
 
       // Handle missing auth user
       if (!userId) {

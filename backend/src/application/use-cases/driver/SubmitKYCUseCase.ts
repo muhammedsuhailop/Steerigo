@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { DriverRepository } from "@application/repositories/DriverRepository";
-import { KYCRepository } from "@application/repositories/KYCRepository";
+import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IKYCRepository } from "@application/repositories/IKYCRepository";
 import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
 import { Result } from "@shared/utils/Result";
 import { KYC } from "@domain/entities/KYC";
@@ -10,46 +10,40 @@ import { TYPES } from "@shared/constants/DITypes";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { Types } from "mongoose";
-
-export interface UpdateKycSubmissionResult {
-  message: string;
-  kycDocuments: {
-    [key: string]: string;
-  };
-  licenseUpdated: boolean;
-  idUpdated: boolean;
-  driverUpdated: boolean;
-}
+import { SubmitKYCResponseDto } from "@application/dto/driver/SubmitKYCResponseDto";
+import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SubmitKYCUseCase {
+export class SubmitKYCUseCase
+  implements
+    IUseCase<KYCSubmissionRequestDto, Promise<Result<SubmitKYCResponseDto>>>
+{
   constructor(
-    @inject(TYPES.DriverRepository) private driverRepository: DriverRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: KYCRepository
+    @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
   ) {}
 
   async execute(
-    userId: string,
     dto: KYCSubmissionRequestDto
-  ): Promise<Result<UpdateKycSubmissionResult>> {
+  ): Promise<Result<SubmitKYCResponseDto>> {
     try {
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
         Logger.warn("KYC submission validation failed", {
-          userId,
+          userId: dto.getUserId(),
           errors: validationErrors,
         });
         return Result.failure(new DomainError(validationErrors.join(", ")));
       }
 
-      const driver = await this.driverRepository.findByUserId(userId);
+      const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
-        Logger.warn("Driver profile not found for KYC update", { userId });
+        Logger.warn("Driver profile not found for KYC update", dto.getUserId());
         return Result.failure(new DomainError("Driver profile not found"));
       }
 
       Logger.info("KYC submission started", {
-        userId,
+        userId: dto.getUserId(),
         driverId: driver.getId(),
         hasLicense: dto.hasLicenseUpdate(),
         hasId: dto.hasIdUpdate(),
@@ -59,7 +53,7 @@ export class SubmitKYCUseCase {
 
       if (dto.getLicenseExpiryDate()) {
         if (dto.getLicenseExpiryDate()! <= now) {
-          Logger.warn("License expiry date in past", { userId });
+          Logger.warn("License expiry date in past", dto.getUserId());
           return Result.failure(
             new DomainError("License expiry date must be in the future")
           );
@@ -68,7 +62,7 @@ export class SubmitKYCUseCase {
 
       if (dto.getLicenseIssueDate()) {
         if (dto.getLicenseIssueDate()! > now) {
-          Logger.warn("License issue date in future", { userId });
+          Logger.warn("License issue date in future", dto.getUserId());
           return Result.failure(
             new DomainError("License issue date cannot be in the future")
           );
@@ -80,7 +74,7 @@ export class SubmitKYCUseCase {
         dto.getIdExpiryDate() !== null
       ) {
         if (dto.getIdExpiryDate()! <= now) {
-          Logger.warn("ID expiry date in past", { userId });
+          Logger.warn("ID expiry date in past", dto.getUserId());
           return Result.failure(
             new DomainError("ID expiry date must be in the future")
           );
@@ -89,7 +83,7 @@ export class SubmitKYCUseCase {
 
       if (dto.getIdIssueDate()) {
         if (dto.getIdIssueDate()! > now) {
-          Logger.warn("ID issue date in future", { userId });
+          Logger.warn("ID issue date in future", dto.getUserId());
           return Result.failure(
             new DomainError("ID issue date cannot be in the future")
           );
@@ -109,7 +103,7 @@ export class SubmitKYCUseCase {
           licenseUpdated = true;
 
           Logger.info("New license KYC created", {
-            userId,
+            userId: dto.getUserId(),
             driverId: driver.getId(),
             kycId: licenseKyc.getId(),
             licenseNumber: dto.getLicenseNumber(),
@@ -127,7 +121,7 @@ export class SubmitKYCUseCase {
           if (gearTypes && bodyTypes) {
             driver.updateEligibleVehicles(gearTypes, bodyTypes);
             Logger.info("Driver eligible vehicles updated", {
-              userId,
+              userId: dto.getUserId(),
               gearTypes,
               bodyTypes,
             });
@@ -139,7 +133,7 @@ export class SubmitKYCUseCase {
           driverUpdated = true;
 
           Logger.info("Driver license information updated", {
-            userId,
+            userId: dto.getUserId(),
             driverId: driver.getId(),
             kycStatusSet: KYCStatus.IN_REVIEW,
           });
@@ -154,7 +148,7 @@ export class SubmitKYCUseCase {
           idUpdated = true;
 
           Logger.info("New ID KYC created", {
-            userId,
+            userId: driver.getUserId(),
             driverId: driver.getId(),
             kycId: idKyc.getId(),
             idType: dto.getIdType(),
@@ -162,16 +156,16 @@ export class SubmitKYCUseCase {
         }
       }
 
-      const response: UpdateKycSubmissionResult = {
-        message: "KYC documents submitted successfully",
+      const response = new SubmitKYCResponseDto(
+        "KYC documents submitted successfully",
         kycDocuments,
         licenseUpdated,
         idUpdated,
-        driverUpdated,
-      };
+        driverUpdated
+      );
 
       Logger.info("KYC submission completed successfully", {
-        userId,
+        userId: driver.getUserId(),
         driverId: driver.getId(),
         kycDocuments,
         driverUpdated,
@@ -180,7 +174,7 @@ export class SubmitKYCUseCase {
       return Result.success(response);
     } catch (error) {
       Logger.error("KYC submission failed", {
-        userId,
+        userId: dto.getUserId(),
         error: error instanceof Error ? error.message : String(error),
       });
       return Result.failure(error as Error);

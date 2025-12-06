@@ -1,8 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { ForgotPasswordRequestUseCase } from "@application/use-cases/auth/ForgotPasswordRequestUseCase";
-import { ForgotPasswordVerifyUseCase } from "@application/use-cases/auth/ForgotPasswordVerifyUseCase";
-import { UpdatePasswordUseCase } from "@application/use-cases/auth/UpdatePasswordUseCase";
 import { ForgotPasswordRequestDto } from "@application/dto/auth/ForgotPasswordRequestDto";
 import { ForgotPasswordVerifyDto } from "@application/dto/auth/ForgotPasswordVerifyDto";
 import { UpdatePasswordDto } from "@application/dto/auth/UpdatePasswordDto";
@@ -12,16 +9,27 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { AuthMessages } from "@shared/constants/AuthConstants";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
 
 @injectable()
 export class PasswordController {
   constructor(
     @inject(TYPES.ForgotPasswordRequestUseCase)
-    private forgotPasswordRequestUseCase: ForgotPasswordRequestUseCase,
+    private forgotPasswordRequestUseCase: IUseCase<
+      ForgotPasswordRequestDto,
+      Promise<Result<void>>
+    >,
     @inject(TYPES.ForgotPasswordVerifyUseCase)
-    private forgotPasswordVerifyUseCase: ForgotPasswordVerifyUseCase,
+    private forgotPasswordVerifyUseCase: IUseCase<
+      ForgotPasswordVerifyDto,
+      Promise<Result<void>>
+    >,
     @inject(TYPES.UpdatePasswordUseCase)
-    private updatePasswordUseCase: UpdatePasswordUseCase
+    private updatePasswordUseCase: IUseCase<
+      UpdatePasswordDto,
+      Promise<Result<void>>
+    >
   ) {}
 
   async forgotPasswordRequest(req: Request, res: Response): Promise<void> {
@@ -92,7 +100,7 @@ export class PasswordController {
 
   async updatePassword(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.userId; // From auth middleware
+      const userId = req.user?.userId as string; // From auth middleware
       const dto = new UpdatePasswordDto({
         userId,
         currentPassword: req.body.currentPassword,

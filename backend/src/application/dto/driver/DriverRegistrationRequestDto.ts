@@ -4,6 +4,7 @@ import { DocumentType } from "@domain/value-objects/DocumentType";
 
 export class DriverRegistrationRequestDto {
   constructor(
+    private readonly userId: string,
     private readonly name: string,
     private readonly mobile: string,
     private readonly dob: Date,
@@ -31,6 +32,9 @@ export class DriverRegistrationRequestDto {
   ) {}
 
   // User profile getters
+  getUserId():string{
+    return this.userId;
+  }
   getName(): string {
     return this.name;
   }

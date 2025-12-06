@@ -1,7 +1,11 @@
+export interface GetDriverProfileInput{
+  driverId: string;
+
+}
 export class GetDriverProfileDto {
   public readonly driverId: string;
 
-  constructor(data: any) {
+  constructor(data: GetDriverProfileInput) {
     this.driverId = data.driverId;
   }
 

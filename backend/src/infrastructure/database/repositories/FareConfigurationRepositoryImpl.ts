@@ -1,16 +1,13 @@
 import { injectable } from "inversify";
-import { FareConfigurationRepository } from "@application/repositories/FareConfigurationRepository";
+import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
 import { FareConfiguration } from "@domain/entities/FareConfiguration";
-import {
-  FareConfigurationModel,
-  IFareConfigurationDocument,
-} from "../models/FareConfigurationModel";
+import { FareConfigurationModel } from "../models/FareConfigurationModel";
 import { FareConfigurationMapper } from "../mappers/FareConfigurationMapper";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
 export class FareConfigurationRepositoryImpl
-  implements FareConfigurationRepository
+  implements IFareConfigurationRepository
 {
   async findById(id: string): Promise<FareConfiguration | null> {
     try {

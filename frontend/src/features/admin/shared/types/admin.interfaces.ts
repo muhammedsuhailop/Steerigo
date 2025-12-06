@@ -78,26 +78,61 @@ export interface AdminUser {
   avatar?: string;
 }
 
-export interface AdminDriver {
+export interface AdminUser {
   id: string;
-  driverId?: string;
+  userId?: string;
+  name: string;
+  email: string;
+  mobile?: string;
+  status:
+    | "Active"
+    | "Inactive"
+    | "Suspended"
+    | "Pending Verification"
+    | "Blocked";
+  role: string;
+  totalBookings: number;
+  totalSpent: number;
+  lastBooked?: string;
+  createdAt: string;
+  updatedAt: string;
+  avatar?: string;
+}
+
+export interface AdminDriverUser {
   userId: string;
   userName: string;
   userEmail: string;
   userMobile: string;
+}
+
+export interface AdminDriverStatusInfo {
   status: string;
   kycStatus: string;
   licenceCategory: string;
   eligibleGearTypes: string[];
   eligibleBodyTypes: string[];
-  licenseIssueDate: string;
-  licenseExpiryDate: string;
+}
+
+export interface AdminDriverLicense {
+  licenseIssueDate: string; // ISO date string
+  licenseExpiryDate: string; // ISO date string
+}
+
+export interface AdminDriverStats {
   totalRides: number;
   totalEarnings: number;
   rating: number;
-  lastRideDate: string | null;
-  profileImage?: string;
-  createdAt: string;
+  lastRideDate: string | null; // ISO or null
+}
+export interface AdminDriver {
+  driverId: string;
+  user: AdminDriverUser;
+  statusInfo: AdminDriverStatusInfo;
+  license: AdminDriverLicense;
+  stats: AdminDriverStats;
+  createdAt: string; // ISO date string
+  profileImage?: string; 
 }
 
 // KYC TYPES

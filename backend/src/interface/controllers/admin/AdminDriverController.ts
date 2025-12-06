@@ -1,11 +1,5 @@
 import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
-import { GetDriversUseCase } from "@application/use-cases/admin/GetDriversUseCase";
-import { DriverActionUseCase } from "@application/use-cases/admin/DriverActionUseCase";
-import { GetDriverProfileUseCase } from "@application/use-cases/admin/GetDriverProfileUseCase";
-import { GetKycRequestsUseCase } from "@application/use-cases/admin/GetKycRequestsUseCase";
-import { UpdateKycStatusUseCase } from "@application/use-cases/admin/UpdateKycStatusUseCase";
-import { GetKycRequestByIdUseCase } from "@application/use-cases/admin/GetKycRequestByIdUseCase";
 import { GetDriversRequestDto } from "@application/dto/admin/GetDriversRequestDto";
 import { DriverActionRequestDto } from "@application/dto/admin/DriverActionRequestDto";
 import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
@@ -13,31 +7,72 @@ import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsR
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { ApiResponse } from "@shared/types/Common";
-import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
-import { UpdateDriverKycStatusUseCase } from "@application/use-cases/admin/UpdateDriverKycStatusUseCase";
 import { UpdateDriverKycStatusRequestDto } from "@application/dto/admin/UpdateDriverKycStatusRequestDto";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { Result } from "@shared/utils/Result";
+import {
+  AdminGetDriverProfileResponseDto,
+  GetDriversResponseDto,
+} from "@application/dto/admin";
+import { GetKycRequestByIdResponseDto } from "@application/dto/admin/GetKycRequestByIdResponseDto";
+import { GetKycRequestsResponseDto } from "@application/dto/admin/GetKycRequestsResponseDto";
+import { UpdateDriverKycStatusResponseDto } from "@application/dto/admin/UpdateDriverKycStatusResponseDto";
+import { KycDocumentResponseDto } from "@application/dto/admin/KycDocumentResponseDto";
 
 @injectable()
 export class AdminDriverController {
   constructor(
     @inject(TYPES.GetDriversUseCase)
-    private getDriversUseCase: GetDriversUseCase,
+    private getDriversUseCase: IUseCase<
+      GetDriversRequestDto,
+      Promise<Result<GetDriversResponseDto>>
+    >,
     @inject(TYPES.DriverActionUseCase)
-    private driverActionUseCase: DriverActionUseCase,
+    private driverActionUseCase: IUseCase<
+      DriverActionRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          driverId: string;
+          newStatus: string;
+        }>
+      >
+    >,
     @inject(TYPES.GetDriverProfileUseCase)
-    private getDriverProfileUseCase: GetDriverProfileUseCase,
+    private getDriverProfileUseCase: IUseCase<
+      GetDriverProfileRequestDto,
+      Promise<Result<AdminGetDriverProfileResponseDto>>
+    >,
     @inject(TYPES.GetKycRequestsUseCase)
-    private getKycRequestsUseCase: GetKycRequestsUseCase,
+    private getKycRequestsUseCase: IUseCase<
+      GetKycRequestsRequestDto,
+      Promise<Result<GetKycRequestsResponseDto>>
+    >,
     @inject(TYPES.UpdateKycStatusUseCase)
-    private updateKycStatusUseCase: UpdateKycStatusUseCase,
+    private updateKycStatusUseCase: IUseCase<
+      UpdateKycStatusRequestDto,
+      Promise<
+        Result<{
+          message: string;
+          kycDocument: KycDocumentResponseDto;
+          driverKycStatusUpdated: boolean;
+        }>
+      >
+    >,
     @inject(TYPES.GetKycRequestByIdUseCase)
-    private getKycRequestByIdUseCase: GetKycRequestByIdUseCase,
+    private getKycRequestByIdUseCase: IUseCase<
+      GetKycRequestByIdRequestDto,
+      Promise<Result<GetKycRequestByIdResponseDto>>
+    >,
     @inject(TYPES.UpdateDriverKycStatusUseCase)
-    private updateDriverKycStatusUseCase: UpdateDriverKycStatusUseCase
+    private updateDriverKycStatusUseCase: IUseCase<
+      UpdateDriverKycStatusRequestDto,
+      Promise<Result<UpdateDriverKycStatusResponseDto>>
+    >
   ) {}
 
   async getDrivers(req: Request, res: Response): Promise<void> {
@@ -56,7 +91,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.DRIVERS_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -90,7 +125,7 @@ export class AdminDriverController {
           driverId: data.driverId,
           newStatus: data.newStatus,
         },
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -118,7 +153,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.DRIVER_PROFILE_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -144,7 +179,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.KYC_REQUESTS_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -180,7 +215,7 @@ export class AdminDriverController {
           kycDocument: data.kycDocument,
           driverKycStatusUpdated: data.driverKycStatusUpdated,
         },
-      } as ApiResponse<any>);
+      } as ApiResponse<unknown>);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
@@ -206,7 +241,7 @@ export class AdminDriverController {
         success: true,
         message: ADMIN_MESSAGES.DRIVER.KYC_DOCUMENT_FETCHED,
         data: result.getValue(),
-      } as ApiResponse<any>);
+      } as ApiResponse);
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
