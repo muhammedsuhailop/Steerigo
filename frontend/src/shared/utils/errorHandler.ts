@@ -241,12 +241,32 @@ export class ErrorHandler {
     requestId: string,
     context?: string
   ): BaseError {
+
+    if (import.meta.env.DEV) {
+      console.log(
+        "%c[ErrorHandler] handleConflict invoked",
+        "color:#f39c12;font-weight:bold;",
+        { data, context }
+      );
+    }
+    let backendMessage = "Resource conflict";
+
+    if (data?.error?.message) {
+      backendMessage = data.error.message;
+    } else if (typeof (data as any)?.message === "string") {
+      backendMessage = (data as any).message;
+    } else if (typeof (data as any)?.error === "string") {
+      backendMessage = (data as any).error;
+    }
+
     return {
       type: ErrorType.CLIENT,
       code: "CONFLICT",
-      message: data?.error.message ?? "Resource conflict",
+      message: backendMessage,
       userMessage:
-        data?.error.userMessage ?? "This action conflicts with existing data.",
+        data?.error.userMessage ??
+        backendMessage ??
+        "This action conflicts with existing data.",
       severity: ErrorSeverity.MEDIUM,
       timestamp,
       requestId,

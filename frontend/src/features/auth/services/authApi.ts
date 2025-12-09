@@ -227,6 +227,7 @@ export const authApi = createApi({
       query: () => ({
         url: "/auth/me",
         method: "GET",
+        skipErrorHandling: true,
       }),
       providesTags: ["User"],
     }),
