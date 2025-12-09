@@ -6,6 +6,10 @@ import {
   waitForTokenRefresh,
   isTokenRefreshing,
 } from "./tokenRefresh";
+import type { BaseError } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
+import { errorHandler } from "@/shared/utils/errorHandler";
+import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
+
 import type { RootState } from "@/app/store";
 
 // Arguments type for custom baseQuery
@@ -20,10 +24,8 @@ export interface AxiosBaseQueryArgs {
 }
 
 // Error type returned by baseQuery
-export interface AxiosBaseQueryError {
-  status: number | string;
-  data: any;
-  error?: string;
+export interface AxiosBaseQueryError extends BaseError {
+  retryCount?: number;
 }
 
 // Update Redux store with new tokens
@@ -53,7 +55,7 @@ const clearReduxAuth = async () => {
 export const axiosBaseQuery = (): BaseQueryFn<
   AxiosBaseQueryArgs,
   unknown,
-  AxiosBaseQueryError
+  BaseError
 > => {
   return async ({
     url,
@@ -101,7 +103,6 @@ export const axiosBaseQuery = (): BaseQueryFn<
           } else {
             // Start new refresh
             newAccessToken = await refreshAccessToken();
-
             // Update Redux store
             const newRefreshToken = localStorage.getItem("refreshToken");
             if (newRefreshToken) {
@@ -127,24 +128,28 @@ export const axiosBaseQuery = (): BaseQueryFn<
           // Refresh failed - clear auth and return error
           await clearReduxAuth();
 
+          const parsedError = errorHandler.parseApiError(
+            refreshError,
+            "Token Refresh Failed"
+          );
+
+          ErrorDispatcher.dispatchError(parsedError);
+
           return {
-            error: {
-              status: 401,
-              data: "Session expired. Please login again.",
-              error: "Unauthorized",
-            },
+            error: parsedError as BaseError,
           };
         }
       }
 
-      // Return error for other cases
-      return {
-        error: {
-          status: err.response?.status || err.code || "UNKNOWN_ERROR",
-          data: err.response?.data || err.message,
-          error: err.message,
-        },
-      };
+      // Other errors
+      const parsedError = errorHandler.parseApiError(err, `RTK: ${url}`);
+
+      // Dispatch unless skipped
+      if (!skipErrorHandling) {
+        ErrorDispatcher.dispatchError(parsedError, false);
+      }
+
+      return { error: parsedError as BaseError };
     }
   };
 };

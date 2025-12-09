@@ -1,4 +1,4 @@
-import { errorHandler } from "@/shared/utils/errorUtils";
+import { errorHandler } from "@/shared/utils/errorHandler";
 import {
   BaseError,
   ErrorType,

@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux"; 
 import { BrowserRouter } from "react-router-dom";
 import { store } from "./store";
 import { AppRouter } from "@/routing/AppRouter";
 import { initializeAuth } from "@/features/auth/store/authSlice";
+import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService"; 
 import {
   ErrorBoundary,
   ToastContainer,
@@ -11,18 +12,23 @@ import {
 } from "@/shared/components/ui";
 
 const AppContent: React.FC = () => {
+  const dispatch = useDispatch(); 
+
   useEffect(() => {
+    ErrorDispatcher.setDispatch(dispatch);
+
     // Initialize auth state from localStorage on app load
     store.dispatch(initializeAuth());
-  }, []);
+  }, [dispatch]); 
 
   return (
     <>
-      <AppRouter />
-
       {/* Global Error Handling Components */}
-      <ToastContainer />
-      <GlobalErrorModal />
+      <ErrorBoundary>
+        <AppRouter />
+        <ToastContainer />
+        <GlobalErrorModal />
+      </ErrorBoundary>
     </>
   );
 };
@@ -30,11 +36,9 @@ const AppContent: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <ErrorBoundary>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </ErrorBoundary>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </Provider>
   );
 };

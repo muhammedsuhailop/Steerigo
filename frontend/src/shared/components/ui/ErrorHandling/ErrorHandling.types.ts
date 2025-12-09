@@ -46,17 +46,17 @@ export interface ServerError extends BaseError {
   url: string;
 }
 
-export interface ApiErrorResponse {
+export interface ApiErrorResponse<T = any> {
   success: false;
+  data: null;
   error: {
-    type: string;
     code: string;
     message: string;
-    userMessage?: string;
+    userMessage: string;
+    details?: T;
     field?: string;
-    details?: Record<string, any>;
-    requestId?: string;
   };
+  requestId: string;
   timestamp: string;
 }
 
