@@ -32,6 +32,7 @@ export const authApi = createApi({
         method: "POST",
         data: credentials,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -45,6 +46,7 @@ export const authApi = createApi({
         method: "POST",
         data: userData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -56,6 +58,7 @@ export const authApi = createApi({
         url: "/auth/google",
         method: "GET",
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -68,6 +71,7 @@ export const authApi = createApi({
         method: "POST",
         data: callbackData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -78,6 +82,7 @@ export const authApi = createApi({
         method: "POST",
         data: otpData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -91,6 +96,7 @@ export const authApi = createApi({
         method: "POST",
         data: { email },
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -100,6 +106,7 @@ export const authApi = createApi({
         method: "POST",
         data: otpData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
       invalidatesTags: ["Auth"],
     }),
@@ -113,6 +120,7 @@ export const authApi = createApi({
         method: "POST",
         data: { email },
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -125,6 +133,7 @@ export const authApi = createApi({
         method: "POST",
         data: emailData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -137,6 +146,7 @@ export const authApi = createApi({
         method: "POST",
         data: resetData,
         skipAuth: true,
+        skipErrorHandling: true,
       }),
     }),
 
@@ -148,6 +158,7 @@ export const authApi = createApi({
         url: "/auth/update-password",
         method: "PUT",
         data: passwordData,
+        skipErrorHandling: true,
       }),
       invalidatesTags: ["Auth"],
     }),
