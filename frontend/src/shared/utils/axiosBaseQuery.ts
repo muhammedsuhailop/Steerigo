@@ -1,18 +1,22 @@
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import type { AxiosRequestConfig, AxiosError } from "axios";
+
 import { api } from "./api";
 import {
   refreshAccessToken,
   waitForTokenRefresh,
   isTokenRefreshing,
 } from "./tokenRefresh";
+
 import type { BaseError } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
 import {
   ErrorType,
   ErrorSeverity,
 } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
+
 import { errorHandler } from "@/shared/utils/errorHandler";
 import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
+
 import type { RootState } from "@/app/store";
 
 // Arguments for baseQuery
@@ -53,20 +57,69 @@ const clearReduxAuth = async () => {
   }
 };
 
-// Extract backend error message
-const extractBackendErrorMessage = (error: any): string | null => {
+// Normalize axios error into a predictable shape
+const normalizeAxiosError = (err: any) => {
   try {
-    if (error?.data) {
-      if (typeof error.data.error === "string") return error.data.error;
-      if (typeof error.data.message === "string") return error.data.message;
+    const isAxios = Boolean(err && err.isAxiosError);
+    const normalized: {
+      status?: number | string;
+      data?: any;
+      headers?: any;
+      request?: any;
+      original?: any;
+      message?: string;
+    } = {
+      original: err,
+      message: (err && err.message) || "Unknown error",
+    };
+
+    if (isAxios) {
+      const axiosErr = err as AxiosError;
+      normalized.request = axiosErr.request ?? null;
+      normalized.headers = axiosErr.response?.headers ?? null;
+
+      if (axiosErr.response) {
+        normalized.status = axiosErr.response.status;
+        normalized.data = axiosErr.response.data ?? axiosErr.response;
+      } else if (axiosErr.request) {
+        normalized.status = "NO_RESPONSE";
+        normalized.data = { message: "No response received from server" };
+      } else {
+        normalized.status = "UNKNOWN";
+        normalized.data = {
+          message: axiosErr.message ?? "Unknown axios error",
+        };
+      }
+    } else {
+      normalized.status = (err && err.status) || "UNKNOWN";
+      normalized.data = (err && (err.data ?? err)) || {
+        message: err?.message ?? "Unknown error",
+      };
     }
 
-    if (error?.response?.data) {
-      if (typeof error.response.data.error === "string")
-        return error.response.data.error;
-      if (typeof error.response.data.message === "string")
-        return error.response.data.message;
-    }
+    return normalized;
+  } catch (e) {
+    return {
+      status: "UNKNOWN",
+      data: { message: "Unknown error" },
+      original: err,
+      message: err?.message ?? "Unknown error",
+    };
+  }
+};
+
+// Extract backend error message from normalized error
+const extractBackendErrorMessage = (errorNormalized: any): string | null => {
+  try {
+    const data =
+      errorNormalized?.data ?? errorNormalized?.original?.response?.data;
+
+    if (!data) return null;
+    if (typeof data === "string") return data;
+    if (typeof data.error === "string") return data.error;
+    if (typeof data.message === "string") return data.message;
+    if (typeof data.msg === "string") return data.msg;
+    if (typeof data.detail === "string") return data.detail;
 
     return null;
   } catch {
@@ -106,11 +159,14 @@ export const axiosBaseQuery = (): BaseQueryFn<
       const result = await api.request(config);
       return { data: result.data };
     } catch (axiosError) {
-      const err = axiosError as AxiosError;
+      // normalize error immediately
+      const normalized = normalizeAxiosError(axiosError);
+      const status = normalized.status;
+      const backendMessage = extractBackendErrorMessage(normalized);
 
-      // Handle expired access token
+      // handle expired access token (protected routes only)
       if (
-        err.response?.status === 401 &&
+        status === 401 &&
         !skipAuth &&
         !url.includes("/auth/refresh-token") &&
         !url.includes("/auth/login") &&
@@ -123,8 +179,8 @@ export const axiosBaseQuery = (): BaseQueryFn<
             newAccessToken = await waitForTokenRefresh();
           } else {
             newAccessToken = await refreshAccessToken();
-
             const newRefreshToken = localStorage.getItem("refreshToken");
+
             if (newRefreshToken) {
               await updateReduxTokens(newAccessToken, newRefreshToken);
             }
@@ -149,12 +205,13 @@ export const axiosBaseQuery = (): BaseQueryFn<
             refreshError,
             "Token Refresh Failed"
           );
+          parsedError.timestamp = new Date().toISOString(); // ensure serializable
           ErrorDispatcher.dispatchError(parsedError);
           return { error: parsedError as BaseError };
         }
       }
 
-      // Direct backend message extraction for auth endpoints
+      // treat auth endpoints specially so backend message surfaces to UI
       const isAuthEndpoint =
         url.includes("/auth/login") ||
         url.includes("/auth/signup") ||
@@ -163,42 +220,52 @@ export const axiosBaseQuery = (): BaseQueryFn<
         url.includes("/auth/reset-password");
 
       let parsedError: BaseError;
-      const backendMessage = extractBackendErrorMessage(err);
 
       if (backendMessage && isAuthEndpoint) {
-        const statusCode = err.response?.status || 500;
-        const now = new Date();
-
+        const statusCode = typeof status === "number" ? status : 500;
         parsedError = {
           type:
             statusCode === 401 ? ErrorType.AUTHENTICATION : ErrorType.CLIENT,
           code: statusCode === 401 ? "UNAUTHORIZED" : "BAD_REQUEST",
           message: backendMessage,
           userMessage: backendMessage,
-          severity: ErrorSeverity.MEDIUM,
-          timestamp: now.toISOString(),
-          requestId: Math.random().toString(36).substring(2, 15),
+          severity:
+            statusCode === 401 ? ErrorSeverity.MEDIUM : ErrorSeverity.MEDIUM,
+          timestamp: new Date().toISOString(),
+          requestId:
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15),
           context: `API: ${url}`,
         } as any as BaseError;
 
+        // return early without dispatching error; caller should handle UI
         return { error: parsedError };
-      } else {
-        parsedError = errorHandler.parseApiError(err, `RTK: ${url}`);
-
-        if (backendMessage) {
-          parsedError = {
-            ...parsedError,
-            userMessage: backendMessage,
-            message: backendMessage,
-          };
-        }
-
-        if (!skipErrorHandling) {
-          ErrorDispatcher.dispatchError(parsedError, false);
-        }
-
-        return { error: parsedError as BaseError };
       }
+
+      // fallback to standard parser
+      parsedError = errorHandler.parseApiError(
+        normalized.original ?? normalized,
+        `RTK: ${url}`
+      );
+
+      // surface backend message when present
+      if (backendMessage) {
+        parsedError = {
+          ...parsedError,
+          userMessage: backendMessage,
+          message: backendMessage,
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        parsedError.timestamp = new Date().toISOString();
+      }
+
+      // dispatch error unless skipped
+      if (!skipErrorHandling) {
+        ErrorDispatcher.dispatchError(parsedError, false);
+      }
+
+      return { error: parsedError as BaseError };
     }
   };
 };

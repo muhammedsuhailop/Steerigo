@@ -21,7 +21,7 @@ export interface BaseError {
   message: string;
   userMessage?: string;
   severity: ErrorSeverity;
-  timestamp: Date;
+  timestamp: string;
   requestId?: string;
   field?: string;
   details?: Record<string, any>;

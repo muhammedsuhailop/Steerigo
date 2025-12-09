@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
       message: error.message,
       userMessage: "Something went wrong with this component.",
       severity: ErrorSeverity.HIGH,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       context: "React Error Boundary",
       details: { stack: error.stack, name: error.name },
     };
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
       message: error.message,
       userMessage: "Something went wrong with this component.",
       severity: ErrorSeverity.HIGH,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       context: "React Error Boundary",
       details: {
         stack: error.stack,

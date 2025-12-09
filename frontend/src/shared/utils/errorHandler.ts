@@ -43,21 +43,29 @@ export class ErrorHandler {
       "ENOTFOUND",
       "ERR_NETWORK_UNREACHABLE",
     ];
-    return networkErrorCodes.includes(error.code);
+    return networkErrorCodes.includes(error?.code);
   }
 
   // Extract or generate a request ID
   private extractRequestId(error: any): string {
     return (
-      error.response?.headers?.["x-request-id"] ||
-      error.response?.data?.requestId ||
+      error?.response?.headers?.["x-request-id"] ||
+      error?.response?.data?.requestId ||
       this.generateRequestId()
     );
   }
 
-  // Parse Axios error into BaseError
+  // Parse Axios or normalized error into BaseError
   public parseApiError(error: any, context?: string): BaseError {
-    const timestamp = new Date();
+    // if already parsed into BaseError-like, return as-is
+    if (
+      error &&
+      (error.type || error.code === "NO_RESPONSE" || error.userMessage)
+    ) {
+      return error as BaseError;
+    }
+
+    const timestamp = new Date().toISOString();
     const requestId = this.extractRequestId(error);
 
     if (this.isNetworkError(error)) {
@@ -70,11 +78,12 @@ export class ErrorHandler {
         timestamp,
         requestId,
         context,
-        details: { originalError: error.message },
-      } as NetworkError;
+        details: { originalError: error?.message ?? error },
+      } as unknown as NetworkError;
     }
 
-    if (!error.response) {
+    // no response -> network/no-response
+    if (!error?.response) {
       return {
         type: ErrorType.NETWORK,
         code: "NO_RESPONSE",
@@ -85,7 +94,7 @@ export class ErrorHandler {
         timestamp,
         requestId,
         context,
-      } as NetworkError;
+      } as unknown as NetworkError;
     }
 
     const { status, data } = error.response;
@@ -94,14 +103,19 @@ export class ErrorHandler {
     switch (status) {
       case 400:
         return this.handleBadRequest(apiError, timestamp, requestId, context);
+
       case 401:
         return this.handleUnauthorized(apiError, timestamp, requestId, context);
+
       case 403:
         return this.handleForbidden(apiError, timestamp, requestId, context);
+
       case 404:
         return this.handleNotFound(apiError, timestamp, requestId, context);
+
       case 409:
         return this.handleConflict(apiError, timestamp, requestId, context);
+
       case 422:
         return this.handleValidationError(
           apiError,
@@ -109,8 +123,10 @@ export class ErrorHandler {
           requestId,
           context
         );
+
       case 429:
         return this.handleRateLimit(apiError, timestamp, requestId, context);
+
       case 500:
       case 502:
       case 503:
@@ -123,6 +139,7 @@ export class ErrorHandler {
           error.config?.url,
           context
         );
+
       default:
         return this.handleUnknownError(
           status,
@@ -136,7 +153,7 @@ export class ErrorHandler {
 
   private handleBadRequest(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -155,17 +172,25 @@ export class ErrorHandler {
     };
   }
 
+  // handleUnauthorized respects backend messages (e.g., invalid credentials)
   private handleUnauthorized(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
+    const backendMessage = data?.error.message;
+    const backendUserMessage = data?.error.userMessage;
+
+    const defaultMessage = backendMessage ?? "Authentication failed";
+    const defaultUserMessage =
+      backendUserMessage ?? "Your session has expired. Please log in again.";
+
     return {
       type: ErrorType.AUTHENTICATION,
       code: "UNAUTHORIZED",
-      message: data?.error.message ?? "Authentication failed",
-      userMessage: "Your session has expired. Please log in again.",
+      message: defaultMessage,
+      userMessage: defaultUserMessage,
       severity: ErrorSeverity.HIGH,
       timestamp,
       requestId,
@@ -175,7 +200,7 @@ export class ErrorHandler {
 
   private handleForbidden(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -194,7 +219,7 @@ export class ErrorHandler {
 
   private handleNotFound(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -212,7 +237,7 @@ export class ErrorHandler {
 
   private handleConflict(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -231,7 +256,7 @@ export class ErrorHandler {
 
   private handleValidationError(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): ValidationError {
@@ -254,7 +279,7 @@ export class ErrorHandler {
 
   private handleRateLimit(
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -274,7 +299,7 @@ export class ErrorHandler {
   private handleServerError(
     status: number,
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     url?: string,
     context?: string
@@ -296,7 +321,7 @@ export class ErrorHandler {
   private handleUnknownError(
     status: number,
     data: ApiErrorResponse | null,
-    timestamp: Date,
+    timestamp: string,
     requestId: string,
     context?: string
   ): BaseError {
@@ -327,7 +352,11 @@ export class ErrorHandler {
       ...error,
       userAgent: navigator.userAgent,
       url: window.location.href,
-      timestamp: error.timestamp.toISOString(),
+      timestamp:
+        typeof error.timestamp === "string"
+          ? error.timestamp
+          : (error.timestamp as any)?.toISOString?.() ||
+            new Date().toISOString(),
     };
 
     if (import.meta.env.DEV) {
