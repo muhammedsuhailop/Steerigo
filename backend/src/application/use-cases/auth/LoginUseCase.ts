@@ -97,7 +97,7 @@ export class LoginUseCase
       Logger.warn("Login failed - user not found", {
         email: dto.getEmailValue(),
       });
-      return Result.failure<User, Error>(new InvalidCredentialsError());
+      return Result.failure(new InvalidCredentialsError());
     }
 
     if (!user.canLogin()) {
@@ -125,7 +125,7 @@ export class LoginUseCase
         Logger.warn("Login failed - invalid password", {
           email: dto.getEmailValue(),
         });
-        return Result.failure<User, Error>(new InvalidCredentialsError());
+        return Result.failure(new InvalidCredentialsError());
       }
     }
 

@@ -43,7 +43,7 @@ export class PasswordService implements IPasswordService {
       return isMatch;
     } catch (error) {
       Logger.error("Error comparing password", error);
-      throw new Error("Failed to compare password");
+      return false;
     }
   }
 
