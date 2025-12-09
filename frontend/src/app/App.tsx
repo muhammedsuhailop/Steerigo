@@ -8,7 +8,6 @@ import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
 import {
   ErrorBoundary,
   ToastContainer,
-  GlobalErrorModal,
 } from "@/shared/components/ui";
 
 const AppContent: React.FC = () => {
@@ -27,7 +26,6 @@ const AppContent: React.FC = () => {
       <ErrorBoundary>
         <AppRouter />
         <ToastContainer />
-        <GlobalErrorModal />
       </ErrorBoundary>
     </>
   );

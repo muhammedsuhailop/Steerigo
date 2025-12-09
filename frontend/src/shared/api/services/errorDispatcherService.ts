@@ -1,8 +1,5 @@
 import type { AppDispatch } from "@/app/store";
-import {
-  addError,
-  setGlobalError,
-} from "@/shared/components/ui/ErrorHandling/errorSlice";
+import { addError } from "@/shared/components/ui/ErrorHandling/errorSlice";
 import {
   BaseError,
   ErrorSeverity,
@@ -10,61 +7,180 @@ import {
 } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
 import { errorHandler } from "@/shared/utils/errorHandler";
 
-// Service to dispatch errors to Redux and show UI (toasts/modals) based on severity
+// Centralized service for routing errors, logging, and dispatching toast notifications
 export class ErrorDispatcher {
   private static dispatch: AppDispatch | null = null;
 
-  // Initialize with Redux dispatch 
+  // Initialize dispatcher with Redux dispatch
   public static setDispatch(dispatch: AppDispatch): void {
     ErrorDispatcher.dispatch = dispatch;
-    console.log("ErrorDispatcher initialized");
+    if (import.meta.env.DEV) {
+      console.log("ErrorDispatcher initialized");
+    }
   }
 
-  // Main method: dispatch error to Redux. Routes to modal or toast based on severity.
+  // Core method to dispatch a single error
   public static dispatchError(
     error: BaseError,
     showToast: boolean = true
   ): void {
     if (!ErrorDispatcher.dispatch) {
-      console.warn(
-        "ErrorDispatcher not initialized. Call ErrorDispatcher.setDispatch(dispatch) in App.tsx"
-      );
+      console.warn("ErrorDispatcher not initialized");
       errorHandler.logError(error);
       return;
     }
 
-    // Log for debugging/monitoring
-    errorHandler.logError(error);
+    const normalizedError: BaseError = {
+      ...error,
+      timestamp: error.timestamp || new Date().toISOString(),
+      requestId: error.requestId || ErrorDispatcher.generateRequestId(),
+      severity: error.severity || ErrorSeverity.MEDIUM,
+    };
 
-    // HIGH/CRITICAL -> show modal
-    if (
-      error.severity === ErrorSeverity.HIGH ||
-      error.severity === ErrorSeverity.CRITICAL
-    ) {
-      console.debug(`Dispatching MODAL error: ${error.code}`);
-      ErrorDispatcher.dispatch(setGlobalError(error));
+    // Log error
+    errorHandler.logError(normalizedError);
+
+    // Show toast if enabled
+    if (showToast) {
+      if (import.meta.env.DEV) {
+        console.debug(
+          `Toast: [${normalizedError.severity}] ${normalizedError.code} - ${normalizedError.userMessage}`
+        );
+      }
+      ErrorDispatcher.dispatch(addError(normalizedError));
     }
-    // LOW/MEDIUM + showToast -> show toast
-    else if (showToast) {
-      console.debug(`Dispatching TOAST error: ${error.code}`);
-      ErrorDispatcher.dispatch(addError(error));
-    }
-    // Otherwise just log (no UI feedback)
   }
 
-  // Map error type to user-facing title
-  private static getTitleForType(type: ErrorType): string {
-    const titles: Record<string, string> = {
-      [ErrorType.AUTHENTICATION]: "Session Expired",
+  // Dispatch multiple errors
+  public static dispatchErrors(
+    errors: BaseError[],
+    showToast: boolean = true
+  ): void {
+    errors.forEach((error) => {
+      ErrorDispatcher.dispatchError(error, showToast);
+    });
+  }
+
+  // Parse raw errors and dispatch them with context
+  public static dispatchWithContext(
+    error: BaseError | Error | any,
+    context: string,
+    severity: ErrorSeverity = ErrorSeverity.MEDIUM
+  ): void {
+    let baseError: BaseError;
+
+    if (error instanceof Error) {
+      baseError = {
+        type: ErrorType.CLIENT,
+        code: "ERROR",
+        message: error.message,
+        userMessage: error.message,
+        severity,
+        timestamp: new Date().toISOString(),
+        requestId: ErrorDispatcher.generateRequestId(),
+        context,
+        details: {
+          name: error.name,
+          stack: error.stack,
+        },
+      };
+    } else if (error && typeof error === "object" && "type" in error) {
+      baseError = {
+        ...error,
+        context: context || error.context,
+        severity: severity || error.severity,
+      };
+    } else {
+      baseError = {
+        type: ErrorType.UNKNOWN,
+        code: "UNKNOWN_ERROR",
+        message: String(error ?? "Unknown error occurred"),
+        userMessage: "An unexpected error occurred.",
+        severity,
+        timestamp: new Date().toISOString(),
+        requestId: ErrorDispatcher.generateRequestId(),
+        context,
+      };
+    }
+
+    ErrorDispatcher.dispatchError(baseError);
+  }
+
+  // Get icon name for toast
+  public static getIconForSeverity(severity: ErrorSeverity): string {
+    switch (severity) {
+      case ErrorSeverity.LOW:
+        return "info";
+      case ErrorSeverity.MEDIUM:
+        return "alert-circle";
+      case ErrorSeverity.HIGH:
+      case ErrorSeverity.CRITICAL:
+        return "alert-triangle";
+      default:
+        return "help-circle";
+    }
+  }
+
+  // Get color for toast
+  public static getColorForSeverity(severity: ErrorSeverity): string {
+    switch (severity) {
+      case ErrorSeverity.LOW:
+        return "blue";
+      case ErrorSeverity.MEDIUM:
+        return "yellow";
+      case ErrorSeverity.HIGH:
+        return "red";
+      case ErrorSeverity.CRITICAL:
+        return "dark-red";
+      default:
+        return "gray";
+    }
+  }
+
+  // Get standard title per error type
+  public static getTitleForType(type: ErrorType): string {
+    const titles: Record<ErrorType, string> = {
+      [ErrorType.AUTHENTICATION]: "Authentication Failed",
       [ErrorType.AUTHORIZATION]: "Access Denied",
-      [ErrorType.VALIDATION]: "Validation Error",
+      [ErrorType.VALIDATION]: "Invalid Input",
       [ErrorType.NETWORK]: "Connection Error",
       [ErrorType.SERVER]: "Server Error",
-      [ErrorType.CLIENT]: "Invalid Request",
+      [ErrorType.CLIENT]: "Request Error",
       [ErrorType.UNKNOWN]: "Unknown Error",
     };
     return titles[type] || `Error: ${type}`;
   }
+
+  // Determine if error can be retried
+  public static isRetryable(error: BaseError): boolean {
+    const retryableCodes = [
+      "NETWORK_ERROR",
+      "TIMEOUT",
+      "SERVER_ERROR",
+      "NO_RESPONSE",
+      "RATE_LIMIT",
+    ];
+    return retryableCodes.includes(error.code);
+  }
+
+  // Determine if user must act based on error type
+  public static isUserActionable(error: BaseError): boolean {
+    return [
+      ErrorType.VALIDATION,
+      ErrorType.AUTHENTICATION,
+      ErrorType.AUTHORIZATION,
+    ].includes(error.type);
+  }
+
+  // Generate unique request ID
+  private static generateRequestId(): string {
+    return (
+      "err_" +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
+  }
 }
 
+// Export singleton
 export const errorDispatcher = ErrorDispatcher;
