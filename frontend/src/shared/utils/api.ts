@@ -96,7 +96,8 @@ api.interceptors.response.use(
       ErrorDispatcher.dispatchError(parsedError);
     }
 
-    return Promise.reject(parsedError);
+    (error as any).parsedError = parsedError;
+    return Promise.reject(error);
   }
 );
 

@@ -182,7 +182,7 @@ export const axiosBaseQuery = (): BaseQueryFn<
             const newRefreshToken = localStorage.getItem("refreshToken");
 
             if (newRefreshToken) {
-              await updateReduxTokens(newAccessToken, newRefreshToken);
+              await updateReduxTokens(newAccessToken, "");
             }
           }
 
