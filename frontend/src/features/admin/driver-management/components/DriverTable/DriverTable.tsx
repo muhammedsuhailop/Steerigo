@@ -4,6 +4,7 @@ import { Table, Badge, Button, OnlineStatus } from "@/shared/components/ui";
 import type { TableProps } from "@/shared/components/ui/Table/Table.types";
 import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
 import { DriverAction } from "../../hooks";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 
 interface DriverTableProps {
   drivers: AdminDriver[];
@@ -49,7 +50,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
       string,
       { variant: BadgeVariant; text: string }
     > = {
-      InReview: { variant: "outline", text: "KYC In Review" },
+      InReview: { variant: "warning", text: "KYC In Review" },
       Approved: { variant: "success", text: "KYC Approved" },
       Rejected: { variant: "danger", text: "KYC Rejected" },
     };
@@ -74,35 +75,13 @@ export const DriverTable: React.FC<DriverTableProps> = ({
 
     return (
       <div className="flex space-x-2">
-        <Button
-          size="xs"
-          variant="outline"
+        <button
+          className="px-2 py-1 text-xs border border-gray-300 rounded flex
+           items-center gap-1 hover:bg-gray-100 hover:border-gray-400 "
           onClick={() => navigate(`/admin/drivers/${driverId}`)}
         >
-          View
-        </Button>
-
-        {status === "Active" && (
-          <Button
-            size="xs"
-            variant="secondary"
-            isLoading={isLoading}
-            onClick={() => onDriverAction(driverId, "block")}
-          >
-            Block
-          </Button>
-        )}
-
-        {status === "Blocked" && (
-          <Button
-            size="xs"
-            variant="success"
-            isLoading={isLoading}
-            onClick={() => onDriverAction(driverId, "activate")}
-          >
-            Activate
-          </Button>
-        )}
+          <MdOutlineRemoveRedEye /> View
+        </button>
       </div>
     );
   };

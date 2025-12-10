@@ -5,8 +5,6 @@ import type { TableProps } from "@/shared/components/ui/Table/Table.types";
 import type { KYCRequest, KYCAction } from "../../../../shared/types";
 import {
   MdVisibility,
-  MdCheckCircle,
-  MdCancel,
   MdDescription,
   MdCalendarToday,
   MdPhone,
@@ -174,49 +172,6 @@ export const KYCRequestsTable: React.FC<KYCRequestsTableProps> = ({
         >
           View
         </Button>
-
-        {isPending && (
-          <>
-            <Button
-              size="xs"
-              variant="success"
-              isLoading={isLoading}
-              disabled={isLoading}
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  await onKYCAction(request.kyc.id, "approve");
-                } catch (error) {
-                  console.error("Approve action failed:", error);
-                }
-              }}
-              leftIcon={!isLoading ? <MdCheckCircle /> : undefined}
-              className="!px-3"
-              title="Approve KYC"
-            >
-              Approve
-            </Button>
-            <Button
-              size="xs"
-              variant="danger"
-              isLoading={isLoading}
-              disabled={isLoading}
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  await onKYCAction(request.kyc.id, "reject");
-                } catch (error) {
-                  console.error("Reject action failed:", error);
-                }
-              }}
-              leftIcon={!isLoading ? <MdCancel /> : undefined}
-              className="!px-3"
-              title="Reject KYC"
-            >
-              Reject
-            </Button>
-          </>
-        )}
       </div>
     );
   };
