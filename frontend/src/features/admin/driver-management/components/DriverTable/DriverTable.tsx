@@ -1,7 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Badge, Button, OnlineStatus } from "@/shared/components/ui";
-import type { TableProps } from "@/shared/components/ui/Table/Table.types";
+import { AdminTable } from "@/shared/components/ui/AdminTable/AdminTable";
+import { Formatters } from "@/shared/components/ui/AdminTable/Formatters";
+import {
+  renderStatusBadge,
+  DriverStatusRegistry,
+  KYCStatusRegistry,
+} from "@/shared/components/ui/AdminTable/StatusRegistry";
+import { Badge, Button, OnlineStatus } from "@/shared/components/ui";
+import type { Column } from "@/shared/components/ui/Table";
 import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
 import { DriverAction } from "../../hooks";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
@@ -17,8 +24,6 @@ interface DriverTableProps {
   isActionLoading: (driverId: string) => boolean;
 }
 
-type BadgeVariant = "warning" | "success" | "secondary" | "outline" | "danger";
-
 export const DriverTable: React.FC<DriverTableProps> = ({
   drivers,
   loading,
@@ -27,158 +32,131 @@ export const DriverTable: React.FC<DriverTableProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<
-      string,
-      { variant: BadgeVariant; text: string }
-    > = {
-      InReview: { variant: "warning", text: "In Review" },
-      Active: { variant: "success", text: "Active" },
-      Blocked: { variant: "secondary", text: "Blocked" },
-    };
-
-    const config = statusConfig[status] || {
-      variant: "secondary" as BadgeVariant,
-      text: status,
-    };
-
-    return <Badge variant={config.variant}>{config.text}</Badge>;
-  };
-
-  const getKYCStatusBadge = (kycStatus: string) => {
-    const statusConfig: Record<
-      string,
-      { variant: BadgeVariant; text: string }
-    > = {
-      InReview: { variant: "warning", text: "KYC In Review" },
-      Approved: { variant: "success", text: "KYC Approved" },
-      Rejected: { variant: "danger", text: "KYC Rejected" },
-    };
-
-    const config = statusConfig[kycStatus] || {
-      variant: "outline" as BadgeVariant,
-      text: kycStatus,
-    };
-
-    return (
-      <Badge variant={config.variant} size="sm">
-        {config.text}
-      </Badge>
-    );
-  };
-
-  const getActionButtons = (driver: AdminDriver) => {
-    const driverId = driver.driverId;
-    const isLoading = isActionLoading(driverId);
-
-    const status = driver.statusInfo.status;
-
-    return (
-      <div className="flex space-x-2">
-        <button
-          className="px-2 py-1 text-xs border border-gray-300 rounded flex
-           items-center gap-1 hover:bg-gray-100 hover:border-gray-400 "
-          onClick={() => navigate(`/admin/drivers/${driverId}`)}
-        >
-          <MdOutlineRemoveRedEye /> View
-        </button>
-      </div>
-    );
-  };
-
-  const columns: TableProps<AdminDriver>["columns"] = [
-    {
-      key: "name",
-      header: "Driver",
-      render: (_, driver) => (
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            {driver.profileImage ? (
-              <img
-                src={driver.profileImage}
-                alt={driver.user.userName}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-xs font-medium text-gray-600">
-                  {driver.user.userName.charAt(0)}
-                </span>
+  const columns: Column<AdminDriver>[] = React.useMemo(
+    () => [
+      {
+        key: "name",
+        header: "Driver",
+        render: (_, driver) => {
+          return (
+            <div className="flex items-center gap-3">
+              <div className="relative flex-shrink-0">
+                {driver.profileImage ? (
+                  <img
+                    src={driver.profileImage}
+                    alt={driver.user.userName}
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                    {driver.user.userName.charAt(0)}
+                  </div>
+                )}
               </div>
-            )}
-            <OnlineStatus
-              isOnline={
-                driver.stats.lastRideDate
-                  ? new Date(driver.stats.lastRideDate).getTime() >
-                    Date.now() - 5 * 60 * 1000
-                  : false
-              }
-              className="absolute -bottom-1 -right-1"
-              size="sm"
-            />
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">
-              {driver.user.userName}
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {driver.user.userName}
+                </p>
+                <p className="text-sm text-gray-500">{driver.user.userEmail}</p>
+              </div>
             </div>
-            <div className="text-sm text-gray-500">{driver.user.userEmail}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "mobile",
-      header: "Mobile",
-      render: (_, driver) => (
-        <div className="text-sm text-gray-900">{driver.user.userMobile}</div>
-      ),
-    },
-    {
-      key: "eligibleVehicleType",
-      header: "Vehicle Types",
-      render: (_, driver) => (
-        <div className="text-sm text-gray-900">
-          {driver.statusInfo.eligibleBodyTypes?.join(", ") || "N/A"}
-        </div>
-      ),
-    },
-    {
-      key: "totalRides",
-      header: "Trips",
-      align: "center",
-      render: (_, driver) => driver.stats.totalRides,
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (_, driver) => getStatusBadge(driver.statusInfo.status),
-    },
-    {
-      key: "kycStatus",
-      header: "KYC",
-      render: (_, driver) => getKYCStatusBadge(driver.statusInfo.kycStatus),
-    },
-    {
-      key: "createdAt",
-      header: "Join Date",
-      render: (_, driver) => new Date(driver.createdAt).toLocaleDateString(),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      render: (_, driver) => getActionButtons(driver),
-    },
-  ];
+          );
+        },
+        width: "280px",
+      },
+      {
+        key: "mobile",
+        header: "Mobile",
+        render: (_, driver) => (
+          <span className="text-sm text-gray-700">
+            {Formatters.formatPhoneNumber(driver.user.userMobile)}
+          </span>
+        ),
+        width: "140px",
+      },
+      {
+        key: "eligibleVehicleType",
+        header: "Vehicle Types",
+        render: (_, driver) => (
+          <span className="text-sm text-gray-700 ">
+            {driver.statusInfo.eligibleBodyTypes?.join(", ") || "N/A"}
+          </span>
+        ),
+        width: "150px",
+      },
+      {
+        key: "totalRides",
+        header: "Trips",
+        align: "center",
+        render: (_, driver) => (
+          <span className="text-sm font-medium text-gray-900">
+            {driver.stats.totalRides}
+          </span>
+        ),
+        width: "80px",
+      },
+      {
+        key: "status",
+        header: "Status",
+        render: (_, driver) =>
+          renderStatusBadge(driver.statusInfo.status, DriverStatusRegistry),
+        align: "center",
+        width: "120px",
+      },
+      {
+        key: "kycStatus",
+        header: "KYC",
+        render: (_, driver) =>
+          renderStatusBadge(driver.statusInfo.kycStatus, KYCStatusRegistry),
+        align: "center",
+        width: "120px",
+      },
+      {
+        key: "createdAt",
+        header: "Join Date",
+        render: (_, driver) => (
+          <span className="text-sm text-gray-700">
+            {Formatters.formatDate(driver.createdAt)}
+          </span>
+        ),
+        align: "center",
+        width: "110px",
+      },
+      {
+        key: "actions",
+        header: "Actions",
+        render: (_, driver) => {
+          const driverId = driver.driverId;
+          const isLoading = isActionLoading(driverId);
+
+          return (
+            <Button
+              variant="primary"
+              size="sm"
+              isLoading={isLoading}
+              onClick={() => navigate(`/admin/drivers/${driverId}`)}
+              leftIcon={<MdOutlineRemoveRedEye />}
+            >
+              View
+            </Button>
+          );
+        },
+        align: "center",
+        width: "120px",
+      },
+    ],
+    [navigate, isActionLoading]
+  );
 
   return (
-    <Table
-      columns={columns}
+    <AdminTable
       data={drivers}
+      columns={columns}
       loading={loading}
-      emptyMessage="No drivers found"
-      striped
-      hoverable
       onRowClick={(driver) => navigate(`/admin/drivers/${driver.driverId}`)}
+      emptyMessage="No drivers found"
     />
   );
 };
+
+export default DriverTable;

@@ -1,5 +1,154 @@
+// import React, { useState } from "react";
+// import { Table, Button } from "@/shared/components/ui";
+// import { UserStatusBadge } from "../UserStatusBadge/UserStatusBadge";
+// import type { UserTableProps, User } from "./UserManagement.types";
+// import { ActionDropdown } from "./ActionDropdown";
+// import type { Column } from "@/shared/components/ui/Table";
+// import { RiUserLine } from "react-icons/ri";
+
+// export const UserTable: React.FC<UserTableProps> = ({
+//   users,
+//   loading,
+//   onUserClick,
+//   onDeleteUser,
+//   onUserAction,
+// }) => {
+//   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+//   const formatCurrency = (amount: number) => {
+//     return new Intl.NumberFormat("en-IN", {
+//       style: "currency",
+//       currency: "INR",
+//       minimumFractionDigits: 0,
+//     }).format(amount);
+//   };
+
+//   const formatDate = (dateString: string) => {
+//     return new Date(dateString).toLocaleDateString("en-IN", {
+//       day: "2-digit",
+//       month: "2-digit",
+//       year: "numeric",
+//     });
+//   };
+
+//   const handleUserAction = async (userId: string, action: any) => {
+//     setActionLoading(userId);
+//     try {
+//       await onUserAction(userId, action);
+//     } finally {
+//       setActionLoading(null);
+//     }
+//   };
+
+//   const columns: Column<User>[] = [
+//     {
+//       key: "name",
+//       header: "User",
+//       render: (_, user) => (
+//         <div className="flex items-center gap-3">
+//           <div className="flex-shrink-0">
+//             {user.avatar ? (
+//               <img
+//                 src={user.avatar}
+//                 alt={user.name}
+//                 className="h-10 w-10 rounded-full object-cover"
+//               />
+//             ) : (
+//               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
+//                 <RiUserLine className="text-lg" />
+//               </div>
+//             )}
+//           </div>
+//           <div>
+//             <p className="font-semibold text-gray-900 dark:text-white">
+//               {user.name}
+//             </p>
+//             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+//               {user.email}
+//             </p>
+//           </div>
+//         </div>
+//       ),
+//       width: "280px",
+//     },
+//     {
+//       key: "mobile",
+//       header: "Mobile",
+//       render: (mobile) => (
+//         <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+//           {mobile || "—"}
+//         </span>
+//       ),
+//       width: "140px",
+//     },
+//     {
+//       key: "totalBookings",
+//       header: "Bookings",
+//       render: (bookings) => (
+//         <span className="text-sm font-medium text-gray-900 dark:text-white">
+//           {bookings}
+//         </span>
+//       ),
+//       align: "center",
+//       width: "100px",
+//     },
+//     {
+//       key: "totalSpent",
+//       header: "Total Spent",
+//       render: (amount) => (
+//         <span className="text-sm font-medium text-gray-900 dark:text-white">
+//           {formatCurrency(amount)}
+//         </span>
+//       ),
+//       align: "right",
+//       width: "120px",
+//     },
+//     {
+//       key: "status",
+//       header: "Status",
+//       render: (status) => <UserStatusBadge status={status} />,
+//       align: "center",
+//       width: "140px",
+//     },
+//     {
+//       key: "lastBooked",
+//       header: "Last Booked",
+//       render: (date) => (
+//         <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+//           {date ? formatDate(date) : "N/A"}
+//         </span>
+//       ),
+//       align: "center",
+//       width: "120px",
+//     },
+//     {
+//       key: "actions",
+//       header: "Actions",
+//       render: (_, user) => (
+//         <ActionDropdown
+//           user={user}
+//           loading={actionLoading === user.id}
+//           onAction={handleUserAction}
+//         />
+//       ),
+//       align: "center",
+//       width: "280px",
+//     },
+//   ];
+
+//   return (
+//     <Table
+//       columns={columns}
+//       data={users}
+//       loading={loading}
+//       className="w-full"
+//     />
+//   );
+// };
+
+// export default UserTable;
 import React, { useState } from "react";
-import { Table, Button } from "@/shared/components/ui";
+import { Table } from "@/shared/components/ui";
 import { UserStatusBadge } from "../UserStatusBadge/UserStatusBadge";
 import type { UserTableProps, User } from "./UserManagement.types";
 import { ActionDropdown } from "./ActionDropdown";
@@ -15,21 +164,19 @@ export const UserTable: React.FC<UserTableProps> = ({
 }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
       minimumFractionDigits: 0,
     }).format(amount);
-  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
-  };
 
   const handleUserAction = async (userId: string, action: any) => {
     setActionLoading(userId);
@@ -45,30 +192,30 @@ export const UserTable: React.FC<UserTableProps> = ({
       key: "name",
       header: "User",
       render: (_, user) => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             {user.avatar ? (
               <img
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
                 src={user.avatar}
                 alt={user.name}
+                className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                <RiUserLine className="w-5 h-5 text-gray-500" />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
+                <RiUserLine className="text-lg" />
               </div>
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-gray-900 truncate">
-              {user.name}
-            </div>
-            <div className="text-sm text-gray-500 truncate">{user.email}</div>
+
+          <div>
+            <p className="font-semibold text-gray-900">{user.name}</p>
+            <p className="text-sm text-gray-900">{user.email}</p>
           </div>
         </div>
       ),
       width: "280px",
     },
+
     {
       key: "mobile",
       header: "Mobile",
@@ -77,39 +224,37 @@ export const UserTable: React.FC<UserTableProps> = ({
       ),
       width: "140px",
     },
+
     {
       key: "totalBookings",
       header: "Bookings",
       render: (bookings) => (
-        <div className="text-center">
-          <span className="text-sm font-medium text-gray-900">{bookings}</span>
-        </div>
+        <span className="text-sm font-semibold text-gray-900">{bookings}</span>
       ),
       align: "center",
       width: "100px",
     },
+
     {
       key: "totalSpent",
       header: "Total Spent",
       render: (amount) => (
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-semibold text-gray-900">
           {formatCurrency(amount)}
         </span>
       ),
       align: "right",
       width: "120px",
     },
+
     {
       key: "status",
       header: "Status",
-      render: (status) => (
-        <div className="flex justify-center">
-          <UserStatusBadge status={status} />
-        </div>
-      ),
+      render: (status) => <UserStatusBadge status={status} />,
       align: "center",
       width: "140px",
     },
+
     {
       key: "lastBooked",
       header: "Last Booked",
@@ -121,19 +266,16 @@ export const UserTable: React.FC<UserTableProps> = ({
       align: "center",
       width: "120px",
     },
+
     {
       key: "actions",
       header: "Actions",
       render: (_, user) => (
-        <div className="flex justify-center">
-          <ActionDropdown
-            user={user}
-            onAction={handleUserAction}
-            loading={
-              actionLoading === user.id || actionLoading === (user as any)._id
-            }
-          />
-        </div>
+        <ActionDropdown
+          user={user}
+          loading={actionLoading === user.id}
+          onAction={handleUserAction}
+        />
       ),
       align: "center",
       width: "280px",
@@ -141,13 +283,13 @@ export const UserTable: React.FC<UserTableProps> = ({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <Table
-        columns={columns}
-        data={users}
-        loading={loading}
-        emptyMessage="No users found"
-      />
-    </div>
+    <Table
+      columns={columns}
+      data={users}
+      loading={loading}
+      className="w-full"
+    />
   );
 };
+
+export default UserTable;
