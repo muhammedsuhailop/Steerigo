@@ -36,6 +36,8 @@
     "reflect-metadata": "^0.2.2",
     "streamifier": "^0.1.1",
     "tsconfig-paths": "^4.2.0",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -52,6 +54,7 @@
     "@types/otp-generator": "^4.0.2",
     "@types/streamifier": "^0.1.2",
     "@types/supertest": "^6.0.3",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^9.39.1",
