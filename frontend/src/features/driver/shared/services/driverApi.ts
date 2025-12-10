@@ -21,6 +21,7 @@ import {
   DriverProfile,
   DriverProfileResponse,
 } from "../../profile/types/driverProfile.types";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -44,7 +45,7 @@ export const driverApi = createApi({
   endpoints: (builder) => ({
     getDriverProfile: builder.query<DriverProfileResponse, void>({
       query: () => ({
-        url: "/driver/profile",
+        url: API_ENDPOINTS.DRIVER.PROFILE,
         method: "GET",
       }),
       transformResponse: (response: ApiResponse<DriverProfile>) => {
@@ -55,7 +56,7 @@ export const driverApi = createApi({
 
     getDriverStatus: builder.query<DriverStatusResponse, void>({
       query: () => ({
-        url: "/driver/status",
+        url: API_ENDPOINTS.DRIVER.STATUS,
         method: "GET",
       }),
       transformResponse: (response: DriverStatusResponse) => {
@@ -66,7 +67,7 @@ export const driverApi = createApi({
 
     getDriverStats: builder.query<{ data: FullDashboardResponse }, void>({
       query: () => ({
-        url: "/driver/dashboard",
+        url: API_ENDPOINTS.DRIVER.DASHBOARD,
         method: "GET",
       }),
       transformResponse: (response: DashboardApiResponse) => {
@@ -306,7 +307,7 @@ export const driverApi = createApi({
 
     endRide: builder.mutation<{ data: CurrentRide }, string>({
       query: (rideId) => ({
-        url: `/driver/ride/${rideId}/complete`,
+        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/complete`,
         method: "POST",
       }),
       transformResponse: (response: any) => {
