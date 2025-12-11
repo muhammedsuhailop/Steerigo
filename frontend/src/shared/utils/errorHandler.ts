@@ -172,7 +172,7 @@ export class ErrorHandler {
     };
   }
 
-  // handleUnauthorized respects backend messages (e.g., invalid credentials)
+  // handleUnauthorized respects backend messages
   private handleUnauthorized(
     data: ApiErrorResponse | null,
     timestamp: string,

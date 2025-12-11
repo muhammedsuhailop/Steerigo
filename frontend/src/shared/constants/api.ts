@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
     GOOGLE: "/auth/google",
     GOOGLE_CALLBACK: "/auth/google/callback",
     LOGOUT: "/auth/logout",
-    REFRESH: "/auth/refresh",
+    // REFRESH: "/auth/refresh",
     REFRESH_TOKEN: "/auth/refresh-token",
     VERIFY_OTP: "/auth/signup/verify",
     RESEND_OTP: "/auth/resend-otp",
