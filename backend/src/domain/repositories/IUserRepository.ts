@@ -1,5 +1,5 @@
 import { QueryOptions } from "@shared/types/Repository";
-import { User } from "../../domain/entities/User";
+import { User } from "../entities/User";
 import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
 import { IQueryableRepository } from "./interfaces/IQueryableRepository";

@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { UpdateStatusRequestDto } from "@application/dto/driver/UpdateStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";

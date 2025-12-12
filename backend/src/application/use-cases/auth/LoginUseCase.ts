@@ -4,7 +4,7 @@ import { LoginRequestDto } from "../../dto/auth/LoginRequestDto";
 import { LoginResponseDto } from "../../dto/auth/LoginResponseDto";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IPasswordService } from "@application/services/IPasswordService";
 import { ITokenManagementService } from "@application/services/ITokenManagementService";
 import { InvalidCredentialsError } from "@domain/errors";

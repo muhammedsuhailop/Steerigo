@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import {
   IRideRequestRepository,
   IRideRequestFilters,
-} from "@application/repositories/IRideRequestRepository";
+} from "@domain/repositories/IRideRequestRepository";
 import { RideRequest } from "@domain/entities/RideRequest";
 import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import {

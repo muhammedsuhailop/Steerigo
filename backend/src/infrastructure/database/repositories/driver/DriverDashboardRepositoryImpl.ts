@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
+import { IDriverDashboardRepository } from "@domain/repositories/IDriverDashboardRepository";
 import { Logger } from "@shared/utils/Logger";
 import { Types } from "mongoose";
 import { RideModel, IRideDocument } from "../../models/RideModel";

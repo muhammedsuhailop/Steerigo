@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IOtpService } from "@application/services/IOtpService";
 import { IEmailService } from "@application/services/IEmailService";
 import { ResendOtpDto } from "../../dto/auth/ResendOtpDto";

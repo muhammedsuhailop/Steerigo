@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
-import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
-import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";

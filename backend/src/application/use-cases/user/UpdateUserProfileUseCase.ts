@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";

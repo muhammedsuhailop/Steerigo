@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
-import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
+import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
 import {
   AdminGetDriverProfileResponseDto,

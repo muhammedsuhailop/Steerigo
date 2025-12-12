@@ -1,4 +1,4 @@
-import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
+import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { FareConfigurationRepositoryImpl } from "@infrastructure/database/repositories/FareConfigurationRepositoryImpl";
 import { TYPES } from "@shared/constants/DITypes";

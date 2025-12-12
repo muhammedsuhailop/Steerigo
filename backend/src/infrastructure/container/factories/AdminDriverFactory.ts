@@ -1,12 +1,12 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
 import { DriverRepositoryImpl } from "@infrastructure/database/repositories/DriverRepositoryImpl";
 
-import { IKYCRepository } from "@application/repositories/IKYCRepository";
-import { IKYCRepository as AdminKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
+import { IKYCRepository } from "@domain/repositories/IKYCRepository";
+import { IKYCRepository as AdminKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
 import { KYCRepositoryImpl } from "@infrastructure/database/repositories/KYCRepositoryImpl";
 
 // Admin Driver Use Cases

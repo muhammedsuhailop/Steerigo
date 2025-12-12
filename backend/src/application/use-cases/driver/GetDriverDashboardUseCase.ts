@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
-import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
+import { IDriverDashboardRepository } from "@domain/repositories/IDriverDashboardRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { GetDriverDashboardDto } from "@application/dto/driver/GetDriverDashboardDto";
 import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashboardResponseDto";
 import { DriverDashboardMapper } from "@infrastructure/database/mappers/DriverDashboardMapper";

@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { ITokenManagementService } from "@application/services/ITokenManagementService";
 import { ITokenService } from "@application/services/ITokenService";
-import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 import { RefreshToken } from "@domain/entities/RefreshToken";
 import { v4 as uuid } from "uuid";
 import { TYPES } from "@shared/constants/DITypes";

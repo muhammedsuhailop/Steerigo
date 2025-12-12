@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import {
   IAdminUserRepository,
   IAdminUserSummary,
-} from "@application/repositories/IAdminUserRepository";
+} from "@domain/repositories/IAdminUserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel } from "../models/UserModel";
 import { UserDomainMapper } from "../mappers/UserDomainMapper";

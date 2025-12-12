@@ -1,6 +1,6 @@
 import { FileUploadDto } from "@application/dto/file/FileUploadDto";
 import { IFileUploadService } from "@application/services/IFileUploadService";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";

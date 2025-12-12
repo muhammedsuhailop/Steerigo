@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IAdminUserRepository } from "@application/repositories/IAdminUserRepository";
+import { IAdminUserRepository } from "@domain/repositories/IAdminUserRepository";
 import {
   AdminUsersQuery,
   GetUsersRequestDto,

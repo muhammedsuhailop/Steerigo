@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
+import { IKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
 import { GetKycRequestByIdRequestDto } from "@application/dto/admin/GetKycRequestByIdRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";

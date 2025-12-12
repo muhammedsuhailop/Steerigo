@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { ScheduleAvailabilityRequestDto } from "@application/dto/driver/ScheduleAvailabilityRequestDto";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { Location } from "@domain/value-objects/Location";
