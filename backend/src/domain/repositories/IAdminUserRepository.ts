@@ -1,6 +1,6 @@
 import { User } from "@domain/entities/User";
-import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
-import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IQueryableRepository } from "./base/IQueryableRepository";
 
 export interface IAdminUsersQuery {
   status?: string;

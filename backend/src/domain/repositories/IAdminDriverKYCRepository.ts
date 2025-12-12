@@ -1,6 +1,6 @@
 import { KYC } from "@domain/entities/KYC";
-import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
-import { IQueryableRepository } from "./interfaces/IQueryableRepository";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IQueryableRepository } from "./base/IQueryableRepository";
 
 export interface IKYCQuery {
   verificationStatus?: string;

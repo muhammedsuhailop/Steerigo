@@ -1,9 +1,9 @@
 import { QueryOptions } from "@shared/types/Repository";
 import { Driver } from "@domain/entities/Driver";
-import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
-import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
-import { IQueryableRepository } from "./interfaces/IQueryableRepository";
-import { IBatchRepository } from "./interfaces/IBatchRepository";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
+import { IQueryableRepository } from "./base/IQueryableRepository";
+import { IBatchRepository } from "./base/IBatchRepository";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";

@@ -1,9 +1,9 @@
 import { QueryOptions } from "@shared/types/Repository";
 import { KYC } from "@domain/entities/KYC";
-import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
-import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
-import { IQueryableRepository } from "./interfaces/IQueryableRepository";
-import { IBatchRepository } from "./interfaces/IBatchRepository";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
+import { IQueryableRepository } from "./base/IQueryableRepository";
+import { IBatchRepository } from "./base/IBatchRepository";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 
