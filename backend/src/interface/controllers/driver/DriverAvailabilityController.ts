@@ -57,7 +57,7 @@ export class DriverAvailabilityController {
         return;
       }
 
-      const dto = new ScheduleAvailabilityRequestDto(userId, req.body);
+      const dto = ScheduleAvailabilityRequestDto.fromRequest(userId, req.body);
       const result = await this.scheduleAvailabilityUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -98,7 +98,7 @@ export class DriverAvailabilityController {
         return;
       }
 
-      const dto = new UpdateStatusRequestDto(req.body);
+      const dto = UpdateStatusRequestDto.fromRequest(req.body);
 
       const driverId = dto.getDriverId();
       const result = await this.updateStatusUseCase.execute(dto);
@@ -144,7 +144,7 @@ export class DriverAvailabilityController {
         return;
       }
 
-      const dto = new UpdateLocationRequestDto(req.body);
+      const dto = UpdateLocationRequestDto.fromRequest(req.body);
 
       const driverId = dto.getDriverId();
 
