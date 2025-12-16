@@ -1,12 +1,13 @@
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { GearType, BodyType } from "@domain/value-objects/VehicleType";
 import { DocumentType } from "@domain/value-objects/DocumentType";
+import { Gender } from "@domain/value-objects/Gender";
 
 interface DriverRegistrationRequestBody {
   name: string;
   mobile: string;
   dob: string;
-  gender: "Male" | "Female" | "Other";
+  gender: Gender;
   state: string;
   pin: string;
   address: string;
@@ -32,7 +33,7 @@ export class DriverRegistrationRequestDto {
     private readonly name: string,
     private readonly mobile: string,
     private readonly dob: Date,
-    private readonly gender: "Male" | "Female" | "Other",
+    private readonly gender: Gender,
     private readonly state: string,
     private readonly pin: string,
     private readonly address: string,
@@ -102,7 +103,7 @@ export class DriverRegistrationRequestDto {
     return this.dob;
   }
 
-  getGender(): "Male" | "Female" | "Other" {
+  getGender(): Gender {
     return this.gender;
   }
 

@@ -22,12 +22,13 @@ import { KYCResponseDto } from "@application/dto/driver/KYCResponseDto";
 import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashboardResponseDto";
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { RegisterDriverResult } from "@application/use-cases/driver/RegisterDriverUseCase";
+import { Gender } from "@domain/value-objects/Gender";
 
 interface DriverRegistrationRequestBody {
   name: string;
   mobile: string;
   dob: string;
-  gender: "Male" | "Female" | "Other";
+  gender: Gender;
   state: string;
   pin: string;
   address: string;
@@ -51,7 +52,7 @@ interface DriverRegistrationRequestBody {
 }
 
 interface LicenseKYCBody {
-  docType: "License";
+  docType: DocumentType.LICENSE;
   licenseCategory: LicenseCategory;
   docNumber: string;
   eligibleBodyTypes?: BodyType[];
@@ -63,7 +64,7 @@ interface LicenseKYCBody {
 }
 
 interface GenericKYCBody {
-  docType: "Aadhaar" | "PAN" | "Passport" | "Voter_ID";
+  docType: DocumentType;
   docNumber: string;
   issueDate?: string;
   expiryDate?: string;
