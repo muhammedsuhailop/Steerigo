@@ -2,6 +2,30 @@ import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { GearType, BodyType } from "@domain/value-objects/VehicleType";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 
+interface DriverRegistrationRequestBody {
+  name: string;
+  mobile: string;
+  dob: string;
+  gender: "Male" | "Female" | "Other";
+  state: string;
+  pin: string;
+  address: string;
+  licenseCategory: LicenseCategory;
+  licenseNumber: string;
+  licenseBodyTypes: BodyType[];
+  licenseGearTypes: GearType[];
+  licenseIssueDate: string;
+  licenseExpiryDate: string;
+  idType: DocumentType;
+  idNumber: string;
+  idIssueDate: string;
+  idExpiryDate?: string;
+  licenseFrontImage: string;
+  licenseBackImage: string;
+  idFrontImage: string;
+  idBackImage: string;
+}
+
 export class DriverRegistrationRequestDto {
   constructor(
     private readonly userId: string,
@@ -12,29 +36,60 @@ export class DriverRegistrationRequestDto {
     private readonly state: string,
     private readonly pin: string,
     private readonly address: string,
-
     private readonly licenseCategory: LicenseCategory,
     private readonly licenseNumber: string,
     private readonly licenseBodyTypes: BodyType[],
     private readonly licenseGearTypes: GearType[],
     private readonly licenseIssueDate: Date,
     private readonly licenseExpiryDate: Date,
-
     private readonly idType: DocumentType,
     private readonly idNumber: string,
     private readonly idIssueDate: Date,
     private readonly idExpiryDate: Date | null,
-
     private readonly licenseFrontImage: string,
     private readonly licenseBackImage: string,
     private readonly idFrontImage: string,
     private readonly idBackImage: string
   ) {}
 
+  static fromRequest(
+    userId: string,
+    body: DriverRegistrationRequestBody
+  ): DriverRegistrationRequestDto {
+    return new DriverRegistrationRequestDto(
+      userId,
+      body.name,
+      body.mobile,
+      new Date(body.dob),
+      body.gender,
+      body.state,
+      body.pin,
+      body.address,
+      body.licenseCategory,
+      body.licenseNumber,
+      body.licenseBodyTypes,
+      body.licenseGearTypes,
+      new Date(body.licenseIssueDate),
+      new Date(body.licenseExpiryDate),
+      body.idType,
+      body.idNumber,
+      new Date(body.idIssueDate),
+      body.idExpiryDate && body.idExpiryDate.trim() !== ""
+        ? new Date(body.idExpiryDate)
+        : null,
+      body.licenseFrontImage,
+      body.licenseBackImage,
+      body.idFrontImage,
+      body.idBackImage
+    );
+  }
+
   // User profile getters
-  getUserId():string{
+
+  getUserId(): string {
     return this.userId;
   }
+
   getName(): string {
     return this.name;
   }
@@ -68,6 +123,7 @@ export class DriverRegistrationRequestDto {
   }
 
   // Driver license getters
+
   getLicenseCategory(): LicenseCategory {
     return this.licenseCategory;
   }
@@ -92,7 +148,8 @@ export class DriverRegistrationRequestDto {
     return this.licenseExpiryDate;
   }
 
-  // ID document getters
+  // ID doc getters
+
   getIdType(): DocumentType {
     return this.idType;
   }
@@ -109,6 +166,7 @@ export class DriverRegistrationRequestDto {
     return this.idExpiryDate;
   }
 
+  // Image getters
   getLicenseFrontImage(): string {
     return this.licenseFrontImage;
   }

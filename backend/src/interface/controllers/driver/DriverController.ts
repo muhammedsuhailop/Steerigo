@@ -122,9 +122,10 @@ export class DriverController {
     try {
       const userId = this.getUserId(req);
       if (!userId) {
-        res
-          .status(HttpStatusCodes.UNAUTHORIZED)
-          .json({ success: false, message: DRIVER_MESSAGES.UNAUTHORIZED });
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
         return;
       }
 
@@ -147,7 +148,6 @@ export class DriverController {
         "idType",
         "idNumber",
         "idIssueDate",
-        // "idExpiryDate",
         "licenseFrontImage",
         "licenseBackImage",
         "idFrontImage",
@@ -167,51 +167,50 @@ export class DriverController {
         return;
       }
 
-      const dto = new DriverRegistrationRequestDto(
+      const dto = DriverRegistrationRequestDto.fromRequest(userId, body);
+
+      Logger.info("Driver registration request received", {
         userId,
-        body.name,
-        body.mobile,
-        new Date(body.dob),
-        body.gender,
-        body.state,
-        body.pin,
-        body.address,
-        body.licenseCategory,
-        body.licenseNumber,
-        body.licenseBodyTypes,
-        body.licenseGearTypes,
-        new Date(body.licenseIssueDate),
-        new Date(body.licenseExpiryDate),
-        body.idType,
-        body.idNumber,
-        new Date(body.idIssueDate),
-        body.idExpiryDate && body.idExpiryDate.trim() !== ""
-          ? new Date(body.idExpiryDate)
-          : null,
-        body.licenseFrontImage,
-        body.licenseBackImage,
-        body.idFrontImage,
-        body.idBackImage
-      );
+        name: body.name,
+        mobile: body.mobile,
+        licenseCategory: body.licenseCategory,
+      });
 
       const result = await this.registerDriverUseCase.execute(dto);
 
       if (result.isSuccessful()) {
+        const responseData = result.getValue();
+        Logger.info("Driver registration successful", {
+          userId,
+          driverId: responseData.driver.id,
+          licenseKycId: responseData.kycDocumentsCreated.license,
+          idKycId: responseData.kycDocumentsCreated.idDocument,
+        });
+
         res.status(HttpStatusCodes.CREATED).json({
           success: true,
           message: DRIVER_MESSAGES.DRIVER_REGISTRATION_SUCCESS,
-          data: result.getValue(),
+          data: responseData,
         });
       } else {
+        const error = result.getError();
+        Logger.warn("Driver registration failed", {
+          userId,
+          error: error.message,
+        });
+
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: result.getError().message,
+          message: error.message,
         });
       }
     } catch (error) {
-      Logger.error("Comprehensive driver registration controller error", {
-        error,
+      Logger.error("Driver registration controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       });
+
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: DRIVER_MESSAGES.INTERNAL_SERVER_ERROR,
