@@ -21,7 +21,7 @@ export { Alert } from "./Alert";
 
 // Error Handling exports
 export { ErrorBoundary } from "./ErrorHandling/ErrorBoundary";
-export { ToastContainer, GlobalErrorModal } from "./ErrorHandling/Toast";
+export { ToastContainer } from "./ErrorHandling/Toast";
 export {
   addError,
   removeError,
@@ -29,12 +29,7 @@ export {
   clearErrorsByType,
   clearErrorsByContext,
   clearErrorsByField,
-  setGlobalError,
-  hideGlobalError,
-  showGlobalError,
   selectErrors,
-  selectGlobalError,
-  selectIsErrorVisible,
   selectErrorsByType,
   selectErrorsByField,
   selectErrorsByContext,
@@ -63,8 +58,5 @@ export type {
   NetworkError,
   ServerError,
   ErrorState,
-  ErrorBoundaryProps,
-  ToastProps,
-  ErrorDisplayProps,
 } from "./ErrorHandling/ErrorHandling.types";
 export { ErrorType, ErrorSeverity } from "./ErrorHandling/ErrorHandling.types";

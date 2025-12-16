@@ -47,22 +47,14 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   } = useSignupForm(
     onSubmit ||
       (async (data: any) => {
-        try {
-          const result = await signupMutation(data).unwrap();
-          if (result.success) {
-            setShowOtpSection(true);
-            setOtpTimer(60);
-          }
-          return result;
-        } catch (error: any) {
-          return {
-            success: false,
-            message:
-              error?.data?.errors?.[0]?.message ||
-              error.data?.message ||
-              "Signup failed. Please try again.",
-          };
+        const result = await signupMutation(data).unwrap();
+
+        if (result.success) {
+          setShowOtpSection(true);
+          setOtpTimer(60);
         }
+
+        return result;
       })
   );
 

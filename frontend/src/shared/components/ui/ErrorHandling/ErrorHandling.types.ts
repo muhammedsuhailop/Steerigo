@@ -1,87 +1,59 @@
 export enum ErrorType {
-  VALIDATION = "validation",
-  AUTHENTICATION = "authentication",
-  AUTHORIZATION = "authorization",
-  NETWORK = "network",
-  SERVER = "server",
-  CLIENT = "client",
-  UNKNOWN = "unknown",
+  VALIDATION = "VALIDATION",
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION = "AUTHORIZATION",
+  NETWORK = "NETWORK",
+  SERVER = "SERVER",
+  CLIENT = "CLIENT",
+  UNKNOWN = "UNKNOWN",
 }
 
 export enum ErrorSeverity {
-  LOW = "low", // Toast notification
-  MEDIUM = "medium", // Toast with action
-  HIGH = "high", // Modal dialog
-  CRITICAL = "critical", // Full page error
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 export interface BaseError {
   type: ErrorType;
   code: string;
   message: string;
-  userMessage?: string;
+  userMessage: string;
   severity: ErrorSeverity;
-  timestamp: Date;
+  timestamp: string;
   requestId?: string;
+  context?: string;
   field?: string;
   details?: Record<string, any>;
-  context?: string;
 }
 
 export interface ValidationError extends BaseError {
-  type: ErrorType.VALIDATION;
   field: string;
   value?: any;
 }
 
 export interface NetworkError extends BaseError {
-  type: ErrorType.NETWORK;
-  status?: number;
-  url?: string;
+  retryCount?: number;
 }
 
 export interface ServerError extends BaseError {
-  type: ErrorType.SERVER;
   status: number;
-  url: string;
+  url?: string;
 }
 
 export interface ApiErrorResponse {
-  success: false;
   error: {
-    type: string;
     code: string;
     message: string;
-    userMessage?: string;
+    userMessage: string;
     field?: string;
     details?: Record<string, any>;
-    requestId?: string;
   };
-  timestamp: string;
 }
 
+// Redux state type
 export interface ErrorState {
   errors: BaseError[];
-  globalError: BaseError | null;
-  isVisible: boolean;
-}
-
-// Component props interfaces
-export interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: (error: BaseError, resetError: () => void) => React.ReactNode;
-  onError?: (error: BaseError, errorInfo: React.ErrorInfo) => void;
-}
-
-export interface ToastProps {
-  error: BaseError;
-  onClose: () => void;
-  autoClose?: boolean;
-  duration?: number;
-}
-
-export interface ErrorDisplayProps {
-  error: BaseError | null;
-  onClose?: () => void;
-  onRetry?: () => void;
+  lastError: BaseError | null;
 }

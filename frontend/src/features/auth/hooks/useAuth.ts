@@ -57,7 +57,12 @@ export const useAuth = () => {
         }
         return { success: false, message: result.message };
       } catch (error: any) {
-        const errorResult = authErrorMapper.processAuthError(error, "login");
+        const rawError = error?.original ?? error ?? null;
+
+        const errorResult = authErrorMapper.processAuthError(
+          rawError ?? error,
+          "login"
+        );
 
         return {
           success: false,

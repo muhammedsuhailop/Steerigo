@@ -11,6 +11,9 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   skipErrorHandling?: boolean;
 }
 
+import { errorHandler } from "@/shared/utils/errorHandler";
+import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
+
 // Axios instance configuration
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
@@ -21,7 +24,7 @@ export const api = axios.create({
   },
 });
 
-// REQUEST INTERCEPTOR 
+// REQUEST INTERCEPTOR
 api.interceptors.request.use(
   (config: ExtendedAxiosRequestConfig) => {
     // Skip auth for specific endpoints
@@ -53,24 +56,47 @@ api.interceptors.request.use(
 
 // RESPONSE INTERCEPTOR - Only for non-RTK Query requests
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    //Log successful responses in dev
+    if (import.meta.env.DEV) {
+      console.debug(
+        `${response.config.method?.toUpperCase()} ${response.config.url}`,
+        { status: response.status }
+      );
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
 
-    // Only handle direct axios calls
-    if (originalRequest?._retry) {
+    // Skip if explicitly requested
+    if (originalRequest?.skipErrorHandling) {
       return Promise.reject(error);
     }
 
-    // Log errors for debugging
-    if (!originalRequest?.skipErrorHandling) {
-      const errorMessage =
-        (error.response?.data as any)?.message ||
-        error.message ||
-        "An unexpected error occurred";
-      console.error("API Error:", errorMessage);
+    // Prevent infinite retry loops
+    if (originalRequest?._retry) {
+      const parsedError = errorHandler.parseApiError(
+        error,
+        `Retry failed: ${originalRequest.url}`
+      );
+      ErrorDispatcher.dispatchError(parsedError);
+      return Promise.reject(parsedError);
     }
 
+    // Parse error
+    const parsedError = errorHandler.parseApiError(
+      error,
+      `${originalRequest?.method?.toUpperCase()} ${originalRequest?.url}`
+    );
+
+    // Dispatch to Redux for UI feedback
+    // Skip 401 - let axiosBaseQuery handle token refresh
+    if (error.response?.status !== 401) {
+      ErrorDispatcher.dispatchError(parsedError);
+    }
+
+    (error as any).parsedError = parsedError;
     return Promise.reject(error);
   }
 );

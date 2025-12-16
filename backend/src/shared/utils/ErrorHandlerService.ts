@@ -537,8 +537,6 @@ export class ErrorHandlerService {
     [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
   };
 
-  // Typed helpers
-
   private static hasProp<T extends string>(
     obj: unknown,
     prop: T
@@ -570,44 +568,56 @@ export class ErrorHandlerService {
     return undefined;
   }
 
-  // Main error handling method - converts any error to standardized API response
-  // Preserves original error message from domain errors
   static handleError(
     error: unknown,
     context?: string
   ): { response: ApiResponse; statusCode: number } {
+    Logger.debug("[ErrorHandlerService] handleError() called", {
+      context,
+      errorType: typeof error,
+      errorMessage: this.getStringProp(error, "message"),
+    });
+
     const errorDetails = this.classifyError(error);
+
+    Logger.debug("[ErrorHandlerService] Error classified", {
+      statusCode: errorDetails.statusCode,
+      type: errorDetails.type,
+      message: errorDetails.message,
+    });
 
     if (errorDetails.shouldLog) {
       this.logError(error, context, errorDetails);
     }
 
-    // Use original error message from domain errors
-    const message =
-      error instanceof DomainError && this.getStringProp(error, "message")
-        ? this.getStringProp(error, "message")!
-        : errorDetails.message;
+    const message = errorDetails.message;
 
-    // Create standardized response
     const response: ApiResponse = {
       success: false,
       message,
       ...(process.env.NODE_ENV === "development" && {
-        // safe property accessors, stay guarded
         error: this.getStringProp(error, "message"),
         errorCode: this.getStringProp(error, "code"),
         field: this.getStringProp(error, "field"),
       }),
     };
 
+    Logger.debug("[ErrorHandlerService] Returning response", {
+      statusCode: errorDetails.statusCode,
+      message: response.message,
+    });
+
     return { response, statusCode: errorDetails.statusCode };
   }
 
-  // Handle validation errors from express-validator
   static handleValidationErrors(errors: Array<{ msg: string }>): {
     response: ApiResponse;
     statusCode: number;
   } {
+    Logger.debug("[ErrorHandlerService] handleValidationErrors() called", {
+      errorCount: errors.length,
+    });
+
     const message = errors.map((err) => err.msg).join(", ");
 
     const response: ApiResponse = {
@@ -618,35 +628,75 @@ export class ErrorHandlerService {
     return { response, statusCode: 400 };
   }
 
-  // Classify error type and determine appropriate response
   private static classifyError(error: unknown): ErrorDetails {
-    // Check for DomainError with code property (for RideRequestErrors)
+    Logger.debug("[ErrorHandlerService.classifyError] Starting classification");
+
+    // Check for DomainError with code property
+    Logger.debug("[classifyError] Checking DomainError with code");
     if (error instanceof DomainError && this.hasProp(error, "code")) {
       const code = this.getStringProp(error, "code");
+      Logger.debug("[classifyError] Found DomainError with code", { code });
       if (code) {
         const errorByCode = this.ERROR_MAP.get(code);
         if (errorByCode) {
+          Logger.debug("[classifyError] Found error by code in ERROR_MAP", {
+            code,
+            statusCode: errorByCode.statusCode,
+          });
           return errorByCode;
         }
       }
     }
 
     // Check if it's a known domain error by exact name match
+    Logger.debug("[classifyError] Checking constructor name match");
+    
     if (typeof error === "object" && error !== null) {
+      const errorName = this.getStringProp(error, "name");
+
+      Logger.debug("[classifyError] Checking error.name property", {
+        errorName,
+      });
+
+      if (errorName && this.ERROR_MAP.has(errorName)) {
+        const result = this.ERROR_MAP.get(errorName)!;
+        Logger.debug("[classifyError] Found error by name property", {
+          errorName,
+          statusCode: result.statusCode,
+          type: result.type,
+        });
+        return result;
+      }
+
       const ctorName = (error as { constructor?: { name?: string } })
         .constructor?.name;
+
+      Logger.debug("[classifyError] Checking constructor.name", {
+        ctorName,
+      });
+
       if (ctorName && this.ERROR_MAP.has(ctorName)) {
-        return this.ERROR_MAP.get(ctorName)!;
+        const result = this.ERROR_MAP.get(ctorName)!;
+        Logger.debug("[classifyError] Found error by constructor name", {
+          ctorName,
+          statusCode: result.statusCode,
+          type: result.type,
+        });
+        return result;
       }
     }
 
-    // Handle MongoDB duplicate key errors
+    //Handle MongoDB duplicate key errors
+    Logger.debug("[classifyError] Checking MongoDB duplicate key");
     if (this.isMongoDbDuplicateKeyError(error)) {
+      Logger.debug("[classifyError] MongoDB duplicate key error detected");
       return this.handleDuplicateKeyError(error);
     }
 
     // Check for database/connection errors
+    Logger.debug("[classifyError] Checking database error");
     if (this.isDatabaseError(error)) {
+      Logger.debug("[classifyError] Database error detected");
       return {
         statusCode: 503,
         message: this.GENERIC_MESSAGES[ErrorType.DATABASE_ERROR],
@@ -657,7 +707,9 @@ export class ErrorHandlerService {
     }
 
     // Check for network/SSL errors
+    Logger.debug("[classifyError] Checking network error");
     if (this.isNetworkError(error)) {
+      Logger.debug("[classifyError] Network error detected");
       return {
         statusCode: 503,
         message: this.GENERIC_MESSAGES[ErrorType.NETWORK_ERROR],
@@ -667,8 +719,10 @@ export class ErrorHandlerService {
       };
     }
 
-    // Check for validation errors (non-express-validator)
+    // Check for validation errors
+    Logger.debug("[classifyError] Checking validation error");
     if (this.isValidationError(error)) {
+      Logger.debug("[classifyError] Validation error detected");
       return {
         statusCode: 400,
         message:
@@ -680,7 +734,8 @@ export class ErrorHandlerService {
       };
     }
 
-    // Default to server error for unknown errors
+    // Default: Server error
+    Logger.debug("[classifyError] Defaulting to server error");
     return {
       statusCode: 500,
       message: this.GENERIC_MESSAGES[ErrorType.SERVER_ERROR],
@@ -771,11 +826,34 @@ export class ErrorHandlerService {
   }
 
   private static isValidationError(error: unknown): boolean {
+    if (typeof error === "object" && error !== null) {
+      const ctorName = (error as { constructor?: { name?: string } })
+        .constructor?.name;
+
+      Logger.debug("[isValidationError] Checking if known domain error", {
+        ctorName,
+        isInMap: ctorName ? this.ERROR_MAP.has(ctorName) : false,
+      });
+
+      if (ctorName && this.ERROR_MAP.has(ctorName)) {
+        Logger.debug("[isValidationError] Excluding known domain error", {
+          ctorName,
+        });
+        return false;
+      }
+    }
+
     const message = this.getStringProp(error, "message")?.toLowerCase() || "";
-    return (
+    const isValidation =
       message.includes("validation") ||
-      (message.includes("invalid") && !this.isNetworkError(error))
-    );
+      (message.includes("invalid") && !this.isNetworkError(error));
+
+    Logger.debug("[isValidationError] Validation check result", {
+      message,
+      isValidation,
+    });
+
+    return isValidation;
   }
 
   private static logError(

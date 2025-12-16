@@ -126,6 +126,7 @@ export interface AdminDriverStats {
   lastRideDate: string | null; // ISO or null
 }
 export interface AdminDriver {
+  lastSeenAt: string | number | Date;
   driverId: string;
   user: AdminDriverUser;
   statusInfo: AdminDriverStatusInfo;

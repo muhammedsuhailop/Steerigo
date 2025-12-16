@@ -3,14 +3,14 @@ import { BaseError, ErrorState, ErrorSeverity } from "./ErrorHandling.types";
 
 const initialState: ErrorState = {
   errors: [],
-  globalError: null,
-  isVisible: false,
+  lastError: null,
 };
 
 const errorSlice = createSlice({
   name: "error",
   initialState,
   reducers: {
+    // Add error and show as toast
     addError: (state, action: PayloadAction<BaseError>) => {
       const error = action.payload;
 
@@ -26,72 +26,42 @@ const errorSlice = createSlice({
 
       // Add new error
       state.errors.push(error);
-
-      // Set as global error if critical or high severity
-      if (
-        error.severity === ErrorSeverity.CRITICAL ||
-        error.severity === ErrorSeverity.HIGH
-      ) {
-        state.globalError = error;
-        state.isVisible = true;
-      }
+      state.lastError = error;
     },
 
+    // Remove error by code
     removeError: (state, action: PayloadAction<string>) => {
       const errorCode = action.payload;
       state.errors = state.errors.filter((error) => error.code !== errorCode);
-
-      // Clear global error if it's the one being removed
-      if (state.globalError?.code === errorCode) {
-        state.globalError = null;
-        state.isVisible = false;
-      }
     },
 
+    // Clear specific error by index (for auto-removal after toast closes)
+    clearErrorByIndex: (state, action: PayloadAction<number>) => {
+      state.errors.splice(action.payload, 1);
+    },
+
+    // Clear all errors
     clearErrors: (state) => {
       state.errors = [];
-      state.globalError = null;
-      state.isVisible = false;
+      state.lastError = null;
     },
 
+    // Clear errors by type
     clearErrorsByType: (state, action: PayloadAction<string>) => {
       const errorType = action.payload;
       state.errors = state.errors.filter((error) => error.type !== errorType);
-
-      if (state.globalError?.type === errorType) {
-        state.globalError = null;
-        state.isVisible = false;
-      }
     },
 
+    // Clear errors by context
     clearErrorsByContext: (state, action: PayloadAction<string>) => {
       const context = action.payload;
       state.errors = state.errors.filter((error) => error.context !== context);
-
-      if (state.globalError?.context === context) {
-        state.globalError = null;
-        state.isVisible = false;
-      }
     },
 
+    // Clear errors by field
     clearErrorsByField: (state, action: PayloadAction<string>) => {
       const field = action.payload;
       state.errors = state.errors.filter((error) => error.field !== field);
-    },
-
-    setGlobalError: (state, action: PayloadAction<BaseError | null>) => {
-      state.globalError = action.payload;
-      state.isVisible = !!action.payload;
-    },
-
-    hideGlobalError: (state) => {
-      state.isVisible = false;
-    },
-
-    showGlobalError: (state) => {
-      if (state.globalError) {
-        state.isVisible = true;
-      }
     },
   },
 });
@@ -99,13 +69,11 @@ const errorSlice = createSlice({
 export const {
   addError,
   removeError,
+  clearErrorByIndex,
   clearErrors,
   clearErrorsByType,
   clearErrorsByContext,
   clearErrorsByField,
-  setGlobalError,
-  hideGlobalError,
-  showGlobalError,
 } = errorSlice.actions;
 
 export default errorSlice.reducer;
@@ -113,16 +81,18 @@ export default errorSlice.reducer;
 // Selectors
 export const selectErrors = (state: { error: ErrorState }) =>
   state.error.errors;
-export const selectGlobalError = (state: { error: ErrorState }) =>
-  state.error.globalError;
-export const selectIsErrorVisible = (state: { error: ErrorState }) =>
-  state.error.isVisible;
+
+export const selectLastError = (state: { error: ErrorState }) =>
+  state.error.lastError;
+
 export const selectErrorsByType =
   (type: string) => (state: { error: ErrorState }) =>
     state.error.errors.filter((error) => error.type === type);
+
 export const selectErrorsByField =
   (field: string) => (state: { error: ErrorState }) =>
     state.error.errors.filter((error) => error.field === field);
+
 export const selectErrorsByContext =
   (context: string) => (state: { error: ErrorState }) =>
     state.error.errors.filter((error) => error.context === context);
