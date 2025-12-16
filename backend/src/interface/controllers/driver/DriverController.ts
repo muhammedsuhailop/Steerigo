@@ -51,8 +51,7 @@ interface DriverRegistrationRequestBody {
   idBackImage: string;
 }
 
-interface LicenseKYCBody {
-  docType: DocumentType.LICENSE;
+interface LicenseKYCRequestBody {
   licenseCategory: LicenseCategory;
   docNumber: string;
   eligibleBodyTypes?: BodyType[];
@@ -63,16 +62,13 @@ interface LicenseKYCBody {
   backImageUrls?: string[];
 }
 
-interface GenericKYCBody {
-  docType: DocumentType;
+interface GenericKYCRequestBody {
   docNumber: string;
   issueDate?: string;
   expiryDate?: string;
   frontImageUrls?: string[];
   backImageUrls?: string[];
 }
-
-type KYCRequestBody = LicenseKYCBody | GenericKYCBody;
 
 @injectable()
 export class DriverController {
@@ -236,16 +232,7 @@ export class DriverController {
         fields: Object.keys(body || {}),
       });
 
-      const dto = new DriverProfileUpdateDto(
-        userId,
-        body.name,
-        body.mobile,
-        body.dob ? new Date(body.dob) : undefined,
-        body.gender,
-        body.address,
-        body.eligibleGearTypes,
-        body.eligibleBodyTypes
-      );
+      const dto = DriverProfileUpdateDto.fromRequest(userId, body);
 
       Logger.info("Driver profile update DTO created", {
         userId,
@@ -322,12 +309,12 @@ export class DriverController {
       const docType = req.body.docType;
 
       const VALID_DOC_TYPES = [
-        "License",
-        "Aadhaar",
-        "PAN",
-        "Passport",
-        "Voter_ID",
+        DocumentType.LICENSE,
+        DocumentType.AADHAAR,
+        DocumentType.PAN,
+        DocumentType.PASSPORT,
       ];
+
       if (!docType || !VALID_DOC_TYPES.includes(docType)) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
@@ -342,7 +329,19 @@ export class DriverController {
         body: Object.keys(req.body),
       });
 
-      const dto = this.createKYCDtoFromDocType(userId, req.body, docType);
+      let dto: KYCSubmissionRequestDto;
+
+      if (docType === DocumentType.LICENSE) {
+        const licenseBody = req.body as LicenseKYCRequestBody;
+        dto = KYCSubmissionRequestDto.fromLicenseRequest(userId, licenseBody);
+      } else {
+        const genericBody = req.body as GenericKYCRequestBody;
+        dto = KYCSubmissionRequestDto.fromGenericRequest(
+          userId,
+          docType as DocumentType,
+          genericBody
+        );
+      }
 
       Logger.info("KYC submission DTO created", {
         userId,
@@ -372,7 +371,6 @@ export class DriverController {
       }
 
       const response = result.getValue();
-
       Logger.info("KYC submission successful", {
         userId,
         docType,
@@ -404,52 +402,6 @@ export class DriverController {
 
       res.status(statusCode).json(response);
     }
-  }
-
-  private createKYCDtoFromDocType(
-    userId: string,
-    body: KYCRequestBody,
-    docType: KYCRequestBody["docType"]
-  ): KYCSubmissionRequestDto {
-    if (docType === "License") {
-      const licenseBody = body as LicenseKYCBody;
-      return new KYCSubmissionRequestDto(
-        userId,
-        licenseBody.licenseCategory,
-        licenseBody.docNumber,
-        licenseBody.eligibleBodyTypes,
-        licenseBody.eligibleGearTypes,
-        licenseBody.issueDate ? new Date(licenseBody.issueDate) : undefined,
-        licenseBody.expiryDate ? new Date(licenseBody.expiryDate) : undefined,
-        licenseBody.frontImageUrls?.[0],
-        licenseBody.backImageUrls?.[0],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined
-      );
-    }
-
-    const genericBody = body as GenericKYCBody;
-    return new KYCSubmissionRequestDto(
-      userId,
-      undefined, // licenseCategory
-      undefined, // licenseNumber
-      undefined, // licenseBodyTypes
-      undefined, // licenseGearTypes
-      undefined, // licenseIssueDate
-      undefined, // licenseExpiryDate
-      undefined, // licenseFrontImage
-      undefined, // licenseBackImage
-      docType as DocumentType,
-      genericBody.docNumber,
-      genericBody.issueDate ? new Date(genericBody.issueDate) : undefined,
-      genericBody.expiryDate ? new Date(genericBody.expiryDate) : undefined,
-      genericBody.frontImageUrls?.[0],
-      genericBody.backImageUrls?.[0]
-    );
   }
 
   async getKYCStatus(req: Request, res: Response): Promise<void> {
@@ -495,7 +447,7 @@ export class DriverController {
         return;
       }
 
-      const dto = new GetDriverDashboardDto(userId);
+      const dto = GetDriverDashboardDto.fromRequest(userId);
 
       const result = await this.getDashboardUseCase.execute(dto);
 

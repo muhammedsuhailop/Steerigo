@@ -2,6 +2,25 @@ import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { GearType, BodyType } from "@domain/value-objects/VehicleType";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 
+interface LicenseKYCRequestBody {
+  licenseCategory: LicenseCategory;
+  docNumber: string;
+  eligibleBodyTypes?: BodyType[];
+  eligibleGearTypes?: GearType[];
+  issueDate?: string;
+  expiryDate?: string;
+  frontImageUrls?: string[];
+  backImageUrls?: string[];
+}
+
+interface GenericKYCRequestBody {
+  docNumber: string;
+  issueDate?: string;
+  expiryDate?: string;
+  frontImageUrls?: string[];
+  backImageUrls?: string[];
+}
+
 export class KYCSubmissionRequestDto {
   constructor(
     private readonly userId: string,
@@ -20,6 +39,53 @@ export class KYCSubmissionRequestDto {
     private readonly idFrontImage?: string,
     private readonly idBackImage?: string
   ) {}
+
+  static fromLicenseRequest(
+    userId: string,
+    body: LicenseKYCRequestBody
+  ): KYCSubmissionRequestDto {
+    return new KYCSubmissionRequestDto(
+      userId,
+      body.licenseCategory,
+      body.docNumber,
+      body.eligibleBodyTypes,
+      body.eligibleGearTypes,
+      body.issueDate ? new Date(body.issueDate) : undefined,
+      body.expiryDate ? new Date(body.expiryDate) : undefined,
+      body.frontImageUrls?.[0],
+      body.backImageUrls?.[0],
+      undefined, // idType
+      undefined, // idNumber
+      undefined, // idIssueDate
+      undefined, // idExpiryDate
+      undefined, // idFrontImage
+      undefined // idBackImage
+    );
+  }
+
+  static fromGenericRequest(
+    userId: string,
+    docType: DocumentType,
+    body: GenericKYCRequestBody
+  ): KYCSubmissionRequestDto {
+    return new KYCSubmissionRequestDto(
+      userId,
+      undefined, // licenseCategory
+      undefined, // licenseNumber
+      undefined, // licenseBodyTypes
+      undefined, // licenseGearTypes
+      undefined, // licenseIssueDate
+      undefined, // licenseExpiryDate
+      undefined, // licenseFrontImage
+      undefined, // licenseBackImage
+      docType,
+      body.docNumber,
+      body.issueDate ? new Date(body.issueDate) : undefined,
+      body.expiryDate ? new Date(body.expiryDate) : undefined,
+      body.frontImageUrls?.[0],
+      body.backImageUrls?.[0]
+    );
+  }
 
   validate(): string[] {
     const errors: string[] = [];
