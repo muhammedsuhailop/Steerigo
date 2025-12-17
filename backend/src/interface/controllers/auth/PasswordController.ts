@@ -34,7 +34,7 @@ export class PasswordController {
 
   async forgotPasswordRequest(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new ForgotPasswordRequestDto(req.body);
+      const dto = ForgotPasswordRequestDto.fromRequest(req.body);
       const result = await this.forgotPasswordRequestUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -67,7 +67,7 @@ export class PasswordController {
 
   async forgotPasswordVerify(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new ForgotPasswordVerifyDto(req.body);
+      const dto = ForgotPasswordVerifyDto.fromRequest(req.body);
       const result = await this.forgotPasswordVerifyUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -101,11 +101,7 @@ export class PasswordController {
   async updatePassword(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.userId as string; // From auth middleware
-      const dto = new UpdatePasswordDto({
-        userId,
-        currentPassword: req.body.currentPassword,
-        newPassword: req.body.newPassword,
-      });
+      const dto = UpdatePasswordDto.fromRequest(userId, req.body);
 
       const result = await this.updatePasswordUseCase.execute(dto);
 

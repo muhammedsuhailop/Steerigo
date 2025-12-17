@@ -34,7 +34,7 @@ export class AuthUserController {
         return;
       }
 
-      const dto = new GetCurrentUserDto({ userId });
+      const dto = GetCurrentUserDto.fromRequest({ userId });
       const result = await this.getCurrentUserUseCase.execute(dto);
 
       if (result.isFailure()) {

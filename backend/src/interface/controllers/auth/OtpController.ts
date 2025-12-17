@@ -22,7 +22,7 @@ export class OtpController {
 
   async resendOtp(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new ResendOtpDto(req.body);
+      const dto = ResendOtpDto.fromRequest(req.body);
       const result = await this.resendOtpUseCase.execute(dto);
 
       if (result.isFailure()) {

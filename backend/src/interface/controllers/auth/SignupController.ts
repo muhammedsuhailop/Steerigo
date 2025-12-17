@@ -30,7 +30,7 @@ export class SignupController {
 
   async signup(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new SignupRequestDto(req.body);
+      const dto = SignupRequestDto.fromRequest(req.body);
       const result = await this.signupRequestUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -65,7 +65,7 @@ export class SignupController {
 
   async verify(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new SignupVerifyDto(req.body);
+      const dto = SignupVerifyDto.fromRequest(req.body);
       const result = await this.signupVerifyUseCase.execute(dto);
 
       if (result.isFailure()) {

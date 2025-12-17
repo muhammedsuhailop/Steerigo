@@ -7,6 +7,10 @@ export class ForgotPasswordRequestDto {
     this.email = Email.create(data.email);
   }
 
+  static fromRequest(data: { email: string }): ForgotPasswordRequestDto {
+    return new ForgotPasswordRequestDto(data);
+  }
+
   getEmail(): string {
     return this.email.getValue();
   }

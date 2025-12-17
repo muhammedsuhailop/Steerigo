@@ -47,7 +47,7 @@ export class TokenController {
         return;
       }
 
-      const dto = new RefreshTokenDto({ refreshToken });
+      const dto = RefreshTokenDto.fromRequest({ refreshToken });
       const result = await this.logoutUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -104,7 +104,7 @@ export class TokenController {
         return;
       }
 
-      const dto = new RefreshTokenDto({ refreshToken });
+      const dto = RefreshTokenDto.fromRequest({ refreshToken });
       const result = await this.refreshTokenUseCase.execute(dto);
 
       if (result.isFailure()) {

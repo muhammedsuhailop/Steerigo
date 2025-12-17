@@ -22,6 +22,16 @@ export class SignupRequestDto {
     this.role = data.role;
   }
 
+  static fromRequest(data: {
+    email: string;
+    name: string;
+    password: string;
+    mobile: string;
+    role: UserRole;
+  }): SignupRequestDto {
+    return new SignupRequestDto(data);
+  }
+
   getEmailValue(): string {
     return this.email.getValue();
   }

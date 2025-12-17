@@ -42,7 +42,7 @@ export class UserAuthController {
         return;
       }
 
-      const dto = new LoginRequestDto(req.body);
+      const dto = LoginRequestDto.fromrequest(req.body);
       const result = await this.loginUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -90,7 +90,7 @@ export class UserAuthController {
         return;
       }
 
-      const getCurrentUserDto = new GetCurrentUserDto({ userId });
+      const getCurrentUserDto = GetCurrentUserDto.fromRequest({ userId });
       const result =
         await this.getCurrentUserUseCase.execute(getCurrentUserDto);
 

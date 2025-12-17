@@ -1,16 +1,22 @@
 export class UpdatePasswordDto {
-  private userId: string;
-  private currentPassword: string;
-  private newPassword: string;
+  private readonly userId: string;
+  private readonly currentPassword: string;
+  private readonly newPassword: string;
 
-  constructor(data: {
-    userId: string;
-    currentPassword: string;
-    newPassword: string;
-  }) {
-    this.userId = data.userId;
-    this.currentPassword = data.currentPassword;
-    this.newPassword = data.newPassword;
+  constructor(
+    userId: string,
+    body: { currentPassword: string; newPassword: string }
+  ) {
+    this.userId = userId;
+    this.currentPassword = body.currentPassword;
+    this.newPassword = body.newPassword;
+  }
+
+  static fromRequest(
+    userId: string,
+    body: { currentPassword: string; newPassword: string }
+  ): UpdatePasswordDto {
+    return new UpdatePasswordDto(userId, body);
   }
 
   getUserId(): string {
