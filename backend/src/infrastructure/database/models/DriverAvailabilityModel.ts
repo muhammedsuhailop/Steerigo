@@ -1,3 +1,4 @@
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IDriverAvailabilityModel extends Document {
@@ -47,8 +48,8 @@ const driverAvailabilitySchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Available", "Busy", "Offline"],
-      default: "Available",
+      enum: AvailabilityStatus,
+      default: AvailabilityStatus.AVAILABLE,
       required: true,
     },
     availableFrom: {

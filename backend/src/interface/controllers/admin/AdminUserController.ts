@@ -31,7 +31,7 @@ export class AdminUserController {
 
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetUsersRequestDto(req.query);
+      const dto = GetUsersRequestDto.fromRequest(req.query);
       const result = await this.getUsersUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -62,11 +62,10 @@ export class AdminUserController {
 
   async updateUserStatus(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new UpdateUserStatusRequestDto({
-        userId: req.params.userId,
-        action: req.body.action,
-        reason: req.body.reason,
-      });
+      const dto = UpdateUserStatusRequestDto.fromRequest(
+        req.params.userId,
+        req.body
+      );
 
       const result = await this.updateUserStatusUseCase.execute(dto);
 

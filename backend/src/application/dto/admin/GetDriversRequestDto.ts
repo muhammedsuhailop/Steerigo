@@ -51,6 +51,10 @@ export class GetDriversRequestDto {
     this.data = getDriversRequestSchema.parse(queryParams);
   }
 
+  static fromRequest(queryParams: unknown): GetDriversRequestDto {
+    return new GetDriversRequestDto(queryParams);
+  }
+
   getPage(): number {
     return this.data.page;
   }

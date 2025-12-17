@@ -1,10 +1,11 @@
+import { RideStatus } from "@domain/value-objects/RideStatus";
 import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRideDocument extends Document {
   rideId: string;
   driverId: Types.ObjectId;
   riderId: Types.ObjectId;
-  status: string; 
+  status: string;
 
   pickup: {
     latitude: number;
@@ -17,7 +18,7 @@ export interface IRideDocument extends Document {
     address?: string;
   };
 
-  rideType: string; 
+  rideType: string;
 
   fareBreakdown: {
     baseFare: number;
@@ -74,15 +75,8 @@ const rideSchema = new Schema<IRideDocument>(
 
     status: {
       type: String,
-      enum: [
-        "Requested",
-        "Accepted",
-        "Started",
-        "Completed",
-        "Cancelled",
-        "Rejected",
-      ],
-      default: "Requested",
+      enum: RideStatus,
+      default: RideStatus.REQUESTED,
       index: true,
     },
 

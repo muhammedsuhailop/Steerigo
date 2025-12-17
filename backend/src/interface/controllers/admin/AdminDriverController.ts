@@ -77,7 +77,7 @@ export class AdminDriverController {
 
   async getDrivers(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetDriversRequestDto(req.query);
+      const dto = GetDriversRequestDto.fromRequest(req.query);
       const result = await this.getDriversUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
@@ -103,11 +103,11 @@ export class AdminDriverController {
 
   async driverAction(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new DriverActionRequestDto({
-        driverId: req.params.driverId,
-        action: req.body.action,
-        reason: req.body.reason,
-      });
+      const dto = DriverActionRequestDto.fromRequest(
+        req.params.driverId,
+        req.body
+      );
+
       const result = await this.driverActionUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
@@ -137,7 +137,7 @@ export class AdminDriverController {
 
   async getDriverProfile(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetDriverProfileRequestDto({
+      const dto = GetDriverProfileRequestDto.fromData({
         driverId: req.params.driverId,
       });
       const result = await this.getDriverProfileUseCase.execute(dto);
@@ -165,7 +165,7 @@ export class AdminDriverController {
 
   async getKycRequests(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetKycRequestsRequestDto(req.query);
+      const dto = GetKycRequestsRequestDto.fromRequest(req.query);
       const result = await this.getKycRequestsUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
@@ -191,13 +191,10 @@ export class AdminDriverController {
 
   async updateKycStatus(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new UpdateKycStatusRequestDto({
-        kycId: req.params.kycId,
-        verificationStatus: req.body.verificationStatus,
-        comments: req.body.comments,
-        docImageUrlsFront: req.body.docImageUrlsFront,
-        docImageUrlsBack: req.body.docImageUrlsBack,
-      });
+      const dto = UpdateKycStatusRequestDto.fromRequest(
+        req.params.kycId,
+        req.body
+      );
       const result = await this.updateKycStatusUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
@@ -227,7 +224,9 @@ export class AdminDriverController {
 
   async getKycRequestById(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new GetKycRequestByIdRequestDto({ kycId: req.params.kycId });
+      const dto = GetKycRequestByIdRequestDto.fromRequest({
+        kycId: req.params.kycId,
+      });
       const result = await this.getKycRequestByIdUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
@@ -253,11 +252,10 @@ export class AdminDriverController {
 
   async updateDriverKycStatus(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new UpdateDriverKycStatusRequestDto({
-        driverId: req.params.driverId,
-        kycStatus: req.body.kycStatus,
-        comments: req.body.comments,
-      });
+      const dto = UpdateDriverKycStatusRequestDto.fromRequest(
+        req.params.driverId,
+        req.body
+      );
 
       const result = await this.updateDriverKycStatusUseCase.execute(dto);
 

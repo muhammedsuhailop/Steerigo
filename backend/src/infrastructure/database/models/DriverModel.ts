@@ -1,3 +1,7 @@
+import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
+import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IDriverModel extends Document {
@@ -26,14 +30,14 @@ const driverSchema = new Schema<IDriverModel>(
     eligibleGearTypes: [
       {
         type: String,
-        enum: ["Manual", "Automatic"],
+        enum: GearType,
         required: true,
       },
     ],
     eligibleBodyTypes: [
       {
         type: String,
-        enum: ["Sedan", "SUV", "Truck", "Hatchback", "Coupe"],
+        enum: BodyType,
         required: true,
       },
     ],
@@ -43,7 +47,7 @@ const driverSchema = new Schema<IDriverModel>(
     },
     licenceCategory: {
       type: String,
-      enum: ["LMV", "HMV", "MCWG", "MCWOG"],
+      enum: LicenseCategory,
       required: true,
     },
     licenseIssueDate: {
@@ -56,13 +60,13 @@ const driverSchema = new Schema<IDriverModel>(
     },
     kycStatus: {
       type: String,
-      enum: ["InReview", "Rejected", "Approved", "Expired"],
-      default: "InReview",
+      enum: KYCStatus,
+      default: KYCStatus.IN_REVIEW,
     },
     status: {
       type: String,
-      enum: ["Active", "Blocked", "Suspended"],
-      default: "Active",
+      enum: DriverStatus,
+      default: DriverStatus.ACTIVE,
     },
   },
   {

@@ -1,3 +1,5 @@
+import { Gender } from "@domain/value-objects/Gender";
+import { UserRole, UserStatus } from "@shared/constants/AuthConstants";
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUserDocument extends Document {
@@ -52,7 +54,7 @@ const UserSchema = new Schema<IUserDocument>(
     },
     gender: {
       type: String,
-      enum: ["Male", "Female", "Other"],
+      enum: Gender,
     },
     address: {
       type: String,
@@ -60,13 +62,13 @@ const UserSchema = new Schema<IUserDocument>(
     },
     role: {
       type: String,
-      enum: ["Rider", "Driver", "Admin"],
-      default: "Rider",
+      enum: UserRole,
+      default: UserRole.RIDER,
     },
     status: {
       type: String,
-      enum: ["Pending Verification", "Active", "Suspended", "Inactive"],
-      default: "Pending Verification",
+      enum: UserStatus,
+      default: UserStatus.PENDING_VERIFICATION,
     },
     isVerified: {
       type: Boolean,

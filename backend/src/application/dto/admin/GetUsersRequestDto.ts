@@ -1,11 +1,10 @@
+import { UserStatus } from "@shared/constants/UserStatus";
 import { z } from "zod";
 
 const getUsersRequestSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
-  status: z
-    .enum(["Active", "Inactive", "Suspended", "Pending Verification"])
-    .optional(),
+  status: z.nativeEnum(UserStatus).optional(),
   search: z.string().min(1).max(255).optional(),
   dateFrom: z
     .union([
@@ -41,6 +40,10 @@ export class GetUsersRequestDto {
     this.data = getUsersRequestSchema.parse(queryParams);
   }
 
+  static fromRequest(queryParams: unknown): GetUsersRequestDto {
+    return new GetUsersRequestDto(queryParams);
+  }
+
   getPage(): number {
     return this.data.page;
   }
@@ -49,7 +52,7 @@ export class GetUsersRequestDto {
     return this.data.pageSize;
   }
 
-  getStatus(): string | undefined {
+  getStatus(): UserStatus | undefined {
     return this.data.status;
   }
 

@@ -17,6 +17,10 @@ export class GetDriverProfileRequestDto {
     this.data = getDriverProfileRequestSchema.parse(requestData);
   }
 
+  static fromData(requestData: unknown): GetDriverProfileRequestDto {
+    return new GetDriverProfileRequestDto(requestData);
+  }
+
   getDriverId(): string {
     return this.data.driverId;
   }
