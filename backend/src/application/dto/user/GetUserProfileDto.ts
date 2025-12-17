@@ -5,6 +5,10 @@ export class GetUserProfileDto {
     this.userId = userId;
   }
 
+  static fromRequest(userId:string):GetUserProfileDto{
+    return new GetUserProfileDto(userId)
+  }
+
   validate(): string[] {
     const errors: string[] = [];
 

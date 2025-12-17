@@ -14,6 +14,7 @@ import {
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
+import { UserRole } from "@shared/constants/AuthConstants";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -71,7 +72,7 @@ export class UserProfileController {
         return;
       }
 
-      const dto = new GetUserProfileDto(userId);
+      const dto = GetUserProfileDto.fromRequest(userId);
       const result = await this.getUserProfileUseCase.execute(dto);
 
       if (result.isSuccessful()) {
@@ -107,9 +108,9 @@ export class UserProfileController {
       }
 
       const { userId } = req.params;
-
       const currentUser = req.user;
-      if (userId !== currentUserId && currentUser?.role !== "Admin") {
+
+      if (userId !== currentUserId && currentUser?.role !== UserRole.ADMIN) {
         res.status(HttpStatusCodes.FORBIDDEN).json({
           success: false,
           message: USER_MESSAGES.PROFILE.ACCESS_DENIED_UPDATE,
@@ -118,7 +119,8 @@ export class UserProfileController {
       }
 
       const body = req.body as UserProfileRequestBody;
-      const dto = new UpdateUserProfileDto({ ...body, userId });
+
+      const dto = UpdateUserProfileDto.fromRequest(userId, body);
 
       const result = await this.updateUserProfileUseCase.execute(dto);
 
@@ -175,7 +177,7 @@ export class UserProfileController {
         return;
       }
 
-      const dto = new RegisterAsDriverRequestDto(userId);
+      const dto = RegisterAsDriverRequestDto.fromRequest(userId);
       const result = await this.registerUserAsDriverUseCase.execute(dto);
 
       if (result.isSuccessful()) {

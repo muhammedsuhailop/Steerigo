@@ -5,6 +5,10 @@ export class RegisterAsDriverRequestDto {
     this.userId = userId;
   }
 
+  static fromRequest(userId: string): RegisterAsDriverRequestDto {
+    return new RegisterAsDriverRequestDto(userId);
+  }
+
   validate(): string[] {
     const errors: string[] = [];
 

@@ -1,20 +1,197 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import {
+  FareBreakdown,
+  TaxBreakdown,
+} from "@domain/value-objects/FareBreakdown";
+import { Money } from "@domain/value-objects/Money";
+
+interface SendRideRequestBody {
+  driverId: string;
+  pickup: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  drop: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  pickupTime: string;
+  rideType: string;
+  fareBreakdown: {
+    baseFare: {
+      amount: number;
+      currency: string;
+    };
+    platformFee: {
+      amount: number;
+      currency: string;
+    };
+    taxes: {
+      fare: {
+        name: string;
+        rate: number;
+        amount: {
+          amount: number;
+          currency: string;
+        };
+      };
+      platformFee: {
+        name: string;
+        rate: number;
+        amount: {
+          amount: number;
+          currency: string;
+        };
+      };
+    };
+    totalFare: {
+      amount: number;
+      currency: string;
+    };
+    durationHours: number;
+  };
+  pickupETA: string;
+}
 
 export class SendRideRequestDto {
+  public readonly riderId: string;
+  public readonly driverId: string;
+  public readonly pickupLatitude: number;
+  public readonly pickupLongitude: number;
+  public readonly pickupAddress: string | undefined;
+  public readonly dropLatitude: number;
+  public readonly dropLongitude: number;
+  public readonly dropAddress: string | undefined;
+  public readonly pickupTime: Date;
+  public readonly rideType: string;
+  public readonly fareBreakdown: FareBreakdown;
+  public readonly pickupETA: string;
+
   constructor(
-    public readonly riderId: string,
-    public readonly driverId: string,
-    public readonly pickupLatitude: number,
-    public readonly pickupLongitude: number,
-    public readonly pickupAddress: string | undefined,
-    public readonly dropLatitude: number,
-    public readonly dropLongitude: number,
-    public readonly dropAddress: string | undefined,
-    public readonly pickupTime: Date,
-    public readonly rideType: string,
-    public readonly fareBreakdown: FareBreakdown, 
-    public readonly pickupETA: string
-  ) {}
+    riderId: string,
+    driverId: string,
+    pickupLatitude: number,
+    pickupLongitude: number,
+    pickupAddress: string | undefined,
+    dropLatitude: number,
+    dropLongitude: number,
+    dropAddress: string | undefined,
+    pickupTime: Date,
+    rideType: string,
+    fareBreakdown: FareBreakdown,
+    pickupETA: string
+  ) {
+    this.riderId = riderId;
+    this.driverId = driverId;
+    this.pickupLatitude = pickupLatitude;
+    this.pickupLongitude = pickupLongitude;
+    this.pickupAddress = pickupAddress;
+    this.dropLatitude = dropLatitude;
+    this.dropLongitude = dropLongitude;
+    this.dropAddress = dropAddress;
+    this.pickupTime = pickupTime;
+    this.rideType = rideType;
+    this.fareBreakdown = fareBreakdown;
+    this.pickupETA = pickupETA;
+  }
+
+  static fromRequest(
+    riderId: string,
+    requestBody: unknown
+  ): SendRideRequestDto {
+    const body = (requestBody ?? {}) as SendRideRequestBody;
+    const {
+      driverId,
+      pickup,
+      drop,
+      pickupTime,
+      rideType,
+      fareBreakdown: fareBreakdownData,
+      pickupETA,
+    } = body;
+
+    if (!driverId?.trim()) {
+      throw new Error("Driver ID is required");
+    }
+
+    if (!pickupTime) {
+      throw new Error("Pickup time is required");
+    }
+
+    if (!rideType?.trim()) {
+      throw new Error("Ride type is required");
+    }
+
+    if (!fareBreakdownData) {
+      throw new Error("Fare breakdown is required");
+    }
+
+    if (!pickupETA?.trim()) {
+      throw new Error("Pickup ETA is required");
+    }
+
+    // Create base fare Money object
+    const baseFare = Money.create(
+      fareBreakdownData.baseFare.amount,
+      fareBreakdownData.baseFare.currency
+    );
+
+    // Create platform fee Money object
+    const platformFee = Money.create(
+      fareBreakdownData.platformFee.amount,
+      fareBreakdownData.platformFee.currency
+    );
+
+    // Create fare tax breakdown
+    const fareTax: TaxBreakdown = {
+      name: fareBreakdownData.taxes.fare.name,
+      rate: fareBreakdownData.taxes.fare.rate,
+      amount: Money.create(
+        fareBreakdownData.taxes.fare.amount.amount,
+        fareBreakdownData.taxes.fare.amount.currency
+      ),
+    };
+
+    // Create platform fee tax breakdown
+    const platformFeeTax: TaxBreakdown = {
+      name: fareBreakdownData.taxes.platformFee.name,
+      rate: fareBreakdownData.taxes.platformFee.rate,
+      amount: Money.create(
+        fareBreakdownData.taxes.platformFee.amount.amount,
+        fareBreakdownData.taxes.platformFee.amount.currency
+      ),
+    };
+
+    const totalFare = Money.create(
+      fareBreakdownData.totalFare.amount,
+      fareBreakdownData.totalFare.currency
+    );
+
+    const fareBreakdown = FareBreakdown.create({
+      baseFare,
+      platformFee,
+      fareTax,
+      platformFeeTax,
+      totalFare,
+      durationHours: fareBreakdownData.durationHours,
+    });
+
+    return new SendRideRequestDto(
+      riderId,
+      driverId,
+      pickup.latitude,
+      pickup.longitude,
+      pickup.address,
+      drop.latitude,
+      drop.longitude,
+      drop.address,
+      new Date(pickupTime),
+      rideType,
+      fareBreakdown,
+      pickupETA
+    );
+  }
 
   validate(): void {
     if (!this.riderId || this.riderId.trim().length === 0) {

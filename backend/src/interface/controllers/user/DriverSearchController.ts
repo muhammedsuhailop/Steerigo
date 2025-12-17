@@ -59,16 +59,7 @@ export class DriverSearchController {
         bodyType,
       });
 
-      const dto = new FindNearbyDriversRequestDto(
-        latitude,
-        longitude,
-        searchDate ? new Date(searchDate) : new Date(),
-        timeRequired,
-        radiusKm || 10,
-        gearType || "",
-        bodyType || "",
-        limit || 20
-      );
+      const dto = FindNearbyDriversRequestDto.fromRequest(req.body);
 
       const result = await this.findNearbyDriversUseCase.execute(dto);
 
