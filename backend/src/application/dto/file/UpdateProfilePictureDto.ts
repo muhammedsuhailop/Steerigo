@@ -10,6 +10,10 @@ export class UpdateProfilePictureDto {
     this.file = data.file;
   }
 
+  static fromRequest(userId: string, file: Express.Multer.File) {
+    return new UpdateProfilePictureDto({ userId, file });
+  }
+
   validate(): string[] {
     const errors: string[] = [];
 

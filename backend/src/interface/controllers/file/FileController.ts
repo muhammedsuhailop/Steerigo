@@ -207,10 +207,7 @@ export class FileController {
         return;
       }
 
-      const dto = new UpdateProfilePictureDto({
-        userId,
-        file: req.file,
-      });
+      const dto = UpdateProfilePictureDto.fromRequest(userId, req.file);
 
       const result = await this._updateProfileUc.execute(dto);
 
