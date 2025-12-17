@@ -9,6 +9,10 @@ export class SignupVerifyDto {
     this.otp = data.otp;
   }
 
+  static fromRequest(data: { email: string; otp: string }): SignupVerifyDto {
+    return new SignupVerifyDto(data);
+  }
+
   getEmail(): string {
     return this.email.getValue();
   }

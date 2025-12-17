@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Repository
-import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { DriverAvailabilityRepositoryImpl } from "@infrastructure/database/repositories/DriverAvailabilityRepositoryImpl";
 
 // Use Cases

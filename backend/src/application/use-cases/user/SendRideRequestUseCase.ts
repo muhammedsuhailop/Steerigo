@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
-import { IRideRequestRepository } from "@application/repositories/IRideRequestRepository";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
 import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
 import { RideRequest } from "@domain/entities/RideRequest";

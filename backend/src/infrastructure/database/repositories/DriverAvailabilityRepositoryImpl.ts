@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import {
   IDriverAvailabilityRepository,
   IDriverAvailabilityFilters,
-} from "@application/repositories/IDriverAvailabilityRepository";
+} from "@domain/repositories/IDriverAvailabilityRepository";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import {

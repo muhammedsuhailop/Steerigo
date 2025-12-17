@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { IKYCRepository } from "@application/repositories/IKYCRepository";
-import { IKYCRepository as IAdminKYCRepository } from "@application/repositories/IAdminDriverKYCRepository";
+import { IKYCRepository } from "@domain/repositories/IKYCRepository";
+import { IKYCRepository as IAdminKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
 import { KYC } from "@domain/entities/KYC";
 import { IKYCModel, KYCModel } from "../models/KYCModel";
 import { KYCMapper } from "../mappers/KYCMapper";
@@ -22,7 +22,7 @@ import {
 import {
   IKYCQuery,
   IKYCWithDriverInfo,
-} from "@application/repositories/IAdminDriverKYCRepository";
+} from "@domain/repositories/IAdminDriverKYCRepository";
 
 type UnifiedKYCFilterOptions = FilterOptions<KYC> & IKYCQuery;
 

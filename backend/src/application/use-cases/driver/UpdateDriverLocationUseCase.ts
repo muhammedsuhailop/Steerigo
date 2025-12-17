@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IDriverAvailabilityRepository } from "@application/repositories/IDriverAvailabilityRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { UpdateLocationRequestDto } from "@application/dto/driver/UpdateLocationRequestDto";
 import { Location } from "@domain/value-objects/Location";
 import { Result } from "@shared/utils/Result";

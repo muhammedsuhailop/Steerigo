@@ -38,6 +38,10 @@ export class GetKycRequestsRequestDto {
     this.data = getKycRequestsRequestSchema.parse(queryParams);
   }
 
+  static fromRequest(queryParams: unknown): GetKycRequestsRequestDto {
+    return new GetKycRequestsRequestDto(queryParams);
+  }
+
   getPage(): number {
     return this.data.page;
   }

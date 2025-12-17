@@ -1,3 +1,5 @@
+import { DocumentType } from "@domain/value-objects/DocumentType";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IKYCModel extends Document {
@@ -24,7 +26,7 @@ const kycSchema = new Schema<IKYCModel>(
     },
     docType: {
       type: String,
-      enum: ["Aadhaar", "PAN", "License", "Passport"],
+      enum: DocumentType,
       required: true,
     },
     docNumber: {
@@ -41,8 +43,8 @@ const kycSchema = new Schema<IKYCModel>(
     },
     verificationStatus: {
       type: String,
-      enum: ["InReview", "Approved", "Rejected", "Expired"],
-      default: "InReview",
+      enum: KYCStatus,
+      default: KYCStatus.IN_REVIEW,
     },
     comments: {
       type: String,

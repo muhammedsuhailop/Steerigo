@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IKYCRepository } from "@application/repositories/IKYCRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IKYCRepository } from "@domain/repositories/IKYCRepository";
 import { KYCResponseDto } from "@application/dto/driver/KYCResponseDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";

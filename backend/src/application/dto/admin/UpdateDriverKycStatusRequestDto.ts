@@ -1,10 +1,16 @@
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { z } from "zod";
+
+interface UpdateDriverKycStatusRequestBody {
+  kycStatus: KYCStatus;
+  comments?: string;
+}
 
 const updateDriverKycStatusSchema = z.object({
   driverId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId format"),
-  kycStatus: z.enum(["InReview", "Rejected", "Approved", "Expired"], {
+  kycStatus: z.nativeEnum(KYCStatus, {
     message: "KYC status must be one of: InReview, Rejected, Approved, Expired",
   }),
   comments: z
@@ -23,11 +29,20 @@ export class UpdateDriverKycStatusRequestDto {
     this.data = updateDriverKycStatusSchema.parse(requestData);
   }
 
+  static fromRequest(driverId: string, requestBody: unknown) {
+    const body = (requestBody ?? {}) as UpdateDriverKycStatusRequestBody;
+    return new UpdateDriverKycStatusRequestDto({
+      driverId,
+      kycStatus: body.kycStatus,
+      comments: body.comments,
+    });
+  }
+
   getDriverId(): string {
     return this.data.driverId;
   }
 
-  getKycStatus(): string {
+  getKycStatus(): KYCStatus {
     return this.data.kycStatus;
   }
 

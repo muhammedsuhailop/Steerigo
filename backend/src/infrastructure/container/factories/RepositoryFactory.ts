@@ -1,11 +1,11 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
-import { IUserRepository } from "@application/repositories/IUserRepository";
-import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 import { UserRepositoryImpl } from "@infrastructure/database/repositories/UserRepositoryImpl";
 import { RefreshTokenRepositoryImpl } from "@infrastructure/database/repositories/RefreshTokenRepositoryImpl";
 import { RideRequestRepositoryImpl } from "@infrastructure/database/repositories/RideRequestRepositoryImpl";
-import { IRideRequestRepository } from "@application/repositories/IRideRequestRepository";
+import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
 
 export class RepositoryFactory {
   static register(container: Container): void {

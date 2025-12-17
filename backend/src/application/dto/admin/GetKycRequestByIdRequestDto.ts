@@ -15,6 +15,10 @@ export class GetKycRequestByIdRequestDto {
     this.data = getKycRequestByIdRequestSchema.parse(requestData);
   }
 
+  static fromRequest(requestData: unknown): GetKycRequestByIdRequestDto {
+    return new GetKycRequestByIdRequestDto(requestData);
+  }
+
   getKycId(): string {
     return this.data.kycId;
   }

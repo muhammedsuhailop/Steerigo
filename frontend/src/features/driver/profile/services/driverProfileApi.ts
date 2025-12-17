@@ -1,11 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 import type {
   DriverProfileResponse,
   DriverProfile,
   KYCDocument,
-  LicenseInfo,
   KYCPayload,
   ProfilePictureData,
 } from "../types/driverProfile.types";
@@ -24,7 +24,7 @@ export const driverProfileApi = createApi({
     // Get driver profile
     getDriverProfile: builder.query<DriverProfileResponse, void>({
       query: () => ({
-        url: "/driver/profile",
+        url: API_ENDPOINTS.DRIVER.PROFILE,
         method: "GET",
       }),
       transformResponse: (response: ApiResponse<DriverProfile>) => {
@@ -39,7 +39,7 @@ export const driverProfileApi = createApi({
       Partial<DriverProfile>
     >({
       query: (data) => ({
-        url: "/driver/profile",
+        url: API_ENDPOINTS.DRIVER.PROFILE,
         method: "PUT",
         data,
       }),
@@ -49,6 +49,7 @@ export const driverProfileApi = createApi({
       invalidatesTags: ["DriverProfile"],
     }),
 
+    // Upload profile picture
     uploadDriverProfilePicture: builder.mutation<
       ApiResponse<ProfilePictureData>,
       { userId: string; file: File }
@@ -58,7 +59,7 @@ export const driverProfileApi = createApi({
         formData.append("file", file);
 
         return {
-          url: `/file/profile-picture/${userId}`,
+          url: `${API_ENDPOINTS.DRIVER.PROFILE_PIC_UPLOAD}/${userId}`,
           method: "POST",
           data: formData,
           headers: {
@@ -74,7 +75,7 @@ export const driverProfileApi = createApi({
     // Add KYC Document
     addKYCDocument: builder.mutation<KYCDocument, KYCPayload>({
       query: (payload) => ({
-        url: "/driver/kyc",
+        url: API_ENDPOINTS.DRIVER.KYC,
         method: "PUT",
         data: payload,
         headers: {

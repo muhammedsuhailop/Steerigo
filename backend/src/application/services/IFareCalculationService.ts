@@ -6,7 +6,7 @@ import {
 } from "@domain/value-objects/FareBreakdown";
 import { Money } from "@domain/value-objects/Money";
 import { TYPES } from "@shared/constants/DITypes";
-import { IFareConfigurationRepository } from "@application/repositories/IFareConfigurationRepository";
+import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
 import { Logger } from "@shared/utils/Logger";
 
 export interface IFareCalculationParams {

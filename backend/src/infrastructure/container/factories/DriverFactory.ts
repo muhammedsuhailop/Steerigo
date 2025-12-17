@@ -14,7 +14,7 @@ import { GetKYCStatusUseCase } from "@application/use-cases/driver/GetKYCStatusU
 
 // Driver Controllers
 import { DriverController } from "@interface/controllers/driver/DriverController";
-import { IDriverDashboardRepository } from "@application/repositories/IDriverDashboardRepository";
+import { IDriverDashboardRepository } from "@domain/repositories/IDriverDashboardRepository";
 import { DriverDashboardRepositoryImpl } from "@infrastructure/database/repositories/driver/DriverDashboardRepositoryImpl";
 import { GetDriverDashboardUseCase } from "@application/use-cases/driver/GetDriverDashboardUseCase";
 import { GetDriverStatusUseCase } from "@application/use-cases/driver/GetDriverStatusUseCase";

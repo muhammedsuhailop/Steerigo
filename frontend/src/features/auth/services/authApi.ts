@@ -20,6 +20,7 @@ import { driverProfileApi } from "@/features/driver/profile/services/driverProfi
 import { schedulingApi } from "@/features/driver/scheduling/services/schedulingApi";
 import { driverApi } from "@/features/driver";
 import { userProfileApi } from "@/features/user";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -28,7 +29,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
-        url: "/auth/login",
+        url: API_ENDPOINTS.AUTH.LOGIN,
         method: "POST",
         data: credentials,
         skipAuth: true,
@@ -42,7 +43,7 @@ export const authApi = createApi({
       SignupRequest
     >({
       query: (userData) => ({
-        url: "/auth/signup",
+        url: API_ENDPOINTS.AUTH.SIGNUP,
         method: "POST",
         data: userData,
         skipAuth: true,
@@ -55,7 +56,7 @@ export const authApi = createApi({
       void
     >({
       query: () => ({
-        url: "/auth/google",
+        url: API_ENDPOINTS.AUTH.GOOGLE,
         method: "GET",
         skipAuth: true,
         skipErrorHandling: true,
@@ -67,7 +68,7 @@ export const authApi = createApi({
       { code: string; state?: string }
     >({
       query: (callbackData) => ({
-        url: "/auth/google/callback",
+        url: API_ENDPOINTS.AUTH.GOOGLE_CALLBACK,
         method: "POST",
         data: callbackData,
         skipAuth: true,
@@ -78,7 +79,7 @@ export const authApi = createApi({
 
     verifySignupOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
       query: (otpData) => ({
-        url: "/auth/signup/verify",
+        url: API_ENDPOINTS.AUTH.VERIFY_OTP,
         method: "POST",
         data: otpData,
         skipAuth: true,
@@ -92,7 +93,7 @@ export const authApi = createApi({
       { email: string }
     >({
       query: ({ email }) => ({
-        url: "/auth/signup/resend",
+        url: API_ENDPOINTS.AUTH.SIGNUP_RESEND,
         method: "POST",
         data: { email },
         skipAuth: true,
@@ -102,7 +103,7 @@ export const authApi = createApi({
 
     verifyOTP: builder.mutation<AuthResponse, OTPVerificationRequest>({
       query: (otpData) => ({
-        url: "/auth/signup/verify",
+        url: API_ENDPOINTS.AUTH.VERIFY_OTP,
         method: "POST",
         data: otpData,
         skipAuth: true,
@@ -116,7 +117,7 @@ export const authApi = createApi({
       { email: string }
     >({
       query: ({ email }) => ({
-        url: "/auth/resend-otp",
+        url: API_ENDPOINTS.AUTH.RESEND_OTP,
         method: "POST",
         data: { email },
         skipAuth: true,
@@ -129,7 +130,7 @@ export const authApi = createApi({
       ForgotPasswordRequest
     >({
       query: (emailData) => ({
-        url: "/auth/forgot-password",
+        url: API_ENDPOINTS.AUTH.RESET_PASSWORD,
         method: "POST",
         data: emailData,
         skipAuth: true,
@@ -142,7 +143,7 @@ export const authApi = createApi({
       ResetPasswordRequest
     >({
       query: (resetData) => ({
-        url: "/auth/reset-password",
+        url: API_ENDPOINTS.AUTH.RESET_PASSWORD_CONFIRM,
         method: "POST",
         data: resetData,
         skipAuth: true,
@@ -155,7 +156,7 @@ export const authApi = createApi({
       UpdatePasswordRequest
     >({
       query: (passwordData) => ({
-        url: "/auth/update-password",
+        url: API_ENDPOINTS.AUTH.UPDATE_PASSWORD,
         method: "PUT",
         data: passwordData,
         skipErrorHandling: true,
@@ -177,7 +178,7 @@ export const authApi = createApi({
           throw new Error("No refresh token found");
         }
         return {
-          url: "/auth/refresh-token",
+          url: API_ENDPOINTS.AUTH.REFRESH_TOKEN,
           method: "POST",
           data: { refreshToken },
           skipAuth: true,
@@ -197,7 +198,7 @@ export const authApi = createApi({
       query: () => {
         const refreshToken = getRefreshTokenFromStorage() || "";
         return {
-          url: "/auth/logout",
+          url: API_ENDPOINTS.AUTH.LOGOUT,
           method: "POST",
           data: { refreshToken },
         };
@@ -225,7 +226,7 @@ export const authApi = createApi({
 
     getCurrentUser: builder.query<{ success: boolean; data: User }, void>({
       query: () => ({
-        url: "/auth/me",
+        url: API_ENDPOINTS.AUTH.ME,
         method: "GET",
         skipErrorHandling: true,
       }),

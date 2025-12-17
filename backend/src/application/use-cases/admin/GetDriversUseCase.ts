@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
+import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
 import {
   AdminDriverQuery,
   GetDriversRequestDto,

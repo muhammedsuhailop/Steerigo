@@ -1,9 +1,20 @@
+import { Gender } from "@domain/value-objects/Gender";
+
 export interface UpdateUserProfileInput {
   userId?: string;
   name?: string;
   mobile?: string;
   dob?: string | Date;
-  gender?: "Male" | "Female" | "Other";
+  gender?: Gender;
+  address?: string;
+  profilePicture?: string;
+}
+
+interface UpdateUserProfileRequestBody {
+  name?: string;
+  mobile?: string;
+  dob?: string;
+  gender?: Gender;
   address?: string;
   profilePicture?: string;
 }
@@ -12,7 +23,7 @@ type UserProfileUpdates = {
   name: string;
   mobile: string;
   dob: Date;
-  gender: "Male" | "Female" | "Other";
+  gender: Gender;
   address: string;
 };
 
@@ -21,27 +32,35 @@ export class UpdateUserProfileDto {
   public readonly name?: string;
   public readonly mobile?: string;
   public readonly dob?: Date;
-  public readonly gender?: "Male" | "Female" | "Other";
+  public readonly gender?: Gender;
   public readonly address?: string;
   public readonly profilePicture?: string;
 
   constructor(data: unknown) {
     const input = (data ?? {}) as UpdateUserProfileInput;
-
     this.userId = input.userId ?? "";
     this.name = input.name?.trim();
     this.mobile = input.mobile?.trim();
-
     this.dob =
       input.dob instanceof Date
         ? input.dob
         : input.dob
           ? new Date(input.dob)
           : undefined;
-
     this.gender = input.gender;
     this.address = input.address?.trim();
     this.profilePicture = input.profilePicture?.trim();
+  }
+
+  static fromRequest(
+    userId: string,
+    requestBody: unknown
+  ): UpdateUserProfileDto {
+    const input = (requestBody ?? {}) as UpdateUserProfileRequestBody;
+    return new UpdateUserProfileDto({
+      userId,
+      ...input,
+    });
   }
 
   validate(): string[] {
@@ -51,25 +70,36 @@ export class UpdateUserProfileDto {
       errors.push("User ID is required");
     }
 
-    if (this.name !== undefined && this.name.length < 2) {
+    if (!this.name) {
+      errors.push("Name is required");
+    } else if (this.name.length < 2) {
       errors.push("Name must be at least 2 characters long");
     }
 
-    if (this.mobile !== undefined && !/^[6-9]\d{9}$/.test(this.mobile)) {
-      errors.push("Please provide a valid 10-digit mobile number");
+    if (!this.mobile) {
+      errors.push("Mobile number is required");
+    } else if (!/^\d{10,}$/.test(this.mobile)) {
+      errors.push("Mobile number must contain at least 10 digits");
     }
 
     if (this.dob !== undefined) {
       const today = new Date();
-      const age = today.getFullYear() - this.dob.getFullYear();
-      if (age < 10 || age > 100) {
-        errors.push("Age must be between 10 and 100 years");
+      let age = today.getFullYear() - this.dob.getFullYear();
+
+      const monthDiff = today.getMonth() - this.dob.getMonth();
+      const dayDiff = today.getDate() - this.dob.getDate();
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--;
+      }
+
+      if (age < 10 || age > 120) {
+        errors.push("Age must be between 10 and 120 years");
       }
     }
 
     if (
       this.gender !== undefined &&
-      !["Male", "Female", "Other"].includes(this.gender)
+      !Object.values(Gender).includes(this.gender)
     ) {
       errors.push("Gender must be Male, Female, or Other");
     }

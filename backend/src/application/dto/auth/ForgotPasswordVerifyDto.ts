@@ -1,4 +1,5 @@
 import { Email } from "@domain/value-objects/Email";
+import { da } from "zod/v4/locales";
 
 export class ForgotPasswordVerifyDto {
   private email: Email;
@@ -9,6 +10,14 @@ export class ForgotPasswordVerifyDto {
     this.email = Email.create(data.email);
     this.otp = data.otp;
     this.newPassword = data.newPassword;
+  }
+
+  static fromRequest(data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }): ForgotPasswordVerifyDto {
+    return new ForgotPasswordVerifyDto(data);
   }
 
   getEmail(): string {

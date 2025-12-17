@@ -1,7 +1,7 @@
 // src/application/use-cases/auth/LogoutUseCase.ts
 
 import { injectable, inject } from "inversify";
-import { IRefreshTokenRepository } from "@application/repositories/IRefreshTokenRepository";
+import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
 import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
 import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";

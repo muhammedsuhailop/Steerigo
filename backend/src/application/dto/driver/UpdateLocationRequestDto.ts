@@ -27,6 +27,10 @@ export class UpdateLocationRequestDto {
     this.data = updateLocationSchema.parse(requestData);
   }
 
+  static fromRequest(requestBody: unknown): UpdateLocationRequestDto {
+    return new UpdateLocationRequestDto(requestBody);
+  }
+
   getLocationData(): {
     latitude: number;
     longitude: number;

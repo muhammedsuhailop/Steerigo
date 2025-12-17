@@ -1,6 +1,6 @@
 import { User } from "@domain/entities/User";
-import { IReadOnlyRepository } from "./interfaces/IReadOnlyRepository";
-import { IWriteOnlyRepository } from "./interfaces/IWriteOnlyRepository";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 
 export interface IUserProfileRepository
   extends IReadOnlyRepository<User, string>,

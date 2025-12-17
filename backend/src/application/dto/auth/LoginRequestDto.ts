@@ -7,6 +7,13 @@ export class LoginRequestDto {
     this.password = data.password;
   }
 
+  static fromrequest(data: {
+    email: string;
+    password: string;
+  }): LoginRequestDto {
+    return new LoginRequestDto(data);
+  }
+
   getEmailValue(): string {
     return this.email;
   }

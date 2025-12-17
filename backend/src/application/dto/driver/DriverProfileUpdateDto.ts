@@ -1,10 +1,22 @@
+import { Gender } from "@domain/value-objects/Gender";
+
 type UserProfileUpdates = Partial<{
   name: string;
   mobile: string;
   dob: Date;
-  gender: "Male" | "Female" | "Other";
+  gender: Gender;
   address: string;
 }>;
+
+interface DriverProfileUpdateRequestBody {
+  name?: string;
+  mobile?: string;
+  dob?: string;
+  gender?: Gender;
+  address?: string;
+  eligibleGearTypes?: string[];
+  eligibleBodyTypes?: string[];
+}
 
 export class DriverProfileUpdateDto {
   constructor(
@@ -12,11 +24,27 @@ export class DriverProfileUpdateDto {
     private readonly name?: string,
     private readonly mobile?: string,
     private readonly dob?: Date,
-    private readonly gender?: "Male" | "Female" | "Other",
+    private readonly gender?: Gender,
     private readonly address?: string,
     private readonly eligibleGearTypes?: string[],
     private readonly eligibleBodyTypes?: string[]
   ) {}
+
+  static fromRequest(
+    userId: string,
+    body: DriverProfileUpdateRequestBody
+  ): DriverProfileUpdateDto {
+    return new DriverProfileUpdateDto(
+      userId,
+      body.name,
+      body.mobile,
+      body.dob ? new Date(body.dob) : undefined,
+      body.gender,
+      body.address,
+      body.eligibleGearTypes,
+      body.eligibleBodyTypes
+    );
+  }
 
   getUserId(): string {
     return this.userId;
@@ -34,7 +62,7 @@ export class DriverProfileUpdateDto {
     return this.dob;
   }
 
-  getGender(): "Male" | "Female" | "Other" | undefined {
+  getGender(): Gender | undefined {
     return this.gender;
   }
 

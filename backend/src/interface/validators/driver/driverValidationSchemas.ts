@@ -13,6 +13,7 @@ import {
   DocumentType,
   VALID_DOC_TYPES,
 } from "@domain/value-objects/DocumentType";
+import { Gender } from "@domain/value-objects/Gender";
 
 const driverRegistrationBodySchema = z.object({
   name: z
@@ -31,7 +32,7 @@ const driverRegistrationBodySchema = z.object({
       message: "Driver must be at least 18 years old",
     })
   ),
-  gender: z.enum(["Male", "Female", "Other"]),
+  gender: z.nativeEnum(Gender),
   state: z.string().trim().min(1, { message: "State is required" }),
   pin: z
     .string()
@@ -124,8 +125,7 @@ const driverUpdateBodySchema = z
     mobile: z
       .string()
       .trim()
-      .regex(/^\+?[1-9]\d{10,14}$/, { message: "Invalid mobile number format" })
-      .optional(),
+      .regex(/^\+?\d{10,15}$/, { message: "Invalid mobile number format" }),
     dob: z
       .preprocess(
         (arg) =>
@@ -135,7 +135,7 @@ const driverUpdateBodySchema = z
         })
       )
       .optional(),
-    gender: z.enum(["Male", "Female", "Other"]).optional(),
+    gender: z.nativeEnum(Gender).optional(),
     state: z
       .string()
       .trim()

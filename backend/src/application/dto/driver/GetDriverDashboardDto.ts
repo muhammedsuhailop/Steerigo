@@ -8,6 +8,10 @@ export class GetDriverDashboardDto {
     this.userId = userId;
   }
 
+  static fromRequest(userId: string): GetDriverDashboardDto {
+    return new GetDriverDashboardDto(userId);
+  }
+
   getUserId(): string {
     return this.userId;
   }

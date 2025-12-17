@@ -20,6 +20,10 @@ export class UpdateStatusRequestDto {
     this.data = updateStatusSchema.parse(requestData);
   }
 
+  static fromRequest(requestBody: unknown): UpdateStatusRequestDto {
+    return new UpdateStatusRequestDto(requestBody);
+  }
+ 
   getStatus(): AvailabilityStatus {
     return this.data.status as AvailabilityStatus;
   }

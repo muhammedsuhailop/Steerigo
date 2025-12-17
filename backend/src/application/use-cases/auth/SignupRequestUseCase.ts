@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { User } from "@domain/entities/User";
 import { UserAlreadyExistsError } from "@domain/errors";
 import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";

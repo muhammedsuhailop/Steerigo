@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 
 // Admin Repositories
-import { IAdminUserRepository } from "@application/repositories/IAdminUserRepository";
+import { IAdminUserRepository } from "@domain/repositories/IAdminUserRepository";
 import { AdminUserRepositoryImpl } from "@infrastructure/database/repositories/AdminUserRepositoryImpl";
 
 // Admin Use Cases

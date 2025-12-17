@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IUserRepository } from "@application/repositories/IUserRepository";
-import { IKYCRepository } from "@application/repositories/IKYCRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { IKYCRepository } from "@domain/repositories/IKYCRepository";
 import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
 import { DriverResponseDto } from "@application/dto/driver/DriverResponseDto";
 import { Result } from "@shared/utils/Result";

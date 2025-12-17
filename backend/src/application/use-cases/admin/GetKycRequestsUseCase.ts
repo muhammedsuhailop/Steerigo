@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import {
   IKYCRepository,
   IKYCQuery,
-} from "@application/repositories/IAdminDriverKYCRepository";
+} from "@domain/repositories/IAdminDriverKYCRepository";
 import { GetKycRequestsRequestDto } from "@application/dto/admin/GetKycRequestsRequestDto";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";

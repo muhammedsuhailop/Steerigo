@@ -1,5 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
+import { API_ENDPOINTS } from "@/shared/constants/api";
+
 import type {
   ProfilePictureData,
   UserProfile,
@@ -21,7 +23,7 @@ export const userProfileApi = createApi({
     // Get user profile
     getUserProfile: builder.query<ApiResponse<UserProfile>, string>({
       query: (userId) => ({
-        url: `/user/profile/${userId}`,
+        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
@@ -35,7 +37,7 @@ export const userProfileApi = createApi({
       { userId: string; data: Partial<UserProfileFormData> }
     >({
       query: ({ userId, data }) => ({
-        url: `/user/profile/${userId}`,
+        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}`,
         method: "PUT",
         data,
       }),
@@ -48,7 +50,7 @@ export const userProfileApi = createApi({
     // Get user statistics
     getUserStats: builder.query<ApiResponse<UserStats>, string>({
       query: (userId) => ({
-        url: `/user/profile/${userId}/stats`,
+        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}/stats`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
@@ -66,7 +68,7 @@ export const userProfileApi = createApi({
         formData.append("file", file);
 
         return {
-          url: `/file/profile-picture/${userId}`,
+          url: `${API_ENDPOINTS.USER.PROFILE_PIC_UPLOAD}/${userId}`,
           method: "POST",
           data: formData,
           headers: {
@@ -85,7 +87,7 @@ export const userProfileApi = createApi({
       string
     >({
       query: (userId) => ({
-        url: `/user/profile/${userId}`,
+        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, userId) => [

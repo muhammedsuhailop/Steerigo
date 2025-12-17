@@ -25,6 +25,13 @@ export class ScheduleAvailabilityRequestDto {
     this.data = scheduleAvailabilitySchema.parse(requestData);
   }
 
+  static fromRequest(
+    userId: string,
+    requestBody: unknown
+  ): ScheduleAvailabilityRequestDto {
+    return new ScheduleAvailabilityRequestDto(userId, requestBody);
+  }
+
   getUserId(): string {
     return this.userId;
   }

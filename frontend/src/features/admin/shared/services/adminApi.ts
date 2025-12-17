@@ -11,8 +11,8 @@ import {
 import {
   AdminDriverProfileResponse,
   DriverProfileAction,
-  KYCVerificationStatus,
 } from "../types/adminDriverProfile.types";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 type QueryParams = Record<string, any> | undefined;
 
@@ -71,7 +71,7 @@ export const adminApi = createApi({
       }
     >({
       query: (params) => ({
-        url: "/admin/users",
+        url: API_ENDPOINTS.ADMIN.USERS,
         method: "GET",
         params: buildParams(params),
       }),
@@ -92,7 +92,7 @@ export const adminApi = createApi({
       { userId: string; action: "Active" | "Inactive" | "Suspended" }
     >({
       query: ({ userId, action }) => ({
-        url: `/admin/users/${userId}/action`,
+        url: `${API_ENDPOINTS.ADMIN.USERS}/${userId}/action`,
         method: "PUT",
         data: { action },
       }),
@@ -123,7 +123,7 @@ export const adminApi = createApi({
       }
     >({
       query: (params) => ({
-        url: "/admin/drivers",
+        url: API_ENDPOINTS.ADMIN.DRIVERS,
         method: "GET",
         params: buildParams(params),
       }),
@@ -141,7 +141,7 @@ export const adminApi = createApi({
 
     getDriverById: builder.query<AdminDriverProfileResponse, string>({
       query: (driverId) => ({
-        url: `/admin/drivers/${driverId}/profile`,
+        url: `${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}/profile`,
         method: "GET",
       }),
       providesTags: (result, error, driverId) => [
@@ -155,7 +155,7 @@ export const adminApi = createApi({
       { driverId: string; action: DriverProfileAction; reason?: string }
     >({
       query: ({ driverId, action, reason }) => ({
-        url: `/admin/drivers/${driverId}/action`,
+        url: `${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}/action`,
         method: "PUT",
         data: { action, reason },
       }),
@@ -179,7 +179,10 @@ export const adminApi = createApi({
       },
       void
     >({
-      query: () => ({ url: "/admin/drivers/stats", method: "GET" }),
+      query: () => ({
+        url: `${API_ENDPOINTS.ADMIN.DRIVERS}/stats`,
+        method: "GET",
+      }),
       providesTags: [{ type: "AdminStats", id: "DRIVER_STATS" }],
     }),
 
@@ -199,7 +202,7 @@ export const adminApi = createApi({
       }
     >({
       query: (params) => ({
-        url: "/admin/drivers/kyc-requests",
+        url: API_ENDPOINTS.ADMIN.KYC,
         method: "GET",
         params: buildParams(params),
       }),
@@ -217,7 +220,7 @@ export const adminApi = createApi({
 
     getKYCById: builder.query<KYCDetailResponseData, string>({
       query: (requestId) => ({
-        url: `/admin/drivers/kyc-requests/${requestId}`,
+        url: `${API_ENDPOINTS.ADMIN.KYC}/${requestId}`,
         method: "GET",
       }),
       providesTags: (result, error, requestId) => [
@@ -235,7 +238,7 @@ export const adminApi = createApi({
       }
     >({
       query: ({ requestId, action, status, reason }) => ({
-        url: `/admin/drivers/kyc-requests/${requestId}/status`,
+        url: `${API_ENDPOINTS.ADMIN.KYC}/${requestId}/status`,
         method: "PATCH",
         data: {
           verificationStatus: action,
@@ -258,7 +261,7 @@ export const adminApi = createApi({
       }
     >({
       query: ({ driverId, kycStatus }) => ({
-        url: `/admin/drivers/${driverId}/kyc-status/update`,
+        url: `${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}/kyc-status/update`,
         method: "PATCH",
         data: { kycStatus },
       }),

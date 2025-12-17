@@ -1,5 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
+import { API_ENDPOINTS } from "@/shared/constants/api";
+
 import type {
   DriverSearchResponse,
   SearchNearbyDriversPayload,
@@ -26,7 +28,7 @@ export const driverSearchApi = createApi({
       SearchNearbyDriversPayload
     >({
       query: (payload) => ({
-        url: `/user/search/nearby`,
+        url: API_ENDPOINTS.USER.SEARCH_NEARBY,
         method: "POST",
         data: payload,
       }),
@@ -36,7 +38,7 @@ export const driverSearchApi = createApi({
     // Send ride request
     sendRideRequest: builder.mutation<RideRequestResponse, RideRequestPayload>({
       query: (payload) => ({
-        url: `/user/ride/request-send`,
+        url: API_ENDPOINTS.USER.SEND_RIDE_REQUEST,
         method: "POST",
         data: payload,
       }),

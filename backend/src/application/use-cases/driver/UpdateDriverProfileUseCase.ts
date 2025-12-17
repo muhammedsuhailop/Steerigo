@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IUserRepository } from "@application/repositories/IUserRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";

@@ -6,6 +6,7 @@ import type {
   FileUploadResponse,
   DriverRegistrationApiResponse,
 } from "../types/driverRegistration.types";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 export const driverRegistrationApi = createApi({
   reducerPath: "driverRegistrationApi",
@@ -68,7 +69,7 @@ export const driverRegistrationApi = createApi({
         console.log("Transformed backend data:", backendData);
 
         return {
-          url: "/driver/register",
+          url: API_ENDPOINTS.DRIVER.REGISTER,
           method: "POST",
           data: backendData,
           headers: {
@@ -89,7 +90,7 @@ export const driverRegistrationApi = createApi({
         formData.append("purpose", purpose);
 
         return {
-          url: "/file/upload",
+          url: API_ENDPOINTS.FILE.UPLOAD,
           method: "POST",
           data: formData,
           headers: {

@@ -1,6 +1,15 @@
 import { z } from "zod";
 import { AdminUserAction } from "@domain/value-objects/AdminAction";
 
+interface UpdateUserStatusRequestBody {
+  action:
+    | typeof AdminUserAction.ACTIVATE
+    | typeof AdminUserAction.DEACTIVATE
+    | typeof AdminUserAction.SUSPEND
+    | typeof AdminUserAction.DELETE;
+  reason?: string;
+}
+
 const updateUserStatusRequestSchema = z.object({
   userId: z
     .string()
@@ -23,6 +32,15 @@ export class UpdateUserStatusRequestDto {
 
   constructor(requestData: unknown) {
     this.data = updateUserStatusRequestSchema.parse(requestData);
+  }
+
+  static fromRequest(userId: string, requestBody: unknown) {
+    const body = (requestBody ?? {}) as UpdateUserStatusRequestBody;
+    return new UpdateUserStatusRequestDto({
+      userId,
+      action: body.action,
+      reason: body.reason,
+    });
   }
 
   getUserId(): string {

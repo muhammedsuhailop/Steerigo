@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { IDriverRepository } from "@application/repositories/IDriverRepository";
-import { IAdminDriverRepository } from "@application/repositories/IAdminDriverRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel, IDriverModel } from "../models/DriverModel";
 import { DriverMapper } from "../mappers/DriverMapper";
@@ -24,7 +24,7 @@ import {
 import {
   IAdminDriverQuery,
   IAdminDriverSummary,
-} from "@application/repositories/IAdminDriverRepository";
+} from "@domain/repositories/IAdminDriverRepository";
 
 type UnifiedDriverFilterOptions = FilterOptions<Driver> & IAdminDriverQuery;
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../constants";
 
 // Centralized token refresh state
 interface QueuedRequest {
@@ -59,10 +60,10 @@ export const refreshAccessToken = async (): Promise<string> => {
       const response = await axios.post(
         `${
           import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-        }/auth/refresh-token`,
+        }${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`,
         {}, // Empty body - backend should read refresh token from httpOnly cookie
         {
-          withCredentials: true, // Critical: send cookies
+          withCredentials: true, // send cookies
           headers: {
             "Content-Type": "application/json",
           },

@@ -1,5 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
+import { API_ENDPOINTS } from "@/shared/constants/api";
+
 import type {
   ScheduleData,
   UpdateLocationPayload,
@@ -13,7 +15,7 @@ export const schedulingApi = createApi({
   endpoints: (builder) => ({
     updateLocation: builder.mutation<void, UpdateLocationPayload>({
       query: (data) => ({
-        url: `/driver/availability/update-location`,
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.UPDATE_LOCATION,
         method: "PUT",
         data,
       }),
@@ -21,7 +23,7 @@ export const schedulingApi = createApi({
     }),
     updateSchedule: builder.mutation<void, ScheduleData>({
       query: (data) => ({
-        url: `/driver/availability/schedule`,
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.SCHEDULE,
         method: "POST",
         data,
       }),
@@ -29,7 +31,7 @@ export const schedulingApi = createApi({
     }),
     updateStatus: builder.mutation<void, UpdateStatusPayload>({
       query: (data) => ({
-        url: `/driver/availability/status`,
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.STATUS,
         method: "PUT",
         data,
       }),
