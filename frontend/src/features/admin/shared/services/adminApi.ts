@@ -13,6 +13,7 @@ import {
   DriverProfileAction,
 } from "../types/adminDriverProfile.types";
 import { API_ENDPOINTS } from "@/shared/constants/api";
+import { UserAction } from "../../user/user-management/components/UserManagement";
 
 type QueryParams = Record<string, any> | undefined;
 
@@ -89,7 +90,7 @@ export const adminApi = createApi({
 
     updateUserStatus: builder.mutation<
       { success: boolean; message: string; data?: AdminUser },
-      { userId: string; action: "Active" | "Inactive" | "Suspended" }
+      { userId: string; action: UserAction }
     >({
       query: ({ userId, action }) => ({
         url: `${API_ENDPOINTS.ADMIN.USERS}/${userId}/action`,

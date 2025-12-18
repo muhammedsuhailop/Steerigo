@@ -10,7 +10,7 @@ import {
   selectPage,
   selectLimit,
 } from "@/features/admin/shared/store/adminDriverSlice";
-import type { DriverFilters as DriverFiltersType } from "../../../shared/types";
+import type { DriverFilters as DriverFiltersType } from "../../../../shared/types";
 import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
 
 // Debounce hook for search input
