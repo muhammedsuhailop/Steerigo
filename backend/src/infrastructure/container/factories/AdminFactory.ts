@@ -17,6 +17,9 @@ import { Result } from "@shared/utils/Result";
 import { GetUsersRequestDto } from "@application/dto/admin/GetUsersRequestDto";
 import { GetUsersResponseDto } from "@application/dto/admin/GetUsersResponseDto";
 import { UpdateUserStatusRequestDto } from "@application/dto/admin/UpdateUserStatusRequestDto";
+import { GetUserProfileRequestDto } from "@application/dto/admin/GetUserProfileRequestDto";
+import { GetUserProfileResponseDto } from "@application/dto/admin/GetUserProfileResponseDto";
+import { GetUserProfileDetailsUseCase } from "@application/use-cases/admin/GetUserProfileDetailsUseCase";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -39,6 +42,15 @@ export class AdminFactory {
         >
       >(TYPES.UpdateUserStatusUseCase)
       .to(UpdateUserStatusUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetUserProfileRequestDto,
+          Promise<Result<GetUserProfileResponseDto>>
+        >
+      >(TYPES.GetUserProfileDetailsUseCase)
+      .to(GetUserProfileDetailsUseCase);
 
     // Controller bindings
     container

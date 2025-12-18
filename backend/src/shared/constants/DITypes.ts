@@ -43,6 +43,7 @@ export const TYPES = {
   // Use Cases - Admin Users
   GetUsersUseCase: Symbol.for("GetUsersUseCase"),
   UpdateUserStatusUseCase: Symbol.for("UpdateUserStatusUseCase"),
+  GetUserProfileDetailsUseCase: Symbol.for("GetUserProfileDetailsUseCase"),
 
   // Use Cases - Admin Drivers
   GetDriversUseCase: Symbol.for("GetDriversUseCase"),

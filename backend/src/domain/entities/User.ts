@@ -8,6 +8,7 @@ import {
   UserStatus,
 } from "@shared/constants/AuthConstants";
 import { BaseEntity } from "@shared/types/Repository";
+import { Gender } from "@domain/value-objects/Gender";
 
 export interface UserCreationProps {
   id: string;
@@ -16,7 +17,7 @@ export interface UserCreationProps {
   password: string;
   mobile?: string;
   dob?: Date;
-  gender?: string;
+  gender?: Gender;
   address?: string;
   role?: UserRole;
 }
@@ -43,7 +44,7 @@ export class User implements BaseEntity {
     private password: Password,
     private mobile?: string,
     private dob?: Date,
-    private gender?: string,
+    private gender?: Gender,
     private address?: string,
     private role: UserRole = UserRole.RIDER,
     private status: UserStatus = UserStatus.PENDING_VERIFICATION,
@@ -196,7 +197,7 @@ export class User implements BaseEntity {
     name?: string;
     mobile?: string;
     dob?: Date;
-    gender?: string;
+    gender?: Gender;
     address?: string;
   }): void {
     if (updates.name) {
@@ -286,7 +287,7 @@ export class User implements BaseEntity {
   getDob(): Date | undefined {
     return this.dob;
   }
-  getGender(): string | undefined {
+  getGender(): Gender | undefined {
     return this.gender;
   }
   getAddress(): string | undefined {

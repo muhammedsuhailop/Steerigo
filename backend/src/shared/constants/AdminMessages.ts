@@ -9,5 +9,6 @@ export const ADMIN_MESSAGES = {
   USER: {
     USERS_FETCHED: "Users fetched successfully",
     USER_STATUS_UPDATED: "User status updated successfully",
+    USER_PROFILE_FETCHED: "User profile fetched successfully",
   },
 } as const;
