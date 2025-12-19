@@ -51,6 +51,7 @@ export const adminApi = createApi({
     "KYCRequests",
     "AdminStats",
     "DriverProfile",
+    "UserProfile"
   ],
   endpoints: (builder) => ({
     // USER MANAGEMENT
@@ -100,6 +101,17 @@ export const adminApi = createApi({
       invalidatesTags: (result, error, { userId }) => [
         { type: "AdminUsers", id: userId },
         { type: "AdminUsers", id: "LIST" },
+      ],
+    }),
+
+    getUserProfileById: builder.query<any, string>({
+      query: (userId) => ({
+        url: `${API_ENDPOINTS.ADMIN.USERS}/${userId}/profile`,
+        method: "GET",
+      }),
+      providesTags: (result, error, userId) => [
+        { type: "AdminUsers", id: userId },
+        { type: "UserProfile", id: userId },
       ],
     }),
 
@@ -281,6 +293,7 @@ export const {
   // User Management
   useGetAllUsersQuery,
   useUpdateUserStatusMutation,
+  useGetUserProfileByIdQuery,
   // Driver Management
   useGetAllDriversQuery,
   useGetDriverByIdQuery,

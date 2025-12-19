@@ -12,6 +12,7 @@ import type { Column } from "@/shared/components/ui/Table";
 import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
 import { DriverAction } from "../../hooks";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 interface DriverTableProps {
   drivers: AdminDriver[];
@@ -134,7 +135,7 @@ export const DriverTable: React.FC<DriverTableProps> = ({
               variant="primary"
               size="sm"
               isLoading={isLoading}
-              onClick={() => navigate(`/admin/drivers/${driverId}`)}
+              onClick={() => navigate(`${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}`)}
               leftIcon={<MdOutlineRemoveRedEye />}
             >
               View
