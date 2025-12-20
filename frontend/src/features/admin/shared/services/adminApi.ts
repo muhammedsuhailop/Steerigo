@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
-import { KYCDetailResponseData } from "../types/kyc.interfaces";
+import { KYCDetailResponseData, KYCVerificationStatus } from "../types/kyc.interfaces";
 import {
   AdminDriver,
   AdminUser,
@@ -14,33 +14,61 @@ import {
 } from "../types/adminDriverProfile.types";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import { UserAction } from "../../user/user-management/components/UserManagement";
+import { AdminUserProfileInfo, AdminUserProfileResponse } from "../types/admin.user.interfaces";
 
-type QueryParams = Record<string, any> | undefined;
+type BaseListQueryParams = {
+  page?: number;
+  limit?: number;
+  pageSize?: number;
+  status?: string;
+  kycStatus?: string;
+  search?: string;
+  vehicleType?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  dateFrom?: string;
+  dateTo?: string;
+};
 
-const buildParams = (params?: QueryParams) => {
+type QueryParams = BaseListQueryParams | undefined;
+
+
+const buildParams = (params?: BaseListQueryParams) => {
   if (!params) return undefined;
-  const out: Record<string, any> = {};
+
+  const out: Partial<BaseListQueryParams & { pageSize: number }> = {};
 
   if (params.page) out.page = params.page;
   if (params.limit) out.pageSize = params.limit;
   if (params.pageSize && !params.limit) out.pageSize = params.pageSize;
 
-  [
-    "status",
-    "kycStatus",
-    "search",
-    "vehicleType",
-    "sortBy",
-    "sortOrder",
-    "dateFrom",
-    "dateTo",
-  ].forEach((k) => {
-    if (params[k] !== undefined && params[k] !== null && params[k] !== "")
-      out[k] = params[k];
+  (
+    [
+      "status",
+      "kycStatus",
+      "search",
+      "vehicleType",
+      "sortBy",
+      "sortOrder",
+      "dateFrom",
+      "dateTo",
+    ] as const
+  ).forEach((key) => {
+    const value = params[key];
+    if (value !== undefined && value !== null && value !== "") {
+      if (key === "sortOrder") {
+        if (value === "asc" || value === "desc") {
+          out.sortOrder = value;
+        }
+      } else {
+        out[key] = value;
+      }
+    }
   });
 
   return Object.keys(out).length ? out : undefined;
 };
+
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
@@ -51,7 +79,7 @@ export const adminApi = createApi({
     "KYCRequests",
     "AdminStats",
     "DriverProfile",
-    "UserProfile"
+    "UserProfile",
   ],
   endpoints: (builder) => ({
     // USER MANAGEMENT
@@ -104,13 +132,12 @@ export const adminApi = createApi({
       ],
     }),
 
-    getUserProfileById: builder.query<any, string>({
+    getUserProfileById: builder.query<AdminUserProfileResponse, string>({
       query: (userId) => ({
         url: `${API_ENDPOINTS.ADMIN.USERS}/${userId}/profile`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
-        { type: "AdminUsers", id: userId },
         { type: "UserProfile", id: userId },
       ],
     }),
@@ -164,7 +191,7 @@ export const adminApi = createApi({
     }),
 
     updateDriverStatus: builder.mutation<
-      { success: boolean; message: string; data: any },
+      { success: boolean; message: string; data: DriverProfileAction },
       { driverId: string; action: DriverProfileAction; reason?: string }
     >({
       query: ({ driverId, action, reason }) => ({
@@ -267,10 +294,10 @@ export const adminApi = createApi({
     }),
 
     updateDriverKYCStatus: builder.mutation<
-      { success: boolean; message: string; data?: any },
+      { success: boolean; message: string; data?: unknown },
       {
         driverId: string;
-        kycStatus: "Approved" | "InReview" | "Rejected" | "InReview";
+        kycStatus: KYCVerificationStatus;
       }
     >({
       query: ({ driverId, kycStatus }) => ({

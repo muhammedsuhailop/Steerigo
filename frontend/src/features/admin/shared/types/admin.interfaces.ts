@@ -3,7 +3,7 @@ import type {
   User,
   UserFilters,
   UserAction,
-} from "../../user-management/components/UserManagement/UserManagement.types";
+} from "../../user/user-management/components/UserManagement/UserManagement.types";
 // import { DashboardStats } from "../services/AdminStatsService";
 
 export interface AdminDataService {
@@ -56,28 +56,6 @@ export interface AdminDetailLayoutProps {
   children: ReactNode;
   title?: string;
 }
-
-export interface AdminUser {
-  id: string;
-  userId?: string;
-  name: string;
-  email: string;
-  mobile?: string;
-  status:
-    | "Active"
-    | "Inactive"
-    | "Suspended"
-    | "Pending Verification"
-    | "Blocked";
-  role: string;
-  totalBookings: number;
-  totalSpent: number;
-  lastBooked?: string;
-  createdAt: string;
-  updatedAt: string;
-  avatar?: string;
-}
-
 export interface AdminUser {
   id: string;
   userId?: string;

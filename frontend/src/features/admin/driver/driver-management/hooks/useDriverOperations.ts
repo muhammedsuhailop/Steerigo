@@ -7,6 +7,7 @@ import {
   resetFilters,
 } from "@/features/admin/shared/store/adminDriverSlice";
 import {
+  DriverProfileAction,
   useGetAllDriversQuery,
   useUpdateDriverStatusMutation,
 } from "@/features/admin/shared/services/adminApi";
@@ -58,7 +59,7 @@ export const useDriverOperations = () => {
   );
 
   const handleDriverAction = useCallback(
-    async (driverId: string, action: DriverAction, reason?: string) => {
+    async (driverId: string, action: DriverProfileAction, reason?: string) => {
       try {
         const result = await updateDriverStatus({
           driverId,
