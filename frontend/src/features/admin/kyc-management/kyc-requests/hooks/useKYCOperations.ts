@@ -12,6 +12,7 @@ import {
   useGetKYCByIdQuery,
 } from "@/features/admin/shared/services/adminApi";
 import type { AppDispatch } from "@/app/store";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 type KYCAction = "Approved" | "Rejected" | "Expired";
 
@@ -62,11 +63,11 @@ export const useKYCOperations = () => {
 
         console.log("KYC action successful:", result.message);
         return { success: true, message: result.message };
-      } catch (error: any) {
-        const errorMessage =
-          error?.data?.message ||
-          error?.message ||
-          "Failed to update KYC status";
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(
+          error,
+          "Failed to update KYC status"
+        );
         console.error("KYC action failed:", errorMessage);
         throw new Error(errorMessage);
       }

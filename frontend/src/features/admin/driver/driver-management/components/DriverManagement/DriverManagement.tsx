@@ -51,7 +51,6 @@ export const DriverManagement: React.FC = () => {
     data: driversData,
     isLoading,
     isFetching,
-    error,
   } = useGetAllDriversQuery({
     page,
     limit,
@@ -100,7 +99,7 @@ export const DriverManagement: React.FC = () => {
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
         // Apply other filters immediately
-        const { search, ...otherFilters } = newFilters;
+        const { search: _search, ...otherFilters } = newFilters;
         if (Object.keys(otherFilters).length > 0) {
           handleFiltersChange(otherFilters);
         }
@@ -138,7 +137,7 @@ export const DriverManagement: React.FC = () => {
 
   // Check if specific driver action is loading
   const isActionLoading = useCallback(
-    (driverId: string) => isUpdating,
+    (_driverId: string) => isUpdating,
     [isUpdating]
   );
 

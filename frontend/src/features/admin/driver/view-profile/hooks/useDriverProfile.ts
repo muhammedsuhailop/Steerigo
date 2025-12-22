@@ -9,6 +9,7 @@ import type {
   DriverProfileAction,
   AdminDriverProfileResponse,
 } from "../../../shared/types/adminDriverProfile.types";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 export const useDriverProfile = () => {
   const { driverId } = useParams<{ driverId: string }>();
@@ -49,12 +50,10 @@ export const useDriverProfile = () => {
         }).unwrap();
         await refetch();
         return { success: true, message: result.message };
-      } catch (error: any) {
-        const errorMessage =
-          error?.data?.message ||
-          error?.message ||
-          "Failed to update driver status";
-        throw new Error(errorMessage);
+      } catch (error: unknown) {
+        throw new Error(
+          getErrorMessage(error, "Failed to update driver status")
+        );
       }
     },
     [driverId, updateDriverStatus, refetch]
@@ -76,12 +75,10 @@ export const useDriverProfile = () => {
           success: true,
           message: result.message || "KYC status updated successfully",
         };
-      } catch (error: any) {
-        const errorMessage =
-          error?.data?.message ||
-          error?.message ||
-          "Failed to update KYC status";
-        throw new Error(errorMessage);
+      } catch (error: unknown) {
+        throw new Error(
+          getErrorMessage(error, "Failed to update driver status")
+        );
       }
     },
     [driverId, updateKYCStatus, refetch]
@@ -130,3 +127,5 @@ export const useDriverProfile = () => {
     driverId,
   };
 };
+
+

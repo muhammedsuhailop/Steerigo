@@ -1,9 +1,6 @@
 import React from "react";
 import { ActivityItem } from "./ActivityItem";
-import type {
-  RecentActivityProps,
-  ActivityItem as Activity,
-} from "./RecentActivity.types";
+import type { ActivityItem as Activity } from "./RecentActivity.types";
 
 const recentActivities: Activity[] = [
   {
@@ -48,7 +45,7 @@ const recentActivities: Activity[] = [
   },
 ];
 
-export const RecentActivity: React.FC<RecentActivityProps> = () => {
+export const RecentActivity: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "@/features/auth";
 import { KYCManagement } from "../components/KYCManagement";
 import { AdminSidebar, AdminTopbar } from "../../../shared/components";
 
 const AdminKYCLayout: React.FC = () => {
-  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 

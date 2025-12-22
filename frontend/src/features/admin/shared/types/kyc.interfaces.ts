@@ -30,12 +30,10 @@ export interface KYCRequest {
 }
 
 export interface KYCPagination {
-  total: number;
-  page: number;
-  limit: number;
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
   totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
 }
 
 export interface KYCListResponse {
@@ -77,7 +75,7 @@ export interface KYCFilters {
   sortOrder: "asc" | "desc";
 }
 
-export type KYCAction = "approve" | "reject";
+export type KYCAction = "Approved" | "Rejected";
 
 export type KYCVerificationStatus = "InReview" | "Approved" | "Rejected";
 

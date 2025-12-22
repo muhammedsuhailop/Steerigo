@@ -1,10 +1,13 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
-import { KYCDetailResponseData, KYCVerificationStatus } from "../types/kyc.interfaces";
+import {
+  KYCDetailResponseData,
+  KYCListResponse,
+  KYCVerificationStatus,
+} from "../types/kyc.interfaces";
 import {
   AdminDriver,
   AdminUser,
-  KYCListResponse,
   KYCUpdateResponse,
   PaginationResponse,
 } from "../types/admin.interfaces";
@@ -14,7 +17,10 @@ import {
 } from "../types/adminDriverProfile.types";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import { UserAction } from "../../user/user-management/components/UserManagement";
-import { AdminUserProfileInfo, AdminUserProfileResponse } from "../types/admin.user.interfaces";
+import {
+  AdminUserProfileInfo,
+  AdminUserProfileResponse,
+} from "../types/admin.user.interfaces";
 
 type BaseListQueryParams = {
   page?: number;
@@ -31,7 +37,6 @@ type BaseListQueryParams = {
 };
 
 type QueryParams = BaseListQueryParams | undefined;
-
 
 const buildParams = (params?: BaseListQueryParams) => {
   if (!params) return undefined;
@@ -68,7 +73,6 @@ const buildParams = (params?: BaseListQueryParams) => {
 
   return Object.keys(out).length ? out : undefined;
 };
-
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
@@ -233,6 +237,7 @@ export const adminApi = createApi({
         page?: number;
         limit?: number;
         pageSize?: number;
+        totalItems?: number;
         status?: string;
         search?: string;
         sortBy?: string;

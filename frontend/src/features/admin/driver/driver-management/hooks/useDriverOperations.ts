@@ -69,11 +69,25 @@ export const useDriverOperations = () => {
 
         console.log("Driver action successful:", result.message);
         return { success: true, message: result.message };
-      } catch (error: any) {
-        const errorMessage =
-          error?.data?.message ||
-          error?.message ||
-          "Failed to update driver status";
+      } catch (error: unknown) {
+        let errorMessage = "Failed to update driver status";
+
+        if (typeof error === "object" && error !== null) {
+          if (
+            "data" in error &&
+            typeof (error as { data?: { message?: string } }).data?.message ===
+              "string"
+          ) {
+            errorMessage = (error as { data: { message: string } }).data
+              .message;
+          } else if (
+            "message" in error &&
+            typeof (error as { message?: string }).message === "string"
+          ) {
+            errorMessage = (error as { message: string }).message;
+          }
+        }
+
         console.error("Driver action failed:", errorMessage);
         throw new Error(errorMessage);
       }

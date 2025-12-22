@@ -111,7 +111,7 @@ export interface AdminDriver {
   license: AdminDriverLicense;
   stats: AdminDriverStats;
   createdAt: string; // ISO date string
-  profileImage?: string; 
+  profileImage?: string;
 }
 
 // KYC TYPES
@@ -144,24 +144,6 @@ export interface KYCDriver {
 export interface KYCRequest {
   kyc: KYCDocument;
   driver: KYCDriver;
-}
-
-export interface KYCPagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage?: boolean;
-  hasPrevPage?: boolean;
-}
-
-export interface KYCListResponse {
-  success: boolean;
-  message: string;
-  data: {
-    kycDocuments: KYCRequest[];
-    pagination: KYCPagination;
-  };
 }
 
 export interface KYCDetailResponse {

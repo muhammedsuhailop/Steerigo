@@ -21,7 +21,8 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({
       InReview: { variant: "info" as const, text: "In Review" },
       Pending: { variant: "warning" as const, text: "Pending" },
     };
-    const config = (statusMap as any)[status] || statusMap.Pending;
+    const config =
+      statusMap[status as keyof typeof statusMap] || statusMap.Pending;
     return <Badge variant={config.variant}>{config.text}</Badge>;
   };
 
@@ -32,7 +33,7 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({
       Rejected: { variant: "danger" as const, text: "Rejected" },
       InReview: { variant: "info" as const, text: "In Review" },
     };
-    const config = (statusMap as any)[status] || statusMap.Pending;
+    const config = statusMap[status] || statusMap.Pending;
     return <Badge variant={config.variant}>{config.text}</Badge>;
   };
 

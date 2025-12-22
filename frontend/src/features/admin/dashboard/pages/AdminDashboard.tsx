@@ -50,12 +50,7 @@ const AdminDashboard: React.FC = () => {
     // Navigate to users page
     window.location.href = "/admin/users";
   };
-
-  const handleUserClick = (clickedUser: any) => {
-    // Handle user click - could navigate to user detail page
-    console.log(`Viewing details for ${clickedUser.name}`);
-  };
-
+  
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -106,7 +101,6 @@ const AdminDashboard: React.FC = () => {
           <RecentUsers
             users={stats.recentUsers}
             loading={loading}
-            onUserClick={handleUserClick}
             onViewAll={handleViewAllUsers}
             maxUsers={5}
           />

@@ -3,10 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AdminSidebar, AdminTopbar } from "@/features/admin/shared/components";
 import {
   Button,
-  Badge,
   LoadingSpinner,
-  Card,
-  CardBody,
   Alert,
   ConfirmationModal,
 } from "@/shared/components/ui";
@@ -17,6 +14,7 @@ import { DriverProfileKYC } from "../components/DriverProfileKYC/DriverProfileKY
 import { RiArrowLeftLine } from "react-icons/ri";
 import { toast } from "react-toastify";
 import type { DriverProfileAction } from "../../../shared/types/adminDriverProfile.types";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 const DriverProfileViewPage: React.FC = () => {
   // Sidebar state
@@ -50,7 +48,6 @@ const DriverProfileViewPage: React.FC = () => {
     handleKYCStatusUpdate,
     refreshProfile,
     availableActions,
-    driverId,
   } = useDriverProfile();
 
   // Confirmation modal state
@@ -93,11 +90,11 @@ const DriverProfileViewPage: React.FC = () => {
       setConfirmOpen(false);
       setConfirmAction(null);
       refreshProfile();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const label = confirmAction
         ? actionButtonConfig[confirmAction]?.label
         : "Action";
-      const msg = err?.message || `${label} failed`;
+      const msg = getErrorMessage(err, `${label} failed`);
       toast.error(msg);
       setErrorMsg(msg);
       setSuccessMsg(null);
@@ -119,8 +116,8 @@ const DriverProfileViewPage: React.FC = () => {
       setErrorMsg(null);
       setKycConfirmOpen(false);
       refreshProfile();
-    } catch (err: any) {
-      const msg = err?.message || "Failed to update KYC status";
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to update KYC status");
       toast.error(msg);
       setErrorMsg(msg);
       setSuccessMsg(null);
@@ -199,10 +196,8 @@ const DriverProfileViewPage: React.FC = () => {
             <div className="max-w-4xl mx-auto">
               <Alert type="danger">
                 <p className="font-semibold">Error Loading Driver Profile</p>
-                <p>
-                  {(error as any)?.data?.message ||
-                    "Failed to load driver profile"}
-                </p>
+                <p>{getErrorMessage(error, "Failed to load driver profile")}</p>
+
                 <Button
                   onClick={() => navigate("/admin/drivers")}
                   className="mt-4"

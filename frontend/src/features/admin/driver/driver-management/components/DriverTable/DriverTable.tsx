@@ -7,10 +7,12 @@ import {
   DriverStatusRegistry,
   KYCStatusRegistry,
 } from "@/shared/components/ui/AdminTable/StatusRegistry";
-import { Badge, Button, OnlineStatus } from "@/shared/components/ui";
+import { Button } from "@/shared/components/ui";
 import type { Column } from "@/shared/components/ui/Table";
-import type { AdminDriver } from "@/features/admin/shared/services/adminApi";
-import { DriverAction } from "../../hooks";
+import type {
+  AdminDriver,
+  DriverProfileAction,
+} from "@/features/admin/shared/services/adminApi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 
@@ -19,7 +21,7 @@ interface DriverTableProps {
   loading: boolean;
   onDriverAction: (
     driverId: string,
-    action: DriverAction,
+    action: DriverProfileAction,
     reason?: string
   ) => Promise<{ success: boolean; message: string }> | void;
   isActionLoading: (driverId: string) => boolean;
@@ -28,7 +30,6 @@ interface DriverTableProps {
 export const DriverTable: React.FC<DriverTableProps> = ({
   drivers,
   loading,
-  onDriverAction,
   isActionLoading,
 }) => {
   const navigate = useNavigate();
@@ -135,7 +136,9 @@ export const DriverTable: React.FC<DriverTableProps> = ({
               variant="primary"
               size="sm"
               isLoading={isLoading}
-              onClick={() => navigate(`${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}`)}
+              onClick={() =>
+                navigate(`${API_ENDPOINTS.ADMIN.DRIVERS}/${driverId}`)
+              }
               leftIcon={<MdOutlineRemoveRedEye />}
             >
               View

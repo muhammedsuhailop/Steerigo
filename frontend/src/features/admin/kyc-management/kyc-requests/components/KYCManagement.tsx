@@ -12,8 +12,9 @@ import {
   selectPage,
   selectLimit,
 } from "@/features/admin/shared/store/adminKYCSlice";
-import type { KYCRequest } from "@/features/admin/shared/types";
+import type { KYCAction, KYCRequest } from "@/features/admin/shared/types";
 import type { KYCFiltersType } from "./KYCManagement.types";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 // Debounce hook for search input
 
@@ -86,7 +87,7 @@ export const KYCManagement: React.FC = () => {
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
         // Apply other filters immediately
-        const { search, ...otherFilters } = newFilters;
+        const { search: _search, ...otherFilters } = newFilters;
         if (Object.keys(otherFilters).length > 0) {
           handleFiltersChange(otherFilters);
         }
@@ -129,13 +130,14 @@ export const KYCManagement: React.FC = () => {
 
   // Handle KYC action with optional reason
   const handleKYCActionWithReason = useCallback(
-    async (kycId: string, action: "approve" | "reject", reason?: string) => {
+    async (kycId: string, action: KYCAction, reason?: string) => {
       setLoadingKYCIds((prev) => new Set(prev).add(kycId));
       try {
         await handleKYCAction(kycId, action, reason);
         console.log(`KYC ${action}d successfully`);
-      } catch (error: any) {
-        console.error(`Failed to ${action} KYC:`, error.message);
+      } catch (error: unknown) {
+        const msg = getErrorMessage(error, "Failed KYC action");
+        console.error(`Failed to ${action} KYC:`, msg);
       } finally {
         setLoadingKYCIds((prev) => {
           const next = new Set(prev);
@@ -152,28 +154,14 @@ export const KYCManagement: React.FC = () => {
 
   // Safe pagination data
   const pagination = {
-    currentPage: kycData?.data?.pagination?.page || page,
-    totalPages: kycData?.data?.pagination?.totalPages || 1,
-    totalItems: kycData?.data?.pagination?.total || 0,
-    pageSize: kycData?.data?.pagination?.limit || limit,
+    currentPage: kycData?.data?.pagination?.currentPage ?? page,
+    totalPages: kycData?.data?.pagination?.totalPages ?? 1,
+    totalItems: kycData?.data?.pagination?.totalItems ?? 0,
+    pageSize: kycData?.data?.pagination?.pageSize ?? limit,
   };
 
   // KYC requests data - Extract from nested structure
   const kycRequests: KYCRequest[] = kycData?.data?.kycDocuments || [];
-
-  // Get status counts for display
-  const statusCounts = {
-    total: pagination.totalItems,
-    inReview: kycRequests.filter(
-      (req) => req.kyc.verificationStatus === "InReview"
-    ).length,
-    approved: kycRequests.filter(
-      (req) => req.kyc.verificationStatus === "Approved"
-    ).length,
-    rejected: kycRequests.filter(
-      (req) => req.kyc.verificationStatus === "Rejected"
-    ).length,
-  };
 
   return (
     <>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useGetKYCByIdQuery,
@@ -16,6 +16,7 @@ import { Alert } from "@/shared/components/ui/Alert";
 import DocumentInfo from "./DocumentInfo";
 import ImageGallery from "./ImageGallery";
 import ActionButtons from "./ActionButtons";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 interface KYCDetailComponentProps {
   requestId: string;
@@ -66,7 +67,7 @@ const KYCDetailComponent: React.FC<KYCDetailComponentProps> = ({
     reason?: string
   ) => {
     try {
-      const result = await updateKYCStatus({
+      const _result = await updateKYCStatus({
         requestId,
         action,
         reason,
@@ -80,10 +81,9 @@ const KYCDetailComponent: React.FC<KYCDetailComponentProps> = ({
         setSuccessMsg(null);
         navigate("/admin/kyc-requests");
       }, 1200);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("KYC action failed:", err);
-      const msg =
-        err?.data?.message || err?.message || "Failed to update KYC status";
+      const msg = getErrorMessage(err, "Failed to update KYC status");
       setErrorMsg(msg);
     }
   };
