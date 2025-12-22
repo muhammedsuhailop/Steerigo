@@ -8,7 +8,7 @@ export interface IUserDocument extends Document {
   password: string;
   mobile?: string;
   dob?: Date;
-  gender?: string;
+  gender?: Gender;
   address?: string;
   role: string;
   status: string;

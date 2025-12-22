@@ -22,15 +22,21 @@ export const DriverProfileKYC: React.FC<ExtendedDriverProfileKYCProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getBadgeVariant = (status: KYCVerificationStatus | KYCStatus) => {
-    const variantMap = {
-      Approved: "success",
-      InReview: "warning",
-      Rejected: "danger",
-      Expired: "secondary",
-      Pending: "warning",
-    };
-    return (variantMap as any)[status] || "secondary";
+  type BadgeVariant = "success" | "warning" | "danger" | "secondary" | "info";
+
+  const getBadgeVariant = (
+    status: KYCVerificationStatus | KYCStatus
+  ): BadgeVariant => {
+    const variantMap: Record<KYCVerificationStatus | KYCStatus, BadgeVariant> =
+      {
+        Approved: "success",
+        InReview: "warning",
+        Rejected: "danger",
+        Expired: "secondary",
+        Pending: "warning",
+      };
+
+    return variantMap[status] ?? "secondary";
   };
 
   const formatDate = (dateString?: string | null) => {

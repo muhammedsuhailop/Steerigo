@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { AdminSidebar, AdminTopbar } from "../../shared/components";
+import { AdminSidebar, AdminTopbar } from "../../../shared/components";
 import { DriverManagement } from "../components/DriverManagement/DriverManagement";
 
 const DriverManagementLayout: React.FC = () => {

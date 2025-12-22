@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { AdminSidebar, AdminTopbar } from "@/features/admin/shared/components";
 import {
   Button,
@@ -7,16 +7,16 @@ import {
   Alert,
   ConfirmationModal,
 } from "@/shared/components/ui";
-import { useDriverProfile } from "../hooks/useDriverProfile";
-import { DriverDetails } from "../components/DriverDetails/DriverDetails";
-import { VehicleDetails } from "../components/VehicleDetails/VehicleDetails";
-import { DriverProfileKYC } from "../components/DriverProfileKYC/DriverProfileKYC";
+import {
+  useGetUserProfileByIdQuery,
+  useUpdateUserStatusMutation,
+} from "../../shared/services/adminApi";
+import { UserProfileDetails, UserActivityCard } from "./components";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { toast } from "react-toastify";
-import type { DriverProfileAction } from "../../../shared/types/adminDriverProfile.types";
-import { getErrorMessage } from "@/shared/utils/getErrorMessage";
+import { UserAction } from "../user-management/components/UserManagement";
 
-const DriverProfileViewPage: React.FC = () => {
+const UserProfileViewPage: React.FC = () => {
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -35,66 +35,56 @@ const DriverProfileViewPage: React.FC = () => {
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
+  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
   const {
-    driverProfile,
+    data: apiResponse,
     isLoading,
     isFetching,
-    isUpdating,
-    isUpdatingKYC,
     error,
-    handleDriverAction,
-    handleKYCStatusUpdate,
-    refreshProfile,
-    availableActions,
-  } = useDriverProfile();
+    refetch,
+  } = useGetUserProfileByIdQuery(userId || "", { skip: !userId });
 
-  // Confirmation modal state
+  const [updateUserAction, { isLoading: isUpdating }] =
+    useUpdateUserStatusMutation();
+
+  const profileData = apiResponse?.data;
+
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmAction, setConfirmAction] =
-    useState<DriverProfileAction | null>(null);
+  const [confirmAction, setConfirmAction] = useState<UserAction | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  // KYC Approval confirmation modal state
-  const [kycConfirmOpen, setKycConfirmOpen] = useState(false);
-  const [kycConfirmLoading, setKycConfirmLoading] = useState(false);
-
-  // Alert messages
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // open modal
-  const openConfirm = (action: DriverProfileAction) => {
+  const openConfirm = (action: UserAction) => {
     setConfirmAction(action);
     setConfirmOpen(true);
   };
 
-  // Open KYC approval confirmation
-  const openKYCConfirm = () => {
-    setKycConfirmOpen(true);
-  };
-
-  // actually perform action after confirm
   const performConfirmedAction = async () => {
-    if (!confirmAction) return;
+    if (!confirmAction || !userId) return;
     setConfirmLoading(true);
     try {
-      const result = await handleDriverAction(confirmAction);
-      const label = actionButtonConfig[confirmAction]?.label ?? confirmAction;
+      const result = await updateUserAction({
+        userId,
+        action: confirmAction,
+      }).unwrap();
 
+      const label = actionButtonConfig[confirmAction]?.label ?? confirmAction;
       toast.success(result.message || `${label} successful`);
       setSuccessMsg(result.message || `${label} successful`);
       setErrorMsg(null);
 
       setConfirmOpen(false);
       setConfirmAction(null);
-      refreshProfile();
-    } catch (err: unknown) {
+      refetch();
+    } catch (err: any) {
       const label = confirmAction
         ? actionButtonConfig[confirmAction]?.label
         : "Action";
-      const msg = getErrorMessage(err, `${label} failed`);
+      const msg = err?.data?.message || `${label} failed`;
       toast.error(msg);
       setErrorMsg(msg);
       setSuccessMsg(null);
@@ -106,28 +96,6 @@ const DriverProfileViewPage: React.FC = () => {
     }
   };
 
-  // Handle KYC approval confirmation
-  const performKYCApproval = async () => {
-    setKycConfirmLoading(true);
-    try {
-      const result = await handleKYCStatusUpdate("Approved");
-      toast.success(result.message || "KYC status updated to Approved");
-      setSuccessMsg(result.message || "KYC status updated to Approved");
-      setErrorMsg(null);
-      setKycConfirmOpen(false);
-      refreshProfile();
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, "Failed to update KYC status");
-      toast.error(msg);
-      setErrorMsg(msg);
-      setSuccessMsg(null);
-      setKycConfirmOpen(false);
-    } finally {
-      setKycConfirmLoading(false);
-    }
-  };
-
-  // auto-dismiss alerts after a timeout 10s
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | null = null;
     if (successMsg || errorMsg) {
@@ -142,12 +110,59 @@ const DriverProfileViewPage: React.FC = () => {
   }, [successMsg, errorMsg]);
 
   const actionButtonConfig: Record<
-    DriverProfileAction,
-    { label: string; variant: "success" | "danger" | "secondary" }
+    UserAction,
+    { label: string; variant: "success" | "danger" }
   > = {
-    activate: { label: "Activate Driver", variant: "success" },
-    suspend: { label: "Suspend Driver", variant: "danger" },
-    block: { label: "Block Driver", variant: "danger" },
+    activate: { label: "Activate", variant: "success" },
+    suspend: { label: "Suspend", variant: "danger" },
+    block: { label: "Block", variant: "danger" },
+    verify: { label: "Verify", variant: "success" },
+    deactivate: { label: "Block", variant: "danger" },
+  };
+
+  const getAvailableActions = (): UserAction[] => {
+    if (!profileData?.userInfo) return [];
+
+    const { status, isVerified } = profileData.userInfo;
+    const actions: UserAction[] = [];
+
+    if (!isVerified) {
+      actions.push("verify");
+      return actions;
+    }
+
+    switch (status) {
+      case "Inactive":
+        actions.push("activate");
+        break;
+
+      case "Active":
+        actions.push("suspend");
+        break;
+
+      case "Suspended":
+        actions.push("activate");
+        break;
+    }
+
+    return actions;
+  };
+
+  const availableActions = getAvailableActions();
+
+  const getStatusBadgeClasses = (status?: string) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-800";
+      case "Suspended":
+        return "bg-red-100 text-red-800";
+      case "Inactive":
+        return "bg-gray-100 text-gray-800";
+      case "Blocked":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   if (isLoading) {
@@ -165,7 +180,7 @@ const DriverProfileViewPage: React.FC = () => {
             transition: "margin-left 0.3s ease",
           }}
         >
-          <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
+          <AdminTopbar onToggleSidebar={toggleSidebar} title="User Profile" />
           <main className="flex-1 overflow-auto bg-gray-50 p-6">
             <div className="flex justify-center items-center h-full">
               <LoadingSpinner size="large" />
@@ -191,18 +206,20 @@ const DriverProfileViewPage: React.FC = () => {
             transition: "margin-left 0.3s ease",
           }}
         >
-          <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
+          <AdminTopbar onToggleSidebar={toggleSidebar} title="User Profile" />
           <main className="flex-1 overflow-auto bg-gray-50 p-6">
             <div className="max-w-4xl mx-auto">
               <Alert type="danger">
-                <p className="font-semibold">Error Loading Driver Profile</p>
-                <p>{getErrorMessage(error, "Failed to load driver profile")}</p>
-
+                <p className="font-semibold">Error Loading User Profile</p>
+                <p>
+                  {(error as any)?.data?.message ||
+                    "Failed to load user profile"}
+                </p>
                 <Button
-                  onClick={() => navigate("/admin/drivers")}
+                  onClick={() => navigate("/admin/users")}
                   className="mt-4"
                 >
-                  Back to Drivers
+                  Back to Users
                 </Button>
               </Alert>
             </div>
@@ -212,7 +229,7 @@ const DriverProfileViewPage: React.FC = () => {
     );
   }
 
-  if (!driverProfile) {
+  if (!profileData) {
     return (
       <div className="flex h-screen">
         <AdminSidebar
@@ -227,16 +244,16 @@ const DriverProfileViewPage: React.FC = () => {
             transition: "margin-left 0.3s ease",
           }}
         >
-          <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
+          <AdminTopbar onToggleSidebar={toggleSidebar} title="User Profile" />
           <main className="flex-1 overflow-auto bg-gray-50 p-6">
             <div className="max-w-4xl mx-auto">
               <Alert type="danger">
-                <p>No driver profile found</p>
+                <p>No user profile found</p>
                 <Button
-                  onClick={() => navigate("/admin/drivers")}
+                  onClick={() => navigate("/admin/users")}
                   className="mt-4"
                 >
-                  Back to Drivers
+                  Back to Users
                 </Button>
               </Alert>
             </div>
@@ -246,22 +263,7 @@ const DriverProfileViewPage: React.FC = () => {
     );
   }
 
-  const { driver, user, stats, kycDocuments } = driverProfile;
-
-  const getStatusBadgeClasses = (status?: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800";
-      case "Suspended":
-        return "bg-red-100 text-red-800";
-      case "Inactive":
-        return "bg-gray-100 text-gray-800";
-      case "Pending Verification":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const { userInfo, accountStats, activityStatus, metadata } = profileData;
 
   return (
     <div className="flex h-screen">
@@ -277,7 +279,7 @@ const DriverProfileViewPage: React.FC = () => {
           transition: "margin-left 0.3s ease",
         }}
       >
-        <AdminTopbar onToggleSidebar={toggleSidebar} title="Driver Profile" />
+        <AdminTopbar onToggleSidebar={toggleSidebar} title="User Profile" />
         <main className="flex-1 overflow-auto bg-gray-50 p-6">
           <div className="max-w-7xl mx-auto">
             {/* Alerts (success / error) */}
@@ -304,14 +306,14 @@ const DriverProfileViewPage: React.FC = () => {
             <div className="flex items-start justify-between">
               <div>
                 <button
-                  onClick={() => navigate("/admin/drivers")}
+                  onClick={() => navigate("/admin/users")}
                   className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
                 >
                   <RiArrowLeftLine className="w-5 h-5 mr-2" />
-                  Back to Drivers
+                  Back to Users
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {user.name}
+                  {userInfo?.name || "User"}
                 </h1>
               </div>
 
@@ -320,7 +322,7 @@ const DriverProfileViewPage: React.FC = () => {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={refreshProfile}
+                    onClick={() => refetch()}
                     disabled={isFetching}
                   >
                     {isFetching ? "Refreshing..." : "Refresh"}
@@ -331,7 +333,7 @@ const DriverProfileViewPage: React.FC = () => {
                     return (
                       <Button
                         key={action}
-                        variant={cfg?.variant ?? "secondary"}
+                        variant={cfg?.variant ?? "dark"}
                         size="sm"
                         onClick={() => openConfirm(action)}
                         disabled={isUpdating}
@@ -342,14 +344,14 @@ const DriverProfileViewPage: React.FC = () => {
                   })}
                 </div>
 
-                {/* status badge */}
+                {/* Status badge */}
                 <div>
                   <span
                     className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClasses(
-                      driver?.status
+                      userInfo?.status
                     )}`}
                   >
-                    {driver?.status}
+                    {userInfo?.status || "Unknown"}
                   </span>
                 </div>
               </div>
@@ -357,23 +359,12 @@ const DriverProfileViewPage: React.FC = () => {
 
             {/* Main Content */}
             <div className="grid grid-cols-1 gap-6 mt-6">
-              {/* Driver Details */}
+              {/* User Profile Details */}
               <div className="w-full bg-white rounded-lg shadow-md p-6">
-                <DriverDetails driver={driver} user={user} stats={stats} />
-              </div>
-
-              {/* Vehicle Details*/}
-              <div className="w-full bg-white rounded-lg shadow-md p-6">
-                <VehicleDetails driver={driver} />
-              </div>
-
-              {/* KYC  */}
-              <div className="w-full bg-white rounded-lg shadow-md p-6">
-                <DriverProfileKYC
-                  kycDocuments={kycDocuments}
-                  overallStatus={driver.kycStatus}
-                  onMarkAsApproved={openKYCConfirm}
-                  isUpdatingKYC={isUpdatingKYC}
+                <UserProfileDetails
+                  userInfo={userInfo}
+                  stats={accountStats}
+                  isLoading={isLoading}
                 />
               </div>
             </div>
@@ -381,7 +372,6 @@ const DriverProfileViewPage: React.FC = () => {
         </main>
       </div>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmOpen}
         onClose={() => {
@@ -392,13 +382,15 @@ const DriverProfileViewPage: React.FC = () => {
         }}
         onConfirm={performConfirmedAction}
         title={
-          confirmAction ? actionButtonConfig[confirmAction].label : "Confirm"
+          confirmAction
+            ? actionButtonConfig[confirmAction]?.label
+            : "Confirm Action"
         }
         message={
           confirmAction
             ? `Are you sure you want to ${actionButtonConfig[
                 confirmAction
-              ].label.toLowerCase()}?`
+              ]?.label?.toLowerCase()}?`
             : "Are you sure?"
         }
         confirmText={confirmLoading ? "Processing..." : "Yes, proceed"}
@@ -407,26 +399,8 @@ const DriverProfileViewPage: React.FC = () => {
         isLoading={confirmLoading}
         size="md"
       />
-
-      {/* KYC Approval Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={kycConfirmOpen}
-        onClose={() => {
-          if (!kycConfirmLoading) {
-            setKycConfirmOpen(false);
-          }
-        }}
-        onConfirm={performKYCApproval}
-        title="Mark KYC as Approved"
-        message="Are you sure you want to mark this driver's overall KYC status as Approved? This will update the driver's KYC status in the system."
-        confirmText={kycConfirmLoading ? "Updating..." : "Yes, Approve"}
-        cancelText="Cancel"
-        variant="question"
-        isLoading={kycConfirmLoading}
-        size="md"
-      />
     </div>
   );
 };
 
-export default DriverProfileViewPage;
+export default UserProfileViewPage;

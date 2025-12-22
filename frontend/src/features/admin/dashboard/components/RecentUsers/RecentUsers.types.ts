@@ -1,4 +1,4 @@
-import type { User } from "../../../user-management/components/UserManagement/UserManagement.types";
+import type { User } from "../../../user/user-management/components/UserManagement/UserManagement.types";
 
 export interface RecentUsersProps {
   users: User[];

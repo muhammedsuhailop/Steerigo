@@ -1,5 +1,3 @@
-export interface RecentActivityProps {}
-
 export interface ActivityItem {
   id: string;
   type: "user" | "driver" | "ride" | "payment" | "kyc";

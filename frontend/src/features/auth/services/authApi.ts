@@ -166,7 +166,7 @@ export const authApi = createApi({
 
     refreshToken: builder.mutation<
       {
-        data: any;
+        data: unknown;
         accessToken: string;
         refreshToken: string;
       },

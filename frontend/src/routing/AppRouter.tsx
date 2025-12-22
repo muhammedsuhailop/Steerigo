@@ -10,10 +10,10 @@ import UserDashboard from "@/features/user/dashbaord/pages/UserDashboard";
 import DriverDashboard from "@/features/driver/dashboard/pages/DriverDashboard";
 import AdminDashboard from "@/features/admin/dashboard/pages/AdminDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
-import AdminUsersLayout from "@/features/admin/user-management/pages/AdminUsersLayout";
+import AdminUsersLayout from "@/features/admin/user/user-management/pages/AdminUsersLayout";
 import { NotFoundPage } from "@/features/public/pages";
 import { DriverRegistrationPage } from "@/features/driver/driver-registration/pages";
-import DriverManagementLayout from "@/features/admin/driver-management/pages/DriverManagementLayout";
+import DriverManagementLayout from "@/features/admin/driver/driver-management/pages/DriverManagementLayout";
 import DriverProfileViewPage from "@/features/admin/driver/view-profile/pages/DriverProfileViewPage";
 import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/pages/AdminKYCLayout";
 import { UserProfileLayout } from "@/features/user";
@@ -23,6 +23,7 @@ import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
 import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
 import HelpPage from "@/features/public/pages/Help";
+import UserProfileViewPage from "@/features/admin/user/user-profile/UserProfileViewPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -107,6 +108,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminUsersLayout />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users/:userId"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <UserProfileViewPage />
           </ProtectedRoute>
         }
       />

@@ -13,6 +13,8 @@ import {
   UpdateUserStatusResponseDto,
 } from "@application/dto/admin";
 import { Result } from "@shared/utils/Result";
+import { GetUserProfileRequestDto } from "@application/dto/admin/GetUserProfileRequestDto";
+import { GetUserProfileResponseDto } from "@application/dto/admin/GetUserProfileResponseDto";
 
 @injectable()
 export class AdminUserController {
@@ -26,6 +28,11 @@ export class AdminUserController {
     private updateUserStatusUseCase: IUseCase<
       UpdateUserStatusRequestDto,
       Promise<Result<UpdateUserStatusResponseDto>>
+    >,
+    @inject(TYPES.GetUserProfileDetailsUseCase)
+    private readonly getUserProfileUseCase: IUseCase<
+      GetUserProfileRequestDto,
+      Promise<Result<GetUserProfileResponseDto>>
     >
   ) {}
 
@@ -94,6 +101,42 @@ export class AdminUserController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "update_user_status"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getUserProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.userId;
+
+      const dto = new GetUserProfileRequestDto(userId);
+
+      const result = await this.getUserProfileUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_user_profile"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      const response: ApiResponse<GetUserProfileResponseDto> = {
+        success: true,
+        message: ADMIN_MESSAGES.USER.USER_PROFILE_FETCHED,
+        data,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_user_profile"
       );
       res.status(statusCode).json(response);
     }

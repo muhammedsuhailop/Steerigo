@@ -1,5 +1,3 @@
-export interface QuickActionsProps {}
-
 export interface QuickAction {
   id: string;
   title: string;

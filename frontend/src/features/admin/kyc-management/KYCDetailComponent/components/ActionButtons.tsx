@@ -3,6 +3,7 @@ import { Button } from "@/shared/components/ui";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
 import { ConfirmationModal } from "@/shared/components/ui/ConfirmationModal";
 import { Alert } from "@/shared/components/ui/Alert";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 interface ActionButtonsProps {
   kycId: string;
@@ -20,7 +21,6 @@ interface RejectModal {
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
-  kycId,
   verificationStatus,
   onAction,
   isLoading,
@@ -44,10 +44,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     try {
       await onAction("Approved");
       setApproveModalOpen(false);
-    } catch (err: any) {
-      setLocalError(
-        err?.data?.message || err?.message || "Failed to approve KYC"
-      );
+    } catch (err: unknown) {
+      setLocalError(getErrorMessage(err, "Failed to approve KYC"));
       setApproveModalOpen(false);
     }
   };
@@ -66,10 +64,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       await onAction("Rejected", rejectModal.reason.trim());
       setRejectModal({ isOpen: false, reason: "" });
       setLocalError(null);
-    } catch (err: any) {
-      setLocalError(
-        err?.data?.message || err?.message || "Failed to reject KYC"
-      );
+    } catch (err: unknown) {
+      setLocalError(getErrorMessage(err, "Failed to reject KYC"));
     }
   };
 

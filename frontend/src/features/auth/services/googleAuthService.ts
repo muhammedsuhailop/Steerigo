@@ -38,7 +38,7 @@ export class GoogleAuthService {
   static handleGoogleCallback(
     accessToken: string,
     refreshToken: string
-  ): { user: any; token: string; refreshToken: string } {
-    return { user: null as any, token: accessToken, refreshToken };
+  ): { user: unknown; token: string; refreshToken: string } {
+    return { user: null, token: accessToken, refreshToken };
   }
 }

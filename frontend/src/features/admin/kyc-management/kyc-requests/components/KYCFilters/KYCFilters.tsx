@@ -35,11 +35,6 @@ export const KYCFilters: React.FC<KYCFiltersProps> = ({
     { value: "docType", label: "Document Type" },
   ];
 
-  const sortOrderOptions = [
-    { value: "desc", label: "Descending" },
-    { value: "asc", label: "Ascending" },
-  ];
-
   const handleSortOrderToggle = () => {
     const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
     onFiltersChange({ sortOrder: newOrder });

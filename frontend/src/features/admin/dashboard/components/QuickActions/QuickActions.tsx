@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionCard } from "./ActionCard";
-import type { QuickActionsProps, QuickAction } from "./QuickActions.types";
+import type { QuickAction } from "./QuickActions.types";
 
 const quickActions: QuickAction[] = [
   {
@@ -25,7 +25,7 @@ const quickActions: QuickAction[] = [
     description: "Review pending document verifications",
     icon: "manage-kyc",
     color: "yellow",
-    path: "/admin/kyc",
+    path: "/admin/kyc-requests",
   },
   {
     id: "view-reports",
@@ -53,7 +53,7 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-export const QuickActions: React.FC<QuickActionsProps> = () => {
+export const QuickActions: React.FC = () => {
   return (
     <div className="mb-8">
       <div className="mb-6">

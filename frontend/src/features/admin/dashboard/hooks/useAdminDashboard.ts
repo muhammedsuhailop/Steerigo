@@ -34,11 +34,8 @@ export const useAdminDashboard = () => {
   });
 
   // Fetch driver statistics
-  const {
-    data: driverStatsData,
-    isLoading: driverStatsLoading,
-    refetch: refetchDriverStats,
-  } = useGetDriverStatsQuery();
+  const { isLoading: driverStatsLoading, refetch: refetchDriverStats } =
+    useGetDriverStatsQuery();
 
   // Fetch pending KYC requests
   const {
@@ -52,11 +49,17 @@ export const useAdminDashboard = () => {
   });
 
   // Extract data safely
-  const users = usersData?.data.users || [];
-  const drivers = driversData?.data.drivers || [];
+  const users = useMemo(() => usersData?.data.users ?? [], [usersData]);
+
+  const drivers = useMemo(() => driversData?.data.drivers ?? [], [driversData]);
+
+  const kycRequests = useMemo(
+    () => kycData?.data.kycDocuments ?? [],
+    [kycData]
+  );
+
   const userPagination = usersData?.data.pagination;
   const driverPagination = driversData?.data.pagination;
-  const kycRequests = kycData?.data.kycDocuments || [];
 
   // Calculate user statistics from fetched data
 
@@ -83,23 +86,42 @@ export const useAdminDashboard = () => {
   // Calculate driver statistics
 
   const getDriverStats = useMemo(() => {
-    const totalDrivers = driverPagination?.totalItems || 0;
-    const activeDrivers = drivers.filter((d) => d.status === "active").length;
-    const pendingDrivers = drivers.filter((d) => d.status === "pending").length;
-    const suspendedDrivers = drivers.filter(
-      (d) => d.status === "suspended"
+    const totalDrivers = driverPagination?.totalItems ?? drivers.length;
+
+    const activeDrivers = drivers.filter(
+      (d) => d.statusInfo.status === "Active"
     ).length;
 
-    // Use backend stats if available
-    const backendStats = driverStatsData?.data;
+    const suspendedDrivers = drivers.filter(
+      (d) => d.statusInfo.status === "Suspended"
+    ).length;
+
+    const blockedDrivers = drivers.filter(
+      (d) => d.statusInfo.status === "Blocked"
+    ).length;
+
+    const pendingKYCDrivers = drivers.filter(
+      (d) => d.statusInfo.kycStatus === "InReview"
+    ).length;
+
+    const approvedKYCDrivers = drivers.filter(
+      (d) => d.statusInfo.kycStatus === "Approved"
+    ).length;
+
+    const rejectedKYCDrivers = drivers.filter(
+      (d) => d.statusInfo.kycStatus === "Rejected"
+    ).length;
 
     return {
-      totalDrivers: backendStats?.totalDrivers || totalDrivers,
-      activeDrivers: backendStats?.activeDrivers || activeDrivers,
-      pendingDrivers: backendStats?.pendingApproval || pendingDrivers,
-      suspendedDrivers: backendStats?.suspendedDrivers || suspendedDrivers,
+      totalDrivers,
+      activeDrivers,
+      suspendedDrivers,
+      blockedDrivers,
+      pendingKYCDrivers,
+      approvedKYCDrivers,
+      rejectedKYCDrivers,
     };
-  }, [drivers, driverPagination, driverStatsData]);
+  }, [drivers, driverPagination]);
 
   // Get recent users (last 5)
 
@@ -118,7 +140,7 @@ export const useAdminDashboard = () => {
   const getKYCStats = useMemo(() => {
     return {
       pendingKYC: kycRequests.length,
-      totalKYCRequests: kycData?.data.pagination.total || 0,
+      totalKYCRequests: kycData?.data.pagination.totalPages || 0,
     };
   }, [kycRequests, kycData]);
 

@@ -3,7 +3,7 @@ import type {
   User,
   UserFilters,
   UserAction,
-} from "../../user-management/components/UserManagement/UserManagement.types";
+} from "../../user/user-management/components/UserManagement/UserManagement.types";
 // import { DashboardStats } from "../services/AdminStatsService";
 
 export interface AdminDataService {
@@ -56,28 +56,6 @@ export interface AdminDetailLayoutProps {
   children: ReactNode;
   title?: string;
 }
-
-export interface AdminUser {
-  id: string;
-  userId?: string;
-  name: string;
-  email: string;
-  mobile?: string;
-  status:
-    | "Active"
-    | "Inactive"
-    | "Suspended"
-    | "Pending Verification"
-    | "Blocked";
-  role: string;
-  totalBookings: number;
-  totalSpent: number;
-  lastBooked?: string;
-  createdAt: string;
-  updatedAt: string;
-  avatar?: string;
-}
-
 export interface AdminUser {
   id: string;
   userId?: string;
@@ -133,7 +111,7 @@ export interface AdminDriver {
   license: AdminDriverLicense;
   stats: AdminDriverStats;
   createdAt: string; // ISO date string
-  profileImage?: string; 
+  profileImage?: string;
 }
 
 // KYC TYPES
@@ -166,24 +144,6 @@ export interface KYCDriver {
 export interface KYCRequest {
   kyc: KYCDocument;
   driver: KYCDriver;
-}
-
-export interface KYCPagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage?: boolean;
-  hasPrevPage?: boolean;
-}
-
-export interface KYCListResponse {
-  success: boolean;
-  message: string;
-  data: {
-    kycDocuments: KYCRequest[];
-    pagination: KYCPagination;
-  };
 }
 
 export interface KYCDetailResponse {
