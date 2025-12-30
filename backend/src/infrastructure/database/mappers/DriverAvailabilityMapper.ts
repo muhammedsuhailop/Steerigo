@@ -2,6 +2,7 @@ import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { IDriverAvailabilityModel } from "../models/DriverAvailabilityModel";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { Location } from "@domain/value-objects/Location";
+import { TimeSlot } from "@domain/value-objects/TimeSlot";
 import { Types } from "mongoose";
 
 export class DriverAvailabilityMapper {
@@ -12,13 +13,39 @@ export class DriverAvailabilityMapper {
       address: raw.currentLocation.address,
     });
 
+    // Convert time slots
+    const timeSlots =
+      raw.recurringSchedule?.dailyRecurrence.timeSlots.map((slot) =>
+        TimeSlot.create(slot.startTime, slot.endTime)
+      ) || [];
+
+    const excludedTimeSlots = raw.recurringSchedule?.dailyRecurrence
+      .excludedTimeSlots
+      ? raw.recurringSchedule.dailyRecurrence.excludedTimeSlots.map((slot) =>
+          TimeSlot.create(slot.startTime, slot.endTime)
+        )
+      : [];
+
+    const recurringSchedule = raw.recurringSchedule
+      ? {
+          dailyRecurrence: {
+            daysOfWeek: raw.recurringSchedule.dailyRecurrence.daysOfWeek,
+            timeSlots,
+            excludedTimeSlots,
+          },
+          validity: raw.recurringSchedule.validity,
+          notes: raw.recurringSchedule.notes,
+        }
+      : undefined;
+
     return DriverAvailability.fromData({
-      id: raw._id,
+      id: raw._id.toString(),
       driverId: raw.driverId.toString(),
       status: raw.status as AvailabilityStatus,
-      availableFrom: raw.availableFrom,
-      availableTill: raw.availableTill,
       currentLocation: location,
+      recurringSchedule,
+      exceptions: raw.exceptions || [],
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     });
@@ -28,15 +55,46 @@ export class DriverAvailabilityMapper {
     availability: DriverAvailability
   ): Partial<IDriverAvailabilityModel> {
     const location = availability.getCurrentLocation();
+    const recurringSchedule = availability.getRecurringSchedule();
 
-    return {
+    const persistenceData: Partial<IDriverAvailabilityModel> = {
       _id: availability.getId(),
       driverId: new Types.ObjectId(availability.getDriverId()),
       status: availability.getStatus(),
-      availableFrom: availability.getAvailableFrom(),
-      availableTill: availability.getAvailableTill(),
-      currentLocation: location.getCoordinates(),
+      currentLocation: {
+        latitude: location.getCoordinates().latitude,
+        longitude: location.getCoordinates().longitude,
+        address: location.getCoordinates().address,
+        updatedAt: new Date(),
+      },
+      exceptions: availability.getExceptions(),
+      isActive: availability.getIsActive(),
       updatedAt: availability.getUpdatedAt(),
     };
+
+    if (recurringSchedule) {
+      persistenceData.recurringSchedule = {
+        dailyRecurrence: {
+          daysOfWeek: recurringSchedule.dailyRecurrence.daysOfWeek,
+          timeSlots: recurringSchedule.dailyRecurrence.timeSlots.map(
+            (slot) => ({
+              startTime: slot.getStartTime(),
+              endTime: slot.getEndTime(),
+            })
+          ),
+          excludedTimeSlots:
+            recurringSchedule.dailyRecurrence.excludedTimeSlots?.map(
+              (slot) => ({
+                startTime: slot.getStartTime(),
+                endTime: slot.getEndTime(),
+              })
+            ),
+        },
+        validity: recurringSchedule.validity,
+        notes: recurringSchedule.notes,
+      };
+    }
+
+    return persistenceData;
   }
 }

@@ -1,70 +1,73 @@
+import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
 import { z } from "zod";
 
-export const scheduleAvailabilitySchema = z.object({
-  body: z
-    .object({
-      availableFrom: z
+export const scheduleRecurringAvailabilitySchema = z.object({
+  body: z.object({
+    daysOfWeek: z
+      .array(z.number().int().min(0).max(6))
+      .min(1, "At least one day must be selected"),
+    timeSlots: z
+      .array(
+        z.object({
+          startTime: z.number().int().min(0).max(1440),
+          endTime: z.number().int().min(0).max(1440),
+        })
+      )
+      .min(1, "At least one time slot must be defined"),
+    excludedTimeSlots: z
+      .array(
+        z.object({
+          startTime: z.number().int().min(0).max(1440),
+          endTime: z.number().int().min(0).max(1440),
+        })
+      )
+      .optional(),
+    validityStartDate: z
+      .string()
+      .datetime("Invalid datetime format for validityStartDate"),
+    validityEndDate: z
+      .string()
+      .datetime("Invalid datetime format for validityEndDate")
+      .optional(),
+    notes: z.string().max(1000).optional(),
+    currentLocation: z.object({
+      latitude: z
+        .number()
+        .min(-90, "Latitude must be between -90 and 90")
+        .max(90, "Latitude must be between -90 and 90"),
+      longitude: z
+        .number()
+        .min(-180, "Longitude must be between -180 and 180")
+        .max(180, "Longitude must be between -180 and 180"),
+      address: z
         .string()
-        .refine((val) => {
-          const date = new Date(val);
-          return !isNaN(date.getTime());
-        }, "availableFrom must be a valid ISO8601 datetime")
-        .refine((val) => {
-          const date = new Date(val);
-          return date >= new Date();
-        }, "availableFrom cannot be in the past"),
-      availableTill: z.string().refine((val) => {
-        const date = new Date(val);
-        return !isNaN(date.getTime());
-      }, "availableTill must be a valid ISO8601 datetime"),
-      currentLocation: z.object({
-        latitude: z
-          .number()
-          .min(-90, "Latitude must be between -90 and 90")
-          .max(90, "Latitude must be between -90 and 90"),
-        longitude: z
-          .number()
-          .min(-180, "Longitude must be between -180 and 180")
-          .max(180, "Longitude must be between -180 and 180"),
-        address: z
-          .string()
-          .max(500, "Address must be a string with maximum 500 characters")
-          .optional(),
-      }),
-    })
-    .refine(
-      (data) => {
-        const availableFrom = new Date(data.availableFrom);
-        const availableTill = new Date(data.availableTill);
-        return availableTill > availableFrom;
-      },
-      {
-        message: "availableTill must be after availableFrom",
-        path: ["availableTill"],
-      }
-    )
-    .refine(
-      (data) => {
-        const availableFrom = new Date(data.availableFrom);
-        const availableTill = new Date(data.availableTill);
-        const maxDuration = 168 * 60 * 60 * 1000; //7 days
-        return availableTill.getTime() - availableFrom.getTime() <= maxDuration;
-      },
-      {
-        message: "Availability duration cannot exceed 7 Days",
-        path: ["availableTill"],
-      }
-    ),
+        .max(500, "Address must not exceed 500 characters")
+        .optional(),
+    }),
+  }),
+});
+
+export const addAvailabilityExceptionSchema = z.object({
+  body: z.object({
+    type: z.nativeEnum(AvailabilityExceptionType),
+    reason: z.string().max(500).optional(),
+    startTime: z.string().datetime("Invalid datetime format for startTime"),
+    endTime: z.string().datetime("Invalid datetime format for endTime"),
+    isRecurring: z.boolean().optional(),
+    recurringPattern: z.nativeEnum(RecurringPattern).optional(),
+  }),
 });
 
 export const updateStatusSchema = z.object({
   body: z.object({
     driverId: z
       .string()
-      .regex(/^[0-9a-fA-F]{24}$/, "driverId must be a valid")
+      .regex(/^[0-9a-fA-F]{24}$/, "driverId must be a valid MongoDB ID")
       .nonempty({ message: "driverId is required" }),
-    status: z.enum(["Available", "Busy", "Offline", "Scheduled"], {
-      message: "Status must be one of: Available, Busy, Offline",
+    status: z.nativeEnum(AvailabilityStatus, {
+      message: "Status must be one of: Available, Busy, Offline, Scheduled",
     }),
   }),
 });
@@ -73,7 +76,7 @@ export const updateLocationSchema = z.object({
   body: z.object({
     driverId: z
       .string()
-      .regex(/^[0-9a-fA-F]{24}$/, "driverId must be a valid")
+      .regex(/^[0-9a-fA-F]{24}$/, "driverId must be a valid MongoDB ID")
       .nonempty({ message: "driverId is required" }),
     currentLocation: z.object({
       latitude: z
@@ -86,7 +89,7 @@ export const updateLocationSchema = z.object({
         .max(180, "Longitude must be between -180 and 180"),
       address: z
         .string()
-        .max(500, "Address must be a string with maximum 500 characters")
+        .max(500, "Address must not exceed 500 characters")
         .optional(),
     }),
   }),

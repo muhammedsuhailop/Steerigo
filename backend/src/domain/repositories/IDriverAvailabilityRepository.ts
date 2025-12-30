@@ -23,6 +23,10 @@ export interface IDriverAvailabilityRepository
   findActiveByDriverId(driverId: string): Promise<DriverAvailability | null>;
   existsActiveForDriver(driverId: string): Promise<boolean>;
 
+  addException(driverId: string, exception: any): Promise<DriverAvailability>;
+  removeException(driverId: string, exceptionId: string): Promise<boolean>;
+  getExceptions(driverId: string): Promise<any[]>;
+
   // Status-based queries
   findByStatus(
     status: AvailabilityStatus,

@@ -120,7 +120,9 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions<DriverAvailability> & { filters?: IDriverAvailabilityFilters }
+    options: QueryOptions<DriverAvailability> & {
+      filters?: IDriverAvailabilityFilters;
+    }
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,
@@ -171,19 +173,26 @@ export class DriverAvailabilityRepositoryImpl
     driverId: string
   ): Promise<DriverAvailability | null> {
     try {
-      const now = new Date();
-      const doc = await DriverAvailabilityModel.findOne({
-        driverId: new Types.ObjectId(driverId),
-        availableTill: { $gte: now },
-      });
+      const driverId_ObjectId = new Types.ObjectId(driverId);
 
-      return doc ? DriverAvailabilityMapper.toDomain(doc) : null;
+      const model = await DriverAvailabilityModel.findOne({
+        driverId: driverId_ObjectId,
+        isActive: true,
+      })
+        .lean()
+        .exec();
+
+      if (!model) return null;
+
+      return DriverAvailabilityMapper.toDomain(
+        model as IDriverAvailabilityModel
+      );
     } catch (error) {
-      Logger.error("Error finding active availability by driver ID", {
+      Logger.error("Error finding active driver availability", {
         driverId,
         error,
       });
-      throw error;
+      return null;
     }
   }
 
@@ -592,6 +601,57 @@ export class DriverAvailabilityRepositoryImpl
         filters,
         error,
       });
+      throw error;
+    }
+  }
+
+  async addException(
+    driverId: string,
+    exception: any
+  ): Promise<DriverAvailability> {
+    try {
+      const availability = await this.findActiveByDriverId(driverId);
+      if (!availability) {
+        throw new Error("Active availability not found");
+      }
+      availability.addException(exception);
+      return this.save(availability);
+    } catch (error) {
+      Logger.error("Error adding exception", { driverId, error });
+      throw error;
+    }
+  }
+
+  async removeException(
+    driverId: string,
+    exceptionId: string
+  ): Promise<boolean> {
+    try {
+      const availability = await this.findActiveByDriverId(driverId);
+      if (!availability) {
+        return false;
+      }
+      const removed = availability.removeException(exceptionId);
+      if (removed) {
+        await this.save(availability);
+      }
+      return removed;
+    } catch (error) {
+      Logger.error("Error removing exception", {
+        driverId,
+        exceptionId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async getExceptions(driverId: string): Promise<any[]> {
+    try {
+      const availability = await this.findActiveByDriverId(driverId);
+      return availability?.getExceptions() || [];
+    } catch (error) {
+      Logger.error("Error getting exceptions", { driverId, error });
       throw error;
     }
   }

@@ -66,6 +66,12 @@ export const TYPES = {
     "GetDriverDetailedProfileUseCase"
   ),
   SendRideRequestUseCase: Symbol.for("SendRideRequestUseCase"),
+  ScheduleRecurringAvailabilityUseCase: Symbol.for(
+    "ScheduleRecurringAvailabilityUseCase"
+  ),
+  AddAvailabilityExceptionUseCase: Symbol.for(
+    "AddAvailabilityExceptionUseCase"
+  ),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

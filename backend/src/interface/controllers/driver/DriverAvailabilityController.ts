@@ -2,10 +2,11 @@ import { injectable, inject } from "inversify";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import {
-  ScheduleAvailabilityRequestDto,
+  ScheduleRecurringAvailabilityRequestDto,
   UpdateStatusRequestDto,
   UpdateLocationRequestDto,
 } from "@application/dto/driver";
+
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
@@ -17,13 +18,15 @@ import { Result } from "@shared/utils/Result";
 import { DriverAvailabilityResponseDto } from "@application/dto/driver/DriverAvailabilityResponseDto";
 import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/UpdateAvailabilityStatusResponseDto";
 import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";
+import { AddAvailabilityExceptionRequestDto } from "@application/dto/driver/AddAvailabilityExceptionRequestDto";
+import { AddAvailabilityExceptionResponseDto } from "@application/dto/driver/AddAvailabilityExceptionResponseDto";
 
 @injectable()
 export class DriverAvailabilityController {
   constructor(
-    @inject(TYPES.ScheduleAvailabilityUseCase)
+    @inject(TYPES.ScheduleRecurringAvailabilityUseCase)
     private scheduleAvailabilityUseCase: IUseCase<
-      ScheduleAvailabilityRequestDto,
+      ScheduleRecurringAvailabilityRequestDto,
       Promise<Result<DriverAvailabilityResponseDto>>
     >,
     @inject(TYPES.UpdateAvailabilityStatusUseCase)
@@ -35,6 +38,11 @@ export class DriverAvailabilityController {
     private updateLocationUseCase: IUseCase<
       UpdateLocationRequestDto,
       Promise<Result<UpdateDriverLocationResponseDto>>
+    >,
+    @inject(TYPES.AddAvailabilityExceptionUseCase)
+    private addExceptionUseCase: IUseCase<
+      AddAvailabilityExceptionRequestDto,
+      Promise<Result<AddAvailabilityExceptionResponseDto>>
     >
   ) {}
 
@@ -57,7 +65,11 @@ export class DriverAvailabilityController {
         return;
       }
 
-      const dto = ScheduleAvailabilityRequestDto.fromRequest(userId, req.body);
+      const dto = ScheduleRecurringAvailabilityRequestDto.fromRequest(
+        userId,
+        req.body
+      );
+
       const result = await this.scheduleAvailabilityUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -173,6 +185,58 @@ export class DriverAvailabilityController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "update_driver_location"
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async addException(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const { response, statusCode } =
+          ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.DRIVER_AUTH_REQUIRED,
+        });
+        return;
+      }
+
+      const dto = AddAvailabilityExceptionRequestDto.fromRequest(
+        userId,
+        req.body
+      );
+      const result = await this.addExceptionUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "add_availability_exception"
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+      const response: ApiResponse = {
+        success: true,
+        message: "Exception added successfully",
+        data,
+      };
+      res.status(HttpStatusCodes.CREATED).json(response);
+      Logger.info("Exception added successfully", { userId });
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "add_availability_exception"
       );
       res.status(statusCode).json(response);
     }

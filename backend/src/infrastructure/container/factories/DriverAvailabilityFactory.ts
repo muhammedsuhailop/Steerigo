@@ -6,7 +6,6 @@ import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvail
 import { DriverAvailabilityRepositoryImpl } from "@infrastructure/database/repositories/DriverAvailabilityRepositoryImpl";
 
 // Use Cases
-import { ScheduleAvailabilityUseCase } from "@application/use-cases/driver/ScheduleAvailabilityUseCase";
 import { UpdateAvailabilityStatusUseCase } from "@application/use-cases/driver/UpdateAvailabilityStatusUseCase";
 import { UpdateDriverLocationUseCase } from "@application/use-cases/driver/UpdateDriverLocationUseCase";
 
@@ -14,7 +13,7 @@ import { UpdateDriverLocationUseCase } from "@application/use-cases/driver/Updat
 import { DriverAvailabilityController } from "@interface/controllers/driver/DriverAvailabilityController";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import {
-  ScheduleAvailabilityRequestDto,
+  ScheduleRecurringAvailabilityRequestDto,
   UpdateLocationRequestDto,
   UpdateStatusRequestDto,
 } from "@application/dto/driver";
@@ -22,6 +21,10 @@ import { DriverAvailabilityResponseDto } from "@application/dto/driver/DriverAva
 import { Result } from "@shared/utils/Result";
 import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/UpdateAvailabilityStatusResponseDto";
 import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";
+import { ScheduleRecurringAvailabilityUseCase } from "@application/use-cases/driver/ScheduleRecurringAvailabilityUseCase";
+import { AddAvailabilityExceptionRequestDto } from "@application/dto/driver/AddAvailabilityExceptionRequestDto";
+import { AddAvailabilityExceptionUseCase } from "@application/use-cases/driver/AddAvailabilityExceptionUseCase";
+import { AddAvailabilityExceptionResponseDto } from "@application/dto/driver/AddAvailabilityExceptionResponseDto";
 
 export class DriverAvailabilityFactory {
   static register(container: Container): void {
@@ -34,11 +37,11 @@ export class DriverAvailabilityFactory {
     container
       .bind<
         IUseCase<
-          ScheduleAvailabilityRequestDto,
+          ScheduleRecurringAvailabilityRequestDto,
           Promise<Result<DriverAvailabilityResponseDto>>
         >
-      >(TYPES.ScheduleAvailabilityUseCase)
-      .to(ScheduleAvailabilityUseCase);
+      >(TYPES.ScheduleRecurringAvailabilityUseCase)
+      .to(ScheduleRecurringAvailabilityUseCase);
 
     container
       .bind<
@@ -57,6 +60,15 @@ export class DriverAvailabilityFactory {
         >
       >(TYPES.UpdateDriverLocationUseCase)
       .to(UpdateDriverLocationUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          AddAvailabilityExceptionRequestDto,
+          Promise<Result<AddAvailabilityExceptionResponseDto>>
+        >
+      >(TYPES.AddAvailabilityExceptionUseCase)
+      .to(AddAvailabilityExceptionUseCase);
 
     // Controller
     container

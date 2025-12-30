@@ -1,45 +1,88 @@
 import { AvailabilityStatus } from "../value-objects/AvailabilityStatus";
 import { Location } from "../value-objects/Location";
+import { TimeSlot } from "../value-objects/TimeSlot";
+import { DayOfWeek } from "../value-objects/DayOfWeek";
+import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
+
+export interface DailyRecurrenceData {
+  daysOfWeek: DayOfWeek[];
+  timeSlots: TimeSlot[];
+  excludedTimeSlots?: TimeSlot[];
+}
+
+export interface ScheduleValidityData {
+  startDate: Date;
+  endDate?: Date | null;
+}
+
+export interface AvailabilityExceptionData {
+  id?: string;
+  type: AvailabilityExceptionType;
+  reason?: string;
+  startTime: Date;
+  endTime: Date;
+  isRecurring?: boolean;
+  recurringPattern?: RecurringPattern;
+  createdAt?: Date;
+}
 
 export class DriverAvailability {
   private constructor(
     private readonly id: string,
     private readonly driverId: string,
     private status: AvailabilityStatus,
-    private availableFrom: Date,
-    private availableTill: Date,
     private currentLocation: Location,
+    private recurringSchedule?: {
+      dailyRecurrence: DailyRecurrenceData;
+      validity: ScheduleValidityData;
+      notes?: string;
+    },
+    private exceptions: AvailabilityExceptionData[] = [],
+    private isActive: boolean = true,
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
 
-  static create(
+  static createRecurring(
     id: string,
     driverId: string,
-    availableFrom: Date,
-    availableTill: Date,
-    currentLocation: Location
+    dailyRecurrence: DailyRecurrenceData,
+    validity: ScheduleValidityData,
+    currentLocation: Location,
+    notes?: string
   ): DriverAvailability {
-    this.validateSchedule(availableFrom, availableTill);
+    this.validateRecurringSchedule(dailyRecurrence, validity);
 
-    return new DriverAvailability(
+    const availability = new DriverAvailability(
       id,
       driverId,
-      AvailabilityStatus.AVAILABLE,
-      availableFrom,
-      availableTill,
-      currentLocation
+      AvailabilityStatus.SCHEDULED,
+      currentLocation,
+      {
+        dailyRecurrence,
+        validity,
+        notes,
+      },
+      [],
+      true
     );
+
+    return availability;
   }
 
-  // Factory method for reconstructing from database
   static fromData(data: {
     id: string;
     driverId: string;
     status: AvailabilityStatus;
-    availableFrom: Date;
-    availableTill: Date;
     currentLocation: Location;
+    recurringSchedule?: {
+      dailyRecurrence: DailyRecurrenceData;
+      validity: ScheduleValidityData;
+      notes?: string;
+    };
+    exceptions?: AvailabilityExceptionData[];
+    isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
   }): DriverAvailability {
@@ -47,31 +90,35 @@ export class DriverAvailability {
       data.id,
       data.driverId,
       data.status,
-      data.availableFrom,
-      data.availableTill,
       data.currentLocation,
+      data.recurringSchedule,
+      data.exceptions || [],
+      data.isActive,
       data.createdAt,
       data.updatedAt
     );
   }
 
-  private static validateSchedule(
-    availableFrom: Date,
-    availableTill: Date
+  private static validateRecurringSchedule(
+    dailyRecurrence: DailyRecurrenceData,
+    validity: ScheduleValidityData
   ): void {
-    const now = new Date();
-
-    if (availableFrom < now) {
-      throw new Error("Available from time cannot be in the past");
+    // Validate days of week
+    if (
+      !dailyRecurrence.daysOfWeek ||
+      dailyRecurrence.daysOfWeek.length === 0
+    ) {
+      throw new Error("At least one day of week must be selected");
     }
 
-    if (availableTill <= availableFrom) {
-      throw new Error("Available till time must be after available from time");
+    // Validate time slots
+    if (!dailyRecurrence.timeSlots || dailyRecurrence.timeSlots.length === 0) {
+      throw new Error("At least one time slot must be defined");
     }
 
-    const maxDuration = 168 * 60 * 60 * 1000; // 24 hours
-    if (availableTill.getTime() - availableFrom.getTime() > maxDuration) {
-      throw new Error("Availability duration cannot exceed 7 days");
+    // Validate validity dates
+    if (validity.endDate && validity.startDate >= validity.endDate) {
+      throw new Error("Schedule validity end date must be after start date");
     }
   }
 
@@ -88,16 +135,20 @@ export class DriverAvailability {
     return this.status;
   }
 
-  getAvailableFrom(): Date {
-    return this.availableFrom;
-  }
-
-  getAvailableTill(): Date {
-    return this.availableTill;
-  }
-
   getCurrentLocation(): Location {
     return this.currentLocation;
+  }
+
+  getRecurringSchedule() {
+    return this.recurringSchedule;
+  }
+
+  getExceptions(): AvailabilityExceptionData[] {
+    return this.exceptions;
+  }
+
+  getIsActive(): boolean {
+    return this.isActive;
   }
 
   getCreatedAt(): Date {
@@ -108,10 +159,9 @@ export class DriverAvailability {
     return this.updatedAt;
   }
 
-  // Business methods
   updateStatus(newStatus: AvailabilityStatus): void {
     if (this.status === newStatus) {
-      throw new Error(`Driver is already ${newStatus.toLowerCase()}`);
+      throw new Error(`Driver is already ${newStatus}`);
     }
 
     if (!this.canTransitionTo(newStatus)) {
@@ -127,64 +177,206 @@ export class DriverAvailability {
     this.updatedAt = new Date();
   }
 
-  updateSchedule(availableFrom: Date, availableTill: Date): void {
-    DriverAvailability.validateSchedule(availableFrom, availableTill);
+  updateRecurringSchedule(
+    dailyRecurrence: DailyRecurrenceData,
+    validity: ScheduleValidityData,
+    notes?: string
+  ): void {
+    DriverAvailability.validateRecurringSchedule(dailyRecurrence, validity);
 
-    this.availableFrom = availableFrom;
-    this.availableTill = availableTill;
+    this.recurringSchedule = {
+      dailyRecurrence,
+      validity,
+      notes,
+    };
+
     this.updatedAt = new Date();
   }
 
+  addException(exception: {
+    id: string;
+    type: AvailabilityExceptionType;
+    reason?: string;
+    startTime: Date;
+    endTime: Date;
+    isRecurring?: boolean;
+    recurringPattern?: RecurringPattern;
+    createdAt?: Date;
+  }): void {
+    if (!this.exceptions) {
+      this.exceptions = [];
+    }
+    this.exceptions.push(exception);
+    this.updatedAt = new Date();
+  }
+
+  removeException(exceptionId: string): boolean {
+    if (!this.exceptions) return false;
+    const initialLength = this.exceptions.length;
+    this.exceptions = this.exceptions.filter((e) => e.id !== exceptionId);
+    if (this.exceptions.length < initialLength) {
+      this.updatedAt = new Date();
+      return true;
+    }
+    return false;
+  }
+
+  deactivate(): void {
+    this.isActive = false;
+    this.status = AvailabilityStatus.OFFLINE;
+    this.updatedAt = new Date();
+  }
+
+  isAvailableAt(checkDate: Date): boolean {
+    // Check exceptions first
+    if (this.exceptions) {
+      for (const exception of this.exceptions) {
+        if (
+          exception.startTime <= checkDate &&
+          checkDate <= exception.endTime
+        ) {
+          return false; // Not available due to exception
+        }
+      }
+    }
+
+    // Check recurring schedule
+    if (this.recurringSchedule) {
+      const dayOfWeek = checkDate.getDay();
+      const { dailyRecurrence, validity } = this.recurringSchedule;
+
+      if (checkDate < validity.startDate) return false;
+      if (validity.endDate && checkDate > validity.endDate) return false;
+
+      if (!dailyRecurrence.daysOfWeek.includes(dayOfWeek)) return false;
+
+      const minutes = checkDate.getHours() * 60 + checkDate.getMinutes();
+      const isInSlot = dailyRecurrence.timeSlots.some((slot) =>
+        slot.containsTime(minutes)
+      );
+
+      if (!isInSlot) return false;
+
+      const isExcluded = dailyRecurrence.excludedTimeSlots?.some((slot) =>
+        slot.containsTime(minutes)
+      );
+
+      return !isExcluded;
+    }
+
+    return false;
+  }
+
+  private isWithinValidityPeriod(checkDate: Date): boolean {
+    if (!this.recurringSchedule) {
+      return false;
+    }
+
+    const { startDate, endDate } = this.recurringSchedule.validity;
+
+    if (checkDate < startDate) {
+      return false;
+    }
+
+    if (endDate && checkDate > endDate) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private isWithinTimeSlot(checkDate: Date): boolean {
+    const hours = checkDate.getHours();
+    const minutes = checkDate.getMinutes();
+    const timeInMinutes = hours * 60 + minutes;
+
+    const { timeSlots, excludedTimeSlots } =
+      this.recurringSchedule!.dailyRecurrence;
+
+    // Check if within any active time slot
+    const inTimeSlot = timeSlots.some((slot) =>
+      slot.containsTime(timeInMinutes)
+    );
+
+    if (!inTimeSlot) {
+      return false;
+    }
+
+    // Check if in excluded time slot
+    if (excludedTimeSlots) {
+      const inExcludedSlot = excludedTimeSlots.some((slot) =>
+        slot.containsTime(timeInMinutes)
+      );
+
+      if (inExcludedSlot) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private hasException(checkDate: Date): boolean {
+    return this.exceptions.some((exception) => {
+      // Check if current date/time falls within exception range
+      if (checkDate >= exception.startTime && checkDate <= exception.endTime) {
+        return true;
+      }
+
+      // Handle recurring exceptions
+      if (
+        exception.isRecurring &&
+        exception.recurringPattern === RecurringPattern.DAILY
+      ) {
+        const exceptionStart = new Date(exception.startTime);
+        const exceptionEnd = new Date(exception.endTime);
+
+        // Check if same time range on any day
+        if (
+          checkDate.getHours() === exceptionStart.getHours() &&
+          checkDate.getMinutes() >= exceptionStart.getMinutes() &&
+          checkDate.getHours() === exceptionEnd.getHours() &&
+          checkDate.getMinutes() <= exceptionEnd.getMinutes()
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }
+
   private canTransitionTo(newStatus: AvailabilityStatus): boolean {
-    const allowedTransitions = {
-      [AvailabilityStatus.OFFLINE]: [
-        AvailabilityStatus.AVAILABLE,
-        AvailabilityStatus.SCHEDULED,
-      ],
-      [AvailabilityStatus.AVAILABLE]: [
-        AvailabilityStatus.BUSY,
-        AvailabilityStatus.OFFLINE,
-      ],
-      [AvailabilityStatus.BUSY]: [
-        AvailabilityStatus.AVAILABLE,
-        AvailabilityStatus.OFFLINE,
-      ],
-      [AvailabilityStatus.SCHEDULED]: [
-        AvailabilityStatus.AVAILABLE,
-        AvailabilityStatus.BUSY,
-        AvailabilityStatus.OFFLINE,
-      ],
-    };
+    const allowedTransitions: Record<AvailabilityStatus, AvailabilityStatus[]> =
+      {
+        [AvailabilityStatus.OFFLINE]: [
+          AvailabilityStatus.AVAILABLE,
+          AvailabilityStatus.SCHEDULED,
+        ],
+        [AvailabilityStatus.AVAILABLE]: [
+          AvailabilityStatus.BUSY,
+          AvailabilityStatus.OFFLINE,
+        ],
+        [AvailabilityStatus.BUSY]: [
+          AvailabilityStatus.AVAILABLE,
+          AvailabilityStatus.OFFLINE,
+        ],
+        [AvailabilityStatus.SCHEDULED]: [
+          AvailabilityStatus.AVAILABLE,
+          AvailabilityStatus.BUSY,
+          AvailabilityStatus.OFFLINE,
+        ],
+      };
 
     return allowedTransitions[this.status]?.includes(newStatus) ?? false;
   }
 
-  // Query methods
-  isAvailable(): boolean {
-    return (
-      this.status === AvailabilityStatus.AVAILABLE && this.isWithinSchedule()
-    );
+  setIsActive(isActive: boolean): void {
+    this.isActive = isActive;
+    this.updatedAt = new Date();
   }
 
-  isBusy(): boolean {
-    return this.status === AvailabilityStatus.BUSY;
-  }
-
-  isOffline(): boolean {
-    return this.status === AvailabilityStatus.OFFLINE;
-  }
-
-  isWithinSchedule(): boolean {
-    const now = new Date();
-    return now >= this.availableFrom && now <= this.availableTill;
-  }
-
-  isExpired(): boolean {
-    return new Date() > this.availableTill;
-  }
-
-  getRemainingTime(): number {
-    const now = new Date();
-    return Math.max(0, this.availableTill.getTime() - now.getTime());
+  private generateExceptionId(): string {
+    return `exc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
