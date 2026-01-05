@@ -28,27 +28,15 @@ export class DriverDashboardMapper {
     performance: DriverDashboardPerformance,
     scheduledRidesCount: number
   ): DriverDashboardResponseDto {
-    const driverInfo = this.mapDriverInfo(driver, driverUser);
-    const availabilityInfo = availability
-      ? this.mapAvailability(availability)
-      : null;
-    const currentRideInfo = currentRide
-      ? this.mapCurrentRide(currentRide, currentRideRiderUser)
-      : null;
-    const pendingRequestsInfo = pendingRequests.map((req, index) =>
-      this.mapPendingRequest(req, pendingRequestUsers[index])
-    );
-
-    const meta: DashboardMeta = {
-      lastUpdated: new Date(),
-      serverTime: new Date(),
-    };
-
     return new DriverDashboardResponseDto({
-      driver: driverInfo,
-      availability: availabilityInfo,
-      currentRide: currentRideInfo,
-      pendingRequests: pendingRequestsInfo,
+      driver: this.mapDriverInfo(driver, driverUser),
+      availability: availability ? this.mapAvailability(availability) : null,
+      currentRide: currentRide
+        ? this.mapCurrentRide(currentRide, currentRideRiderUser)
+        : null,
+      pendingRequests: pendingRequests.map((req, idx) =>
+        this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null)
+      ),
       statistics: {
         ridesCompleted: statistics.getRidesCompleted(),
         ridesCancelled: statistics.getRidesCancelled(),
@@ -61,7 +49,10 @@ export class DriverDashboardMapper {
         cancellationRate: performance.getCancellationRate(),
         averageRating: performance.getAverageRating(),
       },
-      meta,
+      meta: {
+        lastUpdated: new Date(),
+        serverTime: new Date(),
+      },
     });
   }
 
@@ -86,14 +77,16 @@ export class DriverDashboardMapper {
   private static mapAvailability(
     availability: DriverAvailability
   ): AvailabilityInfo {
-    const location = availability.getCurrentLocation();
+    const recurringSchedule = availability.getRecurringSchedule();
+    const availableFrom = recurringSchedule?.validity.startDate ?? new Date();
+    const availableTill = recurringSchedule?.validity.endDate ?? new Date();
 
     return {
       id: availability.getId(),
       status: availability.getStatus(),
-      availableFrom: availability.getAvailableFrom(),
-      availableTill: availability.getAvailableTill(),
-      currentLocation: location,
+      availableFrom,
+      availableTill,
+      currentLocation: availability.getCurrentLocation(),
       updatedAt: availability.getUpdatedAt(),
     };
   }
@@ -102,11 +95,9 @@ export class DriverDashboardMapper {
     ride: Ride,
     riderUser: User | null
   ): CurrentRideInfo {
-    const timer = ride.getStartedAt()
-      ? this.calculateTimer(ride.getStartedAt())
-      : "00:00:00";
-    const pickup = ride.getPickup();
-    const drop = ride.getDrop();
+    const startedAt = ride.getStartedAt() ?? new Date();
+    const riderName = riderUser?.getName() ?? "";
+    const riderMobile = riderUser?.getMobile() ?? undefined;
 
     return {
       rideId: ride.getRideId(),
@@ -114,18 +105,18 @@ export class DriverDashboardMapper {
         ride.getStatus() === RideStatus.STARTED
           ? "Ride started"
           : ride.getStatus(),
-      pickup: pickup,
-      drop: drop,
+      pickup: ride.getPickup(),
+      drop: ride.getDrop(),
       rider: {
         id: ride.getRiderId(),
-        name: riderUser ? riderUser.getName() : "",
-        mobile: riderUser ? riderUser.getMobile() : "",
+        name: riderName,
+        mobile: riderMobile,
       },
       rideType: ride.getRideType(),
       fare: ride.getFare(),
       currency: ride.getCurrency(),
-      startedAt: ride.getStartedAt() || new Date(),
-      timer,
+      startedAt,
+      timer: this.calculateRideTimer(startedAt),
     };
   }
 
@@ -133,6 +124,8 @@ export class DriverDashboardMapper {
     request: RideRequest,
     riderUser: User | null
   ): PendingRequest {
+    const userName = riderUser?.getName() ?? "";
+
     return {
       requestId: request.getRequestId(),
       pickup: request.getPickup(),
@@ -140,15 +133,13 @@ export class DriverDashboardMapper {
       pickupTime: request.getPickupTime(),
       rideType: request.getRideType(),
       fare: request.getFare(),
-      userName: riderUser ? riderUser.getName() : "",
+      userName,
       status: request.getStatus(),
       pickupETA: request.getPickupETA(),
     };
   }
 
-  private static calculateTimer(startedAt: Date | undefined): string {
-    if (!startedAt) return "00:00:00";
-
+  private static calculateRideTimer(startedAt: Date): string {
     const now = new Date();
     const diff = now.getTime() - startedAt.getTime();
 
@@ -156,8 +147,9 @@ export class DriverDashboardMapper {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-      seconds
-    ).padStart(2, "0")}`;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(seconds).padStart(2, "0")}`;
   }
 }
