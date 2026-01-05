@@ -1,35 +1,74 @@
-export class DriverStatusResponseDto {
+import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+
+export interface TimeSlotResponse {
+  readonly startTime: string; // HH:MM format
+  readonly endTime: string; // HH:MM format
+  readonly durationMinutes: number;
+}
+
+export interface DailyRecurrenceResponse {
+  readonly daysOfWeek: number[]; // 0-6 (Sunday=0, Monday=1, etc.)
+  readonly timeSlots: TimeSlotResponse[];
+  readonly excludedTimeSlots: TimeSlotResponse[];
+  readonly daysOfWeekLabels: string[]; // ["Sunday", "Monday", "Tuesday", ...]
+}
+
+export interface ScheduleValidityResponse {
+  readonly startDate: Date;
+  readonly endDate: Date | null;
+  readonly isCurrentlyValid: boolean; // Whether schedule is active today
+}
+
+export interface RecurringScheduleResponse {
+  readonly dailyRecurrence: DailyRecurrenceResponse;
+  readonly validity: ScheduleValidityResponse;
+  readonly notes?: string;
+  readonly isActive: boolean;
+}
+
+export interface AvailabilityExceptionResponse {
+  readonly id: string;
+  readonly type: AvailabilityExceptionType;
+  readonly reason?: string;
+  readonly startTime: Date;
+  readonly endTime: Date;
+  readonly durationHours: number;
+  readonly isRecurring: boolean;
+  readonly recurringPattern?: string; // "DAILY", "WEEKLY", "MONTHLY"
+  readonly createdAt: Date;
+  readonly isActive: boolean; // Whether exception is currently applicable
+}
+
+export interface LocationResponse {
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly address?: string;
+  readonly lastUpdatedAt: Date;
+  readonly accuracy?: number; // GPS accuracy in meters
+}
+
+export interface AvailabilitySummaryResponse {
+  readonly isCurrentlyAvailable: boolean;
+  readonly nextAvailableTime: Date | null;
+  readonly nextUnavailableTime: Date | null;
+  readonly totalHoursAvailableToday: number;
+  readonly activeExceptionsCount: number;
+  readonly scheduleStatus: AvailabilityStatus;
+}
+
+export interface DriverStatusResponseDto {
   readonly id: string;
   readonly driverId: string;
-  readonly availabilityStatus: string;
-  readonly availableFrom: Date;
-  readonly availableTill: Date | null;
-  readonly currentLocation: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
+  readonly availabilityStatus: AvailabilityStatus;
+  readonly currentLocation: LocationResponse;
+  readonly lastLocationUpdateAt: Date;
+  readonly recurringSchedule: RecurringScheduleResponse | null;
+  readonly exceptions: AvailabilityExceptionResponse[];
+  readonly activeExceptionsCount: number;
+  readonly summary: AvailabilitySummaryResponse;
+  readonly todayTimeSlots: TimeSlotResponse[];
+  readonly isActive: boolean;
+  readonly createdAt: Date;
   readonly updatedAt: Date;
-
-  constructor(
-    id: string,
-    driverId: string,
-    availabilityStatus: string,
-    availableFrom: Date,
-    availableTill: Date | null,
-    currentLocation: {
-      latitude: number;
-      longitude: number;
-      address?: string;
-    },
-    updatedAt: Date
-  ) {
-    this.id = id;
-    this.driverId = driverId;
-    this.availabilityStatus = availabilityStatus;
-    this.availableFrom = availableFrom;
-    this.availableTill = availableTill;
-    this.currentLocation = currentLocation;
-    this.updatedAt = updatedAt;
-  }
 }

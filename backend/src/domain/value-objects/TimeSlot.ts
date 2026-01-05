@@ -1,7 +1,3 @@
-/**
- * TimeSlot Value Object
- * Represents a time slot within a day (stored as minutes from midnight)
- */
 export class TimeSlot {
   private readonly startTime: number; // 0-1440 minutes
   private readonly endTime: number; // 0-1440 minutes
@@ -45,10 +41,6 @@ export class TimeSlot {
     return this.endTime;
   }
 
-  /**
-   * Check if this slot contains a given time
-   * Handles both normal and wrap-around slots
-   */
   containsTime(minutes: number): boolean {
     if (this.startTime <= this.endTime) {
       // Normal slot: e.g., 5 AM (300) to 10 PM (1320)
@@ -59,9 +51,6 @@ export class TimeSlot {
     }
   }
 
-  /**
-   * Convert time object to minutes from midnight
-   */
   static timeToMinutes(hours: number, minutes: number = 0): number {
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
       throw new Error("Invalid time");
@@ -69,9 +58,6 @@ export class TimeSlot {
     return hours * 60 + minutes;
   }
 
-  /**
-   * Convert minutes from midnight to HH:MM format
-   */
   static minutesToTime(minutes: number): string {
     if (minutes < 0 || minutes > 1440) {
       throw new Error("Minutes must be between 0 and 1440");
