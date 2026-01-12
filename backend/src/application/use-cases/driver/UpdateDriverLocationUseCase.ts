@@ -41,10 +41,6 @@ export class UpdateDriverLocationUseCase
         );
       }
 
-      if (availability.isExpired()) {
-        return Result.failure(new ExpiredAvailabilityError());
-      }
-
       const newLocation = Location.create(dto.getLocationData());
 
       try {

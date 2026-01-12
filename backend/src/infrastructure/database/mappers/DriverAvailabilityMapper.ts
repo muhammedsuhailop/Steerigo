@@ -1,4 +1,7 @@
-import { DriverAvailability } from "@domain/entities/DriverAvailability";
+import {
+  DriverAvailability,
+  RecurringScheduleData,
+} from "@domain/entities/DriverAvailability";
 import { IDriverAvailabilityModel } from "../models/DriverAvailabilityModel";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { Location } from "@domain/value-objects/Location";
@@ -13,7 +16,7 @@ export class DriverAvailabilityMapper {
       address: raw.currentLocation.address,
     });
 
-    // Convert time slots
+    // Convert time slots if present
     const timeSlots =
       raw.recurringSchedule?.dailyRecurrence.timeSlots.map((slot) =>
         TimeSlot.create(slot.startTime, slot.endTime)
@@ -24,19 +27,21 @@ export class DriverAvailabilityMapper {
       ? raw.recurringSchedule.dailyRecurrence.excludedTimeSlots.map((slot) =>
           TimeSlot.create(slot.startTime, slot.endTime)
         )
-      : [];
-
-    const recurringSchedule = raw.recurringSchedule
-      ? {
-          dailyRecurrence: {
-            daysOfWeek: raw.recurringSchedule.dailyRecurrence.daysOfWeek,
-            timeSlots,
-            excludedTimeSlots,
-          },
-          validity: raw.recurringSchedule.validity,
-          notes: raw.recurringSchedule.notes,
-        }
       : undefined;
+
+    // Build recurring schedule if present
+    const recurringSchedule: RecurringScheduleData | undefined =
+      raw.recurringSchedule
+        ? {
+            dailyRecurrence: {
+              daysOfWeek: raw.recurringSchedule.dailyRecurrence.daysOfWeek,
+              timeSlots,
+              excludedTimeSlots,
+            },
+            validity: raw.recurringSchedule.validity,
+            notes: raw.recurringSchedule.notes,
+          }
+        : undefined;
 
     return DriverAvailability.fromData({
       id: raw._id.toString(),
@@ -55,16 +60,17 @@ export class DriverAvailabilityMapper {
     availability: DriverAvailability
   ): Partial<IDriverAvailabilityModel> {
     const location = availability.getCurrentLocation();
+    const coordinates = location.getCoordinates();
     const recurringSchedule = availability.getRecurringSchedule();
 
     const persistenceData: Partial<IDriverAvailabilityModel> = {
-      _id: availability.getId(),
+      id: availability.getId() as unknown as Types.ObjectId,
       driverId: new Types.ObjectId(availability.getDriverId()),
-      status: availability.getStatus(),
+      status: availability.getStatus() as unknown as string,
       currentLocation: {
-        latitude: location.getCoordinates().latitude,
-        longitude: location.getCoordinates().longitude,
-        address: location.getCoordinates().address,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        address: coordinates.address,
         updatedAt: new Date(),
       },
       exceptions: availability.getExceptions(),
@@ -93,6 +99,8 @@ export class DriverAvailabilityMapper {
         validity: recurringSchedule.validity,
         notes: recurringSchedule.notes,
       };
+    } else {
+      persistenceData.recurringSchedule = null as unknown as undefined;
     }
 
     return persistenceData;

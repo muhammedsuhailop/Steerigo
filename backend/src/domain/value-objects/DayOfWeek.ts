@@ -26,11 +26,11 @@ export class DayOfWeekUtils {
     return names[day];
   }
 
-  static getCurrentDayOfWeek(): DayOfWeek {
-    return new Date().getDay() as DayOfWeek;
+  static getCurrentDayOfWeekUtc(): DayOfWeek {
+    return new Date().getUTCDay() as DayOfWeek;
   }
 
-  static getDayFromDate(date: Date): DayOfWeek {
-    return date.getDay() as DayOfWeek;
+  static getDayFromDateUtc(date: Date): DayOfWeek {
+    return date.getUTCDay() as DayOfWeek;
   }
 }

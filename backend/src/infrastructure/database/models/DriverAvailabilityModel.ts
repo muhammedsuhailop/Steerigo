@@ -5,8 +5,8 @@ import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
 import { Schema, model, Document, Types } from "mongoose";
 
 interface TimeSlot {
-  startTime: number; // 0-1440 minutes
-  endTime: number; // 0-1440 minutes
+  startTime: number; // 0-1439 minutes
+  endTime: number; // 0-1439 minutes
 }
 
 interface DailyRecurrence {
@@ -52,6 +52,8 @@ export interface IDriverAvailabilityModel extends Document {
   updatedAt: Date;
 }
 
+// ==================== Sub-Schemas ====================
+
 // Location sub-schema
 const locationSchema = new Schema(
   {
@@ -87,13 +89,13 @@ const timeSlotSchema = new Schema(
       type: Number,
       required: true,
       min: 0,
-      max: 1440,
+      max: 1439,
     },
     endTime: {
       type: Number,
       required: true,
       min: 0,
-      max: 1440,
+      max: 1439,
     },
   },
   { _id: false }
@@ -111,7 +113,7 @@ const dailyRecurrenceSchema = new Schema(
       type: [timeSlotSchema],
       required: true,
       validate: {
-        validator: (slots: TimeSlot[]) => slots.length > 0,
+        validator: (slots: TimeSlot[]): boolean => slots.length > 0,
         message: "At least one time slot must be defined",
       },
     },
@@ -163,7 +165,7 @@ const availabilityExceptionSchema = new Schema(
   {
     type: {
       type: String,
-      enum: AvailabilityExceptionType,
+      enum: Object.values(AvailabilityExceptionType),
       required: true,
     },
     reason: {
@@ -187,7 +189,7 @@ const availabilityExceptionSchema = new Schema(
     },
     recurringPattern: {
       type: String,
-      enum: RecurringPattern,
+      enum: Object.values(RecurringPattern),
       default: null,
     },
     createdAt: {
@@ -198,7 +200,8 @@ const availabilityExceptionSchema = new Schema(
   { _id: true, timestamps: false }
 );
 
-// Main driver availability schema
+// ==================== Main Schema ====================
+
 const driverAvailabilitySchema = new Schema(
   {
     driverId: {
@@ -209,7 +212,7 @@ const driverAvailabilitySchema = new Schema(
     },
     status: {
       type: String,
-      enum: AvailabilityStatus,
+      enum: Object.values(AvailabilityStatus),
       default: AvailabilityStatus.OFFLINE,
       required: true,
     },
@@ -237,21 +240,37 @@ const driverAvailabilitySchema = new Schema(
   }
 );
 
-// Indexes for optimal querying
+// ==================== Indexes ====================
+
+// Composite index for driver + active status
 driverAvailabilitySchema.index({ driverId: 1, isActive: 1 });
+
+// Status index for fast filtering
 driverAvailabilitySchema.index({ status: 1 });
+
+// Schedule validity indexes for time-based queries
 driverAvailabilitySchema.index({
   "recurringSchedule.validity.startDate": 1,
 });
+
+driverAvailabilitySchema.index({
+  "recurringSchedule.validity.endDate": 1,
+});
+
+// Location indexes for geo-queries
 driverAvailabilitySchema.index({
   "currentLocation.latitude": 1,
   "currentLocation.longitude": 1,
 });
+
+// Compound index for common queries
 driverAvailabilitySchema.index({
   driverId: 1,
   isActive: 1,
   status: 1,
 });
+
+// Unique constraint for active availability per driver
 driverAvailabilitySchema.index(
   { driverId: 1, isActive: 1 },
   {
@@ -261,20 +280,23 @@ driverAvailabilitySchema.index(
   }
 );
 
+// Exception time-based indexes
 driverAvailabilitySchema.index({
   "exceptions.startTime": 1,
   "exceptions.endTime": 1,
 });
 
-// Pre-save validation
-driverAvailabilitySchema.pre("save", function (next) {
+// ==================== Pre-Save Validation ====================
+
+driverAvailabilitySchema.pre<IDriverAvailabilityModel>("save", function (next) {
+  // Validate recurring schedule if present
   if (this.recurringSchedule?.dailyRecurrence) {
     const { timeSlots, excludedTimeSlots } =
       this.recurringSchedule.dailyRecurrence;
 
     // Validate time slots
     for (const slot of timeSlots) {
-      if (slot.startTime >= slot.endTime && slot.startTime !== 0) {
+      if (slot.startTime >= slot.endTime) {
         return next(new Error("Time slot startTime must be less than endTime"));
       }
     }
@@ -294,10 +316,21 @@ driverAvailabilitySchema.pre("save", function (next) {
     if (this.recurringSchedule.dailyRecurrence.daysOfWeek.length === 0) {
       return next(new Error("At least one day of week must be selected"));
     }
+
+    // Validate schedule validity
+    if (
+      this.recurringSchedule.validity.endDate &&
+      this.recurringSchedule.validity.startDate >=
+        this.recurringSchedule.validity.endDate
+    ) {
+      return next(
+        new Error("Schedule validity end date must be after start date")
+      );
+    }
   }
 
   // Validate exceptions
-  if (this.exceptions) {
+  if (this.exceptions && this.exceptions.length > 0) {
     for (const exception of this.exceptions) {
       if (exception.startTime >= exception.endTime) {
         return next(new Error("Exception startTime must be less than endTime"));
@@ -305,8 +338,21 @@ driverAvailabilitySchema.pre("save", function (next) {
     }
   }
 
+  // Validate location coordinates
+  if (this.currentLocation) {
+    const { latitude, longitude } = this.currentLocation;
+    if (latitude < -90 || latitude > 90) {
+      return next(new Error("Invalid latitude value"));
+    }
+    if (longitude < -180 || longitude > 180) {
+      return next(new Error("Invalid longitude value"));
+    }
+  }
+
   next();
 });
+
+// ==================== Model Export ====================
 
 export const DriverAvailabilityModel = model<IDriverAvailabilityModel>(
   "DriverAvailability",

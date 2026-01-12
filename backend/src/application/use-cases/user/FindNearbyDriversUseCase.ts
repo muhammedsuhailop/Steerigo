@@ -79,10 +79,9 @@ export class FindNearbyDriversUseCase
           requestDto.limit
         );
 
-      Logger.debug(
-        "Get available drivers within radius result",
-        nearbyAvailabilities
-      );
+      Logger.debug("Get available drivers within radius result", {
+        count: nearbyAvailabilities.length,
+      });
 
       Logger.info("Found nearby driver availabilities", {
         count: nearbyAvailabilities.length,
@@ -101,10 +100,12 @@ export class FindNearbyDriversUseCase
               radiusKm: searchCriteria.getRadiusKm(),
               searchDate: searchCriteria.getSearchDate(),
               timeRequiredMinutes: searchCriteria.getTimeRequiredMinutes(),
-              filters: {
-                gearType: searchFilter.getGearType(),
-                bodyType: searchFilter.getBodyType(),
-              },
+              filters: searchFilter.hasFilters()
+                ? {
+                    gearType: searchFilter.getGearType(),
+                    bodyType: searchFilter.getBodyType(),
+                  }
+                : undefined,
             },
             fareBreakdown
           )
@@ -117,35 +118,34 @@ export class FindNearbyDriversUseCase
       });
 
       const driverResponses = await Promise.all(
-        nearbyAvailabilities.map(async (availability, index) => {
-          const driverId = availability?.driver?.getDriverId?.() || "Unknown";
-          const availabilityId = availability?.driver.getId() || "N/A";
+        nearbyAvailabilities.map(async (availabilityWithDistance) => {
+          const availability = availabilityWithDistance.driver;
+          const driverId = availability.getDriverId();
+          const availabilityId = availability.getId();
 
           Logger.debug("Processing driver candidate", {
-            index,
             driverId,
             availabilityId,
-            distanceKm: availability.distanceKm,
-            etaMinutes: availability.etaMinutes,
+            distanceKm: availabilityWithDistance.distanceKm,
+            etaMinutes: availabilityWithDistance.etaMinutes,
           });
 
           try {
-            const available = this.isDriverAvailableForDuration(
-              availability.driver,
+            const isAvailable = this.isDriverAvailableForDuration(
+              availability,
               searchCriteria.getSearchDate(),
               searchCriteria.getTimeRequiredMinutes()
             );
 
-            if (!available) {
+            if (!isAvailable) {
+              const schedule = availability.getRecurringSchedule();
               Logger.info(
                 "Driver filtered out - insufficient availability window",
                 {
                   driverId,
                   availabilityId,
-                  availableFrom:
-                    availability.driver.getAvailableFrom?.() || "unknown",
-                  availableTill:
-                    availability.driver.getAvailableTill?.() || "unknown",
+                  availableFrom: schedule?.validity.startDate ?? "unknown",
+                  availableTill: schedule?.validity.endDate ?? "unknown",
                   searchDate: searchCriteria.getSearchDate(),
                   requiredMinutes: searchCriteria.getTimeRequiredMinutes(),
                 }
@@ -153,9 +153,7 @@ export class FindNearbyDriversUseCase
               return null;
             }
 
-            const driver = await this.driverRepository.findById(
-              availability.driver.getDriverId()
-            );
+            const driver = await this.driverRepository.findById(driverId);
 
             if (!driver) {
               Logger.warn("Driver filtered out - driver profile not found", {
@@ -202,42 +200,41 @@ export class FindNearbyDriversUseCase
               return null;
             }
 
+            const location = availability.getCurrentLocation();
+            const coordinates = location.getCoordinates();
+
             const response: DriverInfoResponse = {
               id: driver.getId(),
               userId: user.getId(),
               name: user.getName(),
-              mobile: user.getMobile() as string,
+              mobile: user.getMobile() ?? "",
               profilePicture: user.getProfilePicture(),
               rating: 4.5,
               totalRides: 50,
               status: driver.getStatus(),
-              gearType: driver.getEligibleGearTypes()[0],
-              bodyType: driver.getEligibleBodyTypes()[0],
+              gearType: driver.getEligibleGearTypes()[0] ?? "",
+              bodyType: driver.getEligibleBodyTypes()[0] ?? "",
               distance: {
-                value: availability.distanceKm,
+                value: availabilityWithDistance.distanceKm,
                 unit: "km",
               },
               eta: {
-                value: availability.etaMinutes,
+                value: availabilityWithDistance.etaMinutes,
                 unit: "minutes",
               },
               currentLocation: {
-                latitude: availability.driver
-                  .getCurrentLocation()
-                  .getLatitude(),
-                longitude: availability.driver
-                  .getCurrentLocation()
-                  .getLongitude(),
-                address: availability.driver.getCurrentLocation().getAddress(),
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+                address: coordinates.address,
               },
-              availabilityStatus: availability.driver.getStatus().toString(),
+              availabilityStatus: availability.getStatus(),
             };
 
             Logger.debug("Driver passed all checks and added to results", {
               driverId,
               userId: user.getId(),
-              distanceKm: availability.distanceKm,
-              etaMinutes: availability.etaMinutes,
+              distanceKm: availabilityWithDistance.distanceKm,
+              etaMinutes: availabilityWithDistance.etaMinutes,
             });
 
             return response;
@@ -302,16 +299,59 @@ export class FindNearbyDriversUseCase
   }
 
   private isDriverAvailableForDuration(
-    driverAvailability: DriverAvailability,
+    availability: DriverAvailability,
     searchDate: Date,
     timeRequiredMinutes: number
   ): boolean {
-    const availableFrom = new Date(driverAvailability.getAvailableFrom());
-    const availableTill = new Date(driverAvailability.getAvailableTill());
+    const schedule = availability.getRecurringSchedule();
+    if (!schedule) return false;
 
-    const rideEndTime = new Date(searchDate);
-    rideEndTime.setMinutes(rideEndTime.getMinutes() + timeRequiredMinutes);
+    const validFrom = new Date(schedule.validity.startDate);
+    const validTill = new Date(
+      schedule.validity.endDate ?? new Date(9999, 11, 31)
+    );
 
-    return availableFrom <= searchDate && availableTill >= rideEndTime;
+    const rideEnd = new Date(searchDate);
+    rideEnd.setMinutes(rideEnd.getMinutes() + timeRequiredMinutes);
+
+    if (searchDate < validFrom || rideEnd > validTill) {
+      return false;
+    }
+
+    const daily = schedule.dailyRecurrence;
+    if (!daily) return false;
+
+    const jsDay = searchDate.getUTCDay(); // 0=Sun
+    const normalizedDay = jsDay === 0 ? 7 : jsDay; // ISO (1–7)
+
+    if (!daily.daysOfWeek.includes(normalizedDay)) {
+      return false;
+    }
+
+    const startMinutes =
+      searchDate.getUTCHours() * 60 + searchDate.getUTCMinutes();
+    const endMinutes = startMinutes + timeRequiredMinutes;
+
+    const fitsInSlot = daily.timeSlots.some(
+      (slot) =>
+        startMinutes >= slot.getStartTime() && endMinutes <= slot.getEndTime()
+    );
+
+    if (!fitsInSlot) {
+      return false;
+    }
+
+    if (daily.excludedTimeSlots?.length) {
+      const overlapsExcluded = daily.excludedTimeSlots.some(
+        (slot) =>
+          startMinutes < slot.getEndTime() && endMinutes > slot.getStartTime()
+      );
+
+      if (overlapsExcluded) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

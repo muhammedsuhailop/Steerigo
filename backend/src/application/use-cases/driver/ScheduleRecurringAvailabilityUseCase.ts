@@ -9,10 +9,7 @@ import { Location } from "@domain/value-objects/Location";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import {
-  InvalidAvailabilityScheduleError,
-  DriverAlreadyAvailableError,
-} from "@domain/errors/DriverAvailabilityErrors";
+import { InvalidAvailabilityScheduleError } from "@domain/errors/DriverAvailabilityErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
 import { TimeSlot } from "@domain/value-objects/TimeSlot";
@@ -40,7 +37,6 @@ export class ScheduleRecurringAvailabilityUseCase
         userId: dto.getUserId(),
       });
 
-      // Validate DTO
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
         return Result.failure(
@@ -48,7 +44,6 @@ export class ScheduleRecurringAvailabilityUseCase
         );
       }
 
-      // Get driver
       const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
         return Result.failure(new DriverNotFoundError(dto.getUserId()));
@@ -56,11 +51,29 @@ export class ScheduleRecurringAvailabilityUseCase
 
       const driverId = driver.getId();
 
-      // CRITICAL: Check for existing availability (active OR inactive)
+      Logger.info("Clearing existing exceptions for driver", { driverId });
+      const exceptions =
+        await this.availabilityRepository.getExceptions(driverId);
+      if (exceptions && exceptions.length > 0) {
+        for (const exception of exceptions) {
+          await this.availabilityRepository.removeException(
+            driverId,
+            exception.id as string
+          );
+          Logger.debug("Exception removed", {
+            driverId,
+            exceptionId: exception.id,
+          });
+        }
+        Logger.info("All exceptions cleared successfully", {
+          driverId,
+          clearedCount: exceptions.length,
+        });
+      }
+
       let existingAvailability =
         await this.availabilityRepository.findActiveByDriverId(driverId);
 
-      // If no active, check for any existing record (even inactive)
       if (!existingAvailability) {
         const allAvailability =
           await this.availabilityRepository.findByDriverId(driverId);
@@ -72,7 +85,6 @@ export class ScheduleRecurringAvailabilityUseCase
       let savedAvailability: DriverAvailability;
 
       if (existingAvailability) {
-        // ALWAYS UPDATE if exists
         Logger.info("Updating existing recurring schedule", { driverId });
 
         existingAvailability.updateRecurringSchedule(
@@ -90,7 +102,7 @@ export class ScheduleRecurringAvailabilityUseCase
 
         const location = Location.create(dto.getLocationData());
         existingAvailability.updateLocation(location);
-        existingAvailability.setIsActive(true);
+        existingAvailability.activate();
 
         savedAvailability =
           await this.availabilityRepository.save(existingAvailability);
@@ -100,7 +112,6 @@ export class ScheduleRecurringAvailabilityUseCase
           availabilityId: savedAvailability.getId(),
         });
       } else {
-        // CREATE only if truly doesn't exist
         Logger.info("Creating new recurring schedule", { driverId });
 
         const availabilityId = new Types.ObjectId().toString();
@@ -131,7 +142,6 @@ export class ScheduleRecurringAvailabilityUseCase
         });
       }
 
-      // Build response
       const response = this.buildResponseDto(savedAvailability);
       return Result.success(response);
     } catch (error) {
@@ -151,7 +161,6 @@ export class ScheduleRecurringAvailabilityUseCase
 
     let recurringScheduleDto = undefined;
     if (recurringSchedule) {
-      //   const { TimeSlot } = require("@domain/value-objects/TimeSlot");
       const timeSlotDtos = recurringSchedule.dailyRecurrence.timeSlots.map(
         (slot: TimeSlot) => ({
           startTime: slot.getStartTime(),
