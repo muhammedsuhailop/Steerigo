@@ -13,7 +13,13 @@ import {
   useUpdateStatusMutation,
 } from "../services/schedulingApi";
 import { useGetDriverStatusQuery } from "../../shared/services/driverApi";
-import type { Location, ScheduleFormData } from "../types/scheduling.types";
+import {
+  Location,
+  ScheduleFormData,
+  AvailabilityData,
+  DriverStatusResponse,
+  DriverAvailabilityStatus,
+} from "../types/scheduling.types";
 import {
   DriverSidebar,
   DriverTopbar,
@@ -45,11 +51,14 @@ const DriverScheduling: React.FC = () => {
 
   const [driverId, setDriverId] = useState<string | null>(null);
 
-  const [currentStatus, setCurrentStatus] = useState<
-    "Available" | "Busy" | "Offline"
-  >("Offline");
+  const [currentStatus, setCurrentStatus] = useState<DriverAvailabilityStatus>(
+    DriverAvailabilityStatus.OFFLINE
+  );
 
   const [showScheduleForm, setShowScheduleForm] = useState(false);
+
+  const [availabilityDataFull, setAvailabilityDataFull] =
+    useState<AvailabilityData | null>(null);
 
   const [availabilityData, setAvailabilityData] = useState<{
     availableFrom?: string;
@@ -63,7 +72,6 @@ const DriverScheduling: React.FC = () => {
     type: "success",
   });
 
-  // API calls
   const [updateLocation, { isLoading: isLocationSaving }] =
     useUpdateLocationMutation();
   const [updateSchedule, { isLoading: isScheduleLoading }] =
@@ -71,7 +79,6 @@ const DriverScheduling: React.FC = () => {
   const [updateStatus, { isLoading: isStatusLoading }] =
     useUpdateStatusMutation();
 
-  // Get driver status to preload availability
   const {
     data: driverStatusResponse,
     isLoading: isStatusLoading1,
@@ -79,7 +86,6 @@ const DriverScheduling: React.FC = () => {
     error: driverStatusError,
   } = useGetDriverStatusQuery();
 
-  // Initialize form data from API response or use defaults
   const [defaultFormData, setDefaultFormData] = useState<{
     availableFrom: Date | null;
     availableTill: Date | null;
@@ -93,44 +99,71 @@ const DriverScheduling: React.FC = () => {
   const [hasAvailability, setHasAvailability] = useState(false);
   const didRedirectRef = useRef(false);
 
-  // Load availability data on component mount
   useEffect(() => {
     if (driverStatusResponse?.data) {
-      const availability = driverStatusResponse.data;
+      const availability: AvailabilityData = driverStatusResponse.data;
 
-      // Store availability in Redux
       dispatch(setAvailability(availability));
 
-      // Set default form values
+      const firstTimeSlot =
+        availability.recurringSchedule?.dailyRecurrence?.timeSlots?.[0];
+      let defaultFromDate: Date | null = null;
+      let defaultTillDate: Date | null = null;
+
+      if (firstTimeSlot) {
+        const validityStart = new Date(
+          availability.recurringSchedule.validity.startDate
+        );
+        const [hours, minutes] = firstTimeSlot.startTime.split(":").map(Number);
+        const [endHours, endMinutes] = firstTimeSlot.endTime
+          .split(":")
+          .map(Number);
+
+        defaultFromDate = new Date(validityStart);
+        defaultFromDate.setHours(hours, minutes, 0, 0);
+
+        defaultTillDate = new Date(validityStart);
+        defaultTillDate.setHours(endHours, endMinutes, 0, 0);
+      }
+
       setDefaultFormData({
-        availableFrom: new Date(availability.availableFrom),
-        availableTill: new Date(availability.availableTill),
-        location: availability.currentLocation,
+        availableFrom: defaultFromDate,
+        availableTill: defaultTillDate,
+        location: {
+          latitude: availability.currentLocation.latitude,
+          longitude: availability.currentLocation.longitude,
+          address: availability.currentLocation.address,
+        },
       });
 
-      // Set DriverId locally
       setDriverId(availability.driverId);
 
-      // Availability data for StatusCard
+      setAvailabilityDataFull(availability);
+
       setAvailabilityData({
-        availableFrom: availability.availableFrom,
-        availableTill: availability.availableTill,
-        currentLocation: availability.currentLocation,
+        availableFrom: availability.recurringSchedule?.validity?.startDate,
+        availableTill: availability.recurringSchedule?.validity?.endDate,
+        currentLocation: {
+          latitude: availability.currentLocation.latitude,
+          longitude: availability.currentLocation.longitude,
+          address: availability.currentLocation.address,
+        },
       });
 
-      // Set current status
       setCurrentStatus(
-        availability.availabilityStatus as "Available" | "Busy" | "Offline"
+        availability.availabilityStatus as DriverAvailabilityStatus
       );
 
-      // Set selected location for map
-      setSelectedLocation(availability.currentLocation);
+      setSelectedLocation({
+        latitude: availability.currentLocation.latitude,
+        longitude: availability.currentLocation.longitude,
+        address: availability.currentLocation.address,
+      });
 
       setHasAvailability(true);
-      return; // done
+      return;
     }
 
-    // Errors
     const err: any = driverStatusError;
 
     const serverMessage =
@@ -141,11 +174,10 @@ const DriverScheduling: React.FC = () => {
     );
 
     if (is404ByStatus) {
-      // Clear availability state
       setHasAvailability(false);
+      setAvailabilityDataFull(null);
       setAvailabilityData({});
 
-      // Default times (now +30min to +8h)
       const now = new Date();
       now.setMinutes(now.getMinutes() + 30);
       const endTime = new Date(now);
@@ -157,7 +189,6 @@ const DriverScheduling: React.FC = () => {
         location: null,
       });
 
-      // show the server-provided message if present
       const friendly =
         serverMessage ||
         "No existing availability found. Please create a new schedule.";
@@ -222,6 +253,19 @@ const DriverScheduling: React.FC = () => {
         currentLocation: selectedLocation,
       }));
 
+      if (availabilityDataFull) {
+        setAvailabilityDataFull({
+          ...availabilityDataFull,
+          currentLocation: {
+            latitude: selectedLocation.latitude,
+            longitude: selectedLocation.longitude,
+            address: selectedLocation.address,
+            lastUpdatedAt: new Date().toISOString(),
+            accuracy: 10,
+          },
+        });
+      }
+
       showAlert("Location saved successfully!", "success");
     } catch (error: any) {
       console.error("Failed to save location:", error);
@@ -250,18 +294,29 @@ const DriverScheduling: React.FC = () => {
         currentLocation: data.location,
       }).unwrap();
 
-      // Update local state
       setHasAvailability(true);
       setDefaultFormData(data);
 
-      // Update availability data for StatusCard
       setAvailabilityData({
         availableFrom: data.availableFrom.toISOString(),
         availableTill: data.availableTill.toISOString(),
         currentLocation: data.location,
       });
 
-      // Hide form after successful submission
+      if (availabilityDataFull) {
+        setAvailabilityDataFull({
+          ...availabilityDataFull,
+          recurringSchedule: {
+            ...availabilityDataFull.recurringSchedule,
+            validity: {
+              ...availabilityDataFull.recurringSchedule.validity,
+              startDate: data.availableFrom.toISOString(),
+              endDate: data.availableTill.toISOString(),
+            },
+          },
+        });
+      }
+
       setShowScheduleForm(false);
 
       showAlert("Schedule updated successfully!", "success");
@@ -276,9 +331,7 @@ const DriverScheduling: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (
-    status: "Available" | "Busy" | "Offline"
-  ) => {
+  const handleStatusChange = async (status: DriverAvailabilityStatus) => {
     try {
       await updateStatus({ driverId: driverId || "", status }).unwrap();
       setCurrentStatus(status);
@@ -292,7 +345,6 @@ const DriverScheduling: React.FC = () => {
     }
   };
 
-  // Handle disabled status click
   const handleDisabledStatusClick = () => {
     showAlert(
       "Please create an availability schedule first before changing your status.",
@@ -350,9 +402,7 @@ const DriverScheduling: React.FC = () => {
               {/* Status Card */}
               <StatusCard
                 availabilityStatus={currentStatus}
-                availableFrom={availabilityData.availableFrom}
-                availableTill={availabilityData.availableTill}
-                currentLocation={availabilityData.currentLocation}
+                availabilityData={availabilityDataFull}
               />
 
               {/* Status Toggle */}

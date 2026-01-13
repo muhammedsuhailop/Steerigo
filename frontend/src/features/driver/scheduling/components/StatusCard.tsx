@@ -4,54 +4,78 @@ import {
   FaHourglassHalf,
   FaRegCircle,
   FaMapMarkerAlt,
+  FaClock,
 } from "react-icons/fa";
 import Card from "@/shared/components/ui/Card";
-import { Badge } from "@/shared/components/ui/Badge";
-import type { Location } from "../types/scheduling.types";
-
-type DriverStatus = "Available" | "Busy" | "Offline";
+import type {
+  AvailabilityData,
+  DriverAvailabilityStatus,
+  TimeSlot,
+} from "../types/scheduling.types";
+import WeeklyAvailabilityStrip from "./WeeklyAvailabilityStrip";
+import ExceptionsPanel from "./ExceptionsPanel";
 
 interface StatusCardProps {
-  availabilityStatus: DriverStatus;
-  availableFrom?: string;
-  availableTill?: string;
-  currentLocation?: Location;
+  availabilityStatus: DriverAvailabilityStatus;
+  availabilityData: AvailabilityData | null;
 }
 
-const statusConfig = {
+const statusConfig: Record<
+  DriverAvailabilityStatus,
+  {
+    icon: React.ReactNode;
+    iconColor: string;
+    bgColor: string;
+    borderColor: string;
+    textColor: string;
+    label: string;
+    description: string;
+    badgeVariant: "success" | "warning" | "danger" | "info";
+  }
+> = {
+  Scheduled: {
+    icon: <FaCheckCircle />,
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    textColor: "text-blue-700",
+    label: "Scheduled",
+    description: "Your schedule is set up and ready",
+    badgeVariant: "info",
+  },
   Available: {
-    icon: <FaCheckCircle className="w-6 h-6" />,
+    icon: <FaCheckCircle />,
     iconColor: "text-emerald-600",
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-200",
     textColor: "text-emerald-700",
     label: "Available",
     description: "You are currently available for rides",
-    badgeVariant: "success" as const,
+    badgeVariant: "success",
   },
   Busy: {
-    icon: <FaHourglassHalf className="w-6 h-6" />,
+    icon: <FaHourglassHalf />,
     iconColor: "text-amber-600",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
     textColor: "text-amber-700",
     label: "Busy",
     description: "You are currently on a ride",
-    badgeVariant: "warning" as const,
+    badgeVariant: "warning",
   },
   Offline: {
-    icon: <FaRegCircle className="w-6 h-6" />,
+    icon: <FaRegCircle />,
     iconColor: "text-red-500",
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
     textColor: "text-red-600",
     label: "Offline",
     description: "You are currently offline",
-    badgeVariant: "danger" as const,
+    badgeVariant: "danger",
   },
 } as const;
 
-function formatTime(iso?: string) {
+function formatTime(iso?: string): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("en-IN", {
     hour: "numeric",
@@ -65,65 +89,112 @@ function formatTime(iso?: string) {
 
 const StatusCard: React.FC<StatusCardProps> = ({
   availabilityStatus,
-  availableFrom,
-  availableTill,
-  currentLocation,
+  availabilityData,
 }) => {
   const config = statusConfig[availabilityStatus];
 
-  const cardClassName = `${config.bgColor} ${config.borderColor} rounded-2xl`;
-  const showDetails = availabilityStatus !== "Offline";
+  if (!availabilityData) {
+    return (
+      <Card
+        className={`${config.bgColor} ${config.borderColor} rounded-2xl p-5`}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className={`text-lg font-semibold ${config.textColor}`}>
+              {config.label}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">{config.description}</p>
+          </div>
+          <div className={`text-3xl ${config.iconColor}`}>{config.icon}</div>
+        </div>
+      </Card>
+    );
+  }
+
+  const { recurringSchedule, summary, currentLocation, exceptions } =
+    availabilityData;
+
+  const showDetails =
+    availabilityStatus !== "Offline" && availabilityStatus !== "Scheduled";
 
   return (
-    <Card className={cardClassName}>
-      <Card.Header title={`Current Status: `} className="p-3">
-        <Badge variant={config.badgeVariant} size="sm" className="ml-2">
-          {config.label}
-        </Badge>
-
-        <div className={`${config.iconColor} ml-2`} aria-hidden>
-          {config.icon}
+    <Card className={`${config.bgColor} ${config.borderColor} rounded-2xl p-5`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className={`text-lg font-semibold ${config.textColor}`}>
+            {config.label}
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">{config.description}</p>
         </div>
-      </Card.Header>
+        <div className={`text-3xl ${config.iconColor}`}>{config.icon}</div>
+      </div>
 
-      <Card.Body className="p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`${config.iconColor} text-2xl`}>{config.icon}</div>
-          <p className={`text-sm ${config.textColor} opacity-95`}>
-            {config.description}
-          </p>
-        </div>
+      {/* Scheduled Details */}
+      {availabilityStatus === "Scheduled" &&
+        recurringSchedule &&
+        recurringSchedule.isActive && (
+          <div className="space-y-4 mt-6 pt-5 border-t border-gray-200">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <FaClock className="text-gray-600 text-sm" />
+                <span className="font-medium text-sm text-gray-700">
+                  Recurring Schedule
+                </span>
+              </div>
+            </div>
 
-        {showDetails && (
-          <div className="mt-2 space-y-2 text-sm">
             <div>
-              <span className="font-semibold text-slate-600">
-                Available From:
-              </span>{" "}
-              <span className="text-slate-700">
-                {formatTime(availableFrom)}
-              </span>
+              <div className="flex items-center gap-2 mb-2">
+                <FaClock className="text-gray-600 text-sm" />
+                <span className="font-medium text-sm text-gray-700">
+                  Valid Period
+                </span>
+              </div>
+
+              <div className="text-sm text-gray-600 ml-6 space-y-1">
+                <p>
+                  <span className="font-medium">From:</span>{" "}
+                  {formatTime(recurringSchedule.validity.startDate)}
+                </p>
+                <p>
+                  <span className="font-medium">To:</span>{" "}
+                  {formatTime(recurringSchedule.validity.endDate)}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="font-semibold text-slate-600">
-                Available Till:
-              </span>{" "}
-              <span className="text-slate-700">
-                {formatTime(availableTill)}
-              </span>
-            </div>
+
+            {recurringSchedule.notes && (
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Notes:</span>{" "}
+                {recurringSchedule.notes}
+              </div>
+            )}
           </div>
         )}
-      </Card.Body>
 
-      {showDetails && (
-        <Card.Footer className="flex items-center gap-2">
-          <FaMapMarkerAlt className="text-slate-500" />
-          <span className="font-semibold text-slate-600">Location:</span>
-          <span className="text-slate-700">
-            {currentLocation?.address ?? "—"}
-          </span>
-        </Card.Footer>
+      {/* Weekly Availability */}
+      <div className="mt-6">
+        <WeeklyAvailabilityStrip availabilityData={availabilityData} />
+      </div>
+
+      {/* Exceptions */}
+      {exceptions && <ExceptionsPanel exceptions={exceptions} />}
+
+      {/* Location */}
+      {currentLocation && (
+        <div className="mt-6 pt-5 border-t border-gray-200 text-sm text-gray-600">
+          <div className="flex gap-2">
+            <FaMapMarkerAlt className="mt-1" />
+            <div>
+              <p className="font-medium text-gray-700">Current Location</p>
+              <p className="truncate">{currentLocation.address}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Updated: {formatTime(currentLocation.lastUpdatedAt)}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </Card>
   );
