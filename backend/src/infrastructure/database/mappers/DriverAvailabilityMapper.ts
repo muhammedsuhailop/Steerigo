@@ -2,8 +2,11 @@ import {
   DriverAvailability,
   RecurringScheduleData,
 } from "@domain/entities/DriverAvailability";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 import { IDriverAvailabilityModel } from "../models/DriverAvailabilityModel";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
 import { Location } from "@domain/value-objects/Location";
 import { TimeSlot } from "@domain/value-objects/TimeSlot";
 import { Types } from "mongoose";
@@ -16,7 +19,6 @@ export class DriverAvailabilityMapper {
       address: raw.currentLocation.address,
     });
 
-    // Convert time slots if present
     const timeSlots =
       raw.recurringSchedule?.dailyRecurrence.timeSlots.map((slot) =>
         TimeSlot.create(slot.startTime, slot.endTime)
@@ -29,7 +31,6 @@ export class DriverAvailabilityMapper {
         )
       : undefined;
 
-    // Build recurring schedule if present
     const recurringSchedule: RecurringScheduleData | undefined =
       raw.recurringSchedule
         ? {
@@ -43,13 +44,37 @@ export class DriverAvailabilityMapper {
           }
         : undefined;
 
+    const exceptions: AvailabilityException[] = (raw.exceptions || []).map(
+      (exception) => ({
+        id: exception.id,
+        type: exception.type as AvailabilityExceptionType,
+        reason: exception.reason,
+
+        startTime: new Date(exception.startTime),
+        endTime: new Date(exception.endTime),
+
+        isRecurring: exception.isRecurring ?? false,
+        recurringPattern: exception.recurringPattern as
+          | RecurringPattern
+          | undefined,
+        recurrenceStartDate: exception.recurrenceStartDate
+          ? new Date(exception.recurrenceStartDate)
+          : undefined,
+        recurrenceEndDate: exception.recurrenceEndDate
+          ? new Date(exception.recurrenceEndDate)
+          : undefined,
+
+        createdAt: new Date(exception.createdAt),
+      })
+    );
+
     return DriverAvailability.fromData({
       id: raw._id.toString(),
       driverId: raw.driverId.toString(),
       status: raw.status as AvailabilityStatus,
       currentLocation: location,
       recurringSchedule,
-      exceptions: raw.exceptions || [],
+      exceptions,
       isActive: raw.isActive,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
@@ -67,13 +92,31 @@ export class DriverAvailabilityMapper {
       id: availability.getId() as unknown as Types.ObjectId,
       driverId: new Types.ObjectId(availability.getDriverId()),
       status: availability.getStatus() as unknown as string,
+
       currentLocation: {
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
         address: coordinates.address,
         updatedAt: new Date(),
       },
-      exceptions: availability.getExceptions(),
+
+      exceptions: availability.getExceptions().map((exception) => ({
+        id: exception.id,
+        type: exception.type,
+        reason: exception.reason,
+
+        startTime: exception.startTime,
+        endTime: exception.endTime,
+
+        isRecurring: exception.isRecurring,
+        recurringPattern: exception.recurringPattern,
+
+        recurrenceStartDate: exception.recurrenceStartDate,
+        recurrenceEndDate: exception.recurrenceEndDate,
+
+        createdAt: exception.createdAt,
+      })),
+
       isActive: availability.getIsActive(),
       updatedAt: availability.getUpdatedAt(),
     };

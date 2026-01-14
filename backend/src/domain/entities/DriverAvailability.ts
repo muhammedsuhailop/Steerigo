@@ -2,8 +2,8 @@ import { AvailabilityStatus } from "../value-objects/AvailabilityStatus";
 import { Location } from "../value-objects/Location";
 import { TimeSlot } from "../value-objects/TimeSlot";
 import { DayOfWeek } from "../value-objects/DayOfWeek";
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
 import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 export interface DailyRecurrenceData {
   daysOfWeek: DayOfWeek[];
@@ -15,18 +15,6 @@ export interface ScheduleValidityData {
   startDate: Date;
   endDate?: Date | null;
 }
-
-export interface AvailabilityExceptionData {
-  id?: string;
-  type: AvailabilityExceptionType;
-  reason?: string;
-  startTime: Date;
-  endTime: Date;
-  isRecurring?: boolean;
-  recurringPattern?: RecurringPattern;
-  createdAt?: Date;
-}
-
 export interface RecurringScheduleData {
   dailyRecurrence: DailyRecurrenceData;
   validity: ScheduleValidityData;
@@ -40,7 +28,7 @@ export class DriverAvailability {
     private status: AvailabilityStatus,
     private currentLocation: Location,
     private recurringSchedule?: RecurringScheduleData,
-    private exceptions: AvailabilityExceptionData[] = [],
+    private exceptions: AvailabilityException[] = [],
     private isActive: boolean = true,
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
@@ -95,7 +83,7 @@ export class DriverAvailability {
     status: AvailabilityStatus;
     currentLocation: Location;
     recurringSchedule?: RecurringScheduleData;
-    exceptions?: AvailabilityExceptionData[];
+    exceptions?: AvailabilityException[];
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -157,7 +145,7 @@ export class DriverAvailability {
     return this.recurringSchedule;
   }
 
-  getExceptions(): AvailabilityExceptionData[] {
+  getExceptions(): AvailabilityException[] {
     return [...this.exceptions];
   }
 
@@ -231,22 +219,16 @@ export class DriverAvailability {
   }
 
   // Exception management
-  addException(exception: {
-    id: string;
-    type: AvailabilityExceptionType;
-    reason?: string;
-    startTime: Date;
-    endTime: Date;
-    isRecurring?: boolean;
-    recurringPattern?: RecurringPattern;
-    createdAt?: Date;
-  }): void {
-    if (exception.startTime >= exception.endTime) {
-      throw new Error("Exception start time must be before end time");
+  addException(exception: AvailabilityException): void {
+    if (exception.isRecurring && !exception.recurrenceStartDate) {
+      throw new Error("Recurring exception must have recurrenceStartDate");
+    }
+
+    if (exception.endTime.getTime() - exception.startTime.getTime() <= 0) {
+      throw new Error("Exception duration must be positive");
     }
 
     this.exceptions.push(exception);
-    this.updatedAt = new Date();
   }
 
   removeException(exceptionId: string): boolean {
@@ -263,7 +245,7 @@ export class DriverAvailability {
 
   updateException(
     exceptionId: string,
-    updates: Partial<AvailabilityExceptionData>
+    updates: Partial<AvailabilityException>
   ): boolean {
     const exception = this.exceptions.find((e) => e.id === exceptionId);
 

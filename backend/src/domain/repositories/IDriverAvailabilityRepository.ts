@@ -1,12 +1,9 @@
-import {
-  AvailabilityExceptionData,
-  DriverAvailability,
-} from "@domain/entities/DriverAvailability";
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { QueryOptions, FilterOptions } from "@shared/types/Repository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 export interface IDriverAvailabilityFilters
   extends FilterOptions<DriverAvailability> {
@@ -31,13 +28,13 @@ export interface IDriverAvailabilityRepository
 
   addException(
     driverId: string,
-    exception: AvailabilityExceptionData
+    exception: AvailabilityException
   ): Promise<DriverAvailability | null>;
   removeException(
     driverId: string,
     exceptionId: string
   ): Promise<DriverAvailability | null>;
-  getExceptions(driverId: string): Promise<AvailabilityExceptionData[]>;
+  getExceptions(driverId: string): Promise<AvailabilityException[]>;
 
   // Status-based queries
   findByStatus(

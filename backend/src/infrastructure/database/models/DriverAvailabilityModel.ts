@@ -1,3 +1,4 @@
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { DayOfWeek } from "@domain/value-objects/DayOfWeek";
@@ -20,17 +21,6 @@ interface ScheduleValidity {
   endDate?: Date | null;
 }
 
-interface AvailabilityException {
-  _id?: Types.ObjectId;
-  type: AvailabilityExceptionType;
-  reason?: string;
-  startTime: Date;
-  endTime: Date;
-  isRecurring?: boolean;
-  recurringPattern?: RecurringPattern;
-  createdAt?: Date;
-}
-
 export interface IDriverAvailabilityModel extends Document {
   _id: string;
   driverId: Types.ObjectId;
@@ -51,8 +41,6 @@ export interface IDriverAvailabilityModel extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ==================== Sub-Schemas ====================
 
 // Location sub-schema
 const locationSchema = new Schema(
@@ -187,6 +175,8 @@ const availabilityExceptionSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    recurrenceStartDate: { type: Date },
+    recurrenceEndDate: { type: Date },
     recurringPattern: {
       type: String,
       enum: Object.values(RecurringPattern),
@@ -199,8 +189,6 @@ const availabilityExceptionSchema = new Schema(
   },
   { _id: true, timestamps: false }
 );
-
-// ==================== Main Schema ====================
 
 const driverAvailabilitySchema = new Schema(
   {
@@ -239,8 +227,6 @@ const driverAvailabilitySchema = new Schema(
     collection: "driver_availability",
   }
 );
-
-// ==================== Indexes ====================
 
 // Composite index for driver + active status
 driverAvailabilitySchema.index({ driverId: 1, isActive: 1 });
@@ -285,8 +271,6 @@ driverAvailabilitySchema.index({
   "exceptions.startTime": 1,
   "exceptions.endTime": 1,
 });
-
-// ==================== Pre-Save Validation ====================
 
 driverAvailabilitySchema.pre<IDriverAvailabilityModel>("save", function (next) {
   // Validate recurring schedule if present
@@ -351,8 +335,6 @@ driverAvailabilitySchema.pre<IDriverAvailabilityModel>("save", function (next) {
 
   next();
 });
-
-// ==================== Model Export ====================
 
 export const DriverAvailabilityModel = model<IDriverAvailabilityModel>(
   "DriverAvailability",

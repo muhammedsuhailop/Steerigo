@@ -6,15 +6,13 @@ import {
   AvailabilitySummaryResponse,
   DriverStatusResponseDto,
 } from "@application/dto/driver/DriverStatusResponseDto";
-import {
-  DriverAvailability,
-  AvailabilityExceptionData,
-} from "@domain/entities/DriverAvailability";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { Location } from "@domain/value-objects/Location";
 import { TimeSlot } from "@domain/value-objects/TimeSlot";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { TimeSlotHelper } from "@shared/utils/TimeSlotHelper";
 import { ScheduleValidityHelper } from "@shared/utils/ScheduleValidityHelper";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 export class DriverStatusMapper {
   static toDtoFromEntity(
@@ -104,7 +102,7 @@ export class DriverStatusMapper {
   }
 
   private static mapException(
-    domainException: AvailabilityExceptionData
+    domainException: AvailabilityException
   ): AvailabilityExceptionResponse {
     const startTime = domainException.startTime;
     const endTime = domainException.endTime;
@@ -125,16 +123,14 @@ export class DriverStatusMapper {
     };
   }
 
-  private static isExceptionActive(
-    exception: AvailabilityExceptionData
-  ): boolean {
+  private static isExceptionActive(exception: AvailabilityException): boolean {
     const now = new Date();
     return now >= exception.startTime && now <= exception.endTime;
   }
 
   private static buildSummary(
     availabilityStatus: AvailabilityStatus,
-    exceptions: AvailabilityExceptionData[],
+    exceptions: AvailabilityException[],
     domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>
   ): AvailabilitySummaryResponse {
     const now = new Date();
@@ -160,7 +156,7 @@ export class DriverStatusMapper {
   }
 
   private static calculateTodayTimeSlots(
-    exceptions: AvailabilityExceptionData[],
+    exceptions: AvailabilityException[],
     domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>
   ): TimeSlotResponse[] {
     const recurringSchedule = this.mapRecurringSchedule(domainSchedule);

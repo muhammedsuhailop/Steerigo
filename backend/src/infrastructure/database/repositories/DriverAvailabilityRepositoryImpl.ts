@@ -3,10 +3,7 @@ import {
   IDriverAvailabilityRepository,
   IDriverAvailabilityFilters,
 } from "@domain/repositories/IDriverAvailabilityRepository";
-import {
-  AvailabilityExceptionData,
-  DriverAvailability,
-} from "@domain/entities/DriverAvailability";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import {
   DriverAvailabilityModel,
@@ -17,6 +14,7 @@ import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
 import { Logger } from "@shared/utils/Logger";
 import { SortOrder, Types, FilterQuery } from "mongoose";
 import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
@@ -275,7 +273,7 @@ export class DriverAvailabilityRepositoryImpl
   // Exception Management
   async addException(
     driverId: string,
-    exception: AvailabilityExceptionData
+    exception: AvailabilityException
   ): Promise<DriverAvailability | null> {
     try {
       const driverIdObjectId = new Types.ObjectId(driverId);
@@ -339,7 +337,7 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  async getExceptions(driverId: string): Promise<AvailabilityExceptionData[]> {
+  async getExceptions(driverId: string): Promise<AvailabilityException[]> {
     const driverIdObjectId = new Types.ObjectId(driverId);
 
     const doc = await DriverAvailabilityModel.findOne({

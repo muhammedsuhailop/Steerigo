@@ -1,13 +1,14 @@
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
-
 export interface AddAvailabilityExceptionResponseDto {
   id: string;
-  type: AvailabilityExceptionType;
+  type: string;
   reason?: string;
   startTime: string;
   endTime: string;
-  isRecurring?: boolean;
-  recurringPattern?: RecurringPattern;
+  isRecurring: boolean;
+  recurringPattern?: string;
+
+  recurrenceStartDate?: string;
+  recurrenceEndDate?: string;
+
   createdAt?: string;
 }

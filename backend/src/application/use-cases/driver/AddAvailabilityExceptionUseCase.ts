@@ -62,15 +62,21 @@ export class AddAvailabilityExceptionUseCase
         return Result.failure(new DriverAvailabilityNotFoundError(driverId));
       }
 
-      // Create exception with unique ID
+      // Create exception
       const exception = {
         id: new Types.ObjectId().toString(),
         type: dto.getType(),
         reason: dto.getReason(),
+
         startTime: dto.getStartTime(),
         endTime: dto.getEndTime(),
+
         isRecurring: dto.getIsRecurring(),
         recurringPattern: dto.getRecurringPattern(),
+
+        recurrenceStartDate: dto.getRecurrenceStartDate(),
+        recurrenceEndDate: dto.getRecurrenceEndDate(),
+
         createdAt: new Date(),
       };
 
@@ -86,7 +92,7 @@ export class AddAvailabilityExceptionUseCase
         exceptionId: exception.id,
       });
 
-      // Return the added exception
+      // Response DTO
       const responseDto: AddAvailabilityExceptionResponseDto = {
         id: exception.id,
         type: exception.type,
@@ -95,6 +101,9 @@ export class AddAvailabilityExceptionUseCase
         endTime: exception.endTime.toISOString(),
         isRecurring: exception.isRecurring,
         recurringPattern: exception.recurringPattern,
+        recurrenceStartDate: exception.recurrenceStartDate?.toISOString(),
+        recurrenceEndDate: exception.recurrenceEndDate?.toISOString(),
+
         createdAt: exception.createdAt?.toISOString(),
       };
 
