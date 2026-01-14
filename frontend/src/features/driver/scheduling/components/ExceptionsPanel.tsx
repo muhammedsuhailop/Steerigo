@@ -1,6 +1,8 @@
-import React from "react";
-import { FaExclamationTriangle, FaClock } from "react-icons/fa";
-import { Exception } from "../types/scheduling.types";
+import React, { useState } from "react";
+import { FaExclamationTriangle, FaClock, FaPlus } from "react-icons/fa";
+import { Exception, ExceptionFormData } from "../types/scheduling.types";
+import ExceptionForm from "./ExceptionForm";
+import { useCreateExceptionMutation } from "../services/schedulingApi";
 
 interface Props {
   exceptions: Exception[];
@@ -19,19 +21,48 @@ function formatLocalDateTime(iso: string) {
 }
 
 const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
-  const activeExceptions = exceptions;
+  const [showForm, setShowForm] = useState(false);
+  const [createException, { isLoading }] = useCreateExceptionMutation();
 
-  if (activeExceptions.length === 0) return null;
+  const handleCreate = async (data: ExceptionFormData) => {
+    await createException({ ...data }).unwrap();
+    setShowForm(false);
+  };
+
+  if (!exceptions.length && !showForm) return null;
 
   return (
-    <div className="mt-6 pt-5 border-t border-gray-200">
-      <div className="flex items-center gap-2 mb-3 text-amber-700">
-        <FaExclamationTriangle />
-        <h4 className="text-sm font-semibold">Active Exceptions</h4>
+    <div className="mt-6 pt-5 border-t border-gray-200 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between text-amber-700">
+        <div className="flex items-center gap-2">
+          <FaExclamationTriangle />
+          <h4 className="text-sm font-semibold">Active Exceptions</h4>
+        </div>
+
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 text-xs bg-amber-100 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition"
+          >
+            <FaPlus size={12} />
+            Add Exception
+          </button>
+        )}
       </div>
 
+      {/* Form */}
+      {showForm && (
+        <ExceptionForm
+          onSubmit={handleCreate}
+          isLoading={isLoading}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
+
+      {/* Exceptions List */}
       <div className="space-y-3">
-        {activeExceptions.map((ex, idx) => (
+        {exceptions.map((ex, idx) => (
           <div
             key={idx}
             className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800"

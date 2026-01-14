@@ -4,6 +4,9 @@ export enum DriverAvailabilityStatus {
   BUSY = "Busy",
   OFFLINE = "Offline",
 }
+
+export type ExceptionType = "break" | "leave" | "other";
+export type RecurringPattern = "daily" | "weekly" | "monthly";
 export interface Location {
   latitude: number;
   longitude: number;
@@ -37,7 +40,7 @@ export interface RecurringSchedule {
 }
 
 export interface Exception {
-  type: "break" | "unavailable" | "special";
+  type: ExceptionType;
   reason: string;
   startTime: string;
   endTime: string;
@@ -97,9 +100,15 @@ export interface UpdateStatusPayload {
 }
 
 export interface ScheduleFormData {
-  availableFrom: Date | null;
-  availableTill: Date | null;
-  location: Location | null;
+  daysOfWeek: number[];
+  timeSlots: Array<{
+    startTime: number;
+    endTime: number;
+  }>;
+  validityStartDate: string;
+  validityEndDate: string;
+  notes: string;
+  currentLocation: Location;
 }
 
 export interface GeocodeResult {
@@ -129,4 +138,36 @@ export interface SchedulingState {
   error: string | null;
   statusCode: number | null;
   hasAvailability: boolean;
+}
+
+export interface ExceptionFormData {
+  type: ExceptionType;
+  reason: string;
+  startTime: string;
+  endTime: string;
+  isRecurring: boolean;
+  recurringPattern?: RecurringPattern;
+}
+
+export interface ExceptionResponse {
+  id: string;
+  type: ExceptionType;
+  reason: string;
+  startTime: string;
+  endTime: string;
+  durationHours: number;
+  isRecurring: boolean;
+  recurringPattern?: RecurringPattern;
+  createdAt: string;
+}
+
+export interface ExceptionCreateResponse {
+  success: boolean;
+  message: string;
+  data: ExceptionResponse;
+}
+
+export interface ExceptionDeleteResponse {
+  success: boolean;
+  message: string;
 }

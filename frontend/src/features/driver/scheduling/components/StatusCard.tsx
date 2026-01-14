@@ -133,7 +133,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
       {/* Scheduled Details */}
       {availabilityStatus === "Scheduled" &&
         recurringSchedule &&
-        recurringSchedule.isActive && (
+        recurringSchedule.validity && (
           <div className="space-y-4 mt-6 pt-5 border-t border-gray-200">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -148,7 +148,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
               <div className="flex items-center gap-2 mb-2">
                 <FaClock className="text-gray-600 text-sm" />
                 <span className="font-medium text-sm text-gray-700">
-                  Valid Period
+                  Schedule
                 </span>
               </div>
 

@@ -49,6 +49,8 @@ const DriverScheduling: React.FC = () => {
     null
   );
 
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const [driverId, setDriverId] = useState<string | null>(null);
 
   const [currentStatus, setCurrentStatus] = useState<DriverAvailabilityStatus>(
@@ -276,32 +278,76 @@ const DriverScheduling: React.FC = () => {
     }
   };
 
-  const handleScheduleSubmit = async (data: ScheduleFormData) => {
-    if (!data.location) {
+  const handleScheduleSubmit = async (
+    data: ScheduleFormData
+  ): Promise<void> => {
+    if (!data.currentLocation) {
       showAlert("Please select a location on the map", "danger");
       return;
     }
 
-    if (!data.availableFrom || !data.availableTill) {
-      showAlert("Please select both start and end times", "danger");
+    if (!data.validityStartDate || !data.validityEndDate) {
+      showAlert("Please select validity start and end dates", "danger");
+      return;
+    }
+
+    if (data.daysOfWeek.length === 0) {
+      showAlert("Please select at least one day", "danger");
+      return;
+    }
+
+    if (data.timeSlots.length === 0) {
+      showAlert("Please set time slots", "danger");
       return;
     }
 
     try {
       await updateSchedule({
-        availableFrom: data.availableFrom.toISOString(),
-        availableTill: data.availableTill.toISOString(),
-        currentLocation: data.location,
+        daysOfWeek: data.daysOfWeek,
+        timeSlots: data.timeSlots,
+        validityStartDate: data.validityStartDate,
+        validityEndDate: data.validityEndDate,
+        notes: data.notes,
+        currentLocation: data.currentLocation,
       }).unwrap();
 
       setHasAvailability(true);
-      setDefaultFormData(data);
+
+      const minutesToDate = (minutes: number, baseDate: string): Date => {
+        const date = new Date(baseDate);
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        date.setHours(hours, mins, 0, 0);
+        return date;
+      };
+
+      const firstTimeSlot = data.timeSlots[0];
+      if (firstTimeSlot) {
+        setDefaultFormData({
+          availableFrom: minutesToDate(
+            firstTimeSlot.startTime,
+            data.validityStartDate
+          ),
+          availableTill: minutesToDate(
+            firstTimeSlot.endTime,
+            data.validityStartDate
+          ),
+          location: data.currentLocation,
+        });
+      }
 
       setAvailabilityData({
-        availableFrom: data.availableFrom.toISOString(),
-        availableTill: data.availableTill.toISOString(),
-        currentLocation: data.location,
+        availableFrom: data.validityStartDate,
+        availableTill: data.validityEndDate,
+        currentLocation: data.currentLocation,
       });
+
+      const minutesToTimeString = (minutes: number): string => {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const pad = (n: number): string => String(n).padStart(2, "0");
+        return `${pad(hours)}:${pad(mins)}`;
+      };
 
       if (availabilityDataFull) {
         setAvailabilityDataFull({
@@ -310,9 +356,27 @@ const DriverScheduling: React.FC = () => {
             ...availabilityDataFull.recurringSchedule,
             validity: {
               ...availabilityDataFull.recurringSchedule.validity,
-              startDate: data.availableFrom.toISOString(),
-              endDate: data.availableTill.toISOString(),
+              startDate: data.validityStartDate,
+              endDate: data.validityEndDate,
+              isCurrentlyValid: false,
             },
+            dailyRecurrence: {
+              ...availabilityDataFull.recurringSchedule.dailyRecurrence,
+              daysOfWeek: data.daysOfWeek,
+              timeSlots: data.timeSlots.map((slot) => ({
+                startTime: minutesToTimeString(slot.startTime),
+                endTime: minutesToTimeString(slot.endTime),
+                durationMinutes: slot.endTime - slot.startTime,
+              })),
+            },
+            notes: data.notes,
+          },
+          currentLocation: {
+            latitude: data.currentLocation.latitude,
+            longitude: data.currentLocation.longitude,
+            address: data.currentLocation.address,
+            lastUpdatedAt: new Date().toISOString(),
+            accuracy: 10,
           },
         });
       }

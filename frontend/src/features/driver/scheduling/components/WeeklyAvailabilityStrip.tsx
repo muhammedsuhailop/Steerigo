@@ -1,13 +1,11 @@
 import React from "react";
 import { AvailabilityData } from "../types/scheduling.types";
-import { getNext7DaysAvailability } from "../../shared/utils/availability.utils";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 interface Props {
   availabilityData: AvailabilityData;
 }
 
-/** Convert ISO → local readable date */
 function formatLocalDate(iso?: string) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-IN", {
@@ -17,9 +15,48 @@ function formatLocalDate(iso?: string) {
   });
 }
 
+const startOfUTCDay = (d: Date): Date => {
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  );
+};
+
+function getNext7DaysAvailability(
+  availabilityData: AvailabilityData
+): { date: Date; isAvailable: boolean }[] {
+  const result: { date: Date; isAvailable: boolean }[] = [];
+  const today = new Date();
+
+  const recurring = availabilityData.recurringSchedule;
+  if (!recurring) return result;
+
+  const { validity, dailyRecurrence } = recurring;
+  if (!validity?.startDate || !validity?.endDate) return result;
+
+  const start = startOfUTCDay(new Date(validity.startDate)).getTime();
+  const end = startOfUTCDay(new Date(validity.endDate)).getTime();
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    const dateUTC = startOfUTCDay(date).getTime();
+    const weekday = date.getUTCDay(); // 0–6
+
+    const isWithinValidity = dateUTC >= start && dateUTC <= end;
+    const isDaySelected = dailyRecurrence.daysOfWeek.includes(weekday);
+
+    result.push({
+      date,
+      isAvailable: isWithinValidity && isDaySelected,
+    });
+  }
+
+  return result;
+}
+
 const WeeklyAvailabilityStrip: React.FC<Props> = ({ availabilityData }) => {
   const days = getNext7DaysAvailability(availabilityData);
-
   const validity = availabilityData.recurringSchedule?.validity;
 
   return (
@@ -30,7 +67,7 @@ const WeeklyAvailabilityStrip: React.FC<Props> = ({ availabilityData }) => {
           Weekly Availability
         </h4>
 
-        {/* Validity range (non-intrusive) */}
+        {/* Validity range */}
         {validity && (
           <p className="text-xs text-gray-500 mt-1">
             Available from{" "}
@@ -48,7 +85,9 @@ const WeeklyAvailabilityStrip: React.FC<Props> = ({ availabilityData }) => {
       {/* Week row */}
       <div className="flex justify-between gap-3">
         {days.map((d, idx) => {
-          const day = d.date.toLocaleDateString("en-IN", { weekday: "short" });
+          const day = d.date.toLocaleDateString("en-IN", {
+            weekday: "short",
+          });
           const date = d.date.getDate();
 
           return (
