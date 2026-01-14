@@ -8,16 +8,16 @@ export interface TimeSlotResponse {
 }
 
 export interface DailyRecurrenceResponse {
-  readonly daysOfWeek: number[]; // 0-6 (Sunday=0, Monday=1, etc.)
+  readonly daysOfWeek: number[];
   readonly timeSlots: TimeSlotResponse[];
   readonly excludedTimeSlots: TimeSlotResponse[];
-  readonly daysOfWeekLabels: string[]; // ["Sunday", "Monday", "Tuesday", ...]
+  readonly daysOfWeekLabels: string[];
 }
 
 export interface ScheduleValidityResponse {
   readonly startDate: Date;
   readonly endDate: Date | null;
-  readonly isCurrentlyValid: boolean; // Whether schedule is active today
+  readonly isCurrentlyValid: boolean;
 }
 
 export interface RecurringScheduleResponse {
@@ -35,9 +35,8 @@ export interface AvailabilityExceptionResponse {
   readonly endTime: Date;
   readonly durationHours: number;
   readonly isRecurring: boolean;
-  readonly recurringPattern?: string; // "DAILY", "WEEKLY", "MONTHLY"
+  readonly recurringPattern?: string;
   readonly createdAt: Date;
-  readonly isActive: boolean; // Whether exception is currently applicable
 }
 
 export interface LocationResponse {
@@ -45,7 +44,7 @@ export interface LocationResponse {
   readonly longitude: number;
   readonly address?: string;
   readonly lastUpdatedAt: Date;
-  readonly accuracy?: number; // GPS accuracy in meters
+  readonly accuracy?: number;
 }
 
 export interface AvailabilitySummaryResponse {

@@ -102,7 +102,7 @@ export class ScheduleRecurringAvailabilityUseCase
 
         const location = Location.create(dto.getLocationData());
         existingAvailability.updateLocation(location);
-        existingAvailability.activate();
+        existingAvailability.schedule();
 
         savedAvailability =
           await this.availabilityRepository.save(existingAvailability);

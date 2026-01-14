@@ -122,7 +122,6 @@ export class DriverStatusMapper {
       isRecurring: domainException.isRecurring ?? false,
       recurringPattern: domainException.recurringPattern,
       createdAt: domainException.createdAt ?? new Date(),
-      isActive: this.isExceptionActive(domainException),
     };
   }
 
@@ -155,8 +154,7 @@ export class DriverStatusMapper {
         (sum, slot) => sum + slot.durationMinutes / 60,
         0
       ),
-      activeExceptionsCount: mappedExceptions.filter((exc) => exc.isActive)
-        .length,
+      activeExceptionsCount: mappedExceptions.filter((exc) => exc).length,
       scheduleStatus: this.determineScheduleStatus(recurringSchedule, now),
     };
   }
@@ -191,7 +189,7 @@ export class DriverStatusMapper {
       (slot) =>
         !mappedExceptions.some(
           (exc) =>
-            exc.isActive &&
+            exc &&
             TimeSlotHelper.hasTimeOverlap(
               exc.startTime,
               exc.endTime,
@@ -219,7 +217,7 @@ export class DriverStatusMapper {
   private static findNextUnavailableTime(
     exceptions: AvailabilityExceptionResponse[]
   ): Date | null {
-    const active = exceptions.find((exc) => exc.isActive);
+    const active = exceptions.find((exc) => exc);
     return active?.startTime ?? null;
   }
 

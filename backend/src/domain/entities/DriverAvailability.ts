@@ -174,6 +174,21 @@ export class DriverAvailability {
   }
 
   // Status transitions
+
+  schedule(): void {
+    if (this.status === AvailabilityStatus.SCHEDULED && this.isActive) {
+      return; // idempotent
+    }
+
+    if (!this.canTransitionTo(AvailabilityStatus.SCHEDULED)) {
+      throw new Error(`Cannot transition from ${this.status} to SCHEDULED`);
+    }
+
+    this.status = AvailabilityStatus.SCHEDULED;
+    this.isActive = true;
+    this.updatedAt = new Date();
+  }
+
   updateStatus(newStatus: AvailabilityStatus): void {
     if (this.status === newStatus) {
       throw new Error(`Driver is already ${newStatus}`);
@@ -421,10 +436,12 @@ export class DriverAvailability {
         [AvailabilityStatus.AVAILABLE]: [
           AvailabilityStatus.BUSY,
           AvailabilityStatus.OFFLINE,
+          AvailabilityStatus.SCHEDULED,
         ],
         [AvailabilityStatus.BUSY]: [
           AvailabilityStatus.AVAILABLE,
           AvailabilityStatus.OFFLINE,
+          AvailabilityStatus.SCHEDULED,
         ],
         [AvailabilityStatus.SCHEDULED]: [
           AvailabilityStatus.AVAILABLE,
