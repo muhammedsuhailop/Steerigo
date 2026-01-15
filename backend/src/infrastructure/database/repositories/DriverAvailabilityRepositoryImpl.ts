@@ -12,16 +12,21 @@ import {
 import { DriverAvailabilityMapper } from "../mappers/DriverAvailabilityMapper";
 import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, Types, FilterQuery, UpdateQuery } from "mongoose";
+import { SortOrder, Types, FilterQuery } from "mongoose";
+import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
   implements IDriverAvailabilityRepository
 {
+  private readonly HAVERSINE_RADIUS_KM = 6371;
+
   // Basic Repository Operations
+
   async findById(id: string): Promise<DriverAvailability | null> {
     try {
-      const doc = await DriverAvailabilityModel.findById(id);
+      const doc = await DriverAvailabilityModel.findById(id).exec();
       return doc ? DriverAvailabilityMapper.toDomain(doc) : null;
     } catch (error) {
       Logger.error("Error finding driver availability by id", { id, error });
@@ -31,7 +36,9 @@ export class DriverAvailabilityRepositoryImpl
 
   async exists(id: string): Promise<boolean> {
     try {
-      const count = await DriverAvailabilityModel.countDocuments({ _id: id });
+      const count = await DriverAvailabilityModel.countDocuments({
+        _id: id,
+      }).exec();
       return count > 0;
     } catch (error) {
       Logger.error("Error checking driver availability existence", {
@@ -56,7 +63,7 @@ export class DriverAvailabilityRepositoryImpl
           upsert: true,
           runValidators: true,
         }
-      );
+      ).exec();
 
       if (!savedDoc) {
         throw new Error(
@@ -81,7 +88,7 @@ export class DriverAvailabilityRepositoryImpl
 
   async delete(id: string): Promise<void> {
     try {
-      await DriverAvailabilityModel.findByIdAndDelete(id);
+      await DriverAvailabilityModel.findByIdAndDelete(id).exec();
       Logger.info("Driver availability deleted successfully", { id });
     } catch (error) {
       Logger.error("Error deleting driver availability", { id, error });
@@ -89,20 +96,57 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
+  async existsByFilter(filters: IDriverAvailabilityFilters): Promise<boolean> {
+    try {
+      const mongoFilter = this.buildFilterQuery(filters);
+      const count =
+        await DriverAvailabilityModel.countDocuments(mongoFilter).exec();
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking existence by filter", {
+        filters,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async findByIds(ids: string[]): Promise<DriverAvailability[]> {
+    try {
+      const objectIds = ids.map((id) => new Types.ObjectId(id));
+
+      const docs = await DriverAvailabilityModel.find({
+        _id: { $in: objectIds },
+      }).exec();
+
+      return docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
+    } catch (error) {
+      Logger.error("Error finding driver availabilities by IDs", {
+        ids,
+        error,
+      });
+      throw error;
+    }
+  }
+
   // Query Operations
+
   async findAll(options?: QueryOptions): Promise<DriverAvailability[]> {
     try {
-      const query = DriverAvailabilityModel.find();
+      let query = DriverAvailabilityModel.find();
 
-      if (options?.limit) query.limit(options.limit);
-      if (options?.offset) query.skip(options.offset);
+      if (options?.limit) query = query.limit(options.limit);
+      if (options?.offset) query = query.skip(options.offset);
+
       if (options?.sortBy) {
         const sortOrder = options.sortOrder === "desc" ? -1 : 1;
-        query.sort({ [options.sortBy]: sortOrder as SortOrder });
+        query = query.sort({
+          [options.sortBy]: sortOrder as SortOrder,
+        });
       }
 
       const docs = await query.exec();
-      return docs.map(DriverAvailabilityMapper.toDomain);
+      return docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
     } catch (error) {
       Logger.error("Error finding all driver availabilities", { error });
       throw error;
@@ -112,7 +156,7 @@ export class DriverAvailabilityRepositoryImpl
   async count(filters?: IDriverAvailabilityFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters || {});
-      return await DriverAvailabilityModel.countDocuments(mongoFilter);
+      return await DriverAvailabilityModel.countDocuments(mongoFilter).exec();
     } catch (error) {
       Logger.error("Error counting driver availabilities", { error });
       throw error;
@@ -120,7 +164,9 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions<DriverAvailability> & { filters?: IDriverAvailabilityFilters }
+    options: QueryOptions<DriverAvailability> & {
+      filters?: IDriverAvailabilityFilters;
+    }
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,
@@ -130,32 +176,47 @@ export class DriverAvailabilityRepositoryImpl
       sortOrder = "desc",
     } = options;
 
-    const mongoFilter = this.buildFilterQuery(filters);
-    const sortValue = {
-      [sortBy]: sortOrder === "asc" ? 1 : -1,
-    } as const;
+    try {
+      const mongoFilter = this.buildFilterQuery(filters);
 
-    const total = await DriverAvailabilityModel.countDocuments(mongoFilter);
-    const totalPages = Math.ceil(total / limit);
-    const skip = (page - 1) * limit;
+      const sortValue = {
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      } as const;
 
-    const docs = await DriverAvailabilityModel.find(mongoFilter)
-      .sort(sortValue)
-      .skip(skip)
-      .limit(limit)
-      .exec();
+      const total =
+        await DriverAvailabilityModel.countDocuments(mongoFilter).exec();
+      const totalPages = Math.ceil(total / limit);
+      const skip = (page - 1) * limit;
 
-    const data = docs.map(DriverAvailabilityMapper.toDomain);
+      const docs = await DriverAvailabilityModel.find(mongoFilter)
+        .sort(sortValue)
+        .skip(skip)
+        .limit(limit)
+        .exec();
 
-    return { data, total, page, limit, totalPages };
+      const data = docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
+
+      return { data, total, page, limit, totalPages };
+    } catch (error) {
+      Logger.error("Error finding paginated driver availabilities", {
+        page,
+        limit,
+        error,
+      });
+      throw error;
+    }
   }
 
-  // Driver-specific queries
+  // Driver-Specific Queries
+
   async findByDriverId(driverId: string): Promise<DriverAvailability | null> {
     try {
+      const driverIdObjectId = new Types.ObjectId(driverId);
       const doc = await DriverAvailabilityModel.findOne({
-        driverId: new Types.ObjectId(driverId),
-      }).sort({ createdAt: -1 });
+        driverId: driverIdObjectId,
+      })
+        .sort({ createdAt: -1 })
+        .exec();
 
       return doc ? DriverAvailabilityMapper.toDomain(doc) : null;
     } catch (error) {
@@ -171,15 +232,19 @@ export class DriverAvailabilityRepositoryImpl
     driverId: string
   ): Promise<DriverAvailability | null> {
     try {
-      const now = new Date();
+      const driverIdObjectId = new Types.ObjectId(driverId);
       const doc = await DriverAvailabilityModel.findOne({
-        driverId: new Types.ObjectId(driverId),
-        availableTill: { $gte: now },
-      });
+        driverId: driverIdObjectId,
+        isActive: true,
+      })
+        .lean()
+        .exec();
 
-      return doc ? DriverAvailabilityMapper.toDomain(doc) : null;
+      if (!doc) return null;
+
+      return DriverAvailabilityMapper.toDomain(doc as IDriverAvailabilityModel);
     } catch (error) {
-      Logger.error("Error finding active availability by driver ID", {
+      Logger.error("Error finding active driver availability", {
         driverId,
         error,
       });
@@ -189,11 +254,12 @@ export class DriverAvailabilityRepositoryImpl
 
   async existsActiveForDriver(driverId: string): Promise<boolean> {
     try {
-      const now = new Date();
+      const driverIdObjectId = new Types.ObjectId(driverId);
       const count = await DriverAvailabilityModel.countDocuments({
-        driverId: new Types.ObjectId(driverId),
-        availableTill: { $gte: now },
-      });
+        driverId: driverIdObjectId,
+        isActive: true,
+      }).exec();
+
       return count > 0;
     } catch (error) {
       Logger.error("Error checking active availability for driver", {
@@ -204,25 +270,112 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  // Status-based queries
+  // Exception Management
+  async addException(
+    driverId: string,
+    exception: AvailabilityException
+  ): Promise<DriverAvailability | null> {
+    try {
+      const driverIdObjectId = new Types.ObjectId(driverId);
+      const updatedDoc = await DriverAvailabilityModel.findOneAndUpdate(
+        { driverId: driverIdObjectId, isActive: true },
+        { $push: { exceptions: exception } },
+        { new: true }
+      ).exec();
+
+      if (!updatedDoc) {
+        Logger.warn("No active availability found to add exception", {
+          driverId,
+        });
+        return null;
+      }
+
+      Logger.info("Exception added to driver availability", {
+        driverId,
+      });
+
+      return DriverAvailabilityMapper.toDomain(updatedDoc);
+    } catch (error) {
+      Logger.error("Error adding exception to driver availability", {
+        driverId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async removeException(
+    driverId: string,
+    exceptionId: string
+  ): Promise<DriverAvailability | null> {
+    try {
+      const driverIdObjectId = new Types.ObjectId(driverId);
+      const updatedDoc = await DriverAvailabilityModel.findOneAndUpdate(
+        { driverId: driverIdObjectId },
+        { $pull: { exceptions: { _id: exceptionId } } },
+        { new: true }
+      ).exec();
+
+      if (!updatedDoc) {
+        Logger.warn("No availability found to remove exception", { driverId });
+        return null;
+      }
+
+      Logger.info("Exception removed from driver availability", {
+        driverId,
+        exceptionId,
+      });
+
+      return DriverAvailabilityMapper.toDomain(updatedDoc);
+    } catch (error) {
+      Logger.error("Error removing exception from driver availability", {
+        driverId,
+        exceptionId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async getExceptions(driverId: string): Promise<AvailabilityException[]> {
+    const driverIdObjectId = new Types.ObjectId(driverId);
+
+    const doc = await DriverAvailabilityModel.findOne({
+      driverId: driverIdObjectId,
+    })
+      .select("exceptions")
+      .lean()
+      .exec();
+
+    return doc?.exceptions ?? [];
+  }
+
+  // Status-Based Queries
+
   async findByStatus(
     status: AvailabilityStatus,
     options?: QueryOptions
   ): Promise<DriverAvailability[]> {
     try {
-      const query = DriverAvailabilityModel.find({ status });
+      let query = DriverAvailabilityModel.find({ status });
 
-      if (options?.limit) query.limit(options.limit);
-      if (options?.offset) query.skip(options.offset);
+      if (options?.limit) query = query.limit(options.limit);
+      if (options?.offset) query = query.skip(options.offset);
+
       if (options?.sortBy) {
         const sortOrder = options.sortOrder === "desc" ? -1 : 1;
-        query.sort({ [options.sortBy]: sortOrder as SortOrder });
+        query = query.sort({
+          [options.sortBy]: sortOrder as SortOrder,
+        });
       }
 
       const docs = await query.exec();
-      return docs.map(DriverAvailabilityMapper.toDomain);
+      return docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
     } catch (error) {
-      Logger.error("Error finding availabilities by status", { status, error });
+      Logger.error("Error finding availabilities by status", {
+        status,
+        error,
+      });
       throw error;
     }
   }
@@ -230,30 +383,32 @@ export class DriverAvailabilityRepositoryImpl
   async findAvailableDrivers(
     options?: QueryOptions
   ): Promise<DriverAvailability[]> {
-    const now = new Date();
     try {
-      const query = DriverAvailabilityModel.find({
+      let query = DriverAvailabilityModel.find({
         status: AvailabilityStatus.AVAILABLE,
-        availableFrom: { $lte: now },
-        availableTill: { $gte: now },
+        isActive: true,
       });
 
-      if (options?.limit) query.limit(options.limit);
-      if (options?.offset) query.skip(options.offset);
+      if (options?.limit) query = query.limit(options.limit);
+      if (options?.offset) query = query.skip(options.offset);
+
       if (options?.sortBy) {
         const sortOrder = options.sortOrder === "desc" ? -1 : 1;
-        query.sort({ [options.sortBy]: sortOrder as SortOrder });
+        query = query.sort({
+          [options.sortBy]: sortOrder as SortOrder,
+        });
       }
 
       const docs = await query.exec();
-      return docs.map(DriverAvailabilityMapper.toDomain);
+      return docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
     } catch (error) {
       Logger.error("Error finding available drivers", { error });
       throw error;
     }
   }
 
-  // Enhanced location-based queries with Haversine distance calculation
+  // Location-Based Queries
+
   async findNearLocation(
     latitude: number,
     longitude: number,
@@ -261,18 +416,11 @@ export class DriverAvailabilityRepositoryImpl
     options?: QueryOptions
   ): Promise<DriverAvailability[]> {
     try {
-      const now = new Date();
+      const docs = await DriverAvailabilityModel.find({
+        isActive: true,
+      }).exec();
 
-      // Get all available drivers with their locations
-      const query = DriverAvailabilityModel.find({
-        status: AvailabilityStatus.AVAILABLE,
-        availableFrom: { $lte: now },
-        availableTill: { $gte: now },
-      });
-
-      const docs = await query.exec();
-
-      // Calculate distances using Haversine formula and filter
+      // Calculate distances and filter by radius
       const driversWithDistance = docs
         .map((doc) => {
           const distance = this.calculateHaversineDistance(
@@ -282,19 +430,18 @@ export class DriverAvailabilityRepositoryImpl
             doc.currentLocation.longitude
           );
 
-          return {
-            doc,
-            distance,
-          };
+          return { doc, distance };
         })
         .filter((item) => item.distance <= radiusKm)
         .sort((a, b) => a.distance - b.distance);
 
-      // Apply pagination if needed
+      // Apply pagination
       let filteredDrivers = driversWithDistance;
+
       if (options?.offset) {
         filteredDrivers = filteredDrivers.slice(options.offset);
       }
+
       if (options?.limit) {
         filteredDrivers = filteredDrivers.slice(0, options.limit);
       }
@@ -316,7 +463,7 @@ export class DriverAvailabilityRepositoryImpl
   async findNearbyAvailableDrivers(
     latitude: number,
     longitude: number,
-    searchDate?: Date,
+    searchDate: Date,
     radiusKm: number = 10,
     timeRequiredMinutes: number = 60,
     limit: number = 20
@@ -328,7 +475,7 @@ export class DriverAvailabilityRepositoryImpl
     }>
   > {
     try {
-      const rideStart = searchDate ? new Date(searchDate) : new Date();
+      const rideStart = new Date(searchDate);
       const rideEnd = new Date(
         rideStart.getTime() + timeRequiredMinutes * 60 * 1000
       );
@@ -342,11 +489,12 @@ export class DriverAvailabilityRepositoryImpl
         timeRequiredMinutes,
       });
 
-      // Get all available drivers
+      // Get all active available drivers
       const docs = await DriverAvailabilityModel.find({
-        status: AvailabilityStatus.AVAILABLE,
-        availableFrom: { $lte: rideStart },
-        availableTill: { $gte: rideEnd },
+        isActive: true,
+        status: {
+          $in: [AvailabilityStatus.AVAILABLE, AvailabilityStatus.SCHEDULED],
+        },
       }).exec();
 
       Logger.info("Found drivers to check proximity", { count: docs.length });
@@ -361,12 +509,12 @@ export class DriverAvailabilityRepositoryImpl
             doc.currentLocation.longitude
           );
 
-          // Calculate ETA (assuming average speed of 30 km/h )
+          // Calculate ETA (assuming average speed of 30 km/h)
           const etaMinutes = Math.ceil((distanceKm / 30) * 60);
 
           return {
             driver: DriverAvailabilityMapper.toDomain(doc),
-            distanceKm: Math.round(distanceKm * 100) / 100, // Round to 2 decimal places
+            distanceKm: Math.round(distanceKm * 100) / 100,
             etaMinutes,
           };
         })
@@ -376,8 +524,7 @@ export class DriverAvailabilityRepositoryImpl
 
       Logger.info("Filtered nearby available drivers", {
         totalFound: docs.length,
-        withinRadius: driversWithDetails.length,
-        radiusKm,
+        nearbyCount: driversWithDetails.length,
       });
 
       return driversWithDetails;
@@ -392,97 +539,76 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  // Calculate distance between two coordinates using Haversine formula
-  // Returns distance in kilometers
+  // Time-Based Queries
 
-  private calculateHaversineDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = this.toRadians(lat2 - lat1);
-    const dLon = this.toRadians(lon2 - lon1);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) *
-        Math.cos(this.toRadians(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-
-    return distance;
-  }
-
-  private toRadians(degrees: number): number {
-    return degrees * (Math.PI / 180);
-  }
-
-  // Time-based queries
   async findExpiredAvailabilities(): Promise<DriverAvailability[]> {
     try {
       const now = new Date();
       const docs = await DriverAvailabilityModel.find({
-        availableTill: { $lt: now },
-      });
+        "recurringSchedule.validity.endDate": { $lt: now },
+        isActive: true,
+      }).exec();
 
-      return docs.map(DriverAvailabilityMapper.toDomain);
+      Logger.info("Found expired availabilities", { count: docs.length });
+
+      return docs.map((doc) => DriverAvailabilityMapper.toDomain(doc));
     } catch (error) {
       Logger.error("Error finding expired availabilities", { error });
       throw error;
     }
   }
 
-  async cleanupExpiredRecords(): Promise<number> {
+  async deactivateExpiredAvailabilities(): Promise<number> {
     try {
       const now = new Date();
-      const result = await DriverAvailabilityModel.deleteMany({
-        availableTill: { $lt: now },
-        status: { $ne: AvailabilityStatus.BUSY },
+
+      const result = await DriverAvailabilityModel.updateMany(
+        {
+          "recurringSchedule.validity.endDate": { $lt: now },
+          isActive: true,
+        },
+        {
+          $set: {
+            isActive: false,
+            status: AvailabilityStatus.OFFLINE,
+            updatedAt: now,
+          },
+        }
+      ).exec();
+
+      Logger.info("Deactivated expired availabilities", {
+        modifiedCount: result.modifiedCount,
       });
 
-      Logger.info("Cleaned up expired availability records", {
+      return result.modifiedCount ?? 0;
+    } catch (error) {
+      Logger.error("Error deactivating expired availabilities", { error });
+      throw error;
+    }
+  }
+
+  async cleanupExpiredRecords(): Promise<number> {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const result = await DriverAvailabilityModel.deleteMany({
+        isActive: false,
+        "recurringSchedule.validity.endDate": { $lt: thirtyDaysAgo },
+      }).exec();
+
+      Logger.info("Cleaned up expired records", {
         deletedCount: result.deletedCount,
       });
 
-      return result.deletedCount || 0;
+      return result.deletedCount ?? 0;
     } catch (error) {
       Logger.error("Error cleaning up expired records", { error });
       throw error;
     }
   }
 
-  // Specialized operations
-  async deactivateExpiredAvailabilities(): Promise<number> {
-    try {
-      const now = new Date();
-      const result = await DriverAvailabilityModel.updateMany(
-        {
-          availableTill: { $lt: now },
-          status: { $ne: AvailabilityStatus.OFFLINE },
-        },
-        {
-          $set: {
-            status: AvailabilityStatus.OFFLINE,
-            updatedAt: now,
-          },
-        }
-      );
-
-      Logger.info("Deactivated expired availabilities", {
-        modifiedCount: result.modifiedCount,
-      });
-
-      return result.modifiedCount || 0;
-    } catch (error) {
-      Logger.error("Error deactivating expired availabilities", { error });
-      throw error;
-    }
-  }
+  // Schedule Management
 
   async findConflictingSchedule(
     driverId: string,
@@ -490,16 +616,17 @@ export class DriverAvailabilityRepositoryImpl
     availableTill: Date
   ): Promise<DriverAvailability | null> {
     try {
+      const driverIdObjectId = new Types.ObjectId(driverId);
+
       const doc = await DriverAvailabilityModel.findOne({
-        driverId: new Types.ObjectId(driverId),
-        $or: [
-          {
-            availableFrom: { $lt: availableTill },
-            availableTill: { $gt: availableFrom },
-          },
-        ],
-        availableTill: { $gte: new Date() },
-      });
+        driverId: driverIdObjectId,
+        isActive: true,
+
+        status: { $ne: AvailabilityStatus.OFFLINE },
+
+        "recurringSchedule.validity.startDate": { $lt: availableTill },
+        "recurringSchedule.validity.endDate": { $gt: availableFrom },
+      }).exec();
 
       return doc ? DriverAvailabilityMapper.toDomain(doc) : null;
     } catch (error) {
@@ -513,90 +640,28 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
-  // Batch Operations
-  async updateMany(
-    filters: IDriverAvailabilityFilters,
-    updates:
-      | Partial<DriverAvailability>
-      | Partial<{
-          status?: AvailabilityStatus;
-          currentLocation?: IDriverAvailabilityModel["currentLocation"];
-        }>
-  ): Promise<number> {
-    try {
-      const mongoFilter = this.buildFilterQuery(filters);
+  private calculateHaversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const toRad = (value: number): number => (value * Math.PI) / 180;
 
-      const updateData: UpdateQuery<IDriverAvailabilityModel> = {};
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
 
-      const maybeStatus = (updates as { status?: AvailabilityStatus }).status;
-      if (maybeStatus !== undefined) {
-        updateData.status = maybeStatus;
-      }
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
-      const maybeCurrentLocation = (
-        updates as {
-          currentLocation?: IDriverAvailabilityModel["currentLocation"];
-        }
-      ).currentLocation;
-      if (maybeCurrentLocation !== undefined) {
-        updateData.currentLocation = maybeCurrentLocation;
-      }
-
-      if (hasGetStatus(updates)) {
-        updateData.status = updates.getStatus();
-      }
-
-      if (hasGetCurrentLocation(updates)) {
-        const locObj = updates.getCurrentLocation();
-        const coords = (
-          locObj as {
-            getCoordinates?: () => IDriverAvailabilityModel["currentLocation"];
-          }
-        ).getCoordinates?.();
-        if (coords) updateData.currentLocation = coords;
-      }
-
-      updateData.updatedAt = new Date();
-
-      const result = await DriverAvailabilityModel.updateMany(mongoFilter, {
-        $set: updateData,
-      });
-
-      Logger.info("Multiple driver availabilities updated", {
-        matchedCount: result.matchedCount,
-        modifiedCount: result.modifiedCount,
-      });
-
-      return result.modifiedCount || 0;
-    } catch (error) {
-      Logger.error("Error updating multiple driver availabilities", {
-        filters,
-        error,
-      });
-      throw error;
-    }
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return this.HAVERSINE_RADIUS_KM * c;
   }
 
-  async deleteMany(filters: IDriverAvailabilityFilters): Promise<number> {
-    try {
-      const mongoFilter = this.buildFilterQuery(filters);
-      const result = await DriverAvailabilityModel.deleteMany(mongoFilter);
-
-      Logger.info("Multiple driver availabilities deleted", {
-        count: result.deletedCount,
-      });
-
-      return result.deletedCount ?? 0;
-    } catch (error) {
-      Logger.error("Error deleting multiple driver availabilities", {
-        filters,
-        error,
-      });
-      throw error;
-    }
-  }
-
-  // Helper methods
   private buildFilterQuery(
     filters: IDriverAvailabilityFilters
   ): FilterQuery<IDriverAvailabilityModel> {
@@ -610,47 +675,15 @@ export class DriverAvailabilityRepositoryImpl
       query.driverId = new Types.ObjectId(filters.driverId);
     }
 
-    if (filters.availableFrom || filters.availableTill) {
-      const dateFilter: Partial<{ $gte: Date; $lte: Date }> = {};
-      if (filters.availableFrom) {
-        dateFilter.$gte = filters.availableFrom;
-      }
-      if (filters.availableTill) {
-        dateFilter.$lte = filters.availableTill;
-      }
-      query.availableFrom = dateFilter;
+    if (filters.availableFrom && filters.availableTill) {
+      query["recurringSchedule.validity.startDate"] = {
+        $lt: filters.availableTill,
+      };
+      query["recurringSchedule.validity.endDate"] = {
+        $gt: filters.availableFrom,
+      };
     }
 
     return query;
   }
-
-  // Base repository interface methods
-  async existsByFilter(filters: IDriverAvailabilityFilters): Promise<boolean> {
-    const mongoFilter = this.buildFilterQuery(filters);
-    return (await DriverAvailabilityModel.countDocuments(mongoFilter)) > 0;
-  }
-
-  async findByIds(ids: string[]): Promise<DriverAvailability[]> {
-    const docs = await DriverAvailabilityModel.find({ _id: { $in: ids } });
-    return docs.map(DriverAvailabilityMapper.toDomain);
-  }
-}
-
-// helper type guards
-function hasGetStatus(
-  u: unknown
-): u is { getStatus: () => AvailabilityStatus } {
-  if (typeof u !== "object" || u === null) return false;
-  const obj = u as Record<string, unknown>;
-  return typeof obj.getStatus === "function";
-}
-
-function hasGetCurrentLocation(u: unknown): u is {
-  getCurrentLocation: () => {
-    getCoordinates: () => IDriverAvailabilityModel["currentLocation"];
-  };
-} {
-  if (typeof u !== "object" || u === null) return false;
-  const obj = u as Record<string, unknown>;
-  return typeof obj.getCurrentLocation === "function";
 }

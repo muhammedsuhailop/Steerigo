@@ -11,7 +11,7 @@ import {
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { IUseCase } from "../interfaces/IUseCase";
-
+import { DriverStatusMapper } from "@application/mappers/driver/DriverStatusMapper";
 @injectable()
 export class GetDriverStatusUseCase
   implements IUseCase<string, Promise<Result<DriverStatusResponseDto>>>
@@ -27,10 +27,6 @@ export class GetDriverStatusUseCase
     try {
       Logger.info("Get driver status started", { userId });
 
-      if (!userId || userId.trim() === "") {
-        return Result.failure(new DomainError("User ID is required"));
-      }
-
       const driver = await this.driverRepository.findByUserId(userId);
       if (!driver) {
         Logger.warn("Driver profile not found", { userId });
@@ -38,37 +34,43 @@ export class GetDriverStatusUseCase
       }
 
       const driverId = driver.getId();
+      Logger.debug("Driver profile found", { driverId, userId });
 
       const availability =
-        await this.availabilityRepository.findByDriverId(driverId);
+        await this.availabilityRepository.findActiveByDriverId(driverId);
       if (!availability) {
         Logger.warn("Driver availability not found", { driverId });
         return Result.failure(new DriverAvailabilityNotFoundError(driverId));
       }
 
-      const response = new DriverStatusResponseDto(
-        availability.getId(),
+      Logger.debug("Driver availability found", {
         driverId,
-        availability.getStatus(),
-        availability.getAvailableFrom(),
-        availability.getAvailableTill(),
-        {
-          latitude: availability.getCurrentLocation().getLatitude(),
-          longitude: availability.getCurrentLocation().getLongitude(),
-          address: availability.getCurrentLocation().getAddress(),
-        },
-        availability.getUpdatedAt()
-      );
+        status: availability.getStatus(),
+        hasRecurringSchedule: !!availability.getRecurringSchedule(),
+        exceptionsCount: availability.getExceptions().length,
+      });
 
-      Logger.info("Driver status fetched successfully", { userId, driverId });
+      const response = DriverStatusMapper.toDtoFromEntity(availability);
+
+      Logger.info("Driver status fetched successfully", {
+        userId,
+        driverId,
+        availabilityStatus: response.availabilityStatus,
+        recurringScheduleActive: response.recurringSchedule?.isActive,
+        activeExceptions: response.activeExceptionsCount,
+        currentlyAvailable: response.summary.isCurrentlyAvailable,
+      });
 
       return Result.success(response);
     } catch (error) {
       Logger.error("Error fetching driver status", { userId, error });
+      if (error instanceof DomainError) {
+        return Result.failure(error);
+      }
       return Result.failure(
-        error instanceof DomainError
-          ? error
-          : new DomainError("Failed to fetch driver status")
+        new DomainError(
+          "Failed to fetch driver status. Please try again later."
+        )
       );
     }
   }

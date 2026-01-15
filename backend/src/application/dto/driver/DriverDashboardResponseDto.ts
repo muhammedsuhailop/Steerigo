@@ -3,91 +3,91 @@ import { Location } from "@domain/value-objects/Location";
 import { RideType } from "@domain/value-objects/RideType";
 
 export interface DriverInfo {
-  driverId: string;
-  userId: string;
-  name: string;
-  email: Email;
-  mobile: string | undefined;
-  licenseNumber: string;
-  licenceCategory: string;
-  licenseIssueDate: Date;
-  licenseExpiryDate: Date;
-  kycStatus: string;
-  status: string;
-  eligibleGearTypes: string[];
-  eligibleBodyTypes: string[];
+  readonly driverId: string;
+  readonly userId: string;
+  readonly name: string;
+  readonly email: Email;
+  readonly mobile: string | undefined;
+  readonly licenseNumber: string;
+  readonly licenceCategory: string;
+  readonly licenseIssueDate: Date;
+  readonly licenseExpiryDate: Date;
+  readonly kycStatus: string;
+  readonly status: string;
+  readonly eligibleGearTypes: string[];
+  readonly eligibleBodyTypes: string[];
 }
 
 export interface AvailabilityInfo {
-  id: string;
-  status: string;
-  availableFrom: Date;
-  availableTill: Date;
-  currentLocation:Location
-  updatedAt: Date;
+  readonly id: string;
+  readonly status: string;
+  readonly availableFrom: Date;
+  readonly availableTill: Date;
+  readonly currentLocation: Location;
+  readonly updatedAt: Date;
 }
 
 export interface CurrentRideInfo {
-  rideId: string;
-  status: string;
-  pickup: Location;
-  drop: Location;
-  rider: {
-    id: string;
-    name: string;
-    mobile: string | undefined;
+  readonly rideId: string;
+  readonly status: string;
+  readonly pickup: Location;
+  readonly drop: Location;
+  readonly rider: {
+    readonly id: string;
+    readonly name: string;
+    readonly mobile: string | undefined;
   };
-  rideType: RideType;
-  fare: number;
-  currency: string;
-  startedAt: Date;
-  timer: string;
+  readonly rideType: RideType;
+  readonly fare: number;
+  readonly currency: string;
+  readonly startedAt: Date;
+  readonly timer: string;
 }
 
 export interface PendingRequest {
-  requestId: string;
-  pickup: Location;
-  drop: Location;
-  pickupTime: Date;
-  rideType: string;
-  fare: number;
-  userName: string;
-  status: string;
-  pickupETA: string;
+  readonly requestId: string;
+  readonly pickup: Location;
+  readonly drop: Location;
+  readonly pickupTime: Date;
+  readonly rideType: string;
+  readonly fare: number;
+  readonly userName: string;
+  readonly status: string;
+  readonly pickupETA: string;
 }
 
 export interface Statistics {
-  ridesCompleted: number;
-  ridesCancelled: number;
-  scheduledRides: number;
-  totalEarnings: number;
-  currency: string;
+  readonly ridesCompleted: number;
+  readonly ridesCancelled: number;
+  readonly scheduledRides: number;
+  readonly totalEarnings: number;
+  readonly currency: string;
 }
 
 export interface Performance {
-  acceptanceRate: number;
-  cancellationRate: number;
-  averageRating: number;
+  readonly acceptanceRate: number;
+  readonly cancellationRate: number;
+  readonly averageRating: number;
 }
 
 export interface DashboardMeta {
-  lastUpdated: Date;
-  serverTime: Date;
+  readonly lastUpdated: Date;
+  readonly serverTime: Date;
 }
 
 export class DriverDashboardResponseDto {
-  success: boolean = true;
-  message: string = "Driver dashboard fetched successfully";
+  readonly success: boolean = true;
+  readonly message: string = "Driver dashboard fetched successfully";
 
   constructor(
-    public data: {
-      driver: DriverInfo;
-      availability: AvailabilityInfo | null;
-      currentRide: CurrentRideInfo | null;
-      pendingRequests: PendingRequest[];
-      statistics: Statistics;
-      performance: Performance;
-      meta: DashboardMeta;
+    public readonly data: {
+      readonly driver: DriverInfo;
+      readonly availability: AvailabilityInfo | null;
+      readonly currentRide: CurrentRideInfo | null;
+      readonly pendingRequests: PendingRequest[];
+      readonly statistics: Statistics;
+      readonly performance: Performance;
+      readonly meta: DashboardMeta;
     }
   ) {}
 }

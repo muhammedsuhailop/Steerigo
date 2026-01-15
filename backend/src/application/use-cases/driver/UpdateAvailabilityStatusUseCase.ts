@@ -44,10 +44,6 @@ export class UpdateAvailabilityStatusUseCase
         );
       }
 
-      if (availability.isExpired()) {
-        return Result.failure(new ExpiredAvailabilityError());
-      }
-
       try {
         availability.updateStatus(dto.getStatus());
       } catch (error) {

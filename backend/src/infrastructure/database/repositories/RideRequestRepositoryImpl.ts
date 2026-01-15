@@ -43,7 +43,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
       const requestData = RideRequestMapper.toPersistence(request);
 
       const now = new Date();
-      const defaultExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
+      const defaultExpiresAt = new Date(Date.now() + 1.5 * 60 * 1000);
 
       const savedDoc = await RideRequestModel.findOneAndUpdate(
         { _id: requestId },
@@ -353,7 +353,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
             update: {
               $set: requestData,
               $setOnInsert: {
-                expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+                expiresAt: new Date(Date.now() + 1.5 * 60 * 1000),
               },
             },
             upsert: true,

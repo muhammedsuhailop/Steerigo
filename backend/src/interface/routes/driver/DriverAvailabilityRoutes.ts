@@ -2,10 +2,12 @@ import { Router } from "express";
 import { container } from "@infrastructure/container/DIContainer";
 import { validateSchema } from "@interface/middleware/ValidationMiddleware";
 import {
-  scheduleAvailabilitySchema,
+  scheduleRecurringAvailabilitySchema,
   updateStatusSchema,
   updateLocationSchema,
+  addAvailabilityExceptionSchema,
 } from "@interface/validators/driver/DriverAvailabilityValidators";
+
 import { DriverAvailabilityController } from "@interface/controllers/driver/DriverAvailabilityController";
 import { TYPES } from "@shared/constants/DITypes";
 
@@ -20,9 +22,19 @@ const driverAvailabilityController =
 // POST /api/driver/availability/schedule - Schedule driver availability with location
 router.post(
   "/schedule",
-  validateSchema(scheduleAvailabilitySchema),
+  validateSchema(scheduleRecurringAvailabilitySchema),
   (req, res) => driverAvailabilityController.scheduleAvailability(req, res)
 );
+
+// POST /api/driver/availability/exception - Add exception to driver availability
+router.post(
+  "/exception",
+  validateSchema(addAvailabilityExceptionSchema),
+  (req, res) => driverAvailabilityController.addException(req, res)
+);
+
+// DELETE /api/driver/availability/exception/:exceptionId - Remove exception
+// router.delete("/exception/");
 
 // PUT /api/driver/availability/status - Update driver availability status
 router.put("/status", validateSchema(updateStatusSchema), (req, res) =>

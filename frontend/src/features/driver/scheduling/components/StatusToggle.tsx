@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaHourglassHalf, FaRegCircle } from "react-icons/fa";
-
-type DriverStatus = "Available" | "Busy" | "Offline";
+import { DriverAvailabilityStatus } from "../types/scheduling.types";
 
 interface StatusToggleProps {
-  currentStatus: DriverStatus;
-  onStatusChange: (status: DriverStatus) => void;
+  currentStatus: DriverAvailabilityStatus;
+  onStatusChange: (status: DriverAvailabilityStatus) => void;
   isLoading?: boolean;
   hasAvailability?: boolean;
   onDisabledClick?: () => void;
@@ -13,7 +12,7 @@ interface StatusToggleProps {
 
 const statusOptions = [
   {
-    value: "Available" as DriverStatus,
+    value: "Available" as DriverAvailabilityStatus,
     label: "Available",
     icon: <FaCheckCircle className="w-5 h-5" />,
     iconColor: "text-emerald-600",
@@ -25,7 +24,7 @@ const statusOptions = [
     hoverBg: "hover:bg-emerald-100",
   },
   {
-    value: "Busy" as DriverStatus,
+    value: "Busy" as DriverAvailabilityStatus,
     label: "Busy",
     icon: <FaHourglassHalf className="w-5 h-5" />,
     iconColor: "text-amber-600",
@@ -37,7 +36,7 @@ const statusOptions = [
     hoverBg: "hover:bg-amber-100",
   },
   {
-    value: "Offline" as DriverStatus,
+    value: "Offline" as DriverAvailabilityStatus,
     label: "Offline",
     icon: <FaRegCircle className="w-5 h-5" />,
     iconColor: "text-red-500",
@@ -58,13 +57,13 @@ const StatusToggle: React.FC<StatusToggleProps> = ({
   onDisabledClick,
 }) => {
   const [selectedStatus, setSelectedStatus] =
-    useState<DriverStatus>(currentStatus);
+    useState<DriverAvailabilityStatus>(currentStatus);
 
   useEffect(() => {
     setSelectedStatus(currentStatus);
   }, [currentStatus]);
 
-  const handleStatusClick = (status: DriverStatus) => {
+  const handleStatusClick = (status: DriverAvailabilityStatus) => {
     if (!hasAvailability) {
       if (onDisabledClick) {
         onDisabledClick();

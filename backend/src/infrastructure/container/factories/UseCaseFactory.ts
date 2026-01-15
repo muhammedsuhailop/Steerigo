@@ -31,6 +31,7 @@ import {
   UpdatePasswordDto,
 } from "@application/dto/auth";
 import { Result } from "@shared/utils/Result";
+import { AutoSearchAndSendRideRequestUseCase } from "@application/use-cases/user/AutoSearchAndSendRideRequestUseCase";
 
 export class UseCaseFactory {
   static register(container: Container): void {
@@ -106,5 +107,11 @@ export class UseCaseFactory {
         IUseCase<void, Promise<Result<{ authUrl: string }>>>
       >(TYPES.GetGoogleAuthUrlUseCase)
       .to(GetGoogleAuthUrlUseCase);
+
+    container
+      .bind<AutoSearchAndSendRideRequestUseCase>(
+        TYPES.AutoSearchAndSendRideRequestUseCase
+      )
+      .to(AutoSearchAndSendRideRequestUseCase);
   }
 }

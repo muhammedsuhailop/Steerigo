@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
       UPDATE_LOCATION: "/driver/availability/update-location",
       SCHEDULE: "/driver/availability/schedule",
       STATUS: "/driver/availability/status",
+      EXCEPTION: "/driver/availability/exception",
     },
   },
   ADMIN: {

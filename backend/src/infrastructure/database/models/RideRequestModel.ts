@@ -57,7 +57,6 @@ export interface IRideRequestDocument extends Document {
   expiresAt?: Date;
 }
 
-// RideRequest Schema Definition
 const rideRequestSchema = new Schema(
   {
     _id: {
@@ -76,7 +75,6 @@ const rideRequestSchema = new Schema(
       required: true,
       index: true,
     },
-    // Location data
     pickup: {
       latitude: {
         type: Number,
@@ -113,7 +111,6 @@ const rideRequestSchema = new Schema(
         trim: true,
       },
     },
-    // Ride details
     pickupTime: {
       type: Date,
       required: true,
@@ -221,22 +218,19 @@ const rideRequestSchema = new Schema(
         default: Date.now,
       },
     },
-    // Status
     status: {
       type: String,
       enum: ["Pending", "Accepted", "Rejected", "Expired"],
       default: "Pending",
       index: true,
     },
-    // ETA
     pickupETA: {
       type: String,
       required: true,
     },
-    // Expiry for pending requests (auto-delete after 30 minutes)
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
+      default: () => new Date(Date.now() + 1.5 * 60 * 1000),
     },
   },
   {
@@ -244,12 +238,12 @@ const rideRequestSchema = new Schema(
   }
 );
 
-// Indexes for performance
+// Indexes
 rideRequestSchema.index({ driverId: 1, status: 1 });
 rideRequestSchema.index({ driverId: 1, pickupTime: 1 });
 rideRequestSchema.index({ riderId: 1, status: 1 });
 rideRequestSchema.index({ createdAt: 1 });
-rideRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index for auto-expiry
+rideRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // RideRequest Model
 export const RideRequestModel: Model<IRideRequestDocument> =

@@ -1,7 +1,9 @@
-import { IBaseRepository } from "./IBaseRepository";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { QueryOptions, FilterOptions } from "@shared/types/Repository";
+import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
+import { IQueryableRepository } from "./base/IQueryableRepository";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 export interface IDriverAvailabilityFilters
   extends FilterOptions<DriverAvailability> {
@@ -17,11 +19,22 @@ export interface IDriverAvailabilityFilters
 }
 
 export interface IDriverAvailabilityRepository
-  extends IBaseRepository<DriverAvailability, string> {
+  extends IWriteOnlyRepository<DriverAvailability, string>,
+    IQueryableRepository<DriverAvailability, string> {
   // Driver-specific queries
   findByDriverId(driverId: string): Promise<DriverAvailability | null>;
   findActiveByDriverId(driverId: string): Promise<DriverAvailability | null>;
   existsActiveForDriver(driverId: string): Promise<boolean>;
+
+  addException(
+    driverId: string,
+    exception: AvailabilityException
+  ): Promise<DriverAvailability | null>;
+  removeException(
+    driverId: string,
+    exceptionId: string
+  ): Promise<DriverAvailability | null>;
+  getExceptions(driverId: string): Promise<AvailabilityException[]>;
 
   // Status-based queries
   findByStatus(
