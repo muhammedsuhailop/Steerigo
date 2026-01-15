@@ -1,4 +1,4 @@
-// Container Symbols (for better type safety)
+// Container Symbols 
 export const TYPES = {
   // Repositories
   UserRepository: Symbol.for("UserRepository"),
@@ -22,6 +22,7 @@ export const TYPES = {
   FileUploadService: Symbol.for("FileUploadService"),
   TokenManagementService: Symbol.for("TokenManagementService"),
   FareCalculationService: Symbol.for("FareCalculationService"),
+  AvailabilityCheckService: Symbol.for("AvailabilityCheckService"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
@@ -78,6 +79,9 @@ export const TYPES = {
   UpdateUserProfileUseCase: Symbol.for("UpdateUserProfileUseCase"),
   RegisterUserAsDriverUseCase: Symbol.for("RegisterUserAsDriverUseCase"),
   FindNearbyDriversUseCase: Symbol.for("FindNearbyDriversUseCase"),
+  AutoSearchAndSendRideRequestUseCase: Symbol.for(
+    "AutoSearchAndSendRideRequestUseCase"
+  ),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
@@ -109,4 +113,5 @@ export const TYPES = {
   DriverAvailabilityController: Symbol.for("DriverAvailabilityController"),
   DriverSearchController: Symbol.for("DriverSearchController"),
   RideController: Symbol.for("RideController"),
+  AutoRideController: Symbol.for("AutoRideController"),
 };

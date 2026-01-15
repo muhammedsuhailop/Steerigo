@@ -10,6 +10,8 @@ import { validateSchema } from "@interface/middleware";
 import { findNearbyDriversSearchSchema } from "@interface/validators/user/driverSearchValidators";
 import { sendRideRequestSchema } from "@interface/validators/user/rideRequestValidators";
 import { RideController } from "@interface/controllers/user/RideController";
+import { autoSearchAndRequestSchema } from "@interface/validators/user/autoSearchAndRequestValidators";
+import { AutoRideController } from "@interface/controllers/user/AutoRideController";
 
 const router = Router();
 const userProfileController = container.get<UserProfileController>(
@@ -23,6 +25,9 @@ const driverSearchController = container.get<DriverSearchController>(
 const rideRequestController = container.get<RideController>(
   TYPES.RideController
 );
+
+const autoRideController = container.get<AutoRideController>(TYPES.AutoRideController);
+
 
 router.use(authMiddleware);
 
@@ -60,6 +65,15 @@ router.post(
   handleValidationErrors,
   (req: Request, res: Response) =>
     rideRequestController.sendRideRequest(req, res)
+);
+
+// POST /api/user/ride/auto-request-send
+router.post(
+  "/ride/auto-request-send",
+  validateSchema(autoSearchAndRequestSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) =>
+    autoRideController.autoSearchAndSendRequests(req, res)
 );
 
 export { router as userRoutes };

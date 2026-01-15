@@ -22,13 +22,12 @@ import {
 } from "@infrastructure/adapters/CryptoAdapter";
 import { IFileUploadService } from "@application/services/IFileUploadService";
 import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
+import { AvailabilityCheckService } from "@infrastructure/services/AvailabilityCheckService";
 
 export class ServiceFactory {
   static register(container: Container): void {
     // Bind Service Interfaces to Implementations
-    container
-      .bind<IPasswordService>(TYPES.PasswordService)
-      .to(PasswordService);
+    container.bind<IPasswordService>(TYPES.PasswordService).to(PasswordService);
     container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
     container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
     container.bind<IOtpService>(TYPES.OtpService).to(OtpService);
@@ -46,5 +45,8 @@ export class ServiceFactory {
       .bind<IFileUploadService>(TYPES.FileUploadService)
       .to(CloudinaryService)
       .inSingletonScope();
+    container
+      .bind<AvailabilityCheckService>(TYPES.AvailabilityCheckService)
+      .to(AvailabilityCheckService);
   }
 }
