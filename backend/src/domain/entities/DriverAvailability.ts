@@ -244,10 +244,6 @@ export class DriverAvailability {
   }
 
   activate(): void {
-    if (this.isActive && this.status === AvailabilityStatus.AVAILABLE) {
-      throw new Error("Driver is already active and available");
-    }
-
     this.isActive = true;
 
     if (this.status === AvailabilityStatus.OFFLINE) {
@@ -371,40 +367,44 @@ export class DriverAvailability {
     const endMinutes =
       dayRangeEnd.getUTCHours() * 60 + dayRangeEnd.getUTCMinutes();
 
-    const isInTimeSlot = dailyRecurrence.timeSlots.some((slot) => {
-      const slotStart = slot.getStartTime();
-      const slotEnd = slot.getEndTime();
+    const queryRanges = this.normalizeRange(startMinutes, endMinutes);
 
-      if (slotStart <= slotEnd) {
-        return startMinutes >= slotStart && endMinutes <= slotEnd;
-      } else {
-        const inFirstPart = startMinutes >= slotStart && endMinutes <= 1440;
-        const inSecondPart = startMinutes >= 0 && endMinutes <= slotEnd;
-        return inFirstPart || inSecondPart;
+    for (const [qStart, qEnd] of queryRanges) {
+      let covered = false;
+
+      for (const slot of dailyRecurrence.timeSlots) {
+        const slotRanges = this.normalizeRange(
+          slot.getStartTime(),
+          slot.getEndTime()
+        );
+
+        if (
+          slotRanges.some(([sStart, sEnd]) => qStart >= sStart && qEnd <= sEnd)
+        ) {
+          covered = true;
+          break;
+        }
       }
-    });
 
-    if (!isInTimeSlot) {
-      return false;
+      if (!covered) {
+        return false;
+      }
     }
 
-    if (
-      dailyRecurrence.excludedTimeSlots &&
-      dailyRecurrence.excludedTimeSlots.length > 0
-    ) {
-      const inExcludedSlot = dailyRecurrence.excludedTimeSlots.some((slot) => {
-        const slotStart = slot.getStartTime();
-        const slotEnd = slot.getEndTime();
+    if (dailyRecurrence.excludedTimeSlots?.length) {
+      for (const ex of dailyRecurrence.excludedTimeSlots) {
+        const exRanges = this.normalizeRange(
+          ex.getStartTime(),
+          ex.getEndTime()
+        );
 
-        if (slotStart <= slotEnd) {
-          return startMinutes < slotEnd && endMinutes > slotStart;
-        } else {
-          return !(endMinutes <= slotStart && startMinutes >= slotEnd);
+        for (const [qStart, qEnd] of queryRanges) {
+          if (
+            exRanges.some(([eStart, eEnd]) => qStart < eEnd && eStart < qEnd)
+          ) {
+            return false;
+          }
         }
-      });
-
-      if (inExcludedSlot) {
-        return false;
       }
     }
 
@@ -493,5 +493,15 @@ export class DriverAvailability {
       };
 
     return allowedTransitions[this.status].includes(newStatus);
+  }
+
+  private normalizeRange(start: number, end: number): [number, number][] {
+    if (start <= end) {
+      return [[start, end]];
+    }
+    return [
+      [start, 1440],
+      [0, end],
+    ];
   }
 }
