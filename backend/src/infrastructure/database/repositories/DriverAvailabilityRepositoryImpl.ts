@@ -347,7 +347,13 @@ export class DriverAvailabilityRepositoryImpl
       .lean()
       .exec();
 
-    return doc?.exceptions ?? [];
+    if (!doc || !doc.exceptions) {
+      return [];
+    }
+
+    return doc.exceptions.map((exception) =>
+      DriverAvailabilityMapper.mapRawExceptionToDomain(exception)
+    );
   }
 
   // Status-Based Queries

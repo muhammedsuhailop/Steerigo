@@ -14,15 +14,15 @@ export class DayOfWeekUtils {
   }
 
   static getDayName(day: DayOfWeek): string {
-    const names = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
+    const names: Record<DayOfWeek, string> = {
+      [DayOfWeek.SUNDAY]: "Sunday",
+      [DayOfWeek.MONDAY]: "Monday",
+      [DayOfWeek.TUESDAY]: "Tuesday",
+      [DayOfWeek.WEDNESDAY]: "Wednesday",
+      [DayOfWeek.THURSDAY]: "Thursday",
+      [DayOfWeek.FRIDAY]: "Friday",
+      [DayOfWeek.SATURDAY]: "Saturday",
+    };
     return names[day];
   }
 

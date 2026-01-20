@@ -1,8 +1,6 @@
-import { AvailabilityException } from "@domain/entities/AvailabilityException";
 import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { DayOfWeek } from "@domain/value-objects/DayOfWeek";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
 import { Schema, model, Document, Types } from "mongoose";
 
 interface TimeSlot {
@@ -21,6 +19,15 @@ interface ScheduleValidity {
   endDate?: Date | null;
 }
 
+interface ExceptionDocument {
+  id: string;
+  type: string;
+  reason?: string;
+  startTime: Date;
+  endTime: Date;
+  createdAt: Date;
+}
+
 export interface IDriverAvailabilityModel extends Document {
   _id: string;
   driverId: Types.ObjectId;
@@ -36,13 +43,12 @@ export interface IDriverAvailabilityModel extends Document {
     validity: ScheduleValidity;
     notes?: string;
   };
-  exceptions?: AvailabilityException[];
+  exceptions?: ExceptionDocument[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Location sub-schema
 const locationSchema = new Schema(
   {
     latitude: {
@@ -70,7 +76,6 @@ const locationSchema = new Schema(
   { _id: false }
 );
 
-// Time slot sub-schema
 const timeSlotSchema = new Schema(
   {
     startTime: {
@@ -89,7 +94,6 @@ const timeSlotSchema = new Schema(
   { _id: false }
 );
 
-// Daily recurrence sub-schema
 const dailyRecurrenceSchema = new Schema(
   {
     daysOfWeek: {
@@ -113,7 +117,6 @@ const dailyRecurrenceSchema = new Schema(
   { _id: false }
 );
 
-// Schedule validity sub-schema
 const scheduleValiditySchema = new Schema(
   {
     startDate: {
@@ -128,7 +131,6 @@ const scheduleValiditySchema = new Schema(
   { _id: false }
 );
 
-// Recurring schedule sub-schema
 const recurringScheduleSchema = new Schema(
   {
     dailyRecurrence: {
@@ -148,7 +150,6 @@ const recurringScheduleSchema = new Schema(
   { _id: false }
 );
 
-// Availability exception sub-schema
 const availabilityExceptionSchema = new Schema(
   {
     type: {
@@ -170,17 +171,6 @@ const availabilityExceptionSchema = new Schema(
       type: Date,
       required: true,
       index: true,
-    },
-    isRecurring: {
-      type: Boolean,
-      default: false,
-    },
-    recurrenceStartDate: { type: Date },
-    recurrenceEndDate: { type: Date },
-    recurringPattern: {
-      type: String,
-      enum: Object.values(RecurringPattern),
-      default: null,
     },
     createdAt: {
       type: Date,
@@ -266,13 +256,12 @@ driverAvailabilitySchema.index(
   }
 );
 
-// Exception time-based indexes
 driverAvailabilitySchema.index({
   "exceptions.startTime": 1,
   "exceptions.endTime": 1,
 });
 
-driverAvailabilitySchema.pre<IDriverAvailabilityModel>("save", function (next) {
+driverAvailabilitySchema.pre("save", function (next) {
   // Validate recurring schedule if present
   if (this.recurringSchedule?.dailyRecurrence) {
     const { timeSlots, excludedTimeSlots } =
@@ -325,9 +314,11 @@ driverAvailabilitySchema.pre<IDriverAvailabilityModel>("save", function (next) {
   // Validate location coordinates
   if (this.currentLocation) {
     const { latitude, longitude } = this.currentLocation;
+
     if (latitude < -90 || latitude > 90) {
       return next(new Error("Invalid latitude value"));
     }
+
     if (longitude < -180 || longitude > 180) {
       return next(new Error("Invalid longitude value"));
     }
@@ -341,9 +332,4 @@ export const DriverAvailabilityModel = model<IDriverAvailabilityModel>(
   driverAvailabilitySchema
 );
 
-export type {
-  TimeSlot,
-  DailyRecurrence,
-  ScheduleValidity,
-  AvailabilityException,
-};
+export type { TimeSlot, DailyRecurrence, ScheduleValidity, ExceptionDocument };

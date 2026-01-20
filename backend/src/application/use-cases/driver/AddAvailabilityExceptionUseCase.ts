@@ -71,12 +71,6 @@ export class AddAvailabilityExceptionUseCase
         startTime: dto.getStartTime(),
         endTime: dto.getEndTime(),
 
-        isRecurring: dto.getIsRecurring(),
-        recurringPattern: dto.getRecurringPattern(),
-
-        recurrenceStartDate: dto.getRecurrenceStartDate(),
-        recurrenceEndDate: dto.getRecurrenceEndDate(),
-
         createdAt: new Date(),
       };
 
@@ -99,11 +93,6 @@ export class AddAvailabilityExceptionUseCase
         reason: exception.reason,
         startTime: exception.startTime.toISOString(),
         endTime: exception.endTime.toISOString(),
-        isRecurring: exception.isRecurring,
-        recurringPattern: exception.recurringPattern,
-        recurrenceStartDate: exception.recurrenceStartDate?.toISOString(),
-        recurrenceEndDate: exception.recurrenceEndDate?.toISOString(),
-
         createdAt: exception.createdAt?.toISOString(),
       };
 

@@ -202,8 +202,6 @@ export class ScheduleRecurringAvailabilityUseCase
       reason: exception.reason,
       startTime: exception.startTime.toISOString(),
       endTime: exception.endTime.toISOString(),
-      isRecurring: exception.isRecurring,
-      recurringPattern: exception.recurringPattern,
       createdAt: exception.createdAt?.toISOString(),
     }));
 

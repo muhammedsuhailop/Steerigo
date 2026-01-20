@@ -1,5 +1,4 @@
 import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
 import { z } from "zod";
 
 const addAvailabilityExceptionSchema = z.object({
@@ -9,12 +8,6 @@ const addAvailabilityExceptionSchema = z.object({
 
   startTime: z.string().datetime("Invalid datetime format"),
   endTime: z.string().datetime("Invalid datetime format"),
-
-  isRecurring: z.boolean().optional(),
-  recurringPattern: z.nativeEnum(RecurringPattern).optional(),
-
-  recurrenceStartDate: z.string().date().optional(),
-  recurrenceEndDate: z.string().date().optional(),
 });
 
 type AddAvailabilityExceptionData = z.infer<
@@ -57,26 +50,6 @@ export class AddAvailabilityExceptionRequestDto {
     return new Date(this.data.endTime);
   }
 
-  getIsRecurring(): boolean {
-    return this.data.isRecurring ?? false;
-  }
-
-  getRecurringPattern(): RecurringPattern | undefined {
-    return this.data.recurringPattern;
-  }
-
-  getRecurrenceStartDate(): Date | undefined {
-    return this.data.recurrenceStartDate
-      ? new Date(this.data.recurrenceStartDate)
-      : undefined;
-  }
-
-  getRecurrenceEndDate(): Date | undefined {
-    return this.data.recurrenceEndDate
-      ? new Date(this.data.recurrenceEndDate)
-      : undefined;
-  }
-
   validate(): string[] {
     const errors: string[] = [];
 
@@ -86,17 +59,6 @@ export class AddAvailabilityExceptionRequestDto {
     if (end.getTime() - start.getTime() <= 0) {
       errors.push("Exception duration must be positive");
     }
-
-    if (this.getIsRecurring()) {
-      if (!this.getRecurringPattern()) {
-        errors.push("Recurring pattern must be specified");
-      }
-
-      if (!this.getRecurrenceStartDate()) {
-        errors.push("recurrenceStartDate is required for recurring exceptions");
-      }
-    }
-
     return errors;
   }
 }
