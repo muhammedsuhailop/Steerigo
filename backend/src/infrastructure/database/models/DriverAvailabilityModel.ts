@@ -78,18 +78,8 @@ const locationSchema = new Schema(
 
 const timeSlotSchema = new Schema(
   {
-    startTime: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 1439,
-    },
-    endTime: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 1439,
-    },
+    startTime: { type: Number, required: true, min: 0, max: 1440 },
+    endTime: { type: Number, required: true, min: 0, max: 1440 },
   },
   { _id: false }
 );
