@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from "uuid";
 import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { AppConstants } from "@shared/constants/AppConstants";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -83,6 +84,8 @@ export class AutoSearchAndSendRideRequestUseCase
         dto.bodyType
       );
 
+      const fetchLimit = dto.maxRideRequests * AppConstants.FETCH_MULTIPLIER;
+
       const nearbyAvailabilities =
         await this.driverAvailabilityRepository.findNearbyAvailableDrivers(
           searchCriteria.getLatitude(),
@@ -90,7 +93,7 @@ export class AutoSearchAndSendRideRequestUseCase
           searchCriteria.getSearchDate(),
           searchCriteria.getRadiusKm(),
           searchCriteria.getTimeRequiredMinutes(),
-          dto.maxRideRequests
+          fetchLimit
         );
 
       const successfulRequests: SuccessfulRequestInfo[] = [];
@@ -107,6 +110,9 @@ export class AutoSearchAndSendRideRequestUseCase
         longitude: dto.dropLongitude,
         address: dto.dropAddress,
       });
+
+      const pendingRequests =
+        await this.rideRequestRepository.findPendingByRiderId(userId);
 
       for (const item of nearbyAvailabilities) {
         if (successfulRequests.length >= dto.maxRideRequests) break;
@@ -151,7 +157,7 @@ export class AutoSearchAndSendRideRequestUseCase
           !searchFilter.matches(
             driver.getEligibleGearTypes(),
             driver.getEligibleBodyTypes(),
-            4
+            0
           )
         ) {
           failedRequests.push({
@@ -162,10 +168,7 @@ export class AutoSearchAndSendRideRequestUseCase
           continue;
         }
 
-        const pending =
-          await this.rideRequestRepository.findPendingByRiderId(userId);
-
-        if (pending.some((r) => r.getDriverId() === driverId)) {
+        if (pendingRequests.some((r) => r.getDriverId() === driverId)) {
           failedRequests.push({
             driverId,
             driverName: await this.getDriverName(driverId),

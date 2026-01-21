@@ -236,9 +236,7 @@ export class DriverAvailabilityRepositoryImpl
       const doc = await DriverAvailabilityModel.findOne({
         driverId: driverIdObjectId,
         isActive: true,
-      })
-        .lean()
-        .exec();
+      }).exec();
 
       if (!doc) return null;
 
