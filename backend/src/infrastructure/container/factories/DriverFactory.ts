@@ -32,6 +32,12 @@ import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashbo
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { GetDriverProfileResponseDto } from "@application/dto/driver/GetDriverProfileResponseDto";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
+import { EditAvailabilityExceptionRequestDto } from "@application/dto/driver/EditAvailabilityExceptionRequestDto";
+import { EditAvailabilityExceptionResponseDto } from "@application/dto/driver/EditAvailabilityExceptionResponseDto";
+import { EditAvailabilityExceptionUseCase } from "@application/use-cases/driver/EditAvailabilityExceptionUseCase";
+import { RemoveAvailabilityExceptionRequestDto } from "@application/dto/driver/RemoveAvailabilityExceptionRequestDto";
+import { RemoveAvailabilityExceptionResponseDto } from "@application/dto/driver/RemoveAvailabilityExceptionResponseDto";
+import { RemoveAvailabilityExceptionUseCase } from "@application/use-cases/driver/RemoveAvailabilityExceptionUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -87,6 +93,22 @@ export class DriverFactory {
         >
       >(TYPES.GetDriverDetailedProfileUseCase)
       .to(GetDriverDetailedProfileUseCase);
+    container
+      .bind<
+        IUseCase<
+          EditAvailabilityExceptionRequestDto,
+          Promise<Result<EditAvailabilityExceptionResponseDto>>
+        >
+      >(TYPES.EditAvailabilityExceptionUseCase)
+      .to(EditAvailabilityExceptionUseCase);
+    container
+      .bind<
+        IUseCase<
+          RemoveAvailabilityExceptionRequestDto,
+          Promise<Result<RemoveAvailabilityExceptionResponseDto>>
+        >
+      >(TYPES.RemoveAvailabilityExceptionUseCase)
+      .to(RemoveAvailabilityExceptionUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

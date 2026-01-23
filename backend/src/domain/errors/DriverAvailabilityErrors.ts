@@ -38,3 +38,10 @@ export class DriverProfileNotFoundError extends DomainError {
     this.name = "DriverProfileNotFoundError";
   }
 }
+
+export class AvailabilityExceptionNotFoundError extends DomainError {
+  constructor(exceptionId: string) {
+    super(`Availability Exception is not found for id : ${exceptionId}`);
+    this.name = "AvailabilityExceptionNotFoundError";
+  }
+}

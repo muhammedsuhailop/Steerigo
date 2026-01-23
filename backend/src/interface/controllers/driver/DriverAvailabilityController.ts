@@ -20,6 +20,10 @@ import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/Upd
 import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";
 import { AddAvailabilityExceptionRequestDto } from "@application/dto/driver/AddAvailabilityExceptionRequestDto";
 import { AddAvailabilityExceptionResponseDto } from "@application/dto/driver/AddAvailabilityExceptionResponseDto";
+import { EditAvailabilityExceptionRequestDto } from "@application/dto/driver/EditAvailabilityExceptionRequestDto";
+import { EditAvailabilityExceptionResponseDto } from "@application/dto/driver/EditAvailabilityExceptionResponseDto";
+import { RemoveAvailabilityExceptionRequestDto } from "@application/dto/driver/RemoveAvailabilityExceptionRequestDto";
+import { RemoveAvailabilityExceptionResponseDto } from "@application/dto/driver/RemoveAvailabilityExceptionResponseDto";
 
 @injectable()
 export class DriverAvailabilityController {
@@ -43,7 +47,17 @@ export class DriverAvailabilityController {
     private addExceptionUseCase: IUseCase<
       AddAvailabilityExceptionRequestDto,
       Promise<Result<AddAvailabilityExceptionResponseDto>>
-    >
+    >,
+    @inject(TYPES.EditAvailabilityExceptionUseCase)
+    private editExceptionUseCase: IUseCase<
+      EditAvailabilityExceptionRequestDto,
+      Promise<Result<EditAvailabilityExceptionResponseDto>>
+    >,
+    @inject(TYPES.RemoveAvailabilityExceptionUseCase)
+    private removeExceptionUseCase: IUseCase<
+      RemoveAvailabilityExceptionRequestDto,
+      Promise<Result<RemoveAvailabilityExceptionResponseDto>>
+    >,
   ) {}
 
   async scheduleAvailability(req: Request, res: Response): Promise<void> {
@@ -67,7 +81,7 @@ export class DriverAvailabilityController {
 
       const dto = ScheduleRecurringAvailabilityRequestDto.fromRequest(
         userId,
-        req.body
+        req.body,
       );
 
       const result = await this.scheduleAvailabilityUseCase.execute(dto);
@@ -76,7 +90,7 @@ export class DriverAvailabilityController {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
-          "schedule_availability"
+          "schedule_availability",
         );
         res.status(statusCode).json(response);
         return;
@@ -94,7 +108,7 @@ export class DriverAvailabilityController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "schedule_availability"
+        "schedule_availability",
       );
       res.status(statusCode).json(response);
     }
@@ -119,7 +133,7 @@ export class DriverAvailabilityController {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
-          "update_availability_status"
+          "update_availability_status",
         );
         res.status(statusCode).json(response);
         return;
@@ -140,7 +154,7 @@ export class DriverAvailabilityController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "update_availability_status"
+        "update_availability_status",
       );
       res.status(statusCode).json(response);
     }
@@ -166,7 +180,7 @@ export class DriverAvailabilityController {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
-          "update_driver_location"
+          "update_driver_location",
         );
         res.status(statusCode).json(response);
         return;
@@ -184,7 +198,7 @@ export class DriverAvailabilityController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "update_driver_location"
+        "update_driver_location",
       );
       res.status(statusCode).json(response);
     }
@@ -211,7 +225,7 @@ export class DriverAvailabilityController {
 
       const dto = AddAvailabilityExceptionRequestDto.fromRequest(
         userId,
-        req.body
+        req.body,
       );
       const result = await this.addExceptionUseCase.execute(dto);
 
@@ -219,7 +233,7 @@ export class DriverAvailabilityController {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
-          "add_availability_exception"
+          "add_availability_exception",
         );
         res.status(statusCode).json(response);
         return;
@@ -236,7 +250,120 @@ export class DriverAvailabilityController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "add_availability_exception"
+        "add_availability_exception",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async editException(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const { response, statusCode } =
+          ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.DRIVER_AUTH_REQUIRED,
+        });
+        return;
+      }
+
+      const exceptionId = req.params.exceptionId;
+      const dto = EditAvailabilityExceptionRequestDto.fromRequest(
+        userId,
+        exceptionId,
+        req.body,
+      );
+      const result = await this.editExceptionUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "edit-availability-exception",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+      const response: ApiResponse<EditAvailabilityExceptionResponseDto> = {
+        success: true,
+        message: DRIVER_MESSAGES.AVAILABILITY_EXCEPTION_UPDATED,
+        data,
+      };
+      res.status(HttpStatusCodes.OK).json(response);
+
+      Logger.info("Exception updated successfully", {
+        userId,
+        exceptionId,
+      });
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "edit-availability-exception",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async removeException(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const { response, statusCode } =
+          ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.DRIVER_AUTH_REQUIRED,
+        });
+        return;
+      }
+
+      const exceptionId = req.params.exceptionId;
+      const dto = RemoveAvailabilityExceptionRequestDto.fromRequest(
+        userId,
+        exceptionId,
+      );
+      const result = await this.removeExceptionUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "remove-availability-exception",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+      const response: ApiResponse<RemoveAvailabilityExceptionResponseDto> = {
+        success: true,
+        message: DRIVER_MESSAGES.AVAILABILITY_EXCEPTION_REMOVED,
+        data,
+      };
+      res.status(HttpStatusCodes.OK).json(response);
+
+      Logger.info("Exception removed successfully", {
+        userId,
+        exceptionId,
+      });
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "remove-availability-exception",
       );
       res.status(statusCode).json(response);
     }
