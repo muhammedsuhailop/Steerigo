@@ -5,12 +5,13 @@ import {
   FaRegCircle,
   FaMapMarkerAlt,
   FaClock,
+  FaCalendarAlt,
+  FaInfoCircle,
 } from "react-icons/fa";
 import Card from "@/shared/components/ui/Card";
 import type {
   AvailabilityData,
   DriverAvailabilityStatus,
-  TimeSlot,
 } from "../types/scheduling.types";
 import WeeklyAvailabilityStrip from "./WeeklyAvailabilityStrip";
 import ExceptionsPanel from "./ExceptionsPanel";
@@ -24,68 +25,78 @@ const statusConfig: Record<
   DriverAvailabilityStatus,
   {
     icon: React.ReactNode;
-    iconColor: string;
-    bgColor: string;
-    borderColor: string;
-    textColor: string;
+    colorClass: string;
+    borderClass: string;
+    bgClass: string;
     label: string;
     description: string;
-    badgeVariant: "success" | "warning" | "danger" | "info";
   }
 > = {
   Scheduled: {
-    icon: <FaCheckCircle />,
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    textColor: "text-blue-700",
+    icon: <FaCalendarAlt />,
+    colorClass: "text-gray-600",
+    borderClass: "border-gray-200",
+    bgClass: "bg-gray-50",
     label: "Scheduled",
-    description: "Your schedule is set up and ready",
-    badgeVariant: "info",
+    description: "Scheduled for upcoming hours",
   },
   Available: {
     icon: <FaCheckCircle />,
-    iconColor: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200",
-    textColor: "text-emerald-700",
+    colorClass: "text-emerald-600",
+    borderClass: "border-emerald-200",
+    bgClass: "bg-emerald-50",
     label: "Available",
-    description: "You are currently available for rides",
-    badgeVariant: "success",
+    description: "Actively accepting new ride requests",
   },
   Busy: {
     icon: <FaHourglassHalf />,
-    iconColor: "text-amber-600",
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-200",
-    textColor: "text-amber-700",
+    colorClass: "text-amber-600",
+    borderClass: "border-amber-200",
+    bgClass: "bg-amber-50",
     label: "Busy",
-    description: "You are currently on a ride",
-    badgeVariant: "warning",
+    description: "Currently on a trip",
   },
   Offline: {
     icon: <FaRegCircle />,
-    iconColor: "text-red-500",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
-    textColor: "text-red-600",
+    colorClass: "text-slate-400",
+    borderClass: "border-slate-200",
+    bgClass: "bg-slate-50",
     label: "Offline",
-    description: "You are currently offline",
-    badgeVariant: "danger",
+    description: "Not available for rides",
   },
 } as const;
 
-function formatTime(iso?: string): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", {
+const formatTime = (iso?: string) =>
+  !iso
+    ? "—"
+    : new Date(iso).toLocaleString("en-IN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        day: "2-digit",
+        month: "short",
+      });
+
+const formatSimpleTime = (time?: string) => {
+  if (!time) return "—";
+  const [h, m] = time.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m);
+  return d.toLocaleTimeString("en-IN", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
   });
-}
+};
+
+const formatDateOnly = (iso?: string) =>
+  !iso
+    ? "—"
+    : new Date(iso).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
 
 const StatusCard: React.FC<StatusCardProps> = ({
   availabilityStatus,
@@ -93,109 +104,135 @@ const StatusCard: React.FC<StatusCardProps> = ({
 }) => {
   const config = statusConfig[availabilityStatus];
 
-  if (!availabilityData) {
-    return (
-      <Card
-        className={`${config.bgColor} ${config.borderColor} rounded-2xl p-5`}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`text-lg font-semibold ${config.textColor}`}>
-              {config.label}
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">{config.description}</p>
-          </div>
-          <div className={`text-3xl ${config.iconColor}`}>{config.icon}</div>
-        </div>
-      </Card>
-    );
-  }
-
-  const { recurringSchedule, summary, currentLocation, exceptions } =
-    availabilityData;
-
-  const showDetails =
-    availabilityStatus !== "Offline" && availabilityStatus !== "Scheduled";
-
   return (
-    <Card className={`${config.bgColor} ${config.borderColor} rounded-2xl p-5`}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className={`text-lg font-semibold ${config.textColor}`}>
-            {config.label}
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">{config.description}</p>
+    <Card className="relative overflow-hidden border border-slate-200 bg-white rounded-3xl shadow-xl shadow-slate-200/50">
+      <div className={`absolute left-0 top-0 bottom-0 w-1.5 `} />
+
+      <div className="p-6 space-y-6">
+        {/* Header Section */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex h-2 w-2 rounded-full ${config.colorClass.replace("text", "bg")} animate-pulse`}
+              />
+              <h3 className={`text-lg font-bold tracking-tight text-slate-800`}>
+                {config.label}
+              </h3>
+            </div>
+            <p className="text-xs font-medium text-slate-500">
+              {config.description}
+            </p>
+          </div>
+          <div
+            className={`p-3 rounded-2xl ${config.bgClass} ${config.colorClass} text-xl shadow-inner`}
+          >
+            {config.icon}
+          </div>
         </div>
-        <div className={`text-3xl ${config.iconColor}`}>{config.icon}</div>
-      </div>
 
-      {/* Scheduled Details */}
-      {availabilityStatus === "Scheduled" &&
-        recurringSchedule &&
-        recurringSchedule.validity && (
-          <div className="space-y-4 mt-6 pt-5 border-t border-gray-200">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FaClock className="text-gray-600 text-sm" />
-                <span className="font-medium text-sm text-gray-700">
-                  Recurring Schedule
-                </span>
-              </div>
+        {availabilityData && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Scheduled Details Group */}
+            {availabilityStatus === "Scheduled" &&
+              availabilityData.recurringSchedule?.validity && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <FaCalendarAlt /> Validity Period
+                    </div>
+                    <div className="text-xs font-bold text-slate-700 space-y-1">
+                      <p className="flex justify-between">
+                        <span>Start:</span>{" "}
+                        <span className="text-slate-900">
+                          {formatDateOnly(
+                            availabilityData.recurringSchedule.validity
+                              .startDate,
+                          )}
+                        </span>
+                      </p>
+                      <p className="flex justify-between">
+                        <span>End:</span>{" "}
+                        <span className="text-slate-900">
+                          {formatDateOnly(
+                            availabilityData.recurringSchedule.validity.endDate,
+                          )}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {availabilityData.recurringSchedule.dailyRecurrence?.timeSlots
+                    ?.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-gray-50/50 border border-gray-100 space-y-2">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        <FaClock /> Shift Window
+                      </div>
+                      <div className="text-xs font-bold text-gray-700">
+                        {availabilityData.recurringSchedule.dailyRecurrence.timeSlots.map(
+                          (slot, i) => (
+                            <p key={i}>
+                              {formatSimpleTime(slot.startTime)} —{" "}
+                              {formatSimpleTime(slot.endTime)}
+                            </p>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            {/* Weekly Strip */}
+            <div className="space-y-3">
+              <WeeklyAvailabilityStrip availabilityData={availabilityData} />
             </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FaClock className="text-gray-600 text-sm" />
-                <span className="font-medium text-sm text-gray-700">
-                  Schedule
-                </span>
-              </div>
-
-              <div className="text-sm text-gray-600 ml-6 space-y-1">
-                <p>
-                  <span className="font-medium">From:</span>{" "}
-                  {formatTime(recurringSchedule.validity.startDate)}
-                </p>
-                <p>
-                  <span className="font-medium">To:</span>{" "}
-                  {formatTime(recurringSchedule.validity.endDate)}
-                </p>
-              </div>
+            {/* Exceptions Panel */}
+            <div className="pt-2">
+              <ExceptionsPanel exceptions={availabilityData.exceptions} />
             </div>
 
-            {recurringSchedule.notes && (
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Notes:</span>{" "}
-                {recurringSchedule.notes}
+            {/* Location Footer */}
+            {availabilityData.currentLocation && (
+              <div className="pt-5 border-t border-slate-100">
+                <div className="flex gap-4 items-center p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                  <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-gray-500 shadow-sm border border-slate-200">
+                    <FaMapMarkerAlt size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Current Location
+                    </p>
+                    <p className="text-sm font-bold text-slate-800 truncate">
+                      {availabilityData.currentLocation.address}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      Last sync:{" "}
+                      {formatTime(
+                        availabilityData.currentLocation.lastUpdatedAt,
+                      )}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
         )}
 
-      {/* Weekly Availability */}
-      <div className="mt-6">
-        <WeeklyAvailabilityStrip availabilityData={availabilityData} />
-      </div>
-
-      {/* Exceptions */}
-      {exceptions && <ExceptionsPanel exceptions={exceptions} />}
-
-      {/* Location */}
-      {currentLocation && (
-        <div className="mt-6 pt-5 border-t border-gray-200 text-sm text-gray-600">
-          <div className="flex gap-2">
-            <FaMapMarkerAlt className="mt-1" />
-            <div>
-              <p className="font-medium text-gray-700">Current Location</p>
-              <p className="truncate">{currentLocation.address}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                Updated: {formatTime(currentLocation.lastUpdatedAt)}
-              </p>
-            </div>
+        {/* Notes */}
+        {availabilityData?.recurringSchedule?.notes && (
+          <div className="flex gap-2 items-start p-3 bg-amber-50/50 rounded-xl border border-amber-100">
+            <FaInfoCircle
+              className="text-amber-500 mt-0.5 shrink-0"
+              size={12}
+            />
+            <p className="text-xs text-amber-800 leading-relaxed italic">
+              "{availabilityData.recurringSchedule.notes}"
+            </p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Card>
   );
 };

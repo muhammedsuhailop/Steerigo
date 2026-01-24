@@ -40,6 +40,7 @@ export interface RecurringSchedule {
 }
 
 export interface Exception {
+  id: string;
   type: ExceptionType;
   reason: string;
   startTime: string;
@@ -145,8 +146,6 @@ export interface ExceptionFormData {
   reason: string;
   startTime: string;
   endTime: string;
-  isRecurring: boolean;
-  recurringPattern?: RecurringPattern;
 }
 
 export interface ExceptionResponse {
@@ -162,6 +161,17 @@ export interface ExceptionResponse {
 }
 
 export interface ExceptionCreateResponse {
+  success: boolean;
+  message: string;
+  data: ExceptionResponse;
+}
+
+export interface ExceptionUpdateFormData {
+  reason: string;
+  endTime: string;
+}
+
+export interface ExceptionUpdateResponse {
   success: boolean;
   message: string;
   data: ExceptionResponse;

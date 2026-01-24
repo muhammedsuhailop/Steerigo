@@ -9,6 +9,8 @@ import type {
   ExceptionCreateResponse,
   ExceptionDeleteResponse,
   Exception,
+  ExceptionUpdateFormData,
+  ExceptionUpdateResponse,
 } from "../types/scheduling.types";
 
 export const schedulingApi = createApi({
@@ -64,6 +66,18 @@ export const schedulingApi = createApi({
       invalidatesTags: ["Exceptions", "Schedule"],
     }),
 
+    updateException: builder.mutation<
+      ExceptionUpdateResponse,
+      { id: string; data: ExceptionUpdateFormData }
+    >({
+      query: ({ id, data }) => ({
+        url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}/${id}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["Exceptions", "Schedule"],
+    }),
+
     deleteException: builder.mutation<ExceptionDeleteResponse, string>({
       query: (id) => ({
         url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}/${id}`,
@@ -80,5 +94,6 @@ export const {
   useUpdateStatusMutation,
   useGetExceptionsQuery,
   useCreateExceptionMutation,
+  useUpdateExceptionMutation,
   useDeleteExceptionMutation,
 } = schedulingApi;

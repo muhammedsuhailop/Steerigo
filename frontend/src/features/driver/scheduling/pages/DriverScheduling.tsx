@@ -46,7 +46,7 @@ const DriverScheduling: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null
+    null,
   );
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -54,7 +54,7 @@ const DriverScheduling: React.FC = () => {
   const [driverId, setDriverId] = useState<string | null>(null);
 
   const [currentStatus, setCurrentStatus] = useState<DriverAvailabilityStatus>(
-    DriverAvailabilityStatus.OFFLINE
+    DriverAvailabilityStatus.OFFLINE,
   );
 
   const [showScheduleForm, setShowScheduleForm] = useState(false);
@@ -114,7 +114,7 @@ const DriverScheduling: React.FC = () => {
 
       if (firstTimeSlot) {
         const validityStart = new Date(
-          availability.recurringSchedule.validity.startDate
+          availability.recurringSchedule.validity.startDate,
         );
         const [hours, minutes] = firstTimeSlot.startTime.split(":").map(Number);
         const [endHours, endMinutes] = firstTimeSlot.endTime
@@ -153,7 +153,7 @@ const DriverScheduling: React.FC = () => {
       });
 
       setCurrentStatus(
-        availability.availabilityStatus as DriverAvailabilityStatus
+        availability.availabilityStatus as DriverAvailabilityStatus,
       );
 
       setSelectedLocation({
@@ -172,7 +172,7 @@ const DriverScheduling: React.FC = () => {
       err?.data?.message || driverStatusResponse?.message || err?.message || "";
 
     const is404ByStatus = Boolean(
-      err && (err.status === 404 || err?.data?.status === 404)
+      err && (err.status === 404 || err?.data?.status === 404),
     );
 
     if (is404ByStatus) {
@@ -273,13 +273,13 @@ const DriverScheduling: React.FC = () => {
       console.error("Failed to save location:", error);
       showAlert(
         error?.data?.message || "Failed to save location. Please try again.",
-        "danger"
+        "danger",
       );
     }
   };
 
   const handleScheduleSubmit = async (
-    data: ScheduleFormData
+    data: ScheduleFormData,
   ): Promise<void> => {
     if (!data.currentLocation) {
       showAlert("Please select a location on the map", "danger");
@@ -326,11 +326,11 @@ const DriverScheduling: React.FC = () => {
         setDefaultFormData({
           availableFrom: minutesToDate(
             firstTimeSlot.startTime,
-            data.validityStartDate
+            data.validityStartDate,
           ),
           availableTill: minutesToDate(
             firstTimeSlot.endTime,
-            data.validityStartDate
+            data.validityStartDate,
           ),
           location: data.currentLocation,
         });
@@ -404,7 +404,7 @@ const DriverScheduling: React.FC = () => {
       console.error("Failed to update status:", error);
       showAlert(
         error?.data?.message || "Failed to update status. Please try again.",
-        "danger"
+        "danger",
       );
     }
   };
@@ -412,7 +412,7 @@ const DriverScheduling: React.FC = () => {
   const handleDisabledStatusClick = () => {
     showAlert(
       "Please create an availability schedule first before changing your status.",
-      "danger"
+      "danger",
     );
   };
 
@@ -504,19 +504,19 @@ const DriverScheduling: React.FC = () => {
                   w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-base transition-all duration-200 ease-out
                   ${
                     showScheduleForm
-                      ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                      : "bg-emerald-600 text-white hover:bg-emerald-700"
+                      ? "bg-slate-800 text-white hover:bg-slate-900 border border-slate-700"
+                      : "bg-slate-700 text-white hover:bg-slate-800 border border-slate-600"
                   } active:scale-[0.98] focus:outline-none `}
               >
                 {showScheduleForm ? (
                   <>
                     <FaCaretUp size={18} />
-                    <span>Hide Schedule Form</span>
+                    <span>Hide Schedule</span>
                   </>
                 ) : (
                   <>
                     <FaCaretDown size={18} />
-                    <span>Add / Update Schedule</span>
+                    <span>Add / Edit Schedule</span>
                   </>
                 )}
               </button>
@@ -556,8 +556,8 @@ const DriverScheduling: React.FC = () => {
                   disabled={!selectedLocation || isLocationSaving}
                   className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-base font-semibold transition-all duration-200 active:scale-[0.98] ${
                     !selectedLocation || isLocationSaving
-                      ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                      : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                      ? "bg-slate-800 text-white hover:bg-slate-900 border border-slate-700"
+                      : "bg-slate-700 text-white hover:bg-slate-800 border border-slate-600"
                   }`}
                 >
                   <FaLocationArrow size={20} />
