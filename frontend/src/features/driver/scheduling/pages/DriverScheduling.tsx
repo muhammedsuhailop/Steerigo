@@ -467,6 +467,7 @@ const DriverScheduling: React.FC = () => {
               <StatusCard
                 availabilityStatus={currentStatus}
                 availabilityData={availabilityDataFull}
+                onShowAlert={showAlert}
               />
 
               {/* Status Toggle */}

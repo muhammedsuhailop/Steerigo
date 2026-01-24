@@ -19,6 +19,7 @@ import ExceptionsPanel from "./ExceptionsPanel";
 interface StatusCardProps {
   availabilityStatus: DriverAvailabilityStatus;
   availabilityData: AvailabilityData | null;
+  onShowAlert?: (message: string, type: "success" | "danger") => void;
 }
 
 const statusConfig: Record<
@@ -101,6 +102,7 @@ const formatDateOnly = (iso?: string) =>
 const StatusCard: React.FC<StatusCardProps> = ({
   availabilityStatus,
   availabilityData,
+  onShowAlert,
 }) => {
   const config = statusConfig[availabilityStatus];
 
@@ -190,7 +192,10 @@ const StatusCard: React.FC<StatusCardProps> = ({
 
             {/* Exceptions Panel */}
             <div className="pt-2">
-              <ExceptionsPanel exceptions={availabilityData.exceptions} />
+              <ExceptionsPanel
+                exceptions={availabilityData.exceptions}
+                onShowAlert={onShowAlert}
+              />
             </div>
 
             {/* Location Footer */}

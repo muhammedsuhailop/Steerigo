@@ -6,6 +6,7 @@ import {
   FaTrash,
   FaCalendarAlt,
   FaHistory,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import { BsFillSignStopLightsFill } from "react-icons/bs";
 import type {
@@ -15,6 +16,7 @@ import type {
 } from "../types/scheduling.types";
 import ExceptionForm from "./ExceptionForm";
 import EditExceptionForm from "./EditExceptionForm";
+import { Alert } from "@/shared/components/ui/Alert";
 import {
   useCreateExceptionMutation,
   useUpdateExceptionMutation,
@@ -23,6 +25,7 @@ import {
 
 interface Props {
   exceptions: Exception[];
+  onShowAlert?: (message: string, type: "success" | "danger") => void;
 }
 
 interface FormState {
@@ -41,8 +44,10 @@ function formatLocalDateTime(iso: string): string {
   });
 }
 
-const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
+const ExceptionsPanel: React.FC<Props> = ({ exceptions, onShowAlert }) => {
   const [formState, setFormState] = useState<FormState>({ type: null });
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
   const [createException, { isLoading: isCreateLoading }] =
     useCreateExceptionMutation();
   const [updateException, { isLoading: isUpdateLoading }] =
@@ -51,19 +56,66 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
     useDeleteExceptionMutation();
 
   const handleCreate = async (data: ExceptionFormData): Promise<void> => {
-    await createException({ ...data }).unwrap();
-    setFormState({ type: null });
+    try {
+      await createException({ ...data }).unwrap();
+      setFormState({ type: null });
+      if (onShowAlert) {
+        onShowAlert("Time off scheduled successfully!", "success");
+      }
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        err?.data?.message ||
+        err?.message ||
+        "Failed to schedule time off. Please try again.";
+      if (onShowAlert) {
+        onShowAlert(errorMessage, "danger");
+      }
+    }
   };
 
   const handleEdit = async (data: ExceptionUpdateFormData): Promise<void> => {
-    if (!formState.exceptionId) throw new Error("Exception ID required");
-    await updateException({ id: formState.exceptionId, data }).unwrap();
-    setFormState({ type: null });
+    if (!formState.exceptionId) {
+      if (onShowAlert) {
+        onShowAlert("Exception ID is required", "danger");
+      }
+      throw new Error("Exception ID required");
+    }
+
+    try {
+      await updateException({ id: formState.exceptionId, data }).unwrap();
+      setFormState({ type: null });
+      if (onShowAlert) {
+        onShowAlert("Time off updated successfully!", "success");
+      }
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        err?.data?.message ||
+        err?.message ||
+        "Failed to update time off. Please try again.";
+      if (onShowAlert) {
+        onShowAlert(errorMessage, "danger");
+      }
+    }
   };
 
-  const handleDelete = async (id: string): Promise<void> => {
-    if (confirm("Permanently delete this schedule exception?")) {
+  const confirmDelete = async (id: string): Promise<void> => {
+    try {
       await deleteException(id).unwrap();
+      setDeleteConfirmId(null);
+      if (onShowAlert) {
+        onShowAlert("Time off deleted successfully!", "success");
+      }
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        err?.data?.message ||
+        err?.message ||
+        "Failed to delete time off. Please try again.";
+      if (onShowAlert) {
+        onShowAlert(errorMessage, "danger");
+      }
     }
   };
 
@@ -79,7 +131,8 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
             Time Off & Breaks
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Leaves and time off from your schedule
+            {" "}
+            Leaves and time off from your schedule{" "}
           </p>
         </div>
 
@@ -95,7 +148,7 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
         )}
       </div>
 
-      {/* Forms Area */}
+      {/* Create Form Area */}
       {formState.type === "create" && (
         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 ring-4 ring-indigo-50 animate-in fade-in slide-in-from-top-2 duration-300">
           <ExceptionForm
@@ -117,14 +170,17 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
           exceptions.map((ex) => {
             const isEditing =
               formState.type === "edit" && formState.exceptionId === ex.id;
+            const isDeleting = deleteConfirmId === ex.id;
 
             return (
               <div key={ex.id} className="group space-y-3">
-                {/* Exception Card */}
                 <div
-                  className={`relative overflow-hidden transition-all duration-200 bg-white border ${isEditing ? "border-indigo-200 shadow-md" : "border-slate-200 shadow-sm"} rounded-xl p-4 hover:border-slate-300`}
+                  className={`relative overflow-hidden transition-all duration-200 bg-white border ${
+                    isEditing || isDeleting
+                      ? "border-indigo-200 shadow-md"
+                      : "border-slate-200 shadow-sm"
+                  } rounded-xl p-4 hover:border-slate-300`}
                 >
-                  {/* Left Accent Stripe */}
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 ${ex.type === "leave" ? "bg-rose-400" : "bg-amber-400"}`}
                   />
@@ -168,28 +224,66 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions }) => {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-1 ml-4 transition-opacity duration-200">
-                      <button
-                        onClick={() =>
-                          setFormState({ type: "edit", exceptionId: ex.id })
-                        }
-                        disabled={isGlobalLoading}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                        title="Edit"
-                      >
-                        <FaEdit size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(ex.id)}
-                        disabled={isGlobalLoading}
-                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    </div>
+                    {!isDeleting && (
+                      <div className="flex gap-1 ml-4 transition-opacity duration-200">
+                        <button
+                          onClick={() => {
+                            setFormState({ type: "edit", exceptionId: ex.id });
+                            setDeleteConfirmId(null);
+                          }}
+                          disabled={isGlobalLoading}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        >
+                          <FaEdit size={14} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDeleteConfirmId(ex.id);
+                            setFormState({ type: null });
+                          }}
+                          disabled={isGlobalLoading}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        >
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Deletion Alert Integration */}
+                  {isDeleting && (
+                    <div className="mt-4 animate-in slide-in-from-right-4 duration-300">
+                      <Alert
+                        type="danger"
+                        onClose={() => setDeleteConfirmId(null)}
+                        className="border-rose-200 bg-rose-50"
+                      >
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center gap-2 text-rose-800">
+                            <FaExclamationTriangle className="shrink-0" />
+                            <span className="text-xs font-bold">
+                              Permanently delete this exception?
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => confirmDelete(ex.id)}
+                              disabled={isDeleteLoading}
+                              className="px-3 py-1.5 bg-rose-600 text-white text-[10px] font-bold rounded-lg hover:bg-rose-700 transition-colors disabled:bg-rose-300"
+                            >
+                              {isDeleteLoading ? "Deleting..." : "Yes, Delete"}
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirmId(null)}
+                              className="px-3 py-1.5 bg-white border border-rose-200 text-rose-700 text-[10px] font-bold rounded-lg hover:bg-rose-100 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </Alert>
+                    </div>
+                  )}
                 </div>
 
                 {/* Edit Form */}
