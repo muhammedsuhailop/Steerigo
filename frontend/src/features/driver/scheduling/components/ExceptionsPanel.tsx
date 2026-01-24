@@ -22,6 +22,7 @@ import {
   useUpdateExceptionMutation,
   useDeleteExceptionMutation,
 } from "../services/schedulingApi";
+import { useGetDriverStatusQuery } from "../../shared/services/driverApi";
 
 interface Props {
   exceptions: Exception[];
@@ -45,6 +46,7 @@ function formatLocalDateTime(iso: string): string {
 }
 
 const ExceptionsPanel: React.FC<Props> = ({ exceptions, onShowAlert }) => {
+  const { refetch: refetchStatus } = useGetDriverStatusQuery();
   const [formState, setFormState] = useState<FormState>({ type: null });
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -62,6 +64,7 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions, onShowAlert }) => {
       if (onShowAlert) {
         onShowAlert("Time off scheduled successfully!", "success");
       }
+      refetchStatus();
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
       const errorMessage =
@@ -88,6 +91,7 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions, onShowAlert }) => {
       if (onShowAlert) {
         onShowAlert("Time off updated successfully!", "success");
       }
+      refetchStatus();
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
       const errorMessage =
@@ -107,6 +111,7 @@ const ExceptionsPanel: React.FC<Props> = ({ exceptions, onShowAlert }) => {
       if (onShowAlert) {
         onShowAlert("Time off deleted successfully!", "success");
       }
+      refetchStatus();
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
       const errorMessage =
