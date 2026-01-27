@@ -39,35 +39,26 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
 
   async save(request: RideRequest): Promise<RideRequest> {
     try {
-      const requestId = request.getId();
       const requestData = RideRequestMapper.toPersistence(request);
 
       const now = new Date();
       const defaultExpiresAt = new Date(Date.now() + 1.5 * 60 * 1000);
 
-      const savedDoc = await RideRequestModel.findOneAndUpdate(
-        { _id: requestId },
-        {
-          $set: requestData,
-          $setOnInsert: { createdAt: now, expiresAt: defaultExpiresAt },
-        },
-        {
-          new: true,
-          upsert: true,
-          runValidators: true,
-        }
-      );
+      const doc = await RideRequestModel.create({
+        ...requestData,
+        createdAt: now,
+        expiresAt: defaultExpiresAt,
+      });
 
-      if (!savedDoc)
-        throw new Error(`Failed to save ride request: ${requestId}`);
       Logger.info("Ride request saved successfully", {
-        requestId: request.getRequestId(),
+        id: doc._id.toString(),
+        requestGroupId: doc.requestGroupId.toString(),
         driverId: request.getDriverId(),
       });
-      return RideRequestMapper.toDomain(savedDoc);
+
+      return RideRequestMapper.toDomain(doc);
     } catch (error) {
       Logger.error("Error saving ride request", {
-        requestId: request.getId(),
         error,
       });
       throw error;
@@ -107,7 +98,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   async count(filters?: IRideRequestFilters): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(
-        filters || ({} as IRideRequestFilters)
+        filters || ({} as IRideRequestFilters),
       );
       return await RideRequestModel.countDocuments(mongoFilter);
     } catch (error) {
@@ -117,7 +108,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   }
 
   async findPaginated(
-    options: QueryOptions<RideRequest> & { filters?: IRideRequestFilters }
+    options: QueryOptions<RideRequest> & { filters?: IRideRequestFilters },
   ): Promise<PaginatedResult<RideRequest>> {
     const {
       page = 1,
@@ -150,7 +141,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   // Driver-specific queries
   async findByDriverId(
     driverId: string,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]> {
     try {
       const query = RideRequestModel.find({
@@ -206,7 +197,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   // Rider-specific queries
   async findByRiderId(
     riderId: string,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]> {
     try {
       const query = RideRequestModel.find({
@@ -247,7 +238,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   // Status-based queries
   async findByStatus(
     status: RideRequestStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]> {
     try {
       const query = RideRequestModel.find({ status });
@@ -311,7 +302,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
             status: RideRequestStatus.EXPIRED,
             updatedAt: new Date(),
           },
-        }
+        },
       );
 
       Logger.info("Expired pending ride requests", {
@@ -345,30 +336,31 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
   // Bulk operations
   async saveMany(requests: RideRequest[]): Promise<RideRequest[]> {
     try {
-      const bulkOps = requests.map((request) => {
-        const requestData = RideRequestMapper.toPersistence(request);
+      const now = new Date();
+      const defaultExpiresAt = new Date(Date.now() + 1.5 * 60 * 1000);
+
+      const docsToInsert = requests.map((request) => {
+        const data = RideRequestMapper.toPersistence(request);
+
         return {
-          updateOne: {
-            filter: { _id: request.getId() },
-            update: {
-              $set: requestData,
-              $setOnInsert: {
-                expiresAt: new Date(Date.now() + 1.5 * 60 * 1000),
-              },
-            },
-            upsert: true,
-          },
+          ...data,
+
+          createdAt: now,
+          expiresAt: defaultExpiresAt,
         };
       });
 
-      await RideRequestModel.bulkWrite(bulkOps);
+      const docs = (await RideRequestModel.insertMany(
+        docsToInsert,
+      )) as IRideRequestDocument[];
 
-      Logger.info("Bulk saved ride requests", { count: requests.length });
+      Logger.info("Bulk saved ride requests", {
+        count: docs.length,
+      });
 
-      // Fetch and return saved documents
-      const ids = requests.map((r) => r.getId());
-      const docs = await RideRequestModel.find({ _id: { $in: ids } });
-      return docs.map(RideRequestMapper.toDomain);
+      return docs.map((doc) =>
+        RideRequestMapper.toDomain(doc as IRideRequestDocument),
+      );
     } catch (error) {
       Logger.error("Error bulk saving ride requests", { error });
       throw error;
@@ -377,7 +369,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
 
   async updateMany(
     filters: IRideRequestFilters,
-    updates: Partial<RideRequest>
+    updates: Partial<RideRequest>,
   ): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(filters);
@@ -401,7 +393,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
         mongoFilter as FilterQuery<IRideRequestDocument>,
         {
           $set: updateData,
-        }
+        },
       );
 
       Logger.info("Multiple ride requests updated", {
@@ -445,7 +437,7 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
 
   // Helper methods
   private buildFilterQuery(
-    filters: IRideRequestFilters
+    filters: IRideRequestFilters,
   ): FilterQuery<IRideRequestDocument> {
     const query: FilterQuery<IRideRequestDocument> = {};
 
@@ -455,13 +447,13 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
 
     if (filters.driverId) {
       query.driverId = new Types.ObjectId(
-        filters.driverId
+        filters.driverId,
       ) as unknown as IRideRequestDocument["driverId"];
     }
 
     if (filters.riderId) {
       query.riderId = new Types.ObjectId(
-        filters.riderId
+        filters.riderId,
       ) as unknown as IRideRequestDocument["riderId"];
     }
 

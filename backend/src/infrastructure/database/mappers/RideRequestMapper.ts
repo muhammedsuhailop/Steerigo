@@ -26,12 +26,12 @@ export class RideRequestMapper {
 
     const baseFare = Money.create(
       doc.fareBreakdown.baseFare.amount,
-      doc.fareBreakdown.baseFare.currency
+      doc.fareBreakdown.baseFare.currency,
     );
 
     const platformFee = Money.create(
       doc.fareBreakdown.platformFee.amount,
-      doc.fareBreakdown.platformFee.currency
+      doc.fareBreakdown.platformFee.currency,
     );
 
     const fareTax: TaxBreakdown = {
@@ -39,7 +39,7 @@ export class RideRequestMapper {
       rate: doc.fareBreakdown.taxes.fare.rate,
       amount: Money.create(
         doc.fareBreakdown.taxes.fare.amount.amount,
-        doc.fareBreakdown.taxes.fare.amount.currency
+        doc.fareBreakdown.taxes.fare.amount.currency,
       ),
     };
 
@@ -48,13 +48,13 @@ export class RideRequestMapper {
       rate: doc.fareBreakdown.taxes.platformFee.rate,
       amount: Money.create(
         doc.fareBreakdown.taxes.platformFee.amount.amount,
-        doc.fareBreakdown.taxes.platformFee.amount.currency
+        doc.fareBreakdown.taxes.platformFee.amount.currency,
       ),
     };
 
     const totalFare = Money.create(
       doc.fareBreakdown.totalFare.amount,
-      doc.fareBreakdown.totalFare.currency
+      doc.fareBreakdown.totalFare.currency,
     );
 
     const fareBreakdown = FareBreakdown.create({
@@ -67,8 +67,9 @@ export class RideRequestMapper {
     });
 
     return RideRequest.fromData({
-      id: doc._id,
+      id: doc._id.toString(),
       driverId: doc.driverId.toString(),
+      requestGroupId: doc.requestGroupId.toString(),
       riderId: doc.riderId.toString(),
       pickup,
       drop,
@@ -86,8 +87,8 @@ export class RideRequestMapper {
     const fareBreakdown = entity.getFareBreakdown();
 
     return {
-      _id: entity.getId(),
       driverId: toObjectId(entity.getDriverId()),
+      requestGroupId: toObjectId(entity.getRequestGroupId()),
       riderId: toObjectId(entity.getRiderId()),
       pickup: {
         latitude: entity.getPickup().getLatitude(),

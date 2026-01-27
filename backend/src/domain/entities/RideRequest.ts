@@ -5,9 +5,10 @@ import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 
 export class RideRequest {
   private constructor(
-    private readonly id: string,
+    private id: string,
     private readonly driverId: string,
     private readonly riderId: string,
+    private readonly requestGroupId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly pickupTime: Date,
@@ -16,28 +17,28 @@ export class RideRequest {
     private status: RideRequestStatus,
     private readonly pickupETA: string,
     private readonly createdAt: Date = new Date(),
-    private updatedAt: Date = new Date()
+    private updatedAt: Date = new Date(),
   ) {}
 
   static create(
-    id: string,
     driverId: string,
+    requestGroupId: string,
     riderId: string,
     pickup: Location,
     drop: Location,
     pickupTime: Date,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
-    pickupETA: string
+    pickupETA: string,
   ): RideRequest {
-    // Validate fare breakdown has positive total
     if (fareBreakdown.getTotalFare().getAmount() <= 0) {
       throw new Error("Total fare must be positive");
     }
 
     return new RideRequest(
-      id,
+      "",
       driverId,
+      requestGroupId,
       riderId,
       pickup,
       drop,
@@ -45,13 +46,14 @@ export class RideRequest {
       rideType,
       fareBreakdown,
       RideRequestStatus.PENDING,
-      pickupETA
+      pickupETA,
     );
   }
 
   static fromData(data: {
     id: string;
     driverId: string;
+    requestGroupId: string;
     riderId: string;
     pickup: Location;
     drop: Location;
@@ -66,6 +68,7 @@ export class RideRequest {
     return new RideRequest(
       data.id,
       data.driverId,
+      data.requestGroupId,
       data.riderId,
       data.pickup,
       data.drop,
@@ -75,7 +78,7 @@ export class RideRequest {
       data.status,
       data.pickupETA,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
@@ -134,6 +137,14 @@ export class RideRequest {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  getRequestGroupId(): string {
+    return this.requestGroupId;
+  }
+
+  setId(id: string): void {
+    this.id = id;
   }
 
   // Status check methods

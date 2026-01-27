@@ -17,7 +17,7 @@ export class AutoRideController {
     private autoSearchAndSendUseCase: IUseCase<
       AutoSearchAndRequestDto,
       Promise<Result<AutoSearchAndRequestResponseDto>>
-    >
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -75,6 +75,7 @@ export class AutoRideController {
         res.status(HttpStatusCodes.OK).json({
           success: true,
           message: responseData.message,
+          requestGroupId: responseData.result.requestGroupId,
           data: {
             successfulRequests: responseData.result.successfulRequests,
             failedRequests: responseData.result.failedRequests,
@@ -96,7 +97,7 @@ export class AutoRideController {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
           error,
-          "AutoSearchAndSendRideRequest"
+          "AutoSearchAndSendRideRequest",
         );
 
         res.status(statusCode).json(response);
@@ -114,7 +115,7 @@ export class AutoRideController {
 
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "AutoSearchAndSendRideRequest"
+        "AutoSearchAndSendRideRequest",
       );
 
       res.status(statusCode).json(response);

@@ -90,7 +90,7 @@ export class DriverDashboardRepositoryImpl
   }
 
   private async getStatistics(
-    driverId: Types.ObjectId
+    driverId: Types.ObjectId,
   ): Promise<DriverDashboardStatistics> {
     try {
       const [completedStats, cancelledCount] = await Promise.all([
@@ -120,7 +120,7 @@ export class DriverDashboardRepositoryImpl
       return DriverDashboardStatistics.create(
         completedData.count,
         cancelledCount,
-        completedData.totalEarnings
+        completedData.totalEarnings,
       );
     } catch (error) {
       Logger.error("Error getting statistics", { error });
@@ -129,7 +129,7 @@ export class DriverDashboardRepositoryImpl
   }
 
   private async getPerformance(
-    driverId: Types.ObjectId
+    driverId: Types.ObjectId,
   ): Promise<DriverDashboardPerformance> {
     try {
       const [totalAssigned, totalAccepted, totalCancelled, ratingData] =
@@ -178,7 +178,7 @@ export class DriverDashboardRepositoryImpl
       return DriverDashboardPerformance.create(
         acceptanceRate,
         cancellationRate,
-        averageRating
+        averageRating,
       );
     } catch (error) {
       Logger.error("Error getting performance metrics", { error });
@@ -207,7 +207,7 @@ export class DriverDashboardRepositoryImpl
   }
 
   private async getPendingRequests(
-    driverId: Types.ObjectId
+    driverId: Types.ObjectId,
   ): Promise<RideRequest[]> {
     try {
       const requestDocs = await RideRequestModel.find({
@@ -218,7 +218,7 @@ export class DriverDashboardRepositoryImpl
         .exec();
 
       return requestDocs.map((doc: IRideRequestDocument) =>
-        this.mapDocumentToRideRequest(doc)
+        this.mapDocumentToRideRequest(doc),
       );
     } catch (error) {
       Logger.error("Error getting pending requests", { error });
@@ -227,7 +227,7 @@ export class DriverDashboardRepositoryImpl
   }
 
   private async getScheduledRidesCount(
-    driverId: Types.ObjectId
+    driverId: Types.ObjectId,
   ): Promise<number> {
     try {
       const count = await RideModel.countDocuments({
@@ -285,7 +285,7 @@ export class DriverDashboardRepositoryImpl
             timeFare +
             taxAmount +
             platformFeeAmount +
-            platformFeeAmount * 0.18
+            platformFeeAmount * 0.18,
         ),
         durationHours: 1,
       });
@@ -361,12 +361,12 @@ export class DriverDashboardRepositoryImpl
     try {
       const baseFare = Money.create(
         doc.fareBreakdown.baseFare.amount,
-        doc.fareBreakdown.baseFare.currency
+        doc.fareBreakdown.baseFare.currency,
       );
 
       const platformFee = Money.create(
         doc.fareBreakdown.platformFee.amount,
-        doc.fareBreakdown.platformFee.currency
+        doc.fareBreakdown.platformFee.currency,
       );
 
       const fareTax: TaxBreakdown = {
@@ -374,7 +374,7 @@ export class DriverDashboardRepositoryImpl
         rate: doc.fareBreakdown.taxes.fare.rate,
         amount: Money.create(
           doc.fareBreakdown.taxes.fare.amount.amount,
-          doc.fareBreakdown.taxes.fare.amount.currency
+          doc.fareBreakdown.taxes.fare.amount.currency,
         ),
       };
 
@@ -383,13 +383,13 @@ export class DriverDashboardRepositoryImpl
         rate: doc.fareBreakdown.taxes.platformFee.rate,
         amount: Money.create(
           doc.fareBreakdown.taxes.platformFee.amount.amount,
-          doc.fareBreakdown.taxes.platformFee.amount.currency
+          doc.fareBreakdown.taxes.platformFee.amount.currency,
         ),
       };
 
       const totalFare = Money.create(
         doc.fareBreakdown.totalFare.amount,
-        doc.fareBreakdown.totalFare.currency
+        doc.fareBreakdown.totalFare.currency,
       );
 
       fareBreakdown = FareBreakdown.create({
@@ -406,7 +406,7 @@ export class DriverDashboardRepositoryImpl
         {
           documentId: doc._id,
           error,
-        }
+        },
       );
 
       // Fallback: create minimal fare breakdown
@@ -431,7 +431,8 @@ export class DriverDashboardRepositoryImpl
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
-      riderId: doc.riderId.toString(), 
+      requestGroupId: doc.requestGroupId.toString(),
+      riderId: doc.riderId.toString(),
       pickup,
       drop,
       pickupTime: doc.pickupTime,
