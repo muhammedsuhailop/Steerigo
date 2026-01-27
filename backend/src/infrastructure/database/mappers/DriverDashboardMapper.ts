@@ -26,7 +26,7 @@ export class DriverDashboardMapper {
     pendingRequestUsers: (User | null)[],
     statistics: DriverDashboardStatistics,
     performance: DriverDashboardPerformance,
-    scheduledRidesCount: number
+    scheduledRidesCount: number,
   ): DriverDashboardResponseDto {
     return new DriverDashboardResponseDto({
       driver: this.mapDriverInfo(driver, driverUser),
@@ -35,7 +35,7 @@ export class DriverDashboardMapper {
         ? this.mapCurrentRide(currentRide, currentRideRiderUser)
         : null,
       pendingRequests: pendingRequests.map((req, idx) =>
-        this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null)
+        this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null),
       ),
       statistics: {
         ridesCompleted: statistics.getRidesCompleted(),
@@ -75,7 +75,7 @@ export class DriverDashboardMapper {
   }
 
   private static mapAvailability(
-    availability: DriverAvailability
+    availability: DriverAvailability,
   ): AvailabilityInfo {
     const recurringSchedule = availability.getRecurringSchedule();
     const availableFrom = recurringSchedule?.validity.startDate ?? new Date();
@@ -93,7 +93,7 @@ export class DriverDashboardMapper {
 
   private static mapCurrentRide(
     ride: Ride,
-    riderUser: User | null
+    riderUser: User | null,
   ): CurrentRideInfo {
     const startedAt = ride.getStartedAt() ?? new Date();
     const riderName = riderUser?.getName() ?? "";
@@ -122,12 +122,12 @@ export class DriverDashboardMapper {
 
   private static mapPendingRequest(
     request: RideRequest,
-    riderUser: User | null
+    riderUser: User | null,
   ): PendingRequest {
     const userName = riderUser?.getName() ?? "";
 
     return {
-      requestId: request.getRequestId(),
+      requestId: request.getId(),
       pickup: request.getPickup(),
       drop: request.getDrop(),
       pickupTime: request.getPickupTime(),
@@ -149,7 +149,7 @@ export class DriverDashboardMapper {
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
       2,
-      "0"
+      "0",
     )}:${String(seconds).padStart(2, "0")}`;
   }
 }
