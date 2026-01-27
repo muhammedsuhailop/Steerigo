@@ -26,11 +26,11 @@ export class SendRideRequestUseCase
     @inject(TYPES.DriverRepository)
     private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: IUserRepository
+    private userRepository: IUserRepository,
   ) {}
 
   async execute(
-    dto: SendRideRequestDto
+    dto: SendRideRequestDto,
   ): Promise<Result<SendRideRequestResponseDto>> {
     try {
       try {
@@ -47,8 +47,8 @@ export class SendRideRequestUseCase
 
         return Result.failure(
           RideRequestErrors.rideRequestCreationFailed(
-            (validationError as Error)?.message || "Validation failed"
-          )
+            (validationError as Error)?.message || "Validation failed",
+          ),
         );
       }
 
@@ -83,7 +83,7 @@ export class SendRideRequestUseCase
           status: driver.getStatus(),
         });
         return Result.failure(
-          RideRequestErrors.driverNotAvailable(dto.driverId)
+          RideRequestErrors.driverNotAvailable(dto.driverId),
         );
       }
 
@@ -92,7 +92,7 @@ export class SendRideRequestUseCase
         await this.rideRequestRepository.findPendingByRiderId(dto.riderId);
 
       const hasPendingRequestToDriver = pendingRequests.some(
-        (req) => req.getDriverId() === dto.driverId
+        (req) => req.getDriverId() === dto.driverId,
       );
 
       if (hasPendingRequestToDriver) {
@@ -101,10 +101,10 @@ export class SendRideRequestUseCase
           {
             riderId: dto.riderId,
             driverId: dto.driverId,
-          }
+          },
         );
         return Result.failure(
-          RideRequestErrors.duplicateRideRequest(dto.riderId, dto.driverId)
+          RideRequestErrors.duplicateRideRequest(dto.riderId, dto.driverId),
         );
       }
 
@@ -132,7 +132,7 @@ export class SendRideRequestUseCase
         dto.pickupTime,
         dto.rideType as RideType,
         dto.fareBreakdown,
-        dto.pickupETA
+        dto.pickupETA,
       );
 
       //  Save ride request
@@ -146,13 +146,13 @@ export class SendRideRequestUseCase
         });
         return Result.failure(
           RideRequestErrors.rideRequestCreationFailed(
-            "Failed to persist request"
-          )
+            "Failed to persist request",
+          ),
         );
       }
 
       Logger.info("SendRideRequestUseCase: Ride request created successfully", {
-        requestId: savedRequest.getRequestId?.() ?? savedRequest.getId?.(),
+        requestId: savedRequest.getId(),
         riderId: dto.riderId,
         driverId: dto.driverId,
         status: savedRequest.getStatus(),
