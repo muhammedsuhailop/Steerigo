@@ -24,7 +24,6 @@ import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { AppConstants } from "@shared/constants/AppConstants";
-import mongoose from "mongoose";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -57,7 +56,7 @@ export class AutoSearchAndSendRideRequestUseCase
   async execute(
     dto: AutoSearchAndRequestDto,
   ): Promise<Result<AutoSearchAndRequestResponseDto>> {
-    const userId = dto.getUserId();
+    const userId = dto.getRiderId();
 
     try {
       dto.validate();
@@ -110,8 +109,6 @@ export class AutoSearchAndSendRideRequestUseCase
         longitude: dto.dropLongitude,
         address: dto.dropAddress,
       });
-
-      const requestGroupId = new mongoose.Types.ObjectId().toString();
 
       const pendingRequests =
         await this.rideRequestRepository.findPendingByRiderId(userId);
@@ -182,7 +179,7 @@ export class AutoSearchAndSendRideRequestUseCase
         const rideRequest = RideRequest.create(
           driverId,
           userId,
-          requestGroupId,
+          dto.requestGroupId,
           pickup,
           drop,
           dto.searchDate,
@@ -213,7 +210,7 @@ export class AutoSearchAndSendRideRequestUseCase
 
       return Result.success(
         AutoSearchAndRequestResponseDto.create(
-          requestGroupId,
+          dto.requestGroupId,
           successfulRequests,
           failedRequests,
           nearbyAvailabilities.length,

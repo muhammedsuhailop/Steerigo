@@ -435,6 +435,28 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
     return docs.map(RideRequestMapper.toDomain);
   }
 
+  async findByGroupAndDriver(
+    requestGroupId: string,
+    driverId: string,
+  ): Promise<RideRequest | null> {
+    try {
+      const doc = await RideRequestModel.findOne({
+        requestGroupId: requestGroupId,
+        driverId: new Types.ObjectId(driverId),
+      });
+
+      return doc ? RideRequestMapper.toDomain(doc) : null;
+    } catch (error) {
+      Logger.error("Error finding ride request by group and driver", {
+        requestGroupId,
+        driverId,
+        error,
+      });
+
+      throw error;
+    }
+  }
+
   // Helper methods
   private buildFilterQuery(
     filters: IRideRequestFilters,

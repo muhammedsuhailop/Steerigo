@@ -50,6 +50,9 @@ const fareBreakdownSchema = z.object({
 export const sendRideRequestSchema = z.object({
   body: z
     .object({
+      requestGroupId: z
+        .string()
+        .uuid({ message: "requestGroupId must be a valid UUID" }),
       driverId: z
         .string()
         .min(1, { message: "Driver ID is required" })
@@ -65,7 +68,7 @@ export const sendRideRequestSchema = z.object({
             const date = new Date(val);
             return !isNaN(date.getTime());
           },
-          { message: "Pickup time must be a valid ISO8601 datetime" }
+          { message: "Pickup time must be a valid ISO8601 datetime" },
         )
         .refine(
           (val) => {
@@ -76,7 +79,7 @@ export const sendRideRequestSchema = z.object({
           {
             message:
               "Pickup time cannot be in the past (allow 5 minutes tolerance)",
-          }
+          },
         ),
       rideType: z.enum(VALID_RIDE_TYPES, {
         message: "Ride type must be either 'One Way' or 'Round Trip'",

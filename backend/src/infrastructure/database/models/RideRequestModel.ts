@@ -3,7 +3,7 @@ import { Document, Schema, model, Model, Types } from "mongoose";
 export interface IRideRequestDocument extends Document {
   _id: Types.ObjectId;
   driverId: Types.ObjectId;
-  requestGroupId: Types.ObjectId;
+  requestGroupId: string;
   riderId: Types.ObjectId;
   pickup: {
     latitude: number;
@@ -67,7 +67,7 @@ const rideRequestSchema = new Schema(
       index: true,
     },
     requestGroupId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       required: true,
       index: true,
     },
@@ -246,6 +246,7 @@ rideRequestSchema.index({ driverId: 1, pickupTime: 1 });
 rideRequestSchema.index({ riderId: 1, status: 1 });
 rideRequestSchema.index({ createdAt: 1 });
 rideRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+rideRequestSchema.index({ requestGroupId: 1, driverId: 1 }, { unique: true });
 
 // RideRequest Model
 export const RideRequestModel: Model<IRideRequestDocument> =

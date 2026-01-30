@@ -10,6 +10,7 @@ import {
 } from "@domain/errors/ValidationErrors";
 
 interface AutoSearchRequestBody {
+  requestGroupId: string;
   latitude: number;
   longitude: number;
   searchDate: string;
@@ -26,7 +27,8 @@ interface AutoSearchRequestBody {
 }
 
 export class AutoSearchAndRequestDto {
-  private readonly userId: string;
+  private readonly riderId: string;
+  public readonly requestGroupId: string;
   public readonly latitude: number;
   public readonly longitude: number;
   public readonly searchDate: Date;
@@ -42,7 +44,8 @@ export class AutoSearchAndRequestDto {
   public readonly rideType: string;
 
   constructor(
-    userId: string,
+    requestGroupId: string,
+    riderId: string,
     latitude: number,
     longitude: number,
     searchDate: Date,
@@ -55,9 +58,10 @@ export class AutoSearchAndRequestDto {
     dropLongitude: number,
     dropAddress: string | undefined,
     pickupAddress: string | undefined,
-    rideType: string
+    rideType: string,
   ) {
-    this.userId = userId;
+    this.requestGroupId = requestGroupId;
+    this.riderId = riderId;
     this.latitude = latitude;
     this.longitude = longitude;
     this.searchDate = searchDate;
@@ -74,11 +78,12 @@ export class AutoSearchAndRequestDto {
   }
 
   static fromRequest(
-    userId: string,
-    requestBody: unknown
+    riderId: string,
+    requestBody: unknown,
   ): AutoSearchAndRequestDto {
     const body = (requestBody ?? {}) as AutoSearchRequestBody;
     const {
+      requestGroupId,
       latitude,
       longitude,
       searchDate,
@@ -108,7 +113,8 @@ export class AutoSearchAndRequestDto {
       maxRideRequests && maxRideRequests > 0 ? maxRideRequests : 5;
 
     return new AutoSearchAndRequestDto(
-      userId,
+      requestGroupId,
+      riderId,
       latitude,
       longitude,
       parsedSearchDate,
@@ -121,12 +127,12 @@ export class AutoSearchAndRequestDto {
       dropLongitude,
       dropAddress,
       pickupAddress,
-      rideType
+      rideType,
     );
   }
 
-  getUserId(): string {
-    return this.userId;
+  getRiderId(): string {
+    return this.riderId;
   }
 
   validate(): void {
@@ -144,6 +150,10 @@ export class AutoSearchAndRequestDto {
       this.longitude > 180
     ) {
       throw new InvalidLongitudeError();
+    }
+
+    if (!this.requestGroupId) {
+      throw new Error("RequestGroupId required");
     }
 
     if (!this.searchDate || !(this.searchDate instanceof Date)) {
@@ -198,7 +208,7 @@ export class AutoSearchAndRequestDto {
       const validGearTypes = ["Manual", "Automatic"];
       if (!validGearTypes.includes(this.gearType)) {
         throw new InvalidGearTypeError(
-          `Invalid gear type: ${this.gearType}. Valid options: ${validGearTypes.join(", ")}`
+          `Invalid gear type: ${this.gearType}. Valid options: ${validGearTypes.join(", ")}`,
         );
       }
     }
@@ -207,7 +217,7 @@ export class AutoSearchAndRequestDto {
       const validBodyTypes = ["Sedan", "SUV", "Hatchback"];
       if (!validBodyTypes.includes(this.bodyType)) {
         throw new InvalidBodyTypeError(
-          `Invalid body type: ${this.bodyType}. Valid options: ${validBodyTypes.join(", ")}`
+          `Invalid body type: ${this.bodyType}. Valid options: ${validBodyTypes.join(", ")}`,
         );
       }
     }

@@ -7,13 +7,12 @@ import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
 import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
 import { RideRequest } from "@domain/entities/RideRequest";
 import { Location } from "@domain/value-objects/Location";
+import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
+import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { Result } from "@shared/utils/Result";
-import { DomainError } from "@domain/errors/DomainError";
-import { RideType } from "@domain/value-objects/RideType";
 import { IUseCase } from "../interfaces/IUseCase";
-import mongoose from "mongoose";
 
 @injectable()
 export class SendRideRequestUseCase
@@ -22,11 +21,13 @@ export class SendRideRequestUseCase
 {
   constructor(
     @inject(TYPES.RideRequestRepository)
-    private rideRequestRepository: IRideRequestRepository,
+    private readonly rideRequestRepository: IRideRequestRepository,
+
     @inject(TYPES.DriverRepository)
-    private driverRepository: IDriverRepository,
+    private readonly driverRepository: IDriverRepository,
+
     @inject(TYPES.UserRepository)
-    private userRepository: IUserRepository,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async execute(
@@ -35,59 +36,89 @@ export class SendRideRequestUseCase
     try {
       try {
         dto.validate();
-      } catch (validationError) {
+      } catch (validationError: unknown) {
         Logger.warn("SendRideRequestUseCase: DTO validation failed", {
           error: validationError,
           riderId: dto.riderId,
           driverId: dto.driverId,
         });
+
         if (validationError instanceof DomainError) {
           return Result.failure(validationError);
         }
 
+        if (validationError instanceof Error) {
+          return Result.failure(
+            RideRequestErrors.rideRequestCreationFailed(
+              validationError.message,
+            ),
+          );
+        }
+
         return Result.failure(
-          RideRequestErrors.rideRequestCreationFailed(
-            (validationError as Error)?.message || "Validation failed",
-          ),
+          RideRequestErrors.rideRequestCreationFailed("Validation failed"),
         );
       }
 
       Logger.info("SendRideRequestUseCase: Starting execution", {
         riderId: dto.riderId,
         driverId: dto.driverId,
+        requestGroupId: dto.requestGroupId,
         totalFare: dto.fareBreakdown.getTotalFare().getAmount(),
       });
 
-      // Verify rider exists
       const rider = await this.userRepository.findById(dto.riderId);
+
       if (!rider) {
         Logger.warn("SendRideRequestUseCase: Rider not found", {
           riderId: dto.riderId,
         });
+
         return Result.failure(RideRequestErrors.userNotFound(dto.riderId));
       }
 
-      // Verify driver exists
       const driver = await this.driverRepository.findById(dto.driverId);
+
       if (!driver) {
         Logger.warn("SendRideRequestUseCase: Driver not found", {
           driverId: dto.driverId,
         });
+
         return Result.failure(RideRequestErrors.driverNotFound(dto.driverId));
       }
 
-      //Verify driver is available
       if (!driver.getisAvailable()) {
         Logger.warn("SendRideRequestUseCase: Driver not available", {
           driverId: dto.driverId,
           status: driver.getStatus(),
         });
+
         return Result.failure(
           RideRequestErrors.driverNotAvailable(dto.driverId),
         );
       }
 
-      // Check for duplicate pending requests
+      const existingRequest =
+        await this.rideRequestRepository.findByGroupAndDriver(
+          dto.requestGroupId,
+          dto.driverId,
+        );
+
+      if (existingRequest) {
+        Logger.warn(
+          "SendRideRequestUseCase: Duplicate group-driver request detected",
+          {
+            riderId: dto.riderId,
+            driverId: dto.driverId,
+            requestGroupId: dto.requestGroupId,
+          },
+        );
+
+        return Result.failure(
+          RideRequestErrors.duplicateRideRequest(dto.riderId, dto.driverId),
+        );
+      }
+
       const pendingRequests =
         await this.rideRequestRepository.findPendingByRiderId(dto.riderId);
 
@@ -103,12 +134,12 @@ export class SendRideRequestUseCase
             driverId: dto.driverId,
           },
         );
+
         return Result.failure(
           RideRequestErrors.duplicateRideRequest(dto.riderId, dto.driverId),
         );
       }
 
-      // Create location value objects
       const pickup = Location.create({
         latitude: dto.pickupLatitude,
         longitude: dto.pickupLongitude,
@@ -121,12 +152,12 @@ export class SendRideRequestUseCase
         address: dto.dropAddress,
       });
 
-      //Create ride request entity with fareBreakdown
-      const requestGroupId = new mongoose.Types.ObjectId().toString();
+      const rideType = dto.rideType;
+
       const rideRequest = RideRequest.create(
         dto.driverId,
-        requestGroupId,
         dto.riderId,
+        dto.requestGroupId,
         pickup,
         drop,
         dto.pickupTime,
@@ -135,15 +166,15 @@ export class SendRideRequestUseCase
         dto.pickupETA,
       );
 
-      //  Save ride request
       const savedRequest = await this.rideRequestRepository.save(rideRequest);
 
       if (!savedRequest) {
         Logger.error("SendRideRequestUseCase: Failed to save ride request", {
-          requestGroupId,
+          requestGroupId: dto.requestGroupId,
           riderId: dto.riderId,
           driverId: dto.driverId,
         });
+
         return Result.failure(
           RideRequestErrors.rideRequestCreationFailed(
             "Failed to persist request",
@@ -155,14 +186,15 @@ export class SendRideRequestUseCase
         requestId: savedRequest.getId(),
         riderId: dto.riderId,
         driverId: dto.driverId,
+        requestGroupId: dto.requestGroupId,
         status: savedRequest.getStatus(),
         totalFare: savedRequest.getFare(),
       });
 
-      // Return success response DTO
       const responseDto = SendRideRequestResponseDto.fromDomain(savedRequest);
+
       return Result.success(responseDto);
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error("SendRideRequestUseCase: Execution failed", {
         error,
         riderId: dto.riderId,
@@ -173,9 +205,15 @@ export class SendRideRequestUseCase
         return Result.failure(error);
       }
 
-      const msg =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      return Result.failure(RideRequestErrors.rideRequestCreationFailed(msg));
+      if (error instanceof Error) {
+        return Result.failure(
+          RideRequestErrors.rideRequestCreationFailed(error.message),
+        );
+      }
+
+      return Result.failure(
+        RideRequestErrors.rideRequestCreationFailed("Unknown error occurred"),
+      );
     }
   }
 }

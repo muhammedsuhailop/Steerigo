@@ -18,7 +18,7 @@ export interface IRideRequestRepository
   // Driver-specific queries
   findByDriverId(
     driverId: string,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]>;
   findPendingByDriverId(driverId: string): Promise<RideRequest[]>;
   countPendingByDriverId(driverId: string): Promise<number>;
@@ -26,14 +26,14 @@ export interface IRideRequestRepository
   // Rider-specific queries
   findByRiderId(
     riderId: string,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]>;
   findPendingByRiderId(riderId: string): Promise<RideRequest[]>;
 
   // Status-based queries
   findByStatus(
     status: RideRequestStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<RideRequest[]>;
   findExpiredRequests(): Promise<RideRequest[]>;
 
@@ -41,6 +41,10 @@ export interface IRideRequestRepository
   findByRequestId(requestId: string): Promise<RideRequest | null>;
   expirePendingRequests(olderThanMinutes: number): Promise<number>;
   deleteExpiredRequests(): Promise<number>;
+  findByGroupAndDriver(
+    requestGroupId: string,
+    driverId: string,
+  ): Promise<RideRequest | null>;
 
   // Bulk operations for sending requests to multiple drivers
   saveMany(requests: RideRequest[]): Promise<RideRequest[]>;

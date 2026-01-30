@@ -1,5 +1,8 @@
 import { RideType } from "@domain/value-objects/RideType";
-import { VALID_BODY_TYPES, VALID_GEAR_TYPES } from "@domain/value-objects/VehicleType";
+import {
+  VALID_BODY_TYPES,
+  VALID_GEAR_TYPES,
+} from "@domain/value-objects/VehicleType";
 import { z } from "zod";
 
 const locationSchema = z.object({
@@ -37,7 +40,7 @@ export const autoSearchAndRequestSchema = z.object({
             const date = new Date(val);
             return !isNaN(date.getTime());
           },
-          { message: "Search date must be a valid ISO8601 datetime" }
+          { message: "Search date must be a valid ISO8601 datetime" },
         )
         .refine(
           (val) => {
@@ -47,7 +50,7 @@ export const autoSearchAndRequestSchema = z.object({
           {
             message:
               "Search date cannot be in the past (allow 5 minutes tolerance)",
-          }
+          },
         ),
       timeRequired: z
         .number()
@@ -95,6 +98,9 @@ export const autoSearchAndRequestSchema = z.object({
       rideType: z.enum(RideType, {
         message: "Ride type must be either 'One Way' or 'Round Trip'",
       }),
+      requestGroupId: z
+        .string()
+        .uuid({ message: "requestGroupId must be a valid UUID" }),
     })
     .strict(),
 });

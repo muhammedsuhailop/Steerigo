@@ -69,7 +69,7 @@ export class RideRequestMapper {
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
-      requestGroupId: doc.requestGroupId.toString(),
+      requestGroupId: doc.requestGroupId,
       riderId: doc.riderId.toString(),
       pickup,
       drop,
@@ -88,7 +88,7 @@ export class RideRequestMapper {
 
     return {
       driverId: toObjectId(entity.getDriverId()),
-      requestGroupId: toObjectId(entity.getRequestGroupId()),
+      requestGroupId: entity.getRequestGroupId(),
       riderId: toObjectId(entity.getRiderId()),
       pickup: {
         latitude: entity.getPickup().getLatitude(),

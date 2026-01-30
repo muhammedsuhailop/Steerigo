@@ -1,3 +1,4 @@
+import { DomainError } from "@domain/errors";
 import {
   FareBreakdown,
   TaxBreakdown,
@@ -5,6 +6,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 
 interface SendRideRequestBody {
+  requestGroupId: string;
   driverId: string;
   pickup: {
     latitude: number;
@@ -57,6 +59,7 @@ interface SendRideRequestBody {
 export class SendRideRequestDto {
   public readonly riderId: string;
   public readonly driverId: string;
+  public readonly requestGroupId: string;
   public readonly pickupLatitude: number;
   public readonly pickupLongitude: number;
   public readonly pickupAddress: string | undefined;
@@ -69,6 +72,7 @@ export class SendRideRequestDto {
   public readonly pickupETA: string;
 
   constructor(
+    requestGroupId: string,
     riderId: string,
     driverId: string,
     pickupLatitude: number,
@@ -80,8 +84,9 @@ export class SendRideRequestDto {
     pickupTime: Date,
     rideType: string,
     fareBreakdown: FareBreakdown,
-    pickupETA: string
+    pickupETA: string,
   ) {
+    this.requestGroupId = requestGroupId;
     this.riderId = riderId;
     this.driverId = driverId;
     this.pickupLatitude = pickupLatitude;
@@ -98,10 +103,11 @@ export class SendRideRequestDto {
 
   static fromRequest(
     riderId: string,
-    requestBody: unknown
+    requestBody: unknown,
   ): SendRideRequestDto {
     const body = (requestBody ?? {}) as SendRideRequestBody;
     const {
+      requestGroupId,
       driverId,
       pickup,
       drop,
@@ -131,41 +137,37 @@ export class SendRideRequestDto {
       throw new Error("Pickup ETA is required");
     }
 
-    // Create base fare Money object
     const baseFare = Money.create(
       fareBreakdownData.baseFare.amount,
-      fareBreakdownData.baseFare.currency
+      fareBreakdownData.baseFare.currency,
     );
 
-    // Create platform fee Money object
     const platformFee = Money.create(
       fareBreakdownData.platformFee.amount,
-      fareBreakdownData.platformFee.currency
+      fareBreakdownData.platformFee.currency,
     );
 
-    // Create fare tax breakdown
     const fareTax: TaxBreakdown = {
       name: fareBreakdownData.taxes.fare.name,
       rate: fareBreakdownData.taxes.fare.rate,
       amount: Money.create(
         fareBreakdownData.taxes.fare.amount.amount,
-        fareBreakdownData.taxes.fare.amount.currency
+        fareBreakdownData.taxes.fare.amount.currency,
       ),
     };
 
-    // Create platform fee tax breakdown
     const platformFeeTax: TaxBreakdown = {
       name: fareBreakdownData.taxes.platformFee.name,
       rate: fareBreakdownData.taxes.platformFee.rate,
       amount: Money.create(
         fareBreakdownData.taxes.platformFee.amount.amount,
-        fareBreakdownData.taxes.platformFee.amount.currency
+        fareBreakdownData.taxes.platformFee.amount.currency,
       ),
     };
 
     const totalFare = Money.create(
       fareBreakdownData.totalFare.amount,
-      fareBreakdownData.totalFare.currency
+      fareBreakdownData.totalFare.currency,
     );
 
     const fareBreakdown = FareBreakdown.create({
@@ -178,6 +180,7 @@ export class SendRideRequestDto {
     });
 
     return new SendRideRequestDto(
+      requestGroupId,
       riderId,
       driverId,
       pickup.latitude,
@@ -189,7 +192,7 @@ export class SendRideRequestDto {
       new Date(pickupTime),
       rideType,
       fareBreakdown,
-      pickupETA
+      pickupETA,
     );
   }
 
@@ -200,6 +203,10 @@ export class SendRideRequestDto {
 
     if (!this.driverId || this.driverId.trim().length === 0) {
       throw new Error("Driver ID is required");
+    }
+
+    if (!this.requestGroupId) {
+      throw new DomainError("RequestGroupId is required");
     }
 
     if (!this.fareBreakdown) {

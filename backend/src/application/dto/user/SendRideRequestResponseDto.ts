@@ -61,22 +61,22 @@ export interface RideRequestDto {
 export class SendRideRequestResponseDto {
   constructor(
     public readonly rideRequest: RideRequestDto,
-    public readonly message: string
+    public readonly message: string,
   ) {}
 
   static fromDomain(rideRequest: RideRequest): SendRideRequestResponseDto {
     const expiresAt = new Date(
-      rideRequest.getCreatedAt().getTime() + 30 * 60 * 1000
+      rideRequest.getCreatedAt().getTime() + 30 * 60 * 1000,
     );
     const expiresIn = Math.max(
       0,
-      Math.floor((expiresAt.getTime() - Date.now()) / 1000)
+      Math.floor((expiresAt.getTime() - Date.now()) / 1000),
     );
 
     const fareBreakdown = rideRequest.getFareBreakdown();
 
     const rideRequestDto: RideRequestDto = {
-      requestId: rideRequest.getRequestId(),
+      requestId: rideRequest.getId(),
       driverId: rideRequest.getDriverId(),
       riderId: rideRequest.getRiderId(),
       pickup: {
@@ -134,7 +134,7 @@ export class SendRideRequestResponseDto {
 
     return new SendRideRequestResponseDto(
       rideRequestDto,
-      "Ride request sent successfully. Waiting for driver to accept."
+      "Ride request sent successfully. Waiting for driver to accept.",
     );
   }
 }
