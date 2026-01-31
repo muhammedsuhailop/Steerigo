@@ -25,7 +25,7 @@ import type { TripFormData, Driver } from "../types/driverSearch.types";
 import { useRideRequest } from "../hooks/useRideRequest";
 import { Alert } from "@/shared/components/ui/Alert";
 import type { RideRequestError } from "../types/rideRequest.types";
-import { v4 as uuidv4 } from "uuid"; 
+import { v4 as uuidv4 } from "uuid";
 
 import {
   FaMap,
@@ -50,7 +50,7 @@ const DriverSearchPage: React.FC = () => {
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
-    null
+    null,
   );
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -61,7 +61,7 @@ const DriverSearchPage: React.FC = () => {
 
   // Track requested driver IDs
   const [requestedDriverIds, setRequestedDriverIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Ride request hook
@@ -76,17 +76,11 @@ const DriverSearchPage: React.FC = () => {
     requestGroupId,
     onSuccess: (requestId: string) => {
       if (selectedDriverForRequest) {
-        // Add driver ID to requested set
-        setRequestedDriverIds((prev) =>
-          new Set(prev).add(selectedDriverForRequest.id)
-        );
-
         setSuccessMessage(
-          `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`
+          `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`,
         );
         setSelectedDriverForRequest(null);
 
-        // Auto-dismiss success message after 5 seconds
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
@@ -94,6 +88,14 @@ const DriverSearchPage: React.FC = () => {
     },
     onError: (error: RideRequestError) => {
       console.error("Ride request error:", error);
+
+      if (selectedDriverForRequest) {
+        setRequestedDriverIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(selectedDriverForRequest.id);
+          return newSet;
+        });
+      }
     },
   });
 
@@ -116,8 +118,8 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setError(null));
       setHasSearched(true);
 
-      const newRequestGroupId = uuidv4(); 
-            dispatch(setRequestGroupId(newRequestGroupId)); 
+      const newRequestGroupId = uuidv4();
+      dispatch(setRequestGroupId(newRequestGroupId));
 
       // Clear requested drivers when doing a new search
       setRequestedDriverIds(new Set());
@@ -152,7 +154,7 @@ const DriverSearchPage: React.FC = () => {
             searchRadiusKm: formData.searchRadiusKm,
             gearType: formData.gearType,
             bodyType: formData.bodyType,
-          })
+          }),
         );
       }
     } catch (err: any) {
@@ -164,15 +166,16 @@ const DriverSearchPage: React.FC = () => {
 
   const handleDriverSelect = useCallback(
     async (driver: Driver) => {
-      // Don't allow requesting the same driver again
       if (requestedDriverIds.has(driver.id)) {
         return;
       }
 
+      setRequestedDriverIds((prev) => new Set(prev).add(driver.id));
+
       setSelectedDriverForRequest(driver);
       await sendRequest(driver);
     },
-    [sendRequest, requestedDriverIds]
+    [sendRequest, requestedDriverIds],
   );
 
   const handleDriverCall = (driver: Driver) => {
