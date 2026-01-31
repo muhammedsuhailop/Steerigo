@@ -10,6 +10,7 @@ import {
   setSearchCriteria,
   setTotalFound,
   setSearchedAt,
+  setRequestGroupId,
   setLoading,
   setError,
   selectDrivers,
@@ -18,11 +19,13 @@ import {
   selectIsLoading,
   selectError,
   selectTotalFound,
+  selectRequestGroupId,
 } from "../store/driverSearchSlice";
 import type { TripFormData, Driver } from "../types/driverSearch.types";
 import { useRideRequest } from "../hooks/useRideRequest";
 import { Alert } from "@/shared/components/ui/Alert";
 import type { RideRequestError } from "../types/rideRequest.types";
+import { v4 as uuidv4 } from "uuid"; 
 
 import {
   FaMap,
@@ -43,6 +46,7 @@ const DriverSearchPage: React.FC = () => {
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
   const totalFound = useSelector(selectTotalFound);
+  const requestGroupId = useSelector(selectRequestGroupId);
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
@@ -69,6 +73,7 @@ const DriverSearchPage: React.FC = () => {
   } = useRideRequest({
     formData: currentFormData,
     estimatedFare,
+    requestGroupId,
     onSuccess: (requestId: string) => {
       if (selectedDriverForRequest) {
         // Add driver ID to requested set
@@ -110,6 +115,9 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setLoading(true));
       dispatch(setError(null));
       setHasSearched(true);
+
+      const newRequestGroupId = uuidv4(); 
+            dispatch(setRequestGroupId(newRequestGroupId)); 
 
       // Clear requested drivers when doing a new search
       setRequestedDriverIds(new Set());

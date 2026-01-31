@@ -8,6 +8,7 @@ export interface RideRequestPayload {
   rideType: "One Way" | "Round Trip";
   fareBreakdown: EstimatedFare;
   pickupETA: string;
+  requestGroupId: string;
 }
 
 export interface RideRequestResponse {

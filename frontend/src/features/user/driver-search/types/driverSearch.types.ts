@@ -105,6 +105,7 @@ export interface DriverSearchState {
   isLoading: boolean;
   error: string | null;
   totalFound: number;
+  requestGroupId: string | null;
   searchedAt: string | null;
 }
 
