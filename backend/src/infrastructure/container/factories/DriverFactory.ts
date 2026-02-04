@@ -38,6 +38,9 @@ import { EditAvailabilityExceptionUseCase } from "@application/use-cases/driver/
 import { RemoveAvailabilityExceptionRequestDto } from "@application/dto/driver/RemoveAvailabilityExceptionRequestDto";
 import { RemoveAvailabilityExceptionResponseDto } from "@application/dto/driver/RemoveAvailabilityExceptionResponseDto";
 import { RemoveAvailabilityExceptionUseCase } from "@application/use-cases/driver/RemoveAvailabilityExceptionUseCase";
+import { AcceptRideRequestDto } from "@application/dto/driver/AcceptRideRequestDto";
+import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRideRequestResponseDto";
+import { AcceptRideRequestUseCase } from "@application/use-cases/driver/AcceptRideRequestUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -109,6 +112,15 @@ export class DriverFactory {
         >
       >(TYPES.RemoveAvailabilityExceptionUseCase)
       .to(RemoveAvailabilityExceptionUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          AcceptRideRequestDto,
+          Promise<Result<AcceptRideRequestResponseDto>>
+        >
+      >(TYPES.AcceptRideRequestUseCase)
+      .to(AcceptRideRequestUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

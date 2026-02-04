@@ -184,4 +184,9 @@ export class RideRequest {
     this.status = RideRequestStatus.EXPIRED;
     this.updatedAt = new Date();
   }
+
+  markAsCancelled(): void {
+    this.status = RideRequestStatus.CANCELLED;
+    this.updatedAt = new Date();
+  }
 }

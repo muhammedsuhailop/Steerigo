@@ -44,11 +44,29 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
       const now = new Date();
       const defaultExpiresAt = new Date(Date.now() + 1.5 * 60 * 1000);
 
-      const doc = await RideRequestModel.create({
-        ...requestData,
-        createdAt: now,
-        expiresAt: defaultExpiresAt,
-      });
+      let doc;
+
+      if (!requestData._id) {
+        doc = await RideRequestModel.create({
+          ...requestData,
+          createdAt: now,
+          expiresAt: defaultExpiresAt,
+        });
+      } else {
+        doc = await RideRequestModel.findOneAndUpdate(
+          { _id: requestData._id },
+          {
+            $set: requestData,
+          },
+          {
+            new: true,
+          },
+        );
+      }
+
+      if (!doc) {
+        throw new Error("Failed to save ride request: document not found");
+      }
 
       Logger.info("Ride request saved successfully", {
         id: doc._id.toString(),

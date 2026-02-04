@@ -20,4 +20,5 @@ export const DRIVER_MESSAGES = {
   INVALID_MISSING_DOC_TYPE: "Invalid or missing document type",
   AVAILABILITY_EXCEPTION_UPDATED: "Availability Exception added successfully",
   AVAILABILITY_EXCEPTION_REMOVED: "Availability Exception removed successfully",
+  REQUEST_ID_REQUIRED: "Request ID is required",
 };

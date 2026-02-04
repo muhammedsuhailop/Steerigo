@@ -13,12 +13,13 @@ import {
 import { DriverController } from "@interface/controllers/driver/DriverController";
 import { TYPES } from "@shared/constants/DITypes";
 import { driverAvailabilityRoutes } from "./DriverAvailabilityRoutes";
+import { driverRideRoutes } from "./DriverRideRoutes";
 
 const router = Router();
 
 // Get controller instance from DI container
 const driverController = container.get<DriverController>(
-  TYPES.DriverController
+  TYPES.DriverController,
 );
 
 router.use((req, res, next) => {
@@ -38,22 +39,22 @@ router.get("/status", (req, res) => driverController.getStatus(req, res));
 
 // POST /api/driver/register - Register as driver
 router.post("/register", validateSchema(driverRegistrationSchema), (req, res) =>
-  driverController.register(req, res)
+  driverController.register(req, res),
 );
 
 // GET /api/driver/profile - Get driver profile
 router.get("/profile", (req, res) =>
-  driverController.getDetailedProfile(req, res)
+  driverController.getDetailedProfile(req, res),
 );
 
 // PUT /api/driver/profile - Update driver profile
 router.put("/profile", validateSchema(driverUpdateSchema), (req, res) =>
-  driverController.updateProfile(req, res)
+  driverController.updateProfile(req, res),
 );
 
 // POST /api/driver/kyc - Submit KYC document
 router.put("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
-  driverController.submitKYC(req, res)
+  driverController.submitKYC(req, res),
 );
 
 // GET /api/driver/kyc - Get KYC status
@@ -61,5 +62,8 @@ router.get("/kyc", (req, res) => driverController.getKYCStatus(req, res));
 
 // /api/driver/availability
 router.use("/availability", driverAvailabilityRoutes);
+
+// /api/driver/ride
+router.use("/ride", driverRideRoutes);
 
 export { router as driverRoutes };

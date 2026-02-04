@@ -9,6 +9,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 import { IRideRequestDocument } from "../models/RideRequestModel";
 import { toObjectId } from "@shared/utils/idHelper";
+import { Types } from "mongoose";
 
 export class RideRequestMapper {
   static toDomain(doc: IRideRequestDocument): RideRequest {
@@ -87,6 +88,7 @@ export class RideRequestMapper {
     const fareBreakdown = entity.getFareBreakdown();
 
     return {
+      _id: entity.getId() ? new Types.ObjectId(entity.getId()) : undefined,
       driverId: toObjectId(entity.getDriverId()),
       requestGroupId: entity.getRequestGroupId(),
       riderId: toObjectId(entity.getRiderId()),

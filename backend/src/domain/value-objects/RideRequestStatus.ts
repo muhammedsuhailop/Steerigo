@@ -3,4 +3,5 @@ export enum RideRequestStatus {
   ACCEPTED = "Accepted",
   REJECTED = "Rejected",
   EXPIRED = "Expired",
+  CANCELLED = "Cancelled",
 }
