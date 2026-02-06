@@ -1,38 +1,78 @@
+import { RIDE_ERROR_MESSAGES } from "@shared/constants/RideMessages";
 import { DomainError } from "./DomainError";
+import { ErrorType } from "@shared/enums/ErrorType";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+
+import { formatMessage } from "@shared/utils/errorMessageFormatter";
 
 export class RideErrors {
   static rideNotFound(rideId: string): DomainError {
     return new DomainError(
-      `Ride with ID ${rideId} not found`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_NOT_FOUND, { rideId }),
       "RIDE_NOT_FOUND",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "NOT_FOUND",
+      },
     );
   }
 
   static rideAlreadyAccepted(rideId: string): DomainError {
     return new DomainError(
-      `Ride ${rideId} has already been accepted`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_ALREADY_ACCEPTED, { rideId }),
       "RIDE_ALREADY_ACCEPTED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
   static rideAlreadyStarted(rideId: string): DomainError {
     return new DomainError(
-      `Ride ${rideId} has already been started`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_ALREADY_STARTED, { rideId }),
       "RIDE_ALREADY_STARTED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
   static rideAlreadyCompleted(rideId: string): DomainError {
     return new DomainError(
-      `Ride ${rideId} has already been completed`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_ALREADY_COMPLETED, { rideId }),
       "RIDE_ALREADY_COMPLETED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
   static rideAlreadyCancelled(rideId: string): DomainError {
     return new DomainError(
-      `Ride ${rideId} has been cancelled`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_ALREADY_CANCELLED, { rideId }),
       "RIDE_ALREADY_CANCELLED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
@@ -41,8 +81,18 @@ export class RideErrors {
     existingRideId: string,
   ): DomainError {
     return new DomainError(
-      `Driver ${driverId} already has an active ride: ${existingRideId}`,
+      formatMessage(RIDE_ERROR_MESSAGES.DRIVER_HAS_ACTIVE_RIDE, {
+        driverId,
+        rideId: existingRideId,
+      }),
       "DRIVER_HAS_ACTIVE_RIDE",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
@@ -51,8 +101,18 @@ export class RideErrors {
     existingRideId: string,
   ): DomainError {
     return new DomainError(
-      `Rider ${riderId} already has an active ride: ${existingRideId}`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDER_HAS_ACTIVE_RIDE, {
+        riderId,
+        rideId: existingRideId,
+      }),
       "RIDER_HAS_ACTIVE_RIDE",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
     );
   }
 
@@ -62,15 +122,33 @@ export class RideErrors {
     rideId: string,
   ): DomainError {
     return new DomainError(
-      `Cannot transition ride ${rideId} from ${from} to ${to}`,
+      formatMessage(RIDE_ERROR_MESSAGES.INVALID_STATUS_TRANSITION, {
+        from,
+        to,
+        rideId,
+      }),
       "INVALID_STATUS_TRANSITION",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
     );
   }
 
   static rideCreationFailed(reason: string): DomainError {
     return new DomainError(
-      `Failed to create ride: ${reason}`,
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_CREATION_FAILED, { reason }),
       "RIDE_CREATION_FAILED",
+      {
+        statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+        errorType: ErrorType.SERVER_ERROR,
+        shouldLog: true,
+        isOperational: false,
+        category: "SERVER",
+      },
     );
   }
 }

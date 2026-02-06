@@ -14,6 +14,7 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { Types } from "mongoose";
+import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -147,7 +148,7 @@ export class AcceptRideRequestUseCase
 
       const response: AcceptRideRequestResponseDto = {
         success: true,
-        message: "Ride request accepted successfully",
+        message: RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
         data: {
           rideId: savedRide.getRideId(),
           requestId: rideRequest.getId(),

@@ -12,3 +12,11 @@ export const ADMIN_MESSAGES = {
     USER_PROFILE_FETCHED: "User profile fetched successfully",
   },
 } as const;
+
+export const ADMIN_ERROR_MESSAGES = {
+  USER: {
+    NOT_FOUND: "Admin user not found",
+    INVALID_ACTION: "Invalid admin action",
+    UNAUTHORIZED_ACTION: "You are not authorized to perform this action",
+  },
+};
