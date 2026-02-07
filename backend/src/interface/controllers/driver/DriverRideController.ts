@@ -9,6 +9,10 @@ import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
 import { AcceptRideRequestDto } from "@application/dto/driver/AcceptRideRequestDto";
 import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRideRequestResponseDto";
+import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestDto";
+import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
+import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
+import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
 
 @injectable()
 export class DriverRideController {
@@ -17,6 +21,16 @@ export class DriverRideController {
     private acceptRideRequestUseCase: IUseCase<
       AcceptRideRequestDto,
       Promise<Result<AcceptRideRequestResponseDto>>
+    >,
+    @inject(TYPES.RejectRideRequestUseCase)
+    private rejectRideRequestUseCase: IUseCase<
+      RejectRideRequestDto,
+      Promise<Result<RejectRideRequestResponseDto>>
+    >,
+    @inject(TYPES.GetPendingRideRequestsUseCase)
+    private getPendingRideRequestsUseCase: IUseCase<
+      GetPendingRideRequestsDto,
+      Promise<Result<GetPendingRideRequestsResponseDto>>
     >,
   ) {}
 
@@ -87,6 +101,139 @@ export class DriverRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "accept_ride_request",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async rejectRideRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      const requestId = req.params.requestId;
+      if (!requestId) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: DRIVER_MESSAGES.REQUEST_ID_REQUIRED,
+        });
+        return;
+      }
+
+      Logger.info("Cancel ride request received", {
+        userId,
+        requestId,
+      });
+
+      const dto = RejectRideRequestDto.fromRequest(userId, {
+        requestId,
+        reason: req.body?.reason,
+      });
+
+      const result = await this.rejectRideRequestUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Cancel ride request failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "cancel_ride_request",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+      Logger.info("Ride request cancelled successfully", {
+        userId,
+        requestId: responseData.data.requestId,
+      });
+
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Cancel ride request controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "cancel_ride_request",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getPendingRideRequests(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      Logger.info("Get pending ride requests received", {
+        userId,
+      });
+
+      const limit = req.query.limit
+        ? parseInt(req.query.limit as string, 10)
+        : 10;
+      const offset = req.query.offset
+        ? parseInt(req.query.offset as string, 10)
+        : 0;
+
+      const dto = GetPendingRideRequestsDto.fromRequest(userId, {
+        limit,
+        offset,
+      });
+
+      const result = await this.getPendingRideRequestsUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Get pending ride requests failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_pending_ride_requests",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+      Logger.info("Pending ride requests fetched successfully", {
+        userId,
+        count: responseData.data.total,
+      });
+
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Get pending ride requests controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_pending_ride_requests",
       );
       res.status(statusCode).json(response);
     }

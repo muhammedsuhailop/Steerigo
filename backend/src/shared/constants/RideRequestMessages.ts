@@ -16,4 +16,8 @@ export const RIDE_REQUEST_ERROR_MESSAGES = {
   REQUEST_NOT_IN_PENDING:
     "The ride request cannot be processed because it is no longer in a pending state. requestId: {{requestId}} currentStatus: {{status}}",
   RIDE_REQUEST_CREATION_FAILED: "Failed to create ride request{{reason}}",
+  RIDE_REQUEST_NOT_FOR_DRIVER:
+    "Ride request {requestId} does not belong to driver {driverId}",
+  RIDE_REQUEST_NOT_PENDING:
+    "Ride request {requestId} is not pending. Current status: {status}",
 } as const;

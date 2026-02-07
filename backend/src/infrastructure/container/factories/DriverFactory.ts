@@ -41,6 +41,12 @@ import { RemoveAvailabilityExceptionUseCase } from "@application/use-cases/drive
 import { AcceptRideRequestDto } from "@application/dto/driver/AcceptRideRequestDto";
 import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRideRequestResponseDto";
 import { AcceptRideRequestUseCase } from "@application/use-cases/driver/AcceptRideRequestUseCase";
+import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestDto";
+import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
+import { RejectRideRequestUseCase } from "@application/use-cases/driver/RejectRideRequestUseCase";
+import { GetPendingRideRequestsUseCase } from "@application/use-cases/driver/GetPendingRideRequestsUseCase";
+import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
+import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -121,6 +127,24 @@ export class DriverFactory {
         >
       >(TYPES.AcceptRideRequestUseCase)
       .to(AcceptRideRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          RejectRideRequestDto,
+          Promise<Result<RejectRideRequestResponseDto>>
+        >
+      >(TYPES.RejectRideRequestUseCase)
+      .to(RejectRideRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetPendingRideRequestsDto,
+          Promise<Result<GetPendingRideRequestsResponseDto>>
+        >
+      >(TYPES.GetPendingRideRequestsUseCase)
+      .to(GetPendingRideRequestsUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
