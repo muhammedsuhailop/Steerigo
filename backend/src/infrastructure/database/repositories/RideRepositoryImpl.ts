@@ -1,11 +1,15 @@
 import { injectable } from "inversify";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
+import {
+  IRidePaginationOptions,
+  IRideRepository,
+} from "@domain/repositories/IRideRepository";
 import { Ride } from "@domain/entities/Ride";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideModel, IRideDocument } from "../models/RideModel";
 import { RideMapper } from "../mappers/RideMapper";
 import { Logger } from "@shared/utils/Logger";
-import { Types } from "mongoose";
+import { FilterQuery, SortOrder, Types } from "mongoose";
+import { PaginatedResult } from "@shared/types/Repository";
 
 @injectable()
 export class RideRepositoryImpl implements IRideRepository {
@@ -210,6 +214,73 @@ export class RideRepositoryImpl implements IRideRepository {
       Logger.error("Error finding rides by rider ID", {
         riderId,
         status,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async findPaginatedByDriverId(
+    driverId: string,
+    options: IRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>> {
+    try {
+      const { page, limit, sortBy, sortOrder, status, fromDate, toDate } =
+        options;
+
+      const query: FilterQuery<IRideDocument> = {
+        driverId: new Types.ObjectId(driverId),
+      };
+
+      if (status) {
+        query.status = status;
+      }
+
+      if (fromDate || toDate) {
+        query.createdAt = {};
+        if (fromDate) {
+          query.createdAt.$gte = fromDate;
+        }
+        if (toDate) {
+          query.createdAt.$lte = toDate;
+        }
+      }
+
+      const sortValue: Record<string, SortOrder> = {
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      };
+
+      const total = await RideModel.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+      const skip = (page - 1) * limit;
+
+      const docs = await RideModel.find(query)
+        .sort(sortValue)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      const data = docs.map(RideMapper.toDomain);
+
+      Logger.debug("Paginated rides fetched for driver", {
+        driverId,
+        total,
+        page,
+        limit,
+        status,
+      });
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages,
+      };
+    } catch (error) {
+      Logger.error("Error finding paginated rides by driver ID", {
+        driverId,
+        options,
         error,
       });
       throw error;

@@ -81,8 +81,9 @@ export const TYPES = {
     "RemoveAvailabilityExceptionUseCase",
   ),
   AcceptRideRequestUseCase: Symbol.for("AcceptRideRequestUseCase"),
-  RejectRideRequestUseCase:Symbol.for("RejectRideRequestUseCase"),
-  GetPendingRideRequestsUseCase:Symbol.for("GetPendingRideRequestsUseCase"),
+  RejectRideRequestUseCase: Symbol.for("RejectRideRequestUseCase"),
+  GetPendingRideRequestsUseCase: Symbol.for("GetPendingRideRequestsUseCase"),
+  GetDriverRidesUseCase: Symbol.for("GetDriverRidesUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

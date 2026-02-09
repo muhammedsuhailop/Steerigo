@@ -47,6 +47,9 @@ import { RejectRideRequestUseCase } from "@application/use-cases/driver/RejectRi
 import { GetPendingRideRequestsUseCase } from "@application/use-cases/driver/GetPendingRideRequestsUseCase";
 import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
 import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
+import { GetDriverRidesDto } from "@application/dto/driver/GetDriverRidesDto";
+import { GetDriverRidesResponseDto } from "@application/dto/driver/GetDriverRidesResponseDto";
+import { GetDriverRidesUseCase } from "@application/use-cases/driver/GetDriverRidesUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -145,6 +148,12 @@ export class DriverFactory {
         >
       >(TYPES.GetPendingRideRequestsUseCase)
       .to(GetPendingRideRequestsUseCase);
+
+    container
+      .bind<
+        IUseCase<GetDriverRidesDto, Promise<Result<GetDriverRidesResponseDto>>>
+      >(TYPES.GetDriverRidesUseCase)
+      .to(GetDriverRidesUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

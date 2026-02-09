@@ -2,6 +2,7 @@ export const RIDE_MESSAGES = {
   RIDE_REQUEST_ACCEPTED: "Ride request accepted successfully",
   RIDE_REQUEST_REJECTED: "Ride request rejected successfully",
   PENDING_REQUESTS_FETCHED: "Pending ride requests fetched successfully",
+  RIDES_FETCHED_SUCCESSFULLY: "Rides fetched successfully ",
 };
 export const RIDE_ERROR_MESSAGES = {
   RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",

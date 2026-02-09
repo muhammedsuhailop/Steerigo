@@ -11,6 +11,11 @@ const driverRideController = container.get<DriverRideController>(
   TYPES.DriverRideController,
 );
 
+// GET /api/driver/ride - Get all rides with pagination and filters
+driverRideRoutes.get("/", (req, res) =>
+  driverRideController.getDriverRides(req, res),
+);
+
 // POST /api/driver/ride/:requestId/accept - Accept ride request
 driverRideRoutes.post(
   "/:requestId/accept",

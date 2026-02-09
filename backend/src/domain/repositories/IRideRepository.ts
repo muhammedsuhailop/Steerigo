@@ -1,7 +1,21 @@
+import { PaginatedResult } from "@shared/types/Repository";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { Ride } from "@domain/entities/Ride";
 import { RideStatus } from "@domain/value-objects/RideStatus";
+
+export interface IRideFilters {
+  status?: RideStatus;
+  fromDate?: Date;
+  toDate?: Date;
+}
+
+export interface IRidePaginationOptions extends IRideFilters {
+  page: number;
+  limit: number;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+}
 
 export interface IRideRepository
   extends IReadOnlyRepository<Ride, string>,
@@ -15,4 +29,8 @@ export interface IRideRepository
   findByDriverId(driverId: string, status?: RideStatus): Promise<Ride[]>;
 
   findByRiderId(riderId: string, status?: RideStatus): Promise<Ride[]>;
+  findPaginatedByDriverId(
+    driverId: string,
+    options: IRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>>;
 }

@@ -13,6 +13,8 @@ import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestD
 import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
 import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
 import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
+import { GetDriverRidesDto } from "@application/dto/driver/GetDriverRidesDto";
+import { GetDriverRidesResponseDto } from "@application/dto/driver/GetDriverRidesResponseDto";
 
 @injectable()
 export class DriverRideController {
@@ -31,6 +33,11 @@ export class DriverRideController {
     private getPendingRideRequestsUseCase: IUseCase<
       GetPendingRideRequestsDto,
       Promise<Result<GetPendingRideRequestsResponseDto>>
+    >,
+    @inject(TYPES.GetDriverRidesUseCase)
+    private getDriverRidesUseCase: IUseCase<
+      GetDriverRidesDto,
+      Promise<Result<GetDriverRidesResponseDto>>
     >,
   ) {}
 
@@ -234,6 +241,72 @@ export class DriverRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "get_pending_ride_requests",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+  async getDriverRides(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      Logger.info("Get driver rides received", {
+        userId,
+        query: req.query,
+      });
+
+      const queryData = {
+        page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
+        sortBy: req.query.sortBy as string | undefined,
+        sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
+        status: req.query.status as string | undefined,
+        fromDate: req.query.fromDate as string | undefined,
+        toDate: req.query.toDate as string | undefined,
+      };
+
+      const dto = GetDriverRidesDto.fromRequest(userId, queryData);
+
+      const result = await this.getDriverRidesUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Get driver rides failed", {
+          userId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_rides",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+      Logger.info("Driver rides fetched successfully", {
+        userId,
+        total: responseData.data.pagination.total,
+        page: responseData.data.pagination.page,
+      });
+
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Get driver rides controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_rides",
       );
       res.status(statusCode).json(response);
     }
