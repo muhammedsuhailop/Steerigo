@@ -45,6 +45,11 @@ export interface IRideRequestRepository
     requestGroupId: string,
     driverId: string,
   ): Promise<RideRequest | null>;
+  atomicAcceptRideRequest(requestId: string): Promise<RideRequest | null>;
+  cancelOtherPendingRequestsInGroup(
+    requestGroupId: string,
+    acceptedRequestId: string,
+  ): Promise<number>;
 
   // Bulk operations for sending requests to multiple drivers
   saveMany(requests: RideRequest[]): Promise<RideRequest[]>;

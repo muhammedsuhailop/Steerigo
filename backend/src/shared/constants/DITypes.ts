@@ -24,6 +24,7 @@ export const TYPES = {
   TokenManagementService: Symbol.for("TokenManagementService"),
   FareCalculationService: Symbol.for("FareCalculationService"),
   AvailabilityCheckService: Symbol.for("AvailabilityCheckService"),
+  DistributedLockService: Symbol.for("DistributedLockService"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),

@@ -207,4 +207,52 @@ export class RideRequestErrors {
       },
     );
   }
+  static requestAlreadyBeingProcessed(requestId: string): DomainError {
+    return new DomainError(
+      formatMessage(
+        RIDE_REQUEST_ERROR_MESSAGES.RIDE_REQUEST_ALREADY_PROCESSING,
+        { requestId },
+      ),
+      "RIDE_REQUEST_ALREADY_PROCESSING",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static requestAlreadyAccepted(requestId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_REQUEST_ERROR_MESSAGES.RIDE_REQUEST_ALREADY_ACCEPTED, {
+        requestId,
+      }),
+      "RIDE_REQUEST_ALREADY_ACCEPTED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static rideRequestExpired(requestId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_REQUEST_ERROR_MESSAGES.RIDE_REQUEST_EXPIRED, {
+        requestId,
+      }),
+      "RIDE_REQUEST_EXPIRED",
+      {
+        statusCode: HttpStatusCodes.GONE,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
 }

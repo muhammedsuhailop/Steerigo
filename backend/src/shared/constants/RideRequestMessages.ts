@@ -20,4 +20,9 @@ export const RIDE_REQUEST_ERROR_MESSAGES = {
     "Ride request {requestId} does not belong to driver {driverId}",
   RIDE_REQUEST_NOT_PENDING:
     "Ride request {requestId} is not pending. Current status: {status}",
+  RIDE_REQUEST_ALREADY_PROCESSING:
+    "Ride request {requestId} is currently being processed",
+  RIDE_REQUEST_ALREADY_ACCEPTED:
+    "Ride request {requestId} has already been accepted",
+  RIDE_REQUEST_EXPIRED: "Ride request {requestId} has expired",
 } as const;

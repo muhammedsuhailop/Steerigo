@@ -23,6 +23,8 @@ import {
 import { IFileUploadService } from "@application/services/IFileUploadService";
 import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
 import { AvailabilityCheckService } from "@infrastructure/services/AvailabilityCheckService";
+import { IDistributedLockService } from "@application/services/IDistributedLockService";
+import { RedisLockService } from "@infrastructure/services/DistributedLockService";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -48,5 +50,8 @@ export class ServiceFactory {
     container
       .bind<AvailabilityCheckService>(TYPES.AvailabilityCheckService)
       .to(AvailabilityCheckService);
+    container
+      .bind<IDistributedLockService>(TYPES.DistributedLockService)
+      .to(RedisLockService);
   }
 }

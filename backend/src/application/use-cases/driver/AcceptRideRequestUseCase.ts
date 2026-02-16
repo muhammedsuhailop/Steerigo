@@ -15,6 +15,8 @@ import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { Types } from "mongoose";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { IDistributedLockService } from "@application/services/IDistributedLockService";
+import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -24,6 +26,10 @@ export class AcceptRideRequestUseCase
       Promise<Result<AcceptRideRequestResponseDto>>
     >
 {
+  private readonly LOCK_TTL_SECONDS =
+    Number(process.env.RIDE_ACCEPT_LOCK_TTL_SECONDS) || 10;
+  private readonly LOCK_KEY_PREFIX = REDIS_LOCK_KEYS.RIDE_ACCEPT;
+
   constructor(
     @inject(TYPES.DriverRepository)
     private driverRepository: IDriverRepository,
@@ -31,16 +37,37 @@ export class AcceptRideRequestUseCase
     private rideRequestRepository: IRideRequestRepository,
     @inject(TYPES.RideRepository)
     private rideRepository: IRideRepository,
+    @inject(TYPES.DistributedLockService)
+    private lockService: IDistributedLockService,
   ) {}
 
   async execute(
     dto: AcceptRideRequestDto,
   ): Promise<Result<AcceptRideRequestResponseDto>> {
+    const requestId = dto.getRequestId();
+    const lockKey = `${this.LOCK_KEY_PREFIX}${requestId}`;
+    let lockToken: string | null = null;
+
     try {
       Logger.info("Accepting ride request", {
         userId: dto.getUserId(),
-        requestId: dto.getRequestId(),
+        requestId,
       });
+
+      // Distributed lock per requestId
+      lockToken = await this.lockService.acquireLock(
+        lockKey,
+        this.LOCK_TTL_SECONDS,
+      );
+
+      if (!lockToken) {
+        Logger.warn("Failed to acquire lock - already being processed", {
+          requestId,
+        });
+        return Result.failure(
+          RideRequestErrors.requestAlreadyBeingProcessed(requestId),
+        );
+      }
 
       const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
@@ -49,51 +76,42 @@ export class AcceptRideRequestUseCase
 
       const driverId = driver.getId().toString();
 
-      Logger.debug("Driver found for user", {
-        userId: dto.getUserId(),
-        driverId,
-      });
-
-      const rideRequest = await this.rideRequestRepository.findById(
-        dto.getRequestId(),
-      );
+      const rideRequest = await this.rideRequestRepository.findById(requestId);
       if (!rideRequest) {
+        return Result.failure(RideRequestErrors.rideRequestNotFound(requestId));
+      }
+
+      if (rideRequest.getDriverId().toString() !== driverId) {
         return Result.failure(
-          RideRequestErrors.rideRequestNotFound(dto.getRequestId()),
+          RideRequestErrors.rideRequestNotForDriver(requestId, driverId),
         );
       }
 
-      const requestDriverId = rideRequest.getDriverId().toString();
-
-      Logger.debug("Comparing driver IDs", {
-        driverId,
-        requestDriverId,
-        match: driverId === requestDriverId,
-      });
-
-      // Validate request belongs to this driver
-      if (requestDriverId !== driverId) {
-        return Result.failure(
-          RideRequestErrors.rideRequestNotForDriver(
-            dto.getRequestId(),
-            driverId,
-          ),
-        );
-      }
-
-      // Validate request is still pending
       if (!rideRequest.isPending()) {
         return Result.failure(
           RideRequestErrors.rideRequestNotPending(
-            dto.getRequestId(),
+            requestId,
             rideRequest.getStatus(),
           ),
         );
       }
 
-      // Check if driver already has an active ride
+      // Check expiry based on createdAt
+      const now = new Date();
+      const createdAt = rideRequest.getCreatedAt();
+      const ageMinutes = (now.getTime() - createdAt.getTime()) / 1000 / 60;
+
+      if (ageMinutes > 1.5) {
+        Logger.warn("Ride request expired by age check", {
+          requestId,
+          ageMinutes,
+        });
+        return Result.failure(RideRequestErrors.rideRequestExpired(requestId));
+      }
+
       const existingActiveRide =
         await this.rideRepository.findActiveRideByDriverId(driverId);
+
       if (existingActiveRide) {
         return Result.failure(
           RideErrors.driverAlreadyHasActiveRide(
@@ -103,20 +121,34 @@ export class AcceptRideRequestUseCase
         );
       }
 
-      // Mark ride request as accepted
-      rideRequest.markAsAccepted();
-      await this.rideRequestRepository.save(rideRequest);
+      const acceptedRequest =
+        await this.rideRequestRepository.atomicAcceptRideRequest(requestId);
 
-      Logger.info("Ride request marked as accepted", {
-        requestId: dto.getRequestId(),
+      if (!acceptedRequest) {
+        Logger.warn("Atomic accept failed - probably already accepted", {
+          requestId,
+        });
+        return Result.failure(
+          RideRequestErrors.requestAlreadyAccepted(requestId),
+        );
+      }
+
+      Logger.info("Ride request accepted", {
+        requestId,
         driverId,
+        requestGroupId: acceptedRequest.getRequestGroupId(),
       });
 
-      // Cancell all other pending requests for this rider in the same request group
-      await this.cancellOtherPendingRequests(
-        rideRequest.getRequestGroupId(),
-        dto.getRequestId(),
-      );
+      const cancelledCount =
+        await this.rideRequestRepository.cancelOtherPendingRequestsInGroup(
+          acceptedRequest.getRequestGroupId(),
+          acceptedRequest.getId(),
+        );
+
+      Logger.info("Cancelled other pending group requests", {
+        requestGroupId: acceptedRequest.getRequestGroupId(),
+        cancelledCount,
+      });
 
       const rideId = `RIDE-${new Types.ObjectId().toString()}`;
       const timeline = new RideTimeline(new Date());
@@ -126,24 +158,23 @@ export class AcceptRideRequestUseCase
         new Types.ObjectId().toString(),
         rideId,
         driverId,
-        rideRequest.getRiderId(),
-        rideRequest.getPickup(),
-        rideRequest.getDrop(),
-        rideRequest.getRideType(),
-        rideRequest.getFareBreakdown(),
+        acceptedRequest.getRiderId(),
+        acceptedRequest.getPickup(),
+        acceptedRequest.getDrop(),
+        acceptedRequest.getRideType(),
+        acceptedRequest.getFareBreakdown(),
         timeline,
       );
 
-      // Accept the ride
       ride.setStatusToAccepted();
 
       const savedRide = await this.rideRepository.save(ride);
 
       Logger.info("Ride created successfully", {
         rideId: savedRide.getRideId(),
-        requestId: dto.getRequestId(),
+        requestId: acceptedRequest.getId(),
         driverId,
-        riderId: rideRequest.getRiderId(),
+        riderId: acceptedRequest.getRiderId(),
       });
 
       const response: AcceptRideRequestResponseDto = {
@@ -151,24 +182,24 @@ export class AcceptRideRequestUseCase
         message: RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
         data: {
           rideId: savedRide.getRideId(),
-          requestId: rideRequest.getId(),
-          riderId: rideRequest.getRiderId(),
+          requestId: acceptedRequest.getId(),
+          riderId: acceptedRequest.getRiderId(),
           driverId,
           status: savedRide.getStatus(),
           pickup: {
-            latitude: rideRequest.getPickup().getLatitude(),
-            longitude: rideRequest.getPickup().getLongitude(),
-            address: rideRequest.getPickup().getAddress(),
+            latitude: acceptedRequest.getPickup().getLatitude(),
+            longitude: acceptedRequest.getPickup().getLongitude(),
+            address: acceptedRequest.getPickup().getAddress(),
           },
           drop: {
-            latitude: rideRequest.getDrop().getLatitude(),
-            longitude: rideRequest.getDrop().getLongitude(),
-            address: rideRequest.getDrop().getAddress(),
+            latitude: acceptedRequest.getDrop().getLatitude(),
+            longitude: acceptedRequest.getDrop().getLongitude(),
+            address: acceptedRequest.getDrop().getAddress(),
           },
-          rideType: rideRequest.getRideType(),
-          fare: rideRequest.getFare(),
+          rideType: acceptedRequest.getRideType(),
+          fare: acceptedRequest.getFare(),
           currency: savedRide.getCurrency(),
-          pickupTime: rideRequest.getPickupTime().toISOString(),
+          pickupTime: acceptedRequest.getPickupTime().toISOString(),
           timeline: {
             requestedAt: savedRide.getTimeline().getRequestedAt().toISOString(),
             acceptedAt: savedRide.getTimeline().getAcceptedAt()!.toISOString(),
@@ -180,42 +211,15 @@ export class AcceptRideRequestUseCase
     } catch (error) {
       Logger.error("Error accepting ride request", {
         userId: dto.getUserId(),
-        requestId: dto.getRequestId(),
+        requestId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
       return Result.failure(error as Error);
-    }
-  }
-
-  private async cancellOtherPendingRequests(
-    requestGroupId: string,
-    acceptedRequestId: string,
-  ): Promise<void> {
-    try {
-      const allRequestsInGroup = await this.rideRequestRepository.findAll();
-
-      const otherPendingRequests = allRequestsInGroup.filter(
-        (req) =>
-          req.getRequestGroupId() === requestGroupId &&
-          req.getId() !== acceptedRequestId &&
-          req.isPending(),
-      );
-
-      for (const request of otherPendingRequests) {
-        request.markAsCancelled();
-        await this.rideRequestRepository.save(request);
+    } finally {
+      if (lockToken) {
+        await this.lockService.releaseLock(lockKey, lockToken);
       }
-
-      Logger.info("Cancelled other pending requests in group", {
-        requestGroupId,
-        cancelledCount: otherPendingRequests.length,
-      });
-    } catch (error) {
-      Logger.error("Error rejecting other pending requests", {
-        requestGroupId,
-        error: error instanceof Error ? error.message : String(error),
-      });
     }
   }
 }

@@ -475,6 +475,80 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
     }
   }
 
+  async atomicAcceptRideRequest(
+    requestId: string,
+  ): Promise<RideRequest | null> {
+    try {
+      const doc = await RideRequestModel.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(requestId),
+          status: RideRequestStatus.PENDING, // only if still pending
+        },
+        {
+          $set: {
+            status: RideRequestStatus.ACCEPTED,
+            updatedAt: new Date(),
+          },
+        },
+        {
+          new: true,
+        },
+      );
+
+      if (!doc) {
+        Logger.warn("Atomic accept failed - request not pending", {
+          requestId,
+        });
+        return null;
+      }
+
+      Logger.info("Ride request accepted atomically", {
+        requestId,
+      });
+
+      return RideRequestMapper.toDomain(doc);
+    } catch (error) {
+      Logger.error("Error in atomicAcceptRideRequest", { requestId, error });
+      throw error;
+    }
+  }
+
+  async cancelOtherPendingRequestsInGroup(
+    requestGroupId: string,
+    acceptedRequestId: string,
+  ): Promise<number> {
+    try {
+      const result = await RideRequestModel.updateMany(
+        {
+          requestGroupId,
+          _id: { $ne: new Types.ObjectId(acceptedRequestId) },
+          status: RideRequestStatus.PENDING,
+        },
+        {
+          $set: {
+            status: RideRequestStatus.CANCELLED,
+            updatedAt: new Date(),
+          },
+        },
+      );
+
+      Logger.info("Cancelled other pending requests in group", {
+        requestGroupId,
+        acceptedRequestId,
+        cancelledCount: result.modifiedCount,
+      });
+
+      return result.modifiedCount || 0;
+    } catch (error) {
+      Logger.error("Error cancelling other pending requests", {
+        requestGroupId,
+        acceptedRequestId,
+        error,
+      });
+      throw error;
+    }
+  }
+
   // Helper methods
   private buildFilterQuery(
     filters: IRideRequestFilters,
