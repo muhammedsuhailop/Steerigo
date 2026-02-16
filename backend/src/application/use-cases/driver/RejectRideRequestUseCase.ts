@@ -10,6 +10,8 @@ import { TYPES } from "@shared/constants/DITypes";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { IDistributedLockService } from "@application/services/IDistributedLockService";
+import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 
 @injectable()
 export class RejectRideRequestUseCase
@@ -19,22 +21,45 @@ export class RejectRideRequestUseCase
       Promise<Result<RejectRideRequestResponseDto>>
     >
 {
+  private readonly LOCK_TTL_SECONDS =
+    Number(process.env.RIDE_ACCEPT_LOCK_TTL_SECONDS) || 10;
+  private readonly LOCK_KEY_PREFIX = REDIS_LOCK_KEYS.RIDE_ACCEPT;
+
   constructor(
     @inject(TYPES.DriverRepository)
     private driverRepository: IDriverRepository,
+
     @inject(TYPES.RideRequestRepository)
     private rideRequestRepository: IRideRequestRepository,
+
+    @inject(TYPES.DistributedLockService)
+    private lockService: IDistributedLockService,
   ) {}
 
   async execute(
     dto: RejectRideRequestDto,
   ): Promise<Result<RejectRideRequestResponseDto>> {
+    const requestId = dto.getRequestId();
+    const lockKey = `${this.LOCK_KEY_PREFIX}${requestId}`;
+    let lockToken: string | null = null;
+
     try {
       Logger.info("Rejecting ride request", {
         userId: dto.getUserId(),
-        requestId: dto.getRequestId(),
+        requestId,
         reason: dto.getReason(),
       });
+
+      lockToken = await this.lockService.acquireLock(
+        lockKey,
+        this.LOCK_TTL_SECONDS,
+      );
+
+      if (!lockToken) {
+        return Result.failure(
+          RideRequestErrors.requestAlreadyBeingProcessed(requestId),
+        );
+      }
 
       const driver = await this.driverRepository.findByUserId(dto.getUserId());
       if (!driver) {
@@ -42,41 +67,22 @@ export class RejectRideRequestUseCase
       }
 
       const driverId = driver.getId().toString();
-      Logger.debug("Driver found for user", {
-        userId: dto.getUserId(),
-        driverId,
-      });
 
-      const rideRequest = await this.rideRequestRepository.findById(
-        dto.getRequestId(),
-      );
-
+      const rideRequest = await this.rideRequestRepository.findById(requestId);
       if (!rideRequest) {
-        return Result.failure(
-          RideRequestErrors.rideRequestNotFound(dto.getRequestId()),
-        );
+        return Result.failure(RideRequestErrors.rideRequestNotFound(requestId));
       }
 
-      const requestDriverId = rideRequest.getDriverId().toString();
-      Logger.debug("Comparing driver IDs", {
-        driverId,
-        requestDriverId,
-        match: driverId === requestDriverId,
-      });
-
-      if (requestDriverId !== driverId) {
+      if (rideRequest.getDriverId().toString() !== driverId) {
         return Result.failure(
-          RideRequestErrors.rideRequestNotForDriver(
-            dto.getRequestId(),
-            driverId,
-          ),
+          RideRequestErrors.rideRequestNotForDriver(requestId, driverId),
         );
       }
 
       if (!rideRequest.isPending()) {
         return Result.failure(
           RideRequestErrors.rideRequestNotPending(
-            dto.getRequestId(),
+            requestId,
             rideRequest.getStatus(),
           ),
         );
@@ -86,7 +92,7 @@ export class RejectRideRequestUseCase
       await this.rideRequestRepository.save(rideRequest);
 
       Logger.info("Ride request rejected successfully", {
-        requestId: dto.getRequestId(),
+        requestId,
         driverId,
         reason: dto.getReason(),
       });
@@ -106,12 +112,16 @@ export class RejectRideRequestUseCase
     } catch (error) {
       Logger.error("Error rejecting ride request", {
         userId: dto.getUserId(),
-        requestId: dto.getRequestId(),
+        requestId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
 
       return Result.failure(error as Error);
+    } finally {
+      if (lockToken) {
+        await this.lockService.releaseLock(lockKey, lockToken);
+      }
     }
   }
 }
