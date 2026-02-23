@@ -16,6 +16,7 @@ import { schedulingApi } from "@/features/driver/scheduling/services/schedulingA
 import { driverProfileApi } from "@/features/driver/profile/services/driverProfileApi";
 import { driverSearchApi } from "@/features/user/driver-search/services/driverSearchApi";
 import driverSearchReducer from "@/features/user/driver-search/store/driverSearchSlice";
+import { rideRequestsApi } from "@/features/driver/ride-requests/services/rideRequestsApi";
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
     [driverApi.reducerPath]: driverApi.reducer,
     [schedulingApi.reducerPath]: schedulingApi.reducer,
+    [rideRequestsApi.reducerPath]: rideRequestsApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
@@ -61,7 +63,8 @@ export const store = configureStore({
       adminApi.middleware,
       schedulingApi.middleware,
       driverProfileApi.middleware,
-      driverSearchApi.middleware
+      driverSearchApi.middleware,
+      rideRequestsApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });
