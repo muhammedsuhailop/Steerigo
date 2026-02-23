@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import path from "path";
 import express, { Application } from "express";
+import http from "http";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
@@ -14,16 +15,20 @@ import {
   SecurityMiddleware,
 } from "@interface/middleware";
 import { Logger } from "@shared/utils/Logger";
+import { initializeRideSocketServer } from "@infrastructure/realtime/socket";
 
 class App {
   private app: Application;
+  private httpServer: http.Server;
   private database: DatabaseConnection;
 
   constructor() {
     this.app = express();
+    this.httpServer = http.createServer(this.app);
     this.database = DatabaseConnection.getInstance();
     this.initializeMiddleware();
     this.initializeRoutes();
+    this.initializeSocket();
     this.initializeErrorHandling();
   }
 
@@ -32,7 +37,7 @@ class App {
     this.app.use(SecurityMiddleware.helmet());
     this.app.use(SecurityMiddleware.cors());
 
-    // Cookie parser middleware 
+    // Cookie parser middleware
     this.app.use(cookieParser());
 
     // Body parsing middleware
@@ -54,7 +59,7 @@ class App {
     // 2. Serve React build in production
     if (process.env.NODE_ENV === "production") {
       this.app.use(
-        express.static(path.join(__dirname, "..", "client", "build"))
+        express.static(path.join(__dirname, "..", "client", "build")),
       );
     }
 
@@ -64,7 +69,7 @@ class App {
         // Skip API routes
         if (req.path.startsWith("/api/")) return next();
         res.sendFile(
-          path.join(__dirname, "..", "client", "build", "index.html")
+          path.join(__dirname, "..", "client", "build", "index.html"),
         );
       });
     }
@@ -78,6 +83,15 @@ class App {
     });
 
     Logger.info("Routes initialized successfully");
+  }
+
+  private initializeSocket(): void {
+    const corsOrigins = process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(",")
+      : ["http://localhost:4000", "http://localhost:5173"];
+
+    initializeRideSocketServer(this.httpServer, corsOrigins);
+    Logger.info("Socket.IO initialized successfully");
   }
 
   private initializeErrorHandling(): void {
@@ -103,11 +117,12 @@ class App {
 
       const PORT = process.env.PORT || 3000;
 
-      this.app.listen(PORT, () => {
+      this.httpServer.listen(PORT, () => {
         Logger.info(`----------------------------------------`);
         Logger.info(`Server is running on port ${PORT}`);
         Logger.info(`Environment: ${process.env.NODE_ENV}`);
         Logger.info(`API Base URL: http://localhost:${PORT}/api`);
+        Logger.info(`Socket.IO URL: ws://localhost:${PORT}`);
       });
 
       // Handle graceful shutdown
@@ -119,17 +134,23 @@ class App {
   }
 
   private handleShutdown(): void {
-    process.on("SIGTERM", async () => {
-      Logger.info("SIGTERM received, shutting down gracefully...");
-      await this.database.disconnect();
-      process.exit(0);
-    });
+    const shutdown = async (signal: string): Promise<void> => {
+      Logger.info(`${signal} received, shutting down gracefully...`);
 
-    process.on("SIGINT", async () => {
-      Logger.info("SIGINT received, shutting down gracefully...");
+      // Close HTTP server (this also closes Socket.IO connections)
+      this.httpServer.close(() => {
+        Logger.info("HTTP server closed");
+      });
+
+      // Disconnect database
       await this.database.disconnect();
+
+      Logger.info("Shutdown complete");
       process.exit(0);
-    });
+    };
+
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
 
     process.on("uncaughtException", (error) => {
       Logger.error("Uncaught Exception", error);
@@ -144,6 +165,10 @@ class App {
 
   getExpressApp(): Application {
     return this.app;
+  }
+
+  getHttpServer(): http.Server {
+    return this.httpServer;
   }
 }
 

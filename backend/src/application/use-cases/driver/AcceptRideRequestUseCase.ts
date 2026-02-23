@@ -17,6 +17,8 @@ import { Types } from "mongoose";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideMatchedEvent } from "@application/events/RideEvents";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -39,6 +41,8 @@ export class AcceptRideRequestUseCase
     private rideRepository: IRideRepository,
     @inject(TYPES.DistributedLockService)
     private lockService: IDistributedLockService,
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -206,6 +210,36 @@ export class AcceptRideRequestUseCase
           },
         },
       };
+
+      const rideMatchedEvent: RideMatchedEvent = {
+        type: "RideMatched",
+        occurredAt: new Date(),
+        payload: {
+          rideId: savedRide.getRideId(),
+          driverId,
+          riderId: acceptedRequest.getRiderId(),
+          pickup: {
+            latitude: acceptedRequest.getPickup().getLatitude(),
+            longitude: acceptedRequest.getPickup().getLongitude(),
+            address: acceptedRequest.getPickup().getAddress(),
+          },
+          drop: {
+            latitude: acceptedRequest.getDrop().getLatitude(),
+            longitude: acceptedRequest.getDrop().getLongitude(),
+            address: acceptedRequest.getDrop().getAddress(),
+          },
+          pickupTime: acceptedRequest.getPickupTime().toISOString(),
+          rideType: acceptedRequest.getRideType(),
+          status: savedRide.getStatus(),
+          currency: savedRide.getCurrency(),
+          fare: {
+            amount: acceptedRequest.getFare(),
+            currency: savedRide.getCurrency(),
+          },
+        },
+      };
+
+      await this.eventBus.publish(rideMatchedEvent);
 
       return Result.success(response);
     } catch (error) {

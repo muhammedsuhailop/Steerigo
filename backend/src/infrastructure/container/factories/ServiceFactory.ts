@@ -25,6 +25,10 @@ import { CloudinaryService } from "@infrastructure/services/CloudinaryService";
 import { AvailabilityCheckService } from "@infrastructure/services/AvailabilityCheckService";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { RedisLockService } from "@infrastructure/services/DistributedLockService";
+import { IRideNotificationService } from "@application/services/IRideNotificationService";
+import { RideNotificationService } from "@infrastructure/services/RideNotificationService";
+import { IEventBus } from "@application/services/IEventBus";
+import { InMemoryEventBus } from "@infrastructure/services/InMemoryEventBus";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -53,5 +57,14 @@ export class ServiceFactory {
     container
       .bind<IDistributedLockService>(TYPES.DistributedLockService)
       .to(RedisLockService);
+    container
+      .bind<IRideNotificationService>(TYPES.RideNotificationService)
+      .to(RideNotificationService)
+      .inSingletonScope();
+
+    container
+      .bind<IEventBus>(TYPES.EventBus)
+      .to(InMemoryEventBus)
+      .inSingletonScope();
   }
 }

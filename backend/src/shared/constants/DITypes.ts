@@ -25,6 +25,10 @@ export const TYPES = {
   FareCalculationService: Symbol.for("FareCalculationService"),
   AvailabilityCheckService: Symbol.for("AvailabilityCheckService"),
   DistributedLockService: Symbol.for("DistributedLockService"),
+  RideNotificationService: Symbol.for("RideNotificationService"),
+
+  //Event
+  EventBus: Symbol.for("EventBus"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),

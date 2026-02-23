@@ -24,6 +24,8 @@ import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { AppConstants } from "@shared/constants/AppConstants";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideRequestCreatedEvent } from "@application/events/RideEvents";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -51,6 +53,9 @@ export class AutoSearchAndSendRideRequestUseCase
 
     @inject(TYPES.AvailabilityCheckService)
     private availabilityCheckService: IAvailabilityCheckService,
+
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -197,6 +202,37 @@ export class AutoSearchAndSendRideRequestUseCase
           });
           continue;
         }
+
+        const rideRequestCreatedEvent: RideRequestCreatedEvent = {
+          type: "RideRequestCreated",
+          occurredAt: new Date(),
+          payload: {
+            requestId: saved.getId(),
+            requestGroupId: dto.requestGroupId,
+            riderId: userId,
+            driverId,
+            pickup: {
+              latitude: pickup.getLatitude(),
+              longitude: pickup.getLongitude(),
+              address: pickup.getAddress(),
+            },
+            drop: {
+              latitude: drop.getLatitude(),
+              longitude: drop.getLongitude(),
+              address: drop.getAddress(),
+            },
+            pickupTime: dto.searchDate.toISOString(),
+            rideType: dto.rideType,
+            pickupETA: `${item.etaMinutes} mins`,
+            fare: {
+              amount: fareBreakdown.getTotalFare().getAmount(),
+              currency: fareBreakdown.getTotalFare().getCurrency(),
+            },
+            searchedAt: new Date().toISOString(),
+          },
+        };
+
+        await this.eventBus.publish(rideRequestCreatedEvent);
 
         successfulRequests.push({
           requestId: saved.getId(),
