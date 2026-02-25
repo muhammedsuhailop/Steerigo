@@ -1,33 +1,32 @@
 import { useEffect, useRef } from "react";
-import { createSocket, disconnectSocket } from "./socket";
+import { createSocket, disconnectSocket, updateSocketAuth } from "./socket";
 
-type AuthSocketParams = {
-  userId?: string;
-  role?: "rider" | "driver";
-  driverId?: string;
+type UseSocketAuth = {
+  accessToken: string | null;
 };
 
-export const useSocket = (auth: AuthSocketParams) => {
-  const initializedRef = useRef(false);
+export const useSocket = ({ accessToken }: UseSocketAuth) => {
+  const hasConnectedRef = useRef(false);
+  const lastTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!auth.userId || !auth.role) return;
-
-    if (initializedRef.current) return;
-
-    createSocket({
-      userId: auth.userId,
-      role: auth.role,
-      driverId: auth.driverId,
-    });
-
-    initializedRef.current = true;
-  }, [auth.userId, auth.role, auth.driverId]);
-
-  useEffect(() => {
-    if (!auth.userId) {
+    if (!accessToken) {
       disconnectSocket();
-      initializedRef.current = false;
+      hasConnectedRef.current = false;
+      lastTokenRef.current = null;
+      return;
     }
-  }, [auth.userId]);
+
+    if (!hasConnectedRef.current) {
+      createSocket(accessToken);
+      hasConnectedRef.current = true;
+      lastTokenRef.current = accessToken;
+      return;
+    }
+
+    if (lastTokenRef.current !== accessToken) {
+      updateSocketAuth(accessToken);
+      lastTokenRef.current = accessToken;
+    }
+  }, [accessToken]);
 };

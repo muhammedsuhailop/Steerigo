@@ -51,10 +51,6 @@ export const useAuth = () => {
       try {
         const result = await loginMutation(credentials).unwrap();
         if (result.success) {
-          createSocket({
-            userId: result.data.user.id,
-            role: result.data.user.role.toLowerCase() as "rider" | "driver",
-          });
           // Redirect based on user role
           const redirectPath = getUserDashboardPath(result.data.user.role);
           navigate(redirectPath);

@@ -16,6 +16,7 @@ import {
 } from "@interface/middleware";
 import { Logger } from "@shared/utils/Logger";
 import { initializeRideSocketServer } from "@infrastructure/realtime/socket";
+import { TokenService } from "@infrastructure/services";
 
 class App {
   private app: Application;
@@ -90,7 +91,10 @@ class App {
       ? process.env.CORS_ORIGINS.split(",")
       : ["http://localhost:4000", "http://localhost:5173"];
 
-    initializeRideSocketServer(this.httpServer, corsOrigins);
+    const tokenService = new TokenService();
+
+    initializeRideSocketServer(this.httpServer, corsOrigins, tokenService);
+
     Logger.info("Socket.IO initialized successfully");
   }
 

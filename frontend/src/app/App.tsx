@@ -1,24 +1,27 @@
 import React, { useEffect } from "react";
-import { Provider, useDispatch } from "react-redux"; 
+import { Provider, useDispatch } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { store } from "./store";
 import { AppRouter } from "@/routing/AppRouter";
 import { initializeAuth } from "@/features/auth/store/authSlice";
-import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService"; 
-import {
-  ErrorBoundary,
-  ToastContainer,
-} from "@/shared/components/ui";
+import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
+import { ErrorBoundary, ToastContainer } from "@/shared/components/ui";
+import { useSocket } from "@/shared/socket/useSocket";
+import { useAppSelector } from "./store/hooks";
+import { selectCurrentUser } from "@/features/auth/store/authSelectors";
 
 const AppContent: React.FC = () => {
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
 
   useEffect(() => {
     ErrorDispatcher.setDispatch(dispatch);
 
     // Initialize auth state from localStorage on app load
     store.dispatch(initializeAuth());
-  }, [dispatch]); 
+  }, [dispatch]);
+
+  useSocket({ accessToken });
 
   return (
     <>
