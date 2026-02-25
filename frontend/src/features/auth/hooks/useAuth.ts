@@ -18,6 +18,7 @@ import {
 import type { LoginRequest } from "../types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { authErrorMapper } from "../utils/authErrorMapper";
+import { createSocket, disconnectSocket } from "@/shared/socket/socket";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -50,6 +51,10 @@ export const useAuth = () => {
       try {
         const result = await loginMutation(credentials).unwrap();
         if (result.success) {
+          createSocket({
+            userId: result.data.user.id,
+            role: result.data.user.role.toLowerCase() as "rider" | "driver",
+          });
           // Redirect based on user role
           const redirectPath = getUserDashboardPath(result.data.user.role);
           navigate(redirectPath);
@@ -61,7 +66,7 @@ export const useAuth = () => {
 
         const errorResult = authErrorMapper.processAuthError(
           rawError ?? error,
-          "login"
+          "login",
         );
 
         return {
@@ -70,7 +75,7 @@ export const useAuth = () => {
         };
       }
     },
-    [loginMutation, navigate]
+    [loginMutation, navigate],
   );
 
   const logout = useCallback(async () => {
@@ -80,6 +85,7 @@ export const useAuth = () => {
       console.warn("Logout request failed, but continuing with client logout");
     } finally {
       dispatch(logoutAction());
+      disconnectSocket();
       navigate("/");
     }
     return { success: true, message: "Logged out successfully" };
@@ -95,7 +101,7 @@ export const useAuth = () => {
     (role: string) => {
       return userRole === role;
     },
-    [userRole]
+    [userRole],
   );
 
   const isAdmin = useCallback(() => {
@@ -117,7 +123,7 @@ export const useAuth = () => {
     } catch (error: any) {
       const errorResult = authErrorMapper.processAuthError(
         error,
-        "google_auth"
+        "google_auth",
       );
 
       return {

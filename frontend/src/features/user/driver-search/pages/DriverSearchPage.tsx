@@ -37,6 +37,7 @@ import {
 
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
+import { useAutoRideRequest } from "../hooks/useAutoRideRequest";
 
 const DriverSearchPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ const DriverSearchPage: React.FC = () => {
   const error = useSelector(selectError);
   const totalFound = useSelector(selectTotalFound);
   const requestGroupId = useSelector(selectRequestGroupId);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
@@ -54,6 +56,17 @@ const DriverSearchPage: React.FC = () => {
   );
   const [hasSearched, setHasSearched] = useState(false);
 
+  const { startAutoRequest, isWaiting, cancel } = useAutoRideRequest({
+    onSuccess: (rideId) => {
+      window.location.href = `/ride/${rideId}`;
+    },
+    onTimeout: () => {
+      dispatch(
+        setError("No drivers found. Please try increasing search radius."),
+      );
+    },
+    onError: (msg) => dispatch(setError(msg)),
+  });
   // Ride request state
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedDriverForRequest, setSelectedDriverForRequest] =
@@ -198,6 +211,13 @@ const DriverSearchPage: React.FC = () => {
     }
   }, [selectedDriverForRequest, sendRequest]);
 
+  const handleAutoRequestSubmit = (formData: TripFormData) => {
+    setLocalError(null);
+    const newId = uuidv4();
+    dispatch(setRequestGroupId(newId));
+    startAutoRequest(formData, newId);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -254,6 +274,7 @@ const DriverSearchPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <DriverSearchForm
                 onSubmit={handleFormSubmit}
+                onAutoRequest={handleAutoRequestSubmit}
                 onChange={handleFormChange}
                 isLoading={isLoading || isRequestLoading}
               />
@@ -462,6 +483,32 @@ const DriverSearchPage: React.FC = () => {
         </div>
       )}
 
+      {isWaiting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-white px-8 py-7 shadow-2xl text-center">
+            {/* Spinner */}
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" />
+            </div>
+
+            <h3 className="text-base font-semibold text-gray-900">
+              Finding nearby drivers
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              We’re sending your request to drivers around you. This usually
+              takes less than a minute.
+            </p>
+
+            <button
+              onClick={cancel}
+              className="mt-6 text-sm font-medium text-rose-600 hover:underline"
+            >
+              Cancel request
+            </button>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );

@@ -34,6 +34,47 @@ export interface RideRequestError {
   details?: Record<string, unknown>;
 }
 
+export interface AutoRideRequestPayload {
+  latitude: number;
+  longitude: number;
+  pickupAddress: string;
+  dropAddress: string;
+  searchDate: string;
+  timeRequired: number;
+  radiusKm: number;
+  gearType: string;
+  bodyType: string;
+  dropLatitude: number;
+  dropLongitude: number;
+  rideType: "One Way" | "Round Trip";
+  requestGroupId: string;
+}
+
+export interface SuccessfulAutoRequest {
+  requestId: string;
+  driverId: string;
+  driverName: string;
+  pickupETA: string;
+  totalFare: number;
+  currency: string;
+}
+
+export interface AutoRideRequestResponse {
+  success: boolean;
+  message: string;
+  requestGroupId: string;
+  data: {
+    successfulRequests: SuccessfulAutoRequest[];
+    failedRequests: unknown[];
+    summary: {
+      totalDriversFound: number;
+      successCount: number;
+      failureCount: number;
+      searchedAt: string;
+    };
+  };
+}
+
 export const RIDE_REQUEST_ERROR_CODES = {
   DRIVER_NOT_FOUND: "DRIVER_NOT_FOUND",
   DRIVER_NOT_AVAILABLE: "DRIVER_NOT_AVAILABLE",

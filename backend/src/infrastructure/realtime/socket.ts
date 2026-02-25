@@ -29,6 +29,10 @@ export function initializeRideSocketServer(
     return ioInstance;
   }
 
+  const allowedOrigins = [process.env.FRONTEND_URL, ...corsOrigins].filter(
+    Boolean,
+  ) as string[];
+
   const io = new SocketIOServer<
     DefaultEventsMap,
     DefaultEventsMap,
@@ -36,7 +40,7 @@ export function initializeRideSocketServer(
     SocketData
   >(httpServer, {
     cors: {
-      origin: corsOrigins,
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
     },
   });
@@ -66,8 +70,10 @@ export function initializeRideSocketServer(
 
     if (role === "driver" && driverId) {
       socket.join(`driver:${driverId}`);
+      console.log(`Driver joined room: driver:${driverId}`);
     } else if (role === "rider") {
       socket.join(`rider:${userId}`);
+      console.log(`Rider joined room: rider:${userId}`);
     }
   });
 

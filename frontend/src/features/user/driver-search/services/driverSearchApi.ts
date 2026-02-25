@@ -7,6 +7,8 @@ import type {
   SearchNearbyDriversPayload,
 } from "../types/driverSearch.types";
 import {
+  AutoRideRequestPayload,
+  AutoRideRequestResponse,
   RideRequestPayload,
   RideRequestResponse,
 } from "../types/rideRequest.types";
@@ -44,8 +46,23 @@ export const driverSearchApi = createApi({
       }),
       invalidatesTags: ["RideRequest"],
     }),
+
+    // Send auto ride requests
+    sendAutoRideRequest: builder.mutation<
+      AutoRideRequestResponse,
+      AutoRideRequestPayload
+    >({
+      query: (payload) => ({
+        url: "/user/ride/auto-request-send",
+        method: "POST",
+        data: payload,
+      }),
+    }),
   }),
 });
 
-export const { useSearchNearbyDriversMutation, useSendRideRequestMutation } =
-  driverSearchApi;
+export const {
+  useSearchNearbyDriversMutation,
+  useSendRideRequestMutation,
+  useSendAutoRideRequestMutation,
+} = driverSearchApi;
