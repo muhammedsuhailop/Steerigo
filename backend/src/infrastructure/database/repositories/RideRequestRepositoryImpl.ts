@@ -549,6 +549,59 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
     }
   }
 
+  async existsAcceptedRequestInGroup(requestGroupId: string): Promise<boolean> {
+    try {
+      const count = await RideRequestModel.countDocuments({
+        requestGroupId,
+        status: RideRequestStatus.ACCEPTED,
+      });
+
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking accepted request in group", {
+        requestGroupId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async cancelPendingByGroupAndRider(
+    requestGroupId: string,
+    riderId: string,
+  ): Promise<number> {
+    try {
+      const result = await RideRequestModel.updateMany(
+        {
+          requestGroupId,
+          riderId: new Types.ObjectId(riderId),
+          status: RideRequestStatus.PENDING,
+        },
+        {
+          $set: {
+            status: RideRequestStatus.CANCELLED,
+            updatedAt: new Date(),
+          },
+        },
+      );
+
+      Logger.info("Cancelled pending ride requests by group and rider", {
+        requestGroupId,
+        riderId,
+        cancelledCount: result.modifiedCount,
+      });
+
+      return result.modifiedCount || 0;
+    } catch (error) {
+      Logger.error("Error cancelling pending requests by group and rider", {
+        requestGroupId,
+        riderId,
+        error,
+      });
+      throw error;
+    }
+  }
+
   // Helper methods
   private buildFilterQuery(
     filters: IRideRequestFilters,

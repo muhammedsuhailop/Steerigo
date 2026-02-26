@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
     SEARCH_NEARBY: "/user/search/nearby",
     SEND_RIDE_REQUEST: "/user/ride/request-send",
     REGISTER_AS_DRIVER: "/user/register-as-driver",
+    AUTO_RIDE_REQUEST: "/user/ride/auto-request-send",
+    CANCEL_RIDE_REQUEST: "/user/ride/request-cancel",
   },
   DRIVER: {
     REGISTER: "/driver/register",

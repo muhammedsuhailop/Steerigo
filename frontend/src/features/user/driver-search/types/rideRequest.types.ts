@@ -75,6 +75,16 @@ export interface AutoRideRequestResponse {
   };
 }
 
+export interface CancelRideRequestPayload {
+  requestGroupId: string;
+}
+
+export interface CancelRideRequestResponse {
+  requestGroupId: string;
+  cancelledCount: number;
+  message: string;
+}
+
 export const RIDE_REQUEST_ERROR_CODES = {
   DRIVER_NOT_FOUND: "DRIVER_NOT_FOUND",
   DRIVER_NOT_AVAILABLE: "DRIVER_NOT_AVAILABLE",

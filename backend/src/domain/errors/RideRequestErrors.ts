@@ -38,6 +38,20 @@ export class RideRequestErrors {
     );
   }
 
+  static noPendingRequestsFound(): DomainError {
+    return new DomainError(
+      RIDE_REQUEST_ERROR_MESSAGES.NO_PENDING_REQUEST_FOUND,
+      "NO_PENDING_REQUEST_FOUND",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "NOT_FOUND",
+      },
+    );
+  }
+
   static userNotFound(userId: string): DomainError {
     return new DomainError(
       formatMessage(RIDE_REQUEST_ERROR_MESSAGES.USER_NOT_FOUND, {

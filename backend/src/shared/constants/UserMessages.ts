@@ -18,5 +18,6 @@ export const USER_MESSAGES = {
     INTERNAL_SERVER_ERROR:
       "An internal server error occurred while searching for drivers",
     SEARCH_FAILED: "Failed to find nearby drivers",
+    CANCELLED_SUCCESS: "Ride requests cancelled successfully",
   },
 } as const;

@@ -9,6 +9,9 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { AutoSearchAndRequestResponseDto } from "@application/dto/user/AutoSearchAndRequestResponseDto";
 import { Result } from "@shared/utils/Result";
+import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto";
+import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
+import { USER_MESSAGES } from "@shared/constants/UserMessages";
 
 @injectable()
 export class AutoRideController {
@@ -17,6 +20,11 @@ export class AutoRideController {
     private autoSearchAndSendUseCase: IUseCase<
       AutoSearchAndRequestDto,
       Promise<Result<AutoSearchAndRequestResponseDto>>
+    >,
+    @inject(TYPES.CancelRideRequestsUseCase)
+    private readonly cancelRideRequestsUseCase: IUseCase<
+      CancelRideRequestDto,
+      Promise<Result<CancelRideRequestResponseDto>>
     >,
   ) {}
 
@@ -32,7 +40,7 @@ export class AutoRideController {
       if (!userId) {
         res.status(HttpStatusCodes.UNAUTHORIZED).json({
           success: false,
-          message: "User authentication required",
+          message: USER_MESSAGES.DRIVER_SEARCH.UNAUTHORIZED,
         } as ApiResponse);
         return;
       }
@@ -116,6 +124,73 @@ export class AutoRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "AutoSearchAndSendRideRequest",
+      );
+
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async cancelRideRequests(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: USER_MESSAGES.DRIVER_SEARCH.UNAUTHORIZED,
+        } as ApiResponse);
+        return;
+      }
+
+      const { requestGroupId } = req.body;
+
+      Logger.info("Cancel ride requests received", {
+        userId,
+        requestGroupId,
+      });
+
+      const dto = CancelRideRequestDto.fromRequest(userId, req.body);
+
+      const result = await this.cancelRideRequestsUseCase.execute(dto);
+
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: USER_MESSAGES.DRIVER_SEARCH.CANCELLED_SUCCESS,
+          data: responseData,
+        } as ApiResponse);
+
+        Logger.info("Cancel ride requests successful", {
+          userId,
+          requestGroupId,
+          cancelledCount: responseData.cancelledCount,
+        });
+      } else {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "CancelRideRequests",
+        );
+
+        res.status(statusCode).json(response);
+
+        Logger.warn("Cancel ride requests failed", {
+          userId,
+          requestGroupId,
+          error: error?.message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Cancel ride requests controller error", {
+        error,
+        userId: this.getUserId(req),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "CancelRideRequests",
       );
 
       res.status(statusCode).json(response);

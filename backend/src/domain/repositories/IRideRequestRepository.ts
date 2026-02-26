@@ -50,6 +50,12 @@ export interface IRideRequestRepository
     requestGroupId: string,
     acceptedRequestId: string,
   ): Promise<number>;
+  cancelPendingByGroupAndRider(
+    requestGroupId: string,
+    riderId: string,
+  ): Promise<number>;
+
+  existsAcceptedRequestInGroup(requestGroupId: string): Promise<boolean>;
 
   // Bulk operations for sending requests to multiple drivers
   saveMany(requests: RideRequest[]): Promise<RideRequest[]>;

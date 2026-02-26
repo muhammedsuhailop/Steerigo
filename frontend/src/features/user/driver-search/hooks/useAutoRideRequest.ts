@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useSendAutoRideRequestMutation } from "../services/driverSearchApi";
+import {
+  useSendAutoRideRequestMutation,
+  useCancelRideRequestMutation,
+} from "../services/driverSearchApi";
 import { useRiderRealtime } from "./useRiderRealtime";
 import { TripFormData } from "../types/driverSearch.types";
 import { AutoRideRequestPayload } from "../types/rideRequest.types";
@@ -18,8 +21,13 @@ export const useAutoRideRequest = ({
 }: UseAutoRideOptions) => {
   const [sendAutoRequest, { isLoading: isApiLoading }] =
     useSendAutoRideRequestMutation();
+
+  const [cancelRideRequest] = useCancelRideRequestMutation();
+
   const [isWaiting, setIsWaiting] = useState(false);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const activeRequestGroupIdRef = useRef<string | null>(null);
 
   const stopWaiting = useCallback(() => {
     if (timerRef.current) {
@@ -30,12 +38,14 @@ export const useAutoRideRequest = ({
   }, []);
 
   const handleMatched = useCallback(
-    (data: any) => {
-      const rideId = data?.rideId || data?.data?.rideId;
+    (data: { rideId?: string; data?: { rideId?: string } }) => {
+      const rideId = data?.rideId ?? data?.data?.rideId;
+
       console.log("[AutoRide] Match Callback Triggered:", rideId);
 
       if (rideId) {
         stopWaiting();
+        activeRequestGroupIdRef.current = null;
         onSuccess(rideId);
       } else {
         console.error(
@@ -50,6 +60,7 @@ export const useAutoRideRequest = ({
   const handleNoDriver = useCallback(() => {
     console.warn("[AutoRide] Backend reported no drivers found.");
     stopWaiting();
+    activeRequestGroupIdRef.current = null;
     onTimeout();
   }, [stopWaiting, onTimeout]);
 
@@ -81,6 +92,8 @@ export const useAutoRideRequest = ({
     }
 
     try {
+      activeRequestGroupIdRef.current = requestGroupId;
+
       const payload: AutoRideRequestPayload = {
         latitude: formData.pickupLocation.latitude,
         longitude: formData.pickupLocation.longitude,
@@ -112,15 +125,34 @@ export const useAutoRideRequest = ({
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         console.warn("[AutoRide] 90s timeout reached.");
-        setIsWaiting(false);
+        stopWaiting();
+        activeRequestGroupIdRef.current = null;
         onTimeout();
       }, 90000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[AutoRide] API Failure:", err);
-      setIsWaiting(false);
-      onError(err?.data?.message || "Failed to start search");
+      stopWaiting();
+      activeRequestGroupIdRef.current = null;
+      onError("Failed to start search");
     }
   };
+
+  const cancel = useCallback(async () => {
+    const groupId = activeRequestGroupIdRef.current;
+
+    stopWaiting();
+
+    if (!groupId) return;
+
+    try {
+      await cancelRideRequest({ requestGroupId: groupId }).unwrap();
+      console.log("[AutoRide] Ride requests cancelled:", groupId);
+    } catch (error) {
+      console.error("[AutoRide] Failed to cancel ride requests", error);
+    } finally {
+      activeRequestGroupIdRef.current = null;
+    }
+  }, [cancelRideRequest, stopWaiting]);
 
   useEffect(() => {
     return () => {
@@ -128,5 +160,10 @@ export const useAutoRideRequest = ({
     };
   }, []);
 
-  return { startAutoRequest, isWaiting, isApiLoading, cancel: stopWaiting };
+  return {
+    startAutoRequest,
+    isWaiting,
+    isApiLoading,
+    cancel,
+  };
 };

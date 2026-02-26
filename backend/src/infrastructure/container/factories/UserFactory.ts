@@ -21,6 +21,10 @@ import {
 import { Result } from "@shared/utils/Result";
 import { FindNearbyDriversRequestDto } from "@application/dto/user/FindNearbyDriversRequestDto";
 import { FindNearbyDriversResponseDto } from "@application/dto/user/FindNearbyDriversResponseDto";
+import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto";
+import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
+import { DomainError } from "@domain/errors/DomainError";
+import { CancelRideRequestsUseCase } from "@application/use-cases/user/CancelRideRequestsUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -58,6 +62,15 @@ export class UserFactory {
       >(TYPES.FindNearbyDriversUseCase)
       .to(FindNearbyDriversUseCase);
 
+    container
+      .bind<
+        IUseCase<
+          CancelRideRequestDto,
+          Promise<Result<CancelRideRequestResponseDto, DomainError>>
+        >
+      >(TYPES.CancelRideRequestsUseCase)
+      .to(CancelRideRequestsUseCase);
+      
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);
   }

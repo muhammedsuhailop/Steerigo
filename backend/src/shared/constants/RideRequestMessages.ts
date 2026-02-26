@@ -1,6 +1,7 @@
 export const RIDE_REQUEST_ERROR_MESSAGES = {
   DRIVER_NOT_FOUND: "Driver with ID {{driverId}} not found",
   RIDE_REQUEST_NOT_FOUND: "Ride Request with ID {{requestId}} is not available",
+  NO_PENDING_REQUEST_FOUND: "No Pending ride request found",
   USER_NOT_FOUND: "User with ID {{userId}} not found",
   INVALID_FARE: "Invalid fare amount: {{fare}}. Fare must be positive",
   INVALID_PICKUP_TIME:

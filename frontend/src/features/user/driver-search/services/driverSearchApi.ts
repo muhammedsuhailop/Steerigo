@@ -9,6 +9,8 @@ import type {
 import {
   AutoRideRequestPayload,
   AutoRideRequestResponse,
+  CancelRideRequestPayload,
+  CancelRideRequestResponse,
   RideRequestPayload,
   RideRequestResponse,
 } from "../types/rideRequest.types";
@@ -53,10 +55,23 @@ export const driverSearchApi = createApi({
       AutoRideRequestPayload
     >({
       query: (payload) => ({
-        url: "/user/ride/auto-request-send",
+        url: API_ENDPOINTS.USER.AUTO_RIDE_REQUEST,
         method: "POST",
         data: payload,
       }),
+    }),
+
+    // Cancel ride requests (by requestGroupId)
+    cancelRideRequest: builder.mutation<
+      ApiResponse<CancelRideRequestResponse>,
+      CancelRideRequestPayload
+    >({
+      query: (payload) => ({
+        url: API_ENDPOINTS.USER.CANCEL_RIDE_REQUEST,
+        method: "POST",
+        data: payload,
+      }),
+      invalidatesTags: ["RideRequest"],
     }),
   }),
 });
@@ -65,4 +80,5 @@ export const {
   useSearchNearbyDriversMutation,
   useSendRideRequestMutation,
   useSendAutoRideRequestMutation,
+  useCancelRideRequestMutation,
 } = driverSearchApi;
