@@ -25,6 +25,7 @@ import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto
 import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
 import { DomainError } from "@domain/errors/DomainError";
 import { CancelRideRequestsUseCase } from "@application/use-cases/user/CancelRideRequestsUseCase";
+import { GetUserRideByIdUseCase } from "@application/use-cases/user/GetUserRideByIdUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -70,7 +71,11 @@ export class UserFactory {
         >
       >(TYPES.CancelRideRequestsUseCase)
       .to(CancelRideRequestsUseCase);
-      
+
+    container
+      .bind<GetUserRideByIdUseCase>(TYPES.GetUserRideByIdUseCase)
+      .to(GetUserRideByIdUseCase);
+
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);
   }

@@ -20,4 +20,7 @@ export const USER_MESSAGES = {
     SEARCH_FAILED: "Failed to find nearby drivers",
     CANCELLED_SUCCESS: "Ride requests cancelled successfully",
   },
+  RIDE: {
+    UNAUTHORIZED: "You are not authorized to access this ride",
+  },
 } as const;

@@ -8,12 +8,10 @@ import { handleValidationErrors } from "@interface/middleware/errorHandler";
 import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 import { validateSchema } from "@interface/middleware";
 import { findNearbyDriversSearchSchema } from "@interface/validators/user/driverSearchValidators";
-import { sendRideRequestSchema } from "@interface/validators/user/rideRequestValidators";
-import { RideController } from "@interface/controllers/user/RideController";
-import { autoSearchAndRequestSchema } from "@interface/validators/user/autoSearchAndRequestValidators";
-import { AutoRideController } from "@interface/controllers/user/AutoRideController";
+import { rideRoutes } from "./rideRoutes";
 
 const router = Router();
+
 const userProfileController = container.get<UserProfileController>(
   TYPES.UserProfileController,
 );
@@ -22,15 +20,9 @@ const driverSearchController = container.get<DriverSearchController>(
   TYPES.DriverSearchController,
 );
 
-const rideRequestController = container.get<RideController>(
-  TYPES.RideController,
-);
-
-const autoRideController = container.get<AutoRideController>(
-  TYPES.AutoRideController,
-);
-
 router.use(authMiddleware);
+
+router.use(rideRoutes);
 
 // GET /api/user/profile/:userId
 router.get("/profile/:userId", (req: Request, res: Response) =>
@@ -50,36 +42,13 @@ router.post(
     userProfileController.registerAsDriver(req, res),
 );
 
-//POST /api/drivers/search/nearby
+// POST /api/drivers/search/nearby
 router.post(
   "/search/nearby",
   validateSchema(findNearbyDriversSearchSchema),
   handleValidationErrors,
   (req: Request, res: Response) =>
     driverSearchController.findNearbyDrivers(req, res),
-);
-
-//POST /api/users/ride/request-send
-router.post(
-  "/ride/request-send",
-  validateSchema(sendRideRequestSchema),
-  handleValidationErrors,
-  (req: Request, res: Response) =>
-    rideRequestController.sendRideRequest(req, res),
-);
-
-// POST /api/user/ride/auto-request-send
-router.post(
-  "/ride/auto-request-send",
-  validateSchema(autoSearchAndRequestSchema),
-  handleValidationErrors,
-  (req: Request, res: Response) =>
-    autoRideController.autoSearchAndSendRequests(req, res),
-);
-
-// POST /api/user/request-cancel
-router.post("/ride/request-cancel", (req: Request, res: Response) =>
-  autoRideController.cancelRideRequests(req, res),
 );
 
 export { router as userRoutes };

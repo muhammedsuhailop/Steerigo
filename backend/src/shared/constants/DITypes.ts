@@ -100,6 +100,7 @@ export const TYPES = {
     "AutoSearchAndSendRideRequestUseCase",
   ),
   CancelRideRequestsUseCase: Symbol.for("CancelRideRequestsUseCase"),
+  GetUserRideByIdUseCase: Symbol.for("GetUserRideByIdUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
