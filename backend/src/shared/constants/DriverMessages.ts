@@ -21,6 +21,7 @@ export const DRIVER_MESSAGES = {
   AVAILABILITY_EXCEPTION_UPDATED: "Availability Exception added successfully",
   AVAILABILITY_EXCEPTION_REMOVED: "Availability Exception removed successfully",
   REQUEST_ID_REQUIRED: "Request ID is required",
+  RIDE_ID_REQUIRED: "Ride ID is required",
 };
 
 export const DRIVER_ERROR_MESSAGES = {

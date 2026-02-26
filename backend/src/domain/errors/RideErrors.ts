@@ -151,4 +151,18 @@ export class RideErrors {
       },
     );
   }
+
+  static unauthorizedRideAccess(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.UNAUTHORIZED_RIDE_ACCESS, { rideId }),
+      "UNAUTHORIZED_RIDE_ACCESS",
+      {
+        statusCode: HttpStatusCodes.FORBIDDEN,
+        errorType: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "AUTH",
+      },
+    );
+  }
 }

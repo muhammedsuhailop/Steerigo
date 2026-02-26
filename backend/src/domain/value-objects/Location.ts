@@ -23,7 +23,7 @@ export class Location {
     return new Location(
       coordinates.latitude,
       coordinates.longitude,
-      coordinates.address?.trim()
+      coordinates.address?.trim(),
     );
   }
 
@@ -34,7 +34,7 @@ export class Location {
 
   private static validateCoordinates(
     latitude: number,
-    longitude: number
+    longitude: number,
   ): void {
     if (typeof latitude !== "number" || typeof longitude !== "number") {
       throw new DomainError("Latitude and longitude must be numbers");
@@ -75,6 +75,24 @@ export class Location {
       this.longitude === other.longitude &&
       this.address === other.address
     );
+  }
+
+  distanceTo(other: Location): number {
+    const R = 6371; // Earth radius in km
+    const dLat = this.toRad(other.latitude - this.latitude);
+    const dLon = this.toRad(other.longitude - this.longitude);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(this.toRad(this.latitude)) *
+        Math.cos(this.toRad(other.latitude)) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  private toRad(value: number): number {
+    return (value * Math.PI) / 180;
   }
 
   toString(): string {

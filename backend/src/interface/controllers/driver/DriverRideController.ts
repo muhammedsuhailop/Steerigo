@@ -15,6 +15,8 @@ import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRid
 import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
 import { GetDriverRidesDto } from "@application/dto/driver/GetDriverRidesDto";
 import { GetDriverRidesResponseDto } from "@application/dto/driver/GetDriverRidesResponseDto";
+import { GetDriverRideByIdDto } from "@application/dto/driver/GetDriverRideByIdDto";
+import { GetDriverRideByIdResponseDto } from "@application/dto/driver/GetDriverRideByIdResponseDto";
 
 @injectable()
 export class DriverRideController {
@@ -38,6 +40,11 @@ export class DriverRideController {
     private getDriverRidesUseCase: IUseCase<
       GetDriverRidesDto,
       Promise<Result<GetDriverRidesResponseDto>>
+    >,
+    @inject(TYPES.GetDriverRideByIdUseCase)
+    private getDriverRideByIdUseCase: IUseCase<
+      GetDriverRideByIdDto,
+      Promise<Result<GetDriverRideByIdResponseDto>>
     >,
   ) {}
 
@@ -307,6 +314,74 @@ export class DriverRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "get_driver_rides",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getDriverRideById(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      const rideId = req.params.rideId;
+      if (!rideId) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: DRIVER_MESSAGES.RIDE_ID_REQUIRED,
+        });
+        return;
+      }
+
+      Logger.info("Get driver ride by ID received", {
+        userId,
+        rideId,
+      });
+
+      const dto = GetDriverRideByIdDto.fromRequest(userId, { rideId });
+
+      const result = await this.getDriverRideByIdUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Get driver ride by ID failed", {
+          userId,
+          rideId,
+          error: error.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_driver_ride_by_id",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+      Logger.info("Driver ride fetched successfully", {
+        userId,
+        rideId: responseData.data.ride.rideId,
+        status: responseData.data.ride.status,
+      });
+
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Get driver ride by ID controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_driver_ride_by_id",
       );
       res.status(statusCode).json(response);
     }

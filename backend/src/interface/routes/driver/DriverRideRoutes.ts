@@ -1,6 +1,7 @@
 import { container } from "@infrastructure/container/DIContainer";
 import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
 import { validateSchema } from "@interface/middleware";
+import { rideIdParamSchema } from "@interface/validators/driver/rideIdParamSchema";
 import { rideRequestIdParamSchema } from "@interface/validators/driver/rideRequestIdParamSchema";
 import { TYPES } from "@shared/constants/DITypes";
 import { Router } from "express";
@@ -33,5 +34,12 @@ driverRideRoutes.post(
 // GET /api/driver/ride/requests - Get all pending ride requests
 driverRideRoutes.get("/requests", (req, res) =>
   driverRideController.getPendingRideRequests(req, res),
+);
+
+// GET /api/driver/ride/:rideId - Get driver ride details
+driverRideRoutes.get(
+  "/:rideId",
+  validateSchema(rideIdParamSchema),
+  (req, res) => driverRideController.getDriverRideById(req, res),
 );
 export { driverRideRoutes };
