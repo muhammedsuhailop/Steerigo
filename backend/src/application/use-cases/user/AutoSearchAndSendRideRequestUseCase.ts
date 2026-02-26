@@ -156,6 +156,8 @@ export class AutoSearchAndSendRideRequestUseCase
           continue;
         }
 
+        const driverUserId = driver.getUserId();
+
         if (
           searchFilter.hasFilters() &&
           !searchFilter.matches(
@@ -210,7 +212,7 @@ export class AutoSearchAndSendRideRequestUseCase
             requestId: saved.getId(),
             requestGroupId: dto.requestGroupId,
             riderId: userId,
-            driverId,
+            driverId: driverUserId,
             pickup: {
               latitude: pickup.getLatitude(),
               longitude: pickup.getLongitude(),
@@ -229,6 +231,9 @@ export class AutoSearchAndSendRideRequestUseCase
               currency: fareBreakdown.getTotalFare().getCurrency(),
             },
             searchedAt: new Date().toISOString(),
+            expiresAt: new Date(
+              Date.now() + AppConstants.RIDE_REQUEST_TIMEOUT_MS,
+            ).toISOString(),
           },
         };
 

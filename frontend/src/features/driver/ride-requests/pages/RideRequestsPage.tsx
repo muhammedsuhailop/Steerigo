@@ -3,11 +3,14 @@ import { DriverSidebar, DriverTopbar } from "../../shared/components";
 import { Footer } from "@/features/public/components";
 import { Alert } from "@/shared/components/ui/Alert";
 import { useRideRequests } from "../hooks/useRideRequests";
+import { useDriverRealtime } from "../hooks/useDriverRealtime";
 import { RideRequestsHeader } from "../components/RideRequestsHeader";
 import { RideRequestsEmptyState } from "../components/RideRequestsEmptyState";
 import { RideRequestsList } from "../components/RideRequestsList";
 
 export const RideRequestsPage: React.FC = () => {
+  useDriverRealtime();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -85,14 +88,12 @@ export const RideRequestsPage: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-12 py-8 w-full space-y-6">
-          {/* Header */}
           <RideRequestsHeader
             total={total}
             onRefresh={refresh}
             isRefreshing={isFetching}
           />
 
-          {/* Content Card Wrapper */}
           <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200/60 shadow-sm w-full">
             {requests.length === 0 && !isLoading ? (
               <RideRequestsEmptyState
@@ -112,11 +113,9 @@ export const RideRequestsPage: React.FC = () => {
           </div>
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
 
-      {/* Mobile Overlay */}
       {isMobile && !sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"

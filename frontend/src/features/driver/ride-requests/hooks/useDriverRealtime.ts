@@ -1,31 +1,28 @@
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
+import { rideRequestsApi } from "../services/rideRequestsApi";
 
-interface RiderRealtimeProps {
-  onMatched: (data: {
-    rideId: string;
-    driverId: string;
-    status: string;
-  }) => void;
-  onNoDriver: (data: { requestGroupId: string; reason: string }) => void;
-}
+export const useDriverRealtime = () => {
+  const dispatch = useDispatch();
 
-export const useRiderRealtime = ({
-  onMatched,
-  onNoDriver,
-}: RiderRealtimeProps) => {
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
-    // Use documented event names
-    socket.on(SOCKET_EVENTS.RIDER.MATCHED, onMatched);
-    socket.on(SOCKET_EVENTS.RIDER.NO_DRIVER, onNoDriver);
+    const onNewRideRequest = () => {
+      dispatch(
+        rideRequestsApi.util.invalidateTags([
+          { type: "RideRequests", id: "LIST" },
+        ]),
+      );
+    };
+
+    socket.on(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
 
     return () => {
-      socket.off(SOCKET_EVENTS.RIDER.MATCHED, onMatched);
-      socket.off(SOCKET_EVENTS.RIDER.NO_DRIVER, onNoDriver);
+      socket.off(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
     };
-  }, [onMatched, onNoDriver]);
+  }, [dispatch]);
 };

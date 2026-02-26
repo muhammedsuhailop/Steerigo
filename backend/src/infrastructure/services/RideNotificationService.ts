@@ -2,24 +2,26 @@ import { injectable } from "inversify";
 import {
   IRideNotificationService,
   DriverRequestNotificationPayload,
+  DriverRequestCancelledPayload,
   RiderRideMatchedPayload,
   RiderNoDriverFoundPayload,
-} from "@application/services/IRideNotificationService";
-import { getRideSocketServer } from "@infrastructure/realtime/socket";
-import { Logger } from "@shared/utils/Logger";
+} from "../../application/services/IRideNotificationService";
+import { getRideSocketServer } from "../realtime/socket";
+import { Logger } from "../../shared/utils/Logger";
 
 @injectable()
 export class RideNotificationService implements IRideNotificationService {
   async notifyDriverNewRequest(
-    driverId: string,
+    driverId: string, // driver's userId
     payload: DriverRequestNotificationPayload,
   ): Promise<void> {
     try {
-      Logger.info("RideNotificationService instance", {
-        instanceId: this,
-      });
       const io = getRideSocketServer();
-      io.to(`driver:${driverId}`).emit("ride_request:created", payload);
+      io.to(`driver:${driverId}`).emit("ride:request:created", payload);
+      Logger.info("Notified driver of new request", {
+        driverId,
+        requestId: payload.requestId,
+      });
     } catch (error) {
       Logger.error("Error notifying driver of new request", {
         driverId,
@@ -30,20 +32,15 @@ export class RideNotificationService implements IRideNotificationService {
 
   async notifyDriverRequestCancelled(
     driverId: string,
-    requestId: string,
-    requestGroupId: string,
+    payload: DriverRequestCancelledPayload,
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`driver:${driverId}`).emit("ride_request:cancelled", {
-        requestId,
-        requestGroupId,
-      });
+      io.to(`driver:${driverId}`).emit("ride:request:cancelled", payload);
     } catch (error) {
       Logger.error("Error notifying driver of cancelled request", {
         driverId,
-        requestId,
-        requestGroupId,
+        payload,
         error,
       });
     }
@@ -54,16 +51,14 @@ export class RideNotificationService implements IRideNotificationService {
     payload: RiderRideMatchedPayload,
   ): Promise<void> {
     try {
-      Logger.info("RideNotificationService instance", {
-        instanceId: this,
-      });
       const io = getRideSocketServer();
       io.to(`rider:${riderId}`).emit("ride:matched", payload);
-    } catch (error) {
-      Logger.error("Error notifying rider of matched ride", {
+      Logger.info("Notified rider of matched ride", {
         riderId,
-        error,
+        rideId: payload.rideId,
       });
+    } catch (error) {
+      Logger.error("Error notifying rider of matched ride", { riderId, error });
     }
   }
 
@@ -73,7 +68,7 @@ export class RideNotificationService implements IRideNotificationService {
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`rider:${riderId}`).emit("ride:no_driver_found", payload);
+      io.to(`rider:${riderId}`).emit("ride:no-driver-found", payload);
     } catch (error) {
       Logger.error("Error notifying rider of no driver found", {
         riderId,

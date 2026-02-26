@@ -6,10 +6,11 @@ export const AppConstants = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"),
   RATE_LIMIT_MAX_REQUESTS: parseInt(
-    process.env.RATE_LIMIT_MAX_REQUESTS || "10"
+    process.env.RATE_LIMIT_MAX_REQUESTS || "10",
   ),
   REFRESH_TOKEN_EXPIRES_DAYS: parseInt(
-    process.env.REFRESH_TOKEN_EXPIRES_DAYS || "7"
+    process.env.REFRESH_TOKEN_EXPIRES_DAYS || "7",
   ),
   FETCH_MULTIPLIER: 3,
+  RIDE_REQUEST_TIMEOUT_MS: 90_000,
 };

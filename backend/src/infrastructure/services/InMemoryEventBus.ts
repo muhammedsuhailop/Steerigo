@@ -1,14 +1,14 @@
 import { injectable, inject } from "inversify";
-import { IEventBus } from "@application/services/IEventBus";
-import { IRideNotificationService } from "@application/services/IRideNotificationService";
+import { IEventBus } from "../../application/services/IEventBus";
+import { IRideNotificationService } from "../../application/services/IRideNotificationService";
 import {
   RideDomainEvent,
   RideRequestCreatedEvent,
   RideMatchedEvent,
   RideRequestGroupExhaustedEvent,
-} from "@application/events/RideEvents";
-import { Logger } from "@shared/utils/Logger";
-import { TYPES } from "@shared/constants/DITypes";
+} from "../../application/events/RideEvents";
+import { Logger } from "../../shared/utils/Logger";
+import { TYPES } from "../../shared/constants/DITypes";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -30,7 +30,6 @@ export class InMemoryEventBus implements IEventBus {
         break;
       default: {
         const exhaustiveCheck: never = event;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         void exhaustiveCheck;
       }
     }
@@ -44,7 +43,6 @@ export class InMemoryEventBus implements IEventBus {
       driverId,
       requestId: payload.requestId,
     });
-
     await this.notificationService.notifyDriverNewRequest(driverId, payload);
   }
 
@@ -54,7 +52,6 @@ export class InMemoryEventBus implements IEventBus {
       riderId,
       rideId: matchedPayload.rideId,
     });
-
     await this.notificationService.notifyRiderRideMatched(
       riderId,
       matchedPayload,
@@ -69,7 +66,6 @@ export class InMemoryEventBus implements IEventBus {
       riderId,
       requestGroupId,
     });
-
     await this.notificationService.notifyRiderNoDriverFound(riderId, {
       requestGroupId,
       reason,

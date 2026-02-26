@@ -20,6 +20,7 @@ export interface DriverRequestNotificationPayload {
     currency: string;
   };
   searchedAt: string;
+  expiresAt: string;
 }
 
 export interface RiderRideMatchedPayload {
@@ -50,6 +51,11 @@ export interface RiderNoDriverFoundPayload {
   reason: string;
 }
 
+export interface DriverRequestCancelledPayload {
+  requestId: string;
+  requestGroupId: string;
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -58,8 +64,7 @@ export interface IRideNotificationService {
 
   notifyDriverRequestCancelled(
     driverId: string,
-    requestId: string,
-    requestGroupId: string,
+    payload: DriverRequestCancelledPayload,
   ): Promise<void>;
 
   notifyRiderRideMatched(

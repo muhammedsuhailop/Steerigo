@@ -4,7 +4,7 @@ export const SOCKET_EVENTS = {
     NO_DRIVER: "ride:no_driver_found",
   },
   DRIVER: {
-    NEW_REQUEST: "ride_request:created",
-    CANCELLED: "ride_request:cancelled",
+    NEW_REQUEST: "ride:request:created",
+    CANCELLED: "ride:request:cancelled",
   },
 } as const;
