@@ -19,6 +19,7 @@ import driverSearchReducer from "@/features/user/driver-search/store/driverSearc
 import { rideRequestsApi } from "@/features/driver/ride-requests/services/rideRequestsApi";
 import { viewRideApi } from "@/features/user/view-ride/services/viewRideApi";
 import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
+import { notificationApi } from "@/features/notifications/services/notificationApi";
 
 export const store = configureStore({
   reducer: {
@@ -27,6 +28,9 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
 
     [adminApi.reducerPath]: adminApi.reducer,
+
+    //notification API
+    [notificationApi.reducerPath]: notificationApi.reducer,
 
     // Driver APIs with RTK Query
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
@@ -61,6 +65,7 @@ export const store = configureStore({
       },
     }).concat(
       authApi.middleware,
+      notificationApi.middleware,
       driverRegistrationApi.middleware,
       driverApi.middleware,
       userProfileApi.middleware,
