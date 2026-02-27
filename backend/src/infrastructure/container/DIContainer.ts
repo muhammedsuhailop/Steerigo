@@ -11,6 +11,7 @@ import { FileFactory } from "./factories/FileFactory";
 import { DriverAvailabilityFactory } from "./factories/DriverAvailabilityFactory";
 import { FareCalculationFactory } from "./factories/FareConfigurationFactory";
 import { RideRequestFactory } from "./factories/RideRequestFactory";
+import { NotificationFactory } from "./factories/NotificationFactory";
 
 const container = new Container();
 
@@ -27,5 +28,6 @@ FileFactory.register(container);
 DriverAvailabilityFactory.register(container);
 FareCalculationFactory.register(container);
 RideRequestFactory.register(container);
+NotificationFactory.register(container);
 
 export { container };

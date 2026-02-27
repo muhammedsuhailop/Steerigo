@@ -108,6 +108,12 @@ export const TYPES = {
   DeleteFileUseCase: Symbol.for("DeleteFileUseCase"),
   UpdateProfilePictureUseCase: Symbol.for("UpdateProfilePictureUseCase"),
 
+  //Use Cases - Notifications
+  NotificationRepository: Symbol.for("NotificationRepository"),
+  GetNotificationsUseCase: Symbol.for("GetNotificationsUseCase"),
+  MarkNotificationsReadUseCase: Symbol.for("MarkNotificationsReadUseCase"),
+  CreateNotificationUseCase:Symbol.for("CreateNotificationUseCase"),
+
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),
   UpdateAvailabilityStatusUseCase: Symbol.for(
@@ -134,4 +140,5 @@ export const TYPES = {
   RideController: Symbol.for("RideController"),
   AutoRideController: Symbol.for("AutoRideController"),
   DriverRideController: Symbol.for("DriverRideController"),
+  NotificationController: Symbol.for("NotificationController"),
 };
