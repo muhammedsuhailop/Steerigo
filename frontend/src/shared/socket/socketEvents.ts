@@ -7,4 +7,7 @@ export const SOCKET_EVENTS = {
     NEW_REQUEST: "ride:request:created",
     CANCELLED: "ride:request:cancelled",
   },
+  RIDE: {
+    STATUS_UPDATED: "",
+  },
 } as const;

@@ -17,6 +17,8 @@ import { driverProfileApi } from "@/features/driver/profile/services/driverProfi
 import { driverSearchApi } from "@/features/user/driver-search/services/driverSearchApi";
 import driverSearchReducer from "@/features/user/driver-search/store/driverSearchSlice";
 import { rideRequestsApi } from "@/features/driver/ride-requests/services/rideRequestsApi";
+import { viewRideApi } from "@/features/user/view-ride/services/viewRideApi";
+import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +38,7 @@ export const store = configureStore({
     [userProfileApi.reducerPath]: userProfileApi.reducer,
     [driverProfileApi.reducerPath]: driverProfileApi.reducer,
     [driverSearchApi.reducerPath]: driverSearchApi.reducer,
+    [viewRideApi.reducerPath]: viewRideApi.reducer,
 
     // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
@@ -45,6 +48,7 @@ export const store = configureStore({
     adminKYC: adminKYCReducer,
     userProfile: userProfileReducer,
     driverSearch: driverSearchReducer,
+    viewRide: viewRideReducer,
 
     // Global error handling
     error: errorReducer,
@@ -65,6 +69,7 @@ export const store = configureStore({
       driverProfileApi.middleware,
       driverSearchApi.middleware,
       rideRequestsApi.middleware,
+      viewRideApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });

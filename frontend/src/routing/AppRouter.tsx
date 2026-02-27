@@ -25,6 +25,7 @@ import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPa
 import HelpPage from "@/features/public/pages/Help";
 import UserProfileViewPage from "@/features/admin/user/user-profile/UserProfileViewPage";
 import { RideRequestsPage } from "@/features/driver/ride-requests/pages/RideRequestsPage";
+import ViewRidePage from "@/features/user/view-ride/pages/ViewRidePage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -170,6 +171,14 @@ export const AppRouter: React.FC = () => {
       />
 
       <Route
+        path="/ride/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Rider"]}>
+            <ViewRidePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/driver/dashboard"
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
@@ -201,7 +210,6 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/driver/ride-requests"
         element={
