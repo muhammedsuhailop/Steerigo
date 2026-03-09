@@ -38,13 +38,6 @@ const ViewRidePage: React.FC = () => {
     }
   }, [data, dispatch]);
 
-  console.log({
-    id,
-    isLoading,
-    isFetching,
-    data,
-    activeRide,
-  });
   if (isLoading || isFetching) {
     return (
       <div className="h-screen flex items-center justify-center">
