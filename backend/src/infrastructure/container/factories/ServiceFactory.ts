@@ -29,6 +29,7 @@ import { IRideNotificationService } from "@application/services/IRideNotificatio
 import { RideNotificationService } from "@infrastructure/services/RideNotificationService";
 import { IEventBus } from "@application/services/IEventBus";
 import { InMemoryEventBus } from "@infrastructure/services/InMemoryEventBus";
+import { RedisService } from "@infrastructure/services/RedisService";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -65,6 +66,10 @@ export class ServiceFactory {
     container
       .bind<IEventBus>(TYPES.EventBus)
       .to(InMemoryEventBus)
+      .inSingletonScope();
+    container
+      .bind<RedisService>(TYPES.RedisService)
+      .to(RedisService)
       .inSingletonScope();
   }
 }

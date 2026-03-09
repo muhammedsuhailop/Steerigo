@@ -1,43 +1,26 @@
-import { injectable } from "inversify";
-import { createClient, RedisClientType } from "redis";
+import { injectable, inject } from "inversify";
+import { RedisClientType } from "redis";
 import {
   IDriverLocationRepository,
   DriverLocationSnapshot,
 } from "@domain/repositories/IDriverLocationRepository";
 import { Location } from "@domain/value-objects/Location";
 import { Logger } from "@shared/utils/Logger";
+import { RedisService } from "@infrastructure/services/RedisService";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class DriverLocationRepository implements IDriverLocationRepository {
   private readonly client: RedisClientType;
-  private isConnected = false;
+
   private readonly KEY_PREFIX = "driver:location:";
   private readonly TTL_SECONDS = 60 * 5;
 
-  constructor() {
-    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-
-    this.client = createClient({ url: redisUrl });
-
-    this.client.on("error", (err: unknown) =>
-      Logger.error("DriverLocationRepository Redis Client Error", { err }),
-    );
-
-    this.client.on("connect", () => {
-      this.isConnected = true;
-      Logger.info("DriverLocationRepository Redis client connected");
-    });
-
-    this.client.on("end", () => {
-      this.isConnected = false;
-      Logger.warn("DriverLocationRepository Redis client disconnected");
-    });
-
-    void this.client.connect().catch((err: unknown) => {
-      Logger.error("DriverLocationRepository failed to connect to Redis", {
-        err,
-      });
-    });
+  constructor(
+    @inject(TYPES.RedisService)
+    private readonly redisService: RedisService,
+  ) {
+    this.client = this.redisService.getClient();
   }
 
   private getKey(driverUserId: string): string {
@@ -45,7 +28,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
   }
 
   async saveDriverLocation(location: DriverLocationSnapshot): Promise<void> {
-    if (!this.isConnected) {
+    if (!this.redisService.connectionStatus) {
       Logger.warn(
         "DriverLocationRepository: Redis not connected, skipping saveDriverLocation",
         { driverUserId: location.driverUserId },
@@ -53,7 +36,6 @@ export class DriverLocationRepository implements IDriverLocationRepository {
       return;
     }
 
-    // Validate coordinates using your Location VO
     const validated = Location.create(location.coordinates);
 
     const value = JSON.stringify({
@@ -70,6 +52,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
 
     try {
       await this.client.set(key, value, { EX: this.TTL_SECONDS });
+
       Logger.debug("Driver location saved to Redis", {
         driverUserId: location.driverUserId,
         key,
@@ -79,6 +62,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
         driverUserId: location.driverUserId,
         error,
       });
+
       throw error;
     }
   }
@@ -86,7 +70,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
   async getDriverLocation(
     driverUserId: string,
   ): Promise<DriverLocationSnapshot | null> {
-    if (!this.isConnected) {
+    if (!this.redisService.connectionStatus) {
       Logger.warn(
         "DriverLocationRepository: Redis not connected, getDriverLocation returns null",
         { driverUserId },
@@ -98,6 +82,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
 
     try {
       const raw = await this.client.get(key);
+
       if (!raw) {
         return null;
       }
@@ -133,6 +118,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
         driverUserId,
         error,
       });
+
       throw error;
     }
   }

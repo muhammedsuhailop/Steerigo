@@ -13,7 +13,7 @@ export const TYPES = {
   FareConfigurationRepository: Symbol.for("FareConfigurationRepository"),
   RideRequestRepository: Symbol.for("RideRequestRepository"),
   RideRepository: Symbol.for("RideRepository"),
-  DriverLocationRepository:Symbol.for("DriverLocationRepository"),
+  DriverLocationRepository: Symbol.for("DriverLocationRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -27,6 +27,7 @@ export const TYPES = {
   AvailabilityCheckService: Symbol.for("AvailabilityCheckService"),
   DistributedLockService: Symbol.for("DistributedLockService"),
   RideNotificationService: Symbol.for("RideNotificationService"),
+  RedisService: Symbol.for("RedisService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -113,7 +114,7 @@ export const TYPES = {
   NotificationRepository: Symbol.for("NotificationRepository"),
   GetNotificationsUseCase: Symbol.for("GetNotificationsUseCase"),
   MarkNotificationsReadUseCase: Symbol.for("MarkNotificationsReadUseCase"),
-  CreateNotificationUseCase:Symbol.for("CreateNotificationUseCase"),
+  CreateNotificationUseCase: Symbol.for("CreateNotificationUseCase"),
 
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),

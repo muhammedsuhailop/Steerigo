@@ -1,13 +1,14 @@
-import { injectable } from "inversify";
-import { createClient, RedisClientType } from "redis";
+import { injectable, inject } from "inversify";
+import { RedisClientType } from "redis";
 import { Logger } from "@shared/utils/Logger";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { randomUUID } from "crypto";
+import { RedisService } from "./RedisService";
+import { TYPES } from "@shared/constants/DITypes";
 
 @injectable()
 export class RedisLockService implements IDistributedLockService {
-  private client: RedisClientType;
-  private isConnected = false;
+  private readonly client: RedisClientType;
 
   private readonly LUA_RELEASE_SCRIPT = `
     if redis.call("get", KEYS[1]) == ARGV[1] then
@@ -17,32 +18,15 @@ export class RedisLockService implements IDistributedLockService {
     end
   `;
 
-  constructor() {
-    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-
-    this.client = createClient({ url: redisUrl });
-
-    this.client.on("error", (err) =>
-      Logger.error("Redis Client Error", { err }),
-    );
-
-    this.client.on("connect", () => {
-      this.isConnected = true;
-      Logger.info("Redis client connected");
-    });
-
-    this.client.on("end", () => {
-      this.isConnected = false;
-      Logger.warn("Redis client disconnected");
-    });
-
-    void this.client.connect().catch((err) => {
-      Logger.error("Failed to connect to Redis", { err });
-    });
+  constructor(
+    @inject(TYPES.RedisService)
+    private readonly redisService: RedisService,
+  ) {
+    this.client = this.redisService.getClient();
   }
 
   async acquireLock(key: string, ttlSeconds: number): Promise<string | null> {
-    if (!this.isConnected) {
+    if (!this.redisService.connectionStatus) {
       Logger.warn("Redis not connected yet, skipping lock acquisition", {
         key,
       });
@@ -71,7 +55,7 @@ export class RedisLockService implements IDistributedLockService {
   }
 
   async releaseLock(key: string, token: string): Promise<boolean> {
-    if (!this.isConnected) {
+    if (!this.redisService.connectionStatus) {
       Logger.warn("Redis not connected, cannot release lock", { key });
       return false;
     }
@@ -83,7 +67,13 @@ export class RedisLockService implements IDistributedLockService {
       });
 
       const released = result === 1;
-      Logger.debug("Lock release attempt", { key, token, released });
+
+      Logger.debug("Lock release attempt", {
+        key,
+        token,
+        released,
+      });
+
       return released;
     } catch (error) {
       Logger.error("Error releasing lock", { key, token, error });
@@ -96,18 +86,26 @@ export class RedisLockService implements IDistributedLockService {
     token: string,
     ttlSeconds: number,
   ): Promise<boolean> {
-    if (!this.isConnected) {
+    if (!this.redisService.connectionStatus) {
       Logger.warn("Redis not connected, cannot extend lock", { key });
       return false;
     }
 
     try {
       const currentValue = await this.client.get(key);
+
       if (currentValue === token) {
         await this.client.expire(key, ttlSeconds);
-        Logger.debug("Lock extended", { key, token, ttlSeconds });
+
+        Logger.debug("Lock extended", {
+          key,
+          token,
+          ttlSeconds,
+        });
+
         return true;
       }
+
       return false;
     } catch (error) {
       Logger.error("Error extending lock", { key, error });
@@ -116,8 +114,6 @@ export class RedisLockService implements IDistributedLockService {
   }
 
   async disconnect(): Promise<void> {
-    if (this.client.isOpen) {
-      await this.client.quit();
-    }
+    Logger.warn("RedisLockService disconnect called - skipped (shared client)");
   }
 }
