@@ -5,9 +5,9 @@ export const getRouteGeometry = async (
   try {
     // OSRM Public API
     const OSRM_BASE_URL =
-      process.env.OSRM_BASE_URL || "https://router.project-osrm.org";
+      import.meta.env.VITE_OSRM_BASE_URL || "https://router.project-osrm.org";
     const response = await fetch(
-      `${OSRM_BASE_URL}}/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`,
+      `${OSRM_BASE_URL}/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`,
     );
     const data = await response.json();
 
