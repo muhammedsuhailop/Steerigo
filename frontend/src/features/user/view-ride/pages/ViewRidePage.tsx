@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FaArrowLeft, FaMapMarkerAlt, FaRoute, FaClock } from "react-icons/fa";
-
+import { FaMapMarkerAlt, FaRoute, FaClock } from "react-icons/fa";
 import { useGetRideDetailsQuery } from "../services/viewRideApi";
 import {
   setRideData,
@@ -10,13 +9,12 @@ import {
   selectActiveDriver,
 } from "../store/viewRideSlice";
 import { useViewRide } from "../hooks/useViewRide";
-
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
-import TripLocationMap from "@/shared/components/maps/TripLocationMap";
 import RideDriverCard from "../components/RideDriverCard";
 import FareBreakdown from "../components/FareBreakdown";
 import { RideTimelineStatus } from "../components/RideTimelineStatus";
+import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,8 +30,7 @@ const ViewRidePage: React.FC = () => {
   const activeRide = useSelector(selectActiveRide);
   const activeDriver = useSelector(selectActiveDriver);
 
-  // Initialize Socket Listeners for status changes
-  useViewRide(id);
+  const { driverLocation } = useViewRide(id);
 
   useEffect(() => {
     if (data?.success) {
@@ -107,10 +104,10 @@ const ViewRidePage: React.FC = () => {
             <RideTimelineStatus timeline={activeRide.timeline} />
 
             <div className="h-[400px] rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-              <TripLocationMap
+              <LiveTrackingMap
                 pickupLocation={activeRide.pickup}
                 dropLocation={activeRide.drop}
-                tripType={activeRide.rideType as "oneway" | "roundtrip"}
+                driverLocation={driverLocation}
               />
             </div>
           </div>

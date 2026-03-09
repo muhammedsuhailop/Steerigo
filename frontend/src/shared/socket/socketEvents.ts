@@ -8,6 +8,10 @@ export const SOCKET_EVENTS = {
     CANCELLED: "ride:request:cancelled",
   },
   RIDE: {
-    STATUS_UPDATED: "",
+    JOIN: "ride:join",
+    LEAVE: "ride:leave",
+    UPDATE_LOCATION: "driver:location:update",
+    DRIVER_LOCATION: "ride:driver-location",
+    STATUS_UPDATED: "ride:status:updated",
   },
 } as const;

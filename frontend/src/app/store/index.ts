@@ -20,6 +20,8 @@ import { rideRequestsApi } from "@/features/driver/ride-requests/services/rideRe
 import { viewRideApi } from "@/features/user/view-ride/services/viewRideApi";
 import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
 import { notificationApi } from "@/features/notifications/services/notificationApi";
+import { viewDriverRideApi } from "@/features/driver/view-ride/services/viewDriverRideApi";
+import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverRideSlice";
 
 export const store = configureStore({
   reducer: {
@@ -37,6 +39,7 @@ export const store = configureStore({
     [driverApi.reducerPath]: driverApi.reducer,
     [schedulingApi.reducerPath]: schedulingApi.reducer,
     [rideRequestsApi.reducerPath]: rideRequestsApi.reducer,
+    [viewDriverRideApi.reducerPath]: viewDriverRideApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
@@ -53,6 +56,7 @@ export const store = configureStore({
     userProfile: userProfileReducer,
     driverSearch: driverSearchReducer,
     viewRide: viewRideReducer,
+    viewDriverRide: viewDriverRideReducer,
 
     // Global error handling
     error: errorReducer,
@@ -75,6 +79,7 @@ export const store = configureStore({
       driverSearchApi.middleware,
       rideRequestsApi.middleware,
       viewRideApi.middleware,
+      viewDriverRideApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });
