@@ -7,6 +7,13 @@ import {
 import { ITokenService } from "../../application/services/ITokenService";
 import { Logger } from "../../shared/utils/Logger";
 import { UserRole } from "../../shared/constants/AuthConstants";
+import {
+  DriverLocationUpdateDto,
+  DriverLocationUpdatePayload,
+} from "../../application/dto/driver/DriverLocationUpdateDto";
+import { IDriverLocationRepository } from "../../domain/repositories/IDriverLocationRepository";
+import { container } from "../container/DIContainer";
+import { TYPES } from "../../shared/constants/DITypes";
 
 export interface SocketData {
   userId: string;
@@ -55,6 +62,10 @@ export function initializeRideSocketServer(
       methods: ["GET", "POST"],
     },
   });
+
+  const driverLocationRepository = container.get<IDriverLocationRepository>(
+    TYPES.DriverLocationRepository,
+  );
 
   // Authentication middleware
   io.use(async (socket, next) => {
@@ -135,6 +146,115 @@ export function initializeRideSocketServer(
         userId,
       });
     }
+
+    //Ride
+
+    socket.on("ride:join", (rideId: string) => {
+      if (!rideId) {
+        return;
+      }
+
+      socket.join(`ride:${rideId}`);
+
+      Logger.info("Socket joined ride room", {
+        socketId: socket.id,
+        userId,
+        role,
+        rideId,
+      });
+    });
+
+    socket.on("ride:leave", (rideId: string) => {
+      if (!rideId) {
+        return;
+      }
+
+      socket.leave(`ride:${rideId}`);
+
+      Logger.info("Socket left ride room", {
+        socketId: socket.id,
+        userId,
+        role,
+        rideId,
+      });
+    });
+
+    // Driver real-time location updates
+
+    let lastLocationSentAt = 0;
+    const MIN_INTERVAL_MS = 3000; 
+
+    socket.on(
+      "driver:location:update",
+      async (rawPayload: DriverLocationUpdatePayload) => {
+        if (role !== UserRole.DRIVER) {
+          Logger.warn("Non-driver attempted to send location update", {
+            socketId: socket.id,
+            userId,
+            role,
+          });
+          return;
+        }
+
+        const now = Date.now();
+        if (now - lastLocationSentAt < MIN_INTERVAL_MS) {
+          return;
+        }
+        lastLocationSentAt = now;
+
+        try {
+          const dto = DriverLocationUpdateDto.fromSocket(userId, rawPayload);
+
+          const coordinates = {
+            latitude: dto.getLatitude(),
+            longitude: dto.getLongitude(),
+          };
+
+          await driverLocationRepository.saveDriverLocation({
+            driverUserId: dto.getDriverUserId(),
+            coordinates,
+            bearing: dto.getBearing(),
+            speedKph: dto.getSpeedKph(),
+            accuracy: dto.getAccuracy(),
+            updatedAt: new Date(),
+          });
+
+          const rideId = dto.getRideId();
+
+          const locationPayload = {
+            driverId: userId,
+            lat: dto.getLatitude(),
+            lng: dto.getLongitude(),
+            bearing: dto.getBearing(),
+            speedKph: dto.getSpeedKph(),
+            accuracy: dto.getAccuracy(),
+            updatedAt: new Date().toISOString(),
+            rideId: rideId ?? null,
+          };
+
+          io.to(`driver:${userId}`).emit("driver:location", locationPayload);
+
+          if (rideId) {
+            io.to(`ride:${rideId}`).emit(
+              "ride:driver-location",
+              locationPayload,
+            );
+          }
+
+          Logger.debug("Driver location update processed", {
+            driverId: userId,
+            rideId,
+            lat: dto.getLatitude(),
+            lng: dto.getLongitude(),
+          });
+        } catch (error) {
+          Logger.error("Error handling driver:location:update", {
+            userId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      },
+    );
 
     socket.on("disconnect", (reason) => {
       Logger.info("Client disconnected from Socket.IO", {
