@@ -1,12 +1,4 @@
-import { Location } from "../../driver-search/types/driverSearch.types";
-
-export type RideStatus =
-  | "Pending"
-  | "Accepted"
-  | "Arrived"
-  | "Started"
-  | "Completed"
-  | "Cancelled";
+import { Location, RideStatus } from "@/shared/types/ride.types";
 
 export interface FareDetails {
   baseFare: number;

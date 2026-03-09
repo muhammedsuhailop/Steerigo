@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RideStatus } from "../../../user/view-ride/types/viewRide.types";
 import {
   DriverRideDetails,
   RiderInfo,
   ViewDriverRideState,
 } from "../viewDriverRide.types";
+import { RideStatus } from "@/shared/types/ride.types";
 
 const initialState: ViewDriverRideState = {
   activeRide: null,

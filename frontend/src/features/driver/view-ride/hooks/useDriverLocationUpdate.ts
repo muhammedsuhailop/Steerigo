@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
-import { RideStatus } from "../../../user/view-ride/types/viewRide.types";
+import { RideStatus } from "@/shared/types/ride.types";
 
 export const useDriverLocationUpdate = (
   rideId: string | undefined,

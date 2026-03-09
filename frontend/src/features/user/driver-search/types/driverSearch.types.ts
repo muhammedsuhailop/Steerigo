@@ -1,18 +1,5 @@
-export interface Location {
-  latitude: number;
-  longitude: number;
-  address: string;
-}
+import { Distance, ETA } from "@/shared/types/ride.types";
 
-export interface Distance {
-  value: number;
-  unit: string;
-}
-
-export interface ETA {
-  value: number;
-  unit: string;
-}
 
 export interface Driver {
   id: string;

@@ -1,9 +1,8 @@
-import { Location } from "@/features/user/driver-search/types/driverSearch.types";
 import {
   FareDetails,
-  RideStatus,
   RideTimeline,
 } from "@/features/user/view-ride/types/viewRide.types";
+import { Location, RideStatus } from "@/shared/types/ride.types";
 
 export interface RiderInfo {
   id: string;

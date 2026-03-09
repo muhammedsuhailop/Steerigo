@@ -3,8 +3,8 @@ import {
   ViewRideState,
   RideDetails,
   DriverInfo,
-  RideStatus,
 } from "../types/viewRide.types";
+import { RideStatus } from "@/shared/types/ride.types";
 
 const initialState: ViewRideState = {
   activeRide: null,

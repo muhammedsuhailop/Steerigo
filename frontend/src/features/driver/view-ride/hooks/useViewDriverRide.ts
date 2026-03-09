@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
 import { updateDriverRideStatusLocal } from "../store/viewDriverRideSlice";
-import { RideStatus } from "../../../user/view-ride/types/viewRide.types";
+import { RideStatus } from "@/shared/types/ride.types";
 
 export const useViewDriverRide = (rideId: string | undefined) => {
   const dispatch = useDispatch();

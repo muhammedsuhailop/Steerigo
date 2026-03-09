@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/shared/components/ui/Button";
-import { RideStatus } from "../../../user/view-ride/types/viewRide.types";
 import { useUpdateRideStatusMutation } from "../services/viewDriverRideApi";
+import { RideStatus } from "@/shared/types/ride.types";
 
 interface RideActionControlsProps {
   rideId: string;

@@ -1,8 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import { API_ENDPOINTS } from "@/shared/constants/api";
-import { RideStatus } from "../../../user/view-ride/types/viewRide.types";
 import { ViewDriverRideResponse } from "../viewDriverRide.types";
+import { RideStatus } from "@/shared/types/ride.types";
 
 export const viewDriverRideApi = createApi({
   reducerPath: "viewDriverRideApi",
