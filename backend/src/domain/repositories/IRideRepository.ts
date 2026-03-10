@@ -33,4 +33,8 @@ export interface IRideRepository
     driverId: string,
     options: IRidePaginationOptions,
   ): Promise<PaginatedResult<Ride>>;
+  findPaginatedByRiderId(
+    riderId: string,
+    options: IRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>>;
 }

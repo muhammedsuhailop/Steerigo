@@ -12,6 +12,8 @@ import { SendRideRequestResponseDto } from "@application/dto/user/SendRideReques
 import { GetUserRideByIdDto } from "@application/dto/user/GetUserRideByIdDto";
 import { GetUserRideByIdResponseDto } from "@application/dto/user/GetUserRideByIdResponseDto";
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
+import { GetUserRidesDto } from "@application/dto/user/GetUserRidesDto";
+import { GetUserRidesResponseDto } from "@application/dto/user/GetUserRidesResponseDto";
 
 @injectable()
 export class RideController {
@@ -25,6 +27,12 @@ export class RideController {
     private getUserRideByIdUseCase: IUseCase<
       GetUserRideByIdDto,
       Promise<Result<GetUserRideByIdResponseDto>>
+    >,
+
+    @inject(TYPES.GetUserRidesUseCase)
+    private readonly getUserRidesUseCase: IUseCase<
+      GetUserRidesDto,
+      Promise<Result<GetUserRidesResponseDto>>
     >,
   ) {}
 
@@ -114,7 +122,7 @@ export class RideController {
       if (!rideId) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Ride ID is required",
+          message: USER_MESSAGES.RIDE.RIDE_ID_REQUIRED,
         } as ApiResponse);
         return;
       }
@@ -163,6 +171,63 @@ export class RideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "get_user_ride_by_id",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getUserRides(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: USER_MESSAGES.RIDE.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      Logger.info("Get user rides received", {
+        userId,
+        query: req.query,
+      });
+
+      const dto = GetUserRidesDto.fromRequest(userId, req.query);
+
+      const result = await this.getUserRidesUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.warn("Get user rides failed", {
+          userId,
+          error: result.getError().message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "getuserrides",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+
+      Logger.info("User rides fetched successfully", {
+        userId,
+        total: responseData.data.pagination.total,
+        page: responseData.data.pagination.page,
+      });
+
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Get user rides controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "getuserrides",
       );
       res.status(statusCode).json(response);
     }

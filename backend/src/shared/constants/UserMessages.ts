@@ -22,5 +22,6 @@ export const USER_MESSAGES = {
   },
   RIDE: {
     UNAUTHORIZED: "You are not authorized to access this ride",
+    RIDE_ID_REQUIRED: "Ride ID is required",
   },
 } as const;

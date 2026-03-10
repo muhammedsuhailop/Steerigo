@@ -103,6 +103,7 @@ export const TYPES = {
   ),
   CancelRideRequestsUseCase: Symbol.for("CancelRideRequestsUseCase"),
   GetUserRideByIdUseCase: Symbol.for("GetUserRideByIdUseCase"),
+  GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),

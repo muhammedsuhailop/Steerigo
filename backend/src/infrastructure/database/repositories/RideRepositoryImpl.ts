@@ -286,4 +286,65 @@ export class RideRepositoryImpl implements IRideRepository {
       throw error;
     }
   }
+
+  async findPaginatedByRiderId(
+    riderId: string,
+    options: IRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>> {
+    try {
+      const { page, limit, sortBy, sortOrder, status, fromDate, toDate } =
+        options;
+
+      const query: FilterQuery<IRideDocument> = {
+        riderId: new Types.ObjectId(riderId),
+      };
+
+      if (status) {
+        query.status = status;
+      }
+
+      if (fromDate ?? toDate) {
+        query.createdAt = {};
+        if (fromDate) {
+          query.createdAt.$gte = fromDate;
+        }
+        if (toDate) {
+          query.createdAt.$lte = toDate;
+        }
+      }
+
+      const sortValue: Record<string, SortOrder> = {
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      };
+
+      const total = await RideModel.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+      const skip = (page - 1) * limit;
+
+      const docs = await RideModel.find(query)
+        .sort(sortValue)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      const data = docs.map(RideMapper.toDomain);
+
+      Logger.debug("Paginated rides fetched for rider", {
+        riderId,
+        total,
+        page,
+        limit,
+        status,
+      });
+
+      return { data, total, page, limit, totalPages };
+    } catch (error) {
+      Logger.error("Error finding paginated rides by rider ID", {
+        riderId,
+        options,
+        error,
+      });
+      throw error;
+    }
+  }
 }

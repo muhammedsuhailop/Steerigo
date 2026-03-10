@@ -8,6 +8,7 @@ import { handleValidationErrors } from "@interface/middleware/errorHandler";
 import { sendRideRequestSchema } from "@interface/validators/user/rideRequestValidators";
 import { autoSearchAndRequestSchema } from "@interface/validators/user/autoSearchAndRequestValidators";
 import { rideIdParamSchema } from "@interface/validators/user/rideIdParamSchema";
+import { getUserRidesSchema } from "@interface/validators/user/getUserRidesSchema";
 
 const router = Router();
 
@@ -42,6 +43,14 @@ router.post(
 // POST /api/user/ride/request-cancel
 router.post("/ride/request-cancel", (req: Request, res: Response) =>
   autoRideController.cancelRideRequests(req, res),
+);
+
+// GET /api/user/ride/rides
+router.get(
+  "/ride/rides",
+  validateSchema(getUserRidesSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => rideController.getUserRides(req, res),
 );
 
 // GET /api/user/ride/:rideId - Get specific ride details
