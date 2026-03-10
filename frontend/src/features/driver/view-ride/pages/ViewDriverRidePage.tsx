@@ -18,6 +18,7 @@ import { RideTimelineStatus } from "../../../user/view-ride/components/RideTimel
 import RideRiderCard from "../components/RideRiderCard";
 import RideActionControls from "../components/RideActionControls";
 import { useDriverLocationUpdate } from "../hooks/useDriverLocationUpdate";
+import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
 
 const ViewDriverRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,11 @@ const ViewDriverRidePage: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [driverLocation, setDriverLocation] = useState<{
+    lat: number;
+    lng: number;
+    bearing: number;
+  } | null>(null);
 
   const { data, isLoading, isFetching, error } = useGetDriverRideDetailsQuery(
     id as string,
@@ -58,6 +64,38 @@ const ViewDriverRidePage: React.FC = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation not supported");
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setDriverLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          bearing: position.coords.heading ?? 0,
+        });
+      },
+      (error) => {
+        console.error("Location Error:", error.code, error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 20000,
+      },
+    );
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("Driver location:", driverLocation);
+  }, [driverLocation]);
 
   useDriverLocationUpdate(id, activeRide?.status);
 
@@ -122,10 +160,10 @@ const ViewDriverRidePage: React.FC = () => {
                 {/* Left Column */}
                 <div className="lg:col-span-7 space-y-6">
                   <div className="h-[350px] rounded-3xl overflow-hidden border border-gray-200 shadow-sm relative">
-                    <TripLocationMap
+                    <LiveTrackingMap
                       pickupLocation={activeRide.pickup}
                       dropLocation={activeRide.drop}
-                      tripType={activeRide.rideType as "oneway" | "roundtrip"}
+                      driverLocation={driverLocation}
                     />
                   </div>
 

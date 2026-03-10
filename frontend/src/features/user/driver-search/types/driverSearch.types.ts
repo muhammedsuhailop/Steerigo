@@ -1,5 +1,4 @@
-import { Distance, ETA } from "@/shared/types/ride.types";
-
+import { Distance, ETA, Location } from "@/shared/types/ride.types";
 
 export interface Driver {
   id: string;

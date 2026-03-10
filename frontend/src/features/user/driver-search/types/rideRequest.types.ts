@@ -1,4 +1,5 @@
-import type { Location, EstimatedFare } from "./driverSearch.types";
+import { Location } from "@/shared/types/ride.types";
+import type { EstimatedFare } from "./driverSearch.types";
 
 export interface RideRequestPayload {
   driverId: string;

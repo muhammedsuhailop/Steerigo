@@ -3,8 +3,7 @@ import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Location } from "./types/maps.type";
-
-// Fix Leaflet default marker icons
+import { getRouteGeometry } from "@/shared/utils/routingHelper";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -52,73 +51,71 @@ const MapUpdater: React.FC<{
   const map = useMap();
 
   useEffect(() => {
-    // Clear existing markers
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    const bounds: L.LatLngBoundsExpression = [];
-
-    // Add pickup marker
-    if (pickupLocation) {
-      const pickupMarker = L.marker(
-        [pickupLocation.latitude, pickupLocation.longitude],
-        {
-          icon: createCustomMarker("#10b981", "P"),
+    const updateMap = async () => {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+          map.removeLayer(layer);
         }
-      ).addTo(map);
+      });
 
-      pickupMarker.bindPopup(`
-        <div class="p-2">
-          <p class="font-semibold text-sm">Pickup Location</p>
-          <p class="text-xs text-gray-600 mt-1">${pickupLocation.address}</p>
-        </div>
-      `);
+      const bounds: L.LatLngBoundsExpression = [];
 
-      bounds.push([pickupLocation.latitude, pickupLocation.longitude]);
-    }
-
-    // Add drop marker for oneway trips
-    if (tripType === "oneway" && dropLocation) {
-      const dropMarker = L.marker(
-        [dropLocation.latitude, dropLocation.longitude],
-        {
-          icon: createCustomMarker("#ef4444", "D"),
-        }
-      ).addTo(map);
-
-      dropMarker.bindPopup(`
-        <div class="p-2">
-          <p class="font-semibold text-sm">Drop Location</p>
-          <p class="text-xs text-gray-600 mt-1">${dropLocation.address}</p>
-        </div>
-      `);
-
-      bounds.push([dropLocation.latitude, dropLocation.longitude]);
-
-      // Draw route line
       if (pickupLocation) {
-        L.polyline(
-          [
+        const pickupMarker = L.marker(
+          [pickupLocation.latitude, pickupLocation.longitude],
+          {
+            icon: createCustomMarker("#10b981", "P"),
+          },
+        ).addTo(map);
+
+        pickupMarker.bindPopup(`
+          <div class="p-2">
+            <p class="font-semibold text-sm">Pickup Location</p>
+            <p class="text-xs text-gray-600 mt-1">${pickupLocation.address}</p>
+          </div>
+        `);
+
+        bounds.push([pickupLocation.latitude, pickupLocation.longitude]);
+      }
+
+      if (tripType === "oneway" && dropLocation) {
+        const dropMarker = L.marker(
+          [dropLocation.latitude, dropLocation.longitude],
+          {
+            icon: createCustomMarker("#ef4444", "D"),
+          },
+        ).addTo(map);
+
+        dropMarker.bindPopup(`
+          <div class="p-2">
+            <p class="font-semibold text-sm">Drop Location</p>
+            <p class="text-xs text-gray-600 mt-1">${dropLocation.address}</p>
+          </div>
+        `);
+
+        bounds.push([dropLocation.latitude, dropLocation.longitude]);
+
+        // Fetch real route
+        if (pickupLocation) {
+          const route = await getRouteGeometry(
             [pickupLocation.latitude, pickupLocation.longitude],
             [dropLocation.latitude, dropLocation.longitude],
-          ],
-          {
-            color: "#3b82f6",
-            weight: 3,
-            opacity: 0.7,
-            dashArray: "10, 10",
-          }
-        ).addTo(map);
-      }
-    }
+          );
 
-    // Fit bounds if we have locations
-    if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
+          L.polyline(route, {
+            color: "#3b82f6",
+            weight: 4,
+            opacity: 0.9,
+          }).addTo(map);
+        }
+      }
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    };
+
+    updateMap();
   }, [pickupLocation, dropLocation, tripType, map]);
 
   return null;
