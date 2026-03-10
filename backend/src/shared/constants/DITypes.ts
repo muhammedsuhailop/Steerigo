@@ -64,6 +64,9 @@ export const TYPES = {
   KycSubmissionUseCase: Symbol.for("KycSubmissionUseCase"),
   UpdateDriverKycStatusUseCase: Symbol.for("UpdateDriverKycStatusUseCase"),
 
+  // Use Cases - Admin Ride
+  GetAdminRidesUseCase: Symbol.for("GetAdminRidesUseCase"),
+
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
@@ -144,4 +147,5 @@ export const TYPES = {
   AutoRideController: Symbol.for("AutoRideController"),
   DriverRideController: Symbol.for("DriverRideController"),
   NotificationController: Symbol.for("NotificationController"),
+  AdminRideController: Symbol.for("AdminRideController"),
 };

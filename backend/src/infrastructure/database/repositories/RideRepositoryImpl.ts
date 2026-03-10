@@ -1,5 +1,6 @@
 import { injectable } from "inversify";
 import {
+  IAdminRidePaginationOptions,
   IRidePaginationOptions,
   IRideRepository,
 } from "@domain/repositories/IRideRepository";
@@ -341,6 +342,81 @@ export class RideRepositoryImpl implements IRideRepository {
     } catch (error) {
       Logger.error("Error finding paginated rides by rider ID", {
         riderId,
+        options,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async findPaginatedAll(
+    options: IAdminRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>> {
+    try {
+      const {
+        page,
+        limit,
+        sortBy,
+        sortOrder,
+        status,
+        fromDate,
+        toDate,
+        riderId,
+        driverId,
+      } = options;
+
+      const query: FilterQuery<IRideDocument> = {};
+
+      if (status) {
+        query.status = status;
+      }
+
+      if (riderId) {
+        query.riderId = new Types.ObjectId(riderId);
+      }
+
+      if (driverId) {
+        query.driverId = new Types.ObjectId(driverId);
+      }
+
+      if (fromDate ?? toDate) {
+        query.createdAt = {};
+        if (fromDate) {
+          query.createdAt.$gte = fromDate;
+        }
+        if (toDate) {
+          query.createdAt.$lte = toDate;
+        }
+      }
+
+      const sortValue: Record<string, SortOrder> = {
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      };
+
+      const total = await RideModel.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+      const skip = (page - 1) * limit;
+
+      const docs = await RideModel.find(query)
+        .sort(sortValue)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      const data = docs.map(RideMapper.toDomain);
+
+      Logger.debug("Admin paginated rides fetched", {
+        total,
+        page,
+        limit,
+        status,
+        riderId,
+        driverId,
+      });
+
+      return { data, total, page, limit, totalPages };
+    } catch (error) {
+      Logger.error("Error finding paginated rides for admin", {
         options,
         error,
       });

@@ -17,6 +17,11 @@ export interface IRidePaginationOptions extends IRideFilters {
   sortOrder: "asc" | "desc";
 }
 
+export interface IAdminRidePaginationOptions extends IRidePaginationOptions {
+  riderId?: string;
+  driverId?: string;
+}
+
 export interface IRideRepository
   extends IReadOnlyRepository<Ride, string>,
     IWriteOnlyRepository<Ride, string> {
@@ -36,5 +41,8 @@ export interface IRideRepository
   findPaginatedByRiderId(
     riderId: string,
     options: IRidePaginationOptions,
+  ): Promise<PaginatedResult<Ride>>;
+  findPaginatedAll(
+    options: IAdminRidePaginationOptions,
   ): Promise<PaginatedResult<Ride>>;
 }
