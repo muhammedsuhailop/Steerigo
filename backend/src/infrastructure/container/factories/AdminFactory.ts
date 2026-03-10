@@ -20,6 +20,8 @@ import { UpdateUserStatusRequestDto } from "@application/dto/admin/UpdateUserSta
 import { GetUserProfileRequestDto } from "@application/dto/admin/GetUserProfileRequestDto";
 import { GetUserProfileResponseDto } from "@application/dto/admin/GetUserProfileResponseDto";
 import { GetUserProfileDetailsUseCase } from "@application/use-cases/admin/GetUserProfileDetailsUseCase";
+import { GetAdminRidesUseCase } from "@application/use-cases/admin/GetAdminRidesUseCase";
+import { AdminRideController } from "@interface/controllers/admin/AdminRideController";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -52,9 +54,17 @@ export class AdminFactory {
       >(TYPES.GetUserProfileDetailsUseCase)
       .to(GetUserProfileDetailsUseCase);
 
+    container
+      .bind<GetAdminRidesUseCase>(TYPES.GetAdminRidesUseCase)
+      .to(GetAdminRidesUseCase);
+
     // Controller bindings
     container
       .bind<AdminUserController>(TYPES.AdminUserController)
       .to(AdminUserController);
+
+    container
+      .bind<AdminRideController>(TYPES.AdminRideController)
+      .to(AdminRideController);
   }
 }

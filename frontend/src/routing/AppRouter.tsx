@@ -24,6 +24,9 @@ import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage
 import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
 import HelpPage from "@/features/public/pages/Help";
 import UserProfileViewPage from "@/features/admin/user/user-profile/UserProfileViewPage";
+import { RideRequestsPage } from "@/features/driver/ride-requests/pages/RideRequestsPage";
+import ViewRidePage from "@/features/user/view-ride/pages/ViewRidePage";
+import ViewDriverRidePage from "@/features/driver/view-ride/pages/ViewDriverRidePage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -169,6 +172,14 @@ export const AppRouter: React.FC = () => {
       />
 
       <Route
+        path="/ride/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Rider"]}>
+            <ViewRidePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/driver/dashboard"
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
@@ -197,6 +208,22 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <DriverProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/ride-requests"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <RideRequestsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/ride/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <ViewDriverRidePage />
           </ProtectedRoute>
         }
       />

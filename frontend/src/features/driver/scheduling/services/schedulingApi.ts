@@ -9,12 +9,14 @@ import type {
   ExceptionCreateResponse,
   ExceptionDeleteResponse,
   Exception,
+  ExceptionUpdateFormData,
+  ExceptionUpdateResponse,
 } from "../types/scheduling.types";
 
 export const schedulingApi = createApi({
   reducerPath: "schedulingApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["Schedule", "Status", "Location", "Exceptions"],
+  tagTypes: ["Schedule", "Status", "Location", "Exceptions", "DriverStatus"],
   endpoints: (builder) => ({
     // Existing endpoints
     updateLocation: builder.mutation<any, UpdateLocationPayload>({
@@ -44,13 +46,13 @@ export const schedulingApi = createApi({
       invalidatesTags: ["Status"],
     }),
 
-    getExceptions: builder.query<Exception[], void>({
-      query: () => ({
-        url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}`,
-        method: "GET",
-      }),
-      providesTags: ["Exceptions"],
-    }),
+    // getExceptions: builder.query<Exception[], void>({
+    //   query: () => ({
+    //     url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}`,
+    //     method: "GET",
+    //   }),
+    //   providesTags: ["Exceptions"],
+    // }),
 
     createException: builder.mutation<
       ExceptionCreateResponse,
@@ -61,7 +63,19 @@ export const schedulingApi = createApi({
         method: "POST",
         data,
       }),
-      invalidatesTags: ["Exceptions", "Schedule"],
+      invalidatesTags: ["Exceptions", "Schedule", "DriverStatus"],
+    }),
+
+    updateException: builder.mutation<
+      ExceptionUpdateResponse,
+      { id: string; data: ExceptionUpdateFormData }
+    >({
+      query: ({ id, data }) => ({
+        url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}/${id}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["Exceptions", "Schedule", "DriverStatus"],
     }),
 
     deleteException: builder.mutation<ExceptionDeleteResponse, string>({
@@ -69,7 +83,7 @@ export const schedulingApi = createApi({
         url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Exceptions"],
+      invalidatesTags: ["Exceptions", "DriverStatus"],
     }),
   }),
 });
@@ -78,7 +92,8 @@ export const {
   useUpdateLocationMutation,
   useUpdateScheduleMutation,
   useUpdateStatusMutation,
-  useGetExceptionsQuery,
+  // useGetExceptionsQuery,
   useCreateExceptionMutation,
+  useUpdateExceptionMutation,
   useDeleteExceptionMutation,
 } = schedulingApi;

@@ -1,0 +1,179 @@
+import React from "react";
+import {
+  FaCheckCircle,
+  FaRegCircle,
+  FaClock,
+  FaTimesCircle,
+  FaExclamationTriangle,
+  FaCreditCard,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+import { MdRadioButtonChecked } from "react-icons/md";
+
+interface TimelineStepProps {
+  label: string;
+  description?: string;
+  time?: Date | string;
+  isCompleted: boolean;
+  isActive: boolean;
+  isLast?: boolean;
+  isError?: boolean;
+}
+
+const TimelineStep: React.FC<TimelineStepProps> = ({
+  label,
+  description,
+  time,
+  isCompleted,
+  isActive,
+  isLast,
+  isError,
+}) => {
+  return (
+    <div className="flex gap-4">
+      {/* Icon & Connector Line */}
+      <div className="flex flex-col items-center">
+        <div
+          className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+            isCompleted
+              ? "border-green-500 bg-green-50 text-green-600"
+              : isError
+                ? "border-red-500 bg-red-50 text-red-600"
+                : isActive
+                  ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-200"
+                  : "border-gray-200 bg-white text-gray-300"
+          }`}
+        >
+          {isCompleted ? (
+            <FaCheckCircle size={16} />
+          ) : isError ? (
+            <FaTimesCircle size={16} />
+          ) : isActive ? (
+            <MdRadioButtonChecked size={20} className="animate-pulse" />
+          ) : (
+            <FaRegCircle size={12} />
+          )}
+        </div>
+        {!isLast && (
+          <div
+            className={`w-0.5 flex-1 transition-colors duration-500 ${
+              isCompleted ? "bg-green-500" : "bg-gray-200"
+            }`}
+          />
+        )}
+      </div>
+
+      {/* Text Content */}
+      <div className="pb-8">
+        <p
+          className={`text-sm font-bold transition-colors ${
+            isActive
+              ? "text-blue-600"
+              : isCompleted
+                ? "text-gray-900"
+                : "text-gray-400"
+          }`}
+        >
+          {label}
+        </p>
+
+        {time && (
+          <p className="text-[10px] font-bold text-gray-400 mt-0.5 flex items-center gap-1">
+            <FaClock size={10} />
+            {new Date(time).toLocaleString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })}
+          </p>
+        )}
+
+        {description && isActive && (
+          <p className="mt-1.5 text-xs text-gray-500 leading-relaxed max-w-xs">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const RideTimelineStatus: React.FC<{ timeline: any }> = ({
+  timeline,
+}) => {
+  const steps = [
+    {
+      label: "Request Placed",
+      time: timeline.requestedAt,
+      isCompleted: !!timeline.acceptedAt,
+      isActive:
+        !timeline.acceptedAt && !timeline.cancelledAt && !timeline.rejectedAt,
+      description: "Waiting for a driver to accept your request...",
+    },
+    {
+      label: "Driver Assigned",
+      time: timeline.acceptedAt,
+      isCompleted: !!timeline.startedAt,
+      isActive: !!timeline.acceptedAt && !timeline.startedAt,
+      description: "Your driver has accepted and is heading to your location.",
+    },
+    {
+      label: "Trip in Progress",
+      time: timeline.startedAt,
+      isCompleted: !!timeline.completedAt,
+      isActive: !!timeline.startedAt && !timeline.completedAt,
+      description: "You are safely on your way to the destination.",
+    },
+    {
+      label: "Arrived at Destination",
+      time: timeline.completedAt,
+      isCompleted: !!timeline.paymentCompletedAt,
+      isActive: !!timeline.completedAt && !timeline.paymentCompletedAt,
+      description: "Trip finished. Please proceed with the payment.",
+    },
+    {
+      label: "Payment Completed",
+      time: timeline.paymentCompletedAt,
+      isCompleted: !!timeline.paymentCompletedAt,
+      isActive: !!timeline.paymentInitiatedAt && !timeline.paymentCompletedAt,
+      isLast: true,
+    },
+  ];
+
+  const isCancelled = !!timeline.cancelledAt;
+  const isRejected = !!timeline.rejectedAt;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
+          <FaClock className="text-gray-300" />
+          Live Journey Timeline
+        </h3>
+      </div>
+
+      <div className="flex flex-col ml-1">
+        {isCancelled || isRejected ? (
+          <TimelineStep
+            label={isCancelled ? "Ride Cancelled" : "Ride Rejected"}
+            time={timeline.cancelledAt || timeline.rejectedAt}
+            isCompleted={false}
+            isActive={false}
+            isError={true}
+            isLast={true}
+            description={
+              isCancelled
+                ? "This ride was cancelled by the user."
+                : "The driver declined this request."
+            }
+          />
+        ) : (
+          steps.map((step, idx) => <TimelineStep key={idx} {...step} />)
+        )}
+      </div>
+    </div>
+  );
+};

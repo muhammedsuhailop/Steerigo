@@ -8,7 +8,6 @@ export const API_ENDPOINTS = {
     GOOGLE: "/auth/google",
     GOOGLE_CALLBACK: "/auth/google/callback",
     LOGOUT: "/auth/logout",
-    // REFRESH: "/auth/refresh",
     REFRESH_TOKEN: "/auth/refresh-token",
     VERIFY_OTP: "/auth/signup/verify",
     RESEND_OTP: "/auth/resend-otp",
@@ -25,6 +24,9 @@ export const API_ENDPOINTS = {
     SEARCH_NEARBY: "/user/search/nearby",
     SEND_RIDE_REQUEST: "/user/ride/request-send",
     REGISTER_AS_DRIVER: "/user/register-as-driver",
+    AUTO_RIDE_REQUEST: "/user/ride/auto-request-send",
+    CANCEL_RIDE_REQUEST: "/user/ride/request-cancel",
+    RIDE: "/user/ride",
   },
   DRIVER: {
     REGISTER: "/driver/register",
@@ -53,6 +55,10 @@ export const API_ENDPOINTS = {
   },
   FILE: {
     UPLOAD: "/file/upload",
+  },
+  NOTIFICATION: {
+    GET_NOTIFICATIONS: "/notifications",
+    MARK_AS_READ: "/notifications/read",
   },
 } as const;
 

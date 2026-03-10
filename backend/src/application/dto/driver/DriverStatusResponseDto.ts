@@ -34,8 +34,6 @@ export interface AvailabilityExceptionResponse {
   readonly startTime: Date;
   readonly endTime: Date;
   readonly durationHours: number;
-  readonly isRecurring: boolean;
-  readonly recurringPattern?: string;
   readonly createdAt: Date;
 }
 

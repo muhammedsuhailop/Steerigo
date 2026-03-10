@@ -1,4 +1,5 @@
-import type { Location, EstimatedFare } from "./driverSearch.types";
+import { Location } from "@/shared/types/ride.types";
+import type { EstimatedFare } from "./driverSearch.types";
 
 export interface RideRequestPayload {
   driverId: string;
@@ -8,6 +9,7 @@ export interface RideRequestPayload {
   rideType: "One Way" | "Round Trip";
   fareBreakdown: EstimatedFare;
   pickupETA: string;
+  requestGroupId: string;
 }
 
 export interface RideRequestResponse {
@@ -31,6 +33,57 @@ export interface RideRequestError {
   code: string;
   message: string;
   details?: Record<string, unknown>;
+}
+
+export interface AutoRideRequestPayload {
+  latitude: number;
+  longitude: number;
+  pickupAddress: string;
+  dropAddress: string;
+  searchDate: string;
+  timeRequired: number;
+  radiusKm: number;
+  gearType: string;
+  bodyType: string;
+  dropLatitude: number;
+  dropLongitude: number;
+  rideType: "One Way" | "Round Trip";
+  requestGroupId: string;
+}
+
+export interface SuccessfulAutoRequest {
+  requestId: string;
+  driverId: string;
+  driverName: string;
+  pickupETA: string;
+  totalFare: number;
+  currency: string;
+}
+
+export interface AutoRideRequestResponse {
+  success: boolean;
+  message: string;
+  requestGroupId: string;
+  data: {
+    successfulRequests: SuccessfulAutoRequest[];
+    failedRequests: unknown[];
+    summary: {
+      totalDriversFound: number;
+      successCount: number;
+      failureCount: number;
+      searchedAt: string;
+    };
+  };
+}
+
+export interface CancelRideRequestPayload {
+  requestGroupId: string;
+}
+
+export interface CancelRideRequestResponse {
+  requestGroupId: string;
+  cancelledCount: number;
+  message: string;
 }
 
 export const RIDE_REQUEST_ERROR_CODES = {

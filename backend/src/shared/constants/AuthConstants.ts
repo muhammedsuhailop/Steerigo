@@ -48,6 +48,7 @@ export const AuthMessages = {
   USER_PROFILE_SUCCESS: "User profile fetched  successfully",
   TOKENS_REFRESHED: "Tokens refreshed successfully",
   USER_RETRIEVED: "User fetched successfully",
+  EMAIL_ALREADY_EXISIT: "User with this email already exists",
 } as const;
 
 export const AuthValidationMessages = {
@@ -71,12 +72,18 @@ export const AuthErrorMessages = {
   SIGNUP_FAILED: "Failed to create account",
   OTP_SEND_FAILED: "Failed to send verification code",
   OTP_VERIFICATION_FAILED: "OTP verification failed",
-  PASSWORD_RESET_FAILED: "Failed to reset password",
   GOOGLE_AUTH_FAILED: "Google authentication failed",
   USER_NOT_FOUND: "User not found",
-  OTP_NOT_FOUND: "No OTP found. Please request a new one",
+  OTP_NOT_FOUND: "OTP not found or has expired. Please request a new OTP",
   OTP_INVALID: "Invalid verification code",
-  EMAIL_NOT_VERIFIED: "Please verify your email first",
+  OTP_EXPIRED: "OTP has expired. Please request a new one",
+  MAX_OTP_ATTEMPTS: "Maximum OTP attempts exceeded. Please wait...",
+  EMAIL_NOT_VERIFIED:
+    "Email address is not verified. Please verify your email to continue",
+  REFRESH_TOKEN_EXPIRED: "Refresh token has expired. Please log in again",
+  REFRESH_TOKEN_REVOKED: "Refresh token has been revoked. Please log in again",
+  PASSWORD_RESET_FAILED: "Password reset failed. Please try again",
+  MOBILE_ALREADY_EXISTS: "This mobile number is already registered",
 } as const;
 
 export const TokenConfig = {

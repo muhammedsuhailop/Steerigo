@@ -111,15 +111,13 @@ export class DriverStatusMapper {
     const durationHours = Math.round((durationMs / 36e5) * 10) / 10;
 
     return {
-      id: domainException.id as string,
+      id: domainException.id,
       type: domainException.type,
       reason: domainException.reason,
       startTime,
       endTime,
       durationHours,
-      isRecurring: domainException.isRecurring ?? false,
-      recurringPattern: domainException.recurringPattern,
-      createdAt: domainException.createdAt ?? new Date(),
+      createdAt: domainException.createdAt,
     };
   }
 

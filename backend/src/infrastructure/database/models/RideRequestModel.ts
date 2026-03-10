@@ -1,8 +1,9 @@
 import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRideRequestDocument extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   driverId: Types.ObjectId;
+  requestGroupId: string;
   riderId: Types.ObjectId;
   pickup: {
     latitude: number;
@@ -59,13 +60,14 @@ export interface IRideRequestDocument extends Document {
 
 const rideRequestSchema = new Schema(
   {
-    _id: {
-      type: String,
-      required: true,
-    },
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",
+      required: true,
+      index: true,
+    },
+    requestGroupId: {
+      type: String,
       required: true,
       index: true,
     },
@@ -235,7 +237,7 @@ const rideRequestSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes
@@ -244,6 +246,7 @@ rideRequestSchema.index({ driverId: 1, pickupTime: 1 });
 rideRequestSchema.index({ riderId: 1, status: 1 });
 rideRequestSchema.index({ createdAt: 1 });
 rideRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+rideRequestSchema.index({ requestGroupId: 1, driverId: 1 }, { unique: true });
 
 // RideRequest Model
 export const RideRequestModel: Model<IRideRequestDocument> =

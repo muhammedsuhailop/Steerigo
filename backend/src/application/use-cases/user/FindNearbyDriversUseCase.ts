@@ -16,6 +16,8 @@ import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { IUseCase } from "../interfaces/IUseCase";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
+import { AppConstants } from "@shared/constants/AppConstants";
+import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
 
 @injectable()
 export class FindNearbyDriversUseCase
@@ -33,7 +35,9 @@ export class FindNearbyDriversUseCase
     @inject(TYPES.UserRepository)
     private userRepository: IUserRepository,
     @inject(TYPES.FareCalculationService)
-    private fareCalculationService: IFareCalculationService
+    private fareCalculationService: IFareCalculationService,
+    @inject(TYPES.AvailabilityCheckService)
+    private availabilityCheckService: IAvailabilityCheckService
   ) {}
 
   async execute(
@@ -69,6 +73,8 @@ export class FindNearbyDriversUseCase
         searchDate: requestDto.searchDate,
       });
 
+      const fetchLimit = requestDto.limit * AppConstants.FETCH_MULTIPLIER;
+
       const nearbyAvailabilities =
         await this.driverAvailabilityRepository.findNearbyAvailableDrivers(
           searchCriteria.getLatitude(),
@@ -76,7 +82,7 @@ export class FindNearbyDriversUseCase
           searchCriteria.getSearchDate(),
           searchCriteria.getRadiusKm(),
           searchCriteria.getTimeRequiredMinutes(),
-          requestDto.limit
+          fetchLimit
         );
 
       Logger.debug("Get available drivers within radius result", {
@@ -131,11 +137,18 @@ export class FindNearbyDriversUseCase
           });
 
           try {
-            const isAvailable = this.isDriverAvailableForDuration(
-              availability,
-              searchCriteria.getSearchDate(),
-              searchCriteria.getTimeRequiredMinutes()
+            const startDate = searchCriteria.getSearchDate();
+            const endDate = new Date(
+              startDate.getTime() +
+                searchCriteria.getTimeRequiredMinutes() * 60 * 1000
             );
+
+            const isAvailable =
+              await this.availabilityCheckService.isAvailableDuring(
+                driverId,
+                startDate,
+                endDate
+              );
 
             if (!isAvailable) {
               const schedule = availability.getRecurringSchedule();
@@ -249,9 +262,9 @@ export class FindNearbyDriversUseCase
         })
       );
 
-      const validDrivers = driverResponses.filter(
-        (driver): driver is DriverInfoResponse => driver !== null
-      );
+      const validDrivers = driverResponses
+        .filter((driver): driver is DriverInfoResponse => driver !== null)
+        .slice(0, requestDto.limit);
 
       Logger.info("Filtered drivers after applying criteria", {
         total: nearbyAvailabilities.length,
@@ -296,62 +309,5 @@ export class FindNearbyDriversUseCase
       Logger.error("Find nearby drivers use case failed", { error });
       return Result.failure(error as Error);
     }
-  }
-
-  private isDriverAvailableForDuration(
-    availability: DriverAvailability,
-    searchDate: Date,
-    timeRequiredMinutes: number
-  ): boolean {
-    const schedule = availability.getRecurringSchedule();
-    if (!schedule) return false;
-
-    const validFrom = new Date(schedule.validity.startDate);
-    const validTill = new Date(
-      schedule.validity.endDate ?? new Date(9999, 11, 31)
-    );
-
-    const rideEnd = new Date(searchDate);
-    rideEnd.setMinutes(rideEnd.getMinutes() + timeRequiredMinutes);
-
-    if (searchDate < validFrom || rideEnd > validTill) {
-      return false;
-    }
-
-    const daily = schedule.dailyRecurrence;
-    if (!daily) return false;
-
-    const jsDay = searchDate.getUTCDay(); // 0=Sun
-    const normalizedDay = jsDay === 0 ? 7 : jsDay; // ISO (1–7)
-
-    if (!daily.daysOfWeek.includes(normalizedDay)) {
-      return false;
-    }
-
-    const startMinutes =
-      searchDate.getUTCHours() * 60 + searchDate.getUTCMinutes();
-    const endMinutes = startMinutes + timeRequiredMinutes;
-
-    const fitsInSlot = daily.timeSlots.some(
-      (slot) =>
-        startMinutes >= slot.getStartTime() && endMinutes <= slot.getEndTime()
-    );
-
-    if (!fitsInSlot) {
-      return false;
-    }
-
-    if (daily.excludedTimeSlots?.length) {
-      const overlapsExcluded = daily.excludedTimeSlots.some(
-        (slot) =>
-          startMinutes < slot.getEndTime() && endMinutes > slot.getStartTime()
-      );
-
-      if (overlapsExcluded) {
-        return false;
-      }
-    }
-
-    return true;
   }
 }

@@ -236,9 +236,7 @@ export class DriverAvailabilityRepositoryImpl
       const doc = await DriverAvailabilityModel.findOne({
         driverId: driverIdObjectId,
         isActive: true,
-      })
-        .lean()
-        .exec();
+      }).exec();
 
       if (!doc) return null;
 
@@ -347,7 +345,13 @@ export class DriverAvailabilityRepositoryImpl
       .lean()
       .exec();
 
-    return doc?.exceptions ?? [];
+    if (!doc || !doc.exceptions) {
+      return [];
+    }
+
+    return doc.exceptions.map((exception) =>
+      DriverAvailabilityMapper.mapRawExceptionToDomain(exception)
+    );
   }
 
   // Status-Based Queries

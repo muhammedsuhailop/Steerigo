@@ -14,6 +14,7 @@ const initialState: DriverSearchState = {
   error: null,
   totalFound: 0,
   searchedAt: null,
+  requestGroupId: null,
 };
 
 export const driverSearchSlice = createSlice({
@@ -40,6 +41,10 @@ export const driverSearchSlice = createSlice({
     setSearchedAt: (state, action: PayloadAction<string>) => {
       state.searchedAt = action.payload;
     },
+    // Set requestGroupId
+    setRequestGroupId: (state, action: PayloadAction<string | null>) => {
+      state.requestGroupId = action.payload;
+    },
     // Set loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -56,6 +61,7 @@ export const driverSearchSlice = createSlice({
       state.error = null;
       state.totalFound = 0;
       state.searchedAt = null;
+      state.requestGroupId = null;
     },
     // Clear error
     clearError: (state) => {
@@ -70,6 +76,7 @@ export const {
   setSearchCriteria,
   setTotalFound,
   setSearchedAt,
+  setRequestGroupId,
   setLoading,
   setError,
   clearSearch,
@@ -99,5 +106,9 @@ export const selectTotalFound = (state: { driverSearch: DriverSearchState }) =>
 
 export const selectSearchedAt = (state: { driverSearch: DriverSearchState }) =>
   state.driverSearch.searchedAt;
+
+export const selectRequestGroupId = (state: {
+  driverSearch: DriverSearchState;
+}) => state.driverSearch.requestGroupId;
 
 export default driverSearchSlice.reducer;

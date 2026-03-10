@@ -4,6 +4,7 @@ import { driverRoutes } from "./driver/driverRoutes";
 import { adminRoutes } from "./admin";
 import { fileRoutes } from "./file/fileRoutes";
 import { userRoutes } from "./user/userRoutes";
+import { notificationRoutes } from "./notification/notificationRoutes";
 
 const router = Router();
 
@@ -16,6 +17,8 @@ router.use("/admin", adminRoutes);
 router.use("/user", userRoutes);
 
 router.use("/file", fileRoutes);
+
+router.use("/notifications", notificationRoutes);
 
 // Test Server endpoint
 router.get("/test", (req, res) => {

@@ -32,6 +32,27 @@ import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashbo
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { GetDriverProfileResponseDto } from "@application/dto/driver/GetDriverProfileResponseDto";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
+import { EditAvailabilityExceptionRequestDto } from "@application/dto/driver/EditAvailabilityExceptionRequestDto";
+import { EditAvailabilityExceptionResponseDto } from "@application/dto/driver/EditAvailabilityExceptionResponseDto";
+import { EditAvailabilityExceptionUseCase } from "@application/use-cases/driver/EditAvailabilityExceptionUseCase";
+import { RemoveAvailabilityExceptionRequestDto } from "@application/dto/driver/RemoveAvailabilityExceptionRequestDto";
+import { RemoveAvailabilityExceptionResponseDto } from "@application/dto/driver/RemoveAvailabilityExceptionResponseDto";
+import { RemoveAvailabilityExceptionUseCase } from "@application/use-cases/driver/RemoveAvailabilityExceptionUseCase";
+import { AcceptRideRequestDto } from "@application/dto/driver/AcceptRideRequestDto";
+import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRideRequestResponseDto";
+import { AcceptRideRequestUseCase } from "@application/use-cases/driver/AcceptRideRequestUseCase";
+import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestDto";
+import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
+import { RejectRideRequestUseCase } from "@application/use-cases/driver/RejectRideRequestUseCase";
+import { GetPendingRideRequestsUseCase } from "@application/use-cases/driver/GetPendingRideRequestsUseCase";
+import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
+import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
+import { GetDriverRidesDto } from "@application/dto/driver/GetDriverRidesDto";
+import { GetDriverRidesResponseDto } from "@application/dto/driver/GetDriverRidesResponseDto";
+import { GetDriverRidesUseCase } from "@application/use-cases/driver/GetDriverRidesUseCase";
+import { GetDriverRideByIdDto } from "@application/dto/driver/GetDriverRideByIdDto";
+import { GetDriverRideByIdResponseDto } from "@application/dto/driver/GetDriverRideByIdResponseDto";
+import { GetDriverRideByIdUseCase } from "@application/use-cases/driver/GetDriverRideByIdUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -87,6 +108,64 @@ export class DriverFactory {
         >
       >(TYPES.GetDriverDetailedProfileUseCase)
       .to(GetDriverDetailedProfileUseCase);
+    container
+      .bind<
+        IUseCase<
+          EditAvailabilityExceptionRequestDto,
+          Promise<Result<EditAvailabilityExceptionResponseDto>>
+        >
+      >(TYPES.EditAvailabilityExceptionUseCase)
+      .to(EditAvailabilityExceptionUseCase);
+    container
+      .bind<
+        IUseCase<
+          RemoveAvailabilityExceptionRequestDto,
+          Promise<Result<RemoveAvailabilityExceptionResponseDto>>
+        >
+      >(TYPES.RemoveAvailabilityExceptionUseCase)
+      .to(RemoveAvailabilityExceptionUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          AcceptRideRequestDto,
+          Promise<Result<AcceptRideRequestResponseDto>>
+        >
+      >(TYPES.AcceptRideRequestUseCase)
+      .to(AcceptRideRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          RejectRideRequestDto,
+          Promise<Result<RejectRideRequestResponseDto>>
+        >
+      >(TYPES.RejectRideRequestUseCase)
+      .to(RejectRideRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetPendingRideRequestsDto,
+          Promise<Result<GetPendingRideRequestsResponseDto>>
+        >
+      >(TYPES.GetPendingRideRequestsUseCase)
+      .to(GetPendingRideRequestsUseCase);
+
+    container
+      .bind<
+        IUseCase<GetDriverRidesDto, Promise<Result<GetDriverRidesResponseDto>>>
+      >(TYPES.GetDriverRidesUseCase)
+      .to(GetDriverRidesUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetDriverRideByIdDto,
+          Promise<Result<GetDriverRideByIdResponseDto>>
+        >
+      >(TYPES.GetDriverRideByIdUseCase)
+      .to(GetDriverRideByIdUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

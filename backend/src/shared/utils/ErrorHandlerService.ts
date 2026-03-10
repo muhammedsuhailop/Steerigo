@@ -1,620 +1,82 @@
-import { DomainError } from "@domain/errors";
+import { injectable } from "inversify";
 import { ApiResponse } from "@shared/types/Common";
+import { ErrorClassificationService } from "@shared/errors/ErrorClassificationService";
+import { ErrorResponseBuilder } from "@shared/errors/ErrorResponseBuilder";
 import { Logger } from "./Logger";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
-export enum ErrorType {
-  CLIENT_ERROR = "CLIENT_ERROR",
-  SERVER_ERROR = "SERVER_ERROR",
-  AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR",
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  NETWORK_ERROR = "NETWORK_ERROR",
-  DATABASE_ERROR = "DATABASE_ERROR",
-  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
-  NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
-  CONFLICT_ERROR = "CONFLICT_ERROR",
-}
-
-export interface ErrorDetails {
-  statusCode: number;
-  message: string;
-  type: ErrorType;
-  shouldLog: boolean;
-  isOperational: boolean;
-}
-
+@injectable()
 export class ErrorHandlerService {
-  private static readonly ERROR_MAP = new Map<string, ErrorDetails>([
-    // ===== VALIDATION ERRORS (400) =====
-    [
-      "ValidationError",
-      {
-        statusCode: 400,
-        message: "Validation failed",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidLatitudeError",
-      {
-        statusCode: 400,
-        message: "Latitude must be a number between -90 and 90",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidLongitudeError",
-      {
-        statusCode: 400,
-        message: "Longitude must be a number between -180 and 180",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidSearchDateFormatError",
-      {
-        statusCode: 400,
-        message: "Search date must be a valid date",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidSearchDateRangeError",
-      {
-        statusCode: 400,
-        message: "Search date must be in the future or current",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidTimeRequiredError",
-      {
-        statusCode: 400,
-        message: "Time required must be between 1 and 240 minutes",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidRadiusError",
-      {
-        statusCode: 400,
-        message: "Radius must be between 0 and 50 km",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidLimitError",
-      {
-        statusCode: 400,
-        message: "Limit must be between 1 and 100",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidGearTypeError",
-      {
-        statusCode: 400,
-        message: "Invalid gear type provided",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidBodyTypeError",
-      {
-        statusCode: 400,
-        message: "Invalid body type provided",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== RIDE REQUEST VALIDATION ERRORS (400) =====
-    [
-      "INVALID_FARE",
-      {
-        statusCode: 400,
-        message: "Invalid fare amount. Fare must be positive",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "INVALID_PICKUP_TIME",
-      {
-        statusCode: 400,
-        message: "Invalid pickup time. Pickup time must be in the future",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "INVALID_LOCATION",
-      {
-        statusCode: 400,
-        message: "Invalid location coordinates",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "INVALID_RIDE_TYPE",
-      {
-        statusCode: 400,
-        message: 'Invalid ride type. Must be "One Way" or "Round Trip"',
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== RIDE REQUEST NOT FOUND ERRORS (404) =====
-    [
-      "DRIVER_NOT_FOUND",
-      {
-        statusCode: 404,
-        message: "Driver not found or no longer available",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "USER_NOT_FOUND",
-      {
-        statusCode: 404,
-        message: "User not found. Please check the user ID and try again",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== RIDE REQUEST CONFLICT ERRORS (409) =====
-    [
-      "DRIVER_NOT_AVAILABLE",
-      {
-        statusCode: 409,
-        message: "Driver is currently not available for ride requests",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DUPLICATE_RIDE_REQUEST",
-      {
-        statusCode: 409,
-        message: "You already have a pending request to this driver",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== RIDE REQUEST CREATION ERRORS (500) =====
-    [
-      "RIDE_REQUEST_CREATION_FAILED",
-      {
-        statusCode: 500,
-        message: "Failed to create ride request. Please try again",
-        type: ErrorType.SERVER_ERROR,
-        shouldLog: true,
-        isOperational: false,
-      },
-    ],
-
-    // ===== KYC VALIDATION ERRORS (400) =====
-    [
-      "KYCNotFoundError",
-      {
-        statusCode: 400,
-        message: "No KYC documents found for this driver",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "ProfilePictureNotUploadedError",
-      {
-        statusCode: 400,
-        message: "Driver must upload a profile picture before KYC approval",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "LicenseNotApprovedError",
-      {
-        statusCode: 400,
-        message:
-          "Latest license must be approved before updating driver KYC status",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "NonLicenseKYCNotApprovedError",
-      {
-        statusCode: 400,
-        message:
-          "At least one non-license KYC document (Aadhaar, PAN, or Passport) must be approved",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidKYCStatusTransitionError",
-      {
-        statusCode: 400,
-        message: "Invalid KYC status transition",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== SEARCH ERRORS (400/404) =====
-    [
-      "NoDriversAvailableError",
-      {
-        statusCode: 404,
-        message: "No drivers available in the specified area",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidLocationError",
-      {
-        statusCode: 400,
-        message: "Invalid location coordinates provided",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidSearchDateError",
-      {
-        statusCode: 400,
-        message: "Invalid search date provided",
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverFilterNotMatchError",
-      {
-        statusCode: 404,
-        message: "No drivers match your vehicle type preferences",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "LocationServiceError",
-      {
-        statusCode: 503,
-        message: "Location service temporarily unavailable",
-        type: ErrorType.NETWORK_ERROR,
-        shouldLog: true,
-        isOperational: false,
-      },
-    ],
-
-    // ===== AUTHENTICATION ERRORS (401) =====
-    [
-      "InvalidCredentialsError",
-      {
-        statusCode: 401,
-        message: "Invalid credentials provided",
-        type: ErrorType.AUTHENTICATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "RefreshTokenExpiredError",
-      {
-        statusCode: 401,
-        message: "Session expired. Please log in again",
-        type: ErrorType.AUTHENTICATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "RefreshTokenRevokedError",
-      {
-        statusCode: 401,
-        message: "Session expired. Please log in again",
-        type: ErrorType.AUTHENTICATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== CONFLICT ERRORS (409) =====
-    [
-      "UserAlreadyExistsError",
-      {
-        statusCode: 409,
-        message: "An account with this email already exists",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "MobileAlreadyExistsError",
-      {
-        statusCode: 409,
-        message: "This mobile number is already registered",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverAlreadyAvailableError",
-      {
-        statusCode: 409,
-        message: "Driver already has an active availability record",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "InvalidStatusTransitionError",
-      {
-        statusCode: 409,
-        message: "Invalid status transition",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== NOT FOUND ERRORS (404) =====
-    [
-      "UserNotFoundError",
-      {
-        statusCode: 404,
-        message: "User not found. Please check the user ID and try again",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverNotFoundError",
-      {
-        statusCode: 404,
-        message:
-          "Driver profile not found. Please complete driver registration first",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverProfileNotFoundError",
-      {
-        statusCode: 404,
-        message:
-          "Driver profile not found. Please complete driver registration first",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverAvailabilityNotFoundError",
-      {
-        statusCode: 404,
-        message: "Driver availability not found",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "KycDocumentNotFoundError",
-      {
-        statusCode: 404,
-        message: "KYC document not found. Please upload the required documents",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "ResourceNotFoundError",
-      {
-        statusCode: 404,
-        message: "Requested resource not found",
-        type: ErrorType.NOT_FOUND_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== AUTHORIZATION ERRORS (403) =====
-    [
-      "AccountStatusError",
-      {
-        statusCode: 403,
-        message: "Account access restricted",
-        type: ErrorType.AUTHORIZATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "DriverAccessDeniedError",
-      {
-        statusCode: 403,
-        message: "Access denied. Your driver account is not active",
-        type: ErrorType.AUTHORIZATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-
-    // ===== RATE LIMITING (429) =====
-    [
-      "MaxOtpAttemptsError",
-      {
-        statusCode: 429,
-        message: "Maximum OTP attempts exceeded. Please request a new OTP",
-        type: ErrorType.CLIENT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "OtpExpiredError",
-      {
-        statusCode: 400,
-        message: "OTP has expired. Please request a new one",
-        type: ErrorType.CLIENT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-    [
-      "ExpiredAvailabilityError",
-      {
-        statusCode: 400,
-        message: "Availability period has expired",
-        type: ErrorType.CLIENT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      },
-    ],
-  ]);
-
-  private static readonly GENERIC_MESSAGES = {
-    [ErrorType.SERVER_ERROR]:
-      "Something went wrong on our end. Please try again later",
-    [ErrorType.DATABASE_ERROR]:
-      "Service temporarily unavailable. Please try again later",
-    [ErrorType.NETWORK_ERROR]: "Connection issue occurred. Please try again",
-    [ErrorType.VALIDATION_ERROR]: "Invalid input provided",
-    [ErrorType.CLIENT_ERROR]: "Bad request",
-    [ErrorType.AUTHENTICATION_ERROR]: "Authentication failed",
-    [ErrorType.AUTHORIZATION_ERROR]: "Access forbidden",
-    [ErrorType.NOT_FOUND_ERROR]: "Resource not found",
-    [ErrorType.CONFLICT_ERROR]: "Request conflicts with current state",
-  };
-
-  private static hasProp<T extends string>(
-    obj: unknown,
-    prop: T
-  ): obj is Record<T, unknown> {
-    return typeof obj === "object" && obj !== null && prop in (obj as object);
-  }
-
-  private static getStringProp(obj: unknown, prop: string): string | undefined {
-    if (!this.hasProp(obj, prop)) return undefined;
-    const v = (obj as Record<string, unknown>)[prop];
-    return typeof v === "string" ? v : undefined;
-  }
-
-  private static getNumberProp(obj: unknown, prop: string): number | undefined {
-    if (!this.hasProp(obj, prop)) return undefined;
-    const v = (obj as Record<string, unknown>)[prop];
-    return typeof v === "number" ? v : undefined;
-  }
-
-  private static getStringArray(
-    obj: unknown,
-    prop: string
-  ): string[] | undefined {
-    if (!this.hasProp(obj, prop)) return undefined;
-    const v = (obj as Record<string, unknown>)[prop];
-    if (Array.isArray(v)) {
-      return v.filter((i): i is string => typeof i === "string");
-    }
-    return undefined;
-  }
+  private static classificationService = new ErrorClassificationService();
+  private static responseBuilder = new ErrorResponseBuilder();
 
   static handleError(
     error: unknown,
-    context?: string
+    context?: string,
   ): { response: ApiResponse; statusCode: number } {
-    Logger.debug("[ErrorHandlerService] handleError() called", {
+    Logger.debug("[ErrorHandlerService] Handling error", {
       context,
-      errorType: typeof error,
-      errorMessage: this.getStringProp(error, "message"),
+      errorType: error?.constructor?.name,
     });
 
-    const errorDetails = this.classifyError(error);
+    try {
+      // Classify the error
+      const errorDetails = this.classificationService.classify(error, context);
 
-    Logger.debug("[ErrorHandlerService] Error classified", {
-      statusCode: errorDetails.statusCode,
-      type: errorDetails.type,
-      message: errorDetails.message,
-    });
+      // Log if needed (based on error classification)
+      if (errorDetails.shouldLog) {
+        Logger.error("[ErrorHandlerService] Error requires logging", {
+          context,
+          statusCode: errorDetails.statusCode,
+          type: errorDetails.type,
+          message: errorDetails.message,
+          error: error instanceof Error ? error.stack : String(error),
+        });
+      } else {
+        Logger.debug(
+          "[ErrorHandlerService] Error handled (no logging required)",
+          {
+            context,
+            statusCode: errorDetails.statusCode,
+            type: errorDetails.type,
+          },
+        );
+      }
 
-    if (errorDetails.shouldLog) {
-      this.logError(error, context, errorDetails);
+      // Build API response
+      const response = this.responseBuilder.build(errorDetails);
+
+      return {
+        response,
+        statusCode: errorDetails.statusCode,
+      };
+    } catch (handlingError) {
+      // Error occurred while handling error
+      Logger.error("[ErrorHandlerService] Critical error in error handler", {
+        context,
+        originalError: error,
+        handlingError:
+          handlingError instanceof Error
+            ? handlingError.message
+            : String(handlingError),
+        stack: handlingError instanceof Error ? handlingError.stack : undefined,
+      });
+
+      // Return a safe fallback response
+      return {
+        response: {
+          success: false,
+          message: "An unexpected error occurred. Please try again later.",
+        },
+        statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
-
-    const message = errorDetails.message;
-
-    const response: ApiResponse = {
-      success: false,
-      message,
-      ...(process.env.NODE_ENV === "development" && {
-        error: this.getStringProp(error, "message"),
-        errorCode: this.getStringProp(error, "code"),
-        field: this.getStringProp(error, "field"),
-      }),
-    };
-
-    Logger.debug("[ErrorHandlerService] Returning response", {
-      statusCode: errorDetails.statusCode,
-      message: response.message,
-    });
-
-    return { response, statusCode: errorDetails.statusCode };
   }
 
-  static handleValidationErrors(errors: Array<{ msg: string }>): {
-    response: ApiResponse;
-    statusCode: number;
-  } {
-    Logger.debug("[ErrorHandlerService] handleValidationErrors() called", {
+  static handleValidationErrors(
+    errors: Array<{ msg: string; param?: string }>,
+  ): { response: ApiResponse; statusCode: number } {
+    Logger.debug("[ErrorHandlerService] Handling validation errors", {
       errorCount: errors.length,
     });
 
@@ -625,268 +87,15 @@ export class ErrorHandlerService {
       message: message || "Validation failed",
     };
 
-    return { response, statusCode: 400 };
-  }
-
-  private static classifyError(error: unknown): ErrorDetails {
-    Logger.debug("[ErrorHandlerService.classifyError] Starting classification");
-
-    // Check for DomainError with code property
-    Logger.debug("[classifyError] Checking DomainError with code");
-    if (error instanceof DomainError && this.hasProp(error, "code")) {
-      const code = this.getStringProp(error, "code");
-      Logger.debug("[classifyError] Found DomainError with code", { code });
-      if (code) {
-        const errorByCode = this.ERROR_MAP.get(code);
-        if (errorByCode) {
-          Logger.debug("[classifyError] Found error by code in ERROR_MAP", {
-            code,
-            statusCode: errorByCode.statusCode,
-          });
-          return errorByCode;
-        }
-      }
-    }
-
-    // Check if it's a known domain error by exact name match
-    Logger.debug("[classifyError] Checking constructor name match");
-    
-    if (typeof error === "object" && error !== null) {
-      const errorName = this.getStringProp(error, "name");
-
-      Logger.debug("[classifyError] Checking error.name property", {
-        errorName,
-      });
-
-      if (errorName && this.ERROR_MAP.has(errorName)) {
-        const result = this.ERROR_MAP.get(errorName)!;
-        Logger.debug("[classifyError] Found error by name property", {
-          errorName,
-          statusCode: result.statusCode,
-          type: result.type,
-        });
-        return result;
-      }
-
-      const ctorName = (error as { constructor?: { name?: string } })
-        .constructor?.name;
-
-      Logger.debug("[classifyError] Checking constructor.name", {
-        ctorName,
-      });
-
-      if (ctorName && this.ERROR_MAP.has(ctorName)) {
-        const result = this.ERROR_MAP.get(ctorName)!;
-        Logger.debug("[classifyError] Found error by constructor name", {
-          ctorName,
-          statusCode: result.statusCode,
-          type: result.type,
-        });
-        return result;
-      }
-    }
-
-    //Handle MongoDB duplicate key errors
-    Logger.debug("[classifyError] Checking MongoDB duplicate key");
-    if (this.isMongoDbDuplicateKeyError(error)) {
-      Logger.debug("[classifyError] MongoDB duplicate key error detected");
-      return this.handleDuplicateKeyError(error);
-    }
-
-    // Check for database/connection errors
-    Logger.debug("[classifyError] Checking database error");
-    if (this.isDatabaseError(error)) {
-      Logger.debug("[classifyError] Database error detected");
-      return {
-        statusCode: 503,
-        message: this.GENERIC_MESSAGES[ErrorType.DATABASE_ERROR],
-        type: ErrorType.DATABASE_ERROR,
-        shouldLog: true,
-        isOperational: false,
-      };
-    }
-
-    // Check for network/SSL errors
-    Logger.debug("[classifyError] Checking network error");
-    if (this.isNetworkError(error)) {
-      Logger.debug("[classifyError] Network error detected");
-      return {
-        statusCode: 503,
-        message: this.GENERIC_MESSAGES[ErrorType.NETWORK_ERROR],
-        type: ErrorType.NETWORK_ERROR,
-        shouldLog: true,
-        isOperational: false,
-      };
-    }
-
-    // Check for validation errors
-    Logger.debug("[classifyError] Checking validation error");
-    if (this.isValidationError(error)) {
-      Logger.debug("[classifyError] Validation error detected");
-      return {
-        statusCode: 400,
-        message:
-          this.getStringProp(error, "message") ||
-          this.GENERIC_MESSAGES[ErrorType.VALIDATION_ERROR],
-        type: ErrorType.VALIDATION_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      };
-    }
-
-    // Default: Server error
-    Logger.debug("[classifyError] Defaulting to server error");
-    return {
-      statusCode: 500,
-      message: this.GENERIC_MESSAGES[ErrorType.SERVER_ERROR],
-      type: ErrorType.SERVER_ERROR,
-      shouldLog: true,
-      isOperational: false,
-    };
-  }
-
-  private static isDatabaseError(error: unknown): boolean {
-    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
-    const code = String(this.getStringProp(error, "code") ?? "").toLowerCase();
-
-    const databasePatterns = [
-      "database",
-      "connection",
-      "mongodb",
-      "sql",
-      "redis",
-      "timeout",
-      "econnrefused",
-      "enotfound",
-      "etimedout",
-    ];
-
-    return databasePatterns.some(
-      (pattern) => message.includes(pattern) || code.includes(pattern)
-    );
-  }
-
-  private static isMongoDbDuplicateKeyError(error: unknown): boolean {
-    const code = this.getNumberProp(error, "code");
-    const message = this.getStringProp(error, "message") ?? "";
-    return (
-      code === 11000 ||
-      message.includes("E11000 duplicate key error") ||
-      message.includes("duplicate key error collection")
-    );
-  }
-
-  private static handleDuplicateKeyError(error: unknown): ErrorDetails {
-    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
-
-    if (message.includes("mobile")) {
-      return {
-        statusCode: 409,
-        message: "This mobile number is already registered",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      };
-    } else if (message.includes("email")) {
-      return {
-        statusCode: 409,
-        message: "An account with this email already exists",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: false,
-        isOperational: true,
-      };
-    } else {
-      return {
-        statusCode: 409,
-        message: "This information is already registered",
-        type: ErrorType.CONFLICT_ERROR,
-        shouldLog: true,
-        isOperational: true,
-      };
-    }
-  }
-
-  private static isNetworkError(error: unknown): boolean {
-    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
-
-    const networkPatterns = [
-      "ssl",
-      "tls",
-      "cert",
-      "network",
-      "socket",
-      "ssl routines",
-      "ssl3_read_bytes",
-      "tlsv1 alert",
-      "openssl",
-      "c:\\ws\\deps",
-    ];
-
-    return networkPatterns.some((pattern) => message.includes(pattern));
-  }
-
-  private static isValidationError(error: unknown): boolean {
-    if (typeof error === "object" && error !== null) {
-      const ctorName = (error as { constructor?: { name?: string } })
-        .constructor?.name;
-
-      Logger.debug("[isValidationError] Checking if known domain error", {
-        ctorName,
-        isInMap: ctorName ? this.ERROR_MAP.has(ctorName) : false,
-      });
-
-      if (ctorName && this.ERROR_MAP.has(ctorName)) {
-        Logger.debug("[isValidationError] Excluding known domain error", {
-          ctorName,
-        });
-        return false;
-      }
-    }
-
-    const message = this.getStringProp(error, "message")?.toLowerCase() || "";
-    const isValidation =
-      message.includes("validation") ||
-      (message.includes("invalid") && !this.isNetworkError(error));
-
-    Logger.debug("[isValidationError] Validation check result", {
-      message,
-      isValidation,
-    });
-
-    return isValidation;
-  }
-
-  private static logError(
-    error: unknown,
-    context?: string,
-    details?: ErrorDetails
-  ): void {
-    const logData: Record<string, unknown> = {
-      error: this.getStringProp(error, "message"),
-      errorCode: this.getStringProp(error, "code"),
-      stack:
-        typeof error === "object" && error !== null && "stack" in error
-          ? (error as { stack?: unknown }).stack
-          : undefined,
-      type: details?.type,
-      context,
-      timestamp: new Date().toISOString(),
-    };
-
-    if (
-      details?.type === ErrorType.SERVER_ERROR ||
-      details?.type === ErrorType.DATABASE_ERROR
-    ) {
-      Logger.error("Server Error", logData);
-    } else {
-      Logger.warn("Operational Error", logData);
-    }
+    return { response, statusCode: HttpStatusCodes.BAD_REQUEST };
   }
 
   static isOperationalError(error: unknown): boolean {
-    if (error instanceof DomainError) return true;
-
-    const errorDetails = this.classifyError(error);
-    return errorDetails.isOperational;
+    try {
+      const errorDetails = this.classificationService.classify(error);
+      return errorDetails.isOperational;
+    } catch {
+      return false;
+    }
   }
 }

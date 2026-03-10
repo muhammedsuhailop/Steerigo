@@ -26,7 +26,7 @@ export class AccountStatusErrorFactory {
 
   static registerStrategy(
     status: string,
-    strategy: AccountStatusMessageStrategy
+    strategy: AccountStatusMessageStrategy,
   ): void {
     this.strategies.set(status, strategy);
   }

@@ -18,12 +18,9 @@ export class Ride {
     private readonly currency: string = "INR",
     private readonly timeline: RideTimeline,
     private readonly createdAt: Date = new Date(),
-    private readonly updatedAt: Date = new Date()
+    private readonly updatedAt: Date = new Date(),
   ) {}
 
-  /**
-   * Factory method for creating a new ride
-   */
   static create(
     id: string,
     rideId: string,
@@ -33,7 +30,7 @@ export class Ride {
     drop: Location,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
-    timeline: RideTimeline
+    timeline: RideTimeline,
   ): Ride {
     if (!id || !rideId || !driverId || !riderId) {
       throw new Error("All ID fields are required");
@@ -52,13 +49,10 @@ export class Ride {
       rideType,
       fareBreakdown,
       "INR",
-      timeline
+      timeline,
     );
   }
 
-  /**
-   * Factory method for reconstructing from database
-   */
   static fromData(data: {
     id: string;
     rideId: string;
@@ -87,7 +81,7 @@ export class Ride {
       data.currency,
       data.timeline,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
@@ -144,10 +138,9 @@ export class Ride {
     return this.updatedAt;
   }
 
-  // ✅ FIX: Extract numeric amount from Money object
   // Convenience getters for fare
   getFare(): number {
-    return this.fareBreakdown.getTotalFare().getAmount(); // ✅ CHANGED: Added .getAmount()
+    return this.fareBreakdown.getTotalFare().getAmount();
   }
 
   // Status check methods
@@ -184,9 +177,6 @@ export class Ride {
     return this.timeline.getCancelledAt();
   }
 
-  /**
-   * Calculate ride duration in milliseconds
-   */
   getRideDurationMs(): number | undefined {
     const startedAt = this.getStartedAt();
     const completedAt = this.getCompletedAt();
@@ -198,9 +188,6 @@ export class Ride {
     return completedAt.getTime() - startedAt.getTime();
   }
 
-  /**
-   * Calculate ride duration as formatted string (HH:MM:SS)
-   */
   getFormattedRideDuration(): string {
     const durationMs = this.getRideDurationMs();
 
@@ -213,14 +200,10 @@ export class Ride {
     const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-      seconds
+      seconds,
     ).padStart(2, "0")}`;
   }
 
-  /**
-   * Calculate elapsed time from start (if ride is ongoing)
-   * Returns formatted string (HH:MM:SS)
-   */
   getElapsedTimeFromStart(): string {
     const startedAt = this.getStartedAt();
 
@@ -236,11 +219,10 @@ export class Ride {
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-      seconds
+      seconds,
     ).padStart(2, "0")}`;
   }
 
-  // Status mutators (if needed for state transitions)
   setStatusToAccepted(): void {
     if (this.status !== RideStatus.REQUESTED) {
       throw new Error("Only requested rides can be accepted");

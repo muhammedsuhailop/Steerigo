@@ -1,0 +1,198 @@
+import { injectable, inject } from "inversify";
+import { IUseCase } from "../interfaces/IUseCase";
+import { GetUserRideByIdDto } from "@application/dto/user/GetUserRideByIdDto";
+import {
+  GetUserRideByIdResponseDto,
+  RideDetails,
+  DriverDetails,
+  LocationDetails,
+  FareDetails,
+  TimelineDetails,
+} from "@application/dto/user/GetUserRideByIdResponseDto";
+import { IRideRepository } from "@domain/repositories/IRideRepository";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { Result } from "@shared/utils/Result";
+import { Logger } from "@shared/utils/Logger";
+import { TYPES } from "@shared/constants/DITypes";
+import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { Ride } from "@domain/entities/Ride";
+import { User } from "@domain/entities/User";
+import { Driver } from "@domain/entities/Driver";
+import { RideErrors } from "@domain/errors/RideErrors";
+import { TaxBreakdown } from "@domain/value-objects/FareBreakdown";
+
+@injectable()
+export class GetUserRideByIdUseCase
+  implements
+    IUseCase<GetUserRideByIdDto, Promise<Result<GetUserRideByIdResponseDto>>>
+{
+  constructor(
+    @inject(TYPES.RideRepository)
+    private rideRepository: IRideRepository,
+    @inject(TYPES.DriverRepository)
+    private driverRepository: IDriverRepository,
+    @inject(TYPES.UserRepository)
+    private userRepository: IUserRepository,
+  ) {}
+
+  async execute(
+    dto: GetUserRideByIdDto,
+  ): Promise<Result<GetUserRideByIdResponseDto>> {
+    try {
+      Logger.info("Fetching user ride by ID", {
+        userId: dto.getUserId(),
+        rideId: dto.getRideId(),
+      });
+
+      const ride = await this.rideRepository.findByRideId(dto.getRideId());
+      if (!ride) {
+        return Result.failure(RideErrors.rideNotFound(dto.getRideId()));
+      }
+
+      if (ride.getRiderId() !== dto.getUserId()) {
+        Logger.warn("User attempted to access ride not belonging to them", {
+          userId: dto.getUserId(),
+          rideId: dto.getRideId(),
+          actualRiderId: ride.getRiderId(),
+        });
+        return Result.failure(
+          RideErrors.unauthorizedRideAccess(dto.getRideId()),
+        );
+      }
+
+      const driver = await this.driverRepository.findById(ride.getDriverId());
+      if (!driver) {
+        Logger.error("Driver not found for ride", {
+          driverId: ride.getDriverId(),
+          rideId: dto.getRideId(),
+        });
+        return Result.failure(
+          new Error("Driver information not available for this ride"),
+        );
+      }
+
+      const driverUser = await this.userRepository.findById(driver.getUserId());
+      if (!driverUser) {
+        Logger.error("Driver user not found", {
+          driverUserId: driver.getUserId(),
+          rideId: dto.getRideId(),
+        });
+        return Result.failure(
+          new Error("Driver user information not available for this ride"),
+        );
+      }
+
+      const rideDetails = this.mapRideToDetails(ride);
+      const driverDetails = this.mapDriverToDetails(driver, driverUser);
+
+      const response: GetUserRideByIdResponseDto = {
+        success: true,
+        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+        data: {
+          ride: rideDetails,
+          driver: driverDetails,
+        },
+      };
+
+      Logger.info("User ride fetched successfully", {
+        userId: dto.getUserId(),
+        rideId: dto.getRideId(),
+        status: ride.getStatus(),
+        driverId: driver.getId().toString(),
+      });
+
+      return Result.success(response);
+    } catch (error) {
+      Logger.error("Error fetching user ride by ID", {
+        userId: dto.getUserId(),
+        rideId: dto.getRideId(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return Result.failure(error as Error);
+    }
+  }
+
+  private mapRideToDetails(ride: Ride): RideDetails {
+    const fareBreakdown = ride.getFareBreakdown();
+    const timeline = ride.getTimeline();
+
+    const fareTax = fareBreakdown.getFareTax();
+
+    const fareDetails: FareDetails = {
+      baseFare: fareBreakdown.getBaseFare().getAmount(),
+
+      tax: this.mapTaxToGst(fareTax),
+
+      platformFee: fareBreakdown.getPlatformFee().getAmount(),
+      totalFare: fareBreakdown.getTotalFare().getAmount(),
+      currency: ride.getCurrency(),
+    };
+
+    const timelineDetails: TimelineDetails = {
+      requestedAt: timeline.getRequestedAt().toISOString(),
+      acceptedAt: timeline.getAcceptedAt()?.toISOString(),
+      startedAt: timeline.getStartedAt()?.toISOString(),
+      completedAt: timeline.getCompletedAt()?.toISOString(),
+      cancelledAt: timeline.getCancelledAt()?.toISOString(),
+    };
+
+    const pickupLocation: LocationDetails = {
+      latitude: ride.getPickup().getLatitude(),
+      longitude: ride.getPickup().getLongitude(),
+      address: ride.getPickup().getAddress(),
+    };
+
+    const dropLocation: LocationDetails = {
+      latitude: ride.getDrop().getLatitude(),
+      longitude: ride.getDrop().getLongitude(),
+      address: ride.getDrop().getAddress(),
+    };
+
+    return {
+      id: ride.getId(),
+      rideId: ride.getRideId(),
+      status: ride.getStatus(),
+      rideType: ride.getRideType(),
+      pickup: pickupLocation,
+      drop: dropLocation,
+      distance: ride.getPickup().distanceTo(ride.getDrop()),
+      fare: fareDetails,
+      timeline: timelineDetails,
+      createdAt: ride.getCreatedAt().toISOString(),
+      updatedAt: ride.getUpdatedAt().toISOString(),
+    };
+  }
+
+  private mapTaxToGst(tax?: TaxBreakdown): {
+    cgst: number;
+    sgst: number;
+    igst: number;
+  } {
+    if (!tax) {
+      return { cgst: 0, sgst: 0, igst: 0 };
+    }
+
+    const amount = tax.amount.getAmount();
+    const taxName = tax.name.toUpperCase();
+
+    return {
+      cgst: taxName.includes("CGST") ? amount : 0,
+      sgst: taxName.includes("SGST") ? amount : 0,
+      igst: taxName.includes("IGST") ? amount : 0,
+    };
+  }
+
+  private mapDriverToDetails(driver: Driver, driverUser: User): DriverDetails {
+    const driverDetails: DriverDetails = {
+      driverId: driver.getId().toString(),
+      userId: driver.getUserId(),
+      name: driverUser.getName(),
+      email: driverUser.getEmail().getValue(),
+      phoneNumber: driverUser.getMobile(),
+      profilePicture: driverUser.getProfilePicture(),
+    };
+
+    return driverDetails;
+  }
+}

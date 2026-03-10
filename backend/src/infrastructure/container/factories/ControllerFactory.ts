@@ -10,6 +10,7 @@ import { OtpController } from "@interface/controllers/auth/OtpController";
 import { SocialAuthController } from "@interface/controllers/auth/SocialAuthController";
 import { DriverSearchController } from "@interface/controllers/user/DriverSearchController";
 import { AutoRideController } from "@interface/controllers/user/AutoRideController";
+import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
 
 export class ControllerFactory {
   static register(container: Container): void {
@@ -22,5 +23,6 @@ export class ControllerFactory {
     container.bind(TYPES.SocialAuthController).to(SocialAuthController);
     container.bind(TYPES.DriverSearchController).to(DriverSearchController);
     container.bind(TYPES.AutoRideController).to(AutoRideController);
+    container.bind(TYPES.DriverRideController).to(DriverRideController);
   }
 }

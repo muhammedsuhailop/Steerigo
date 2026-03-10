@@ -1,21 +1,26 @@
 import { DomainError } from "./DomainError";
-
-//   Base class for all validation errors
-//   return 400 Bad Request
+import { ErrorType } from "@shared/enums/ErrorType";
+import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 
 export class ValidationError extends DomainError {
   constructor(
     message: string,
-    public readonly field?: string
+    public readonly field?: string,
   ) {
-    super(message);
+    super(message, "VALIDATION_ERROR", {
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      errorType: ErrorType.VALIDATION_ERROR,
+      shouldLog: false,
+      isOperational: true,
+      category: "VALIDATION",
+    });
     this.name = "ValidationError";
   }
 }
 
 export class InvalidLatitudeError extends ValidationError {
   constructor(
-    message: string = "Latitude must be a number between -90 and 90"
+    message: string = "Latitude must be a number between -90 and 90",
   ) {
     super(message, "latitude");
     this.name = "InvalidLatitudeError";
@@ -24,7 +29,7 @@ export class InvalidLatitudeError extends ValidationError {
 
 export class InvalidLongitudeError extends ValidationError {
   constructor(
-    message: string = "Longitude must be a number between -180 and 180"
+    message: string = "Longitude must be a number between -180 and 180",
   ) {
     super(message, "longitude");
     this.name = "InvalidLongitudeError";
@@ -40,7 +45,7 @@ export class InvalidSearchDateFormatError extends ValidationError {
 
 export class InvalidSearchDateRangeError extends ValidationError {
   constructor(
-    message: string = "Search date must be in the future or current"
+    message: string = "Search date must be in the future or current",
   ) {
     super(message, "searchDate");
     this.name = "InvalidSearchDateRangeError";
@@ -49,7 +54,7 @@ export class InvalidSearchDateRangeError extends ValidationError {
 
 export class InvalidTimeRequiredError extends ValidationError {
   constructor(
-    message: string = "Time required must be between 1 and 480 minutes"
+    message: string = "Time required must be between 1 and 480 minutes",
   ) {
     super(message, "timeRequired");
     this.name = "InvalidTimeRequiredError";

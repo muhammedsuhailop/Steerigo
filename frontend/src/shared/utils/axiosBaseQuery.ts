@@ -17,7 +17,7 @@ import {
 import { errorHandler } from "@/shared/utils/errorHandler";
 import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
 
-import type { RootState } from "@/app/store";
+import { updateSocketAuth } from "../socket/socket";
 
 // Arguments for baseQuery
 export interface AxiosBaseQueryArgs {
@@ -41,6 +41,7 @@ const updateReduxTokens = async (accessToken: string, refreshToken: string) => {
     const { store } = await import("@/app/store");
     const { setTokens } = await import("@/features/auth/store/authSlice");
     store.dispatch(setTokens({ accessToken, refreshToken }));
+    updateSocketAuth(accessToken);
   } catch (error) {
     console.error("Failed to update Redux tokens:", error);
   }

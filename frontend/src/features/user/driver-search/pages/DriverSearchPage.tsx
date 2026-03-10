@@ -10,6 +10,7 @@ import {
   setSearchCriteria,
   setTotalFound,
   setSearchedAt,
+  setRequestGroupId,
   setLoading,
   setError,
   selectDrivers,
@@ -18,11 +19,13 @@ import {
   selectIsLoading,
   selectError,
   selectTotalFound,
+  selectRequestGroupId,
 } from "../store/driverSearchSlice";
 import type { TripFormData, Driver } from "../types/driverSearch.types";
 import { useRideRequest } from "../hooks/useRideRequest";
 import { Alert } from "@/shared/components/ui/Alert";
 import type { RideRequestError } from "../types/rideRequest.types";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   FaMap,
@@ -34,6 +37,7 @@ import {
 
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
+import { useAutoRideRequest } from "../hooks/useAutoRideRequest";
 
 const DriverSearchPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -43,13 +47,26 @@ const DriverSearchPage: React.FC = () => {
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
   const totalFound = useSelector(selectTotalFound);
+  const requestGroupId = useSelector(selectRequestGroupId);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
-    null
+    null,
   );
   const [hasSearched, setHasSearched] = useState(false);
 
+  const { startAutoRequest, isWaiting, cancel } = useAutoRideRequest({
+    onSuccess: (rideId) => {
+      window.location.href = `/ride/${rideId}`;
+    },
+    onTimeout: () => {
+      dispatch(
+        setError("No drivers found. Please try increasing search radius."),
+      );
+    },
+    onError: (msg) => dispatch(setError(msg)),
+  });
   // Ride request state
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedDriverForRequest, setSelectedDriverForRequest] =
@@ -57,7 +74,7 @@ const DriverSearchPage: React.FC = () => {
 
   // Track requested driver IDs
   const [requestedDriverIds, setRequestedDriverIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Ride request hook
@@ -69,19 +86,14 @@ const DriverSearchPage: React.FC = () => {
   } = useRideRequest({
     formData: currentFormData,
     estimatedFare,
+    requestGroupId,
     onSuccess: (requestId: string) => {
       if (selectedDriverForRequest) {
-        // Add driver ID to requested set
-        setRequestedDriverIds((prev) =>
-          new Set(prev).add(selectedDriverForRequest.id)
-        );
-
         setSuccessMessage(
-          `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`
+          `Request sent to ${selectedDriverForRequest.name} successfully! You'll be notified once the driver responds.`,
         );
         setSelectedDriverForRequest(null);
 
-        // Auto-dismiss success message after 5 seconds
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
@@ -89,6 +101,14 @@ const DriverSearchPage: React.FC = () => {
     },
     onError: (error: RideRequestError) => {
       console.error("Ride request error:", error);
+
+      if (selectedDriverForRequest) {
+        setRequestedDriverIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(selectedDriverForRequest.id);
+          return newSet;
+        });
+      }
     },
   });
 
@@ -110,6 +130,9 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setLoading(true));
       dispatch(setError(null));
       setHasSearched(true);
+
+      const newRequestGroupId = uuidv4();
+      dispatch(setRequestGroupId(newRequestGroupId));
 
       // Clear requested drivers when doing a new search
       setRequestedDriverIds(new Set());
@@ -144,7 +167,7 @@ const DriverSearchPage: React.FC = () => {
             searchRadiusKm: formData.searchRadiusKm,
             gearType: formData.gearType,
             bodyType: formData.bodyType,
-          })
+          }),
         );
       }
     } catch (err: any) {
@@ -156,15 +179,16 @@ const DriverSearchPage: React.FC = () => {
 
   const handleDriverSelect = useCallback(
     async (driver: Driver) => {
-      // Don't allow requesting the same driver again
       if (requestedDriverIds.has(driver.id)) {
         return;
       }
 
+      setRequestedDriverIds((prev) => new Set(prev).add(driver.id));
+
       setSelectedDriverForRequest(driver);
       await sendRequest(driver);
     },
-    [sendRequest, requestedDriverIds]
+    [sendRequest, requestedDriverIds],
   );
 
   const handleDriverCall = (driver: Driver) => {
@@ -186,6 +210,13 @@ const DriverSearchPage: React.FC = () => {
       sendRequest(selectedDriverForRequest);
     }
   }, [selectedDriverForRequest, sendRequest]);
+
+  const handleAutoRequestSubmit = (formData: TripFormData) => {
+    setLocalError(null);
+    const newId = uuidv4();
+    dispatch(setRequestGroupId(newId));
+    startAutoRequest(formData, newId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,6 +274,7 @@ const DriverSearchPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <DriverSearchForm
                 onSubmit={handleFormSubmit}
+                onAutoRequest={handleAutoRequestSubmit}
                 onChange={handleFormChange}
                 isLoading={isLoading || isRequestLoading}
               />
@@ -451,6 +483,32 @@ const DriverSearchPage: React.FC = () => {
         </div>
       )}
 
+      {isWaiting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-white px-8 py-7 shadow-2xl text-center">
+            {/* Spinner */}
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" />
+            </div>
+
+            <h3 className="text-base font-semibold text-gray-900">
+              Finding nearby drivers
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              We’re sending your request to drivers around you. This usually
+              takes less than a minute.
+            </p>
+
+            <button
+              onClick={cancel}
+              className="mt-6 text-sm font-medium text-rose-600 hover:underline"
+            >
+              Cancel request
+            </button>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );

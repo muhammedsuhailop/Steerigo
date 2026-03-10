@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaCar,
-  FaCalendarAlt,
-  FaClock,
-  FaCog,
-  FaSearch,
-  FaRoute,
-} from "react-icons/fa";
+import { FaCar, FaCalendarAlt, FaClock, FaCog, FaRoute } from "react-icons/fa";
 import MapLocationInput from "@/shared/components/maps";
 import { TripFormData, Location } from "../types/driverSearch.types";
+import { GiSteeringWheel } from "react-icons/gi";
 
 interface DriverSearchFormProps {
   onSubmit: (formData: TripFormData) => void;
+  onAutoRequest: (formData: TripFormData) => void;
   onChange?: (formData: TripFormData) => void;
   isLoading?: boolean;
 }
@@ -64,6 +59,7 @@ const LocationPreview: React.FC<{
 
 const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   onSubmit,
+  onAutoRequest,
   onChange,
   isLoading = false,
 }) => {
@@ -125,14 +121,14 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     if (!formData.rideEndDate || !formData.rideEndTime) return;
 
     const start = new Date(
-      `${formData.rideStartDate}T${formData.rideStartTime}:00`
+      `${formData.rideStartDate}T${formData.rideStartTime}:00`,
     );
     const end = new Date(`${formData.rideEndDate}T${formData.rideEndTime}:00`);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
 
     const diffMin = Math.max(
       0,
-      Math.ceil((end.getTime() - start.getTime()) / (60 * 1000))
+      Math.ceil((end.getTime() - start.getTime()) / (60 * 1000)),
     );
     const hours = Math.max(1, Math.min(24, Math.ceil(diffMin / 60)));
     setFormData((p) => ({ ...p, timeRequired: hours }));
@@ -168,10 +164,10 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
 
     if (formData.rideEndDate && formData.rideEndTime) {
       const start = new Date(
-        `${formData.rideStartDate}T${formData.rideStartTime}:00`
+        `${formData.rideStartDate}T${formData.rideStartTime}:00`,
       );
       const end = new Date(
-        `${formData.rideEndDate}T${formData.rideEndTime}:00`
+        `${formData.rideEndDate}T${formData.rideEndTime}:00`,
       );
       if (end.getTime() < start.getTime())
         newErrors.rideEndDate = "End date/time must be after start date/time";
@@ -184,6 +180,11 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) onSubmit(formData);
+  };
+
+  const handleAutoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (validate()) onAutoRequest(formData);
   };
 
   const handlePickupLocationChange = (location: Location | null) => {
@@ -537,23 +538,25 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
 
         {/* Submit Button */}
         <button
-          type="submit"
+          type="button"
+          onClick={handleAutoClick}
           disabled={isLoading}
-          className={`w-full h-10 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition ${
+          aria-busy={isLoading}
+          className={`w-full h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
             isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-gray-800 to-gray-900 hover:opacity-95"
+              ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+              : "bg-gray-900 text-white border border-gray-900 hover:bg-gray-800 active:scale-[0.97]"
           }`}
         >
           {isLoading ? (
             <>
-              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-              Searching...
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
+              Requesting...
             </>
           ) : (
             <>
-              <FaSearch />
-              Search Drivers
+              <GiSteeringWheel />
+              Request Driver
             </>
           )}
         </button>

@@ -22,6 +22,7 @@ interface UseRideRequestReturn {
 interface UseRideRequestOptions {
   formData: TripFormData | null;
   estimatedFare: EstimatedFare | null;
+  requestGroupId: string | null;
   onSuccess?: (requestId: string) => void;
   onError?: (error: RideRequestError) => void;
 }
@@ -29,6 +30,7 @@ interface UseRideRequestOptions {
 export function useRideRequest({
   formData,
   estimatedFare,
+  requestGroupId,
   onSuccess,
   onError,
 }: UseRideRequestOptions): UseRideRequestReturn {
@@ -38,14 +40,14 @@ export function useRideRequest({
 
   const buildPayload = useCallback(
     (driver: Driver): RideRequestPayload | null => {
-      if (!formData?.pickupLocation || !estimatedFare) {
+      if (!formData?.pickupLocation || !estimatedFare || !requestGroupId) {
         return null;
       }
 
       const dropLoc = formData.dropLocation ?? formData.pickupLocation;
       // Combine date and time into ISO string
       const pickupDateTime = new Date(
-        `${formData.rideStartDate}T${formData.rideStartTime}`
+        `${formData.rideStartDate}T${formData.rideStartTime}`,
       ).toISOString();
 
       const payload: RideRequestPayload = {
@@ -56,11 +58,12 @@ export function useRideRequest({
         rideType: formData.tripType === "oneway" ? "One Way" : "Round Trip",
         fareBreakdown: estimatedFare,
         pickupETA: `${driver.eta.value} ${driver.eta.unit}`,
+        requestGroupId,
       };
 
       return payload;
     },
-    [formData, estimatedFare]
+    [formData, estimatedFare, requestGroupId],
   );
 
   const sendRequest = useCallback(
@@ -127,6 +130,7 @@ export function useRideRequest({
     [
       formData,
       estimatedFare,
+      requestGroupId,
       buildPayload,
       sendRideRequestMutation,
       onSuccess,

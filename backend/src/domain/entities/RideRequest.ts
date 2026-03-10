@@ -5,9 +5,10 @@ import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 
 export class RideRequest {
   private constructor(
-    private readonly id: string,
+    private id: string,
     private readonly driverId: string,
     private readonly riderId: string,
+    private readonly requestGroupId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly pickupTime: Date,
@@ -16,36 +17,36 @@ export class RideRequest {
     private status: RideRequestStatus,
     private readonly pickupETA: string,
     private readonly createdAt: Date = new Date(),
-    private updatedAt: Date = new Date()
+    private updatedAt: Date = new Date(),
   ) {}
 
   static create(
-    id: string,
     driverId: string,
     riderId: string,
+    requestGroupId: string,
     pickup: Location,
     drop: Location,
     pickupTime: Date,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
-    pickupETA: string
+    pickupETA: string,
   ): RideRequest {
-    // Validate fare breakdown has positive total
     if (fareBreakdown.getTotalFare().getAmount() <= 0) {
       throw new Error("Total fare must be positive");
     }
 
     return new RideRequest(
-      id,
+      "",
       driverId,
       riderId,
+      requestGroupId,
       pickup,
       drop,
       pickupTime,
       rideType,
       fareBreakdown,
       RideRequestStatus.PENDING,
-      pickupETA
+      pickupETA,
     );
   }
 
@@ -53,6 +54,7 @@ export class RideRequest {
     id: string;
     driverId: string;
     riderId: string;
+    requestGroupId: string;
     pickup: Location;
     drop: Location;
     pickupTime: Date;
@@ -67,6 +69,7 @@ export class RideRequest {
       data.id,
       data.driverId,
       data.riderId,
+      data.requestGroupId,
       data.pickup,
       data.drop,
       data.pickupTime,
@@ -75,16 +78,12 @@ export class RideRequest {
       data.status,
       data.pickupETA,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
   // Getters
   getId(): string {
-    return this.id;
-  }
-
-  getRequestId(): string {
     return this.id;
   }
 
@@ -108,7 +107,7 @@ export class RideRequest {
     return this.pickupTime;
   }
 
-  getRideType(): string {
+  getRideType(): RideType {
     return this.rideType;
   }
 
@@ -134,6 +133,14 @@ export class RideRequest {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  getRequestGroupId(): string {
+    return this.requestGroupId;
+  }
+
+  setId(id: string): void {
+    this.id = id;
   }
 
   // Status check methods
@@ -175,6 +182,11 @@ export class RideRequest {
       throw new Error("Only pending requests can be expired");
     }
     this.status = RideRequestStatus.EXPIRED;
+    this.updatedAt = new Date();
+  }
+
+  markAsCancelled(): void {
+    this.status = RideRequestStatus.CANCELLED;
     this.updatedAt = new Date();
   }
 }

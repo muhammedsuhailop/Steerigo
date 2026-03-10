@@ -117,8 +117,6 @@ export class DriverStatusMapper {
       startTime,
       endTime,
       durationHours,
-      isRecurring: domainException.isRecurring ?? false,
-      recurringPattern: domainException.recurringPattern,
       createdAt: domainException.createdAt ?? new Date(),
     };
   }

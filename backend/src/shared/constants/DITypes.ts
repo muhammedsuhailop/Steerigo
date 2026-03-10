@@ -1,4 +1,4 @@
-// Container Symbols 
+// Container Symbols
 export const TYPES = {
   // Repositories
   UserRepository: Symbol.for("UserRepository"),
@@ -12,6 +12,8 @@ export const TYPES = {
   DriverDashboardRepository: Symbol.for("DriverDashboardRepository"),
   FareConfigurationRepository: Symbol.for("FareConfigurationRepository"),
   RideRequestRepository: Symbol.for("RideRequestRepository"),
+  RideRepository: Symbol.for("RideRepository"),
+  DriverLocationRepository: Symbol.for("DriverLocationRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -23,6 +25,12 @@ export const TYPES = {
   TokenManagementService: Symbol.for("TokenManagementService"),
   FareCalculationService: Symbol.for("FareCalculationService"),
   AvailabilityCheckService: Symbol.for("AvailabilityCheckService"),
+  DistributedLockService: Symbol.for("DistributedLockService"),
+  RideNotificationService: Symbol.for("RideNotificationService"),
+  RedisService: Symbol.for("RedisService"),
+
+  //Event
+  EventBus: Symbol.for("EventBus"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
@@ -56,6 +64,9 @@ export const TYPES = {
   KycSubmissionUseCase: Symbol.for("KycSubmissionUseCase"),
   UpdateDriverKycStatusUseCase: Symbol.for("UpdateDriverKycStatusUseCase"),
 
+  // Use Cases - Admin Ride
+  GetAdminRidesUseCase: Symbol.for("GetAdminRidesUseCase"),
+
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
@@ -64,15 +75,26 @@ export const TYPES = {
   GetDriverDashboardUseCase: Symbol.for("GetDriverDashboardUseCase"),
   GetDriverStatusUseCase: Symbol.for("GetDriverStatusUseCase"),
   GetDriverDetailedProfileUseCase: Symbol.for(
-    "GetDriverDetailedProfileUseCase"
+    "GetDriverDetailedProfileUseCase",
   ),
   SendRideRequestUseCase: Symbol.for("SendRideRequestUseCase"),
   ScheduleRecurringAvailabilityUseCase: Symbol.for(
-    "ScheduleRecurringAvailabilityUseCase"
+    "ScheduleRecurringAvailabilityUseCase",
   ),
   AddAvailabilityExceptionUseCase: Symbol.for(
-    "AddAvailabilityExceptionUseCase"
+    "AddAvailabilityExceptionUseCase",
   ),
+  EditAvailabilityExceptionUseCase: Symbol.for(
+    "EditAvailabilityExceptionUseCase",
+  ),
+  RemoveAvailabilityExceptionUseCase: Symbol.for(
+    "RemoveAvailabilityExceptionUseCase",
+  ),
+  AcceptRideRequestUseCase: Symbol.for("AcceptRideRequestUseCase"),
+  RejectRideRequestUseCase: Symbol.for("RejectRideRequestUseCase"),
+  GetPendingRideRequestsUseCase: Symbol.for("GetPendingRideRequestsUseCase"),
+  GetDriverRidesUseCase: Symbol.for("GetDriverRidesUseCase"),
+  GetDriverRideByIdUseCase: Symbol.for("GetDriverRideByIdUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -80,8 +102,11 @@ export const TYPES = {
   RegisterUserAsDriverUseCase: Symbol.for("RegisterUserAsDriverUseCase"),
   FindNearbyDriversUseCase: Symbol.for("FindNearbyDriversUseCase"),
   AutoSearchAndSendRideRequestUseCase: Symbol.for(
-    "AutoSearchAndSendRideRequestUseCase"
+    "AutoSearchAndSendRideRequestUseCase",
   ),
+  CancelRideRequestsUseCase: Symbol.for("CancelRideRequestsUseCase"),
+  GetUserRideByIdUseCase: Symbol.for("GetUserRideByIdUseCase"),
+  GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
@@ -89,10 +114,16 @@ export const TYPES = {
   DeleteFileUseCase: Symbol.for("DeleteFileUseCase"),
   UpdateProfilePictureUseCase: Symbol.for("UpdateProfilePictureUseCase"),
 
+  //Use Cases - Notifications
+  NotificationRepository: Symbol.for("NotificationRepository"),
+  GetNotificationsUseCase: Symbol.for("GetNotificationsUseCase"),
+  MarkNotificationsReadUseCase: Symbol.for("MarkNotificationsReadUseCase"),
+  CreateNotificationUseCase: Symbol.for("CreateNotificationUseCase"),
+
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),
   UpdateAvailabilityStatusUseCase: Symbol.for(
-    "UpdateAvailabilityStatusUseCase"
+    "UpdateAvailabilityStatusUseCase",
   ),
   UpdateDriverLocationUseCase: Symbol.for("UpdateDriverLocationUseCase"),
 
@@ -114,4 +145,7 @@ export const TYPES = {
   DriverSearchController: Symbol.for("DriverSearchController"),
   RideController: Symbol.for("RideController"),
   AutoRideController: Symbol.for("AutoRideController"),
+  DriverRideController: Symbol.for("DriverRideController"),
+  NotificationController: Symbol.for("NotificationController"),
+  AdminRideController: Symbol.for("AdminRideController"),
 };

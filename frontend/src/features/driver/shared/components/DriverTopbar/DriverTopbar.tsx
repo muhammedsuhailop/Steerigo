@@ -20,6 +20,7 @@ import {
   Logo,
 } from "@/shared/components/ui";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
+import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
 
 export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   title = "Dashboard",
@@ -38,7 +39,9 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const walletRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const { isOnline, driver } = useSelector((state: RootState) => state.driver);
   const walletBalance = driver?.todayEarnings || 0;
 
@@ -78,6 +81,20 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const { data, refetch } = useGetNotificationsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const unreadCount = data?.data?.unreadCount || 0;
+
+  const handleNotificationToggle = () => {
+    const nextState = !isNotificationOpen;
+    setIsNotificationOpen(nextState);
+    if (nextState) {
+      refetch();
+    }
+  };
 
   const profileActions = [
     {
@@ -156,14 +173,16 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
             {/* Notifications */}
             <div className="relative" ref={notificationRef}>
               <button
-                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                onClick={handleNotificationToggle}
                 className="p-2 hover:bg-gray-100 rounded-lg"
                 aria-label="Notifications"
               >
                 <FaRegBell className="w-5 h-5 text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  2
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </button>
               <NotificationDropdown
                 isOpen={isNotificationOpen}

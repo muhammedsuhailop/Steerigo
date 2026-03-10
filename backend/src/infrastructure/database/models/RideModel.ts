@@ -2,11 +2,11 @@ import { RideStatus } from "@domain/value-objects/RideStatus";
 import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRideDocument extends Document {
+  _id: Types.ObjectId;
   rideId: string;
   driverId: Types.ObjectId;
   riderId: Types.ObjectId;
   status: string;
-
   pickup: {
     latitude: number;
     longitude: number;
@@ -17,9 +17,7 @@ export interface IRideDocument extends Document {
     longitude: number;
     address?: string;
   };
-
   rideType: string;
-
   fareBreakdown: {
     baseFare: number;
     distanceFare: number;
@@ -27,9 +25,7 @@ export interface IRideDocument extends Document {
     tax: number;
     surgeMultiplier: number;
   };
-
   currency: string;
-
   timeline: {
     requestedAt: Date;
     acceptedAt?: Date;
@@ -40,15 +36,11 @@ export interface IRideDocument extends Document {
     paymentInitiatedAt?: Date;
     paymentCompletedAt?: Date;
   };
-
   rating?: number;
   feedback?: string;
-
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Ride Schema Definition
 
 const rideSchema = new Schema<IRideDocument>(
   {
@@ -58,29 +50,24 @@ const rideSchema = new Schema<IRideDocument>(
       unique: true,
       index: true,
     },
-
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",
       required: true,
       index: true,
     },
-
     riderId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: true,
     },
-
     status: {
       type: String,
-      enum: RideStatus,
+      enum: Object.values(RideStatus),
       default: RideStatus.REQUESTED,
       index: true,
     },
-
-    // Location data
     pickup: {
       latitude: {
         type: Number,
@@ -99,7 +86,6 @@ const rideSchema = new Schema<IRideDocument>(
         trim: true,
       },
     },
-
     drop: {
       latitude: {
         type: Number,
@@ -118,35 +104,35 @@ const rideSchema = new Schema<IRideDocument>(
         trim: true,
       },
     },
-
-    // Ride details
     rideType: {
       type: String,
       enum: ["One Way", "Round Trip"],
       required: true,
     },
-
-    // Fare breakdown
     fareBreakdown: {
       baseFare: {
         type: Number,
         required: true,
         min: 0,
+        default: 0,
       },
       distanceFare: {
         type: Number,
         required: true,
         min: 0,
+        default: 0,
       },
       timeFare: {
         type: Number,
         required: true,
         min: 0,
+        default: 0,
       },
       tax: {
         type: Number,
         required: true,
         min: 0,
+        default: 0,
       },
       surgeMultiplier: {
         type: Number,
@@ -154,19 +140,15 @@ const rideSchema = new Schema<IRideDocument>(
         min: 1,
       },
     },
-
-    // Currency
     currency: {
       type: String,
       default: "INR",
     },
-
-    // Timeline
     timeline: {
       requestedAt: {
         type: Date,
         required: true,
-        default: new Date(),
+        default: Date.now,
       },
       acceptedAt: {
         type: Date,
@@ -190,33 +172,29 @@ const rideSchema = new Schema<IRideDocument>(
         type: Date,
       },
     },
-
-    // Optional fields
     rating: {
       type: Number,
-      min: 0,
+      min: 1,
       max: 5,
     },
     feedback: {
       type: String,
-      trim: true,
+      maxlength: 1000,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-// Indexes for performance
+// Indexes
 rideSchema.index({ driverId: 1, status: 1 });
-rideSchema.index({ driverId: 1, "timeline.startedAt": 1 });
 rideSchema.index({ riderId: 1, status: 1 });
-rideSchema.index({ createdAt: 1 });
-rideSchema.index({ "timeline.completedAt": 1 });
-
-// Ride Model
+rideSchema.index({ createdAt: -1 });
+rideSchema.index({ "timeline.requestedAt": -1 });
+rideSchema.index({ "timeline.acceptedAt": -1 });
 
 export const RideModel: Model<IRideDocument> = model<IRideDocument>(
   "Ride",
-  rideSchema
+  rideSchema,
 );

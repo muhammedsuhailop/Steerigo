@@ -1,18 +1,4 @@
-export interface Location {
-  latitude: number;
-  longitude: number;
-  address: string;
-}
-
-export interface Distance {
-  value: number;
-  unit: string;
-}
-
-export interface ETA {
-  value: number;
-  unit: string;
-}
+import { Distance, ETA, Location } from "@/shared/types/ride.types";
 
 export interface Driver {
   id: string;
@@ -105,6 +91,7 @@ export interface DriverSearchState {
   isLoading: boolean;
   error: string | null;
   totalFound: number;
+  requestGroupId: string | null;
   searchedAt: string | null;
 }
 

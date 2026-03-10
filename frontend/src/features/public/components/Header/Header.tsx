@@ -8,11 +8,12 @@ import { Navigation } from "./Navigation";
 import { MobileMenu } from "./MobileMenu";
 import { NavigateDropdown } from "./NavigateDropdown";
 import { ProfileDropdown } from "./ProfileDropdown";
-import { NotificationDropdown } from "./NotificationDropdown";
 import type { HeaderProps } from "./Header.types";
 import type { RootState } from "@/app/store";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { FaRegBell } from "react-icons/fa6";
+import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
+import { NotificationDropdown } from "@/shared/components/ui/Notification";
 
 export const Header: React.FC<HeaderProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -26,7 +27,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   // Get authentication status from Redux store
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const navigate = useNavigate();
@@ -65,8 +66,14 @@ export const Header: React.FC<HeaderProps> = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const { data, refetch } = useGetNotificationsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const unreadCount = data?.data?.unreadCount || 0;
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-[1010]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -124,16 +131,22 @@ export const Header: React.FC<HeaderProps> = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setIsNotificationOpen(!isNotificationOpen);
+                      const nextState = !isNotificationOpen;
+                      setIsNotificationOpen(nextState);
+                      if (nextState) {
+                        refetch();
+                      }
                       setIsNavigateDropdownOpen(false);
                       setIsProfileDropdownOpen(false);
                     }}
                     className="relative flex items-center justify-center p-2 text-gray-700 hover:bg-gray-100 rounded-md"
                   >
                     <FaRegBell className="w-5 h-5" />
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                      3
-                    </span>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </button>
 
                   <NotificationDropdown

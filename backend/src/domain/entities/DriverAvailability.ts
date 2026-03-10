@@ -2,8 +2,10 @@ import { AvailabilityStatus } from "../value-objects/AvailabilityStatus";
 import { Location } from "../value-objects/Location";
 import { TimeSlot } from "../value-objects/TimeSlot";
 import { DayOfWeek } from "../value-objects/DayOfWeek";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
-import { AvailabilityException } from "@domain/entities/AvailabilityException";
+import {
+  AvailabilityException,
+  AvailabilityExceptionValidator,
+} from "./AvailabilityException";
 
 export interface DailyRecurrenceData {
   daysOfWeek: DayOfWeek[];
@@ -15,6 +17,7 @@ export interface ScheduleValidityData {
   startDate: Date;
   endDate?: Date | null;
 }
+
 export interface RecurringScheduleData {
   dailyRecurrence: DailyRecurrenceData;
   validity: ScheduleValidityData;
@@ -43,8 +46,7 @@ export class DriverAvailability {
     notes?: string
   ): DriverAvailability {
     this.validateRecurringSchedule(dailyRecurrence, validity);
-
-    const availability = new DriverAvailability(
+    return new DriverAvailability(
       id,
       driverId,
       AvailabilityStatus.SCHEDULED,
@@ -57,8 +59,6 @@ export class DriverAvailability {
       [],
       true
     );
-
-    return availability;
   }
 
   static createImmediate(
@@ -105,7 +105,6 @@ export class DriverAvailability {
     dailyRecurrence: DailyRecurrenceData,
     validity: ScheduleValidityData
   ): void {
-    // Validate days of week
     if (
       !dailyRecurrence.daysOfWeek ||
       dailyRecurrence.daysOfWeek.length === 0
@@ -113,18 +112,15 @@ export class DriverAvailability {
       throw new Error("At least one day of week must be selected");
     }
 
-    // Validate time slots
     if (!dailyRecurrence.timeSlots || dailyRecurrence.timeSlots.length === 0) {
       throw new Error("At least one time slot must be defined");
     }
 
-    // Validate validity dates
     if (validity.endDate && validity.startDate >= validity.endDate) {
       throw new Error("Schedule validity end date must be after start date");
     }
   }
 
-  // Getters
   getId(): string {
     return this.id;
   }
@@ -161,11 +157,9 @@ export class DriverAvailability {
     return this.updatedAt;
   }
 
-  // Status transitions
-
   schedule(): void {
     if (this.status === AvailabilityStatus.SCHEDULED && this.isActive) {
-      return; // idempotent
+      return;
     }
 
     if (!this.canTransitionTo(AvailabilityStatus.SCHEDULED)) {
@@ -190,26 +184,22 @@ export class DriverAvailability {
     this.updatedAt = new Date();
   }
 
-  // Location management
   updateLocation(newLocation: Location): void {
     this.currentLocation = newLocation;
     this.updatedAt = new Date();
   }
 
-  // Schedule management
   updateRecurringSchedule(
     dailyRecurrence: DailyRecurrenceData,
     validity: ScheduleValidityData,
     notes?: string
   ): void {
     DriverAvailability.validateRecurringSchedule(dailyRecurrence, validity);
-
     this.recurringSchedule = {
       dailyRecurrence,
       validity,
       notes,
     };
-
     this.updatedAt = new Date();
   }
 
@@ -218,17 +208,10 @@ export class DriverAvailability {
     this.updatedAt = new Date();
   }
 
-  // Exception management
   addException(exception: AvailabilityException): void {
-    if (exception.isRecurring && !exception.recurrenceStartDate) {
-      throw new Error("Recurring exception must have recurrenceStartDate");
-    }
-
-    if (exception.endTime.getTime() - exception.startTime.getTime() <= 0) {
-      throw new Error("Exception duration must be positive");
-    }
-
+    AvailabilityExceptionValidator.validate(exception);
     this.exceptions.push(exception);
+    this.updatedAt = new Date();
   }
 
   removeException(exceptionId: string): boolean {
@@ -248,25 +231,21 @@ export class DriverAvailability {
     updates: Partial<AvailabilityException>
   ): boolean {
     const exception = this.exceptions.find((e) => e.id === exceptionId);
-
     if (!exception) {
       return false;
     }
+
+    const updatedException = { ...exception, ...updates };
+    AvailabilityExceptionValidator.validate(updatedException);
 
     Object.assign(exception, updates);
     this.updatedAt = new Date();
     return true;
   }
 
-  // Active state management
   activate(): void {
-    if (this.isActive && this.status === AvailabilityStatus.AVAILABLE) {
-      throw new Error("Driver is already active and available");
-    }
-
     this.isActive = true;
 
-    // Set to AVAILABLE if OFFLINE
     if (this.status === AvailabilityStatus.OFFLINE) {
       this.status = AvailabilityStatus.AVAILABLE;
     }
@@ -280,19 +259,15 @@ export class DriverAvailability {
     this.updatedAt = new Date();
   }
 
-  // Availability checks
   isAvailableAt(checkDate: Date): boolean {
-    // Check if driver is active
     if (!this.isActive) {
       return false;
     }
 
-    // Check exceptions first
-    if (this.hasException(checkDate)) {
+    if (this.hasDateBasedException(checkDate)) {
       return false;
     }
 
-    // Check recurring schedule
     if (this.recurringSchedule) {
       return this.isWithinRecurringSchedule(checkDate);
     }
@@ -305,15 +280,132 @@ export class DriverAvailability {
       throw new Error("Start time must be before end time");
     }
 
-    // sample at reasonable intervals
-    const interval = 10 * 60 * 1000; // Check every 10 minutes
-    let currentTime = new Date(startTime);
+    if (!this.isActive) {
+      return false;
+    }
 
-    while (currentTime <= endTime) {
-      if (!this.isAvailableAt(currentTime)) {
+    for (const exception of this.exceptions) {
+      if (exception.startTime < endTime && exception.endTime > startTime) {
         return false;
       }
-      currentTime = new Date(currentTime.getTime() + interval);
+    }
+
+    if (this.recurringSchedule) {
+      return this.isRangeWithinRecurringSchedule(startTime, endTime);
+    }
+
+    return this.status === AvailabilityStatus.AVAILABLE;
+  }
+
+  private isRangeWithinRecurringSchedule(
+    startTime: Date,
+    endTime: Date
+  ): boolean {
+    const { dailyRecurrence, validity } = this.recurringSchedule!;
+
+    if (startTime < validity.startDate) {
+      return false;
+    }
+    if (validity.endDate && endTime > validity.endDate) {
+      return false;
+    }
+
+    let currentDate = new Date(startTime);
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const endDate = new Date(endTime);
+    endDate.setUTCHours(23, 59, 59, 999);
+
+    while (currentDate <= endDate) {
+      const dayOfWeek = currentDate.getUTCDay() as DayOfWeek;
+
+      if (dailyRecurrence.daysOfWeek.includes(dayOfWeek)) {
+        let dayRangeStart = new Date(currentDate);
+        let dayRangeEnd = new Date(currentDate);
+        dayRangeEnd.setUTCHours(23, 59, 59, 999);
+
+        if (startTime > dayRangeStart) {
+          dayRangeStart = new Date(startTime);
+        }
+        if (endTime < dayRangeEnd) {
+          dayRangeEnd = new Date(endTime);
+        }
+
+        if (
+          !this.isDayRangeCoveredBySlots(
+            dayRangeStart,
+            dayRangeEnd,
+            dailyRecurrence
+          )
+        ) {
+          return false;
+        }
+      } else {
+        const dayStart = new Date(currentDate);
+        const dayEnd = new Date(currentDate);
+        dayEnd.setUTCHours(23, 59, 59, 999);
+
+        if (startTime < dayEnd && endTime > dayStart) {
+          return false;
+        }
+      }
+
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+      currentDate.setUTCHours(0, 0, 0, 0);
+    }
+
+    return true;
+  }
+
+  private isDayRangeCoveredBySlots(
+    dayRangeStart: Date,
+    dayRangeEnd: Date,
+    dailyRecurrence: DailyRecurrenceData
+  ): boolean {
+    const startMinutes =
+      dayRangeStart.getUTCHours() * 60 + dayRangeStart.getUTCMinutes();
+    const endMinutes =
+      dayRangeEnd.getUTCHours() * 60 + dayRangeEnd.getUTCMinutes();
+
+    const queryRanges = this.normalizeRange(startMinutes, endMinutes);
+
+    for (const [qStart, qEnd] of queryRanges) {
+      let covered = false;
+
+      for (const slot of dailyRecurrence.timeSlots) {
+        const slotRanges = this.normalizeRange(
+          slot.getStartTime(),
+          slot.getEndTime()
+        );
+
+        if (
+          slotRanges.some(([sStart, sEnd]) => qStart >= sStart && qEnd <= sEnd)
+        ) {
+          covered = true;
+          break;
+        }
+      }
+
+      if (!covered) {
+        return false;
+      }
+    }
+
+    if (dailyRecurrence.excludedTimeSlots?.length) {
+      for (const ex of dailyRecurrence.excludedTimeSlots) {
+        const exRanges = this.normalizeRange(
+          ex.getStartTime(),
+          ex.getEndTime()
+        );
+
+        for (const [qStart, qEnd] of queryRanges) {
+          if (
+            exRanges.some(([eStart, eEnd]) => qStart < eEnd && eStart < qEnd)
+          ) {
+            return false;
+          }
+        }
+      }
     }
 
     return true;
@@ -326,7 +418,6 @@ export class DriverAvailability {
 
     const { dailyRecurrence, validity } = this.recurringSchedule;
 
-    // Check validity period
     if (checkDate < validity.startDate) {
       return false;
     }
@@ -335,13 +426,11 @@ export class DriverAvailability {
       return false;
     }
 
-    // Check day of week
     const dayOfWeek = checkDate.getUTCDay() as DayOfWeek;
     if (!dailyRecurrence.daysOfWeek.includes(dayOfWeek)) {
       return false;
     }
 
-    // Check time slot
     return this.isWithinTimeSlots(checkDate, dailyRecurrence);
   }
 
@@ -353,7 +442,6 @@ export class DriverAvailability {
     const minutes = checkDate.getUTCMinutes();
     const timeInMinutes = hours * 60 + minutes;
 
-    // Check if within any active time slot
     const inTimeSlot = dailyRecurrence.timeSlots.some((slot) =>
       slot.containsTime(timeInMinutes)
     );
@@ -362,7 +450,6 @@ export class DriverAvailability {
       return false;
     }
 
-    // Check if in excluded time slot
     if (dailyRecurrence.excludedTimeSlots) {
       const inExcludedSlot = dailyRecurrence.excludedTimeSlots.some((slot) =>
         slot.containsTime(timeInMinutes)
@@ -376,38 +463,11 @@ export class DriverAvailability {
     return true;
   }
 
-  private hasException(checkDate: Date): boolean {
+  private hasDateBasedException(checkDate: Date): boolean {
     return this.exceptions.some((exception) => {
-      if (checkDate >= exception.startTime && checkDate <= exception.endTime) {
-        return true;
-      }
-
-      if (
-        exception.isRecurring &&
-        exception.recurringPattern === RecurringPattern.DAILY
-      ) {
-        const checkMinutes =
-          checkDate.getUTCHours() * 60 + checkDate.getUTCMinutes();
-
-        const exceptionStart = new Date(exception.startTime);
-        const exceptionEnd = new Date(exception.endTime);
-
-        const startMinutes =
-          exceptionStart.getUTCHours() * 60 + exceptionStart.getUTCMinutes();
-
-        const endMinutes =
-          exceptionEnd.getUTCHours() * 60 + exceptionEnd.getUTCMinutes();
-
-        if (checkMinutes >= startMinutes && checkMinutes <= endMinutes) {
-          return true;
-        }
-      }
-
-      return false;
+      return checkDate >= exception.startTime && checkDate <= exception.endTime;
     });
   }
-
-  // Status transition validation
   private canTransitionTo(newStatus: AvailabilityStatus): boolean {
     const allowedTransitions: Record<AvailabilityStatus, AvailabilityStatus[]> =
       {
@@ -432,6 +492,16 @@ export class DriverAvailability {
         ],
       };
 
-    return allowedTransitions[this.status]?.includes(newStatus) ?? false;
+    return allowedTransitions[this.status].includes(newStatus);
+  }
+
+  private normalizeRange(start: number, end: number): [number, number][] {
+    if (start <= end) {
+      return [[start, end]];
+    }
+    return [
+      [start, 1440],
+      [0, end],
+    ];
   }
 }

@@ -21,6 +21,12 @@ import {
 import { Result } from "@shared/utils/Result";
 import { FindNearbyDriversRequestDto } from "@application/dto/user/FindNearbyDriversRequestDto";
 import { FindNearbyDriversResponseDto } from "@application/dto/user/FindNearbyDriversResponseDto";
+import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto";
+import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
+import { DomainError } from "@domain/errors/DomainError";
+import { CancelRideRequestsUseCase } from "@application/use-cases/user/CancelRideRequestsUseCase";
+import { GetUserRideByIdUseCase } from "@application/use-cases/user/GetUserRideByIdUseCase";
+import { GetUserRidesUseCase } from "@application/use-cases/user/GetUserRidesUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -57,6 +63,23 @@ export class UserFactory {
         >
       >(TYPES.FindNearbyDriversUseCase)
       .to(FindNearbyDriversUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          CancelRideRequestDto,
+          Promise<Result<CancelRideRequestResponseDto, DomainError>>
+        >
+      >(TYPES.CancelRideRequestsUseCase)
+      .to(CancelRideRequestsUseCase);
+
+    container
+      .bind<GetUserRideByIdUseCase>(TYPES.GetUserRideByIdUseCase)
+      .to(GetUserRideByIdUseCase);
+
+    container
+      .bind<GetUserRidesUseCase>(TYPES.GetUserRidesUseCase)
+      .to(GetUserRidesUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

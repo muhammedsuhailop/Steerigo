@@ -20,10 +20,12 @@ import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
 import { RideRequest } from "@domain/entities/RideRequest";
 import { Location } from "@domain/value-objects/Location";
-import { v4 as uuidv4 } from "uuid";
 import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { AppConstants } from "@shared/constants/AppConstants";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideRequestCreatedEvent } from "@application/events/RideEvents";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -50,13 +52,16 @@ export class AutoSearchAndSendRideRequestUseCase
     private fareCalculationService: IFareCalculationService,
 
     @inject(TYPES.AvailabilityCheckService)
-    private availabilityCheckService: IAvailabilityCheckService
+    private availabilityCheckService: IAvailabilityCheckService,
+
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
-    dto: AutoSearchAndRequestDto
+    dto: AutoSearchAndRequestDto,
   ): Promise<Result<AutoSearchAndRequestResponseDto>> {
-    const userId = dto.getUserId();
+    const userId = dto.getRiderId();
 
     try {
       dto.validate();
@@ -75,13 +80,15 @@ export class AutoSearchAndSendRideRequestUseCase
         { latitude: dto.latitude, longitude: dto.longitude },
         dto.searchDate,
         dto.radiusKm,
-        dto.timeRequired
+        dto.timeRequired,
       );
 
       const searchFilter = DriverSearchFilter.create(
         dto.gearType,
-        dto.bodyType
+        dto.bodyType,
       );
+
+      const fetchLimit = dto.maxRideRequests * AppConstants.FETCH_MULTIPLIER;
 
       const nearbyAvailabilities =
         await this.driverAvailabilityRepository.findNearbyAvailableDrivers(
@@ -90,7 +97,7 @@ export class AutoSearchAndSendRideRequestUseCase
           searchCriteria.getSearchDate(),
           searchCriteria.getRadiusKm(),
           searchCriteria.getTimeRequiredMinutes(),
-          dto.maxRideRequests
+          fetchLimit,
         );
 
       const successfulRequests: SuccessfulRequestInfo[] = [];
@@ -108,6 +115,9 @@ export class AutoSearchAndSendRideRequestUseCase
         address: dto.dropAddress,
       });
 
+      const pendingRequests =
+        await this.rideRequestRepository.findPendingByRiderId(userId);
+
       for (const item of nearbyAvailabilities) {
         if (successfulRequests.length >= dto.maxRideRequests) break;
 
@@ -117,14 +127,14 @@ export class AutoSearchAndSendRideRequestUseCase
         const startDate = searchCriteria.getSearchDate();
         const endDate = new Date(
           startDate.getTime() +
-            searchCriteria.getTimeRequiredMinutes() * 60 * 1000
+            searchCriteria.getTimeRequiredMinutes() * 60 * 1000,
         );
 
         const isAvailable =
           await this.availabilityCheckService.isAvailableDuring(
             driverId,
             startDate,
-            endDate
+            endDate,
           );
 
         if (!isAvailable) {
@@ -146,12 +156,14 @@ export class AutoSearchAndSendRideRequestUseCase
           continue;
         }
 
+        const driverUserId = driver.getUserId();
+
         if (
           searchFilter.hasFilters() &&
           !searchFilter.matches(
             driver.getEligibleGearTypes(),
             driver.getEligibleBodyTypes(),
-            4
+            0,
           )
         ) {
           failedRequests.push({
@@ -162,10 +174,7 @@ export class AutoSearchAndSendRideRequestUseCase
           continue;
         }
 
-        const pending =
-          await this.rideRequestRepository.findPendingByRiderId(userId);
-
-        if (pending.some((r) => r.getDriverId() === driverId)) {
+        if (pendingRequests.some((r) => r.getDriverId() === driverId)) {
           failedRequests.push({
             driverId,
             driverName: await this.getDriverName(driverId),
@@ -175,15 +184,15 @@ export class AutoSearchAndSendRideRequestUseCase
         }
 
         const rideRequest = RideRequest.create(
-          uuidv4(),
           driverId,
           userId,
+          dto.requestGroupId,
           pickup,
           drop,
           dto.searchDate,
           dto.rideType as RideType,
           fareBreakdown,
-          `${item.etaMinutes} mins`
+          `${item.etaMinutes} mins`,
         );
 
         const saved = await this.rideRequestRepository.save(rideRequest);
@@ -195,6 +204,40 @@ export class AutoSearchAndSendRideRequestUseCase
           });
           continue;
         }
+
+        const rideRequestCreatedEvent: RideRequestCreatedEvent = {
+          type: "RideRequestCreated",
+          occurredAt: new Date(),
+          payload: {
+            requestId: saved.getId(),
+            requestGroupId: dto.requestGroupId,
+            riderId: userId,
+            driverId: driverUserId,
+            pickup: {
+              latitude: pickup.getLatitude(),
+              longitude: pickup.getLongitude(),
+              address: pickup.getAddress(),
+            },
+            drop: {
+              latitude: drop.getLatitude(),
+              longitude: drop.getLongitude(),
+              address: drop.getAddress(),
+            },
+            pickupTime: dto.searchDate.toISOString(),
+            rideType: dto.rideType,
+            pickupETA: `${item.etaMinutes} mins`,
+            fare: {
+              amount: fareBreakdown.getTotalFare().getAmount(),
+              currency: fareBreakdown.getTotalFare().getCurrency(),
+            },
+            searchedAt: new Date().toISOString(),
+            expiresAt: new Date(
+              Date.now() + AppConstants.RIDE_REQUEST_TIMEOUT_MS,
+            ).toISOString(),
+          },
+        };
+
+        await this.eventBus.publish(rideRequestCreatedEvent);
 
         successfulRequests.push({
           requestId: saved.getId(),
@@ -208,10 +251,11 @@ export class AutoSearchAndSendRideRequestUseCase
 
       return Result.success(
         AutoSearchAndRequestResponseDto.create(
+          dto.requestGroupId,
           successfulRequests,
           failedRequests,
-          nearbyAvailabilities.length
-        )
+          nearbyAvailabilities.length,
+        ),
       );
     } catch (error) {
       Logger.error("Auto search failed", { error });
@@ -222,8 +266,8 @@ export class AutoSearchAndSendRideRequestUseCase
 
       return Result.failure(
         RideRequestErrors.rideRequestCreationFailed(
-          error instanceof Error ? error.message : "Unknown error"
-        )
+          error instanceof Error ? error.message : "Unknown error",
+        ),
       );
     }
   }

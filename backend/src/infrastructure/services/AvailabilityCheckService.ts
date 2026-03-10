@@ -3,6 +3,7 @@ import { IAvailabilityCheckService } from "@application/services/IAvailabilityCh
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
 
 @injectable()
 export class AvailabilityCheckService implements IAvailabilityCheckService {
@@ -10,15 +11,6 @@ export class AvailabilityCheckService implements IAvailabilityCheckService {
     @inject(TYPES.DriverAvailabilityRepository)
     private availabilityRepository: IDriverAvailabilityRepository
   ) {}
-
-  async isDriverAvailable(driverId: string, checkDate: Date): Promise<boolean> {
-    const availability =
-      await this.availabilityRepository.findActiveByDriverId(driverId);
-
-    if (!availability) return false;
-
-    return availability.isAvailableAt(checkDate);
-  }
 
   async isAvailableDuring(
     driverId: string,
@@ -28,66 +20,75 @@ export class AvailabilityCheckService implements IAvailabilityCheckService {
     const availability =
       await this.availabilityRepository.findActiveByDriverId(driverId);
 
-    if (!availability) {
-      Logger.debug("No active availability found", { driverId });
+    if (!availability) return false;
+
+    const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
+
+    return this.isDriverAvailableForDuration(
+      availability,
+      startDate,
+      durationMinutes
+    );
+  }
+
+  private isDriverAvailableForDuration(
+    availability: DriverAvailability,
+    searchDate: Date,
+    timeRequiredMinutes: number
+  ): boolean {
+    const schedule = availability.getRecurringSchedule();
+    if (!schedule) return false;
+
+    const rideEnd = new Date(searchDate);
+    rideEnd.setMinutes(rideEnd.getMinutes() + timeRequiredMinutes);
+
+    const exceptions = availability.getExceptions?.() ?? [];
+    for (const exception of exceptions) {
+      const exceptionStart = new Date(exception.startTime);
+      const exceptionEnd = new Date(exception.endTime);
+      if (searchDate < exceptionEnd && rideEnd > exceptionStart) {
+        return false;
+      }
+    }
+
+    const validFrom = new Date(schedule.validity.startDate);
+    const validTill = new Date(
+      schedule.validity.endDate ?? new Date(9999, 11, 31)
+    );
+
+    if (searchDate < validFrom || rideEnd > validTill) {
       return false;
     }
 
-    const isAvailable = availability.isAvailableForTimeRange(
-      startDate,
-      endDate
-    );
+    const daily = schedule.dailyRecurrence;
+    if (!daily) return false;
 
-    Logger.debug("Availability range check result", {
-      driverId,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      isAvailable,
-    });
+    const jsDay = searchDate.getUTCDay();
+    const normalizedDay = jsDay === 0 ? 7 : jsDay;
 
-    return isAvailable;
-  }
-
-  async getNextAvailableSlot(
-    driverId: string,
-    fromDate: Date
-  ): Promise<{ startTime: Date; endTime: Date } | null> {
-    const availability =
-      await this.availabilityRepository.findActiveByDriverId(driverId);
-
-    if (!availability) return null;
-
-    const recurring = availability.getRecurringSchedule();
-    if (!recurring) return null;
-
-    let cursor = new Date(fromDate);
-
-    for (let i = 0; i < 365; i++) {
-      for (const slot of recurring.dailyRecurrence.timeSlots) {
-        const start = new Date(cursor);
-        start.setUTCHours(
-          Math.floor(slot.getStartTime() / 60),
-          slot.getStartTime() % 60,
-          0,
-          0
-        );
-
-        const end = new Date(cursor);
-        end.setUTCHours(
-          Math.floor(slot.getEndTime() / 60),
-          slot.getEndTime() % 60,
-          0,
-          0
-        );
-
-        if (availability.isAvailableForTimeRange(start, end)) {
-          return { startTime: start, endTime: end };
-        }
-      }
-
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    if (!daily.daysOfWeek.includes(normalizedDay)) {
+      return false;
     }
 
-    return null;
+    const startMinutes =
+      searchDate.getUTCHours() * 60 + searchDate.getUTCMinutes();
+    const endMinutes = startMinutes + timeRequiredMinutes;
+
+    const fitsInSlot = daily.timeSlots.some(
+      (slot) =>
+        startMinutes >= slot.getStartTime() && endMinutes <= slot.getEndTime()
+    );
+
+    if (!fitsInSlot) return false;
+
+    if (daily.excludedTimeSlots?.length) {
+      const overlapsExcluded = daily.excludedTimeSlots.some(
+        (slot) =>
+          startMinutes < slot.getEndTime() && endMinutes > slot.getStartTime()
+      );
+      if (overlapsExcluded) return false;
+    }
+
+    return true;
   }
 }

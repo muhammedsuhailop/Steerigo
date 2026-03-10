@@ -9,6 +9,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 import { IRideRequestDocument } from "../models/RideRequestModel";
 import { toObjectId } from "@shared/utils/idHelper";
+import { Types } from "mongoose";
 
 export class RideRequestMapper {
   static toDomain(doc: IRideRequestDocument): RideRequest {
@@ -26,12 +27,12 @@ export class RideRequestMapper {
 
     const baseFare = Money.create(
       doc.fareBreakdown.baseFare.amount,
-      doc.fareBreakdown.baseFare.currency
+      doc.fareBreakdown.baseFare.currency,
     );
 
     const platformFee = Money.create(
       doc.fareBreakdown.platformFee.amount,
-      doc.fareBreakdown.platformFee.currency
+      doc.fareBreakdown.platformFee.currency,
     );
 
     const fareTax: TaxBreakdown = {
@@ -39,7 +40,7 @@ export class RideRequestMapper {
       rate: doc.fareBreakdown.taxes.fare.rate,
       amount: Money.create(
         doc.fareBreakdown.taxes.fare.amount.amount,
-        doc.fareBreakdown.taxes.fare.amount.currency
+        doc.fareBreakdown.taxes.fare.amount.currency,
       ),
     };
 
@@ -48,13 +49,13 @@ export class RideRequestMapper {
       rate: doc.fareBreakdown.taxes.platformFee.rate,
       amount: Money.create(
         doc.fareBreakdown.taxes.platformFee.amount.amount,
-        doc.fareBreakdown.taxes.platformFee.amount.currency
+        doc.fareBreakdown.taxes.platformFee.amount.currency,
       ),
     };
 
     const totalFare = Money.create(
       doc.fareBreakdown.totalFare.amount,
-      doc.fareBreakdown.totalFare.currency
+      doc.fareBreakdown.totalFare.currency,
     );
 
     const fareBreakdown = FareBreakdown.create({
@@ -67,8 +68,9 @@ export class RideRequestMapper {
     });
 
     return RideRequest.fromData({
-      id: doc._id,
+      id: doc._id.toString(),
       driverId: doc.driverId.toString(),
+      requestGroupId: doc.requestGroupId,
       riderId: doc.riderId.toString(),
       pickup,
       drop,
@@ -86,8 +88,9 @@ export class RideRequestMapper {
     const fareBreakdown = entity.getFareBreakdown();
 
     return {
-      _id: entity.getId(),
+      _id: entity.getId() ? new Types.ObjectId(entity.getId()) : undefined,
       driverId: toObjectId(entity.getDriverId()),
+      requestGroupId: entity.getRequestGroupId(),
       riderId: toObjectId(entity.getRiderId()),
       pickup: {
         latitude: entity.getPickup().getLatitude(),

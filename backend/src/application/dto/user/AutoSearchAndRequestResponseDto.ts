@@ -14,6 +14,7 @@ export interface FailedRequestInfo {
 }
 
 export interface AutoSearchAndRequestResult {
+  requestGroupId: string;
   successfulRequests: SuccessfulRequestInfo[];
   failedRequests: FailedRequestInfo[];
   totalDriversFound: number;
@@ -25,18 +26,20 @@ export interface AutoSearchAndRequestResult {
 export class AutoSearchAndRequestResponseDto {
   constructor(
     public readonly result: AutoSearchAndRequestResult,
-    public readonly message: string
+    public readonly message: string,
   ) {}
 
   static create(
+    requestGroupId: string,
     successfulRequests: SuccessfulRequestInfo[],
     failedRequests: FailedRequestInfo[],
-    totalDriversFound: number
+    totalDriversFound: number,
   ): AutoSearchAndRequestResponseDto {
     const successCount = successfulRequests.length;
     const failureCount = failedRequests.length;
 
     const result: AutoSearchAndRequestResult = {
+      requestGroupId,
       successfulRequests,
       failedRequests,
       totalDriversFound,

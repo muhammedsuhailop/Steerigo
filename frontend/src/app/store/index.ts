@@ -16,6 +16,12 @@ import { schedulingApi } from "@/features/driver/scheduling/services/schedulingA
 import { driverProfileApi } from "@/features/driver/profile/services/driverProfileApi";
 import { driverSearchApi } from "@/features/user/driver-search/services/driverSearchApi";
 import driverSearchReducer from "@/features/user/driver-search/store/driverSearchSlice";
+import { rideRequestsApi } from "@/features/driver/ride-requests/services/rideRequestsApi";
+import { viewRideApi } from "@/features/user/view-ride/services/viewRideApi";
+import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
+import { notificationApi } from "@/features/notifications/services/notificationApi";
+import { viewDriverRideApi } from "@/features/driver/view-ride/services/viewDriverRideApi";
+import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverRideSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,15 +31,21 @@ export const store = configureStore({
 
     [adminApi.reducerPath]: adminApi.reducer,
 
+    //notification API
+    [notificationApi.reducerPath]: notificationApi.reducer,
+
     // Driver APIs with RTK Query
     [driverRegistrationApi.reducerPath]: driverRegistrationApi.reducer,
     [driverApi.reducerPath]: driverApi.reducer,
     [schedulingApi.reducerPath]: schedulingApi.reducer,
+    [rideRequestsApi.reducerPath]: rideRequestsApi.reducer,
+    [viewDriverRideApi.reducerPath]: viewDriverRideApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
     [driverProfileApi.reducerPath]: driverProfileApi.reducer,
     [driverSearchApi.reducerPath]: driverSearchApi.reducer,
+    [viewRideApi.reducerPath]: viewRideApi.reducer,
 
     // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
@@ -43,6 +55,8 @@ export const store = configureStore({
     adminKYC: adminKYCReducer,
     userProfile: userProfileReducer,
     driverSearch: driverSearchReducer,
+    viewRide: viewRideReducer,
+    viewDriverRide: viewDriverRideReducer,
 
     // Global error handling
     error: errorReducer,
@@ -55,13 +69,17 @@ export const store = configureStore({
       },
     }).concat(
       authApi.middleware,
+      notificationApi.middleware,
       driverRegistrationApi.middleware,
       driverApi.middleware,
       userProfileApi.middleware,
       adminApi.middleware,
       schedulingApi.middleware,
       driverProfileApi.middleware,
-      driverSearchApi.middleware
+      driverSearchApi.middleware,
+      rideRequestsApi.middleware,
+      viewRideApi.middleware,
+      viewDriverRideApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });
