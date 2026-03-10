@@ -12,13 +12,12 @@ import {
   selectActiveRider,
 } from "../store/viewDriverRideSlice";
 import { useViewDriverRide } from "../hooks/useViewDriverRide";
-import TripLocationMap from "@/shared/components/maps/TripLocationMap";
 import FareBreakdown from "../../../user/view-ride/components/FareBreakdown";
 import { RideTimelineStatus } from "../../../user/view-ride/components/RideTimelineStatus";
 import RideRiderCard from "../components/RideRiderCard";
 import RideActionControls from "../components/RideActionControls";
 import { useDriverLocationUpdate } from "../hooks/useDriverLocationUpdate";
-import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
+import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
 
 const ViewDriverRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -160,10 +159,11 @@ const ViewDriverRidePage: React.FC = () => {
                 {/* Left Column */}
                 <div className="lg:col-span-7 space-y-6">
                   <div className="h-[350px] rounded-3xl overflow-hidden border border-gray-200 shadow-sm relative">
-                    <LiveTrackingMap
+                    <LiveNavigationMap
                       pickupLocation={activeRide.pickup}
                       dropLocation={activeRide.drop}
                       driverLocation={driverLocation}
+                      status={activeRide.status}
                     />
                   </div>
 
