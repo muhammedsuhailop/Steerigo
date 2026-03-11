@@ -13,11 +13,10 @@ import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
-import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { IUseCase } from "../interfaces/IUseCase";
-import { DriverAvailability } from "@domain/entities/DriverAvailability";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
+import { IFareCalculationService } from "@application/services/IFareCalculationService";
 
 @injectable()
 export class FindNearbyDriversUseCase
@@ -37,11 +36,11 @@ export class FindNearbyDriversUseCase
     @inject(TYPES.FareCalculationService)
     private fareCalculationService: IFareCalculationService,
     @inject(TYPES.AvailabilityCheckService)
-    private availabilityCheckService: IAvailabilityCheckService
+    private availabilityCheckService: IAvailabilityCheckService,
   ) {}
 
   async execute(
-    requestDto: FindNearbyDriversRequestDto
+    requestDto: FindNearbyDriversRequestDto,
   ): Promise<Result<FindNearbyDriversResponseDto>> {
     try {
       Logger.info("Find nearby drivers use case started", {
@@ -60,12 +59,12 @@ export class FindNearbyDriversUseCase
         { latitude: requestDto.latitude, longitude: requestDto.longitude },
         requestDto.searchDate,
         requestDto.radiusKm,
-        requestDto.timeRequired
+        requestDto.timeRequired,
       );
 
       const searchFilter = DriverSearchFilter.create(
         requestDto.gearType,
-        requestDto.bodyType
+        requestDto.bodyType,
       );
 
       const fareBreakdown = await this.fareCalculationService.calculateFare({
@@ -82,7 +81,7 @@ export class FindNearbyDriversUseCase
           searchCriteria.getSearchDate(),
           searchCriteria.getRadiusKm(),
           searchCriteria.getTimeRequiredMinutes(),
-          fetchLimit
+          fetchLimit,
         );
 
       Logger.debug("Get available drivers within radius result", {
@@ -113,8 +112,8 @@ export class FindNearbyDriversUseCase
                   }
                 : undefined,
             },
-            fareBreakdown
-          )
+            fareBreakdown,
+          ),
         );
       }
 
@@ -140,14 +139,14 @@ export class FindNearbyDriversUseCase
             const startDate = searchCriteria.getSearchDate();
             const endDate = new Date(
               startDate.getTime() +
-                searchCriteria.getTimeRequiredMinutes() * 60 * 1000
+                searchCriteria.getTimeRequiredMinutes() * 60 * 1000,
             );
 
             const isAvailable =
               await this.availabilityCheckService.isAvailableDuring(
                 driverId,
                 startDate,
-                endDate
+                endDate,
               );
 
             if (!isAvailable) {
@@ -161,7 +160,7 @@ export class FindNearbyDriversUseCase
                   availableTill: schedule?.validity.endDate ?? "unknown",
                   searchDate: searchCriteria.getSearchDate(),
                   requiredMinutes: searchCriteria.getTimeRequiredMinutes(),
-                }
+                },
               );
               return null;
             }
@@ -188,7 +187,7 @@ export class FindNearbyDriversUseCase
               const matches = searchFilter.matches(
                 driver.getEligibleGearTypes(),
                 driver.getEligibleBodyTypes(),
-                0
+                0,
               );
 
               if (!matches) {
@@ -259,7 +258,7 @@ export class FindNearbyDriversUseCase
             });
             return null;
           }
-        })
+        }),
       );
 
       const validDrivers = driverResponses
@@ -289,7 +288,7 @@ export class FindNearbyDriversUseCase
               }
             : undefined,
         },
-        fareBreakdown
+        fareBreakdown,
       );
 
       Logger.info("Find nearby drivers use case completed successfully", {

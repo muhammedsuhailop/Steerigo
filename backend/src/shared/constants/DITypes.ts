@@ -97,6 +97,7 @@ export const TYPES = {
   GetDriverRideByIdUseCase: Symbol.for("GetDriverRideByIdUseCase"),
   MarkRideAsArrivedUseCase: Symbol.for("MarkRideAsArrivedUseCase"),
   MarkRideAsStartedUseCase: Symbol.for("MarkRideAsStartedUseCase"),
+  MarkRideAsCompletedUseCase: Symbol.for("MarkRideAsCompletedUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

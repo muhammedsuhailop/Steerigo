@@ -1,4 +1,5 @@
 import { RideStatus } from "@domain/value-objects/RideStatus";
+import { RideType } from "@domain/value-objects/RideType";
 import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRideDocument extends Document {
@@ -20,8 +21,8 @@ export interface IRideDocument extends Document {
   rideType: string;
   fareBreakdown: {
     baseFare: number;
-    distanceFare: number;
     timeFare: number;
+    platformFee: number;
     tax: number;
     surgeMultiplier: number;
   };
@@ -45,12 +46,7 @@ export interface IRideDocument extends Document {
 
 const rideSchema = new Schema<IRideDocument>(
   {
-    rideId: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
+    rideId: { type: String, required: true, unique: true, index: true },
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",
@@ -70,133 +66,48 @@ const rideSchema = new Schema<IRideDocument>(
       index: true,
     },
     pickup: {
-      latitude: {
-        type: Number,
-        required: true,
-        min: -90,
-        max: 90,
-      },
-      longitude: {
-        type: Number,
-        required: true,
-        min: -180,
-        max: 180,
-      },
-      address: {
-        type: String,
-        trim: true,
-      },
+      latitude: { type: Number, required: true, min: -90, max: 90 },
+      longitude: { type: Number, required: true, min: -180, max: 180 },
+      address: { type: String, trim: true },
     },
     drop: {
-      latitude: {
-        type: Number,
-        required: true,
-        min: -90,
-        max: 90,
-      },
-      longitude: {
-        type: Number,
-        required: true,
-        min: -180,
-        max: 180,
-      },
-      address: {
-        type: String,
-        trim: true,
-      },
+      latitude: { type: Number, required: true, min: -90, max: 90 },
+      longitude: { type: Number, required: true, min: -180, max: 180 },
+      address: { type: String, trim: true },
     },
-    rideType: {
-      type: String,
-      enum: ["One Way", "Round Trip"],
-      required: true,
-    },
+    rideType: { type: String, enum: RideType, required: true },
     fareBreakdown: {
-      baseFare: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 0,
-      },
-      distanceFare: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 0,
-      },
-      timeFare: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 0,
-      },
-      tax: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 0,
-      },
-      surgeMultiplier: {
-        type: Number,
-        default: 1,
-        min: 1,
-      },
+      baseFare: { type: Number, required: true, min: 0, default: 0 },
+      timeFare: { type: Number, required: true, min: 0, default: 0 },
+      platformFee: { type: Number, required: true, min: 0, default: 0 },
+      tax: { type: Number, required: true, min: 0, default: 0 },
+      surgeMultiplier: { type: Number, default: 1, min: 1 },
     },
-    currency: {
-      type: String,
-      default: "INR",
-    },
+    currency: { type: String, default: "INR" },
     timeline: {
-      requestedAt: {
-        type: Date,
-        required: true,
-        default: Date.now,
-      },
-      acceptedAt: {
-        type: Date,
-      },
-      arrivedAt: {
-        type: Date,
-      },
-      startedAt: {
-        type: Date,
-      },
-      completedAt: {
-        type: Date,
-      },
-      cancelledAt: {
-        type: Date,
-      },
-      rejectedAt: {
-        type: Date,
-      },
-      paymentInitiatedAt: {
-        type: Date,
-      },
-      paymentCompletedAt: {
-        type: Date,
-      },
+      requestedAt: { type: Date, required: true, default: Date.now },
+      acceptedAt: { type: Date },
+      arrivedAt: { type: Date },
+      startedAt: { type: Date },
+      completedAt: { type: Date },
+      cancelledAt: { type: Date },
+      rejectedAt: { type: Date },
+      paymentInitiatedAt: { type: Date },
+      paymentCompletedAt: { type: Date },
     },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-    },
-    feedback: {
-      type: String,
-      maxlength: 1000,
-    },
+    rating: { type: Number, min: 1, max: 5 },
+    feedback: { type: String, maxlength: 1000 },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-// Indexes
 rideSchema.index({ driverId: 1, status: 1 });
 rideSchema.index({ riderId: 1, status: 1 });
 rideSchema.index({ createdAt: -1 });
 rideSchema.index({ "timeline.requestedAt": -1 });
 rideSchema.index({ "timeline.acceptedAt": -1 });
+rideSchema.index({ "timeline.arrivedAt": -1 });
+rideSchema.index({ "timeline.completedAt": -1 });
 
 export const RideModel: Model<IRideDocument> = model<IRideDocument>(
   "Ride",

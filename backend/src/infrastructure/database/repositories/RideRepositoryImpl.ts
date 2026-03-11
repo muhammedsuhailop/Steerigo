@@ -48,6 +48,7 @@ export class RideRepositoryImpl implements IRideRepository {
         {
           new: true,
           runValidators: true,
+          upsert: true,
         },
       );
 

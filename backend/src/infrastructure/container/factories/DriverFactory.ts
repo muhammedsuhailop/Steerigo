@@ -59,6 +59,9 @@ import { MarkRideAsArrivedUseCase } from "@application/use-cases/driver/MarkRide
 import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedDto";
 import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
 import { MarkRideAsStartedUseCase } from "@application/use-cases/driver/MarkRideAsStartedUseCase";
+import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsCompletedDto";
+import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
+import { MarkRideAsCompletedUseCase } from "@application/use-cases/driver/MarkRideAsCompletedUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -66,6 +69,7 @@ export class DriverFactory {
       .bind<IDriverDashboardRepository>(TYPES.DriverDashboardRepository)
       .to(DriverDashboardRepositoryImpl)
       .inSingletonScope();
+
     // Use case bindings
     container
       .bind<
@@ -190,6 +194,15 @@ export class DriverFactory {
         >
       >(TYPES.MarkRideAsStartedUseCase)
       .to(MarkRideAsStartedUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          MarkRideAsCompletedDto,
+          Promise<Result<MarkRideAsCompletedResponseDto>>
+        >
+      >(TYPES.MarkRideAsCompletedUseCase)
+      .to(MarkRideAsCompletedUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

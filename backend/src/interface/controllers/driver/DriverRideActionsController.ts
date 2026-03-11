@@ -11,6 +11,8 @@ import { MarkRideAsArrivedDto } from "@application/dto/driver/MarkRideAsArrivedD
 import { MarkRideAsArrivedResponseDto } from "@application/dto/driver/MarkRideAsArrivedResponseDto";
 import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedDto";
 import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
+import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsCompletedDto";
+import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
 
 @injectable()
 export class DriverRideActionsController {
@@ -24,6 +26,11 @@ export class DriverRideActionsController {
     private markRideAsStartedUseCase: IUseCase<
       MarkRideAsStartedDto,
       Promise<Result<MarkRideAsStartedResponseDto>>
+    >,
+    @inject(TYPES.MarkRideAsCompletedUseCase)
+    private markRideAsCompletedUseCase: IUseCase<
+      MarkRideAsCompletedDto,
+      Promise<Result<MarkRideAsCompletedResponseDto>>
     >,
   ) {}
 
@@ -158,6 +165,70 @@ export class DriverRideActionsController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "mark_ride_as_started",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async markRideAsCompleted(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+      if (!userId) {
+        res.status(HttpStatusCodes.UNAUTHORIZED).json({
+          success: false,
+          message: DRIVER_MESSAGES.UNAUTHORIZED,
+        });
+        return;
+      }
+
+      const rideId = req.params.rideId;
+      if (!rideId) {
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: DRIVER_MESSAGES.RIDE_ID_REQUIRED,
+        });
+        return;
+      }
+
+      Logger.info("Mark ride as completed received", { userId, rideId });
+
+      const dto = MarkRideAsCompletedDto.fromRequest(userId, { rideId });
+      const result = await this.markRideAsCompletedUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Mark ride as completed failed", {
+          userId,
+          rideId,
+          error: error.message,
+        });
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "mark_ride_as_completed",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const responseData = result.getValue();
+      Logger.info("Ride completed successfully", {
+        userId,
+        rideId: responseData.data.rideId,
+        totalFare: responseData.data.fareBreakdown.totalFare.amount,
+        actualDurationMinutes:
+          responseData.data.fareBreakdown.actualDurationMinutes,
+        durationHours: responseData.data.fareBreakdown.durationHours,
+      });
+      res.status(HttpStatusCodes.OK).json(responseData);
+    } catch (error) {
+      Logger.error("Mark ride as completed controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "mark_ride_as_completed",
       );
       res.status(statusCode).json(response);
     }

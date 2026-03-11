@@ -61,4 +61,11 @@ driverRideRoutes.patch(
   validateSchema(rideIdParamSchema),
   (req, res) => driverRideActionsController.markRideAsStarted(req, res),
 );
+
+// PATCH /api/driver/ride/:rideId/completed - - Mark ride as completed
+driverRideRoutes.patch(
+  "/:rideId/completed",
+  validateSchema(rideIdParamSchema),
+  (req, res) => driverRideActionsController.markRideAsCompleted(req, res),
+);
 export { driverRideRoutes };

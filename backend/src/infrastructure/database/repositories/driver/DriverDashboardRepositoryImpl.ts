@@ -260,14 +260,13 @@ export class DriverDashboardRepositoryImpl
     try {
       // Calculate total fare from components
       const baseFare = doc.fareBreakdown?.baseFare || 0;
-      const distanceFare = doc.fareBreakdown?.distanceFare || 0;
       const timeFare = doc.fareBreakdown?.timeFare || 0;
       const taxAmount = doc.fareBreakdown?.tax || 0;
 
       const platformFeeAmount = baseFare * 0.02;
 
       fareBreakdown = FareBreakdown.create({
-        baseFare: Money.create(baseFare + distanceFare + timeFare),
+        baseFare: Money.create(baseFare + timeFare),
         platformFee: Money.create(platformFeeAmount),
         fareTax: {
           name: "GST on Fare",
@@ -281,7 +280,6 @@ export class DriverDashboardRepositoryImpl
         } as TaxBreakdown,
         totalFare: Money.create(
           baseFare +
-            distanceFare +
             timeFare +
             taxAmount +
             platformFeeAmount +
