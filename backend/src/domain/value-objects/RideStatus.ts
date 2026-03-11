@@ -5,5 +5,5 @@ export enum RideStatus {
   COMPLETED = "Completed",
   CANCELLED = "Cancelled",
   REJECTED = "Rejected",
-  ARRIVED = "ARRIVED",
+  ARRIVED = "Arrived",
 }

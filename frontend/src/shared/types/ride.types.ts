@@ -5,7 +5,7 @@ export type RideStatus =
   | "Started"
   | "Completed"
   | "Cancelled"
-  | "ARRIVED";
+  | "Arrived";
 
 export interface Location {
   latitude: number;
