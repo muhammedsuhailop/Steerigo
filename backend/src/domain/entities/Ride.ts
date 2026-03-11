@@ -253,4 +253,20 @@ export class Ride {
     this.status = RideStatus.CANCELLED;
     this.timeline.setCancelledAt(new Date());
   }
+
+  isArrived(): boolean {
+    return this.status === RideStatus.ARRIVED;
+  }
+
+  getArrivedAt(): Date | undefined {
+    return this.timeline.getArrivedAt();
+  }
+
+  setStatusToArrived(): void {
+    if (!this.isAccepted()) {
+      throw new Error("Only accepted rides can be marked as arrived");
+    }
+    this.status = RideStatus.ARRIVED;
+    this.timeline.setArrivedAt(new Date());
+  }
 }

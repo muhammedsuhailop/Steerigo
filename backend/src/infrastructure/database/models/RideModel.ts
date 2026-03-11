@@ -29,6 +29,7 @@ export interface IRideDocument extends Document {
   timeline: {
     requestedAt: Date;
     acceptedAt?: Date;
+    arrivedAt?: Date;
     startedAt?: Date;
     completedAt?: Date;
     cancelledAt?: Date;
@@ -151,6 +152,9 @@ const rideSchema = new Schema<IRideDocument>(
         default: Date.now,
       },
       acceptedAt: {
+        type: Date,
+      },
+      arrivedAt: {
         type: Date,
       },
       startedAt: {

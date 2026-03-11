@@ -24,6 +24,7 @@ export interface RideData {
   timeline: {
     requestedAt: string;
     acceptedAt?: string;
+    arrivedAt?:string;
     startedAt?: string;
     completedAt?: string;
     cancelledAt?: string;

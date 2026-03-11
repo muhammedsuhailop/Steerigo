@@ -11,6 +11,7 @@ import { RideMapper } from "../mappers/RideMapper";
 import { Logger } from "@shared/utils/Logger";
 import { FilterQuery, SortOrder, Types } from "mongoose";
 import { PaginatedResult } from "@shared/types/Repository";
+import { RideErrors } from "@domain/errors/RideErrors";
 
 @injectable()
 export class RideRepositoryImpl implements IRideRepository {
@@ -38,42 +39,27 @@ export class RideRepositoryImpl implements IRideRepository {
     try {
       const rideData = RideMapper.toPersistence(ride);
 
-      let doc;
-
-      if (rideData._id) {
-        doc = await RideModel.findByIdAndUpdate(
-          rideData._id,
-          {
-            ...rideData,
-            updatedAt: new Date(),
-          },
-          { new: true, runValidators: true },
-        );
-
-        if (!doc) {
-          throw new Error(`Ride with id ${rideData._id} not found for update`);
-        }
-
-        Logger.info("Ride updated successfully", {
-          id: doc._id.toString(),
-          rideId: doc.rideId,
-          status: doc.status,
-        });
-      } else {
-        doc = await RideModel.create({
+      const doc = await RideModel.findOneAndUpdate(
+        { rideId: rideData.rideId },
+        {
           ...rideData,
-          createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
 
-        Logger.info("Ride created successfully", {
-          id: doc._id.toString(),
-          rideId: doc.rideId,
-          driverId: doc.driverId.toString(),
-          riderId: doc.riderId.toString(),
-          status: doc.status,
-        });
+      if (!doc) {
+        throw RideErrors.rideNotFound(ride.getRideId());
       }
+
+      Logger.info("Ride updated successfully", {
+        id: doc._id.toString(),
+        rideId: doc.rideId,
+        status: doc.status,
+      });
 
       return RideMapper.toDomain(doc);
     } catch (error) {

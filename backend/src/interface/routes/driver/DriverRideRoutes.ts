@@ -12,8 +12,8 @@ const driverRideController = container.get<DriverRideController>(
   TYPES.DriverRideController,
 );
 
-// GET /api/driver/ride - Get all rides with pagination and filters
-driverRideRoutes.get("/", (req, res) =>
+// GET /api/driver/ride/rides - Get all rides with pagination and filters
+driverRideRoutes.get("/rides", (req, res) =>
   driverRideController.getDriverRides(req, res),
 );
 
@@ -41,5 +41,12 @@ driverRideRoutes.get(
   "/:rideId",
   validateSchema(rideIdParamSchema),
   (req, res) => driverRideController.getDriverRideById(req, res),
+);
+
+// PATCH /api/driver/ride/:rideId/arrived
+driverRideRoutes.patch(
+  "/:rideId/arrived",
+  validateSchema(rideIdParamSchema),
+  driverRideController.markRideAsArrived.bind(driverRideController),
 );
 export { driverRideRoutes };

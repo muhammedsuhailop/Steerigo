@@ -4,6 +4,7 @@ export const RIDE_MESSAGES = {
   PENDING_REQUESTS_FETCHED: "Pending ride requests fetched successfully",
   RIDES_FETCHED_SUCCESSFULLY: "Rides fetched successfully ",
   RIDE_FETCHED_SUCCESSFULLY: "Ride details fetched successfully",
+  DRIVER_ARRIVED_AT_PICKUP: "Driver has arrived at pickup location",
 };
 export const RIDE_ERROR_MESSAGES = {
   RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",
@@ -19,4 +20,6 @@ export const RIDE_ERROR_MESSAGES = {
     "Cannot transition ride {{rideId}} from {{from}} to {{to}}",
   RIDE_CREATION_FAILED: "Failed to create ride: {{reason}}",
   UNAUTHORIZED_RIDE_ACCESS: "You are not authorized to access ride {rideId}",
+  CANNOT_MARK_AS_ARRIVED:
+    "Cannot mark ride {{rideId}} as arrived from status {{currentStatus}}. Only accepted rides can be marked as arrived.",
 } as const;

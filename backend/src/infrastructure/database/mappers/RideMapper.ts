@@ -60,6 +60,7 @@ export class RideMapper {
     const timeline = RideTimeline.fromData({
       requestedAt: doc.timeline.requestedAt,
       acceptedAt: doc.timeline.acceptedAt,
+      arrivedAt: doc.timeline.arrivedAt,
       startedAt: doc.timeline.startedAt,
       completedAt: doc.timeline.completedAt,
       cancelledAt: doc.timeline.cancelledAt,
@@ -125,6 +126,7 @@ export class RideMapper {
       timeline: {
         requestedAt: timeline.getRequestedAt(),
         acceptedAt: timeline.getAcceptedAt(),
+        arrivedAt: timeline.getArrivedAt(),
         startedAt: timeline.getStartedAt(),
         completedAt: timeline.getCompletedAt(),
         cancelledAt: timeline.getCancelledAt(),

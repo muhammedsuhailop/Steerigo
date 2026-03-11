@@ -1,6 +1,7 @@
 export class RideTimeline {
   private readonly requestedAt: Date;
   private acceptedAt?: Date;
+  private arrivedAt?: Date;
   private startedAt?: Date;
   private completedAt?: Date;
   private cancelledAt?: Date;
@@ -12,57 +13,76 @@ export class RideTimeline {
     this.requestedAt = requestedAt;
   }
 
-  // --- Setters  ---
   public setAcceptedAt(date: Date): void {
     if (this.acceptedAt) throw new Error("Ride already accepted");
     this.acceptedAt = date;
   }
 
-  public setStartedAt(date: Date): void {
+  public setArrivedAt(date: Date): void {
     if (!this.acceptedAt)
-      throw new Error("Ride cannot start before being accepted");
+      throw new Error("Driver cannot arrive before accepting the ride");
+
+    if (this.arrivedAt) throw new Error("Driver already marked as arrived");
+
+    this.arrivedAt = date;
+  }
+
+  public setStartedAt(date: Date): void {
+    if (!this.arrivedAt)
+      throw new Error("Ride cannot start before driver arrival");
+
     if (this.startedAt) throw new Error("Ride already started");
+
     this.startedAt = date;
   }
 
   public setCompletedAt(date: Date): void {
     if (!this.startedAt)
       throw new Error("Ride cannot complete before being started");
+
     if (this.completedAt) throw new Error("Ride already completed");
+
     this.completedAt = date;
   }
 
   public setCancelledAt(date: Date): void {
     if (this.completedAt || this.cancelledAt)
       throw new Error("Ride already ended");
+
     this.cancelledAt = date;
   }
 
   public setRejectedAt(date: Date): void {
     if (this.acceptedAt)
       throw new Error("Cannot reject after ride is accepted");
+
     this.rejectedAt = date;
   }
 
   public setPaymentInitiatedAt(date: Date): void {
     if (!this.completedAt)
       throw new Error("Payment cannot start before ride completion");
+
     this.paymentInitiatedAt = date;
   }
 
   public setPaymentCompletedAt(date: Date): void {
     if (!this.paymentInitiatedAt)
       throw new Error("Payment cannot complete before initiation");
+
     this.paymentCompletedAt = date;
   }
 
-  // --- Getters  ---
   public getRequestedAt(): Date {
     return this.requestedAt;
   }
 
   public getAcceptedAt(): Date | undefined {
     return this.acceptedAt;
+  }
+
+  public getArrivedAt(): Date | undefined {
+    return this.arrivedAt;
   }
 
   public getStartedAt(): Date | undefined {
@@ -89,7 +109,6 @@ export class RideTimeline {
     return this.paymentCompletedAt;
   }
 
-  // --- Derived metrics ---
   public getDuration(): number | null {
     return this.completedAt && this.startedAt
       ? this.completedAt.getTime() - this.startedAt.getTime()
@@ -105,6 +124,7 @@ export class RideTimeline {
   static fromData(data: {
     requestedAt?: Date;
     acceptedAt?: Date;
+    arrivedAt?: Date;
     startedAt?: Date;
     completedAt?: Date;
     cancelledAt?: Date;
@@ -115,6 +135,7 @@ export class RideTimeline {
     const timeline = new RideTimeline(data.requestedAt || new Date());
 
     if (data.acceptedAt) timeline.setAcceptedAt(data.acceptedAt);
+    if (data.arrivedAt) timeline.setArrivedAt(data.arrivedAt);
     if (data.startedAt) timeline.setStartedAt(data.startedAt);
     if (data.completedAt) timeline.setCompletedAt(data.completedAt);
     if (data.cancelledAt) timeline.setCancelledAt(data.cancelledAt);
@@ -127,11 +148,11 @@ export class RideTimeline {
     return timeline;
   }
 
-  // --- Serialization ---
   public toJSON() {
     return {
       requestedAt: this.requestedAt,
       acceptedAt: this.acceptedAt,
+      arrivedAt: this.arrivedAt,
       startedAt: this.startedAt,
       completedAt: this.completedAt,
       cancelledAt: this.cancelledAt,
