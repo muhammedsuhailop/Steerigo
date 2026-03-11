@@ -4,6 +4,7 @@ import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsComple
 import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -12,6 +13,7 @@ import { RideErrors } from "@domain/errors/RideErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { RideStatus } from "@domain/value-objects/RideStatus";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 
 @injectable()
 export class MarkRideAsCompletedUseCase
@@ -26,6 +28,8 @@ export class MarkRideAsCompletedUseCase
     private driverRepository: IDriverRepository,
     @inject(TYPES.RideRepository)
     private rideRepository: IRideRepository,
+    @inject(TYPES.DriverAvailabilityRepository)
+    private driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.FareCalculationService)
     private fareCalculationService: IFareCalculationService,
   ) {}
@@ -79,7 +83,6 @@ export class MarkRideAsCompletedUseCase
       }
 
       const completedAt = new Date();
-
       const actualDurationMinutes = Math.ceil(
         (completedAt.getTime() - startedAt.getTime()) / (1000 * 60),
       );
@@ -108,6 +111,8 @@ export class MarkRideAsCompletedUseCase
         durationHours: finalFareBreakdown.getDurationHours(),
         totalFare: updatedRide.getFare(),
       });
+
+      await this.markDriverAsScheduled(driverId);
 
       const fareBreakdown = updatedRide.getFareBreakdown();
 
@@ -151,6 +156,43 @@ export class MarkRideAsCompletedUseCase
         stack: error instanceof Error ? error.stack : undefined,
       });
       return Result.failure(error as Error);
+    }
+  }
+
+  private async markDriverAsScheduled(driverId: string): Promise<void> {
+    try {
+      const availability =
+        await this.driverAvailabilityRepository.findActiveByDriverId(driverId);
+
+      if (!availability) {
+        Logger.warn(
+          "No active availability record found when reverting driver to scheduled",
+          {
+            driverId,
+          },
+        );
+        return;
+      }
+
+      if (availability.getStatus() === AvailabilityStatus.SCHEDULED) {
+        Logger.debug("Driver availability already Scheduled", { driverId });
+        return;
+      }
+
+      availability.updateStatus(AvailabilityStatus.SCHEDULED);
+      await this.driverAvailabilityRepository.save(availability);
+
+      Logger.info(
+        "Driver availability reverted to SCHEDULED after ride completion",
+        {
+          driverId,
+        },
+      );
+    } catch (error) {
+      Logger.error("Failed to revert driver availability to SCHEDULED", {
+        driverId,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
