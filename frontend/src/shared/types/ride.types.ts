@@ -1,11 +1,12 @@
-export type RideStatus =
-  | "Pending"
-  | "Accepted"
-  | "Arrived"
-  | "Started"
-  | "Completed"
-  | "Cancelled"
-  | "Arrived";
+export enum RideStatus {
+  REQUESTED = "Requested",
+  ACCEPTED = "Accepted",
+  STARTED = "Started",
+  COMPLETED = "Completed",
+  CANCELLED = "Cancelled",
+  REJECTED = "Rejected",
+  ARRIVED = "Arrived",
+}
 
 export interface Location {
   latitude: number;
