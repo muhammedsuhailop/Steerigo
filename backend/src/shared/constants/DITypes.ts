@@ -96,6 +96,7 @@ export const TYPES = {
   GetDriverRidesUseCase: Symbol.for("GetDriverRidesUseCase"),
   GetDriverRideByIdUseCase: Symbol.for("GetDriverRideByIdUseCase"),
   MarkRideAsArrivedUseCase: Symbol.for("MarkRideAsArrivedUseCase"),
+  MarkRideAsStartedUseCase: Symbol.for("MarkRideAsStartedUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -149,4 +150,5 @@ export const TYPES = {
   DriverRideController: Symbol.for("DriverRideController"),
   NotificationController: Symbol.for("NotificationController"),
   AdminRideController: Symbol.for("AdminRideController"),
+  DriverRideActionsController: Symbol.for("DriverRideActionsController"),
 };

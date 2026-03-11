@@ -231,8 +231,11 @@ export class Ride {
   }
 
   setStatusToStarted(): void {
-    if (!this.isAccepted()) {
-      throw new Error("Only accepted rides can be started");
+    if (!this.isAccepted() && !this.isArrived()) {
+      throw new Error("Only accepted or arrived rides can be started");
+    }
+    if (this.isAccepted() && !this.timeline.getArrivedAt()) {
+      this.timeline.setArrivedAt(new Date());
     }
     this.status = RideStatus.STARTED;
     this.timeline.setStartedAt(new Date());

@@ -56,6 +56,9 @@ import { GetDriverRideByIdUseCase } from "@application/use-cases/driver/GetDrive
 import { MarkRideAsArrivedDto } from "@application/dto/driver/MarkRideAsArrivedDto";
 import { MarkRideAsArrivedResponseDto } from "@application/dto/driver/MarkRideAsArrivedResponseDto";
 import { MarkRideAsArrivedUseCase } from "@application/use-cases/driver/MarkRideAsArrivedUseCase";
+import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedDto";
+import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
+import { MarkRideAsStartedUseCase } from "@application/use-cases/driver/MarkRideAsStartedUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -178,6 +181,15 @@ export class DriverFactory {
         >
       >(TYPES.MarkRideAsArrivedUseCase)
       .to(MarkRideAsArrivedUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          MarkRideAsStartedDto,
+          Promise<Result<MarkRideAsStartedResponseDto>>
+        >
+      >(TYPES.MarkRideAsStartedUseCase)
+      .to(MarkRideAsStartedUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);

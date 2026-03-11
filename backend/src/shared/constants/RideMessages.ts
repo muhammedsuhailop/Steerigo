@@ -5,6 +5,9 @@ export const RIDE_MESSAGES = {
   RIDES_FETCHED_SUCCESSFULLY: "Rides fetched successfully ",
   RIDE_FETCHED_SUCCESSFULLY: "Ride details fetched successfully",
   DRIVER_ARRIVED_AT_PICKUP: "Driver has arrived at pickup location",
+  RIDE_STARTED: "Ride has started",
+  RIDE_STARTED_WITH_AUTO_ARRIVED:
+    "Ride has started. Driver arrival has been automatically recorded",
 };
 export const RIDE_ERROR_MESSAGES = {
   RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",

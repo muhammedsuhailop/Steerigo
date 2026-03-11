@@ -103,7 +103,9 @@ export class RideRepositoryImpl implements IRideRepository {
     try {
       const doc = await RideModel.findOne({
         driverId: new Types.ObjectId(driverId),
-        status: { $in: [RideStatus.ACCEPTED, RideStatus.STARTED] },
+        status: {
+          $in: [RideStatus.ACCEPTED, RideStatus.ARRIVED, RideStatus.STARTED],
+        },
       }).sort({ createdAt: -1 });
 
       if (doc) {
