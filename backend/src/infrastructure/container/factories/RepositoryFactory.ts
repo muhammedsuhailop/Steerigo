@@ -10,6 +10,8 @@ import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { RideRepositoryImpl } from "@infrastructure/database/repositories/RideRepositoryImpl";
 import { IDriverLocationRepository } from "@domain/repositories/IDriverLocationRepository";
 import { DriverLocationRepository } from "@infrastructure/services/DriverLocationRepository";
+import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
+import { PaymentRepositoryImpl } from "@infrastructure/database/repositories/PaymentRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -28,5 +30,8 @@ export class RepositoryFactory {
     container
       .bind<IDriverLocationRepository>(TYPES.DriverLocationRepository)
       .to(DriverLocationRepository);
+    container
+      .bind<IPaymentRepository>(TYPES.PaymentRepository)
+      .to(PaymentRepositoryImpl);
   }
 }
