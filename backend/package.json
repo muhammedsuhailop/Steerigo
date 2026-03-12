@@ -33,6 +33,7 @@
     "nodemailer": "^6.9.4",
     "otp-generator": "^4.0.1",
     "pino": "^9.9.0",
+    "razorpay": "^2.9.6",
     "redis": "^5.10.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.3",

@@ -32,6 +32,7 @@ export const TYPES = {
   DistributedLockService: Symbol.for("DistributedLockService"),
   RideNotificationService: Symbol.for("RideNotificationService"),
   RedisService: Symbol.for("RedisService"),
+  PaymentGatewayService: Symbol.for("PaymentGatewayService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -121,11 +122,16 @@ export const TYPES = {
   DeleteFileUseCase: Symbol.for("DeleteFileUseCase"),
   UpdateProfilePictureUseCase: Symbol.for("UpdateProfilePictureUseCase"),
 
-  //Use Cases - Notifications
+  // Use Cases - Notifications
   NotificationRepository: Symbol.for("NotificationRepository"),
   GetNotificationsUseCase: Symbol.for("GetNotificationsUseCase"),
   MarkNotificationsReadUseCase: Symbol.for("MarkNotificationsReadUseCase"),
   CreateNotificationUseCase: Symbol.for("CreateNotificationUseCase"),
+
+  // Use Cases - Payment
+  InitiatePaymentUseCase: Symbol.for("InitiatePaymentUseCase"),
+  VerifyPaymentUseCase: Symbol.for("VerifyPaymentUseCase"),
+  ConfirmCashPaymentUseCase: Symbol.for("ConfirmCashPaymentUseCase"),
 
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),
@@ -156,4 +162,5 @@ export const TYPES = {
   NotificationController: Symbol.for("NotificationController"),
   AdminRideController: Symbol.for("AdminRideController"),
   DriverRideActionsController: Symbol.for("DriverRideActionsController"),
+  PaymentController: Symbol.for("PaymentController"),
 };

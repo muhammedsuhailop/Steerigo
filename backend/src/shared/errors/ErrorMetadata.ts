@@ -5,7 +5,14 @@ export interface ErrorMetadata {
   errorType: ErrorType;
   shouldLog: boolean;
   isOperational: boolean;
-  category?: "NOT_FOUND" | "VALIDATION" | "CONFLICT" | "AUTH" | "SERVER";
+  category?:
+    | "NOT_FOUND"
+    | "VALIDATION"
+    | "CONFLICT"
+    | "AUTH"
+    | "SERVER"
+    | "SECURITY"
+    | "BUSINESS";
 }
 
 export class ErrorMetadataInferrer {

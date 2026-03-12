@@ -21,6 +21,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { RideType } from "@domain/value-objects/RideType";
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 
 interface AggregationResult {
   count: number;
@@ -328,6 +329,7 @@ export class DriverDashboardRepositoryImpl
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       status: doc.status as RideStatus,
+      paymentStatus: doc.paymentStatus as PaymentStatus,
       pickup,
       drop,
       rideType: rideTypeValue,

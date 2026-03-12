@@ -28,12 +28,11 @@ export interface IPaymentDocument extends Document {
 const paymentSchema = new Schema<IPaymentDocument>(
   {
     paymentId: { type: String, required: true, unique: true, index: true },
-    rideId: { type: String, required: true, index: true },
+    rideId: { type: String, required: true },
     riderId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     driverId: { type: Schema.Types.ObjectId, ref: "Driver" },
 

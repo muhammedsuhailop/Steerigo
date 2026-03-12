@@ -61,7 +61,6 @@ const rideSchema = new Schema<IRideDocument>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     status: {
       type: String,
