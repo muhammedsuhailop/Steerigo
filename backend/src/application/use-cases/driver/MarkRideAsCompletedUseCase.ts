@@ -6,6 +6,8 @@ import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideCompletedEvent } from "@application/events/RideEvents";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -14,6 +16,7 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { RideFareBreakdownJson } from "@application/services/IRideNotificationService";
 
 @injectable()
 export class MarkRideAsCompletedUseCase
@@ -32,6 +35,8 @@ export class MarkRideAsCompletedUseCase
     private driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.FareCalculationService)
     private fareCalculationService: IFareCalculationService,
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -116,6 +121,41 @@ export class MarkRideAsCompletedUseCase
 
       const fareBreakdown = updatedRide.getFareBreakdown();
 
+      const fareBreakdownJson: RideFareBreakdownJson = {
+        baseFare: fareBreakdown.getBaseFare().toJSON(),
+        platformFee: fareBreakdown.getPlatformFee().toJSON(),
+        taxes: {
+          fare: {
+            name: fareBreakdown.getFareTax().name,
+            amount: fareBreakdown.getFareTax().amount.toJSON(),
+          },
+          platformFee: {
+            name: fareBreakdown.getPlatformFeeTax().name,
+            amount: fareBreakdown.getPlatformFeeTax().amount.toJSON(),
+          },
+        },
+        totalFare: fareBreakdown.getTotalFare().toJSON(),
+        durationHours: fareBreakdown.getDurationHours(),
+        actualDurationMinutes,
+      };
+
+      const rideCompletedEvent: RideCompletedEvent = {
+        type: "RideCompleted",
+        occurredAt: new Date(),
+        payload: {
+          rideId: updatedRide.getRideId(),
+          riderId: updatedRide.getRiderId(),
+          driverId: updatedRide.getDriverId(),
+          status: updatedRide.getStatus(),
+          arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
+          startedAt: updatedRide.getStartedAt()!.toISOString(),
+          completedAt: updatedRide.getCompletedAt()!.toISOString(),
+          fareBreakdown: fareBreakdownJson,
+        },
+      };
+
+      await this.eventBus.publish(rideCompletedEvent);
+
       const response: MarkRideAsCompletedResponseDto = {
         success: true,
         message: RIDE_MESSAGES.RIDE_COMPLETED,
@@ -125,23 +165,7 @@ export class MarkRideAsCompletedUseCase
           arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
           startedAt: updatedRide.getStartedAt()!.toISOString(),
           completedAt: updatedRide.getCompletedAt()!.toISOString(),
-          fareBreakdown: {
-            baseFare: fareBreakdown.getBaseFare().toJSON(),
-            platformFee: fareBreakdown.getPlatformFee().toJSON(),
-            taxes: {
-              fare: {
-                name: fareBreakdown.getFareTax().name,
-                amount: fareBreakdown.getFareTax().amount.toJSON(),
-              },
-              platformFee: {
-                name: fareBreakdown.getPlatformFeeTax().name,
-                amount: fareBreakdown.getPlatformFeeTax().amount.toJSON(),
-              },
-            },
-            totalFare: fareBreakdown.getTotalFare().toJSON(),
-            durationHours: fareBreakdown.getDurationHours(),
-            actualDurationMinutes,
-          },
+          fareBreakdown: fareBreakdownJson,
           riderId: updatedRide.getRiderId(),
           driverId: updatedRide.getDriverId(),
         },
@@ -167,9 +191,7 @@ export class MarkRideAsCompletedUseCase
       if (!availability) {
         Logger.warn(
           "No active availability record found when reverting driver to scheduled",
-          {
-            driverId,
-          },
+          { driverId },
         );
         return;
       }

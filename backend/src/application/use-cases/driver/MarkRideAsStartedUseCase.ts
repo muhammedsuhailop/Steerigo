@@ -4,6 +4,8 @@ import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedD
 import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideStartedEvent } from "@application/events/RideEvents";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -25,6 +27,8 @@ export class MarkRideAsStartedUseCase
     private driverRepository: IDriverRepository,
     @inject(TYPES.RideRepository)
     private rideRepository: IRideRepository,
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -77,6 +81,32 @@ export class MarkRideAsStartedUseCase
         arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
         startedAt: updatedRide.getStartedAt()?.toISOString(),
       });
+
+      const rideStartedEvent: RideStartedEvent = {
+        type: "RideStarted",
+        occurredAt: new Date(),
+        payload: {
+          rideId: updatedRide.getRideId(),
+          riderId: updatedRide.getRiderId(),
+          driverId: updatedRide.getDriverId(),
+          status: updatedRide.getStatus(),
+          arrivedAt: updatedRide.getArrivedAt()!.toISOString(),
+          startedAt: updatedRide.getStartedAt()!.toISOString(),
+          wasArrivedAutoSet,
+          pickup: {
+            latitude: updatedRide.getPickup().getLatitude(),
+            longitude: updatedRide.getPickup().getLongitude(),
+            address: updatedRide.getPickup().getAddress(),
+          },
+          drop: {
+            latitude: updatedRide.getDrop().getLatitude(),
+            longitude: updatedRide.getDrop().getLongitude(),
+            address: updatedRide.getDrop().getAddress(),
+          },
+        },
+      };
+
+      await this.eventBus.publish(rideStartedEvent);
 
       const response: MarkRideAsStartedResponseDto = {
         success: true,

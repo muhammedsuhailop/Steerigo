@@ -5,14 +5,18 @@ import {
   DriverRequestCancelledPayload,
   RiderRideMatchedPayload,
   RiderNoDriverFoundPayload,
+  RideArrivedPayload,
+  RideStartedPayload,
+  RideCompletedPayload,
 } from "../../application/services/IRideNotificationService";
 import { getRideSocketServer } from "../realtime/socket";
+import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
 import { Logger } from "../../shared/utils/Logger";
 
 @injectable()
 export class RideNotificationService implements IRideNotificationService {
   async notifyDriverNewRequest(
-    driverId: string, // driver's userId
+    driverId: string,
     payload: DriverRequestNotificationPayload,
   ): Promise<void> {
     try {
@@ -72,6 +76,66 @@ export class RideNotificationService implements IRideNotificationService {
     } catch (error) {
       Logger.error("Error notifying rider of no driver found", {
         riderId,
+        error,
+      });
+    }
+  }
+
+  async notifyRiderRideArrived(
+    riderId: string,
+    payload: RideArrivedPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`ride:${payload.rideId}`).emit(SOCKET_EVENTS.RIDE_ARRIVED, payload);
+      io.to(`rider:${riderId}`).emit(SOCKET_EVENTS.RIDE_ARRIVED, payload);
+      Logger.info("Notified ride arrived", { riderId, rideId: payload.rideId });
+    } catch (error) {
+      Logger.error("Error notifying ride arrived", {
+        riderId,
+        rideId: payload.rideId,
+        error,
+      });
+    }
+  }
+
+  async notifyRiderRideStarted(
+    riderId: string,
+    payload: RideStartedPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`ride:${payload.rideId}`).emit(SOCKET_EVENTS.RIDE_STARTED, payload);
+      io.to(`rider:${riderId}`).emit(SOCKET_EVENTS.RIDE_STARTED, payload);
+      Logger.info("Notified ride started", { riderId, rideId: payload.rideId });
+    } catch (error) {
+      Logger.error("Error notifying ride started", {
+        riderId,
+        rideId: payload.rideId,
+        error,
+      });
+    }
+  }
+
+  async notifyRideCompleted(
+    riderId: string,
+    payload: RideCompletedPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`ride:${payload.rideId}`).emit(
+        SOCKET_EVENTS.RIDE_COMPLETED,
+        payload,
+      );
+      io.to(`rider:${riderId}`).emit(SOCKET_EVENTS.RIDE_COMPLETED, payload);
+      Logger.info("Notified ride completed", {
+        riderId,
+        rideId: payload.rideId,
+      });
+    } catch (error) {
+      Logger.error("Error notifying ride completed", {
+        riderId,
+        rideId: payload.rideId,
         error,
       });
     }

@@ -4,6 +4,8 @@ import { MarkRideAsArrivedDto } from "@application/dto/driver/MarkRideAsArrivedD
 import { MarkRideAsArrivedResponseDto } from "@application/dto/driver/MarkRideAsArrivedResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideArrivedEvent } from "@application/events/RideEvents";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -24,6 +26,8 @@ export class MarkRideAsArrivedUseCase
     private driverRepository: IDriverRepository,
     @inject(TYPES.RideRepository)
     private rideRepository: IRideRepository,
+    @inject(TYPES.EventBus)
+    private eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -72,6 +76,25 @@ export class MarkRideAsArrivedUseCase
         driverId,
         arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
       });
+
+      const rideArrivedEvent: RideArrivedEvent = {
+        type: "RideArrived",
+        occurredAt: new Date(),
+        payload: {
+          rideId: updatedRide.getRideId(),
+          riderId: updatedRide.getRiderId(),
+          driverId: updatedRide.getDriverId(),
+          status: updatedRide.getStatus(),
+          arrivedAt: updatedRide.getArrivedAt()!.toISOString(),
+          pickup: {
+            latitude: updatedRide.getPickup().getLatitude(),
+            longitude: updatedRide.getPickup().getLongitude(),
+            address: updatedRide.getPickup().getAddress(),
+          },
+        },
+      };
+
+      await this.eventBus.publish(rideArrivedEvent);
 
       const response: MarkRideAsArrivedResponseDto = {
         success: true,

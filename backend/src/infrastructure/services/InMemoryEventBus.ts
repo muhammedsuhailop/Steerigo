@@ -6,6 +6,9 @@ import {
   RideRequestCreatedEvent,
   RideMatchedEvent,
   RideRequestGroupExhaustedEvent,
+  RideArrivedEvent,
+  RideStartedEvent,
+  RideCompletedEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -44,12 +47,23 @@ export class InMemoryEventBus implements IEventBus {
       case "RideRequestGroupExhausted":
         await this.handleRideRequestGroupExhausted(event);
         break;
+      case "RideArrived":
+        await this.handleRideArrived(event);
+        break;
+      case "RideStarted":
+        await this.handleRideStarted(event);
+        break;
+      case "RideCompleted":
+        await this.handleRideCompleted(event);
+        break;
       default: {
         const exhaustiveCheck: never = event;
         void exhaustiveCheck;
       }
     }
   }
+
+  // ─── Existing handlers ────────────────────────────────────────────────────
 
   private async handleRideRequestCreated(
     event: RideRequestCreatedEvent,
@@ -62,7 +76,6 @@ export class InMemoryEventBus implements IEventBus {
     });
 
     await this.notificationService.notifyDriverNewRequest(driverId, payload);
-
     await this.persistNewRideRequestNotification(driverId, event);
   }
 
@@ -79,10 +92,7 @@ export class InMemoryEventBus implements IEventBus {
         channel: NotificationChannel.IN_APP,
         title: "New ride request!",
         body: `New ride request: ${pickup.address ?? `${pickup.latitude}, ${pickup.longitude}`} → ${drop.address ?? `${drop.latitude}, ${drop.longitude}`}`,
-        metadata: {
-          requestId,
-          riderId,
-        },
+        metadata: { requestId, riderId },
       });
 
       const result = await this.createNotificationUseCase.execute(dto);
@@ -125,7 +135,6 @@ export class InMemoryEventBus implements IEventBus {
       riderId,
       matchedPayload,
     );
-
     await this.persistRideAcceptedNotification(riderId, event);
   }
 
@@ -142,10 +151,7 @@ export class InMemoryEventBus implements IEventBus {
         channel: NotificationChannel.IN_APP,
         title: "Your ride has been accepted!",
         body: `Your driver is on the way. Total fare: ${fare.currency} ${fare.amount}.`,
-        metadata: {
-          rideId,
-          driverId,
-        },
+        metadata: { rideId, driverId },
       });
 
       const result = await this.createNotificationUseCase.execute(dto);
@@ -185,5 +191,174 @@ export class InMemoryEventBus implements IEventBus {
       requestGroupId,
       reason,
     });
+  }
+
+  private async handleRideArrived(event: RideArrivedEvent): Promise<void> {
+    const { riderId, ...notificationPayload } = event.payload;
+
+    Logger.info("Handling RideArrived event", {
+      riderId,
+      rideId: notificationPayload.rideId,
+    });
+
+    await this.notificationService.notifyRiderRideArrived(
+      riderId,
+      notificationPayload,
+    );
+    await this.persistRideArrivedNotification(riderId, event);
+  }
+
+  private async persistRideArrivedNotification(
+    riderId: string,
+    event: RideArrivedEvent,
+  ): Promise<void> {
+    try {
+      const { rideId, driverId } = event.payload;
+
+      const dto = CreateNotificationDto.fromPayload({
+        recipientId: riderId,
+        type: NotificationType.RIDE_ARRIVED,
+        channel: NotificationChannel.IN_APP,
+        title: "Your driver has arrived!",
+        body: "Your driver is waiting at the pickup location.",
+        metadata: { rideId, driverId },
+      });
+
+      const result = await this.createNotificationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.error("Failed to persist driver arrived notification", {
+          riderId,
+          rideId,
+          error: result.getError().message,
+        });
+        return;
+      }
+
+      Logger.info("Driver arrived notification persisted", {
+        riderId,
+        rideId,
+        notificationId: result.getValue().data.notificationId,
+      });
+    } catch (error) {
+      Logger.error("Unexpected error persisting driver arrived notification", {
+        riderId,
+        rideId: event.payload.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async handleRideStarted(event: RideStartedEvent): Promise<void> {
+    const { riderId, ...notificationPayload } = event.payload;
+
+    Logger.info("Handling RideStarted event", {
+      riderId,
+      rideId: notificationPayload.rideId,
+    });
+
+    await this.notificationService.notifyRiderRideStarted(
+      riderId,
+      notificationPayload,
+    );
+    await this.persistRideStartedNotification(riderId, event);
+  }
+
+  private async persistRideStartedNotification(
+    riderId: string,
+    event: RideStartedEvent,
+  ): Promise<void> {
+    try {
+      const { rideId, driverId } = event.payload;
+
+      const dto = CreateNotificationDto.fromPayload({
+        recipientId: riderId,
+        type: NotificationType.RIDE_STARTED,
+        channel: NotificationChannel.IN_APP,
+        title: "Your ride has started!",
+        body: "You are on your way to your destination.",
+        metadata: { rideId, driverId },
+      });
+
+      const result = await this.createNotificationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.error("Failed to persist ride started notification", {
+          riderId,
+          rideId,
+          error: result.getError().message,
+        });
+        return;
+      }
+
+      Logger.info("Ride started notification persisted", {
+        riderId,
+        rideId,
+        notificationId: result.getValue().data.notificationId,
+      });
+    } catch (error) {
+      Logger.error("Unexpected error persisting ride started notification", {
+        riderId,
+        rideId: event.payload.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async handleRideCompleted(event: RideCompletedEvent): Promise<void> {
+    const { riderId, ...notificationPayload } = event.payload;
+
+    Logger.info("Handling RideCompleted event", {
+      riderId,
+      rideId: notificationPayload.rideId,
+    });
+
+    await this.notificationService.notifyRideCompleted(
+      riderId,
+      notificationPayload,
+    );
+    await this.persistRideCompletedNotification(riderId, event);
+  }
+
+  private async persistRideCompletedNotification(
+    riderId: string,
+    event: RideCompletedEvent,
+  ): Promise<void> {
+    try {
+      const { rideId, driverId, fareBreakdown } = event.payload;
+      const total = fareBreakdown.totalFare;
+
+      const dto = CreateNotificationDto.fromPayload({
+        recipientId: riderId,
+        type: NotificationType.RIDE_COMPLETED,
+        channel: NotificationChannel.IN_APP,
+        title: "Ride completed!",
+        body: `Your ride has ended. Total fare: ${total.currency} ${total.amount}.`,
+        metadata: { rideId, driverId },
+      });
+
+      const result = await this.createNotificationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.error("Failed to persist ride completed notification", {
+          riderId,
+          rideId,
+          error: result.getError().message,
+        });
+        return;
+      }
+
+      Logger.info("Ride completed notification persisted", {
+        riderId,
+        rideId,
+        notificationId: result.getValue().data.notificationId,
+      });
+    } catch (error) {
+      Logger.error("Unexpected error persisting ride completed notification", {
+        riderId,
+        rideId: event.payload.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }

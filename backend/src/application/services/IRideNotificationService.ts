@@ -56,6 +56,69 @@ export interface DriverRequestCancelledPayload {
   requestGroupId: string;
 }
 
+export interface RideFareMoneyJson {
+  amount: number;
+  currency: string;
+}
+
+export interface RideFareTaxJson {
+  name: string;
+  amount: RideFareMoneyJson;
+}
+
+export interface RideFareBreakdownJson {
+  baseFare: RideFareMoneyJson;
+  platformFee: RideFareMoneyJson;
+  taxes: {
+    fare: RideFareTaxJson;
+    platformFee: RideFareTaxJson;
+  };
+  totalFare: RideFareMoneyJson;
+  durationHours: number;
+  actualDurationMinutes: number;
+}
+
+export interface RideArrivedPayload {
+  rideId: string;
+  driverId: string;
+  status: string;
+  arrivedAt: string;
+  pickup: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
+export interface RideStartedPayload {
+  rideId: string;
+  driverId: string;
+  status: string;
+  arrivedAt: string;
+  startedAt: string;
+  wasArrivedAutoSet: boolean;
+  pickup: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  drop: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
+export interface RideCompletedPayload {
+  rideId: string;
+  driverId: string;
+  status: string;
+  arrivedAt?: string;
+  startedAt: string;
+  completedAt: string;
+  fareBreakdown: RideFareBreakdownJson;
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -75,5 +138,20 @@ export interface IRideNotificationService {
   notifyRiderNoDriverFound(
     riderId: string,
     payload: RiderNoDriverFoundPayload,
+  ): Promise<void>;
+
+  notifyRiderRideArrived(
+    riderId: string,
+    payload: RideArrivedPayload,
+  ): Promise<void>;
+
+  notifyRiderRideStarted(
+    riderId: string,
+    payload: RideStartedPayload,
+  ): Promise<void>;
+
+  notifyRideCompleted(
+    riderId: string,
+    payload: RideCompletedPayload,
   ): Promise<void>;
 }

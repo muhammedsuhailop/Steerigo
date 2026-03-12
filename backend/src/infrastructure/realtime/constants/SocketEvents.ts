@@ -7,4 +7,11 @@ export const SOCKET_EVENTS = {
   RIDE_LEAVE: "ride:leave",
 
   AUTH_LOGOUT: "auth:logout",
-};
+
+  RIDE_ARRIVED: "ride:arrived",
+  RIDE_STARTED: "ride:started",
+  RIDE_COMPLETED: "ride:completed",
+} as const;
+
+export type SocketEventKey = keyof typeof SOCKET_EVENTS;
+export type SocketEventValue = (typeof SOCKET_EVENTS)[SocketEventKey];
