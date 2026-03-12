@@ -18,8 +18,7 @@ export interface LocationDetails {
 export interface FareDetails {
   baseFare: number;
   tax: {
-    cgst: number;
-    sgst: number;
+    total: number;
   };
   platformFee: number;
   totalFare: number;
