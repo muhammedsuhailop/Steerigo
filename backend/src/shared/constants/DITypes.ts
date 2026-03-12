@@ -17,6 +17,7 @@ export const TYPES = {
   PaymentRepository: Symbol.for("PaymentRepository"),
   TransactionRepository: Symbol.for("TransactionRepository"),
   PayoutRepository: Symbol.for("PayoutRepository"),
+  WalletRepository: Symbol.for("WalletRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
