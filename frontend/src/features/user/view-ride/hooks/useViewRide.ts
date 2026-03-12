@@ -3,7 +3,14 @@ import { useDispatch } from "react-redux";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
 import { updateRideStatusLocal } from "../store/viewRideSlice";
-import { RideStatus } from "@/shared/types/ride.types";
+import {
+  RideArrivedPayload,
+  RideStartedPayload,
+  RideCompletedPayload,
+  RideStatus,
+  RideFareBreakdown,
+} from "@/shared/types/ride.types";
+import { FareDetails } from "../types/viewRide.types";
 
 export const useViewRide = (rideId: string | undefined) => {
   const dispatch = useDispatch();
@@ -20,16 +27,70 @@ export const useViewRide = (rideId: string | undefined) => {
 
     socket.emit(SOCKET_EVENTS.RIDE.JOIN, rideId);
 
-    const handleStatusUpdate = (data: {
-      rideId: string;
-      status: RideStatus;
-    }) => {
-      if (data.rideId === rideId) {
-        dispatch(updateRideStatusLocal(data.status));
+    const onArrived = (data: RideArrivedPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+
+      if (payload.rideId === rideId) {
+        dispatch(
+          updateRideStatusLocal({
+            status: payload.status,
+            timestampField: "arrivedAt",
+            timestampValue: payload.arrivedAt,
+          }),
+        );
       }
     };
 
-    const handleLocationUpdate = (data: any) => {
+    const onStarted = (data: RideStartedPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(
+          updateRideStatusLocal({
+            status: payload.status,
+            timestampField: "startedAt",
+            timestampValue: payload.startedAt,
+          }),
+        );
+      }
+    };
+
+    const onCompleted = (data: RideCompletedPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+
+      if (payload.rideId === rideId) {
+        const mappedFare: FareDetails = {
+          baseFare: payload.fareBreakdown?.baseFare?.amount ?? 0,
+
+          tax: {
+            total:
+              (payload.fareBreakdown?.taxes?.fare?.amount?.amount ?? 0) +
+              (payload.fareBreakdown?.taxes?.platformFee?.amount?.amount ?? 0),
+          },
+
+          platformFee: payload.fareBreakdown?.platformFee?.amount ?? 0,
+
+          totalFare: payload.fareBreakdown?.totalFare?.amount ?? 0,
+
+          currency: payload.fareBreakdown?.totalFare?.currency ?? "INR",
+        };
+
+        dispatch(
+          updateRideStatusLocal({
+            status: payload.status as RideStatus,
+            timestampField: "completedAt",
+            timestampValue: payload.completedAt,
+            fare: mappedFare,
+          }),
+        );
+      }
+    };
+
+    const handleLocationUpdate = (data: {
+      rideId: string;
+      lat: number;
+      lng: number;
+      bearing?: number;
+    }) => {
       if (data.rideId === rideId) {
         setDriverLocation({
           lat: data.lat,
@@ -39,13 +100,19 @@ export const useViewRide = (rideId: string | undefined) => {
       }
     };
 
-    socket.on(SOCKET_EVENTS.RIDE.STATUS_UPDATED, handleStatusUpdate);
+    // Binding events
+    socket.on(SOCKET_EVENTS.RIDE.ARRIVED, onArrived);
+    socket.on(SOCKET_EVENTS.RIDE.STARTED, onStarted);
+    socket.on(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
     socket.on(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
 
     return () => {
       socket.emit(SOCKET_EVENTS.RIDE.LEAVE, rideId);
-      socket.off(SOCKET_EVENTS.RIDE.STATUS_UPDATED, handleStatusUpdate);
+      socket.off(SOCKET_EVENTS.RIDE.ARRIVED, onArrived);
+      socket.off(SOCKET_EVENTS.RIDE.STARTED, onStarted);
+      socket.off(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
       socket.off(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
+      socket.offAny();
     };
   }, [rideId, dispatch]);
 

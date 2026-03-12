@@ -4,9 +4,6 @@ import {
   FaRegCircle,
   FaClock,
   FaTimesCircle,
-  FaExclamationTriangle,
-  FaCreditCard,
-  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { MdRadioButtonChecked } from "react-icons/md";
 
@@ -116,9 +113,16 @@ export const RideTimelineStatus: React.FC<{ timeline: any }> = ({
     {
       label: "Driver Assigned",
       time: timeline.acceptedAt,
-      isCompleted: !!timeline.startedAt,
-      isActive: !!timeline.acceptedAt && !timeline.startedAt,
+      isCompleted: !!timeline.arrivedAt,
+      isActive: !!timeline.acceptedAt && !timeline.arrivedAt,
       description: "Your driver has accepted and is heading to your location.",
+    },
+    {
+      label: "Driver Arrived",
+      time: timeline.arrivedAt,
+      isCompleted: !!timeline.startedAt,
+      isActive: !!timeline.arrivedAt && !timeline.startedAt,
+      description: "Your driver is waiting at the pickup location.",
     },
     {
       label: "Trip in Progress",

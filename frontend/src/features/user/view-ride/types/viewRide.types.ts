@@ -3,9 +3,7 @@ import { Location, RideStatus } from "@/shared/types/ride.types";
 export interface FareDetails {
   baseFare: number;
   tax: {
-    cgst: number;
-    sgst: number;
-    igst: number;
+    total: number;
   };
   platformFee: number;
   totalFare: number;

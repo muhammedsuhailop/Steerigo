@@ -10,8 +10,12 @@ export const SOCKET_EVENTS = {
   RIDE: {
     JOIN: "ride:join",
     LEAVE: "ride:leave",
+
     UPDATE_LOCATION: "driver:location:update",
     DRIVER_LOCATION: "ride:driver-location",
     STATUS_UPDATED: "ride:status:updated",
+    ARRIVED: "ride:arrived",
+    STARTED: "ride:started",
+    COMPLETED: "ride:completed",
   },
 } as const;

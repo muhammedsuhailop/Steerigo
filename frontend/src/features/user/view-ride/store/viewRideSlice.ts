@@ -3,6 +3,8 @@ import {
   ViewRideState,
   RideDetails,
   DriverInfo,
+  RideTimeline,
+  FareDetails,
 } from "../types/viewRide.types";
 import { RideStatus } from "@/shared/types/ride.types";
 
@@ -24,9 +26,26 @@ export const viewRideSlice = createSlice({
       state.activeRide = action.payload.ride;
       state.activeDriver = action.payload.driver;
     },
-    updateRideStatusLocal: (state, action: PayloadAction<RideStatus>) => {
+    updateRideStatusLocal: (
+      state,
+      action: PayloadAction<{
+        status: RideStatus;
+        timestampField?: keyof RideTimeline;
+        timestampValue?: string;
+        fare?: FareDetails;
+      }>,
+    ) => {
       if (state.activeRide) {
-        state.activeRide.status = action.payload;
+        state.activeRide.status = action.payload.status;
+
+        if (action.payload.timestampField && action.payload.timestampValue) {
+          state.activeRide.timeline[action.payload.timestampField] =
+            action.payload.timestampValue;
+        }
+
+        if (action.payload.fare) {
+          state.activeRide.fare = action.payload.fare;
+        }
       }
     },
     clearRideData: (state) => {
