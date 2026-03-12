@@ -12,6 +12,8 @@ import { IDriverLocationRepository } from "@domain/repositories/IDriverLocationR
 import { DriverLocationRepository } from "@infrastructure/services/DriverLocationRepository";
 import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { PaymentRepositoryImpl } from "@infrastructure/database/repositories/PaymentRepositoryImpl";
+import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
+import { TransactionRepositoryImpl } from "@infrastructure/database/repositories/TransactionRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -33,5 +35,8 @@ export class RepositoryFactory {
     container
       .bind<IPaymentRepository>(TYPES.PaymentRepository)
       .to(PaymentRepositoryImpl);
+    container
+      .bind<ITransactionRepository>(TYPES.TransactionRepository)
+      .to(TransactionRepositoryImpl);
   }
 }
