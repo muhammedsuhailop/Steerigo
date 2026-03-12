@@ -1,5 +1,7 @@
+import { CouponDetails } from "@domain/value-objects/CouponDetails";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { Location } from "@domain/value-objects/Location";
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { RideType } from "@domain/value-objects/RideType";
@@ -11,6 +13,7 @@ export class Ride {
     private readonly driverId: string,
     private readonly riderId: string,
     private status: RideStatus,
+    private paymentStatus: PaymentStatus,
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly rideType: RideType,
@@ -19,6 +22,7 @@ export class Ride {
     private readonly timeline: RideTimeline,
     private readonly createdAt: Date = new Date(),
     private readonly updatedAt: Date = new Date(),
+    private couponDetails?: CouponDetails,
   ) {}
 
   static create(
@@ -44,12 +48,14 @@ export class Ride {
       driverId,
       riderId,
       RideStatus.REQUESTED,
+      PaymentStatus.PENDING,
       pickup,
       drop,
       rideType,
       fareBreakdown,
       "INR",
       timeline,
+      undefined,
     );
   }
 
@@ -59,6 +65,7 @@ export class Ride {
     driverId: string;
     riderId: string;
     status: RideStatus;
+    paymentStatus: PaymentStatus;
     pickup: Location;
     drop: Location;
     rideType: RideType;
@@ -67,6 +74,7 @@ export class Ride {
     timeline: RideTimeline;
     createdAt: Date;
     updatedAt: Date;
+    couponDetails?: CouponDetails;
   }): Ride {
     return new Ride(
       data.id,
@@ -74,6 +82,7 @@ export class Ride {
       data.driverId,
       data.riderId,
       data.status,
+      data.paymentStatus,
       data.pickup,
       data.drop,
       data.rideType,
@@ -82,6 +91,7 @@ export class Ride {
       data.timeline,
       data.createdAt,
       data.updatedAt,
+      data.couponDetails,
     );
   }
 
@@ -126,6 +136,17 @@ export class Ride {
   }
   getFare(): number {
     return this.fareBreakdown.getTotalFare().getAmount();
+  }
+  getPaymentStatus(): PaymentStatus {
+    return this.paymentStatus;
+  }
+
+  getCouponDetails(): CouponDetails | undefined {
+    return this.couponDetails;
+  }
+
+  hasCouponApplied(): boolean {
+    return !!this.couponDetails;
   }
 
   // Status checks
@@ -238,5 +259,36 @@ export class Ride {
     }
     this.status = RideStatus.CANCELLED;
     this.timeline.setCancelledAt(new Date());
+  }
+
+  applyCoupon(code: string, discountAmount: number): void {
+    if (this.paymentStatus !== PaymentStatus.PENDING) {
+      throw new Error(
+        "Cannot apply coupon: Payment is already processed or completed.",
+      );
+    }
+
+    if (discountAmount < 0) {
+      throw new Error("Discount amount cannot be negative.");
+    }
+
+    this.couponDetails = {
+      code,
+      discountAmount,
+    };
+  }
+
+  removeCoupon(): void {
+    if (this.paymentStatus !== PaymentStatus.PENDING) {
+      throw new Error(
+        "Cannot remove coupon: Payment is already processed or completed.",
+      );
+    }
+
+    this.couponDetails = undefined;
+  }
+
+  updatePaymentStatus(status: PaymentStatus): void {
+    this.paymentStatus = status;
   }
 }

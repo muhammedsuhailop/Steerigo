@@ -1,3 +1,4 @@
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideType } from "@domain/value-objects/RideType";
 import { Document, Schema, model, Model, Types } from "mongoose";
@@ -8,6 +9,7 @@ export interface IRideDocument extends Document {
   driverId: Types.ObjectId;
   riderId: Types.ObjectId;
   status: string;
+  paymentStatus: string;
   pickup: {
     latitude: number;
     longitude: number;
@@ -40,6 +42,8 @@ export interface IRideDocument extends Document {
   };
   rating?: number;
   feedback?: string;
+  couponName?: string;
+  couponDiscountAmount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,6 +67,12 @@ const rideSchema = new Schema<IRideDocument>(
       type: String,
       enum: Object.values(RideStatus),
       default: RideStatus.REQUESTED,
+      index: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: PaymentStatus,
+      default: PaymentStatus.PENDING,
       index: true,
     },
     pickup: {
@@ -95,6 +105,8 @@ const rideSchema = new Schema<IRideDocument>(
       paymentInitiatedAt: { type: Date },
       paymentCompletedAt: { type: Date },
     },
+    couponName: { type: String, trim: true },
+    couponDiscountAmount: { type: Number, default: 0, min: 0 },
     rating: { type: Number, min: 1, max: 5 },
     feedback: { type: String, maxlength: 1000 },
   },
