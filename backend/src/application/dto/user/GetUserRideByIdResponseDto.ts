@@ -1,3 +1,5 @@
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+
 export interface DriverDetails {
   driverId: string;
   userId: string;
@@ -37,6 +39,7 @@ export interface RideDetails {
   id: string;
   rideId: string;
   status: string;
+  paymentStatus?:PaymentStatus;
   rideType: string;
   pickup: LocationDetails;
   drop: LocationDetails;

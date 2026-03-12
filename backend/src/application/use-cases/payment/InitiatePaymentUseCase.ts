@@ -12,6 +12,8 @@ import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { IWalletRepository } from "@domain/repositories/IWalletRepository";
 import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
 import { IPaymentGatewayService } from "@application/services/IPaymentGatewayService";
+import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
+import { Ride } from "@domain/entities/Ride";
 import { Payment } from "@domain/entities/Payment";
 import { Transaction } from "@domain/entities/Transaction";
 import { Money } from "@domain/value-objects/Money";
@@ -51,16 +53,16 @@ export class InitiatePaymentUseCase
     private readonly transactionRepository: ITransactionRepository,
     @inject(TYPES.PaymentGatewayService)
     private readonly paymentGatewayService: IPaymentGatewayService,
+    @inject(TYPES.EarningsDistributionService)
+    private readonly earningsDistributionService: IEarningsDistributionService,
   ) {}
 
   async execute(
     dto: InitiatePaymentDto,
   ): Promise<Result<InitiatePaymentResponseDto>> {
-    const { rideId, method, userId } = {
-      rideId: dto.getRideId(),
-      method: dto.getMethod(),
-      userId: dto.getUserId(),
-    };
+    const rideId = dto.getRideId();
+    const method = dto.getMethod();
+    const userId = dto.getUserId();
 
     try {
       Logger.info("Initiating payment", { userId, rideId, method });
@@ -101,7 +103,7 @@ export class InitiatePaymentUseCase
       }
 
       if (method === PaymentMethod.WALLET) {
-        return this.handleWalletPayment(payment, amount, userId, rideId, ride);
+        return this.handleWalletPayment(payment, amount, userId, ride);
       }
 
       if (method === PaymentMethod.CASH) {
@@ -163,17 +165,14 @@ export class InitiatePaymentUseCase
     payment: Payment,
     amount: Money,
     userId: string,
-    rideId: string,
-    ride: {
-      updatePaymentStatus: (status: PaymentStatus) => void;
-      getRideId: () => string;
-    },
+    ride: Ride,
   ): Promise<Result<InitiatePaymentResponseDto>> {
+    const rideId = ride.getRideId();
+
     const wallet = await this.walletRepository.findByOwner(
       userId,
       WalletOwnerType.RIDER,
     );
-
     if (!wallet) {
       return Result.failure(PaymentErrors.walletNotFound(userId));
     }
@@ -190,7 +189,7 @@ export class InitiatePaymentUseCase
     wallet.debit(amount);
     await this.walletRepository.save(wallet);
 
-    const transaction = Transaction.create({
+    const riderTransaction = Transaction.create({
       id: new Types.ObjectId().toString(),
       walletId: wallet.getId(),
       type: TransactionType.RIDE_PAYMENT,
@@ -200,11 +199,29 @@ export class InitiatePaymentUseCase
       relatedEntityType: "Ride",
       note: `Payment for ride ${rideId}`,
     });
-
-    await this.transactionRepository.save(transaction);
+    await this.transactionRepository.save(riderTransaction);
 
     payment.markSuccess(undefined, new Date());
     const savedPayment = await this.paymentRepository.save(payment);
+
+    ride.updatePaymentStatus(PaymentStatus.SUCCESS);
+    await this.rideRepository.save(ride);
+
+    const fareBreakdown = ride.getFareBreakdown();
+    await this.earningsDistributionService
+      .distribute({
+        rideId,
+        driverId: ride.getDriverId(),
+        totalFare: fareBreakdown.getTotalFare(),
+        platformFee: fareBreakdown.getPlatformFee(),
+        platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+      })
+      .catch((err: Error) => {
+        Logger.error("Earnings distribution failed after wallet payment", {
+          rideId,
+          error: err.message,
+        });
+      });
 
     Logger.info("Wallet payment processed", {
       paymentId: savedPayment.getId(),

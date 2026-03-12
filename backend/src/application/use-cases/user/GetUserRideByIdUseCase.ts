@@ -162,6 +162,7 @@ export class GetUserRideByIdUseCase
       id: ride.getId(),
       rideId: ride.getRideId(),
       status: ride.getStatus(),
+      paymentStatus:ride.getPaymentStatus(),
       rideType: ride.getRideType(),
       pickup: pickupLocation,
       drop: dropLocation,

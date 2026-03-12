@@ -1,3 +1,5 @@
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+
 export interface RiderDetails {
   id: string;
   name: string;
@@ -34,6 +36,7 @@ export interface RideDetails {
   id: string;
   rideId: string;
   status: string;
+  paymentStatus?: PaymentStatus;
   rideType: string;
   pickup: LocationDetails;
   drop: LocationDetails;

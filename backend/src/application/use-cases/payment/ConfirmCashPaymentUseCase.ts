@@ -5,6 +5,7 @@ import { ConfirmCashPaymentResponseDto } from "@application/dto/payment/ConfirmC
 import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
@@ -27,6 +28,8 @@ export class ConfirmCashPaymentUseCase
     private readonly rideRepository: IRideRepository,
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
+    @inject(TYPES.EarningsDistributionService)
+    private readonly earningsDistributionService: IEarningsDistributionService,
   ) {}
 
   async execute(
@@ -76,6 +79,23 @@ export class ConfirmCashPaymentUseCase
       if (ride) {
         ride.updatePaymentStatus(PaymentStatus.SUCCESS);
         await this.rideRepository.save(ride);
+
+        const fareBreakdown = ride.getFareBreakdown();
+        await this.earningsDistributionService
+          .distribute({
+            rideId: ride.getRideId(),
+            driverId: ride.getDriverId(),
+            totalFare: fareBreakdown.getTotalFare(),
+            platformFee: fareBreakdown.getPlatformFee(),
+            platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+          })
+          .catch((err: Error) => {
+            Logger.error("Earnings distribution failed after cash payment", {
+              paymentId,
+              rideId: ride.getRideId(),
+              error: err.message,
+            });
+          });
       }
 
       Logger.info("Cash payment confirmed", {

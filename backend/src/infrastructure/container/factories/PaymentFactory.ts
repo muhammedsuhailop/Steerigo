@@ -6,13 +6,20 @@ import { InitiatePaymentUseCase } from "@application/use-cases/payment/InitiateP
 import { VerifyPaymentUseCase } from "@application/use-cases/payment/VerifyPaymentUseCase";
 import { ConfirmCashPaymentUseCase } from "@application/use-cases/payment/ConfirmCashPaymentUseCase";
 import { PaymentController } from "@interface/controllers/payment/PaymentController";
+import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
+import { EarningsDistributionService } from "@infrastructure/services/EarningsDistributionService";
 
 export class PaymentFactory {
   static register(container: Container): void {
-    // Payment Gateway Service
+    // Services
     container
       .bind<IPaymentGatewayService>(TYPES.PaymentGatewayService)
       .to(RazorpayService)
+      .inSingletonScope();
+
+    container
+      .bind<IEarningsDistributionService>(TYPES.EarningsDistributionService)
+      .to(EarningsDistributionService)
       .inSingletonScope();
 
     // Use Cases

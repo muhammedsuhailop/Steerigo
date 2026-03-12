@@ -5,12 +5,12 @@ import { VerifyPaymentResponseDto } from "@application/dto/payment/VerifyPayment
 import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IPaymentGatewayService } from "@application/services/IPaymentGatewayService";
+import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
-import { RideErrors } from "@domain/errors/RideErrors";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -24,6 +24,8 @@ export class VerifyPaymentUseCase
     private readonly rideRepository: IRideRepository,
     @inject(TYPES.PaymentGatewayService)
     private readonly paymentGatewayService: IPaymentGatewayService,
+    @inject(TYPES.EarningsDistributionService)
+    private readonly earningsDistributionService: IEarningsDistributionService,
   ) {}
 
   async execute(
@@ -75,6 +77,23 @@ export class VerifyPaymentUseCase
       if (ride) {
         ride.updatePaymentStatus(PaymentStatus.SUCCESS);
         await this.rideRepository.save(ride);
+
+        const fareBreakdown = ride.getFareBreakdown();
+        await this.earningsDistributionService
+          .distribute({
+            rideId: ride.getRideId(),
+            driverId: ride.getDriverId(),
+            totalFare: ride.getFareBreakdown().getTotalFare(),
+            platformFee: fareBreakdown.getPlatformFee(),
+            platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+          })
+          .catch((err: Error) => {
+            Logger.error("Earnings distribution failed after online payment", {
+              paymentId,
+              rideId: ride.getRideId(),
+              error: err.message,
+            });
+          });
       }
 
       Logger.info("Payment verified and marked successful", {

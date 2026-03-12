@@ -33,6 +33,7 @@ export const TYPES = {
   RideNotificationService: Symbol.for("RideNotificationService"),
   RedisService: Symbol.for("RedisService"),
   PaymentGatewayService: Symbol.for("PaymentGatewayService"),
+  EarningsDistributionService: Symbol.for("EarningsDistributionService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
