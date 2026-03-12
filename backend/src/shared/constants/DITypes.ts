@@ -15,7 +15,8 @@ export const TYPES = {
   RideRepository: Symbol.for("RideRepository"),
   DriverLocationRepository: Symbol.for("DriverLocationRepository"),
   PaymentRepository: Symbol.for("PaymentRepository"),
-  TransactionRepository:Symbol.for("TransactionRepository"),
+  TransactionRepository: Symbol.for("TransactionRepository"),
+  PayoutRepository: Symbol.for("PayoutRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),

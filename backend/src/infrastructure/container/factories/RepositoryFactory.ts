@@ -14,6 +14,8 @@ import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { PaymentRepositoryImpl } from "@infrastructure/database/repositories/PaymentRepositoryImpl";
 import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
 import { TransactionRepositoryImpl } from "@infrastructure/database/repositories/TransactionRepositoryImpl";
+import { IPayoutRepository } from "@domain/repositories/IPayoutRepository";
+import { PayoutRepositoryImpl } from "@infrastructure/database/repositories/PayoutRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -38,5 +40,8 @@ export class RepositoryFactory {
     container
       .bind<ITransactionRepository>(TYPES.TransactionRepository)
       .to(TransactionRepositoryImpl);
+    container
+      .bind<IPayoutRepository>(TYPES.PayoutRepository)
+      .to(PayoutRepositoryImpl);
   }
 }
