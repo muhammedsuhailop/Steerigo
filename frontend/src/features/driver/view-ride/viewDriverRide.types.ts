@@ -14,6 +14,7 @@ export interface DriverRideDetails {
   id: string;
   rideId: string;
   status: RideStatus;
+  paymentStatus: PaymentStatus;
   rideType: string;
   pickup: Location;
   drop: Location;
