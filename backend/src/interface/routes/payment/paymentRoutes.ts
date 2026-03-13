@@ -26,7 +26,7 @@ router.post(
   "/initiate",
   requireRole([UserRole.RIDER]),
   validateSchema(initiatePaymentSchema),
-  (req, res, nxt) => controller.initiatePayment(req, res, nxt),
+  (req, res) => controller.initiatePayment(req, res),
 );
 
 // POST /api/payment/verify
@@ -34,15 +34,15 @@ router.post(
   "/verify",
   requireRole([UserRole.RIDER]),
   validateSchema(verifyPaymentSchema),
-  (req, res, nxt) => controller.verifyPayment(req, res, nxt),
+  (req, res) => controller.verifyPayment(req, res),
 );
 
-// PATCH /api/payment/:paymentId/confirm-cash
-router.patch(
-  "/:paymentId/confirm-cash",
+// POST /api/payment/confirm-cash
+router.post(
+  "/confirm-cash",
   requireRole([UserRole.DRIVER]),
   validateSchema(confirmCashPaymentSchema),
-  (req, res, nxt) => controller.confirmCashPayment(req, res, nxt),
+  (req, res) => controller.confirmCashPayment(req, res),
 );
 
 export { router as paymentRoutes };

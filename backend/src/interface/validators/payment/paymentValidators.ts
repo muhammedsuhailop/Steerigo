@@ -18,7 +18,16 @@ export const verifyPaymentSchema = z.object({
 });
 
 export const confirmCashPaymentSchema = z.object({
-  params: z.object({
-    paymentId: z.string().min(1, "paymentId is required"),
+  body: z.object({
+    rideId: z.string().min(1, "rideId is required"),
+
+    method: z.literal(PaymentMethod.CASH, {
+      message: "Payment method must be CASH",
+    }),
+
+    amount: z
+      .number({
+        error: "amount is required",
+      })
   }),
 });

@@ -28,14 +28,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { Types } from "mongoose";
-
-const PAYMENT_MESSAGES = {
-  ONLINE_ORDER_CREATED:
-    "Payment order created. Complete payment using the gateway.",
-  WALLET_PAYMENT_SUCCESS: "Wallet payment processed successfully.",
-  CASH_PAYMENT_INITIATED:
-    "Cash payment initiated. Driver will collect payment.",
-};
+import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 
 @injectable()
 export class InitiatePaymentUseCase

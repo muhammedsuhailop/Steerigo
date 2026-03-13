@@ -1,9 +1,14 @@
 import { injectable } from "inversify";
 import { Payout } from "@domain/entities/Payout";
-import { IPayoutRepository } from "@domain/repositories/IPayoutRepository";
+import {
+  IPayoutRepository,
+  PayoutQueryFilters,
+  PayoutQueryResult,
+} from "@domain/repositories/IPayoutRepository";
 import { PayoutModel } from "../models/PayoutModel";
 import { PayoutMapper } from "../mappers/PayoutMapper";
 import { Logger } from "@shared/utils/Logger";
+import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
 
 @injectable()
 export class PayoutRepositoryImpl implements IPayoutRepository {
@@ -79,5 +84,43 @@ export class PayoutRepositoryImpl implements IPayoutRepository {
       Logger.error("Error checking payout existence", { id, error });
       throw error;
     }
+  }
+
+  async findPendingByDriverId(driverId: string): Promise<Payout | null> {
+    const doc = await PayoutModel.findOne({
+      driverId,
+      status: PayoutStatus.REQUESTED,
+    });
+    return doc ? PayoutMapper.toDomain(doc) : null;
+  }
+
+  async findAllWithFilters(
+    filters: PayoutQueryFilters,
+  ): Promise<PayoutQueryResult> {
+    const query: Record<string, unknown> = {};
+
+    if (filters.status) query["status"] = filters.status;
+    if (filters.driverId) query["driverId"] = filters.driverId;
+
+    const sortField =
+      filters.sortBy === "amount" ? "amount.value" : "createdAt";
+    const sortDirection = filters.sortOrder === "asc" ? 1 : -1;
+
+    const skip = (filters.page - 1) * filters.limit;
+
+    const [docs, total] = await Promise.all([
+      PayoutModel.find(query)
+        .sort({ [sortField]: sortDirection })
+        .skip(skip)
+        .limit(filters.limit),
+      PayoutModel.countDocuments(query),
+    ]);
+
+    return {
+      payouts: docs.map(PayoutMapper.toDomain),
+      total,
+      page: filters.page,
+      limit: filters.limit,
+    };
   }
 }

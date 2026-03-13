@@ -14,6 +14,7 @@ import { DriverController } from "@interface/controllers/driver/DriverController
 import { TYPES } from "@shared/constants/DITypes";
 import { driverAvailabilityRoutes } from "./DriverAvailabilityRoutes";
 import { driverRideRoutes } from "./DriverRideRoutes";
+import { driverPayoutRoutes } from "./driverPayoutRoutes";
 
 const router = Router();
 
@@ -65,5 +66,8 @@ router.use("/availability", driverAvailabilityRoutes);
 
 // /api/driver/ride
 router.use("/ride", driverRideRoutes);
+
+// /api/driver/payouts
+router.use("/payouts", driverPayoutRoutes);
 
 export { router as driverRoutes };

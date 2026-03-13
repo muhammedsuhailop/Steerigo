@@ -30,6 +30,8 @@ import { RideNotificationService } from "@infrastructure/services/RideNotificati
 import { IEventBus } from "@application/services/IEventBus";
 import { InMemoryEventBus } from "@infrastructure/services/InMemoryEventBus";
 import { RedisService } from "@infrastructure/services/RedisService";
+import { IIdGenerator } from "@application/services/IIdGenerator";
+import { MongoIdGenerator } from "@infrastructure/services/MongoIdGenerator";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -71,5 +73,6 @@ export class ServiceFactory {
       .bind<RedisService>(TYPES.RedisService)
       .to(RedisService)
       .inSingletonScope();
+    container.bind<IIdGenerator>(TYPES.IDGenerator).to(MongoIdGenerator);
   }
 }

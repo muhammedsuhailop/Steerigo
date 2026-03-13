@@ -11,6 +11,7 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
+import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -104,7 +105,7 @@ export class VerifyPaymentUseCase
 
       return Result.success({
         success: true,
-        message: "Payment verified successfully.",
+        message: PAYMENT_MESSAGES.VERIFIED,
         data: {
           paymentId: savedPayment.getId(),
           rideId: savedPayment.getRideId(),

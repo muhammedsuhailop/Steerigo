@@ -12,6 +12,8 @@ import { DriverSearchController } from "@interface/controllers/user/DriverSearch
 import { AutoRideController } from "@interface/controllers/user/AutoRideController";
 import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
 import { DriverRideActionsController } from "@interface/controllers/driver/DriverRideActionsController";
+import { DriverPayoutController } from "@interface/controllers/driver/DriverPayoutController";
+import { AdminPayoutController } from "@interface/controllers/admin/AdminPayoutController";
 
 export class ControllerFactory {
   static register(container: Container): void {
@@ -28,5 +30,7 @@ export class ControllerFactory {
     container
       .bind(TYPES.DriverRideActionsController)
       .to(DriverRideActionsController);
+    container.bind(TYPES.DriverPayoutController).to(DriverPayoutController);
+    container.bind(TYPES.AdminPayoutController).to(AdminPayoutController);
   }
 }

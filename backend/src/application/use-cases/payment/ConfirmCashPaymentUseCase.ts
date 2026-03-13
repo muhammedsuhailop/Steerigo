@@ -12,6 +12,11 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
+import { Money } from "@domain/value-objects/Money";
+import { Payment } from "@domain/entities/Payment";
+import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { IIdGenerator } from "@application/services/IIdGenerator";
+import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 
 @injectable()
 export class ConfirmCashPaymentUseCase
@@ -24,22 +29,28 @@ export class ConfirmCashPaymentUseCase
   constructor(
     @inject(TYPES.PaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
+
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
+
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
+
     @inject(TYPES.EarningsDistributionService)
     private readonly earningsDistributionService: IEarningsDistributionService,
+
+    @inject(TYPES.IDGenerator)
+    private readonly idGenerator: IIdGenerator,
   ) {}
 
   async execute(
     dto: ConfirmCashPaymentDto,
   ): Promise<Result<ConfirmCashPaymentResponseDto>> {
-    const paymentId = dto.getPaymentId();
+    const rideId = dto.getRideId();
 
     try {
-      Logger.info("Confirming cash payment", {
-        paymentId,
+      Logger.info("Confirming cash payment by driver", {
+        rideId,
         userId: dto.getUserId(),
       });
 
@@ -50,64 +61,88 @@ export class ConfirmCashPaymentUseCase
 
       const driverId = driver.getId().toString();
 
-      const payment = await this.paymentRepository.findById(paymentId);
-      if (!payment) {
-        return Result.failure(PaymentErrors.paymentNotFound(paymentId));
+      const ride = await this.rideRepository.findByRideId(rideId);
+      if (!ride) {
+        return Result.failure(PaymentErrors.paymentNotFound(rideId));
       }
 
-      if (payment.getDriverId() !== driverId) {
+      if (ride.getDriverId() !== driverId) {
         return Result.failure(
-          PaymentErrors.cashConfirmationUnauthorized(payment.getRideId()),
+          PaymentErrors.cashConfirmationUnauthorized(rideId),
         );
       }
 
-      if (!payment.isCash()) {
+      if (!ride.isCompleted()) {
+        return Result.failure(PaymentErrors.rideNotCompleted(rideId));
+      }
+
+      const existingPayment = await this.paymentRepository.findByRideId(rideId);
+      if (existingPayment) {
+        return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
+      }
+
+      const rideFare = ride.getFare();
+      const providedAmount = dto.getAmount();
+
+      if (Math.abs(rideFare - providedAmount) > 1) {
         return Result.failure(
-          PaymentErrors.invalidPaymentMethod(payment.getMethod()),
+          PaymentErrors.invalidPaymentAmount(
+            rideFare.toString(),
+            providedAmount.toString(),
+          ),
         );
       }
 
-      if (payment.getStatus() !== PaymentStatus.PENDING) {
-        return Result.failure(PaymentErrors.paymentNotPending(paymentId));
-      }
+      const amount = Money.create(rideFare, ride.getCurrency());
+
+      const paymentId = this.idGenerator.generate();
+
+      const payment = Payment.create(
+        paymentId,
+        rideId,
+        ride.getRiderId(),
+        ride.getDriverId(),
+        amount,
+        PaymentMethod.CASH,
+        { confirmedBy: driverId },
+      );
 
       const paidAt = new Date();
+
       payment.confirmCashCollected(paidAt);
+
       const savedPayment = await this.paymentRepository.save(payment);
 
-      const ride = await this.rideRepository.findByRideId(payment.getRideId());
-      if (ride) {
-        ride.updatePaymentStatus(PaymentStatus.SUCCESS);
-        await this.rideRepository.save(ride);
+      ride.updatePaymentStatus(PaymentStatus.SUCCESS);
+      await this.rideRepository.save(ride);
 
-        const fareBreakdown = ride.getFareBreakdown();
-        await this.earningsDistributionService
-          .distribute({
-            rideId: ride.getRideId(),
-            driverId: ride.getDriverId(),
-            totalFare: fareBreakdown.getTotalFare(),
-            platformFee: fareBreakdown.getPlatformFee(),
-            platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
-          })
-          .catch((err: Error) => {
-            Logger.error("Earnings distribution failed after cash payment", {
-              paymentId,
-              rideId: ride.getRideId(),
-              error: err.message,
-            });
+      const fareBreakdown = ride.getFareBreakdown();
+
+      await this.earningsDistributionService
+        .distribute({
+          rideId: ride.getRideId(),
+          driverId: ride.getDriverId(),
+          totalFare: fareBreakdown.getTotalFare(),
+          platformFee: fareBreakdown.getPlatformFee(),
+          platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+        })
+        .catch((err: Error) => {
+          Logger.error("Earnings distribution failed after cash payment", {
+            rideId,
+            error: err.message,
           });
-      }
+        });
 
-      Logger.info("Cash payment confirmed", {
-        paymentId,
-        rideId: payment.getRideId(),
+      Logger.info("Cash payment confirmed and payment created", {
+        paymentId: savedPayment.getId(),
+        rideId,
         driverId,
         paidAt: paidAt.toISOString(),
       });
 
       return Result.success({
         success: true,
-        message: "Cash payment confirmed successfully.",
+        message: PAYMENT_MESSAGES.CONFIRMED,
         data: {
           paymentId: savedPayment.getId(),
           rideId: savedPayment.getRideId(),
@@ -119,9 +154,10 @@ export class ConfirmCashPaymentUseCase
       });
     } catch (error) {
       Logger.error("Error confirming cash payment", {
-        paymentId,
+        rideId,
         error: error instanceof Error ? error.message : String(error),
       });
+
       return Result.failure(error as Error);
     }
   }

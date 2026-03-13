@@ -11,6 +11,12 @@ export const ADMIN_MESSAGES = {
     USER_STATUS_UPDATED: "User status updated successfully",
     USER_PROFILE_FETCHED: "User profile fetched successfully",
   },
+
+  PAYOUT: {
+    RETRIVED: "Payouts retrieved successfully.",
+    APPROVED: "Payout approved and processed successfully.",
+    REJECTED: "Payout request rejected.",
+  },
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {
@@ -18,5 +24,8 @@ export const ADMIN_ERROR_MESSAGES = {
     NOT_FOUND: "Admin user not found",
     INVALID_ACTION: "Invalid admin action",
     UNAUTHORIZED_ACTION: "You are not authorized to perform this action",
+  },
+  PAYOUT: {
+    WALLET_DEBIT_FAILED_ON_APPROVAL: "Wallet debit failed during approval",
   },
 };

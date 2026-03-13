@@ -22,6 +22,9 @@ import { GetUserProfileResponseDto } from "@application/dto/admin/GetUserProfile
 import { GetUserProfileDetailsUseCase } from "@application/use-cases/admin/GetUserProfileDetailsUseCase";
 import { GetAdminRidesUseCase } from "@application/use-cases/admin/GetAdminRidesUseCase";
 import { AdminRideController } from "@interface/controllers/admin/AdminRideController";
+import { ApprovePayoutUseCase } from "@application/use-cases/admin/ApprovePayoutUseCase";
+import { RejectPayoutUseCase } from "@application/use-cases/admin/RejectPayoutUseCase";
+import { GetAdminPayoutsUseCase } from "@application/use-cases/admin/GetAdminPayoutsUseCase";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -57,6 +60,9 @@ export class AdminFactory {
     container
       .bind<GetAdminRidesUseCase>(TYPES.GetAdminRidesUseCase)
       .to(GetAdminRidesUseCase);
+    container.bind(TYPES.ApprovePayoutUseCase).to(ApprovePayoutUseCase);
+    container.bind(TYPES.RejectPayoutUseCase).to(RejectPayoutUseCase);
+    container.bind(TYPES.GetAdminPayoutsUseCase).to(GetAdminPayoutsUseCase);
 
     // Controller bindings
     container

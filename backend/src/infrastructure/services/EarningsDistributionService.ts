@@ -37,7 +37,7 @@ export class EarningsDistributionService
     const platformRevenueMoney = platformFee.add(platformFeeTax);
     const driverEarningsMoney = totalFare.subtract(platformRevenueMoney);
 
-    Logger.info("Distributing earnings", {
+    Logger.info("Distributing ride earnings", {
       rideId,
       driverId,
       totalFare: totalFare.getAmount(),
@@ -94,7 +94,6 @@ export class EarningsDistributionService
       driverId,
       amount: amount.getAmount(),
       rideId,
-      walletBalance: wallet.getAvailableBalance().getAmount(),
     });
   }
 

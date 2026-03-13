@@ -34,6 +34,7 @@ export const TYPES = {
   RedisService: Symbol.for("RedisService"),
   PaymentGatewayService: Symbol.for("PaymentGatewayService"),
   EarningsDistributionService: Symbol.for("EarningsDistributionService"),
+  IDGenerator: Symbol.for("IDGenerator"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -72,6 +73,9 @@ export const TYPES = {
 
   // Use Cases - Admin Ride
   GetAdminRidesUseCase: Symbol.for("GetAdminRidesUseCase"),
+  ApprovePayoutUseCase: Symbol.for("ApprovePayoutUseCase"),
+  RejectPayoutUseCase: Symbol.for("RejectPayoutUseCase"),
+  GetAdminPayoutsUseCase: Symbol.for("GetAdminPayoutsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -104,6 +108,8 @@ export const TYPES = {
   MarkRideAsArrivedUseCase: Symbol.for("MarkRideAsArrivedUseCase"),
   MarkRideAsStartedUseCase: Symbol.for("MarkRideAsStartedUseCase"),
   MarkRideAsCompletedUseCase: Symbol.for("MarkRideAsCompletedUseCase"),
+  RequestPayoutUseCase: Symbol.for("RequestPayoutUseCase"),
+  GetDriverPayoutsUseCase: Symbol.for("GetDriverPayoutsUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -164,4 +170,6 @@ export const TYPES = {
   AdminRideController: Symbol.for("AdminRideController"),
   DriverRideActionsController: Symbol.for("DriverRideActionsController"),
   PaymentController: Symbol.for("PaymentController"),
+  DriverPayoutController: Symbol.for("DriverPayoutController"),
+  AdminPayoutController: Symbol.for("AdminPayoutController"),
 };

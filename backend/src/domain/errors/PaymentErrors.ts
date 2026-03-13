@@ -154,4 +154,21 @@ export class PaymentErrors {
       },
     );
   }
+
+  static invalidPaymentAmount(expected: string, received: string): DomainError {
+    return new DomainError(
+      formatMessage(PAYMENT_ERROR_MESSAGES.INVALID_PAYMENT_AMOUNT, {
+        expected,
+        received,
+      }),
+      "INVALID_PAYMENT_AMOUNT",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }
