@@ -170,7 +170,7 @@ export const RideTimelineStatus: React.FC<{ timeline: RideTimeline }> = ({
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
           <FaClock className="text-gray-300" />
-          Live Journey Timeline
+          Ride Timeline
         </h3>
       </div>
 
