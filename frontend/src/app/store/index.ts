@@ -24,6 +24,7 @@ import { viewDriverRideApi } from "@/features/driver/view-ride/services/viewDriv
 import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverRideSlice";
 import { driverWalletApi } from "@/features/driver/wallet/services/driverWalletApi";
 import { driverPayoutApi } from "@/features/driver/payout/services/driverPayoutApi";
+import { adminPayoutApi } from "@/features/admin/payouts/services/adminPayoutApi";
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
 
     [adminApi.reducerPath]: adminApi.reducer,
+    [adminPayoutApi.reducerPath]: adminPayoutApi.reducer,
 
     //notification API
     [notificationApi.reducerPath]: notificationApi.reducer,
@@ -86,6 +88,7 @@ export const store = configureStore({
       viewDriverRideApi.middleware,
       driverWalletApi.middleware,
       driverPayoutApi.middleware,
+      adminPayoutApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });

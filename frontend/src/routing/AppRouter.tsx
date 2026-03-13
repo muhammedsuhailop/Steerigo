@@ -29,6 +29,7 @@ import ViewRidePage from "@/features/user/view-ride/pages/ViewRidePage";
 import ViewDriverRidePage from "@/features/driver/view-ride/pages/ViewDriverRidePage";
 import WalletPage from "@/features/driver/wallet/pages/WalletPage";
 import PayoutPage from "@/features/driver/payout/pages/PayoutPage";
+import PayoutManagement from "@/features/admin/payouts/pages/PayoutManagement";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -153,6 +154,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <KYCRequestDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/drivers/payouts"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <PayoutManagement />
           </ProtectedRoute>
         }
       />

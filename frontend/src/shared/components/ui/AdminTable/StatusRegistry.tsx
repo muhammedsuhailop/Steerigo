@@ -7,7 +7,7 @@ import type {
   StatusBadgeRegistry,
 } from "@/shared/components/ui/AdminTable/AdminTable.types";
 
-//  Driver status mapping 
+//  Driver status mapping
 export const DriverStatusRegistry: StatusBadgeRegistry = {
   InReview: { variant: "warning", text: "In Review" },
   Active: { variant: "success", text: "Active" },
@@ -16,7 +16,7 @@ export const DriverStatusRegistry: StatusBadgeRegistry = {
   Suspended: { variant: "danger", text: "Suspended" },
 };
 
-//  KYC status mapping 
+//  KYC status mapping
 export const KYCStatusRegistry: StatusBadgeRegistry = {
   InReview: { variant: "warning", text: "KYC In Review" },
   Approved: { variant: "success", text: "KYC Approved" },
@@ -24,14 +24,14 @@ export const KYCStatusRegistry: StatusBadgeRegistry = {
   Pending: { variant: "outline", text: "Pending" },
 };
 
-//  Driver badge mapping 
+//  Driver badge mapping
 export const DriverStatusBadgeRegistry: StatusBadgeRegistry = {
   Active: { variant: "success", text: "Active" },
   Suspended: { variant: "danger", text: "Suspended" },
   Inactive: { variant: "secondary", text: "Inactive" },
 };
 
-//  Document type colors 
+//  Document type colors
 export const DocTypeColorRegistry: Record<string, string> = {
   License: "bg-blue-100 text-blue-800",
   "Driving License": "bg-blue-100 text-blue-800",
@@ -43,7 +43,7 @@ export const DocTypeColorRegistry: Record<string, string> = {
   Insurance: "bg-cyan-100 text-cyan-800",
 };
 
-//  User status mapping 
+//  User status mapping
 export const UserStatusRegistry: StatusBadgeRegistry = {
   Active: { variant: "success", text: "Active" },
   Inactive: { variant: "secondary", text: "Inactive" },
@@ -52,11 +52,18 @@ export const UserStatusRegistry: StatusBadgeRegistry = {
   Pending: { variant: "outline", text: "Pending" },
 };
 
-//  Render status badge 
+export const PayoutStatusRegistry: StatusBadgeRegistry = {
+  REQUESTED: { variant: "warning", text: "Requested" },
+  PENDING: { variant: "outline", text: "Processing" },
+  COMPLETED: { variant: "success", text: "Paid" },
+  FAILED: { variant: "danger", text: "Failed" },
+};
+
+//  Render status badge
 export const renderStatusBadge = (
   status: string,
   registry: StatusBadgeRegistry,
-  fallbackVariant: StatusConfig["variant"] = "secondary"
+  fallbackVariant: StatusConfig["variant"] = "secondary",
 ): React.ReactNode => {
   const config = registry[status];
   return (
@@ -66,7 +73,7 @@ export const renderStatusBadge = (
   );
 };
 
-//  Render document type badge 
+//  Render document type badge
 export const renderDocTypeBadge = (docType: string): React.ReactNode => {
   const colorClass =
     DocTypeColorRegistry[docType] || "bg-gray-100 text-gray-800";
@@ -80,15 +87,15 @@ export const renderDocTypeBadge = (docType: string): React.ReactNode => {
   );
 };
 
-//  Create a custom status registry 
+//  Create a custom status registry
 export const createStatusRegistry = (
   baseRegistry: StatusBadgeRegistry,
-  customStatuses: StatusBadgeRegistry = {}
+  customStatuses: StatusBadgeRegistry = {},
 ): StatusBadgeRegistry => {
   return { ...baseRegistry, ...customStatuses };
 };
 
-//  Status helper utilities 
+//  Status helper utilities
 export const StatusHelpers = {
   isPending: (status: string): boolean =>
     ["InReview", "Pending", "Processing"].includes(status),
@@ -101,24 +108,24 @@ export const StatusHelpers = {
 
   getStatusVariant: (
     status: string,
-    registry: StatusBadgeRegistry
+    registry: StatusBadgeRegistry,
   ): StatusConfig["variant"] => registry[status]?.variant || "secondary",
 
   getStatusText: (status: string, registry: StatusBadgeRegistry): string =>
     registry[status]?.text || status,
 };
 
-//  Batch process status list 
+//  Batch process status list
 export const processBatchStatuses = (
   statuses: string[],
-  registry: StatusBadgeRegistry
+  registry: StatusBadgeRegistry,
 ): Map<string, StatusConfig> => {
   const processed = new Map<string, StatusConfig>();
 
   for (const status of statuses) {
     processed.set(
       status,
-      registry[status] || { variant: "secondary", text: status }
+      registry[status] || { variant: "secondary", text: status },
     );
   }
 

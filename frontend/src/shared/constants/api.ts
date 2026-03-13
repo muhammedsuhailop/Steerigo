@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
     USERS: "/admin/users",
     DRIVERS: "/admin/drivers",
     KYC: "/admin/drivers/kyc-requests",
+    PAYOUTS: "/admin/payouts",
   },
   FILE: {
     UPLOAD: "/file/upload",
