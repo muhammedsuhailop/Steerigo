@@ -2,25 +2,25 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { SidebarItemProps } from "./DriverSidebar.types";
 import {
-  RiDashboardLine,
-  RiSteeringFill,
+  RiDashboard3Line,
+  RiCalendarTodoLine,
+  RiNotificationBadgeLine,
+  RiSteering2Line,
+  RiBankCardLine,
+  RiUser3Line,
+  RiSettings4Line,
   RiWallet3Line,
-  RiUserLine,
-  RiSettingsLine,
-  RiHeadphoneLine,
-  RiNotificationLine,
-  RiCalendarLine,
 } from "react-icons/ri";
 
 const iconMap: Record<string, React.ComponentType<any>> = {
-  RiDashboardLine,
-  RiSteeringFill,
+  RiDashboard3Line,
+  RiCalendarTodoLine,
+  RiNotificationBadgeLine,
+  RiSteering2Line,
+  RiBankCardLine,
+  RiUser3Line,
+  RiSettings4Line,
   RiWallet3Line,
-  RiUserLine,
-  RiSettingsLine,
-  RiHeadphoneLine,
-  RiNotificationLine,
-  RiCalendarLine,
 };
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({

@@ -27,3 +27,19 @@ export enum TransactionDirection {
   CREDIT = "CREDIT",
   DEBIT = "DEBIT",
 }
+
+export enum PayoutMethod {
+  BANK_TRANSFER = "BANK_TRANSFER",
+  UPI = "UPI",
+  WALLET = "WALLET",
+}
+
+
+export enum PayoutStatus {
+  REQUESTED = "REQUESTED",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
+
