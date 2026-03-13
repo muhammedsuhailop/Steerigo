@@ -52,6 +52,9 @@ export class VerifyPaymentUseCase
         return Result.failure(PaymentErrors.paymentNotPending(paymentId));
       }
 
+      const ride = await this.rideRepository.findByRideId(payment.getRideId());
+      const now = new Date();
+
       const isValid = this.paymentGatewayService.verifySignature({
         gatewayOrderId: dto.getGatewayOrderId(),
         gatewayPaymentId: dto.getGatewayPaymentId(),
@@ -61,21 +64,26 @@ export class VerifyPaymentUseCase
       if (!isValid) {
         payment.markFailed("Signature verification failed");
         await this.paymentRepository.save(payment);
+
+        if (ride) {
+          ride.getTimeline().setPaymentFailedAt(now);
+          await this.rideRepository.save(ride);
+        }
+
         Logger.warn("Payment signature invalid", { paymentId });
         return Result.failure(PaymentErrors.invalidSignature());
       }
 
-      const paidAt = new Date();
       payment.attachGatewayIds({
         gatewayPaymentId: dto.getGatewayPaymentId(),
         gatewaySignature: dto.getGatewaySignature(),
       });
-      payment.markSuccess(dto.getGatewayPaymentId(), paidAt);
+      payment.markSuccess(dto.getGatewayPaymentId(), now);
 
       const savedPayment = await this.paymentRepository.save(payment);
 
-      const ride = await this.rideRepository.findByRideId(payment.getRideId());
       if (ride) {
+        ride.getTimeline().setPaymentCompletedAt(now);
         ride.updatePaymentStatus(PaymentStatus.SUCCESS);
         await this.rideRepository.save(ride);
 
@@ -100,7 +108,7 @@ export class VerifyPaymentUseCase
       Logger.info("Payment verified and marked successful", {
         paymentId,
         rideId: payment.getRideId(),
-        paidAt: paidAt.toISOString(),
+        paidAt: now.toISOString(),
       });
 
       return Result.success({
@@ -110,7 +118,7 @@ export class VerifyPaymentUseCase
           paymentId: savedPayment.getId(),
           rideId: savedPayment.getRideId(),
           status: savedPayment.getStatus(),
-          paidAt: paidAt.toISOString(),
+          paidAt: now.toISOString(),
           amount: savedPayment.getAmount().getAmount(),
           currency: savedPayment.getAmount().getCurrency(),
         },

@@ -71,6 +71,8 @@ export class RideMapper {
       rejectedAt: doc.timeline.rejectedAt,
       paymentInitiatedAt: doc.timeline.paymentInitiatedAt,
       paymentCompletedAt: doc.timeline.paymentCompletedAt,
+      paymentFailedAt: doc.timeline.paymentFailedAt,
+      paymentRefundedAt: doc.timeline.paymentRefundedAt,
     });
 
     const couponDetails = doc.couponName
@@ -143,6 +145,8 @@ export class RideMapper {
         rejectedAt: timeline.getRejectedAt(),
         paymentInitiatedAt: timeline.getPaymentInitiatedAt(),
         paymentCompletedAt: timeline.getPaymentCompletedAt(),
+        paymentFailedAt: timeline.getPaymentFailedAt(),
+        paymentRefundedAt: timeline.getPaymentRefundedAt(),
       },
       updatedAt: entity.getUpdatedAt(),
     };

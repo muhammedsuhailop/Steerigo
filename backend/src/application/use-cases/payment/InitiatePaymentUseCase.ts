@@ -78,6 +78,9 @@ export class InitiatePaymentUseCase
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }
 
+      const now = new Date();
+      ride.getTimeline().setPaymentInitiatedAt(now);
+
       const amount = Money.create(ride.getFare(), ride.getCurrency());
       const paymentId = new Types.ObjectId().toString();
 
@@ -92,7 +95,7 @@ export class InitiatePaymentUseCase
       );
 
       if (method === PaymentMethod.ONLINE) {
-        return this.handleOnlinePayment(payment, amount, rideId);
+        return this.handleOnlinePayment(payment, amount, ride);
       }
 
       if (method === PaymentMethod.WALLET) {
@@ -100,7 +103,7 @@ export class InitiatePaymentUseCase
       }
 
       if (method === PaymentMethod.CASH) {
-        return this.handleCashPayment(payment, amount, rideId);
+        return this.handleCashPayment(payment, amount, ride);
       }
 
       return Result.failure(PaymentErrors.invalidPaymentMethod(method));
@@ -117,8 +120,9 @@ export class InitiatePaymentUseCase
   private async handleOnlinePayment(
     payment: Payment,
     amount: Money,
-    rideId: string,
+    ride: Ride,
   ): Promise<Result<InitiatePaymentResponseDto>> {
+    const rideId = ride.getRideId();
     const order = await this.paymentGatewayService.createOrder({
       amount: amount.getAmount(),
       currency: amount.getCurrency(),
@@ -131,15 +135,16 @@ export class InitiatePaymentUseCase
       gatewayOrderId: order.gatewayOrderId,
     });
 
-    const savedPayment = await this.paymentRepository.save(payment);
+    await this.paymentRepository.save(payment);
+    await this.rideRepository.save(ride);
 
-    Logger.info("Razorpay order created", {
-      paymentId: savedPayment.getId(),
-      gatewayOrderId: order.gatewayOrderId,
+    Logger.info("Razorpay order created & timeline updated", {
+      paymentId: payment.getId(),
+      rideId,
     });
 
     const data: OnlinePaymentInitData = {
-      paymentId: savedPayment.getId(),
+      paymentId: payment.getId(),
       gatewayOrderId: order.gatewayOrderId,
       amount: amount.getAmount(),
       currency: amount.getCurrency(),
@@ -161,14 +166,13 @@ export class InitiatePaymentUseCase
     ride: Ride,
   ): Promise<Result<InitiatePaymentResponseDto>> {
     const rideId = ride.getRideId();
+    const now = new Date();
 
     const wallet = await this.walletRepository.findByOwner(
       userId,
       WalletOwnerType.RIDER,
     );
-    if (!wallet) {
-      return Result.failure(PaymentErrors.walletNotFound(userId));
-    }
+    if (!wallet) return Result.failure(PaymentErrors.walletNotFound(userId));
 
     if (wallet.getAvailableBalance().getAmount() < amount.getAmount()) {
       return Result.failure(
@@ -194,9 +198,10 @@ export class InitiatePaymentUseCase
     });
     await this.transactionRepository.save(riderTransaction);
 
-    payment.markSuccess(undefined, new Date());
-    const savedPayment = await this.paymentRepository.save(payment);
+    payment.markSuccess(undefined, now);
+    await this.paymentRepository.save(payment);
 
+    ride.getTimeline().setPaymentCompletedAt(now);
     ride.updatePaymentStatus(PaymentStatus.SUCCESS);
     await this.rideRepository.save(ride);
 
@@ -209,22 +214,13 @@ export class InitiatePaymentUseCase
         platformFee: fareBreakdown.getPlatformFee(),
         platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
       })
-      .catch((err: Error) => {
-        Logger.error("Earnings distribution failed after wallet payment", {
-          rideId,
-          error: err.message,
-        });
-      });
-
-    Logger.info("Wallet payment processed", {
-      paymentId: savedPayment.getId(),
-      userId,
-      rideId,
-    });
+      .catch((err) =>
+        Logger.error("Distribution failed", { rideId, error: err.message }),
+      );
 
     const data: WalletPaymentInitData = {
-      paymentId: savedPayment.getId(),
-      status: savedPayment.getStatus(),
+      paymentId: payment.getId(),
+      status: payment.getStatus(),
       amount: amount.getAmount(),
       currency: amount.getCurrency(),
       walletBalanceAfter: wallet.getAvailableBalance().getAmount(),
@@ -241,18 +237,19 @@ export class InitiatePaymentUseCase
   private async handleCashPayment(
     payment: Payment,
     amount: Money,
-    rideId: string,
+    ride: Ride,
   ): Promise<Result<InitiatePaymentResponseDto>> {
-    const savedPayment = await this.paymentRepository.save(payment);
+    await this.paymentRepository.save(payment);
+    await this.rideRepository.save(ride);
 
-    Logger.info("Cash payment initiated", {
-      paymentId: savedPayment.getId(),
-      rideId,
+    Logger.info("Cash payment initiated & timeline updated", {
+      paymentId: payment.getId(),
+      rideId: ride.getRideId(),
     });
 
     const data: CashPaymentInitData = {
-      paymentId: savedPayment.getId(),
-      status: savedPayment.getStatus(),
+      paymentId: payment.getId(),
+      status: payment.getStatus(),
       amount: amount.getAmount(),
       currency: amount.getCurrency(),
     };

@@ -39,6 +39,8 @@ export interface IRideDocument extends Document {
     rejectedAt?: Date;
     paymentInitiatedAt?: Date;
     paymentCompletedAt?: Date;
+    paymentFailedAt?: Date;
+    paymentRefundedAt?: Date;
   };
   rating?: number;
   feedback?: string;
@@ -103,6 +105,8 @@ const rideSchema = new Schema<IRideDocument>(
       rejectedAt: { type: Date },
       paymentInitiatedAt: { type: Date },
       paymentCompletedAt: { type: Date },
+      paymentFailedAt: { type: Date },
+      paymentRefundedAt: { type: Date },
     },
     couponName: { type: String, trim: true },
     couponDiscountAmount: { type: Number, default: 0, min: 0 },

@@ -6,8 +6,11 @@ export class RideTimeline {
   private completedAt?: Date;
   private cancelledAt?: Date;
   private rejectedAt?: Date;
+
   private paymentInitiatedAt?: Date;
   private paymentCompletedAt?: Date;
+  private paymentFailedAt?: Date;
+  private paymentRefundedAt?: Date;
 
   constructor(requestedAt: Date) {
     this.requestedAt = requestedAt;
@@ -73,6 +76,23 @@ export class RideTimeline {
     this.paymentCompletedAt = date;
   }
 
+  public setPaymentFailedAt(date: Date): void {
+    if (!this.paymentInitiatedAt)
+      throw new Error("Payment cannot fail before initiation");
+
+    if (this.paymentCompletedAt)
+      throw new Error("Cannot mark failed after payment completion");
+
+    this.paymentFailedAt = date;
+  }
+
+  public setPaymentRefundedAt(date: Date): void {
+    if (!this.paymentCompletedAt)
+      throw new Error("Refund can only happen after successful payment");
+
+    this.paymentRefundedAt = date;
+  }
+
   public getRequestedAt(): Date {
     return this.requestedAt;
   }
@@ -109,6 +129,14 @@ export class RideTimeline {
     return this.paymentCompletedAt;
   }
 
+  public getPaymentFailedAt(): Date | undefined {
+    return this.paymentFailedAt;
+  }
+
+  public getPaymentRefundedAt(): Date | undefined {
+    return this.paymentRefundedAt;
+  }
+
   public getDuration(): number | null {
     return this.completedAt && this.startedAt
       ? this.completedAt.getTime() - this.startedAt.getTime()
@@ -131,6 +159,8 @@ export class RideTimeline {
     rejectedAt?: Date;
     paymentInitiatedAt?: Date;
     paymentCompletedAt?: Date;
+    paymentFailedAt?: Date;
+    paymentRefundedAt?: Date;
   }): RideTimeline {
     const timeline = new RideTimeline(data.requestedAt || new Date());
 
@@ -140,10 +170,17 @@ export class RideTimeline {
     if (data.completedAt) timeline.setCompletedAt(data.completedAt);
     if (data.cancelledAt) timeline.setCancelledAt(data.cancelledAt);
     if (data.rejectedAt) timeline.setRejectedAt(data.rejectedAt);
+
     if (data.paymentInitiatedAt)
       timeline.setPaymentInitiatedAt(data.paymentInitiatedAt);
+
     if (data.paymentCompletedAt)
       timeline.setPaymentCompletedAt(data.paymentCompletedAt);
+
+    if (data.paymentFailedAt) timeline.setPaymentFailedAt(data.paymentFailedAt);
+
+    if (data.paymentRefundedAt)
+      timeline.setPaymentRefundedAt(data.paymentRefundedAt);
 
     return timeline;
   }
@@ -159,6 +196,8 @@ export class RideTimeline {
       rejectedAt: this.rejectedAt,
       paymentInitiatedAt: this.paymentInitiatedAt,
       paymentCompletedAt: this.paymentCompletedAt,
+      paymentFailedAt: this.paymentFailedAt,
+      paymentRefundedAt: this.paymentRefundedAt,
     };
   }
 }

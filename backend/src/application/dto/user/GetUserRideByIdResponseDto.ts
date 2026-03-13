@@ -30,16 +30,22 @@ export interface FareDetails {
 export interface TimelineDetails {
   requestedAt: string;
   acceptedAt?: string;
+  arrivedAt?: string;
   startedAt?: string;
   completedAt?: string;
   cancelledAt?: string;
+  rejectedAt?: string;
+  paymentInitiatedAt?: string;
+  paymentCompletedAt?: string;
+  paymentFailedAt?: string;
+  paymentRefundedAt?: string;
 }
 
 export interface RideDetails {
   id: string;
   rideId: string;
   status: string;
-  paymentStatus?:PaymentStatus;
+  paymentStatus?: PaymentStatus;
   rideType: string;
   pickup: LocationDetails;
   drop: LocationDetails;

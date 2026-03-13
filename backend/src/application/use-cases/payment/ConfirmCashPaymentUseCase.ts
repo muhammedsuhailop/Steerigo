@@ -94,8 +94,13 @@ export class ConfirmCashPaymentUseCase
       }
 
       const amount = Money.create(rideFare, ride.getCurrency());
-
       const paymentId = this.idGenerator.generate();
+      const paidAt = new Date();
+
+      if (!ride.getTimeline().getPaymentInitiatedAt()) {
+        ride.getTimeline().setPaymentInitiatedAt(paidAt);
+      }
+      ride.getTimeline().setPaymentCompletedAt(paidAt);
 
       const payment = Payment.create(
         paymentId,
@@ -106,8 +111,6 @@ export class ConfirmCashPaymentUseCase
         PaymentMethod.CASH,
         { confirmedBy: driverId },
       );
-
-      const paidAt = new Date();
 
       payment.confirmCashCollected(paidAt);
 

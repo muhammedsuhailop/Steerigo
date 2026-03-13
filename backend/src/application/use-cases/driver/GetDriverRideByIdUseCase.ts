@@ -143,9 +143,14 @@ export class GetDriverRideByIdUseCase
     const timelineDetails: TimelineDetails = {
       requestedAt: timeline.getRequestedAt().toISOString(),
       acceptedAt: timeline.getAcceptedAt()?.toISOString(),
+      arrivedAt: timeline.getArrivedAt()?.toISOString(),
       startedAt: timeline.getStartedAt()?.toISOString(),
       completedAt: timeline.getCompletedAt()?.toISOString(),
       cancelledAt: timeline.getCancelledAt()?.toISOString(),
+      paymentInitiatedAt: timeline.getPaymentInitiatedAt()?.toISOString(),
+      paymentCompletedAt: timeline.getPaymentCompletedAt()?.toISOString(),
+      paymentFailedAt: timeline.getPaymentFailedAt()?.toISOString(),
+      paymentRefundedAt: timeline.getPaymentRefundedAt()?.toISOString(),
     };
 
     const pickupLocation: LocationDetails = {
