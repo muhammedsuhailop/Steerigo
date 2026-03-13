@@ -27,6 +27,7 @@ import UserProfileViewPage from "@/features/admin/user/user-profile/UserProfileV
 import { RideRequestsPage } from "@/features/driver/ride-requests/pages/RideRequestsPage";
 import ViewRidePage from "@/features/user/view-ride/pages/ViewRidePage";
 import ViewDriverRidePage from "@/features/driver/view-ride/pages/ViewDriverRidePage";
+import WalletPage from "@/features/driver/wallet/pages/WalletPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -224,6 +225,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <ViewDriverRidePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/wallet"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <WalletPage />
           </ProtectedRoute>
         }
       />

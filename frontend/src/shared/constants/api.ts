@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
       STATUS: "/driver/availability/status",
       EXCEPTION: "/driver/availability/exception",
     },
+    WALLET: "/driver/wallet",
   },
   ADMIN: {
     USERS: "/admin/users",

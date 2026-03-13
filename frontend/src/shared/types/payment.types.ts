@@ -10,3 +10,20 @@ export enum PaymentMethod {
   ONLINE = "ONLINE",
   CASH = "CASH",
 }
+
+export enum TransactionType {
+  RIDE_PAYMENT = "RIDE_PAYMENT",
+  DRIVER_EARNING = "DRIVER_EARNING",
+  PLATFORM_COMMISSION = "PLATFORM_COMMISSION",
+  DRIVER_BONUS = "DRIVER_BONUS",
+  DRIVER_PENALTY = "DRIVER_PENALTY",
+  REFUND = "REFUND",
+  PAYOUT = "PAYOUT",
+  WALLET_TOPUP = "WALLET_TOPUP",
+  ADJUSTMENT = "ADJUSTMENT",
+}
+
+export enum TransactionDirection {
+  CREDIT = "CREDIT",
+  DEBIT = "DEBIT",
+}
