@@ -60,6 +60,10 @@ export const API_ENDPOINTS = {
     GET_NOTIFICATIONS: "/notifications",
     MARK_AS_READ: "/notifications/read",
   },
+  PAYMENT: {
+    INITIATE: "/payment/initiate",
+    VERIFY: "/payment/verify",
+  },
 } as const;
 
 export const EXTERNAL_API = {

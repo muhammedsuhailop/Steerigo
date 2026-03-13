@@ -1,4 +1,5 @@
-import { Location, RideStatus } from "@/shared/types/ride.types";
+import { PaymentMethod, PaymentStatus } from "@/shared/types/payment.types";
+import { Location, RideStatus, RideTimeline } from "@/shared/types/ride.types";
 
 export interface FareDetails {
   baseFare: number;
@@ -8,14 +9,6 @@ export interface FareDetails {
   platformFee: number;
   totalFare: number;
   currency: string;
-}
-
-export interface RideTimeline {
-  requestedAt: string;
-  acceptedAt?: string;
-  arrivedAt?: string;
-  startedAt?: string;
-  completedAt?: string;
 }
 
 export interface DriverInfo {
@@ -31,6 +24,7 @@ export interface RideDetails {
   id: string;
   rideId: string;
   status: RideStatus;
+  paymentStatus?: PaymentStatus;
   rideType: string;
   pickup: Location;
   drop: Location;
@@ -55,4 +49,42 @@ export interface ViewRideState {
   activeDriver: DriverInfo | null;
   isLoading: boolean;
   error: string | null;
+}
+
+export interface InitiatePaymentRequest {
+  rideId: string;
+  method: PaymentMethod.ONLINE;
+}
+
+export interface InitiatePaymentResponse {
+  success: boolean;
+  message: string;
+  method: string;
+  data: {
+    paymentId: string;
+    gatewayOrderId: string;
+    amount: number;
+    currency: string;
+    gateway: string;
+  };
+}
+
+export interface VerifyPaymentRequest {
+  paymentId: string;
+  gatewayPaymentId: string;
+  gatewayOrderId: string;
+  gatewaySignature: string;
+}
+
+export interface VerifyPaymentResponse {
+  success: boolean;
+  message: string;
+  data: {
+    paymentId: string;
+    rideId: string;
+    status: PaymentStatus;
+    paidAt: string;
+    amount: number;
+    currency: string;
+  };
 }

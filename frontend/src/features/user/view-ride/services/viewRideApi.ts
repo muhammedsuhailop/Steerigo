@@ -1,7 +1,13 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import { API_ENDPOINTS } from "@/shared/constants/api";
-import { ViewRideResponse } from "../types/viewRide.types";
+import {
+  InitiatePaymentRequest,
+  InitiatePaymentResponse,
+  VerifyPaymentRequest,
+  VerifyPaymentResponse,
+  ViewRideResponse,
+} from "../types/viewRide.types";
 
 export const viewRideApi = createApi({
   reducerPath: "viewRideApi",
@@ -14,6 +20,29 @@ export const viewRideApi = createApi({
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Ride", id }],
+    }),
+
+    initiatePayment: builder.mutation<
+      InitiatePaymentResponse,
+      InitiatePaymentRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.PAYMENT.INITIATE,
+        method: "POST",
+        data,
+      }),
+    }),
+
+    verifyPayment: builder.mutation<
+      VerifyPaymentResponse,
+      VerifyPaymentRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.PAYMENT.VERIFY,
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["Ride"],
     }),
 
     cancelActiveRide: builder.mutation<
@@ -30,5 +59,9 @@ export const viewRideApi = createApi({
   }),
 });
 
-export const { useGetRideDetailsQuery, useCancelActiveRideMutation } =
-  viewRideApi;
+export const {
+  useGetRideDetailsQuery,
+  useInitiatePaymentMutation,
+  useVerifyPaymentMutation,
+  useCancelActiveRideMutation,
+} = viewRideApi;

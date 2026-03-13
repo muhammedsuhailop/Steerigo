@@ -1,3 +1,4 @@
+import { RideTimeline } from "@/shared/types/ride.types";
 import React from "react";
 import {
   FaCheckCircle,
@@ -68,7 +69,9 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
               ? "text-blue-600"
               : isCompleted
                 ? "text-gray-900"
-                : "text-gray-400"
+                : isError
+                  ? "text-red-600"
+                  : "text-gray-400"
           }`}
         >
           {label}
@@ -88,8 +91,10 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
           </p>
         )}
 
-        {description && isActive && (
-          <p className="mt-1.5 text-xs text-gray-500 leading-relaxed max-w-xs">
+        {description && (isActive || isError) && (
+          <p
+            className={`mt-1.5 text-xs leading-relaxed max-w-xs ${isError ? "text-red-500" : "text-gray-500"}`}
+          >
             {description}
           </p>
         )}
@@ -98,7 +103,7 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
   );
 };
 
-export const RideTimelineStatus: React.FC<{ timeline: any }> = ({
+export const RideTimelineStatus: React.FC<{ timeline: RideTimeline }> = ({
   timeline,
 }) => {
   const steps = [
@@ -115,34 +120,44 @@ export const RideTimelineStatus: React.FC<{ timeline: any }> = ({
       time: timeline.acceptedAt,
       isCompleted: !!timeline.arrivedAt,
       isActive: !!timeline.acceptedAt && !timeline.arrivedAt,
-      description: "Your driver has accepted and is heading to your location.",
+      description: "Your driver is heading to your location.",
     },
     {
       label: "Driver Arrived",
       time: timeline.arrivedAt,
       isCompleted: !!timeline.startedAt,
       isActive: !!timeline.arrivedAt && !timeline.startedAt,
-      description: "Your driver is waiting at the pickup location.",
+      description: "Your driver is at the pickup location.",
     },
     {
       label: "Trip in Progress",
       time: timeline.startedAt,
       isCompleted: !!timeline.completedAt,
       isActive: !!timeline.startedAt && !timeline.completedAt,
-      description: "You are safely on your way to the destination.",
+      description: "You are on your way to the destination.",
     },
     {
       label: "Arrived at Destination",
       time: timeline.completedAt,
       isCompleted: !!timeline.paymentCompletedAt,
-      isActive: !!timeline.completedAt && !timeline.paymentCompletedAt,
-      description: "Trip finished. Please proceed with the payment.",
+      isActive:
+        !!timeline.completedAt &&
+        !timeline.paymentCompletedAt &&
+        !timeline.paymentFailedAt,
+      description: "Trip finished. Please proceed with payment.",
     },
     {
-      label: "Payment Completed",
-      time: timeline.paymentCompletedAt,
+      label: timeline.paymentFailedAt ? "Payment Failed" : "Payment Completed",
+      time: timeline.paymentCompletedAt || timeline.paymentFailedAt,
       isCompleted: !!timeline.paymentCompletedAt,
-      isActive: !!timeline.paymentInitiatedAt && !timeline.paymentCompletedAt,
+      isActive:
+        !!timeline.paymentInitiatedAt &&
+        !timeline.paymentCompletedAt &&
+        !timeline.paymentFailedAt,
+      isError: !!timeline.paymentFailedAt,
+      description: timeline.paymentFailedAt
+        ? "The payment attempt was unsuccessful. Please try again."
+        : undefined,
       isLast: true,
     },
   ];
@@ -170,7 +185,7 @@ export const RideTimelineStatus: React.FC<{ timeline: any }> = ({
             isLast={true}
             description={
               isCancelled
-                ? "This ride was cancelled by the user."
+                ? "This ride was cancelled."
                 : "The driver declined this request."
             }
           />

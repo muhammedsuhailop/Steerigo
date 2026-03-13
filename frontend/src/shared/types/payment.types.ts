@@ -1,0 +1,12 @@
+export enum PaymentStatus {
+  PENDING = "PENDING",
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+  PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED",
+  REFUNDED = "REFUNDED",
+}
+
+export enum PaymentMethod {
+  ONLINE = "ONLINE",
+  CASH = "CASH",
+}

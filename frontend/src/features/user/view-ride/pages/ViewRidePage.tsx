@@ -15,6 +15,7 @@ import RideDriverCard from "../components/RideDriverCard";
 import FareBreakdown from "../components/FareBreakdown";
 import { RideTimelineStatus } from "../components/RideTimelineStatus";
 import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +30,7 @@ const ViewRidePage: React.FC = () => {
   );
   const activeRide = useSelector(selectActiveRide);
   const activeDriver = useSelector(selectActiveDriver);
-
+  const { user } = useAuth();
   const { driverLocation } = useViewRide(id);
 
   useEffect(() => {
@@ -179,7 +180,14 @@ const ViewRidePage: React.FC = () => {
             </div>
 
             {/* Fare */}
-            <FareBreakdown fare={activeRide.fare} />
+            <FareBreakdown
+              fare={activeRide.fare}
+              rideId={activeRide.rideId}
+              status={activeRide.status}
+              paymentStatus={activeRide.paymentStatus}
+              userName={user?.name || ""}
+              userEmail={user?.email || ""}
+            />
           </div>
         </div>
       </main>

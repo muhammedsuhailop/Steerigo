@@ -3,10 +3,10 @@ import {
   ViewRideState,
   RideDetails,
   DriverInfo,
-  RideTimeline,
   FareDetails,
 } from "../types/viewRide.types";
-import { RideStatus } from "@/shared/types/ride.types";
+import { RideStatus, RideTimeline } from "@/shared/types/ride.types";
+import { PaymentStatus } from "@/shared/types/payment.types";
 
 const initialState: ViewRideState = {
   activeRide: null,
@@ -48,6 +48,22 @@ export const viewRideSlice = createSlice({
         }
       }
     },
+    updatePaymentStatusLocal: (
+      state,
+      action: PayloadAction<{
+        paymentStatus: PaymentStatus;
+        paymentCompletedAt?: string;
+      }>,
+    ) => {
+      if (state.activeRide) {
+        state.activeRide.paymentStatus = action.payload.paymentStatus;
+
+        if (action.payload.paymentCompletedAt) {
+          state.activeRide.timeline.paymentCompletedAt =
+            action.payload.paymentCompletedAt;
+        }
+      }
+    },
     clearRideData: (state) => {
       state.activeRide = null;
       state.activeDriver = null;
@@ -55,8 +71,12 @@ export const viewRideSlice = createSlice({
   },
 });
 
-export const { setRideData, updateRideStatusLocal, clearRideData } =
-  viewRideSlice.actions;
+export const {
+  setRideData,
+  updateRideStatusLocal,
+  updatePaymentStatusLocal,
+  clearRideData,
+} = viewRideSlice.actions;
 
 export const selectActiveRide = (state: { viewRide: ViewRideState }) =>
   state.viewRide.activeRide;
