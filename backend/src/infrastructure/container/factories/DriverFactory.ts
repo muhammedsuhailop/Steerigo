@@ -64,6 +64,8 @@ import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRide
 import { MarkRideAsCompletedUseCase } from "@application/use-cases/driver/MarkRideAsCompletedUseCase";
 import { RequestPayoutUseCase } from "@application/use-cases/driver/RequestPayoutUseCase";
 import { GetDriverPayoutsUseCase } from "@application/use-cases/driver/GetDriverPayoutsUseCase";
+import { GetDriverWalletUseCase } from "@application/use-cases/driver/GetDriverWalletUseCase";
+import { DriverWalletController } from "@interface/controllers/driver/DriverWalletController";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -207,8 +209,10 @@ export class DriverFactory {
       .to(MarkRideAsCompletedUseCase);
     container.bind(TYPES.RequestPayoutUseCase).to(RequestPayoutUseCase);
     container.bind(TYPES.GetDriverPayoutsUseCase).to(GetDriverPayoutsUseCase);
+    container.bind(TYPES.GetDriverWalletUseCase).to(GetDriverWalletUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
+    container.bind(TYPES.DriverWalletController).to(DriverWalletController);
   }
 }

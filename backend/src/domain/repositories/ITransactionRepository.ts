@@ -1,8 +1,32 @@
 import { Transaction } from "@domain/entities/Transaction";
+import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
+import { TransactionType } from "@domain/value-objects/TransactionType";
+
+export interface TransactionQueryFilters {
+  type?: TransactionType;
+  direction?: TransactionDirection;
+  fromDate?: Date;
+  toDate?: Date;
+  page: number;
+  limit: number;
+  sortOrder: "asc" | "desc";
+}
+
+export interface TransactionQueryResult {
+  transactions: Transaction[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 export interface ITransactionRepository {
   save(transaction: Transaction): Promise<Transaction>;
   findById(id: string): Promise<Transaction | null>;
   findByWalletId(walletId: string): Promise<Transaction[]>;
   exists(id: string): Promise<boolean>;
+  findPaginatedByWalletId(
+    walletId: string,
+    filters: TransactionQueryFilters,
+  ): Promise<TransactionQueryResult>;
 }

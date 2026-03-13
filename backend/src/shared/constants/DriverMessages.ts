@@ -25,6 +25,7 @@ export const DRIVER_MESSAGES = {
   PAYOUT_RETRIVED: "Payouts retrieved successfully.",
   PAYOUT_REQUEST_SUBMITTED:
     "Payout request submitted successfully. Awaiting admin approval.",
+  WALLET_FETCHED: "Wallet details fetched successfully.",
 };
 
 export const DRIVER_ERROR_MESSAGES = {
