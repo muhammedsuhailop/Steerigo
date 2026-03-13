@@ -39,11 +39,8 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({ rider }) => {
       </div>
 
       <div className="mt-6 flex gap-2">
-        <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold">
-          <FaPhone size={14} /> Call
-        </button>
         <button className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold opacity-90">
-          <FaCommentDots size={14} /> Chat
+          <FaCommentDots size={14} /> Message
         </button>
       </div>
     </div>

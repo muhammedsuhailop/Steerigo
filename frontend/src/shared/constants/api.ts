@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   PAYMENT: {
     INITIATE: "/payment/initiate",
     VERIFY: "/payment/verify",
+    CONFIRM_CASH: "/payment/confirm-cash",
   },
 } as const;
 

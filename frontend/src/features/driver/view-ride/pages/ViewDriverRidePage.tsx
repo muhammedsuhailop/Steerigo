@@ -175,8 +175,9 @@ const ViewDriverRidePage: React.FC = () => {
                   {activeRider && <RideRiderCard rider={activeRider} />}
 
                   <RideActionControls
-                    rideId={activeRide.id}
+                    rideId={activeRide.rideId}
                     status={activeRide.status}
+                    amount={activeRide.fare.totalFare}
                   />
 
                   <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">

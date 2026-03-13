@@ -1,8 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import { API_ENDPOINTS } from "@/shared/constants/api";
-import { ViewDriverRideResponse } from "../viewDriverRide.types";
-import { RideStatus } from "@/shared/types/ride.types";
+import {
+  ConfirmCashPaymentResponse,
+  ConfirmCashRequest,
+  RideStatusResponse,
+  ViewDriverRideResponse,
+} from "../viewDriverRide.types";
 
 export const viewDriverRideApi = createApi({
   reducerPath: "viewDriverRideApi",
@@ -17,14 +21,52 @@ export const viewDriverRideApi = createApi({
       providesTags: (result, error, id) => [{ type: "DriverRide", id }],
     }),
 
-    updateRideStatus: builder.mutation<
-      { success: boolean; message: string },
-      { rideId: string; status: RideStatus }
-    >({
-      query: ({ rideId, status }) => ({
-        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/status`,
+    markArrived: builder.mutation<RideStatusResponse, string>({
+      query: (rideId) => ({
+        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/arrived`,
         method: "PATCH",
-        data: { status },
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "DriverRide", id }],
+    }),
+
+    startRide: builder.mutation<RideStatusResponse, string>({
+      query: (rideId) => ({
+        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/started`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "DriverRide", id }],
+    }),
+
+    completeRide: builder.mutation<RideStatusResponse, string>({
+      query: (rideId) => ({
+        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/completed`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "DriverRide", id }],
+    }),
+
+    cancelRide: builder.mutation<
+      RideStatusResponse,
+      { rideId: string; reason: string }
+    >({
+      query: ({ rideId, reason }) => ({
+        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/cancel`,
+        method: "PATCH",
+        data: { reason },
+      }),
+      invalidatesTags: (result, error, { rideId }) => [
+        { type: "DriverRide", id: rideId },
+      ],
+    }),
+
+    confirmCashPayment: builder.mutation<
+      ConfirmCashPaymentResponse,
+      ConfirmCashRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.PAYMENT.CONFIRM_CASH,
+        method: "POST",
+        data,
       }),
       invalidatesTags: (result, error, { rideId }) => [
         { type: "DriverRide", id: rideId },
@@ -33,5 +75,11 @@ export const viewDriverRideApi = createApi({
   }),
 });
 
-export const { useGetDriverRideDetailsQuery, useUpdateRideStatusMutation } =
-  viewDriverRideApi;
+export const {
+  useGetDriverRideDetailsQuery,
+  useMarkArrivedMutation,
+  useStartRideMutation,
+  useCompleteRideMutation,
+  useCancelRideMutation,
+  useConfirmCashPaymentMutation,
+} = viewDriverRideApi;
