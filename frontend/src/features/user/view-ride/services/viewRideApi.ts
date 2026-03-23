@@ -45,6 +45,17 @@ export const viewRideApi = createApi({
       invalidatesTags: ["Ride"],
     }),
 
+    markPaymentFailed: builder.mutation<
+      { success: boolean; message: string },
+      { paymentId: string; reason?: string }
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.PAYMENT.MARK_FAILED,
+        method: "POST",
+        data,
+      }),
+    }),
+
     cancelActiveRide: builder.mutation<
       { success: boolean; message: string },
       string
@@ -63,5 +74,6 @@ export const {
   useGetRideDetailsQuery,
   useInitiatePaymentMutation,
   useVerifyPaymentMutation,
+  useMarkPaymentFailedMutation,
   useCancelActiveRideMutation,
 } = viewRideApi;

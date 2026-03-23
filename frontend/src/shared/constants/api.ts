@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
     INITIATE: "/payment/initiate",
     VERIFY: "/payment/verify",
     CONFIRM_CASH: "/payment/confirm-cash",
+    MARK_FAILED: "/payment/mark-failed",
   },
 } as const;
 

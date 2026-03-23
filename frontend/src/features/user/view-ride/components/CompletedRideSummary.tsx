@@ -1,30 +1,18 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FaCheckCircle,
   FaCalendarAlt,
   FaTimesCircle,
   FaCreditCard,
   FaMapMarkerAlt,
-  FaStar,
-  FaEnvelope,
-  FaCommentDots,
-  FaPhoneAlt,
-  FaArrowLeft,
 } from "react-icons/fa";
-import { useDispatch } from "react-redux";
-import { toast } from "react-hot-toast";
 import { RideStatus, RideTimeline } from "@/shared/types/ride.types";
-import { PaymentMethod, PaymentStatus } from "@/shared/types/payment.types";
+import { PaymentStatus } from "@/shared/types/payment.types";
 import { FareDetails, DriverInfo } from "../types/viewRide.types";
-import {
-  useInitiatePaymentMutation,
-  useVerifyPaymentMutation,
-} from "../services/viewRideApi";
-import { updatePaymentStatusLocal } from "../store/viewRideSlice";
 import FareBreakdown from "./FareBreakdown";
 import RideTimelineExpandable from "./RideTimelineExpandable";
 import HorizontalDriverCard from "./HorizontalDriverCard";
+import { usePayment } from "../hooks/usePayment";
 
 interface CompletedRideSummaryProps {
   rideId: string;
@@ -51,12 +39,7 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
   paymentStatus,
   user,
 }) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [initiatePayment, { isLoading: isInitiating }] =
-    useInitiatePaymentMutation();
-  const [verifyPayment, { isLoading: isVerifying }] =
-    useVerifyPaymentMutation();
+  const { handlePayment, isLoading } = usePayment();
 
   const isCompleted = status === RideStatus.COMPLETED;
   const needsPayment =
@@ -64,48 +47,6 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
     (!paymentStatus ||
       paymentStatus === PaymentStatus.FAILED ||
       paymentStatus === PaymentStatus.PENDING);
-
-  const handlePayment = async () => {
-    try {
-      const orderResponse = await initiatePayment({
-        rideId,
-        method: PaymentMethod.ONLINE,
-      }).unwrap();
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderResponse.data.amount * 100,
-        currency: orderResponse.data.currency,
-        name: "Steerigo",
-        description: `Payment for Ride ${rideId}`,
-        order_id: orderResponse.data.gatewayOrderId,
-        handler: async (response: any) => {
-          try {
-            await verifyPayment({
-              paymentId: orderResponse.data.paymentId,
-              gatewayPaymentId: response.razorpay_payment_id,
-              gatewayOrderId: response.razorpay_order_id,
-              gatewaySignature: response.razorpay_signature,
-            }).unwrap();
-            toast.success("Payment Successful!");
-            dispatch(
-              updatePaymentStatusLocal({
-                paymentStatus: PaymentStatus.SUCCESS,
-                paymentCompletedAt: new Date().toISOString(),
-              }),
-            );
-          } catch (err) {
-            toast.error("Payment verification failed.");
-          }
-        },
-        prefill: { name: user.name, email: user.email },
-        theme: { color: "#000000" },
-      };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (err) {
-      toast.error("Could not initiate payment.");
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-20 px-4">
@@ -150,11 +91,11 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
           </div>
           <div className="flex flex-col items-center md:items-end gap-3">
             <button
-              onClick={handlePayment}
-              disabled={isInitiating || isVerifying}
+              onClick={() => handlePayment({ rideId, user })}
+              disabled={isLoading}
               className="px-12 py-4 bg-black text-white rounded-2xl font-black text-base flex items-center gap-3 hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/10 disabled:opacity-50"
             >
-              {isInitiating || isVerifying ? "Processing..." : "Pay Online"}
+              {isLoading ? "Processing..." : "Pay Online"}
             </button>
             <p className="text-[10px] font-bold text-gray-300 italic">
               Or pay by cash directly to the driver
@@ -222,7 +163,6 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
       {driver && <HorizontalDriverCard driver={driver} />}
 
       <RideTimelineExpandable timeline={timeline} />
-
     </div>
   );
 };
