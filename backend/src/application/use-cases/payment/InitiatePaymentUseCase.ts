@@ -73,7 +73,7 @@ export class InitiatePaymentUseCase
         return Result.failure(PaymentErrors.unauthorizedPaymentAccess(rideId));
       }
 
-      const existingPayment = await this.paymentRepository.findByRideId(rideId);
+      const existingPayment = await this.paymentRepository.findSuccessfulByRideId(rideId);
       if (existingPayment) {
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }

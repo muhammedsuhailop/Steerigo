@@ -5,6 +5,7 @@ import { Payment } from "@domain/entities/Payment";
 import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
 import { Logger } from "@shared/utils/Logger";
 import { Types } from "mongoose";
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 
 @injectable()
 export class PaymentRepositoryImpl implements IPaymentRepository {
@@ -101,6 +102,23 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       }
     } catch (error) {
       Logger.error("Error deleting payment", { paymentId: id, error });
+      throw error;
+    }
+  }
+
+  async findSuccessfulByRideId(rideId: string): Promise<Payment | null> {
+    try {
+      const doc = await PaymentModel.findOne({
+        rideId,
+        status: PaymentStatus.SUCCESS,
+      }).exec();
+
+      return doc ? PaymentMapper.toDomain(doc) : null;
+    } catch (error) {
+      Logger.error("Error finding successful payment by rideId", {
+        rideId,
+        error,
+      });
       throw error;
     }
   }

@@ -76,7 +76,7 @@ export class ConfirmCashPaymentUseCase
         return Result.failure(PaymentErrors.rideNotCompleted(rideId));
       }
 
-      const existingPayment = await this.paymentRepository.findByRideId(rideId);
+      const existingPayment = await this.paymentRepository.findSuccessfulByRideId(rideId);
       if (existingPayment) {
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }

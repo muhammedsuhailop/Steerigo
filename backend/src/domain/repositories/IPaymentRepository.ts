@@ -7,4 +7,5 @@ export interface IPaymentRepository
     IReadOnlyRepository<Payment> {
   findByRideId(rideId: string): Promise<Payment | null>;
   findByRiderId(riderId: string): Promise<Payment[]>;
+  findSuccessfulByRideId(rideId: string): Promise<Payment | null>;
 }
