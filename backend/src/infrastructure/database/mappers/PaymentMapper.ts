@@ -1,6 +1,7 @@
 import { IPaymentDocument } from "../models/PaymentModel";
 import { Payment } from "@domain/entities/Payment";
 import { Money } from "@domain/value-objects/Money";
+import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { Types } from "mongoose";
@@ -24,7 +25,7 @@ export class PaymentMapper {
       gatewayOrderId: doc.gatewayOrderId,
       gatewayPaymentId: doc.gatewayPaymentId,
       gatewaySignature: doc.gatewaySignature,
-      failureReason: doc.failureReason,
+      failureReason: doc.failureReason as PaymentFailureReason,
       metadata: (doc.metadata as Record<string, string>) ?? {},
       paidAt: doc.paidAt,
       createdAt: doc.createdAt,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { markPaymentFailedSchema } from "@application/dto/payment/MarkPaymentFailedDto";
 
 export const initiatePaymentSchema = z.object({
   body: z.object({
@@ -30,4 +31,8 @@ export const confirmCashPaymentSchema = z.object({
         error: "amount is required",
       })
   }),
+});
+
+export const markPaymentFailedValidatorSchema = z.object({
+  body: markPaymentFailedSchema,
 });

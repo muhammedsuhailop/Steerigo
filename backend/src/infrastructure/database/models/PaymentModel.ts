@@ -1,6 +1,7 @@
 import { Document, Schema, model, Model, Types } from "mongoose";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 
 export interface IPaymentDocument extends Document {
   _id: Types.ObjectId;
@@ -58,7 +59,7 @@ const paymentSchema = new Schema<IPaymentDocument>(
     gatewayPaymentId: { type: String },
     gatewaySignature: { type: String },
 
-    failureReason: { type: String },
+    failureReason: { type: String, enum: Object.values(PaymentFailureReason) },
     metadata: { type: Schema.Types.Mixed },
     paidAt: { type: Date },
   },

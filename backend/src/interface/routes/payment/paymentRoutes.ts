@@ -13,6 +13,7 @@ import {
   initiatePaymentSchema,
   verifyPaymentSchema,
   confirmCashPaymentSchema,
+  markPaymentFailedValidatorSchema,
 } from "@interface/validators/payment/paymentValidators";
 
 const router = Router();
@@ -43,6 +44,14 @@ router.post(
   requireRole([UserRole.DRIVER]),
   validateSchema(confirmCashPaymentSchema),
   (req, res) => controller.confirmCashPayment(req, res),
+);
+
+// POST /api/payment/mark-failed
+router.post(
+  "/mark-failed",
+  requireRole([UserRole.RIDER]),
+  validateSchema(markPaymentFailedValidatorSchema),
+  (req, res) => controller.markPaymentFailed(req, res),
 );
 
 export { router as paymentRoutes };

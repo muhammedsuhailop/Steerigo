@@ -8,6 +8,7 @@ import { ConfirmCashPaymentUseCase } from "@application/use-cases/payment/Confir
 import { PaymentController } from "@interface/controllers/payment/PaymentController";
 import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
 import { EarningsDistributionService } from "@infrastructure/services/EarningsDistributionService";
+import { MarkPaymentFailedUseCase } from "@application/use-cases/payment/MarkPaymentFailedUseCase";
 
 export class PaymentFactory {
   static register(container: Container): void {
@@ -34,6 +35,8 @@ export class PaymentFactory {
     container
       .bind<ConfirmCashPaymentUseCase>(TYPES.ConfirmCashPaymentUseCase)
       .to(ConfirmCashPaymentUseCase);
+
+    container.bind(TYPES.MarkPaymentFailedUseCase).to(MarkPaymentFailedUseCase);
 
     // Controller
     container

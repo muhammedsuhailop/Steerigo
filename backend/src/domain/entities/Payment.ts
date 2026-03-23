@@ -1,6 +1,7 @@
 import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { Money } from "@domain/value-objects/Money";
+import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 
 export class Payment {
   private constructor(
@@ -22,7 +23,7 @@ export class Payment {
 
     private gatewaySignature?: string,
 
-    private failureReason?: string,
+    private failureReason?: PaymentFailureReason,
 
     private readonly metadata: Record<string, string> = {},
 
@@ -75,7 +76,7 @@ export class Payment {
     gatewayOrderId?: string;
     gatewayPaymentId?: string;
     gatewaySignature?: string;
-    failureReason?: string;
+    failureReason?: PaymentFailureReason;
     metadata?: Record<string, string>;
     paidAt?: Date;
     createdAt: Date;
@@ -114,13 +115,15 @@ export class Payment {
     this.updatedAt = new Date();
   }
 
-  markFailed(reason?: string): void {
+  markFailed(reason?: PaymentFailureReason): void {
     if (this.status !== PaymentStatus.PENDING) {
       throw new Error("Payment cannot be marked failed from current state");
     }
 
     this.status = PaymentStatus.FAILED;
+
     if (reason) this.failureReason = reason;
+
     this.updatedAt = new Date();
   }
 
@@ -183,7 +186,7 @@ export class Payment {
     this.updatedAt = new Date();
   }
 
-  setFailureReason(reason: string): void {
+  setFailureReason(reason: PaymentFailureReason): void {
     this.failureReason = reason;
     this.updatedAt = new Date();
   }

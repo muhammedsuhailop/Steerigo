@@ -140,6 +140,7 @@ export const TYPES = {
   InitiatePaymentUseCase: Symbol.for("InitiatePaymentUseCase"),
   VerifyPaymentUseCase: Symbol.for("VerifyPaymentUseCase"),
   ConfirmCashPaymentUseCase: Symbol.for("ConfirmCashPaymentUseCase"),
+  MarkPaymentFailedUseCase: Symbol.for("MarkPaymentFailedUseCase"),
 
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),

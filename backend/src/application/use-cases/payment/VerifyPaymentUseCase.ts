@@ -12,6 +12,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
+import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -48,10 +49,6 @@ export class VerifyPaymentUseCase
         );
       }
 
-      if (payment.getStatus() !== PaymentStatus.PENDING) {
-        return Result.failure(PaymentErrors.paymentNotPending(paymentId));
-      }
-
       const ride = await this.rideRepository.findByRideId(payment.getRideId());
       const now = new Date();
 
@@ -62,7 +59,7 @@ export class VerifyPaymentUseCase
       });
 
       if (!isValid) {
-        payment.markFailed("Signature verification failed");
+        payment.markFailed(PaymentFailureReason.SIGNATURE_VERIFICATION_FAILED);
         await this.paymentRepository.save(payment);
 
         if (ride) {

@@ -13,6 +13,7 @@ export const PAYMENT_ERROR_MESSAGES = {
   CASH_CONFIRMATION_UNAUTHORIZED:
     "Only the assigned driver can confirm cash payment for ride {{rideId}}.",
   INVALID_PAYMENT_AMOUNT: "INVALID_PAYMENT_AMOUNT",
+  CANNOT_MARK_PAYMENT_FAILED: "Payment {paymentId} cannot be marked as failed",
 };
 
 export const PAYMENT_MESSAGES = {
@@ -23,4 +24,5 @@ export const PAYMENT_MESSAGES = {
   WALLET_PAYMENT_SUCCESS: "Wallet payment processed successfully.",
   CASH_PAYMENT_INITIATED:
     "Cash payment initiated. Driver will collect payment.",
+  PAYMENT_FAILED: "Payment has been marked as failed.",
 };

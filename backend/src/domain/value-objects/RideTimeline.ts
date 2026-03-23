@@ -46,6 +46,8 @@ export class RideTimeline {
     if (this.completedAt) throw new Error("Ride already completed");
 
     this.completedAt = date;
+
+    this.paymentFailedAt = undefined;
   }
 
   public setCancelledAt(date: Date): void {
@@ -80,9 +82,7 @@ export class RideTimeline {
     if (!this.paymentInitiatedAt)
       throw new Error("Payment cannot fail before initiation");
 
-    if (this.paymentCompletedAt)
-      throw new Error("Cannot mark failed after payment completion");
-
+    if (this.paymentCompletedAt) return;
     this.paymentFailedAt = date;
   }
 
@@ -177,7 +177,15 @@ export class RideTimeline {
     if (data.paymentCompletedAt)
       timeline.setPaymentCompletedAt(data.paymentCompletedAt);
 
-    if (data.paymentFailedAt) timeline.setPaymentFailedAt(data.paymentFailedAt);
+    if (data.paymentCompletedAt && data.paymentFailedAt) {
+      timeline.setPaymentCompletedAt(data.paymentCompletedAt);
+    } else {
+      if (data.paymentCompletedAt)
+        timeline.setPaymentCompletedAt(data.paymentCompletedAt);
+
+      if (data.paymentFailedAt)
+        timeline.setPaymentFailedAt(data.paymentFailedAt);
+    }
 
     if (data.paymentRefundedAt)
       timeline.setPaymentRefundedAt(data.paymentRefundedAt);

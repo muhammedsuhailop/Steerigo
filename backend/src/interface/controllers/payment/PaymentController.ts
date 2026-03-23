@@ -12,7 +12,8 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import { ApiResponse } from "@shared/types/Common";
+import { MarkPaymentFailedDto } from "@application/dto/payment/MarkPaymentFailedDto";
+import { MarkPaymentFailedResponseDto } from "@application/dto/payment/MarkPaymentFailedResponseDto";
 
 @injectable()
 export class PaymentController {
@@ -33,6 +34,11 @@ export class PaymentController {
     private readonly confirmCashPaymentUseCase: IUseCase<
       ConfirmCashPaymentDto,
       Promise<Result<ConfirmCashPaymentResponseDto>>
+    >,
+    @inject(TYPES.MarkPaymentFailedUseCase)
+    private readonly markPaymentFailedUseCase: IUseCase<
+      MarkPaymentFailedDto,
+      Promise<Result<MarkPaymentFailedResponseDto>>
     >,
   ) {}
 
@@ -139,6 +145,36 @@ export class PaymentController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "confirm_cash_payment",
+      );
+
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async markPaymentFailed(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.userId;
+
+      const dto = MarkPaymentFailedDto.fromRequest(userId, req.body);
+      const result = await this.markPaymentFailedUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "mark_payment_failed",
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json(result.getValue());
+    } catch (error) {
+      Logger.error("PaymentController.markPaymentFailed error", { error });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "mark_payment_failed",
       );
 
       res.status(statusCode).json(response);
