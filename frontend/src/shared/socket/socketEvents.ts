@@ -24,4 +24,7 @@ export const SOCKET_EVENTS = {
     PAYMENT_FAILED: "payment:failed",
     PAYMENT_CASH_CONFIRMED: "cash-confirmed",
   },
+  NOTIFICATION: {
+    CREATED: "notification:created",
+  },
 } as const;

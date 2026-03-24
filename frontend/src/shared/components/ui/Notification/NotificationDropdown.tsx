@@ -141,11 +141,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                   !notif.isRead ? `${bgColor}/40` : ""
                 }`}
               >
-                <Link
-                  to={`/notifications/${notif.id}`}
-                  onClick={onClose}
-                  className="flex items-start space-x-3 p-3 pr-10"
-                >
+                <div className="flex items-start space-x-3 p-3 pr-10 cursor-pointer">
                   <div className="flex-shrink-0">{icon}</div>
                   <div className="flex-1 min-w-0">
                     <p
@@ -160,7 +156,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       {formatNotificationDate(notif.createdAt)}
                     </span>
                   </div>
-                </Link>
+                </div>
 
                 {!notif.isRead && (
                   <button

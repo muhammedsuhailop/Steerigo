@@ -84,6 +84,9 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
 
   const { data, refetch } = useGetNotificationsQuery(undefined, {
     skip: !isAuthenticated,
+    // This ensures the query stays "alive" and listening to the socket
+    // even when the dropdown is closed
+    pollingInterval: 0,
   });
 
   const unreadCount = data?.data?.unreadCount || 0;

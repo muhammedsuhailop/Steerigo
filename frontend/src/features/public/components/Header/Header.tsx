@@ -68,6 +68,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   const { data, refetch } = useGetNotificationsQuery(undefined, {
     skip: !isAuthenticated,
+    pollingInterval: 0,
   });
 
   const unreadCount = data?.data?.unreadCount || 0;
