@@ -97,3 +97,30 @@ export interface ETA {
   value: number;
   unit: string;
 }
+
+export interface PaymentSucceededPayload {
+  paymentId: string;
+  rideId: string;
+  riderId: string;
+  amount: number;
+  currency: string;
+  paidAt: string;
+}
+
+export interface PaymentFailedPayload {
+  paymentId: string;
+  rideId: string;
+  riderId: string;
+  reason?: string;
+  failedAt: string;
+}
+
+export interface PaymentCashConfirmedPayload {
+  paymentId: string;
+  rideId: string;
+  driverId: string;
+  riderId: string;
+  amount: number;
+  currency: string;
+  paidAt: string;
+}

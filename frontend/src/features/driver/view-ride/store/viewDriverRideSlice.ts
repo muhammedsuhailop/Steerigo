@@ -5,6 +5,7 @@ import {
   ViewDriverRideState,
 } from "../viewDriverRide.types";
 import { RideStatus } from "@/shared/types/ride.types";
+import { PaymentStatus } from "@/shared/types/payment.types";
 
 const initialState: ViewDriverRideState = {
   activeRide: null,
@@ -29,6 +30,21 @@ export const viewDriverRideSlice = createSlice({
         state.activeRide.status = action.payload;
       }
     },
+    updateDriverPaymentStatusLocal: (
+      state,
+      action: PayloadAction<{
+        status: PaymentStatus;
+        paidAt?: string;
+        reason?: string;
+      }>,
+    ) => {
+      if (state.activeRide) {
+        state.activeRide.paymentStatus = action.payload.status;
+        if (action.payload.paidAt) {
+          state.activeRide.timeline.paymentCompletedAt = action.payload.paidAt;
+        }
+      }
+    },
     clearDriverRideData: (state) => {
       state.activeRide = null;
       state.activeRider = null;
@@ -39,6 +55,7 @@ export const viewDriverRideSlice = createSlice({
 export const {
   setDriverRideData,
   updateDriverRideStatusLocal,
+  updateDriverPaymentStatusLocal,
   clearDriverRideData,
 } = viewDriverRideSlice.actions;
 

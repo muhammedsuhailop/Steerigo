@@ -2,14 +2,22 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
-import { updateRideStatusLocal } from "../store/viewRideSlice";
+import {
+  updateRideStatusLocal,
+  updatePaymentStatusLocal,
+} from "../store/viewRideSlice";
 import {
   RideArrivedPayload,
   RideStartedPayload,
   RideCompletedPayload,
   RideStatus,
-  RideFareBreakdown,
+  PaymentSucceededPayload,
+  PaymentFailedPayload,
 } from "@/shared/types/ride.types";
+import {
+  PaymentStatus,
+  PaymentFailureReason,
+} from "@/shared/types/payment.types";
 import { FareDetails } from "../types/viewRide.types";
 
 export const useViewRide = (rideId: string | undefined) => {
@@ -29,7 +37,6 @@ export const useViewRide = (rideId: string | undefined) => {
 
     const onArrived = (data: RideArrivedPayload) => {
       const payload = Array.isArray(data) ? data[0] : data;
-
       if (payload.rideId === rideId) {
         dispatch(
           updateRideStatusLocal({
@@ -56,21 +63,16 @@ export const useViewRide = (rideId: string | undefined) => {
 
     const onCompleted = (data: RideCompletedPayload) => {
       const payload = Array.isArray(data) ? data[0] : data;
-
       if (payload.rideId === rideId) {
         const mappedFare: FareDetails = {
           baseFare: payload.fareBreakdown?.baseFare?.amount ?? 0,
-
           tax: {
             total:
               (payload.fareBreakdown?.taxes?.fare?.amount?.amount ?? 0) +
               (payload.fareBreakdown?.taxes?.platformFee?.amount?.amount ?? 0),
           },
-
           platformFee: payload.fareBreakdown?.platformFee?.amount ?? 0,
-
           totalFare: payload.fareBreakdown?.totalFare?.amount ?? 0,
-
           currency: payload.fareBreakdown?.totalFare?.currency ?? "INR",
         };
 
@@ -80,6 +82,29 @@ export const useViewRide = (rideId: string | undefined) => {
             timestampField: "completedAt",
             timestampValue: payload.completedAt,
             fare: mappedFare,
+          }),
+        );
+      }
+    };
+
+    const onPaymentSucceeded = (data: PaymentSucceededPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(
+          updatePaymentStatusLocal({
+            paymentStatus: PaymentStatus.SUCCESS,
+            paymentCompletedAt: payload.paidAt,
+          }),
+        );
+      }
+    };
+
+    const onPaymentFailed = (data: PaymentFailedPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(
+          updatePaymentStatusLocal({
+            paymentStatus: PaymentStatus.FAILED,
           }),
         );
       }
@@ -106,12 +131,19 @@ export const useViewRide = (rideId: string | undefined) => {
     socket.on(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
     socket.on(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
 
+    socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
+    socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
+
     return () => {
       socket.emit(SOCKET_EVENTS.RIDE.LEAVE, rideId);
       socket.off(SOCKET_EVENTS.RIDE.ARRIVED, onArrived);
       socket.off(SOCKET_EVENTS.RIDE.STARTED, onStarted);
       socket.off(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
       socket.off(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
+
+      socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
+      socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
+
       socket.offAny();
     };
   }, [rideId, dispatch]);

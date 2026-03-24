@@ -53,14 +53,26 @@ export const viewRideSlice = createSlice({
       action: PayloadAction<{
         paymentStatus: PaymentStatus;
         paymentCompletedAt?: string;
+        paymentFailedAt?: string;
+        failureReason?: string;
       }>,
     ) => {
       if (state.activeRide) {
-        state.activeRide.paymentStatus = action.payload.paymentStatus;
+        const {
+          paymentStatus,
+          paymentCompletedAt,
+          paymentFailedAt,
+          failureReason,
+        } = action.payload;
 
-        if (action.payload.paymentCompletedAt) {
-          state.activeRide.timeline.paymentCompletedAt =
-            action.payload.paymentCompletedAt;
+        state.activeRide.paymentStatus = paymentStatus;
+
+        if (paymentCompletedAt) {
+          state.activeRide.timeline.paymentCompletedAt = paymentCompletedAt;
+        }
+
+        if (paymentFailedAt) {
+          state.activeRide.timeline.paymentFailedAt = paymentFailedAt;
         }
       }
     },

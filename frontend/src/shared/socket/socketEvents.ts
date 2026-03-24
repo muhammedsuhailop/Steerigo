@@ -18,4 +18,10 @@ export const SOCKET_EVENTS = {
     STARTED: "ride:started",
     COMPLETED: "ride:completed",
   },
+  PAYMENT: {
+    PAYMENT_INITIATED: "payment:initiated",
+    PAYMENT_COMPLETED: "payment:succeeded",
+    PAYMENT_FAILED: "payment:failed",
+    PAYMENT_CASH_CONFIRMED: "cash-confirmed",
+  },
 } as const;

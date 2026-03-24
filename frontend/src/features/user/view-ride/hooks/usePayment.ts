@@ -12,6 +12,19 @@ import {
 import { useDispatch } from "react-redux";
 import { updatePaymentStatusLocal } from "../store/viewRideSlice";
 
+import {
+  RazorpaySuccessResponse,
+  RazorpayFailureResponse,
+  RazorpayOptions,
+  RazorpayInstance,
+} from "@/shared/types/razorpay.types";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
 export const usePayment = () => {
   const dispatch = useDispatch();
 
@@ -45,7 +58,7 @@ export const usePayment = () => {
         await markFailed({ paymentId, reason }).catch(() => {});
       };
 
-      const options = {
+      const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderResponse.data.amount * 100,
         currency: orderResponse.data.currency,
@@ -53,7 +66,7 @@ export const usePayment = () => {
         description: `Payment for Ride ${rideId}`,
         order_id: orderResponse.data.gatewayOrderId,
 
-        handler: async (response: any) => {
+        handler: async (response: RazorpaySuccessResponse) => {
           isFinalized = true;
           try {
             await verifyPayment({
@@ -95,13 +108,14 @@ export const usePayment = () => {
             }
           },
         },
+
         prefill: { name: user.name, email: user.email },
         theme: { color: "#000000" },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
 
-      rzp.on("payment.failed", (response: any) => {
+      rzp.on("payment.failed", (response: RazorpayFailureResponse) => {
         const error = response?.error;
 
         if (error?.reason === "payment_failed") {
