@@ -8,6 +8,12 @@ export interface Notification {
   metadata: unknown;
 }
 
+export interface NotificationQueryParams {
+  page?: number;
+  limit?: number;
+  isRead?: boolean;
+}
+
 export interface NotificationsResponse {
   success: boolean;
   data: {
@@ -16,6 +22,8 @@ export interface NotificationsResponse {
     pagination: {
       total: number;
       totalPages: number;
+      currentPage: number;
+      limit: number;
     };
   };
 }

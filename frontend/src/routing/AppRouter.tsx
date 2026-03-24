@@ -30,9 +30,11 @@ import ViewDriverRidePage from "@/features/driver/view-ride/pages/ViewDriverRide
 import WalletPage from "@/features/driver/wallet/pages/WalletPage";
 import PayoutPage from "@/features/driver/payout/pages/PayoutPage";
 import PayoutManagement from "@/features/admin/payouts/pages/PayoutManagement";
+import { useNotificationSocket } from "@/features/notifications/hooks/useNotificationSocket";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
+  useNotificationSocket();
 
   const getDashboardRedirect = () => {
     switch (user?.role) {

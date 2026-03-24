@@ -1,5 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import {
   useGetNotificationsQuery,
   useMarkAsReadMutation,
@@ -7,7 +6,13 @@ import {
 import { GiConfirmed } from "react-icons/gi";
 import { GrAnnounce } from "react-icons/gr";
 import { HiBellAlert } from "react-icons/hi2";
-import { MdDirectionsCar, MdPayment, MdCancel, MdCheck } from "react-icons/md";
+import {
+  MdDirectionsCar,
+  MdCancel,
+  MdCheck,
+  MdChevronLeft,
+  MdChevronRight,
+} from "react-icons/md";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 import { NotificationDropdownProps } from "./NotificationDropdown.types.ts";
 
@@ -51,15 +56,32 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { data, isLoading } = useGetNotificationsQuery(undefined, {
-    skip: !isOpen,
-  });
+  const [page, setPage] = useState(1);
+  const [isReadFilter, setIsReadFilter] = useState<boolean | undefined>(
+    undefined,
+  );
+  const limit = 12;
+
+  useEffect(() => {
+    setPage(1);
+  }, [isReadFilter]);
+
+  const { data, isLoading, isFetching } = useGetNotificationsQuery(
+    {
+      page,
+      limit,
+      isRead: isReadFilter,
+    },
+    { skip: !isOpen },
+  );
+
   const [markAsRead] = useMarkAsReadMutation();
 
   if (!isOpen) return null;
 
   const notifications = data?.data?.notifications || [];
   const unreadCount = data?.data?.unreadCount || 0;
+  const pagination = data?.data?.pagination;
 
   const handleMarkAll = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,57 +101,76 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     const diffInDays = Math.floor(diffInSeconds / 86400);
 
     if (diffInSeconds < 60) return "just now";
-
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-
     if (diffInSeconds < 86400)
       return `${Math.floor(diffInSeconds / 3600)}h ago`;
-
     if (diffInDays === 1) return "Yesterday";
-
-    if (diffInDays < 365) {
-      return date.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-      });
-    }
-
-    return date.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-      <div className="p-3 border-b border-gray-100 font-medium text-gray-700 flex justify-between items-center bg-white">
-        <div className="flex items-center gap-2">
-          <span>Notifications</span>
+    <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden flex flex-col max-h-[500px]">
+      {/* Header */}
+      <div className="p-3 border-b border-gray-100 bg-white sticky top-0 z-10">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-semibold text-gray-800 text-sm">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
-              {unreadCount}
-            </span>
+            <button
+              onClick={handleMarkAll}
+              className="text-[11px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold transition-colors"
+            >
+              <IoCheckmarkDoneSharp size={14} />
+              Mark all
+            </button>
           )}
         </div>
-        {unreadCount > 0 && (
+
+        {/* Filter Taps */}
+        <div className="flex gap-2">
           <button
-            onClick={handleMarkAll}
-            className="text-[11px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-semibold transition-colors"
-            title="Mark all as read"
+            onClick={() => setIsReadFilter(undefined)}
+            className={`px-3 py-1 text-xs rounded-full font-medium transition-all ${
+              isReadFilter === undefined
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
           >
-            <IoCheckmarkDoneSharp size={14} />
-            Mark all
+            All
           </button>
-        )}
+          <button
+            onClick={() => setIsReadFilter(false)}
+            className={`px-3 py-1 text-xs rounded-full font-medium transition-all flex items-center gap-1 ${
+              isReadFilter === false
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Unread
+            {unreadCount > 0 && (
+              <span
+                className={`text-[10px] ${isReadFilter === false ? "text-blue-100" : "text-blue-600"}`}
+              >
+                ({unreadCount})
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
-      <ul className="max-h-80 overflow-y-auto">
-        {isLoading ? (
-          <li className="p-4 text-center text-sm text-gray-500">Loading...</li>
+      {/* List Content */}
+      <ul className="overflow-y-auto flex-1">
+        {isLoading || isFetching ? (
+          <li className="p-8 text-center text-sm text-gray-400">
+            Loading notifications...
+          </li>
         ) : notifications.length === 0 ? (
-          <li className="p-4 text-center text-sm text-gray-500">
-            No notifications yet
+          <li className="p-8 text-center">
+            <p className="text-sm text-gray-500 font-medium">
+              No notifications found
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              We'll notify you when something happens.
+            </p>
           </li>
         ) : (
           notifications.map((notif) => {
@@ -145,11 +186,11 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                   <div className="flex-shrink-0">{icon}</div>
                   <div className="flex-1 min-w-0">
                     <p
-                      className={`text-sm leading-tight ${!notif.isRead ? "font-semibold text-gray-900" : "text-gray-700"}`}
+                      className={`text-sm leading-tight ${!notif.isRead ? "font-bold text-gray-900" : "text-gray-700"}`}
                     >
                       {notif.title}
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                       {notif.body}
                     </p>
                     <span className="text-[10px] text-gray-400 mt-1 block font-medium">
@@ -176,6 +217,29 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           })
         )}
       </ul>
+
+      {/* Pagination Footer */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="p-2 border-t border-gray-100 bg-gray-50 flex items-center justify-between sticky bottom-0">
+          <button
+            disabled={page === 1 || isFetching}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <MdChevronLeft size={20} className="text-gray-600" />
+          </button>
+          <span className="text-[11px] font-medium text-gray-500">
+            Page {page} of {pagination.totalPages}
+          </span>
+          <button
+            disabled={page === pagination.totalPages || isFetching}
+            onClick={() => setPage((p) => p + 1)}
+            className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <MdChevronRight size={20} className="text-gray-600" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -82,12 +82,13 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const { data, refetch } = useGetNotificationsQuery(undefined, {
-    skip: !isAuthenticated,
-    // This ensures the query stays "alive" and listening to the socket
-    // even when the dropdown is closed
-    pollingInterval: 0,
-  });
+  const { data, refetch } = useGetNotificationsQuery(
+    { page: 1, limit: 12 },
+    {
+      skip: !isAuthenticated,
+      pollingInterval: 0,
+    },
+  );
 
   const unreadCount = data?.data?.unreadCount || 0;
 
