@@ -34,6 +34,7 @@ export class PaymentNotificationService {
 
   async notifyPaymentSucceeded(
     riderId: string,
+    driverId: string,
     payload: {
       paymentId: string;
       rideId: string;
@@ -48,6 +49,11 @@ export class PaymentNotificationService {
       io.to(`rider:${riderId}`).emit(SOCKET_EVENTS.PAYMENT_COMPLETED, payload);
 
       io.to(`ride:${payload.rideId}`).emit(
+        SOCKET_EVENTS.PAYMENT_COMPLETED,
+        payload,
+      );
+
+      io.to(`driver:${driverId}`).emit(
         SOCKET_EVENTS.PAYMENT_COMPLETED,
         payload,
       );

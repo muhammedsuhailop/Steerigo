@@ -4,7 +4,7 @@ export interface NotificationData {
   channel: string;
   title: string;
   body: string;
-  metadata: Record<string, string | undefined>;
+  metadata: Record<string, unknown>;
   isRead: boolean;
   readAt?: string;
   createdAt: string;

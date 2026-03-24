@@ -13,6 +13,7 @@ export interface IPaymentNotificationService {
 
   notifyPaymentSucceeded(
     riderId: string,
+    driverId:string,
     payload: PaymentSucceededPayload,
   ): Promise<void>;
 

@@ -20,6 +20,8 @@ export const SOCKET_EVENTS = {
   PAYMENT_COMPLETED: "payment:succeeded",
   PAYMENT_FAILED: "payment:failed",
   PAYMENT_CASH_CONFIRMED: "cash-confirmed",
+
+  NOTIFICATION_CREATED: "notification:created",
 } as const;
 
 export type SocketEventKey = keyof typeof SOCKET_EVENTS;
