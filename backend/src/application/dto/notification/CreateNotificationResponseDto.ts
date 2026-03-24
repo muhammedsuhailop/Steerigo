@@ -1,4 +1,4 @@
-interface CreateNotificationResponseDto {
+export interface CreateNotificationResponseDto {
   success: boolean;
   message: string;
   data: { notificationId: string };

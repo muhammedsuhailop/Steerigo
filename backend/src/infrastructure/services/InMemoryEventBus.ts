@@ -25,6 +25,7 @@ import {
   PaymentSucceededEvent,
 } from "@application/events/PaymentEvents";
 import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
+import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -393,7 +394,7 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentFailed(event: PaymentFailedEvent): Promise<void> {
-    const { riderId, driverId,rideId,paymentId } = event.payload;
+    const { riderId, driverId, rideId, paymentId } = event.payload;
     Logger.warn("Handling PaymentFailed", {
       riderId,
       paymentId: event.payload.paymentId,
