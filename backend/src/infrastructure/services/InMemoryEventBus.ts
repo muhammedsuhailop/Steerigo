@@ -178,11 +178,12 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentSucceeded(event: PaymentSucceededEvent) {
-    const { riderId, driverId } = event.payload;
+    const { riderId, driverId, driverUserId } = event.payload;
 
     await this.paymentNotificationService.notifyPaymentSucceeded(
       riderId,
       driverId,
+      driverUserId,
       event.payload,
     );
 
@@ -193,7 +194,7 @@ export class InMemoryEventBus implements IEventBus {
       metadata: { ...event.payload },
     });
 
-    await this.persistNotification(driverId, {
+    await this.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Payment received",
       body: "You received a payment.",
@@ -202,10 +203,11 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentFailed(event: PaymentFailedEvent) {
-    const { riderId, driverId } = event.payload;
+    const { riderId, driverUserId } = event.payload;
 
     await this.paymentNotificationService.notifyPaymentFailed(
       riderId,
+      driverUserId,
       event.payload,
     );
 
@@ -216,7 +218,7 @@ export class InMemoryEventBus implements IEventBus {
       metadata: { ...event.payload },
     });
 
-    await this.persistNotification(driverId, {
+    await this.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_FAILED,
       title: "Payment failed",
       body: "Rider payment failed.",

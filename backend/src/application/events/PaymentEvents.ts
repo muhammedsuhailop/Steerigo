@@ -22,6 +22,7 @@ export interface PaymentSucceededPayload {
   paymentId: string;
   rideId: string;
   driverId: string;
+  driverUserId: string;
   riderId: string;
   amount: number;
   currency: string;
@@ -36,7 +37,7 @@ export type PaymentSucceededEvent = BasePaymentEvent<
 export interface PaymentFailedPayload {
   paymentId: string;
   rideId: string;
-  driverId: string;
+  driverUserId: string;
   riderId: string;
   reason?: string;
   failedAt: string;

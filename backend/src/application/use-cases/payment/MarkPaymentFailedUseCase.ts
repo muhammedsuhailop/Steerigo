@@ -11,6 +11,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 import { IEventBus } from "@application/services/IEventBus";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 
 @injectable()
 export class MarkPaymentFailedUseCase
@@ -27,12 +28,15 @@ export class MarkPaymentFailedUseCase
     private readonly rideRepository: IRideRepository,
     @inject(TYPES.EventBus)
     private readonly eventBus: IEventBus,
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
   ) {}
 
   async execute(
     dto: MarkPaymentFailedDto,
   ): Promise<Result<MarkPaymentFailedResponseDto>> {
     const paymentId = dto.getPaymentId();
+    let driverUserId: string | null = null;
 
     try {
       Logger.info("Marking payment as failed", {
@@ -65,6 +69,10 @@ export class MarkPaymentFailedUseCase
         ride.getTimeline().setPaymentFailedAt(failedAt);
         ride.updatePaymentStatus(PaymentStatus.FAILED);
         await this.rideRepository.save(ride);
+
+        const driver = await this.driverRepository.findById(ride.getDriverId());
+
+        driverUserId = driver?.getUserId() ?? null;
       }
 
       Logger.info("Payment marked as failed", {
@@ -80,7 +88,7 @@ export class MarkPaymentFailedUseCase
         payload: {
           paymentId,
           rideId: payment.getRideId(),
-          driverId: ride?.getDriverId() as string,
+          driverUserId: driverUserId as string,
           riderId: payment.getRiderId(),
           reason: dto.getReason(),
           failedAt: failedAt.toISOString(),

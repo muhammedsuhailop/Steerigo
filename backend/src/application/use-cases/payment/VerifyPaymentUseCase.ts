@@ -14,6 +14,7 @@ import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 import { IEventBus } from "@application/services/IEventBus";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -31,6 +32,8 @@ export class VerifyPaymentUseCase
     private readonly earningsDistributionService: IEarningsDistributionService,
     @inject(TYPES.EventBus)
     private readonly eventBus: IEventBus,
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
   ) {}
 
   async execute(
@@ -61,6 +64,14 @@ export class VerifyPaymentUseCase
         gatewaySignature: dto.getGatewaySignature(),
       });
 
+      let driverUserId: string | null = null;
+
+      if (ride) {
+        const driver = await this.driverRepository.findById(ride.getDriverId());
+
+        driverUserId = driver?.getUserId() ?? null;
+      }
+
       if (!isValid) {
         payment.markFailed(PaymentFailureReason.SIGNATURE_VERIFICATION_FAILED);
         await this.paymentRepository.save(payment);
@@ -71,7 +82,7 @@ export class VerifyPaymentUseCase
           payload: {
             paymentId,
             rideId: payment.getRideId(),
-            driverId: ride?.getDriverId() as string,
+            driverUserId: driverUserId as string,
             riderId: payment.getRiderId(),
             reason: PaymentFailureReason.SIGNATURE_VERIFICATION_FAILED,
             failedAt: now.toISOString(),
@@ -99,6 +110,10 @@ export class VerifyPaymentUseCase
         ride.getTimeline().setPaymentCompletedAt(now);
         ride.updatePaymentStatus(PaymentStatus.SUCCESS);
         await this.rideRepository.save(ride);
+
+        const driver = await this.driverRepository.findById(ride.getDriverId());
+
+        driverUserId = driver?.getUserId() ?? null;
 
         const fareBreakdown = ride.getFareBreakdown();
         await this.earningsDistributionService
@@ -131,6 +146,7 @@ export class VerifyPaymentUseCase
           paymentId,
           rideId: payment.getRideId(),
           driverId: ride?.getDriverId() as string,
+          driverUserId: driverUserId as string,
           riderId: payment.getRiderId(),
           amount: payment.getAmount().getAmount(),
           currency: payment.getAmount().getCurrency(),
