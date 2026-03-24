@@ -17,12 +17,14 @@ import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-
-interface CreateNotificationResponseDto {
-  success: boolean;
-  message: string;
-  data: { notificationId: string };
-}
+import {
+  PaymentCashConfirmedEvent,
+  PaymentDomainEvent,
+  PaymentFailedEvent,
+  PaymentInitiatedEvent,
+  PaymentSucceededEvent,
+} from "@application/events/PaymentEvents";
+import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -34,9 +36,11 @@ export class InMemoryEventBus implements IEventBus {
       CreateNotificationDto,
       Promise<Result<CreateNotificationResponseDto>>
     >,
+    @inject(TYPES.PaymentNotificationService)
+    private readonly paymentNotificationService: IPaymentNotificationService,
   ) {}
 
-  async publish(event: RideDomainEvent): Promise<void> {
+  async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
     switch (event.type) {
       case "RideRequestCreated":
         await this.handleRideRequestCreated(event);
@@ -56,14 +60,24 @@ export class InMemoryEventBus implements IEventBus {
       case "RideCompleted":
         await this.handleRideCompleted(event);
         break;
+      case "PaymentInitiated":
+        return this.handlePaymentInitiated(event);
+
+      case "PaymentSucceeded":
+        return this.handlePaymentSucceeded(event);
+
+      case "PaymentFailed":
+        return this.handlePaymentFailed(event);
+
+      case "PaymentCashConfirmed":
+        return this.handlePaymentCashConfirmed(event);
+
       default: {
         const exhaustiveCheck: never = event;
         void exhaustiveCheck;
       }
     }
   }
-
-  // ─── Existing handlers ────────────────────────────────────────────────────
 
   private async handleRideRequestCreated(
     event: RideRequestCreatedEvent,
@@ -320,6 +334,123 @@ export class InMemoryEventBus implements IEventBus {
     await this.persistRideCompletedNotification(riderId, event);
   }
 
+  private async handlePaymentInitiated(
+    event: PaymentInitiatedEvent,
+  ): Promise<void> {
+    const { riderId } = event.payload;
+    Logger.info("Handling PaymentInitiated", {
+      riderId,
+      paymentId: event.payload.paymentId,
+    });
+
+    await this.paymentNotificationService.notifyPaymentInitiated(
+      riderId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_INITIATED,
+      title: "Payment Processing",
+      body: `Payment of ${event.payload.currency} ${event.payload.amount} has been initiated.`,
+      metadata: {
+        paymentId: event.payload.paymentId,
+        rideId: event.payload.rideId,
+      },
+    });
+  }
+
+  private async handlePaymentSucceeded(
+    event: PaymentSucceededEvent,
+  ): Promise<void> {
+    const { riderId, driverId, currency, rideId, paymentId, amount } =
+      event.payload;
+    Logger.info("Handling PaymentSucceeded", {
+      riderId,
+      paymentId: event.payload.paymentId,
+    });
+
+    await this.paymentNotificationService.notifyPaymentSucceeded(
+      riderId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment Successful",
+      body: `Your payment of ${event.payload.currency} ${event.payload.amount} was successful.`,
+      metadata: {
+        paymentId: event.payload.paymentId,
+        rideId: event.payload.rideId,
+      },
+    });
+
+    await this.persistNotification(driverId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment Received",
+      body: `You received a payment of ${currency} ${amount} for ride ${rideId}.`,
+      metadata: { paymentId, rideId },
+    });
+  }
+
+  private async handlePaymentFailed(event: PaymentFailedEvent): Promise<void> {
+    const { riderId, driverId,rideId,paymentId } = event.payload;
+    Logger.warn("Handling PaymentFailed", {
+      riderId,
+      paymentId: event.payload.paymentId,
+    });
+
+    await this.paymentNotificationService.notifyPaymentFailed(
+      riderId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_FAILED,
+      title: "Payment Failed",
+      body: `Payment failed: ${event.payload.reason || "Unknown error"}. Please try again.`,
+      metadata: {
+        paymentId: event.payload.paymentId,
+        rideId: event.payload.rideId,
+      },
+    });
+
+    await this.persistNotification(driverId, {
+      type: NotificationType.PAYMENT_FAILED,
+      title: "Rider Payment Failed",
+      body: `The online payment for ride ${rideId} failed. Please check with the rider.`,
+      metadata: { paymentId, rideId },
+    });
+  }
+
+  private async handlePaymentCashConfirmed(
+    event: PaymentCashConfirmedEvent,
+  ): Promise<void> {
+    const { driverId, riderId, amount, currency, rideId } = event.payload;
+
+    await this.paymentNotificationService.notifyPaymentCashConfirmed(
+      driverId,
+      event.payload,
+    );
+    await this.persistNotification(driverId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Cash Received",
+      body: `You confirmed receipt of ${currency} ${amount}.`,
+      metadata: { rideId, paymentId: event.payload.paymentId },
+    });
+
+    await this.paymentNotificationService.notifyPaymentSucceeded(riderId, {
+      ...event.payload,
+      paidAt: event.payload.paidAt,
+    });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment Successful",
+      body: `The driver confirmed your cash payment of ${currency} ${amount}.`,
+      metadata: { rideId, paymentId: event.payload.paymentId },
+    });
+  }
+
   private async persistRideCompletedNotification(
     riderId: string,
     event: RideCompletedEvent,
@@ -357,6 +488,47 @@ export class InMemoryEventBus implements IEventBus {
       Logger.error("Unexpected error persisting ride completed notification", {
         riderId,
         rideId: event.payload.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async persistNotification(
+    recipientId: string,
+    data: {
+      type: NotificationType;
+      title: string;
+      body: string;
+      metadata: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    try {
+      const dto = CreateNotificationDto.fromPayload({
+        recipientId,
+        type: data.type,
+        channel: NotificationChannel.IN_APP,
+        title: data.title,
+        body: data.body,
+        metadata: data.metadata,
+      });
+
+      const result = await this.createNotificationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.error(`Failed to persist ${data.type} notification`, {
+          recipientId,
+          error: result.getError().message,
+        });
+        return;
+      }
+
+      Logger.info(`${data.type} notification persisted successfully`, {
+        recipientId,
+        notificationId: result.getValue().data.notificationId,
+      });
+    } catch (error) {
+      Logger.error(`Unexpected error persisting ${data.type} notification`, {
+        recipientId,
         error: error instanceof Error ? error.message : String(error),
       });
     }

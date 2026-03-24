@@ -17,6 +17,7 @@ import { Payment } from "@domain/entities/Payment";
 import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
 import { IIdGenerator } from "@application/services/IIdGenerator";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
+import { IEventBus } from "@application/services/IEventBus";
 
 @injectable()
 export class ConfirmCashPaymentUseCase
@@ -29,18 +30,16 @@ export class ConfirmCashPaymentUseCase
   constructor(
     @inject(TYPES.PaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
-
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
-
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
-
     @inject(TYPES.EarningsDistributionService)
     private readonly earningsDistributionService: IEarningsDistributionService,
-
     @inject(TYPES.IDGenerator)
     private readonly idGenerator: IIdGenerator,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -76,7 +75,8 @@ export class ConfirmCashPaymentUseCase
         return Result.failure(PaymentErrors.rideNotCompleted(rideId));
       }
 
-      const existingPayment = await this.paymentRepository.findSuccessfulByRideId(rideId);
+      const existingPayment =
+        await this.paymentRepository.findSuccessfulByRideId(rideId);
       if (existingPayment) {
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }
@@ -141,6 +141,20 @@ export class ConfirmCashPaymentUseCase
         rideId,
         driverId,
         paidAt: paidAt.toISOString(),
+      });
+
+      await this.eventBus.publish({
+        type: "PaymentCashConfirmed",
+        occurredAt: paidAt,
+        payload: {
+          paymentId: savedPayment.getId(),
+          rideId,
+          driverId,
+          riderId: ride.getRiderId(),
+          amount: amount.getAmount(),
+          currency: amount.getCurrency(),
+          paidAt: paidAt.toISOString(),
+        },
       });
 
       return Result.success({

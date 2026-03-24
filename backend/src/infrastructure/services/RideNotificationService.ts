@@ -21,7 +21,10 @@ export class RideNotificationService implements IRideNotificationService {
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`driver:${driverId}`).emit("ride:request:created", payload);
+      io.to(`driver:${driverId}`).emit(
+        SOCKET_EVENTS.DRIVER_REQUEST_CREATED,
+        payload,
+      );
       Logger.info("Notified driver of new request", {
         driverId,
         requestId: payload.requestId,
@@ -40,7 +43,10 @@ export class RideNotificationService implements IRideNotificationService {
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`driver:${driverId}`).emit("ride:request:cancelled", payload);
+      io.to(`driver:${driverId}`).emit(
+        SOCKET_EVENTS.DRIVER_REQUEST_CANCELLED,
+        payload,
+      );
     } catch (error) {
       Logger.error("Error notifying driver of cancelled request", {
         driverId,
@@ -56,7 +62,7 @@ export class RideNotificationService implements IRideNotificationService {
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`rider:${riderId}`).emit("ride:matched", payload);
+      io.to(`rider:${riderId}`).emit(SOCKET_EVENTS.RIDE_MATCHED, payload);
       Logger.info("Notified rider of matched ride", {
         riderId,
         rideId: payload.rideId,
@@ -72,7 +78,10 @@ export class RideNotificationService implements IRideNotificationService {
   ): Promise<void> {
     try {
       const io = getRideSocketServer();
-      io.to(`rider:${riderId}`).emit("ride:no-driver-found", payload);
+      io.to(`rider:${riderId}`).emit(
+        SOCKET_EVENTS.RIDE_NO_DRIVER_FOUND,
+        payload,
+      );
     } catch (error) {
       Logger.error("Error notifying rider of no driver found", {
         riderId,

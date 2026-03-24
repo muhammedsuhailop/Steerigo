@@ -13,6 +13,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
+import { IEventBus } from "@application/services/IEventBus";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -28,6 +29,8 @@ export class VerifyPaymentUseCase
     private readonly paymentGatewayService: IPaymentGatewayService,
     @inject(TYPES.EarningsDistributionService)
     private readonly earningsDistributionService: IEarningsDistributionService,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -61,6 +64,19 @@ export class VerifyPaymentUseCase
       if (!isValid) {
         payment.markFailed(PaymentFailureReason.SIGNATURE_VERIFICATION_FAILED);
         await this.paymentRepository.save(payment);
+
+        await this.eventBus.publish({
+          type: "PaymentFailed",
+          occurredAt: now,
+          payload: {
+            paymentId,
+            rideId: payment.getRideId(),
+            driverId: ride?.getDriverId() as string,
+            riderId: payment.getRiderId(),
+            reason: PaymentFailureReason.SIGNATURE_VERIFICATION_FAILED,
+            failedAt: now.toISOString(),
+          },
+        });
 
         if (ride) {
           ride.getTimeline().setPaymentFailedAt(now);
@@ -106,6 +122,20 @@ export class VerifyPaymentUseCase
         paymentId,
         rideId: payment.getRideId(),
         paidAt: now.toISOString(),
+      });
+
+      await this.eventBus.publish({
+        type: "PaymentSucceeded",
+        occurredAt: now,
+        payload: {
+          paymentId,
+          rideId: payment.getRideId(),
+          driverId: ride?.getDriverId() as string,
+          riderId: payment.getRiderId(),
+          amount: payment.getAmount().getAmount(),
+          currency: payment.getAmount().getCurrency(),
+          paidAt: now.toISOString(),
+        },
       });
 
       return Result.success({

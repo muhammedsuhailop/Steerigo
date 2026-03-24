@@ -9,6 +9,8 @@ import { PaymentController } from "@interface/controllers/payment/PaymentControl
 import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
 import { EarningsDistributionService } from "@infrastructure/services/EarningsDistributionService";
 import { MarkPaymentFailedUseCase } from "@application/use-cases/payment/MarkPaymentFailedUseCase";
+import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
+import { PaymentNotificationService } from "@infrastructure/services/PaymentNotificationService";
 
 export class PaymentFactory {
   static register(container: Container): void {
@@ -22,6 +24,10 @@ export class PaymentFactory {
       .bind<IEarningsDistributionService>(TYPES.EarningsDistributionService)
       .to(EarningsDistributionService)
       .inSingletonScope();
+
+    container
+      .bind<IPaymentNotificationService>(TYPES.PaymentNotificationService)
+      .to(PaymentNotificationService);
 
     // Use Cases
     container

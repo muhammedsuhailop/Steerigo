@@ -10,6 +10,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
+import { IEventBus } from "@application/services/IEventBus";
 
 @injectable()
 export class MarkPaymentFailedUseCase
@@ -24,6 +25,8 @@ export class MarkPaymentFailedUseCase
     private readonly paymentRepository: IPaymentRepository,
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -69,6 +72,19 @@ export class MarkPaymentFailedUseCase
         rideId: payment.getRideId(),
         reason: dto.getReason(),
         failedAt: failedAt.toISOString(),
+      });
+
+      await this.eventBus.publish({
+        type: "PaymentFailed",
+        occurredAt: failedAt,
+        payload: {
+          paymentId,
+          rideId: payment.getRideId(),
+          driverId: ride?.getDriverId() as string,
+          riderId: payment.getRiderId(),
+          reason: dto.getReason(),
+          failedAt: failedAt.toISOString(),
+        },
       });
 
       return Result.success({

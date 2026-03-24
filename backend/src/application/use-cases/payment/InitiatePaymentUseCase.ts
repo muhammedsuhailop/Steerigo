@@ -29,6 +29,7 @@ import { PaymentErrors } from "@domain/errors/PaymentErrors";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { Types } from "mongoose";
 import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
+import { IEventBus } from "@application/services/IEventBus";
 
 @injectable()
 export class InitiatePaymentUseCase
@@ -48,6 +49,8 @@ export class InitiatePaymentUseCase
     private readonly paymentGatewayService: IPaymentGatewayService,
     @inject(TYPES.EarningsDistributionService)
     private readonly earningsDistributionService: IEarningsDistributionService,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -73,7 +76,8 @@ export class InitiatePaymentUseCase
         return Result.failure(PaymentErrors.unauthorizedPaymentAccess(rideId));
       }
 
-      const existingPayment = await this.paymentRepository.findSuccessfulByRideId(rideId);
+      const existingPayment =
+        await this.paymentRepository.findSuccessfulByRideId(rideId);
       if (existingPayment) {
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }
@@ -93,6 +97,19 @@ export class InitiatePaymentUseCase
         method,
         { initiatedBy: userId },
       );
+
+      await this.eventBus.publish({
+        type: "PaymentInitiated",
+        occurredAt: new Date(),
+        payload: {
+          paymentId: payment.getId(),
+          rideId,
+          riderId: ride.getRiderId(),
+          amount: amount.getAmount(),
+          currency: amount.getCurrency(),
+          method: payment.getMethod(),
+        },
+      });
 
       if (method === PaymentMethod.ONLINE) {
         return this.handleOnlinePayment(payment, amount, ride);
