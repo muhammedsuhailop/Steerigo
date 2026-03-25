@@ -16,6 +16,8 @@ import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { PayoutErrors } from "@domain/errors/PayoutErrors";
 import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { Wallet } from "@domain/entities/Wallet";
+import { IIdGenerator } from "@application/services/IIdGenerator";
 
 @injectable()
 export class GetDriverWalletUseCase
@@ -29,6 +31,8 @@ export class GetDriverWalletUseCase
     private readonly walletRepository: IWalletRepository,
     @inject(TYPES.TransactionRepository)
     private readonly transactionRepository: ITransactionRepository,
+    @inject(TYPES.IDGenerator)
+    private readonly idGenerator: IIdGenerator,
   ) {}
 
   async execute(
@@ -50,13 +54,26 @@ export class GetDriverWalletUseCase
 
       const driverId = driver.getId().toString();
 
-      const wallet = await this.walletRepository.findByOwner(
+      let wallet = await this.walletRepository.findByOwner(
         driverId,
         WalletOwnerType.DRIVER,
       );
 
       if (!wallet) {
-        return Result.failure(PayoutErrors.driverWalletNotFound(driverId));
+        if (!wallet) {
+          Logger.info(
+            "Driver wallet not found, creating new one during fetch",
+            { driverId },
+          );
+
+          wallet = Wallet.create({
+            id: this.idGenerator.generate(),
+            ownerId: driverId,
+            ownerType: WalletOwnerType.DRIVER,
+          });
+
+          await this.walletRepository.save(wallet);
+        }
       }
 
       const paginatedResult =
