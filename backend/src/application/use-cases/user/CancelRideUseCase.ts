@@ -13,9 +13,9 @@ import {
 } from "@application/services/ICancellationChargeService";
 import { IEventBus } from "@application/services/IEventBus";
 import { Logger } from "@shared/utils/Logger";
-import { Money } from "@domain/value-objects/Money";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { RideCancellationErrors } from "@domain/errors/RideCancellationErrors";
 
 @injectable()
 export class CancelRideUseCase
@@ -45,35 +45,38 @@ export class CancelRideUseCase
 
     try {
       Logger.info("Rider cancellation requested", { riderId, rideId, reason });
-
       const ride = await this.rideRepository.findByRideId(rideId);
 
       if (!ride) {
-        return Result.failure(new DomainError("Ride not found"));
+        return Result.failure(RideCancellationErrors.rideNotFound(rideId));
       }
 
       if (ride.getRiderId() !== riderId) {
         return Result.failure(
-          new DomainError("You are not authorized to cancel this ride"),
+          RideCancellationErrors.unauthorizedCancellation(rideId),
         );
       }
 
       if (ride.isCancelled()) {
-        return Result.failure(new DomainError("Ride is already cancelled"));
+        return Result.failure(
+          RideCancellationErrors.rideAlreadyCancelled(rideId),
+        );
       }
 
       if (ride.isCompleted()) {
         return Result.failure(
-          new DomainError("Completed rides cannot be cancelled"),
+          RideCancellationErrors.cannotCancelCompletedRide(rideId),
         );
       }
 
+      // Eligibility — ride must not have started
       if (ride.isStarted()) {
         return Result.failure(
-          new DomainError("Started rides cannot be cancelled by rider"),
+          RideCancellationErrors.cannotCancelStartedRide(rideId),
         );
       }
 
+      // Build cancellation context
       const arrivedAt = ride.getArrivedAt();
       const isDriverArrived = !!arrivedAt;
 
@@ -95,26 +98,47 @@ export class CancelRideUseCase
         isDriverDelayed: false,
       };
 
-      Logger.debug("Ride FareBreakdown before cancellation", {
+      Logger.debug("Cancellation context built", {
         rideId,
-        baseFare: ride.getFareBreakdown()?.getBaseFare()?.getAmount(),
-        totalFare: ride.getFareBreakdown()?.getTotalFare()?.getAmount(),
+        ...context,
       });
 
-      const fareBreakdown = ride.getFareBreakdown();
-      const cancellationFee: Money =
-        await this.cancellationChargeService.calculateRiderCancellationCharge({
-          fareBreakdown,
-          context,
-          searchDate: now,
-        });
+      // Calculate cancellation charge
+      let cancellationFee;
+      try {
+        cancellationFee =
+          await this.cancellationChargeService.calculateRiderCancellationCharge(
+            {
+              fareBreakdown: ride.getFareBreakdown(),
+              context,
+              searchDate: now,
+            },
+          );
+      } catch (err) {
+        return Result.failure(
+          RideCancellationErrors.chargeCalculationFailed(
+            rideId,
+            err instanceof Error ? err.message : String(err),
+          ),
+        );
+      }
 
+      // Build resolved FareBreakdown and cancel ride
       const resolvedFareBreakdown: FareBreakdown =
         cancellationFee.getAmount() === 0
           ? FareBreakdown.zero(cancellationFee.getCurrency())
           : FareBreakdown.forCancellation(cancellationFee);
 
-      ride.cancelWithFareBreakdown(resolvedFareBreakdown);
+      try {
+        ride.cancelWithFareBreakdown(resolvedFareBreakdown);
+      } catch (err) {
+        return Result.failure(
+          RideCancellationErrors.fareResetFailed(
+            rideId,
+            err instanceof Error ? err.message : String(err),
+          ),
+        );
+      }
 
       if (cancellationFee.getAmount() === 0) {
         ride.updatePaymentStatus(PaymentStatus.SUCCESS);
@@ -161,8 +185,7 @@ export class CancelRideUseCase
         rideId: ride.getRideId(),
         status: ride.getStatus(),
         paymentStatus: ride.getPaymentStatus(),
-        fee: cancellationFee.getAmount(),
-        currency: cancellationFee.getCurrency(),
+        resolvedTotalFare: ride.getFareBreakdown().getTotalFare().getAmount(),
       });
 
       return Result.success({
@@ -181,7 +204,7 @@ export class CancelRideUseCase
             : "Ride cancelled successfully with no cancellation fee.",
       });
     } catch (error) {
-      Logger.error("Error processing rider ride cancellation", {
+      Logger.error("Unexpected error processing rider ride cancellation", {
         riderId,
         rideId,
         error: error instanceof Error ? error.message : String(error),

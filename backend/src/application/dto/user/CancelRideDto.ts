@@ -1,8 +1,7 @@
-import { DomainError } from "@domain/errors/DomainError";
+import { RideCancellationErrors } from "@domain/errors/RideCancellationErrors";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 interface CancelRideRequestBody {
-  rideId?: string;
   reason?: RideCancellationReason | string;
 }
 
@@ -27,17 +26,11 @@ export class CancelRideDto {
     body: unknown,
   ): CancelRideDto {
     const parsedBody = (body ?? {}) as CancelRideRequestBody;
-
-    const paramRideId = params.rideId;
-    const bodyRideId = parsedBody.rideId;
     const reason = parsedBody.reason as RideCancellationReason;
-
-    const effectiveRideId = paramRideId ?? bodyRideId;
+    const effectiveRideId = params.rideId;
 
     const dto = new CancelRideDto(riderId, effectiveRideId as string, reason);
-
     dto.validate();
-
     return dto;
   }
 
@@ -47,20 +40,18 @@ export class CancelRideDto {
 
   validate(): void {
     if (!this.riderId || this.riderId.trim().length === 0) {
-      throw new DomainError("Rider ID is required to cancel a ride");
+      throw RideCancellationErrors.unauthorizedCancellation("unknown");
     }
 
     if (!this.rideId || this.rideId.trim().length === 0) {
-      throw new DomainError("Ride ID is required to cancel a ride");
+      throw RideCancellationErrors.rideNotFound("unknown");
     }
 
-    if (!this.reason) {
-      throw new DomainError("Cancellation reason is required");
-    }
-
-    const validReasons = Object.values(RideCancellationReason);
-    if (!validReasons.includes(this.reason)) {
-      throw new DomainError("Invalid ride cancellation reason");
+    if (
+      !this.reason ||
+      !Object.values(RideCancellationReason).includes(this.reason)
+    ) {
+      throw RideCancellationErrors.invalidCancellationReason(this.reason ?? "");
     }
   }
 }
