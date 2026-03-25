@@ -21,10 +21,11 @@ export interface RideData {
   rideType: string;
   fare: number;
   currency: string;
+  paymentStatus: string;
   timeline: {
     requestedAt: string;
     acceptedAt?: string;
-    arrivedAt?:string;
+    arrivedAt?: string;
     startedAt?: string;
     completedAt?: string;
     cancelledAt?: string;
