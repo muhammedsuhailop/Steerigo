@@ -7,6 +7,10 @@ export class Money {
   ) {}
 
   static create(amount: number, currency: string = "INR"): Money {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      throw new DomainError("Invalid money amount");
+    }
+
     if (amount < 0) {
       throw new DomainError("Amount cannot be negative");
     }
@@ -15,7 +19,7 @@ export class Money {
   }
 
   static zero(currency: string = "INR"): Money {
-    return new Money(0, currency);
+    return Money.create(0, currency);
   }
 
   getAmount(): number {

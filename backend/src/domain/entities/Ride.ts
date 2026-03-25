@@ -261,6 +261,22 @@ export class Ride {
     this.timeline.setCancelledAt(new Date());
   }
 
+  cancelWithFareBreakdown(resolvedFare: FareBreakdown): void {
+    if (this.isCancelled()) {
+      throw new Error("Ride is already cancelled");
+    }
+    if (this.isCompleted()) {
+      throw new Error("Completed rides cannot be cancelled");
+    }
+    if (this.isStarted()) {
+      throw new Error("Started rides cannot be cancelled by rider");
+    }
+
+    this.fareBreakdown = resolvedFare;
+    this.status = RideStatus.CANCELLED;
+    this.timeline.setCancelledAt(new Date());
+  }
+
   applyCoupon(code: string, discountAmount: number): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
       throw new Error(

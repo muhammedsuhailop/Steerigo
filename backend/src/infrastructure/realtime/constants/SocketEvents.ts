@@ -10,6 +10,9 @@ export const SOCKET_EVENTS = {
   RIDE_LEAVE: "ride:leave",
   RIDE_NO_DRIVER_FOUND: "ride:no-driver-found",
 
+  RIDE_CANCELLED_RIDER: "ride:cancelled:rider",
+  RIDE_CANCELLED_DRIVER: "ride:cancelled:driver",
+
   AUTH_LOGOUT: "auth:logout",
 
   RIDE_ARRIVED: "ride:arrived",

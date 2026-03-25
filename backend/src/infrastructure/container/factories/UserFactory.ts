@@ -27,6 +27,9 @@ import { DomainError } from "@domain/errors/DomainError";
 import { CancelRideRequestsUseCase } from "@application/use-cases/user/CancelRideRequestsUseCase";
 import { GetUserRideByIdUseCase } from "@application/use-cases/user/GetUserRideByIdUseCase";
 import { GetUserRidesUseCase } from "@application/use-cases/user/GetUserRidesUseCase";
+import { CancelRideDto } from "@application/dto/user/CancelRideDto";
+import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseDto";
+import { CancelRideUseCase } from "@application/use-cases/user/CancelRideUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -80,6 +83,12 @@ export class UserFactory {
     container
       .bind<GetUserRidesUseCase>(TYPES.GetUserRidesUseCase)
       .to(GetUserRidesUseCase);
+
+    container
+      .bind<
+        IUseCase<CancelRideDto, Promise<Result<CancelRideResponseDto>>>
+      >(TYPES.CancelRideUseCase)
+      .to(CancelRideUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

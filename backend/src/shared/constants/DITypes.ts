@@ -36,6 +36,7 @@ export const TYPES = {
   EarningsDistributionService: Symbol.for("EarningsDistributionService"),
   IDGenerator: Symbol.for("IDGenerator"),
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
+  CancellationChargeService: Symbol.for("CancellationChargeService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -124,6 +125,7 @@ export const TYPES = {
   CancelRideRequestsUseCase: Symbol.for("CancelRideRequestsUseCase"),
   GetUserRideByIdUseCase: Symbol.for("GetUserRideByIdUseCase"),
   GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
+  CancelRideUseCase: Symbol.for("CancelRideUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
