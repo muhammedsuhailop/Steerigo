@@ -21,6 +21,10 @@ import { schedulingApi } from "@/features/driver/scheduling/services/schedulingA
 import { driverApi } from "@/features/driver";
 import { userProfileApi } from "@/features/user";
 import { API_ENDPOINTS } from "@/shared/constants/api";
+import { driverWalletApi } from "@/features/driver/wallet/services/driverWalletApi";
+import { driverPayoutApi } from "@/features/driver/payout/services/driverPayoutApi";
+import { viewRideApi } from "@/features/user/view-ride/services/viewRideApi";
+import { viewDriverRideApi } from "@/features/driver/view-ride/services/viewDriverRideApi";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -219,6 +223,12 @@ export const authApi = createApi({
           dispatch(schedulingApi.util.resetApiState());
           dispatch(driverApi.util.resetApiState());
           dispatch(userProfileApi.util.resetApiState());
+          dispatch(driverApi.util.resetApiState());
+          dispatch(driverWalletApi.util.resetApiState());
+          dispatch(driverPayoutApi.util.resetApiState());
+          dispatch(viewRideApi.util.resetApiState());
+          dispatch(viewDriverRideApi.util.resetApiState());
+
           clearAuthStorage();
         }
       },

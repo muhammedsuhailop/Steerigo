@@ -13,7 +13,7 @@ export interface UserInfo {
   id: string;
   name?: string;
   email?: string;
-  avatarUrl?: string;
+  profilePicture?: string;
 }
 
 export interface ProfileDropdownProps {

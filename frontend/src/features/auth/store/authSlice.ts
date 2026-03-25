@@ -255,10 +255,7 @@ const authSlice = createSlice({
     setGoogleAuthLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    /**
-     * CRITICAL: This reducer is called by tokenRefresh.ts to update tokens
-     * It synchronizes localStorage and Redux state
-     */
+    
     setTokens: (
       state,
       action: PayloadAction<{ accessToken: string; refreshToken: string }>

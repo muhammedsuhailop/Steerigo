@@ -21,6 +21,8 @@ import {
 } from "@/shared/components/ui";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
 import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
+import { useGetWalletDetailsQuery } from "@/features/driver/wallet/services/driverWalletApi";
+import { useNavigate } from "react-router-dom";
 
 export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   title = "Dashboard",
@@ -38,12 +40,22 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const messagesRef = useRef<HTMLDivElement>(null);
   const walletRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth,
   );
+
   const { isOnline, driver } = useSelector((state: RootState) => state.driver);
-  const walletBalance = driver?.todayEarnings || 0;
+
+  const { data: walletResponse } = useGetWalletDetailsQuery(
+    { limit: 5 },
+    { skip: !isAuthenticated },
+  );
+
+  const walletData = walletResponse?.data;
+  const walletBalance = walletData?.availableBalance || 0;
+  const currency = walletData?.currency || "₹";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -120,7 +132,7 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
           <div className="block lg:hidden">
             <Logo size="md" variant="square" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 truncate max-w-[120px] xs:max-w-none">
+          <h1 className="text-xl font-semibold text-gray-900 truncate max-w-[120px] md:max-w-none md:overflow-visible">
             {title}
           </h1>
         </div>
@@ -146,14 +158,16 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
             <div className="relative" ref={walletRef}>
               <button
                 onClick={() => setIsWalletOpen(!isWalletOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isWalletOpen ? "bg-emerald-50 text-emerald-600" : "hover:bg-gray-100 text-gray-600"}`}
               >
-                <RiWallet3Line className="w-5 h-5 text-gray-600" />
+                <RiWallet3Line className="w-5 h-5" />
               </button>
               <WalletDropdown
                 isOpen={isWalletOpen}
                 onClose={() => setIsWalletOpen(false)}
                 balance={walletBalance}
+                currency={currency}
+                transactions={walletData?.transactions}
               />
             </div>
           </div>
@@ -205,15 +219,18 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
                   </span>
                 </button>
 
-                <button className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => {
+                    navigate("/driver/wallet");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
                   <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center mr-3">
                     <RiWallet3Line className="w-5 h-5 text-green-600" />
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="font-medium text-gray-900">Wallet</span>
-                    <span className="text-[11px] text-gray-500">
-                      Balance: ₹{walletBalance}
-                    </span>
                   </div>
                 </button>
 
@@ -248,8 +265,18 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
               className="flex items-center p-1 hover:bg-gray-100 rounded-full sm:rounded-lg transition-colors"
             >
               <div className="relative">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-                  <RiUserLine className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+                  {user?.profilePicture ? (
+                    <img
+                      src={user.profilePicture}
+                      alt="profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <RiUserLine className="w-5 h-5 text-gray-600" />
+                    </div>
+                  )}
                 </div>
               </div>
               <RiArrowDropDownLine className="w-5 h-5 text-gray-500 hidden sm:block" />

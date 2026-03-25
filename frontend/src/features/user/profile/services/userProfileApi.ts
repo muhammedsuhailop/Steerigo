@@ -8,6 +8,7 @@ import type {
   UserProfileFormData,
   UserStats,
 } from "../types/userProfile.types";
+import { updateUser } from "@/features/auth/store/authSlice";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -41,6 +42,34 @@ export const userProfileApi = createApi({
         method: "PUT",
         data,
       }),
+
+      async onQueryStarted({ userId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: response } = await queryFulfilled;
+
+          const updatedProfile = response.data;
+
+          dispatch(
+            userProfileApi.util.updateQueryData(
+              "getUserProfile",
+              userId,
+              (draft) => {
+                draft.data = updatedProfile;
+              },
+            ),
+          );
+
+          dispatch(
+            updateUser({
+              name: updatedProfile.name,
+              email: updatedProfile.email,
+            }),
+          );
+        } catch (err) {
+          console.error("Profile update failed", err);
+        }
+      },
+
       invalidatesTags: (result, error, { userId }) => [
         { type: "UserProfile", id: userId },
         { type: "UserStats", id: userId },

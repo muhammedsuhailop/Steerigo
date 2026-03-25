@@ -1,124 +1,118 @@
 import React from "react";
-import type { WalletDropdownProps, Transaction } from "./Wallet.types";
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    type: "credit",
-    description: "Ride Payment",
-    amount: 250,
-    timestamp: "2 minutes ago",
-    category: "ride_payment",
-  },
-  {
-    id: "2",
-    type: "credit",
-    description: "Night Bonus",
-    amount: 50,
-    timestamp: "1 hour ago",
-    category: "bonus",
-  },
-  {
-    id: "3",
-    type: "debit",
-    description: "Platform Fee",
-    amount: 25,
-    timestamp: "2 hours ago",
-    category: "fee",
-  },
-];
+import { useNavigate } from "react-router-dom";
+import type { WalletDropdownProps } from "./Wallet.types";
 
 export const WalletDropdown: React.FC<WalletDropdownProps> = ({
   isOpen,
   onClose,
   balance,
-  transactions = mockTransactions,
-  onWithdraw,
-  onViewHistory,
-  currency = "₹",
+  transactions = [],
+  currency = "INR",
 }) => {
+  const navigate = useNavigate();
+  const displaySymbol = currency === "INR" ? "₹ " : currency + ":";
+
   if (!isOpen) return null;
 
   const handleWithdraw = () => {
-    if (onWithdraw) {
-      onWithdraw();
-    }
+    navigate("/driver/payouts");
     onClose();
   };
 
   const handleViewHistory = () => {
-    if (onViewHistory) {
-      onViewHistory();
-    }
+    navigate("/driver/wallet");
     onClose();
   };
 
-  const getTransactionColor = (type: Transaction["type"]): string => {
-    return type === "credit" ? "text-emerald-600" : "text-red-600";
-  };
-
-  const getTransactionSign = (type: Transaction["type"]): string => {
-    return type === "credit" ? "+" : "-";
+  // Logic based on TransactionDirection from wallet.types.ts
+  const getTransactionStyles = (direction: string) => {
+    const isIncoming =
+      direction.toLowerCase() === "incoming" ||
+      direction.toLowerCase() === "credit";
+    return {
+      color: isIncoming ? "text-emerald-600" : "text-red-600",
+      sign: isIncoming ? "+" : "-",
+    };
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-900">Wallet</h3>
+    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+      <div className="p-4 border-b border-gray-200 bg-gray-50/50">
+        <h3 className="text-sm font-bold text-gray-900">Driver Wallet</h3>
       </div>
+
       <div className="p-4">
-        {/* Balance */}
-        <div className="text-center mb-4">
-          <p className="text-xs text-gray-500 mb-1">Available Balance</p>
-          <p className="text-2xl font-bold text-emerald-600">
-            {currency}
-            {balance.toLocaleString()}
+        {/* Real Balance */}
+        <div className="text-center mb-5 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+          <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold mb-1">
+            Available Balance
+          </p>
+          <p className="text-3xl font-black text-emerald-700">
+            {displaySymbol}
+            {balance.toLocaleString("en-IN")}
           </p>
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-2">
+        {/* Real Quick Actions */}
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleWithdraw}
-            className="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg transition-colors text-sm font-medium"
+            className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-xs font-bold shadow-sm"
           >
-            Withdraw Money
+            Withdraw
           </button>
           <button
             onClick={handleViewHistory}
-            className="w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+            className="flex-1 py-2.5 px-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-xs font-bold"
           >
-            Transaction History
+            History
           </button>
         </div>
 
-        {/* Recent Transactions */}
-        {transactions.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-xs font-medium text-gray-700 mb-2">Recent</h4>
-            <div className="space-y-2">
-              {transactions.slice(0, 3).map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="text-gray-600 truncate flex-1 mr-2">
-                    {transaction.description}
-                  </span>
-                  <span
-                    className={`font-medium ${getTransactionColor(
-                      transaction.type
-                    )}`}
-                  >
-                    {getTransactionSign(transaction.type)}
-                    {currency}
-                    {transaction.amount}
-                  </span>
-                </div>
-              ))}
-            </div>
+        {/* Recent Transactions from API */}
+        <div className="mt-5 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">
+              Recent Activity
+            </h4>
           </div>
-        )}
+
+          <div className="space-y-3">
+            {transactions.length > 0 ? (
+              transactions.slice(0, 4).map((transaction) => {
+                const { color, sign } = getTransactionStyles(
+                  transaction.direction,
+                );
+                return (
+                  <div
+                    key={transaction.id}
+                    className="flex items-start justify-between group"
+                  >
+                    <div className="flex-1 mr-3">
+                      <p className="text-xs font-semibold text-gray-800 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                        {transaction.note || "System Transaction"}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        {new Date(transaction.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-xs font-bold whitespace-nowrap ${color}`}
+                    >
+                      {sign}
+                      {displaySymbol}
+                      {transaction.amount}
+                    </span>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-xs text-center text-gray-400 py-2">
+                No recent transactions
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
