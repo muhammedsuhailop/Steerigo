@@ -26,6 +26,7 @@ import { driverWalletApi } from "@/features/driver/wallet/services/driverWalletA
 import { driverPayoutApi } from "@/features/driver/payout/services/driverPayoutApi";
 import { adminPayoutApi } from "@/features/admin/payouts/services/adminPayoutApi";
 import { driverRidesApi } from "@/features/driver/driver-rides/services/driverRidesApi";
+import { userRidesApi } from "@/features/user/rides/services/userRidesApi";
 
 export const store = configureStore({
   reducer: {
@@ -54,6 +55,7 @@ export const store = configureStore({
     [driverProfileApi.reducerPath]: driverProfileApi.reducer,
     [driverSearchApi.reducerPath]: driverSearchApi.reducer,
     [viewRideApi.reducerPath]: viewRideApi.reducer,
+    [userRidesApi.reducerPath]: userRidesApi.reducer,
 
     // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
@@ -92,6 +94,7 @@ export const store = configureStore({
       driverPayoutApi.middleware,
       adminPayoutApi.middleware,
       driverRidesApi.middleware,
+      userRidesApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });
