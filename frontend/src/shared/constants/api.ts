@@ -32,7 +32,7 @@ export const API_ENDPOINTS = {
     REGISTER: "/driver/register",
     PROFILE: "/driver/profile",
     KYC: "/driver/kyc",
-    RIDES: "/driver/rides",
+    RIDES: "/driver/ride/rides",
     STATUS: "/driver/status",
     EARNINGS: "/driver/earnings",
     DASHBOARD: "/driver/dashboard",

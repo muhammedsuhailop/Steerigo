@@ -31,6 +31,7 @@ import WalletPage from "@/features/driver/wallet/pages/WalletPage";
 import PayoutPage from "@/features/driver/payout/pages/PayoutPage";
 import PayoutManagement from "@/features/admin/payouts/pages/PayoutManagement";
 import { useNotificationSocket } from "@/features/notifications/hooks/useNotificationSocket";
+import DriverRidesPage from "@/features/driver/driver-rides/pages/DriverRidesPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -229,6 +230,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <RideRequestsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/rides"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <DriverRidesPage />
           </ProtectedRoute>
         }
       />

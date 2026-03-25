@@ -25,6 +25,7 @@ import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverR
 import { driverWalletApi } from "@/features/driver/wallet/services/driverWalletApi";
 import { driverPayoutApi } from "@/features/driver/payout/services/driverPayoutApi";
 import { adminPayoutApi } from "@/features/admin/payouts/services/adminPayoutApi";
+import { driverRidesApi } from "@/features/driver/driver-rides/services/driverRidesApi";
 
 export const store = configureStore({
   reducer: {
@@ -46,6 +47,7 @@ export const store = configureStore({
     [viewDriverRideApi.reducerPath]: viewDriverRideApi.reducer,
     [driverWalletApi.reducerPath]: driverWalletApi.reducer,
     [driverPayoutApi.reducerPath]: driverPayoutApi.reducer,
+    [driverRidesApi.reducerPath]: driverRidesApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
@@ -89,6 +91,7 @@ export const store = configureStore({
       driverWalletApi.middleware,
       driverPayoutApi.middleware,
       adminPayoutApi.middleware,
+      driverRidesApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });
