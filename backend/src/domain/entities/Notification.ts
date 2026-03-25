@@ -5,7 +5,7 @@ export interface NotificationMetadata {
   rideId?: string;
   requestId?: string;
   paymentId?: string;
-  [key: string]: string | undefined;
+  [key: string]: unknown;
 }
 
 export class Notification {

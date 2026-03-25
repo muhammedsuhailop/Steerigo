@@ -165,4 +165,24 @@ export class RideErrors {
       },
     );
   }
+
+  static cannotMarkAsArrived(
+    rideId: string,
+    currentStatus: string,
+  ): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.CANNOT_MARK_AS_ARRIVED, {
+        rideId,
+        currentStatus,
+      }),
+      "CANNOT_MARK_AS_ARRIVED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

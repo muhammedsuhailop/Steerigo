@@ -1,8 +1,6 @@
-import {
-  FareDetails,
-  RideTimeline,
-} from "@/features/user/view-ride/types/viewRide.types";
-import { Location, RideStatus } from "@/shared/types/ride.types";
+import { FareDetails } from "@/features/user/view-ride/types/viewRide.types";
+import { PaymentStatus } from "@/shared/types/payment.types";
+import { Location, RideStatus, RideTimeline } from "@/shared/types/ride.types";
 
 export interface RiderInfo {
   id: string;
@@ -16,6 +14,7 @@ export interface DriverRideDetails {
   id: string;
   rideId: string;
   status: RideStatus;
+  paymentStatus: PaymentStatus;
   rideType: string;
   pickup: Location;
   drop: Location;
@@ -40,4 +39,29 @@ export interface ViewDriverRideState {
   activeRider: RiderInfo | null;
   isLoading: boolean;
   error: string | null;
+}
+
+export interface RideStatusResponse {
+  success: boolean;
+  message: string;
+  data: Record<string, unknown>;
+}
+
+export interface ConfirmCashRequest {
+  rideId: string;
+  method: "CASH";
+  amount: number;
+}
+
+export interface ConfirmCashPaymentResponse {
+  success: boolean;
+  message: string;
+  data: {
+    paymentId: string;
+    rideId: string;
+    status: PaymentStatus;
+    paidAt: string;
+    amount: number;
+    currency: string;
+  };
 }

@@ -4,6 +4,8 @@ import {
   useAcceptRideRequestMutation,
   useRejectRideRequestMutation,
 } from "../services/rideRequestsApi";
+import { API_ENDPOINTS } from "@/shared/constants";
+import { useNavigate } from "react-router-dom";
 
 export const useRideRequests = () => {
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +16,8 @@ export const useRideRequests = () => {
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(
     null,
   );
+
+  const navigate = useNavigate();
 
   const {
     data: requestsData,
@@ -37,6 +41,12 @@ export const useRideRequests = () => {
 
         const response = await acceptRequest(requestId).unwrap();
         setSuccess(response.message || "Ride request accepted successfully");
+
+        const rideId = response.data?.rideId;
+
+        if (rideId) {
+          navigate(`${API_ENDPOINTS.DRIVER.RIDE}/${rideId}`);
+        }
 
         return { success: true, data: response.data };
       } catch (err: unknown) {

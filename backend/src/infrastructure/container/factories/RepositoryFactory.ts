@@ -10,6 +10,14 @@ import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { RideRepositoryImpl } from "@infrastructure/database/repositories/RideRepositoryImpl";
 import { IDriverLocationRepository } from "@domain/repositories/IDriverLocationRepository";
 import { DriverLocationRepository } from "@infrastructure/services/DriverLocationRepository";
+import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
+import { PaymentRepositoryImpl } from "@infrastructure/database/repositories/PaymentRepositoryImpl";
+import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
+import { TransactionRepositoryImpl } from "@infrastructure/database/repositories/TransactionRepositoryImpl";
+import { IPayoutRepository } from "@domain/repositories/IPayoutRepository";
+import { PayoutRepositoryImpl } from "@infrastructure/database/repositories/PayoutRepositoryImpl";
+import { IWalletRepository } from "@domain/repositories/IWalletRepository";
+import { WalletRepositoryImpl } from "@infrastructure/database/repositories/WalletRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -28,5 +36,17 @@ export class RepositoryFactory {
     container
       .bind<IDriverLocationRepository>(TYPES.DriverLocationRepository)
       .to(DriverLocationRepository);
+    container
+      .bind<IPaymentRepository>(TYPES.PaymentRepository)
+      .to(PaymentRepositoryImpl);
+    container
+      .bind<ITransactionRepository>(TYPES.TransactionRepository)
+      .to(TransactionRepositoryImpl);
+    container
+      .bind<IPayoutRepository>(TYPES.PayoutRepository)
+      .to(PayoutRepositoryImpl);
+    container
+      .bind<IWalletRepository>(TYPES.WalletRepository)
+      .to(WalletRepositoryImpl);
   }
 }

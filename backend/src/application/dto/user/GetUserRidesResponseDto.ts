@@ -23,6 +23,7 @@ export interface UserRideData {
   rideType: string;
   fare: number;
   currency: string;
+  paymentStatus: string;
   timeline: {
     requestedAt: string;
     acceptedAt?: string;
@@ -30,7 +31,7 @@ export interface UserRideData {
     completedAt?: string;
     cancelledAt?: string;
   };
-  durationFormatted?: string; 
+  durationFormatted?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -8,7 +8,7 @@ const createNotificationSchema = z.object({
   channel: z.nativeEnum(NotificationChannel),
   title: z.string().min(1).max(255),
   body: z.string().min(1).max(1000),
-  metadata: z.record(z.string(), z.string().optional()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
 type CreateNotificationData = z.infer<typeof createNotificationSchema>;
@@ -39,7 +39,7 @@ export class CreateNotificationDto {
   getBody(): string {
     return this.data.body;
   }
-  getMetadata(): Record<string, string | undefined> {
+  getMetadata(): Record<string, unknown> {
     return this.data.metadata;
   }
 }

@@ -1,7 +1,8 @@
 import { Money } from "./Money";
+
 export interface TaxBreakdown {
   name: string;
-  rate: number; // percentage
+  rate: number;
   amount: Money;
 }
 
@@ -13,7 +14,7 @@ export class FareBreakdown {
     private readonly platformFeeTax: TaxBreakdown,
     private readonly totalFare: Money,
     private readonly durationHours: number,
-    private readonly calculatedAt: Date = new Date()
+    private readonly calculatedAt: Date = new Date(),
   ) {}
 
   static create(params: {
@@ -30,7 +31,7 @@ export class FareBreakdown {
       params.fareTax,
       params.platformFeeTax,
       params.totalFare,
-      params.durationHours
+      params.durationHours,
     );
   }
 

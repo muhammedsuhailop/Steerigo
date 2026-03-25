@@ -21,6 +21,8 @@ import {
 } from "@/shared/components/ui";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
 import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
+import { useGetWalletDetailsQuery } from "@/features/driver/wallet/services/driverWalletApi";
+import { useNavigate } from "react-router-dom";
 
 export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   title = "Dashboard",
@@ -38,53 +40,54 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const messagesRef = useRef<HTMLDivElement>(null);
   const walletRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth,
   );
+
   const { isOnline, driver } = useSelector((state: RootState) => state.driver);
-  const walletBalance = driver?.todayEarnings || 0;
+
+  const { data: walletResponse } = useGetWalletDetailsQuery(
+    { limit: 5 },
+    { skip: !isAuthenticated },
+  );
+
+  const walletData = walletResponse?.data;
+  const walletBalance = walletData?.availableBalance || 0;
+  const currency = walletData?.currency || "₹";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setIsProfileOpen(false);
-      }
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationOpen(false);
-      }
-      if (
-        messagesRef.current &&
-        !messagesRef.current.contains(event.target as Node)
-      ) {
-        setIsMessagesOpen(false);
-      }
-      if (
-        walletRef.current &&
-        !walletRef.current.contains(event.target as Node)
-      ) {
-        setIsWalletOpen(false);
-      }
-      if (
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
+      const refs = [
+        profileRef,
+        notificationRef,
+        messagesRef,
+        walletRef,
+        mobileMenuRef,
+      ];
+      const setters = [
+        setIsProfileOpen,
+        setIsNotificationOpen,
+        setIsMessagesOpen,
+        setIsWalletOpen,
+        setIsMobileMenuOpen,
+      ];
+
+      refs.forEach((ref, index) => {
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+          setters[index](false);
+        }
+      });
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const { data, refetch } = useGetNotificationsQuery(undefined, {
-    skip: !isAuthenticated,
-  });
+  const { data, refetch } = useGetNotificationsQuery(
+    { page: 1, limit: 12 },
+    { skip: !isAuthenticated, pollingInterval: 0 },
+  );
 
   const unreadCount = data?.data?.unreadCount || 0;
 
@@ -117,11 +120,11 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       className={`bg-white border-b border-gray-200 shadow-sm h-16 ${className}`}
     >
       <div className="flex items-center justify-between px-4 sm:px-6 h-full">
-        {/* Left */}
+        {/* Left Side */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           <button
             onClick={onToggleSidebar}
-            className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
+            className="p-2 hover:bg-gray-100 rounded-lg lg:hidden active:bg-gray-200 transition-colors"
             aria-label="Toggle sidebar"
           >
             <RiMenuLine className="w-5 h-5 text-gray-600" />
@@ -129,24 +132,22 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
           <div className="block lg:hidden">
             <Logo size="md" variant="square" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <h1 className="text-xl font-semibold text-gray-900 truncate max-w-[120px] md:max-w-none md:overflow-visible">
+            {title}
+          </h1>
         </div>
 
-        {/* Right */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Desktop icons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Messages */}
+        {/* Right Side */}
+        <div className="flex items-center space-x-1 sm:space-x-4">
+          {/* Desktop Only Icons */}
+          <div className="hidden md:flex items-center space-x-2">
             <div className="relative" ref={messagesRef}>
               <button
                 onClick={() => setIsMessagesOpen(!isMessagesOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-                aria-label="Messages"
+                className="p-2 hover:bg-gray-100 rounded-lg relative"
               >
                 <RiMessage3Line className="w-5 h-5 text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
               </button>
               <MessagesDropdown
                 isOpen={isMessagesOpen}
@@ -154,99 +155,138 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
               />
             </div>
 
-            {/* Wallet */}
             <div className="relative" ref={walletRef}>
               <button
                 onClick={() => setIsWalletOpen(!isWalletOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-                aria-label="Wallet"
+                className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isWalletOpen ? "bg-emerald-50 text-emerald-600" : "hover:bg-gray-100 text-gray-600"}`}
               >
-                <RiWallet3Line className="w-5 h-5 text-gray-600" />
+                <RiWallet3Line className="w-5 h-5" />
               </button>
               <WalletDropdown
                 isOpen={isWalletOpen}
                 onClose={() => setIsWalletOpen(false)}
                 balance={walletBalance}
-              />
-            </div>
-
-            {/* Notifications */}
-            <div className="relative" ref={notificationRef}>
-              <button
-                onClick={handleNotificationToggle}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-                aria-label="Notifications"
-              >
-                <FaRegBell className="w-5 h-5 text-gray-600" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </button>
-              <NotificationDropdown
-                isOpen={isNotificationOpen}
-                onClose={() => setIsNotificationOpen(false)}
+                currency={currency}
+                transactions={walletData?.transactions}
               />
             </div>
           </div>
 
-          {/* Mobile menu */}
+          {/* Notifications */}
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={handleNotificationToggle}
+              className={`p-2 rounded-lg transition-colors ${isNotificationOpen ? "bg-gray-100" : "hover:bg-gray-100"}`}
+              aria-label="Notifications"
+            >
+              <FaRegBell className="w-5 h-5 text-gray-600" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold border-2 border-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+            <NotificationDropdown
+              isOpen={isNotificationOpen}
+              onClose={() => setIsNotificationOpen(false)}
+            />
+          </div>
+
+          {/* Mobile "More" Menu */}
           <div className="relative md:hidden" ref={mobileMenuRef}>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-              aria-label="More options"
+              className={`p-2 rounded-lg transition-colors ${isMobileMenuOpen ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-100"}`}
             >
-              <RiMore2Line className="w-5 h-5 text-gray-600" />
+              <RiMore2Line className="w-6 h-6" />
             </button>
+
             {isMobileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <RiMessage3Line className="w-5 h-5 mr-3 text-gray-400" />
-                  Messages
-                  <span className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden py-1">
+                <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Quick Access
+                  </p>
+                </div>
+
+                <button className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mr-3">
+                    <RiMessage3Line className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span className="flex-1 text-left font-medium">Messages</span>
+                  <span className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                     3
                   </span>
                 </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <RiWallet3Line className="w-5 h-5 mr-3 text-gray-400" />
-                  Wallet
-                  <span className="ml-auto text-xs text-gray-700">
-                    ₹{walletBalance}
-                  </span>
+
+                <button
+                  onClick={() => {
+                    navigate("/driver/wallet");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center mr-3">
+                    <RiWallet3Line className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium text-gray-900">Wallet</span>
+                  </div>
                 </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <FaRegBell className="w-5 h-5 mr-3 text-gray-400" />
-                  Notifications
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                    2
+
+                {/* Mobile Notification Trigger */}
+                <button
+                  onClick={() => {
+                    handleNotificationToggle();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center mr-3">
+                    <FaRegBell className="w-5 h-5 text-red-600" />
+                  </div>
+                  <span className="flex-1 text-left font-medium">
+                    View All Notifications
                   </span>
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
               </div>
             )}
           </div>
 
-          {/* Profile */}
-          <div className="relative" ref={profileRef}>
-            <div
+          {/* Profile Section */}
+          <div className="relative ml-1" ref={profileRef}>
+            <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="flex items-center p-1 hover:bg-gray-100 rounded-full sm:rounded-lg transition-colors"
             >
-              <OnlineStatus isOnline={isOnline} size="sm" showPulse={false} />
-              <RiUserLine className="w-5 h-5 text-gray-600" />
-              <RiArrowDropDownLine className="w-5 h-5 text-gray-600 hidden sm:block" />
-            </div>
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <ProfileDropdown
-                  isOpen={isProfileOpen}
-                  onClose={() => setIsProfileOpen(false)}
-                  user={user}
-                  actions={profileActions}
-                />
+              <div className="relative">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+                  {user?.profilePicture ? (
+                    <img
+                      src={user.profilePicture}
+                      alt="profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <RiUserLine className="w-5 h-5 text-gray-600" />
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+              <RiArrowDropDownLine className="w-5 h-5 text-gray-500 hidden sm:block" />
+            </button>
+            <ProfileDropdown
+              isOpen={isProfileOpen}
+              onClose={() => setIsProfileOpen(false)}
+              user={user}
+              actions={profileActions}
+            />
           </div>
         </div>
       </div>

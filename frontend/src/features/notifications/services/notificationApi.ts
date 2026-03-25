@@ -1,6 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
-import { NotificationsResponse } from "../types/notifications.types";
+import {
+  NotificationsResponse,
+  NotificationQueryParams,
+} from "../types/notifications.types";
 import { API_ENDPOINTS } from "@/shared/constants";
 
 export const notificationApi = createApi({
@@ -8,10 +11,18 @@ export const notificationApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Notification"],
   endpoints: (builder) => ({
-    getNotifications: builder.query<NotificationsResponse, void>({
-      query: () => ({
+    getNotifications: builder.query<
+      NotificationsResponse,
+      NotificationQueryParams | void
+    >({
+      query: (params) => ({
         url: API_ENDPOINTS.NOTIFICATION.GET_NOTIFICATIONS,
         method: "GET",
+        params: {
+          page: params?.page || 1,
+          limit: params?.limit || 12,
+          isRead: params?.isRead,
+        },
       }),
       providesTags: ["Notification"],
     }),

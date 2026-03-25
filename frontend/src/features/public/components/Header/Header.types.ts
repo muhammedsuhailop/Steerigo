@@ -34,6 +34,7 @@ export interface ProfileDropdownProps {
     email: string;
     name?: string;
     role: string;
+    profilePicture?: string;
   } | null;
 }
 

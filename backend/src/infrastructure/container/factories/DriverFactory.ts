@@ -53,6 +53,19 @@ import { GetDriverRidesUseCase } from "@application/use-cases/driver/GetDriverRi
 import { GetDriverRideByIdDto } from "@application/dto/driver/GetDriverRideByIdDto";
 import { GetDriverRideByIdResponseDto } from "@application/dto/driver/GetDriverRideByIdResponseDto";
 import { GetDriverRideByIdUseCase } from "@application/use-cases/driver/GetDriverRideByIdUseCase";
+import { MarkRideAsArrivedDto } from "@application/dto/driver/MarkRideAsArrivedDto";
+import { MarkRideAsArrivedResponseDto } from "@application/dto/driver/MarkRideAsArrivedResponseDto";
+import { MarkRideAsArrivedUseCase } from "@application/use-cases/driver/MarkRideAsArrivedUseCase";
+import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedDto";
+import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
+import { MarkRideAsStartedUseCase } from "@application/use-cases/driver/MarkRideAsStartedUseCase";
+import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsCompletedDto";
+import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
+import { MarkRideAsCompletedUseCase } from "@application/use-cases/driver/MarkRideAsCompletedUseCase";
+import { RequestPayoutUseCase } from "@application/use-cases/driver/RequestPayoutUseCase";
+import { GetDriverPayoutsUseCase } from "@application/use-cases/driver/GetDriverPayoutsUseCase";
+import { GetDriverWalletUseCase } from "@application/use-cases/driver/GetDriverWalletUseCase";
+import { DriverWalletController } from "@interface/controllers/driver/DriverWalletController";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -60,6 +73,7 @@ export class DriverFactory {
       .bind<IDriverDashboardRepository>(TYPES.DriverDashboardRepository)
       .to(DriverDashboardRepositoryImpl)
       .inSingletonScope();
+
     // Use case bindings
     container
       .bind<
@@ -167,7 +181,38 @@ export class DriverFactory {
       >(TYPES.GetDriverRideByIdUseCase)
       .to(GetDriverRideByIdUseCase);
 
+    container
+      .bind<
+        IUseCase<
+          MarkRideAsArrivedDto,
+          Promise<Result<MarkRideAsArrivedResponseDto>>
+        >
+      >(TYPES.MarkRideAsArrivedUseCase)
+      .to(MarkRideAsArrivedUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          MarkRideAsStartedDto,
+          Promise<Result<MarkRideAsStartedResponseDto>>
+        >
+      >(TYPES.MarkRideAsStartedUseCase)
+      .to(MarkRideAsStartedUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          MarkRideAsCompletedDto,
+          Promise<Result<MarkRideAsCompletedResponseDto>>
+        >
+      >(TYPES.MarkRideAsCompletedUseCase)
+      .to(MarkRideAsCompletedUseCase);
+    container.bind(TYPES.RequestPayoutUseCase).to(RequestPayoutUseCase);
+    container.bind(TYPES.GetDriverPayoutsUseCase).to(GetDriverPayoutsUseCase);
+    container.bind(TYPES.GetDriverWalletUseCase).to(GetDriverWalletUseCase);
+
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
+    container.bind(TYPES.DriverWalletController).to(DriverWalletController);
   }
 }

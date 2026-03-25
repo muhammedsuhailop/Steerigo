@@ -118,23 +118,37 @@ export class GetUserRideByIdUseCase
     const timeline = ride.getTimeline();
 
     const fareTax = fareBreakdown.getFareTax();
+    const platformFeeTax = fareBreakdown.getPlatformFeeTax();
+
+    const totalTax =
+      (fareTax?.amount.getAmount() ?? 0) +
+      (platformFeeTax?.amount.getAmount() ?? 0);
 
     const fareDetails: FareDetails = {
       baseFare: fareBreakdown.getBaseFare().getAmount(),
 
-      tax: this.mapTaxToGst(fareTax),
+      tax: {
+        total: totalTax,
+      },
 
       platformFee: fareBreakdown.getPlatformFee().getAmount(),
+
       totalFare: fareBreakdown.getTotalFare().getAmount(),
+
       currency: ride.getCurrency(),
     };
 
     const timelineDetails: TimelineDetails = {
       requestedAt: timeline.getRequestedAt().toISOString(),
       acceptedAt: timeline.getAcceptedAt()?.toISOString(),
+      arrivedAt: timeline.getArrivedAt()?.toISOString(),
       startedAt: timeline.getStartedAt()?.toISOString(),
       completedAt: timeline.getCompletedAt()?.toISOString(),
       cancelledAt: timeline.getCancelledAt()?.toISOString(),
+      paymentInitiatedAt: timeline.getPaymentInitiatedAt()?.toISOString(),
+      paymentCompletedAt: timeline.getPaymentCompletedAt()?.toISOString(),
+      paymentFailedAt: timeline.getPaymentFailedAt()?.toISOString(),
+      paymentRefundedAt: timeline.getPaymentRefundedAt()?.toISOString(),
     };
 
     const pickupLocation: LocationDetails = {
@@ -153,6 +167,7 @@ export class GetUserRideByIdUseCase
       id: ride.getId(),
       rideId: ride.getRideId(),
       status: ride.getStatus(),
+      paymentStatus: ride.getPaymentStatus(),
       rideType: ride.getRideType(),
       pickup: pickupLocation,
       drop: dropLocation,
@@ -161,25 +176,6 @@ export class GetUserRideByIdUseCase
       timeline: timelineDetails,
       createdAt: ride.getCreatedAt().toISOString(),
       updatedAt: ride.getUpdatedAt().toISOString(),
-    };
-  }
-
-  private mapTaxToGst(tax?: TaxBreakdown): {
-    cgst: number;
-    sgst: number;
-    igst: number;
-  } {
-    if (!tax) {
-      return { cgst: 0, sgst: 0, igst: 0 };
-    }
-
-    const amount = tax.amount.getAmount();
-    const taxName = tax.name.toUpperCase();
-
-    return {
-      cgst: taxName.includes("CGST") ? amount : 0,
-      sgst: taxName.includes("SGST") ? amount : 0,
-      igst: taxName.includes("IGST") ? amount : 0,
     };
   }
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "@/features/auth/services/authApi";
 import type { ProfileDropdownProps } from "./ProfileDropdown.types";
+import { RiUserLine } from "react-icons/ri";
 
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   isOpen,
@@ -43,8 +44,18 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       {/* User Info */}
       <div className="px-4 py-3 border-b border-gray-100">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-sm font-medium text-white">
-            {user?.name ? user.name.charAt(0).toUpperCase() : "👤"}
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+            {user?.profilePicture ? (
+              <img
+                src={user.profilePicture}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <RiUserLine className="w-5 h-5 text-gray-600" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">

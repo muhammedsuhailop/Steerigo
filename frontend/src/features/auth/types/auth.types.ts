@@ -7,6 +7,7 @@ export interface User {
     isVerified: boolean;
     createdAt: string;
     updatedAt: string;
+    profilePicture?:string;
 }
 
 export interface AuthState {

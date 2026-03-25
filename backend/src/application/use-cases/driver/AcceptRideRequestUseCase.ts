@@ -5,6 +5,7 @@ import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRide
 import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -13,6 +14,7 @@ import { RideErrors } from "@domain/errors/RideErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { Types } from "mongoose";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
@@ -39,6 +41,8 @@ export class AcceptRideRequestUseCase
     private rideRequestRepository: IRideRequestRepository,
     @inject(TYPES.RideRepository)
     private rideRepository: IRideRepository,
+    @inject(TYPES.DriverAvailabilityRepository)
+    private driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DistributedLockService)
     private lockService: IDistributedLockService,
     @inject(TYPES.EventBus)
@@ -58,7 +62,6 @@ export class AcceptRideRequestUseCase
         requestId,
       });
 
-      // Distributed lock per requestId
       lockToken = await this.lockService.acquireLock(
         lockKey,
         this.LOCK_TTL_SECONDS,
@@ -100,7 +103,6 @@ export class AcceptRideRequestUseCase
         );
       }
 
-      // Check expiry based on createdAt
       const now = new Date();
       const createdAt = rideRequest.getCreatedAt();
       const ageMinutes = (now.getTime() - createdAt.getTime()) / 1000 / 60;
@@ -181,6 +183,8 @@ export class AcceptRideRequestUseCase
         riderId: acceptedRequest.getRiderId(),
       });
 
+      await this.markDriverAsBusy(driverId);
+
       const response: AcceptRideRequestResponseDto = {
         success: true,
         message: RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
@@ -254,6 +258,41 @@ export class AcceptRideRequestUseCase
       if (lockToken) {
         await this.lockService.releaseLock(lockKey, lockToken);
       }
+    }
+  }
+
+  private async markDriverAsBusy(driverId: string): Promise<void> {
+    try {
+      const availability =
+        await this.driverAvailabilityRepository.findActiveByDriverId(driverId);
+
+      if (!availability) {
+        Logger.warn(
+          "No active availability record found when marking driver busy",
+          {
+            driverId,
+          },
+        );
+        return;
+      }
+
+      if (availability.getStatus() === AvailabilityStatus.BUSY) {
+        Logger.debug("Driver availability already BUSY", { driverId });
+        return;
+      }
+
+      availability.updateStatus(AvailabilityStatus.BUSY);
+      await this.driverAvailabilityRepository.save(availability);
+
+      Logger.info("Driver availability marked as BUSY", { driverId });
+    } catch (error) {
+      Logger.error(
+        "Failed to mark driver availability as BUSY — non-critical",
+        {
+          driverId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 }

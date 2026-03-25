@@ -114,9 +114,11 @@ export class GetDriverRidesUseCase
           rideType: ride.getRideType(),
           fare: ride.getFare(),
           currency: ride.getCurrency(),
+          paymentStatus: ride.getPaymentStatus(),
           timeline: {
             requestedAt: ride.getTimeline().getRequestedAt().toISOString(),
             acceptedAt: ride.getTimeline().getAcceptedAt()?.toISOString(),
+            arrivedAt: ride.getTimeline().getArrivedAt()?.toISOString(),
             startedAt: ride.getTimeline().getStartedAt()?.toISOString(),
             completedAt: ride.getTimeline().getCompletedAt()?.toISOString(),
             cancelledAt: ride.getTimeline().getCancelledAt()?.toISOString(),

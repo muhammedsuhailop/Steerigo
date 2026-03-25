@@ -21,6 +21,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { RideType } from "@domain/value-objects/RideType";
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 
 interface AggregationResult {
   count: number;
@@ -260,14 +261,13 @@ export class DriverDashboardRepositoryImpl
     try {
       // Calculate total fare from components
       const baseFare = doc.fareBreakdown?.baseFare || 0;
-      const distanceFare = doc.fareBreakdown?.distanceFare || 0;
       const timeFare = doc.fareBreakdown?.timeFare || 0;
       const taxAmount = doc.fareBreakdown?.tax || 0;
 
       const platformFeeAmount = baseFare * 0.02;
 
       fareBreakdown = FareBreakdown.create({
-        baseFare: Money.create(baseFare + distanceFare + timeFare),
+        baseFare: Money.create(baseFare + timeFare),
         platformFee: Money.create(platformFeeAmount),
         fareTax: {
           name: "GST on Fare",
@@ -281,7 +281,6 @@ export class DriverDashboardRepositoryImpl
         } as TaxBreakdown,
         totalFare: Money.create(
           baseFare +
-            distanceFare +
             timeFare +
             taxAmount +
             platformFeeAmount +
@@ -330,6 +329,7 @@ export class DriverDashboardRepositoryImpl
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       status: doc.status as RideStatus,
+      paymentStatus: doc.paymentStatus as PaymentStatus,
       pickup,
       drop,
       rideType: rideTypeValue,

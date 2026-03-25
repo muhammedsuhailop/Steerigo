@@ -1,5 +1,5 @@
 import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
-import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { IFareCalculationService } from "@application/services/IFareCalculationService1";
 import { FareConfigurationRepositoryImpl } from "@infrastructure/database/repositories/FareConfigurationRepositoryImpl";
 import { TYPES } from "@shared/constants/DITypes";
 import { Container } from "inversify";

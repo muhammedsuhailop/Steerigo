@@ -27,9 +27,16 @@ import UserProfileViewPage from "@/features/admin/user/user-profile/UserProfileV
 import { RideRequestsPage } from "@/features/driver/ride-requests/pages/RideRequestsPage";
 import ViewRidePage from "@/features/user/view-ride/pages/ViewRidePage";
 import ViewDriverRidePage from "@/features/driver/view-ride/pages/ViewDriverRidePage";
+import WalletPage from "@/features/driver/wallet/pages/WalletPage";
+import PayoutPage from "@/features/driver/payout/pages/PayoutPage";
+import PayoutManagement from "@/features/admin/payouts/pages/PayoutManagement";
+import { useNotificationSocket } from "@/features/notifications/hooks/useNotificationSocket";
+import DriverRidesPage from "@/features/driver/driver-rides/pages/DriverRidesPage";
+import UserRidesPage from "@/features/user/rides/pages/UserRidesPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
+  useNotificationSocket();
 
   const getDashboardRedirect = () => {
     switch (user?.role) {
@@ -155,6 +162,14 @@ export const AppRouter: React.FC = () => {
         }
       />
       <Route
+        path="/admin/drivers/payouts"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <PayoutManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/search"
         element={
           <ProtectedRoute allowedRoles={["Rider"]}>
@@ -167,6 +182,15 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Rider"]}>
             <UserProfileLayout />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/rides"
+        element={
+          <ProtectedRoute allowedRoles={["Rider"]}>
+            <UserRidesPage />
           </ProtectedRoute>
         }
       />
@@ -220,10 +244,34 @@ export const AppRouter: React.FC = () => {
         }
       />
       <Route
+        path="/driver/rides"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <DriverRidesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/driver/ride/:id"
         element={
           <ProtectedRoute allowedRoles={["Driver"]}>
             <ViewDriverRidePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/wallet"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <WalletPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver/payouts"
+        element={
+          <ProtectedRoute allowedRoles={["Driver"]}>
+            <PayoutPage />
           </ProtectedRoute>
         }
       />

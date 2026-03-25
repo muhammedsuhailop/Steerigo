@@ -14,12 +14,18 @@ import { DriverController } from "@interface/controllers/driver/DriverController
 import { TYPES } from "@shared/constants/DITypes";
 import { driverAvailabilityRoutes } from "./DriverAvailabilityRoutes";
 import { driverRideRoutes } from "./DriverRideRoutes";
+import { driverPayoutRoutes } from "./driverPayoutRoutes";
+import { DriverWalletController } from "@interface/controllers/driver/DriverWalletController";
 
 const router = Router();
 
 // Get controller instance from DI container
 const driverController = container.get<DriverController>(
   TYPES.DriverController,
+);
+
+const walletController = container.get<DriverWalletController>(
+  TYPES.DriverWalletController,
 );
 
 router.use((req, res, next) => {
@@ -60,10 +66,16 @@ router.put("/kyc", validateSchema(kycSubmissionSchema), (req, res) =>
 // GET /api/driver/kyc - Get KYC status
 router.get("/kyc", (req, res) => driverController.getKYCStatus(req, res));
 
+// GET /api/driver/wallet
+router.get("/wallet", (req, res) => walletController.getWallet(req, res));
+
 // /api/driver/availability
 router.use("/availability", driverAvailabilityRoutes);
 
 // /api/driver/ride
 router.use("/ride", driverRideRoutes);
+
+// /api/driver/payouts
+router.use("/payouts", driverPayoutRoutes);
 
 export { router as driverRoutes };

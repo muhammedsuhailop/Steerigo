@@ -10,8 +10,21 @@ export const SOCKET_EVENTS = {
   RIDE: {
     JOIN: "ride:join",
     LEAVE: "ride:leave",
+
     UPDATE_LOCATION: "driver:location:update",
     DRIVER_LOCATION: "ride:driver-location",
     STATUS_UPDATED: "ride:status:updated",
+    ARRIVED: "ride:arrived",
+    STARTED: "ride:started",
+    COMPLETED: "ride:completed",
+  },
+  PAYMENT: {
+    PAYMENT_INITIATED: "payment:initiated",
+    PAYMENT_COMPLETED: "payment:succeeded",
+    PAYMENT_FAILED: "payment:failed",
+    PAYMENT_CASH_CONFIRMED: "cash-confirmed",
+  },
+  NOTIFICATION: {
+    CREATED: "notification:created",
   },
 } as const;

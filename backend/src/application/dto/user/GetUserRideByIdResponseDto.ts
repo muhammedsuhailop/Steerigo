@@ -1,3 +1,5 @@
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+
 export interface DriverDetails {
   driverId: string;
   userId: string;
@@ -18,8 +20,7 @@ export interface LocationDetails {
 export interface FareDetails {
   baseFare: number;
   tax: {
-    cgst: number;
-    sgst: number;
+    total: number;
   };
   platformFee: number;
   totalFare: number;
@@ -29,15 +30,22 @@ export interface FareDetails {
 export interface TimelineDetails {
   requestedAt: string;
   acceptedAt?: string;
+  arrivedAt?: string;
   startedAt?: string;
   completedAt?: string;
   cancelledAt?: string;
+  rejectedAt?: string;
+  paymentInitiatedAt?: string;
+  paymentCompletedAt?: string;
+  paymentFailedAt?: string;
+  paymentRefundedAt?: string;
 }
 
 export interface RideDetails {
   id: string;
   rideId: string;
   status: string;
+  paymentStatus?: PaymentStatus;
   rideType: string;
   pickup: LocationDetails;
   drop: LocationDetails;

@@ -22,6 +22,11 @@ import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
 import { notificationApi } from "@/features/notifications/services/notificationApi";
 import { viewDriverRideApi } from "@/features/driver/view-ride/services/viewDriverRideApi";
 import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverRideSlice";
+import { driverWalletApi } from "@/features/driver/wallet/services/driverWalletApi";
+import { driverPayoutApi } from "@/features/driver/payout/services/driverPayoutApi";
+import { adminPayoutApi } from "@/features/admin/payouts/services/adminPayoutApi";
+import { driverRidesApi } from "@/features/driver/driver-rides/services/driverRidesApi";
+import { userRidesApi } from "@/features/user/rides/services/userRidesApi";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +35,7 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
 
     [adminApi.reducerPath]: adminApi.reducer,
+    [adminPayoutApi.reducerPath]: adminPayoutApi.reducer,
 
     //notification API
     [notificationApi.reducerPath]: notificationApi.reducer,
@@ -40,12 +46,16 @@ export const store = configureStore({
     [schedulingApi.reducerPath]: schedulingApi.reducer,
     [rideRequestsApi.reducerPath]: rideRequestsApi.reducer,
     [viewDriverRideApi.reducerPath]: viewDriverRideApi.reducer,
+    [driverWalletApi.reducerPath]: driverWalletApi.reducer,
+    [driverPayoutApi.reducerPath]: driverPayoutApi.reducer,
+    [driverRidesApi.reducerPath]: driverRidesApi.reducer,
 
     // User API with RTK Query
     [userProfileApi.reducerPath]: userProfileApi.reducer,
     [driverProfileApi.reducerPath]: driverProfileApi.reducer,
     [driverSearchApi.reducerPath]: driverSearchApi.reducer,
     [viewRideApi.reducerPath]: viewRideApi.reducer,
+    [userRidesApi.reducerPath]: userRidesApi.reducer,
 
     // Feature reducers (local state only)
     adminUsers: adminUsersReducer,
@@ -80,6 +90,11 @@ export const store = configureStore({
       rideRequestsApi.middleware,
       viewRideApi.middleware,
       viewDriverRideApi.middleware,
+      driverWalletApi.middleware,
+      driverPayoutApi.middleware,
+      adminPayoutApi.middleware,
+      driverRidesApi.middleware,
+      userRidesApi.middleware,
     ),
   devTools: import.meta.env.DEV,
 });

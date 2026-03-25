@@ -14,7 +14,6 @@ import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvail
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
-import { IFareCalculationService } from "@application/services/IFareCalculationService";
 import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
 import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
 import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
@@ -26,6 +25,7 @@ import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { IEventBus } from "@application/services/IEventBus";
 import { RideRequestCreatedEvent } from "@application/events/RideEvents";
+import { IFareCalculationService } from "@application/services/IFareCalculationService";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase

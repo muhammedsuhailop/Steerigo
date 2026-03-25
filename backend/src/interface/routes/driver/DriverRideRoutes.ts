@@ -1,4 +1,5 @@
 import { container } from "@infrastructure/container/DIContainer";
+import { DriverRideActionsController } from "@interface/controllers/driver/DriverRideActionsController";
 import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
 import { validateSchema } from "@interface/middleware";
 import { rideIdParamSchema } from "@interface/validators/driver/rideIdParamSchema";
@@ -12,8 +13,12 @@ const driverRideController = container.get<DriverRideController>(
   TYPES.DriverRideController,
 );
 
-// GET /api/driver/ride - Get all rides with pagination and filters
-driverRideRoutes.get("/", (req, res) =>
+const driverRideActionsController = container.get<DriverRideActionsController>(
+  TYPES.DriverRideActionsController,
+);
+
+// GET /api/driver/ride/rides - Get all rides with pagination and filters
+driverRideRoutes.get("/rides", (req, res) =>
   driverRideController.getDriverRides(req, res),
 );
 
@@ -41,5 +46,26 @@ driverRideRoutes.get(
   "/:rideId",
   validateSchema(rideIdParamSchema),
   (req, res) => driverRideController.getDriverRideById(req, res),
+);
+
+// PATCH /api/driver/ride/:rideId/arrived - Mark ride as arrived
+driverRideRoutes.patch(
+  "/:rideId/arrived",
+  validateSchema(rideIdParamSchema),
+  (req, res) => driverRideActionsController.markRideAsArrived(req, res),
+);
+
+// PATCH /api/driver/ride/:rideId/started - Mark ride as started
+driverRideRoutes.patch(
+  "/:rideId/started",
+  validateSchema(rideIdParamSchema),
+  (req, res) => driverRideActionsController.markRideAsStarted(req, res),
+);
+
+// PATCH /api/driver/ride/:rideId/completed - - Mark ride as completed
+driverRideRoutes.patch(
+  "/:rideId/completed",
+  validateSchema(rideIdParamSchema),
+  (req, res) => driverRideActionsController.markRideAsCompleted(req, res),
 );
 export { driverRideRoutes };

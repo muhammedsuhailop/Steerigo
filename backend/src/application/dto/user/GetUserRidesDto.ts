@@ -2,9 +2,9 @@ import { z } from "zod";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 
 const getUserRidesSchema = z.object({
-  page: z.number().positive().optional().default(1),
+  page: z.coerce.number().positive().optional().default(1),
 
-  limit: z.number().positive().max(100).optional().default(10),
+  limit: z.coerce.number().positive().max(100).optional().default(10),
 
   sortBy: z
     .enum(["createdAt", "updatedAt", "fare"])

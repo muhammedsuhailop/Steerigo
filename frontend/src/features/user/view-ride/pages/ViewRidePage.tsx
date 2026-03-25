@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FaMapMarkerAlt, FaRoute, FaClock } from "react-icons/fa";
 import { useGetRideDetailsQuery } from "../services/viewRideApi";
 import {
   setRideData,
@@ -15,21 +14,22 @@ import RideDriverCard from "../components/RideDriverCard";
 import FareBreakdown from "../components/FareBreakdown";
 import { RideTimelineStatus } from "../components/RideTimelineStatus";
 import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { RideStatus } from "@/shared/types/ride.types";
+import CompletedRideSummary from "../components/CompletedRideSummary";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useAuth();
 
   const { data, isLoading, isFetching, error } = useGetRideDetailsQuery(
     id as string,
-    {
-      skip: !id,
-    },
+    { skip: !id },
   );
+
   const activeRide = useSelector(selectActiveRide);
   const activeDriver = useSelector(selectActiveDriver);
-
   const { driverLocation } = useViewRide(id);
 
   useEffect(() => {
@@ -38,150 +38,112 @@ const ViewRidePage: React.FC = () => {
     }
   }, [data, dispatch]);
 
-  if (isLoading || isFetching) {
+  const { isOngoing, isEndState } = useMemo(() => {
+    if (!activeRide) return { isOngoing: false, isEndState: false };
+
+    const endStatuses = [
+      RideStatus.COMPLETED,
+      RideStatus.CANCELLED,
+      RideStatus.REJECTED,
+    ];
+    const status = activeRide.status as RideStatus;
+
+    return {
+      isOngoing: [
+        RideStatus.REQUESTED,
+        RideStatus.ACCEPTED,
+        RideStatus.ARRIVED,
+        RideStatus.STARTED,
+      ].includes(status),
+      isEndState: endStatuses.includes(status),
+    };
+  }, [activeRide]);
+
+  if (isLoading || isFetching || !activeRide) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black" />
+          <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+            Loading Trip Details
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
-    return <div className="p-10 text-center">Failed to load ride details.</div>;
-  }
-
-  if (!activeRide) {
+  if (error)
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="p-20 text-center font-bold text-red-500 underline">
+        Error loading ride details.
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FB] flex flex-col">
       <Header />
 
       <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Trip Overview
-          </h1>
-          <p className="text-gray-600">
-            Review your journey details, track your ride.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-7 space-y-6">
-            {/* Ride ID + Status */}
-            <div className="flex items-center justify-between">
+        {isOngoing && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-end">
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  Ride ID
-                </p>
-                <p className="text-sm font-mono font-bold text-gray-900">
-                  {activeRide.rideId}
+                <h1 className="text-3xl font-black text-gray-900">
+                  Live Journey
+                </h1>
+                <p className="text-gray-500 font-medium">
+                  Tracking your ride in real-time
                 </p>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                  activeRide.status === "Completed"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-blue-100 text-blue-700"
-                }`}
-              >
+              <div className="bg-blue-600 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                <div className="w-2 h-2 bg-white rounded-full" />
                 {activeRide.status}
-              </span>
+              </div>
             </div>
-            <RideTimelineStatus timeline={activeRide.timeline} />
 
-            <div className="h-[400px] rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-              <LiveTrackingMap
-                pickupLocation={activeRide.pickup}
-                dropLocation={activeRide.drop}
-                driverLocation={driverLocation}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-8 space-y-6">
+                <div className="h-[500px] rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl">
+                  <LiveTrackingMap
+                    pickupLocation={activeRide.pickup}
+                    dropLocation={activeRide.drop}
+                    driverLocation={driverLocation}
+                  />
+                </div>
+                <RideTimelineStatus timeline={activeRide.timeline} />
+              </div>
+
+              <div className="lg:col-span-4 space-y-6">
+                {activeDriver ? (
+                  <RideDriverCard driver={activeDriver} />
+                ) : (
+                  <div className="bg-amber-50 border border-amber-100 rounded-3xl p-8 text-amber-900 font-bold animate-pulse text-center">
+                    Finding your driver...
+                  </div>
+                )}
+                <FareBreakdown
+                  fare={activeRide.fare}
+                  paymentStatus={activeRide.paymentStatus}
+                />
+              </div>
             </div>
           </div>
+        )}
 
-          <div className="lg:col-span-5 space-y-6">
-            {/* Driver Card */}
-            {activeDriver ? (
-              <RideDriverCard driver={activeDriver} />
-            ) : (
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 text-amber-800 text-sm font-medium">
-                Searching for your driver...
-              </div>
-            )}
-
-            {/* Ride Summary */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
-              {/* Metrics */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
-                    <FaRoute />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                      Distance
-                    </p>
-                    <p className="text-sm font-bold">
-                      {activeRide.distance.toFixed(2)} km
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
-                    <FaClock />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                      Trip Type
-                    </p>
-                    <p className="text-sm font-bold capitalize">
-                      {activeRide.rideType}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Locations */}
-              <div className="flex gap-4 pt-2">
-                <div className="flex flex-col items-center gap-1 pt-1">
-                  <div className="w-3 h-3 rounded-full bg-blue-600" />
-                  <div className="w-0.5 h-10 bg-gray-100" />
-                  <FaMapMarkerAlt className="text-red-500" />
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                      Pickup Location
-                    </p>
-                    <p className="text-sm font-semibold text-gray-800 leading-relaxed">
-                      {activeRide.pickup.address}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                      Dropoff Location
-                    </p>
-                    <p className="text-sm font-semibold text-gray-800 leading-relaxed">
-                      {activeRide.drop.address}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fare */}
-            <FareBreakdown fare={activeRide.fare} />
-          </div>
-        </div>
+        {isEndState && (
+          <CompletedRideSummary
+            rideId={activeRide.rideId}
+            fare={activeRide.fare}
+            timeline={activeRide.timeline}
+            pickup={activeRide.pickup}
+            drop={activeRide.drop}
+            distance={activeRide.distance}
+            driver={activeDriver}
+            status={activeRide.status as RideStatus}
+            paymentStatus={activeRide.paymentStatus}
+            user={{ name: user?.name || "", email: user?.email || "" }}
+          />
+        )}
       </main>
 
       <Footer />

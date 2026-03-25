@@ -6,6 +6,9 @@ import {
   RideRequestCreatedEvent,
   RideMatchedEvent,
   RideRequestGroupExhaustedEvent,
+  RideArrivedEvent,
+  RideStartedEvent,
+  RideCompletedEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -14,176 +17,283 @@ import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-
-interface CreateNotificationResponseDto {
-  success: boolean;
-  message: string;
-  data: { notificationId: string };
-}
+import {
+  PaymentCashConfirmedEvent,
+  PaymentDomainEvent,
+  PaymentFailedEvent,
+  PaymentInitiatedEvent,
+  PaymentSucceededEvent,
+} from "@application/events/PaymentEvents";
+import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
+import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
+import { NotificationSocketAdapter } from "@infrastructure/adapters/NotificationSocketAdapter";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
   constructor(
     @inject(TYPES.RideNotificationService)
     private readonly notificationService: IRideNotificationService,
+
     @inject(TYPES.CreateNotificationUseCase)
     private readonly createNotificationUseCase: IUseCase<
       CreateNotificationDto,
       Promise<Result<CreateNotificationResponseDto>>
     >,
+
+    @inject(TYPES.PaymentNotificationService)
+    private readonly paymentNotificationService: IPaymentNotificationService,
   ) {}
 
-  async publish(event: RideDomainEvent): Promise<void> {
+  async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
     switch (event.type) {
       case "RideRequestCreated":
-        await this.handleRideRequestCreated(event);
-        break;
+        return this.handleRideRequestCreated(event);
+
       case "RideMatched":
-        await this.handleRideMatched(event);
-        break;
+        return this.handleRideMatched(event);
+
       case "RideRequestGroupExhausted":
-        await this.handleRideRequestGroupExhausted(event);
-        break;
-      default: {
-        const exhaustiveCheck: never = event;
-        void exhaustiveCheck;
-      }
+        return this.handleRideRequestGroupExhausted(event);
+
+      case "RideArrived":
+        return this.handleRideArrived(event);
+
+      case "RideStarted":
+        return this.handleRideStarted(event);
+
+      case "RideCompleted":
+        return this.handleRideCompleted(event);
+
+      case "PaymentInitiated":
+        return this.handlePaymentInitiated(event);
+
+      case "PaymentSucceeded":
+        return this.handlePaymentSucceeded(event);
+
+      case "PaymentFailed":
+        return this.handlePaymentFailed(event);
+
+      case "PaymentCashConfirmed":
+        return this.handlePaymentCashConfirmed(event);
     }
   }
 
-  private async handleRideRequestCreated(
-    event: RideRequestCreatedEvent,
-  ): Promise<void> {
+  private async handleRideRequestCreated(event: RideRequestCreatedEvent) {
     const { driverId, ...payload } = event.payload;
-
-    Logger.info("Handling RideRequestCreated event", {
-      driverId,
-      requestId: payload.requestId,
-    });
 
     await this.notificationService.notifyDriverNewRequest(driverId, payload);
 
-    await this.persistNewRideRequestNotification(driverId, event);
-  }
-
-  private async persistNewRideRequestNotification(
-    driverId: string,
-    event: RideRequestCreatedEvent,
-  ): Promise<void> {
-    try {
-      const { requestId, riderId, pickup, drop } = event.payload;
-
-      const dto = CreateNotificationDto.fromPayload({
-        recipientId: driverId,
-        type: NotificationType.RIDE_REQUESTED,
-        channel: NotificationChannel.IN_APP,
-        title: "New ride request!",
-        body: `New ride request: ${pickup.address ?? `${pickup.latitude}, ${pickup.longitude}`} → ${drop.address ?? `${drop.latitude}, ${drop.longitude}`}`,
-        metadata: {
-          requestId,
-          riderId,
-        },
-      });
-
-      const result = await this.createNotificationUseCase.execute(dto);
-
-      if (result.isFailure()) {
-        Logger.error("Failed to persist new ride request notification", {
-          driverId,
-          requestId,
-          error: result.getError().message,
-        });
-        return;
-      }
-
-      Logger.info("New ride request notification persisted", {
-        driverId,
-        requestId,
-        notificationId: result.getValue().data.notificationId,
-      });
-    } catch (error) {
-      Logger.error(
-        "Unexpected error persisting new ride request notification",
-        {
-          driverId,
-          requestId: event.payload.requestId,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      );
-    }
-  }
-
-  private async handleRideMatched(event: RideMatchedEvent): Promise<void> {
-    const { riderId, ...matchedPayload } = event.payload;
-
-    Logger.info("Handling RideMatched event", {
-      riderId,
-      rideId: matchedPayload.rideId,
+    await this.persistNotification(driverId, {
+      type: NotificationType.RIDE_REQUESTED,
+      title: "New ride request!",
+      body: `New ride request available`,
+      metadata: payload,
     });
-
-    await this.notificationService.notifyRiderRideMatched(
-      riderId,
-      matchedPayload,
-    );
-
-    await this.persistRideAcceptedNotification(riderId, event);
   }
 
-  private async persistRideAcceptedNotification(
-    riderId: string,
-    event: RideMatchedEvent,
-  ): Promise<void> {
-    try {
-      const { rideId, driverId, fare } = event.payload;
+  private async handleRideMatched(event: RideMatchedEvent) {
+    const { riderId, ...payload } = event.payload;
 
-      const dto = CreateNotificationDto.fromPayload({
-        recipientId: riderId,
-        type: NotificationType.RIDE_ACCEPTED,
-        channel: NotificationChannel.IN_APP,
-        title: "Your ride has been accepted!",
-        body: `Your driver is on the way. Total fare: ${fare.currency} ${fare.amount}.`,
-        metadata: {
-          rideId,
-          driverId,
-        },
-      });
+    await this.notificationService.notifyRiderRideMatched(riderId, payload);
 
-      const result = await this.createNotificationUseCase.execute(dto);
-
-      if (result.isFailure()) {
-        Logger.error("Failed to persist ride accepted notification", {
-          riderId,
-          rideId,
-          error: result.getError().message,
-        });
-        return;
-      }
-
-      Logger.info("Ride accepted notification persisted", {
-        riderId,
-        rideId,
-        notificationId: result.getValue().data.notificationId,
-      });
-    } catch (error) {
-      Logger.error("Unexpected error persisting ride accepted notification", {
-        riderId,
-        rideId: event.payload.rideId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_ACCEPTED,
+      title: "Your ride has been accepted!",
+      body: "Your driver is on the way.",
+      metadata: payload,
+    });
   }
 
   private async handleRideRequestGroupExhausted(
     event: RideRequestGroupExhaustedEvent,
-  ): Promise<void> {
+  ) {
     const { riderId, requestGroupId, reason } = event.payload;
-    Logger.info("Handling RideRequestGroupExhausted event", {
-      riderId,
-      requestGroupId,
-    });
+
     await this.notificationService.notifyRiderNoDriverFound(riderId, {
       requestGroupId,
       reason,
     });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_REQUESTED,
+      title: "No drivers found",
+      body: "No drivers available at the moment.",
+      metadata: { requestGroupId, reason },
+    });
+  }
+
+  private async handleRideArrived(event: RideArrivedEvent) {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRiderRideArrived(riderId, payload);
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_ARRIVED,
+      title: "Driver arrived",
+      body: "Your driver is waiting.",
+      metadata: payload,
+    });
+  }
+
+  private async handleRideStarted(event: RideStartedEvent) {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRiderRideStarted(riderId, payload);
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_STARTED,
+      title: "Ride started",
+      body: "Enjoy your trip!",
+      metadata: payload,
+    });
+  }
+
+  private async handleRideCompleted(event: RideCompletedEvent) {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRideCompleted(riderId, payload);
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_COMPLETED,
+      title: "Ride completed",
+      body: "Thank you for riding with us.",
+      metadata: payload,
+    });
+  }
+
+  private async handlePaymentInitiated(event: PaymentInitiatedEvent) {
+    const { riderId } = event.payload;
+
+    await this.paymentNotificationService.notifyPaymentInitiated(
+      riderId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_INITIATED,
+      title: "Payment initiated",
+      body: "Processing your payment...",
+      metadata: { ...event.payload },
+    });
+  }
+
+  private async handlePaymentSucceeded(event: PaymentSucceededEvent) {
+    const { riderId, driverId, driverUserId } = event.payload;
+
+    await this.paymentNotificationService.notifyPaymentSucceeded(
+      riderId,
+      driverId,
+      driverUserId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment successful",
+      body: "Payment completed successfully.",
+      metadata: { ...event.payload },
+    });
+
+    await this.persistNotification(driverUserId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment received",
+      body: "You received a payment.",
+      metadata: { ...event.payload },
+    });
+  }
+
+  private async handlePaymentFailed(event: PaymentFailedEvent) {
+    const { riderId, driverUserId } = event.payload;
+
+    await this.paymentNotificationService.notifyPaymentFailed(
+      riderId,
+      driverUserId,
+      event.payload,
+    );
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_FAILED,
+      title: "Payment failed",
+      body: "Payment failed. Please try again.",
+      metadata: { ...event.payload },
+    });
+
+    await this.persistNotification(driverUserId, {
+      type: NotificationType.PAYMENT_FAILED,
+      title: "Payment failed",
+      body: "Rider payment failed.",
+      metadata: { ...event.payload },
+    });
+  }
+
+  private async handlePaymentCashConfirmed(event: PaymentCashConfirmedEvent) {
+    const { riderId, driverId } = event.payload;
+
+    await this.persistNotification(driverId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Cash received",
+      body: "You confirmed cash payment.",
+      metadata: { ...event.payload },
+    });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.PAYMENT_COMPLETED,
+      title: "Payment completed",
+      body: "Cash payment confirmed.",
+      metadata: { ...event.payload },
+    });
+  }
+
+  private async persistNotification(
+    recipientId: string,
+    data: {
+      type: NotificationType;
+      title: string;
+      body: string;
+      metadata: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    try {
+      const dto = CreateNotificationDto.fromPayload({
+        recipientId,
+        type: data.type,
+        channel: NotificationChannel.IN_APP,
+        title: data.title,
+        body: data.body,
+        metadata: data.metadata,
+      });
+
+      const result = await this.createNotificationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        Logger.error("Notification persist failed", {
+          recipientId,
+          error: result.getError().message,
+        });
+        return;
+      }
+
+      const notification = result.getValue().data;
+
+      Logger.info("Notification persisted", {
+        recipientId,
+        notificationId: notification.notificationId,
+        type: data.type,
+      });
+
+      NotificationSocketAdapter.emitToUser(recipientId, {
+        notificationId: notification.notificationId,
+        type: data.type,
+        title: data.title,
+        body: data.body,
+        metadata: data.metadata,
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      Logger.error("Unexpected notification error", {
+        recipientId,
+        error,
+      });
+    }
   }
 }

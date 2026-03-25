@@ -68,6 +68,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   const { data, refetch } = useGetNotificationsQuery(undefined, {
     skip: !isAuthenticated,
+    pollingInterval: 0,
   });
 
   const unreadCount = data?.data?.unreadCount || 0;
@@ -76,54 +77,58 @@ export const Header: React.FC<HeaderProps> = () => {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-[1010]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Left: Logo */}
           <div className="flex-shrink-0">
             <Link to="/dashboard" className="flex items-center">
               <Logo variant="horizontal" />
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Center: Desktop Navigation */}
           <div className="hidden md:block">
             <Navigation isAuthenticated={isAuthenticated} />
           </div>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Right: Actions Container */}
+          <div className="flex items-center space-x-1 sm:space-x-4">
             {isAuthenticated ? (
               <>
-                <button
-                  type="button"
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
-                >
-                  <Link to="/help" className="block w-full h-full">
-                    Help
-                  </Link>
-                </button>
-
-                {/* Navigate Dropdown */}
-                <div className="relative" ref={navigateDropdownRef}>
+                {/* Desktop-only items */}
+                <div className="hidden md:flex items-center space-x-4">
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsNavigateDropdownOpen(!isNavigateDropdownOpen);
-                      setIsProfileDropdownOpen(false);
-                      setIsNotificationOpen(false);
-                    }}
-                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
+                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
                   >
-                    <span className="leading-none flex-shrink-0">Navigate</span>
-                    <RiArrowDropDownLine
-                      className={`w-5 h-5 flex-shrink-0 leading-none transition-transform duration-200 ${
-                        isNavigateDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
+                    <Link to="/help" className="block w-full h-full">
+                      Help
+                    </Link>
                   </button>
 
-                  <NavigateDropdown
-                    isOpen={isNavigateDropdownOpen}
-                    onClose={() => setIsNavigateDropdownOpen(false)}
-                  />
+                  {/* Navigate Dropdown */}
+                  <div className="relative" ref={navigateDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsNavigateDropdownOpen(!isNavigateDropdownOpen);
+                        setIsProfileDropdownOpen(false);
+                        setIsNotificationOpen(false);
+                      }}
+                      className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
+                    >
+                      <span className="leading-none flex-shrink-0">
+                        Navigate
+                      </span>
+                      <RiArrowDropDownLine
+                        className={`w-5 h-5 flex-shrink-0 leading-none transition-transform duration-200 ${
+                          isNavigateDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    <NavigateDropdown
+                      isOpen={isNavigateDropdownOpen}
+                      onClose={() => setIsNavigateDropdownOpen(false)}
+                    />
+                  </div>
                 </div>
 
                 {/* Notifications */}
@@ -139,11 +144,11 @@ export const Header: React.FC<HeaderProps> = () => {
                       setIsNavigateDropdownOpen(false);
                       setIsProfileDropdownOpen(false);
                     }}
-                    className="relative flex items-center justify-center p-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    className="relative flex items-center justify-center p-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                   >
                     <FaRegBell className="w-5 h-5" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                      <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full border-2 border-white">
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
                     )}
@@ -155,8 +160,11 @@ export const Header: React.FC<HeaderProps> = () => {
                   />
                 </div>
 
-                {/* Profile Dropdown */}
-                <div className="relative" ref={profileDropdownRef}>
+                {/* Desktop-only Profile */}
+                <div
+                  className="hidden md:block relative"
+                  ref={profileDropdownRef}
+                >
                   <button
                     type="button"
                     onClick={() => {
@@ -166,29 +174,26 @@ export const Header: React.FC<HeaderProps> = () => {
                     }}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
                   >
-                    {/* Avatar */}
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {/* {user?.avatar ? (
-                                                <img
-                                                    src={user.avatar}
-                                                    alt="profile"
-                                                    className="w-8 h-8 rounded-full object-cover"
-                                                />
-                                            ) : ( */}
-                      <span className="text-sm font-medium text-gray-700">
-                        {user?.name?.charAt(0).toUpperCase() || "👤"}
-                      </span>
-                      {/* )} */}
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                      {user?.profilePicture ? (
+                        <img
+                          src={user.profilePicture}
+                          alt="profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {user?.name?.charAt(0).toUpperCase() || "👤"}
+                          </span>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Name */}
-                    <span className="hidden lg:inline truncate max-w-[120px] flex-shrink-0">
+                    <span className="hidden lg:inline truncate max-w-[120px]">
                       {user?.name || "Profile"}
                     </span>
-
-                    {/* Dropdown arrow */}
                     <RiArrowDropDownLine
-                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${
+                      className={`w-5 h-5 transition-transform duration-200 ${
                         isProfileDropdownOpen ? "rotate-180" : ""
                       }`}
                     />
@@ -202,7 +207,8 @@ export const Header: React.FC<HeaderProps> = () => {
                 </div>
               </>
             ) : (
-              <>
+              /* Unauthenticated Desktop Actions */
+              <div className="hidden md:flex items-center space-x-2">
                 {!hideLogin && (
                   <Button variant="ghost" size="sm" onClick={onLoginClick}>
                     Login
@@ -213,20 +219,26 @@ export const Header: React.FC<HeaderProps> = () => {
                     Sign Up
                   </Button>
                 )}
-              </>
+              </div>
             )}
-          </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <span className="sr-only">Open main menu</span>
-              {isMobileMenuOpen ? "✕" : "☰"}
-            </Button>
+            {/* Mobile Hamburger Button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                  setIsNotificationOpen(false);
+                }}
+                className="p-2"
+              >
+                <span className="sr-only">Open main menu</span>
+                <span className="text-2xl leading-none">
+                  {isMobileMenuOpen ? "✕" : "☰"}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -237,6 +249,8 @@ export const Header: React.FC<HeaderProps> = () => {
         onClose={() => setIsMobileMenuOpen(false)}
         isAuthenticated={isAuthenticated}
         user={user}
+        unreadCount={unreadCount}
+        onNotificationClick={refetch}
       />
     </header>
   );

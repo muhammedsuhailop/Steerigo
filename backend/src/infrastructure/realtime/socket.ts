@@ -76,6 +76,15 @@ export function initializeRideSocketServer(
       role,
     });
 
+    const userRoom = `user:${userId}`;
+    socket.join(userRoom);
+
+    Logger.info("User joined unified room", {
+      socketId: socket.id,
+      userId,
+      room: userRoom,
+    });
+
     if (role === UserRole.DRIVER) {
       const room = `driver:${userId}`;
       socket.join(room);

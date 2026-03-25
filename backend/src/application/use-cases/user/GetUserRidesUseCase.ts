@@ -120,6 +120,7 @@ export class GetUserRidesUseCase
             rideType: ride.getRideType(),
             fare: ride.getFare(),
             currency: ride.getCurrency(),
+            paymentStatus: ride.getPaymentStatus(),
             timeline: {
               requestedAt: ride.getTimeline().getRequestedAt().toISOString(),
               acceptedAt: ride.getTimeline().getAcceptedAt()?.toISOString(),

@@ -22,6 +22,10 @@ export const DRIVER_MESSAGES = {
   AVAILABILITY_EXCEPTION_REMOVED: "Availability Exception removed successfully",
   REQUEST_ID_REQUIRED: "Request ID is required",
   RIDE_ID_REQUIRED: "Ride ID is required",
+  PAYOUT_RETRIVED: "Payouts retrieved successfully.",
+  PAYOUT_REQUEST_SUBMITTED:
+    "Payout request submitted successfully. Awaiting admin approval.",
+  WALLET_FETCHED: "Wallet details fetched successfully.",
 };
 
 export const DRIVER_ERROR_MESSAGES = {

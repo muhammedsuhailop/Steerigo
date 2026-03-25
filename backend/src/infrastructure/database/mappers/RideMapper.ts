@@ -10,6 +10,7 @@ import {
 import { Money } from "@domain/value-objects/Money";
 import { IRideDocument } from "../models/RideModel";
 import { toObjectId } from "@shared/utils/idHelper";
+import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 
 export class RideMapper {
   static toDomain(doc: IRideDocument): Ride {
@@ -25,28 +26,31 @@ export class RideMapper {
       address: doc.drop.address,
     });
 
-    const baseFare = Money.create(doc.fareBreakdown.baseFare, doc.currency);
-    const platformFee = Money.create(0, doc.currency);
+    const cur = doc.currency;
+    const baseFare = Money.create(doc.fareBreakdown.baseFare, cur);
+    const platformFee = Money.create(doc.fareBreakdown.platformFee ?? 0, cur);
+
+    const combinedTax = doc.fareBreakdown.tax;
 
     const totalFareAmount =
       doc.fareBreakdown.baseFare +
-      doc.fareBreakdown.distanceFare +
-      doc.fareBreakdown.timeFare +
-      doc.fareBreakdown.tax;
+      (doc.fareBreakdown.platformFee ?? 0) +
+      combinedTax -
+      (doc.couponDiscountAmount ?? 0);
 
     const fareTax: TaxBreakdown = {
-      name: "GST",
-      rate: 18,
-      amount: Money.create(doc.fareBreakdown.tax, doc.currency),
+      name: "GST on Fare",
+      rate: 0,
+      amount: Money.create(combinedTax, cur),
     };
 
     const platformFeeTax: TaxBreakdown = {
-      name: "GST",
-      rate: 18,
-      amount: Money.create(0, doc.currency),
+      name: "GST on Platform Fee",
+      rate: 0,
+      amount: Money.zero(cur),
     };
 
-    const totalFare = Money.create(totalFareAmount, doc.currency);
+    const totalFare = Money.create(totalFareAmount, cur);
 
     const fareBreakdown = FareBreakdown.create({
       baseFare,
@@ -60,13 +64,20 @@ export class RideMapper {
     const timeline = RideTimeline.fromData({
       requestedAt: doc.timeline.requestedAt,
       acceptedAt: doc.timeline.acceptedAt,
+      arrivedAt: doc.timeline.arrivedAt,
       startedAt: doc.timeline.startedAt,
       completedAt: doc.timeline.completedAt,
       cancelledAt: doc.timeline.cancelledAt,
       rejectedAt: doc.timeline.rejectedAt,
       paymentInitiatedAt: doc.timeline.paymentInitiatedAt,
       paymentCompletedAt: doc.timeline.paymentCompletedAt,
+      paymentFailedAt: doc.timeline.paymentFailedAt,
+      paymentRefundedAt: doc.timeline.paymentRefundedAt,
     });
+
+    const couponDetails = doc.couponName
+      ? { code: doc.couponName, discountAmount: doc.couponDiscountAmount || 0 }
+      : undefined;
 
     return Ride.fromData({
       id: doc._id.toString(),
@@ -74,35 +85,35 @@ export class RideMapper {
       driverId: doc.driverId.toString(),
       riderId: doc.riderId.toString(),
       status: doc.status as RideStatus,
+      paymentStatus:
+        (doc.paymentStatus as PaymentStatus) || PaymentStatus.PENDING,
       pickup,
       drop,
       rideType: doc.rideType as RideType,
       fareBreakdown,
-      currency: doc.currency,
+      currency: cur,
       timeline,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
+      couponDetails,
     });
   }
 
   static toPersistence(entity: Ride): Partial<IRideDocument> {
     const fareBreakdown = entity.getFareBreakdown();
     const timeline = entity.getTimeline();
+    const coupon = entity.getCouponDetails();
 
-    const baseFareAmount = fareBreakdown.getBaseFare().getAmount();
-    const platformFeeAmount = fareBreakdown.getPlatformFee().getAmount();
-    const taxAmount =
+    const combinedTax =
       fareBreakdown.getFareTax().amount.getAmount() +
       fareBreakdown.getPlatformFeeTax().amount.getAmount();
-    const totalFareAmount = fareBreakdown.getTotalFare().getAmount();
 
-    const distanceFare = 0;
-    const timeFare = 0;
     return {
       rideId: entity.getRideId(),
       driverId: toObjectId(entity.getDriverId()),
       riderId: toObjectId(entity.getRiderId()),
       status: entity.getStatus(),
+      paymentStatus: entity.getPaymentStatus(),
       pickup: {
         latitude: entity.getPickup().getLatitude(),
         longitude: entity.getPickup().getLongitude(),
@@ -115,22 +126,27 @@ export class RideMapper {
       },
       rideType: entity.getRideType(),
       fareBreakdown: {
-        baseFare: baseFareAmount,
-        distanceFare: distanceFare,
-        timeFare: timeFare,
-        tax: taxAmount,
+        baseFare: fareBreakdown.getBaseFare().getAmount(),
+        timeFare: 0,
+        platformFee: fareBreakdown.getPlatformFee().getAmount(),
+        tax: combinedTax,
         surgeMultiplier: 1,
       },
+      couponName: coupon?.code,
+      couponDiscountAmount: coupon?.discountAmount,
       currency: entity.getCurrency(),
       timeline: {
         requestedAt: timeline.getRequestedAt(),
         acceptedAt: timeline.getAcceptedAt(),
+        arrivedAt: timeline.getArrivedAt(),
         startedAt: timeline.getStartedAt(),
         completedAt: timeline.getCompletedAt(),
         cancelledAt: timeline.getCancelledAt(),
         rejectedAt: timeline.getRejectedAt(),
         paymentInitiatedAt: timeline.getPaymentInitiatedAt(),
         paymentCompletedAt: timeline.getPaymentCompletedAt(),
+        paymentFailedAt: timeline.getPaymentFailedAt(),
+        paymentRefundedAt: timeline.getPaymentRefundedAt(),
       },
       updatedAt: entity.getUpdatedAt(),
     };

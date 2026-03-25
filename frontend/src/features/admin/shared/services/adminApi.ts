@@ -36,6 +36,14 @@ type BaseListQueryParams = {
   dateTo?: string;
 };
 
+const actionToStatusMap: Record<UserAction, AdminUser["status"]> = {
+  block: "Blocked",
+  activate: "Active",
+  deactivate: "Inactive",
+  suspend: "Suspended",
+  verify: "Active",
+};
+
 type QueryParams = BaseListQueryParams | undefined;
 
 const buildParams = (params?: BaseListQueryParams) => {
@@ -130,12 +138,46 @@ export const adminApi = createApi({
         method: "PUT",
         data: { action },
       }),
-      invalidatesTags: (result, error, { userId }) => [
-        { type: "AdminUsers", id: userId },
-        { type: "AdminUsers", id: "LIST" },
-      ],
-    }),
 
+      async onQueryStarted(
+        { userId, action },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        const state = getState();
+
+        const queries = adminApi.util.selectInvalidatedBy(state, [
+          { type: "AdminUsers", id: "LIST" },
+        ]);
+
+        const patches: any[] = [];
+
+        for (const { originalArgs } of queries) {
+          const patch = dispatch(
+            adminApi.util.updateQueryData(
+              "getAllUsers",
+              originalArgs,
+              (draft) => {
+                const user = draft.data.users.find(
+                  (u) => (u.userId ?? u.id) === userId,
+                );
+
+                if (user) {
+                  user.status = actionToStatusMap[action];
+                }
+              },
+            ),
+          );
+
+          patches.push(patch);
+        }
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
+    }),
     getUserProfileById: builder.query<AdminUserProfileResponse, string>({
       query: (userId) => ({
         url: `${API_ENDPOINTS.ADMIN.USERS}/${userId}/profile`,

@@ -6,11 +6,13 @@ import { RideStatus } from "@/shared/types/ride.types";
 export const useDriverLocationUpdate = (
   rideId: string | undefined,
   status: RideStatus | undefined,
+  isInactive?: boolean,
 ) => {
   useEffect(() => {
     const isTrackingActive =
-      status === "Accepted" || status === "Arrived" || status === "Started";
-    if (!rideId || !isTrackingActive) return;
+      status === RideStatus.ACCEPTED || RideStatus.ARRIVED || RideStatus.STARTED;
+
+    if (!rideId || !isTrackingActive || isInactive) return;
 
     const socket = getSocket();
     if (!socket) return;
@@ -51,5 +53,5 @@ export const useDriverLocationUpdate = (
       clearInterval(interval);
       socket.emit(SOCKET_EVENTS.RIDE.LEAVE, rideId);
     };
-  }, [rideId, status]);
+  }, [rideId, status, isInactive]);
 };

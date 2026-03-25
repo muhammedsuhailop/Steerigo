@@ -14,6 +14,10 @@ export const TYPES = {
   RideRequestRepository: Symbol.for("RideRequestRepository"),
   RideRepository: Symbol.for("RideRepository"),
   DriverLocationRepository: Symbol.for("DriverLocationRepository"),
+  PaymentRepository: Symbol.for("PaymentRepository"),
+  TransactionRepository: Symbol.for("TransactionRepository"),
+  PayoutRepository: Symbol.for("PayoutRepository"),
+  WalletRepository: Symbol.for("WalletRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -28,6 +32,10 @@ export const TYPES = {
   DistributedLockService: Symbol.for("DistributedLockService"),
   RideNotificationService: Symbol.for("RideNotificationService"),
   RedisService: Symbol.for("RedisService"),
+  PaymentGatewayService: Symbol.for("PaymentGatewayService"),
+  EarningsDistributionService: Symbol.for("EarningsDistributionService"),
+  IDGenerator: Symbol.for("IDGenerator"),
+  PaymentNotificationService: Symbol.for("PaymentNotificationService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -66,6 +74,9 @@ export const TYPES = {
 
   // Use Cases - Admin Ride
   GetAdminRidesUseCase: Symbol.for("GetAdminRidesUseCase"),
+  ApprovePayoutUseCase: Symbol.for("ApprovePayoutUseCase"),
+  RejectPayoutUseCase: Symbol.for("RejectPayoutUseCase"),
+  GetAdminPayoutsUseCase: Symbol.for("GetAdminPayoutsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -95,6 +106,12 @@ export const TYPES = {
   GetPendingRideRequestsUseCase: Symbol.for("GetPendingRideRequestsUseCase"),
   GetDriverRidesUseCase: Symbol.for("GetDriverRidesUseCase"),
   GetDriverRideByIdUseCase: Symbol.for("GetDriverRideByIdUseCase"),
+  MarkRideAsArrivedUseCase: Symbol.for("MarkRideAsArrivedUseCase"),
+  MarkRideAsStartedUseCase: Symbol.for("MarkRideAsStartedUseCase"),
+  MarkRideAsCompletedUseCase: Symbol.for("MarkRideAsCompletedUseCase"),
+  RequestPayoutUseCase: Symbol.for("RequestPayoutUseCase"),
+  GetDriverPayoutsUseCase: Symbol.for("GetDriverPayoutsUseCase"),
+  GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -114,11 +131,17 @@ export const TYPES = {
   DeleteFileUseCase: Symbol.for("DeleteFileUseCase"),
   UpdateProfilePictureUseCase: Symbol.for("UpdateProfilePictureUseCase"),
 
-  //Use Cases - Notifications
+  // Use Cases - Notifications
   NotificationRepository: Symbol.for("NotificationRepository"),
   GetNotificationsUseCase: Symbol.for("GetNotificationsUseCase"),
   MarkNotificationsReadUseCase: Symbol.for("MarkNotificationsReadUseCase"),
   CreateNotificationUseCase: Symbol.for("CreateNotificationUseCase"),
+
+  // Use Cases - Payment
+  InitiatePaymentUseCase: Symbol.for("InitiatePaymentUseCase"),
+  VerifyPaymentUseCase: Symbol.for("VerifyPaymentUseCase"),
+  ConfirmCashPaymentUseCase: Symbol.for("ConfirmCashPaymentUseCase"),
+  MarkPaymentFailedUseCase: Symbol.for("MarkPaymentFailedUseCase"),
 
   // Use Cases Driver Availability
   ScheduleAvailabilityUseCase: Symbol.for("ScheduleAvailabilityUseCase"),
@@ -148,4 +171,9 @@ export const TYPES = {
   DriverRideController: Symbol.for("DriverRideController"),
   NotificationController: Symbol.for("NotificationController"),
   AdminRideController: Symbol.for("AdminRideController"),
+  DriverRideActionsController: Symbol.for("DriverRideActionsController"),
+  PaymentController: Symbol.for("PaymentController"),
+  DriverPayoutController: Symbol.for("DriverPayoutController"),
+  AdminPayoutController: Symbol.for("AdminPayoutController"),
+  DriverWalletController: Symbol.for("DriverWalletController"),
 };

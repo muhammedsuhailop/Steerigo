@@ -4,9 +4,13 @@ import { RiderInfo } from "../viewDriverRide.types";
 
 interface RideRiderCardProps {
   rider: RiderInfo;
+  minimal?: boolean;
 }
 
-const RideRiderCard: React.FC<RideRiderCardProps> = ({ rider }) => {
+const RideRiderCard: React.FC<RideRiderCardProps> = ({
+  rider,
+  minimal = false,
+}) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
       <div className="flex items-center gap-4">
@@ -23,29 +27,30 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({ rider }) => {
         </div>
       </div>
 
-      <div className="mt-5 space-y-3">
-        <div className="flex items-center gap-3 text-sm text-gray-700">
-          <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-            <FaPhone size={14} />
+      {!minimal && (
+        <>
+          <div className="mt-5 space-y-3">
+            <div className="flex items-center gap-3 text-sm text-gray-700">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                <FaPhone size={14} />
+              </div>
+              <span className="font-medium">{rider.phoneNumber}</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-700">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                <FaEnvelope size={14} />
+              </div>
+              <span className="font-medium">{rider.email}</span>
+            </div>
           </div>
-          <span className="font-medium">{rider.phoneNumber}</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm text-gray-700">
-          <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-            <FaEnvelope size={14} />
-          </div>
-          <span className="font-medium">{rider.email}</span>
-        </div>
-      </div>
 
-      <div className="mt-6 flex gap-2">
-        <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold">
-          <FaPhone size={14} /> Call
-        </button>
-        <button className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold opacity-90">
-          <FaCommentDots size={14} /> Chat
-        </button>
-      </div>
+          <div className="mt-6 flex gap-2">
+            <button className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold opacity-90">
+              <FaCommentDots size={14} /> Message
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -27,12 +27,13 @@ export const API_ENDPOINTS = {
     AUTO_RIDE_REQUEST: "/user/ride/auto-request-send",
     CANCEL_RIDE_REQUEST: "/user/ride/request-cancel",
     RIDE: "/user/ride",
+    RIDES: "/user/ride/rides",
   },
   DRIVER: {
     REGISTER: "/driver/register",
     PROFILE: "/driver/profile",
     KYC: "/driver/kyc",
-    RIDES: "/driver/rides",
+    RIDES: "/driver/ride/rides",
     STATUS: "/driver/status",
     EARNINGS: "/driver/earnings",
     DASHBOARD: "/driver/dashboard",
@@ -47,11 +48,14 @@ export const API_ENDPOINTS = {
       STATUS: "/driver/availability/status",
       EXCEPTION: "/driver/availability/exception",
     },
+    WALLET: "/driver/wallet",
+    PAYOUTS: "/driver/payouts",
   },
   ADMIN: {
     USERS: "/admin/users",
     DRIVERS: "/admin/drivers",
     KYC: "/admin/drivers/kyc-requests",
+    PAYOUTS: "/admin/payouts",
   },
   FILE: {
     UPLOAD: "/file/upload",
@@ -59,6 +63,12 @@ export const API_ENDPOINTS = {
   NOTIFICATION: {
     GET_NOTIFICATIONS: "/notifications",
     MARK_AS_READ: "/notifications/read",
+  },
+  PAYMENT: {
+    INITIATE: "/payment/initiate",
+    VERIFY: "/payment/verify",
+    CONFIRM_CASH: "/payment/confirm-cash",
+    MARK_FAILED: "/payment/mark-failed",
   },
 } as const;
 
