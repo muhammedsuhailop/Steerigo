@@ -1,4 +1,7 @@
-import { RIDE_CANCELLATION_ERROR_MESSAGES } from "@shared/constants/RideMessages";
+import {
+  DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES,
+  RIDE_CANCELLATION_ERROR_MESSAGES,
+} from "@shared/constants/RideMessages";
 import { DomainError } from "./DomainError";
 import { ErrorType } from "@shared/enums/ErrorType";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
@@ -137,6 +140,112 @@ export class RideCancellationErrors {
         shouldLog: false,
         isOperational: true,
         category: "VALIDATION",
+      },
+    );
+  }
+
+  static driverNotFound(userId: string): DomainError {
+    return new DomainError(
+      formatMessage(DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.DRIVER_NOT_FOUND, {
+        userId,
+      }),
+      "DRIVER_NOT_FOUND",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "NOT_FOUND",
+      },
+    );
+  }
+
+  static unauthorizedDriverCancellation(
+    driverId: string,
+    rideId: string,
+  ): DomainError {
+    return new DomainError(
+      formatMessage(
+        DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.UNAUTHORIZED_CANCELLATION,
+        { driverId, rideId },
+      ),
+      "UNAUTHORIZED_DRIVER_CANCELLATION",
+      {
+        statusCode: HttpStatusCodes.FORBIDDEN,
+        errorType: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "AUTH",
+      },
+    );
+  }
+
+  static driverChargeCalculationFailed(
+    rideId: string,
+    reason: string,
+  ): DomainError {
+    return new DomainError(
+      formatMessage(
+        DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.CHARGE_CALCULATION_FAILED,
+        { rideId, reason },
+      ),
+      "DRIVER_CANCELLATION_CHARGE_CALCULATION_FAILED",
+      {
+        statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+        errorType: ErrorType.SERVER_ERROR,
+        shouldLog: true,
+        isOperational: false,
+        category: "SERVER",
+      },
+    );
+  }
+
+  static driverFareResetFailed(rideId: string, reason: string): DomainError {
+    return new DomainError(
+      formatMessage(DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.FARE_RESET_FAILED, {
+        rideId,
+        reason,
+      }),
+      "DRIVER_CANCELLATION_FARE_RESET_FAILED",
+      {
+        statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+        errorType: ErrorType.SERVER_ERROR,
+        shouldLog: true,
+        isOperational: false,
+        category: "SERVER",
+      },
+    );
+  }
+
+  static invalidDriverCancellationReason(reason: string): DomainError {
+    return new DomainError(
+      formatMessage(
+        DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.INVALID_CANCELLATION_REASON,
+        { reason },
+      ),
+      "INVALID_DRIVER_CANCELLATION_REASON",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static walletNotFound(driverId: string): DomainError {
+    return new DomainError(
+      formatMessage(DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES.WALLET_NOT_FOUND, {
+        driverId,
+      }),
+      "DRIVER_WALLET_NOT_FOUND",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: true,
+        isOperational: true,
+        category: "NOT_FOUND",
       },
     );
   }

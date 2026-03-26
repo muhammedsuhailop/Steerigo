@@ -10,6 +10,7 @@ import {
   RideStartedEvent,
   RideCompletedEvent,
   RideCancelledEvent,
+  RideCancelledByDriverEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -80,6 +81,8 @@ export class InMemoryEventBus implements IEventBus {
         return this.handlePaymentCashConfirmed(event);
       case "RideCancelled":
         return this.handleRideCancelled(event);
+      case "RideCancelledByDriver":
+        return this.handleRideCancelledByDriver(event);
     }
   }
 
@@ -377,5 +380,80 @@ export class InMemoryEventBus implements IEventBus {
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  private async handleRideCancelledByDriver(event: RideCancelledByDriverEvent) {
+    const {
+      rideId,
+      riderId,
+      driverId,
+      driverUserId,
+      reason,
+      riderChargeAmount,
+      riderChargeCurrency,
+      driverPenaltyAmount,
+      driverPenaltyCurrency,
+      penaltyDeducted,
+      penaltyAddedToArrears,
+      cancelledAt,
+      pickup,
+      drop,
+    } = event.payload;
+
+    await this.notificationService.notifyRiderRideCancelledByDriver(riderId, {
+      rideId,
+      driverId,
+      reason,
+      riderChargeAmount,
+      riderChargeCurrency,
+      cancelledAt,
+      pickup,
+      drop,
+    });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
+      title: "Your driver cancelled the ride",
+      body:
+        riderChargeAmount > 0
+          ? `Your ride was cancelled by the driver. A charge of ${riderChargeCurrency} ${riderChargeAmount} may apply.`
+          : "Your ride was cancelled by the driver. No charge applied.",
+      metadata: { rideId, driverId, reason, riderChargeAmount, cancelledAt },
+    });
+
+    await this.notificationService.notifyDriverRideCancelledConfirmation(
+      driverUserId,
+      {
+        rideId,
+        riderId,
+        reason,
+        driverPenaltyAmount,
+        driverPenaltyCurrency,
+        penaltyDeducted,
+        cancelledAt,
+        pickup,
+        drop,
+      },
+    );
+
+    await this.persistNotification(driverUserId, {
+      type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
+      title: "Ride cancelled",
+      body:
+        driverPenaltyAmount > 0
+          ? penaltyDeducted
+            ? `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} was deducted from your wallet.`
+            : `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} will be applied later.`
+          : "Ride cancelled with no penalty.",
+      metadata: {
+        rideId,
+        riderId,
+        reason,
+        driverPenaltyAmount,
+        penaltyDeducted,
+        penaltyAddedToArrears,
+        cancelledAt,
+      },
+    });
   }
 }

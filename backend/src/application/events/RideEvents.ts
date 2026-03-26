@@ -2,6 +2,7 @@ import {
   DriverRequestNotificationPayload,
   RideFareBreakdownJson,
 } from "@application/services/IRideNotificationService";
+import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 export interface BaseRideEvent<TType extends string, TPayload> {
@@ -124,6 +125,29 @@ export interface RideCancelledEventPayload {
   };
 }
 
+export interface RideCancelledByDriverEventPayload {
+  rideId: string;
+  riderId: string;
+  driverId: string;
+  driverUserId: string;
+  status: string;
+  reason: DriverCancellationReason;
+  riderChargeAmount: number;
+  riderChargeCurrency: string;
+  driverPenaltyAmount: number;
+  driverPenaltyCurrency: string;
+  penaltyDeducted: boolean;
+  penaltyAddedToArrears: boolean;
+  cancelledAt: string;
+  pickup: { latitude: number; longitude: number; address?: string };
+  drop: { latitude: number; longitude: number; address?: string };
+}
+
+export type RideCancelledByDriverEvent = BaseRideEvent<
+  "RideCancelledByDriver",
+  RideCancelledByDriverEventPayload
+>;
+
 export type RideArrivedEvent = BaseRideEvent<
   "RideArrived",
   RideArrivedEventPayload
@@ -149,4 +173,5 @@ export type RideDomainEvent =
   | RideArrivedEvent
   | RideStartedEvent
   | RideCompletedEvent
-  | RideCancelledEvent;
+  | RideCancelledEvent
+  | RideCancelledByDriverEvent;

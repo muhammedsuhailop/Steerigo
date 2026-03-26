@@ -113,6 +113,7 @@ export const TYPES = {
   RequestPayoutUseCase: Symbol.for("RequestPayoutUseCase"),
   GetDriverPayoutsUseCase: Symbol.for("GetDriverPayoutsUseCase"),
   GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
+  DriverCancelRideUseCase: Symbol.for("DriverCancelRideUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),

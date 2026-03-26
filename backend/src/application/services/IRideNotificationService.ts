@@ -1,3 +1,4 @@
+import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 export interface DriverRequestNotificationPayload {
@@ -141,6 +142,28 @@ export interface RideCancelledDriverPayload {
   drop: { latitude: number; longitude: number; address?: string };
 }
 
+export interface RideCancelledByDriverRiderPayload {
+  rideId: string;
+  driverId: string;
+  reason: DriverCancellationReason;
+  riderChargeAmount: number;
+  riderChargeCurrency: string;
+  cancelledAt: string;
+  pickup: { latitude: number; longitude: number; address?: string };
+  drop: { latitude: number; longitude: number; address?: string };
+}
+
+export interface RideCancelledByDriverDriverPayload {
+  rideId: string;
+  riderId: string;
+  reason: DriverCancellationReason;
+  driverPenaltyAmount: number;
+  driverPenaltyCurrency: string;
+  penaltyDeducted: boolean;
+  cancelledAt: string;
+  pickup: { latitude: number; longitude: number; address?: string };
+  drop: { latitude: number; longitude: number; address?: string };
+}
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -185,5 +208,15 @@ export interface IRideNotificationService {
   notifyDriverRideCancelled(
     driverId: string,
     payload: RideCancelledDriverPayload,
+  ): Promise<void>;
+
+  notifyRiderRideCancelledByDriver(
+    riderId: string,
+    payload: RideCancelledByDriverRiderPayload,
+  ): Promise<void>;
+
+  notifyDriverRideCancelledConfirmation(
+    driverUserId: string,
+    payload: RideCancelledByDriverDriverPayload,
   ): Promise<void>;
 }

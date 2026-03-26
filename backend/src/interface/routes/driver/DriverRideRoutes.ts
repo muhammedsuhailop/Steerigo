@@ -1,7 +1,8 @@
 import { container } from "@infrastructure/container/DIContainer";
 import { DriverRideActionsController } from "@interface/controllers/driver/DriverRideActionsController";
 import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
-import { validateSchema } from "@interface/middleware";
+import { handleValidationErrors, validateSchema } from "@interface/middleware";
+import { driverCancelRideSchema } from "@interface/validators/driver/driverCancelRideSchema";
 import { rideIdParamSchema } from "@interface/validators/driver/rideIdParamSchema";
 import { rideRequestIdParamSchema } from "@interface/validators/driver/rideRequestIdParamSchema";
 import { TYPES } from "@shared/constants/DITypes";
@@ -62,10 +63,17 @@ driverRideRoutes.patch(
   (req, res) => driverRideActionsController.markRideAsStarted(req, res),
 );
 
-// PATCH /api/driver/ride/:rideId/completed - - Mark ride as completed
+// PATCH /api/driver/ride/:rideId/completed - Mark ride as completed
 driverRideRoutes.patch(
   "/:rideId/completed",
   validateSchema(rideIdParamSchema),
   (req, res) => driverRideActionsController.markRideAsCompleted(req, res),
+);
+
+// POST /api/driver/ride/:rideId/cancel - Driver cancels a ride
+driverRideRoutes.post(
+  "/:rideId/cancel",
+  validateSchema(driverCancelRideSchema),
+  (req, res) => driverRideActionsController.cancelRide(req, res),
 );
 export { driverRideRoutes };

@@ -10,6 +10,8 @@ import {
   RideCompletedPayload,
   RideCancelledDriverPayload,
   RideCancelledRiderPayload,
+  RideCancelledByDriverRiderPayload,
+  RideCancelledByDriverDriverPayload,
 } from "../../application/services/IRideNotificationService";
 import { getRideSocketServer } from "../realtime/socket";
 import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
@@ -200,6 +202,61 @@ export class RideNotificationService implements IRideNotificationService {
     } catch (error) {
       Logger.error("Error notifying driver of ride cancellation", {
         driverId,
+        rideId: payload.rideId,
+        error,
+      });
+    }
+  }
+
+  async notifyRiderRideCancelledByDriver(
+    riderId: string,
+    payload: RideCancelledByDriverRiderPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`rider:${riderId}`).emit(
+        SOCKET_EVENTS.RIDE_CANCELLED_BY_DRIVER_TO_RIDER,
+        payload,
+      );
+      io.to(`ride:${payload.rideId}`).emit(
+        SOCKET_EVENTS.RIDE_CANCELLED_BY_DRIVER_TO_RIDER,
+        payload,
+      );
+      Logger.info("Notified rider of driver cancellation", {
+        riderId,
+        rideId: payload.rideId,
+      });
+    } catch (error) {
+      Logger.error("Error notifying rider of driver cancellation", {
+        riderId,
+        rideId: payload.rideId,
+        error,
+      });
+    }
+  }
+
+  async notifyDriverRideCancelledConfirmation(
+    driverUserId: string,
+    payload: RideCancelledByDriverDriverPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`driver:${driverUserId}`).emit(
+        SOCKET_EVENTS.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
+        payload,
+      );
+      io.to(`ride:${payload.rideId}`).emit(
+        SOCKET_EVENTS.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
+        payload,
+      );
+      Logger.info("Sent driver cancellation confirmation", {
+        driverUserId,
+        rideId: payload.rideId,
+        penaltyDeducted: payload.penaltyDeducted,
+      });
+    } catch (error) {
+      Logger.error("Error sending driver cancellation confirmation", {
+        driverUserId,
         rideId: payload.rideId,
         error,
       });

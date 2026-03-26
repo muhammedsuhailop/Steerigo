@@ -42,3 +42,20 @@ export const RIDE_CANCELLATION_ERROR_MESSAGES = {
     "Failed to reset fare breakdown for ride {rideId}: {reason}.",
   INVALID_CANCELLATION_REASON: "{{reason}} is not a valid cancellation reason.",
 } as const;
+
+export const DRIVER_RIDE_CANCELLATION_ERROR_MESSAGES = {
+  RIDE_NOT_FOUND: "Ride with ID {{rideId}} was not found.",
+  DRIVER_NOT_FOUND: "Driver with user ID {{userId}} was not found.",
+  UNAUTHORIZED_CANCELLATION:
+    "Driver {{driverId}} is not authorized to cancel ride {{rideId}}.",
+  RIDE_ALREADY_CANCELLED: "Ride {{rideId}} has already been cancelled.",
+  CANNOT_CANCEL_COMPLETED_RIDE:
+    "Ride {{rideId}} cannot be cancelled because it has already been completed.",
+  CHARGE_CALCULATION_FAILED:
+    "Failed to calculate the cancellation outcome for ride {{rideId}}: {{reason}}.",
+  FARE_RESET_FAILED:
+    "Failed to reset fare breakdown for ride {{rideId}}: {{reason}}.",
+  INVALID_CANCELLATION_REASON:
+    "{{reason}} is not a valid driver cancellation reason.",
+  WALLET_NOT_FOUND: "Wallet not found for driver {{driverId}}.",
+} as const;

@@ -66,6 +66,9 @@ import { RequestPayoutUseCase } from "@application/use-cases/driver/RequestPayou
 import { GetDriverPayoutsUseCase } from "@application/use-cases/driver/GetDriverPayoutsUseCase";
 import { GetDriverWalletUseCase } from "@application/use-cases/driver/GetDriverWalletUseCase";
 import { DriverWalletController } from "@interface/controllers/driver/DriverWalletController";
+import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
+import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
+import { DriverCancelRideUseCase } from "@application/use-cases/driver/DriverCancelRideUseCase";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -210,6 +213,14 @@ export class DriverFactory {
     container.bind(TYPES.RequestPayoutUseCase).to(RequestPayoutUseCase);
     container.bind(TYPES.GetDriverPayoutsUseCase).to(GetDriverPayoutsUseCase);
     container.bind(TYPES.GetDriverWalletUseCase).to(GetDriverWalletUseCase);
+    container
+      .bind<
+        IUseCase<
+          DriverCancelRideDto,
+          Promise<Result<DriverCancelRideResponseDto>>
+        >
+      >(TYPES.DriverCancelRideUseCase)
+      .to(DriverCancelRideUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
