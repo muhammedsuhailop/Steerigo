@@ -18,6 +18,14 @@ export class Money {
     return new Money(Money.round(amount), currency);
   }
 
+  static forceCreate(amount: number, currency: string = "INR"): Money {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      throw new DomainError("Invalid money amount");
+    }
+
+    return new Money(Money.round(amount), currency);
+  }
+
   static zero(currency: string = "INR"): Money {
     return Money.create(0, currency);
   }
@@ -47,6 +55,14 @@ export class Money {
     }
 
     return Money.create(result, this.currency);
+  }
+
+  subtractAllowingNegative(other: Money): Money {
+    this.validateSameCurrency(other);
+
+    const result = this.amount - other.amount;
+
+    return Money.forceCreate(result, this.currency);
   }
 
   multiply(factor: number): Money {

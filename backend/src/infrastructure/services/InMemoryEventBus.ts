@@ -394,7 +394,6 @@ export class InMemoryEventBus implements IEventBus {
       driverPenaltyAmount,
       driverPenaltyCurrency,
       penaltyDeducted,
-      penaltyAddedToArrears,
       cancelledAt,
       pickup,
       drop,
@@ -451,9 +450,10 @@ export class InMemoryEventBus implements IEventBus {
         reason,
         driverPenaltyAmount,
         penaltyDeducted,
-        penaltyAddedToArrears,
         cancelledAt,
       },
     });
+
+    await this.updateDriverAvailability(driverId);
   }
 }

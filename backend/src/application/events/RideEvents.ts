@@ -137,7 +137,6 @@ export interface RideCancelledByDriverEventPayload {
   driverPenaltyAmount: number;
   driverPenaltyCurrency: string;
   penaltyDeducted: boolean;
-  penaltyAddedToArrears: boolean;
   cancelledAt: string;
   pickup: { latitude: number; longitude: number; address?: string };
   drop: { latitude: number; longitude: number; address?: string };

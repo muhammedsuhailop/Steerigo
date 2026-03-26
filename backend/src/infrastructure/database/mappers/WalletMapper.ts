@@ -5,7 +5,7 @@ import { WalletOwnerType } from "@domain/value-objects/WalletOwnerType";
 
 export class WalletMapper {
   static toDomain(doc: IWalletDocument): Wallet {
-    const available = Money.create(doc.availableBalance, doc.currency);
+    const available = Money.forceCreate(doc.availableBalance, doc.currency);
     const pending = Money.create(doc.pendingBalance, doc.currency);
 
     return Wallet.fromData({

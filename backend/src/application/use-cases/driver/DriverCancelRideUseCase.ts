@@ -142,7 +142,6 @@ export class DriverCancelRideUseCase
       await this.rideRepository.save(ride);
 
       let penaltyDeducted = false;
-      let penaltyAddedToArrears = false;
 
       if (driverPenalty.getAmount() > 0) {
         try {
@@ -152,45 +151,19 @@ export class DriverCancelRideUseCase
           );
 
           if (!wallet) {
-            Logger.warn(
-              "Driver wallet not found, penalty flagged for arrears",
-              {
-                driverId,
-                rideId,
-              },
-            );
-            penaltyAddedToArrears = true;
+            Logger.error("Driver wallet not found for penalty application", {
+              driverId,
+              rideId,
+              penaltyAmount: driverPenalty.getAmount(),
+            });
           } else {
-            const hasSufficientBalance =
-              wallet.getAvailableBalance().getAmount() >=
-              driverPenalty.getAmount();
+            wallet.forceDebit(driverPenalty);
 
-            if (hasSufficientBalance) {
-              wallet.debit(driverPenalty);
-              await this.walletRepository.save(wallet);
-              penaltyDeducted = true;
-
-              Logger.info("Driver penalty deducted from wallet", {
-                driverId,
-                rideId,
-                penaltyAmount: driverPenalty.getAmount(),
-                currency: driverPenalty.getCurrency(),
-                remainingBalance: wallet.getAvailableBalance().getAmount(),
-              });
-            } else {
-                //TODO
-              penaltyAddedToArrears = true;
-              Logger.warn("Insufficient available balance for driver penalty", {
-                driverId,
-                rideId,
-                penaltyAmount: driverPenalty.getAmount(),
-                availableBalance: wallet.getAvailableBalance().getAmount(),
-              });
-            }
+            await this.walletRepository.save(wallet);
+            penaltyDeducted = true;
           }
         } catch (err) {
-          penaltyAddedToArrears = true;
-          Logger.error("Driver wallet deduction failed unexpectedly", {
+          Logger.error("Failed to persist driver penalty to wallet", {
             driverId,
             rideId,
             error: err instanceof Error ? err.message : String(err),
@@ -213,7 +186,6 @@ export class DriverCancelRideUseCase
           driverPenaltyAmount: driverPenalty.getAmount(),
           driverPenaltyCurrency: driverPenalty.getCurrency(),
           penaltyDeducted,
-          penaltyAddedToArrears,
           cancelledAt: now.toISOString(),
           pickup: {
             latitude: ride.getPickup().getLatitude(),
@@ -237,7 +209,6 @@ export class DriverCancelRideUseCase
         resolvedRiderFare: ride.getFareBreakdown().getTotalFare().getAmount(),
         driverPenalty: driverPenalty.getAmount(),
         penaltyDeducted,
-        penaltyAddedToArrears,
       });
 
       const message =
@@ -260,7 +231,6 @@ export class DriverCancelRideUseCase
           currency: driverPenalty.getCurrency(),
         },
         penaltyDeducted,
-        penaltyAddedToArrears,
         message,
       });
     } catch (error) {

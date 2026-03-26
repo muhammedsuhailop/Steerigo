@@ -14,6 +14,5 @@ export interface DriverCancelRideResponseDto {
     currency: string;
   };
   penaltyDeducted: boolean;
-  penaltyAddedToArrears: boolean;
   message: string;
 }
