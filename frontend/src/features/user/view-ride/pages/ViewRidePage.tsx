@@ -58,7 +58,7 @@ const ViewRidePage: React.FC = () => {
       ].includes(status),
       isEndState: endStatuses.includes(status),
     };
-  }, [activeRide]);
+  }, [activeRide?.status]);
 
   if (isLoading || isFetching || !activeRide) {
     return (

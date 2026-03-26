@@ -109,7 +109,7 @@ export const useViewRide = (rideId: string | undefined) => {
       if (payload.rideId === rideId) {
         dispatch(
           updateRideStatusLocal({
-            status: payload.status as RideStatus,
+            status: RideStatus.CANCELLED,
             timestampField: "cancelledAt",
             timestampValue: payload.cancelledAt,
           }),
