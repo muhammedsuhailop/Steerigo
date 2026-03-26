@@ -23,6 +23,25 @@ export interface RideTimeline {
   paymentRefundedAt?: string;
 }
 
+export enum RideCancellationReason {
+  RIDER_CHANGED_MIND = "Rider changed mind",
+  DRIVER_DELAYED = "Driver delayed",
+  DRIVER_NOT_MOVING = "Driver not moving",
+  WRONG_PICKUP_LOCATION = "Wrong pickup location",
+  FOUND_ALTERNATIVE = "Found alternative",
+  EMERGENCY = "Emergency",
+  OTHER = "Other",
+}
+
+export enum DriverCancellationReason {
+  VEHICLE_BREAKDOWN = "Vehicle breakdown",
+  EMERGENCY = "Emergency",
+  RIDER_UNRESPONSIVE = "Rider unresponsive",
+  WRONG_PICKUP_LOCATION = "Wrong pickup location",
+  SAFETY_CONCERN = "Safety concern",
+  OTHER = "Other",
+}
+
 export interface Money {
   amount: number;
   currency: string;
@@ -123,4 +142,43 @@ export interface PaymentCashConfirmedPayload {
   amount: number;
   currency: string;
   paidAt: string;
+}
+
+export interface RideCancelledEventPayload {
+  rideId: string;
+  riderId: string;
+  driverId: string;
+  driverUserId: string;
+  status: string;
+  reason: RideCancellationReason;
+  cancellationFeeAmount: number;
+  cancellationFeeCurrency: string;
+  cancelledAt: string;
+  pickup: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  drop: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
+export interface RideCancelledByDriverEventPayload {
+  rideId: string;
+  riderId: string;
+  driverId: string;
+  driverUserId: string;
+  status: string;
+  reason: DriverCancellationReason;
+  riderChargeAmount: number;
+  riderChargeCurrency: string;
+  driverPenaltyAmount: number;
+  driverPenaltyCurrency: string;
+  penaltyDeducted: boolean;
+  cancelledAt: string;
+  pickup: { latitude: number; longitude: number; address?: string };
+  drop: { latitude: number; longitude: number; address?: string };
 }
