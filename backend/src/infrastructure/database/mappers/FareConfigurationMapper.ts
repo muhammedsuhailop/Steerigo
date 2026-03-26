@@ -14,6 +14,7 @@ export class FareConfigurationMapper {
       isActive: doc.isActive,
       effectiveFrom: doc.effectiveFrom,
       effectiveTill: doc.effectiveTill,
+      maxCancellationCharge:doc.maxCancellationCharge,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -33,6 +34,7 @@ export class FareConfigurationMapper {
       isActive: config.isActiveAt(new Date()),
       effectiveFrom: config.getEffectiveFrom(),
       effectiveTill: config.getEffectiveTill(),
+      maxCancellationCharge:config.getMaxCancellationCharge(),
       updatedAt: new Date(),
     };
   }

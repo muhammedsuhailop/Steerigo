@@ -17,6 +17,7 @@ import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { RideStatus } from "@/shared/types/ride.types";
 import CompletedRideSummary from "../components/CompletedRideSummary";
+import CancelRideButton from "../components/CancelRideButton";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +58,7 @@ const ViewRidePage: React.FC = () => {
       ].includes(status),
       isEndState: endStatuses.includes(status),
     };
-  }, [activeRide]);
+  }, [activeRide?.status]);
 
   if (isLoading || isFetching || !activeRide) {
     return (
@@ -124,6 +125,11 @@ const ViewRidePage: React.FC = () => {
                 <FareBreakdown
                   fare={activeRide.fare}
                   paymentStatus={activeRide.paymentStatus}
+                />
+
+                <CancelRideButton
+                  rideId={id as string}
+                  status={activeRide.status as RideStatus}
                 />
               </div>
             </div>

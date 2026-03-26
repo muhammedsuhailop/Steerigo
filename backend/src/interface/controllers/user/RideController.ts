@@ -14,6 +14,8 @@ import { GetUserRideByIdResponseDto } from "@application/dto/user/GetUserRideByI
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
 import { GetUserRidesDto } from "@application/dto/user/GetUserRidesDto";
 import { GetUserRidesResponseDto } from "@application/dto/user/GetUserRidesResponseDto";
+import { CancelRideDto } from "@application/dto/user/CancelRideDto";
+import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseDto";
 
 @injectable()
 export class RideController {
@@ -33,6 +35,12 @@ export class RideController {
     private readonly getUserRidesUseCase: IUseCase<
       GetUserRidesDto,
       Promise<Result<GetUserRidesResponseDto>>
+    >,
+
+    @inject(TYPES.CancelRideUseCase)
+    private readonly cancelRideUseCase: IUseCase<
+      CancelRideDto,
+      Promise<Result<CancelRideResponseDto>>
     >,
   ) {}
 
@@ -228,6 +236,68 @@ export class RideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "getuserrides",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async cancelRide(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req) as string;
+      const rideId = req.params.rideId;
+
+      Logger.info("Cancel ride request received from rider", {
+        userId,
+        rideId,
+        body: req.body,
+      });
+
+      const dto = CancelRideDto.fromRequest(userId, { rideId }, req.body);
+
+      const result = await this.cancelRideUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Cancel ride failed", {
+          userId,
+          rideId,
+          error: error?.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "cancel_ride",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      Logger.info("Ride cancelled successfully", {
+        userId,
+        rideId: data.rideId,
+        feeAmount: data.cancellationFee.amount,
+        feeCurrency: data.cancellationFee.currency,
+        feeCharged: data.feeCharged,
+        addedToArrears: data.addedToArrears,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: data.message,
+        data,
+      } as ApiResponse);
+    } catch (error) {
+      Logger.error("Cancel ride controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "cancel_ride",
       );
       res.status(statusCode).json(response);
     }

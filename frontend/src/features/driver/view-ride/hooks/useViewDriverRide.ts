@@ -10,6 +10,8 @@ import {
   PaymentCashConfirmedPayload,
   PaymentFailedPayload,
   PaymentSucceededPayload,
+  RideCancelledByDriverEventPayload,
+  RideCancelledEventPayload,
   RideStatus,
 } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
@@ -29,6 +31,22 @@ export const useViewDriverRide = (rideId: string | undefined) => {
     }) => {
       if (data.rideId === rideId) {
         dispatch(updateDriverRideStatusLocal(data.status));
+      }
+    };
+
+    const onRiderCancelled = (data: RideCancelledEventPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(updateDriverRideStatusLocal(payload.status as RideStatus));
+      }
+    };
+
+    const onDriverCancelledBySelf = (
+      data: RideCancelledByDriverEventPayload,
+    ) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(updateDriverRideStatusLocal(payload.status as RideStatus));
       }
     };
 
@@ -70,6 +88,12 @@ export const useViewDriverRide = (rideId: string | undefined) => {
 
     // Binding Listeners
     socket.on(SOCKET_EVENTS.RIDE.STATUS_UPDATED, handleStatusUpdate);
+    socket.on(SOCKET_EVENTS.RIDE.RIDE_CANCELLED_RIDER, onRiderCancelled);
+    socket.on(
+      SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
+      onDriverCancelledBySelf,
+    );
+
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_CASH_CONFIRMED, onCashConfirmed);
@@ -77,6 +101,12 @@ export const useViewDriverRide = (rideId: string | undefined) => {
     return () => {
       // Cleanup Listeners
       socket.off(SOCKET_EVENTS.RIDE.STATUS_UPDATED, handleStatusUpdate);
+      socket.off(SOCKET_EVENTS.RIDE.RIDE_CANCELLED_RIDER, onRiderCancelled);
+      socket.off(
+        SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
+        onDriverCancelledBySelf,
+      );
+
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_CASH_CONFIRMED, onCashConfirmed);

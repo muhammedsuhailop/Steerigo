@@ -51,7 +51,7 @@ export const viewDriverRideApi = createApi({
     >({
       query: ({ rideId, reason }) => ({
         url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/cancel`,
-        method: "PATCH",
+        method: "POST",
         data: { reason },
       }),
       invalidatesTags: (result, error, { rideId }) => [

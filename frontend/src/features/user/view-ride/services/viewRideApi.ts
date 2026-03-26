@@ -57,13 +57,22 @@ export const viewRideApi = createApi({
     }),
 
     cancelActiveRide: builder.mutation<
-      { success: boolean; message: string },
-      string
+      {
+        success: boolean;
+        message: string;
+        data: {
+          rideId: string;
+          status: string;
+          reason: string;
+          cancellationFee: { amount: number | null; currency: string };
+        };
+      },
+      { rideId: string; reason: string }
     >({
-      query: (rideId) => ({
+      query: ({ rideId, reason }) => ({
         url: `${API_ENDPOINTS.USER.RIDE}/${rideId}/cancel`,
         method: "POST",
-        data: { rideId },
+        data: { reason },
       }),
       invalidatesTags: ["Ride"],
     }),

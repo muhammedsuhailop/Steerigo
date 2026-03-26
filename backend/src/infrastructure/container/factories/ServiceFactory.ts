@@ -32,6 +32,8 @@ import { InMemoryEventBus } from "@infrastructure/services/InMemoryEventBus";
 import { RedisService } from "@infrastructure/services/RedisService";
 import { IIdGenerator } from "@application/services/IIdGenerator";
 import { MongoIdGenerator } from "@infrastructure/services/MongoIdGenerator";
+import { ICancellationChargeService } from "@application/services/ICancellationChargeService";
+import { CancellationChargeService } from "@infrastructure/services/CancellationChargeService";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -64,6 +66,10 @@ export class ServiceFactory {
       .bind<IRideNotificationService>(TYPES.RideNotificationService)
       .to(RideNotificationService)
       .inSingletonScope();
+
+    container
+      .bind<ICancellationChargeService>(TYPES.CancellationChargeService)
+      .to(CancellationChargeService);
 
     container
       .bind<IEventBus>(TYPES.EventBus)

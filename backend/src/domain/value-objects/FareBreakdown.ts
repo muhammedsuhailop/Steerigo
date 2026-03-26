@@ -35,6 +35,33 @@ export class FareBreakdown {
     );
   }
 
+  static zero(currency: string): FareBreakdown {
+    const zeroMoney = Money.create(0, currency);
+    const zeroTax: TaxBreakdown = { name: "None", rate: 0, amount: zeroMoney };
+    return new FareBreakdown(
+      zeroMoney,
+      zeroMoney,
+      zeroTax,
+      zeroTax,
+      zeroMoney,
+      0,
+    );
+  }
+
+  static forCancellation(cancellationFee: Money): FareBreakdown {
+    const currency = cancellationFee.getCurrency();
+    const zeroMoney = Money.create(0, currency);
+    const zeroTax: TaxBreakdown = { name: "None", rate: 0, amount: zeroMoney };
+    return new FareBreakdown(
+      cancellationFee,
+      zeroMoney,
+      zeroTax,
+      zeroTax,
+      cancellationFee,
+      0,
+    );
+  }
+
   getBaseFare(): Money {
     return this.baseFare;
   }

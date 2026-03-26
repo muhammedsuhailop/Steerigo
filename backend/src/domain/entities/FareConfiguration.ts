@@ -15,8 +15,9 @@ export class FareConfiguration {
     private readonly isActive: boolean,
     private readonly effectiveFrom: Date,
     private readonly effectiveTill: Date | null,
+    private readonly maxCancellationCharge: number,
     private readonly createdAt: Date = new Date(),
-    private readonly updatedAt: Date = new Date()
+    private readonly updatedAt: Date = new Date(),
   ) {}
 
   static create(params: {
@@ -29,6 +30,7 @@ export class FareConfiguration {
     platformFeeTaxPercentage: number;
     effectiveFrom: Date;
     effectiveTill?: Date | null;
+    maxCancellationCharge: number;
   }): FareConfiguration {
     // Validate and sort rules
     const sortedRules = [...params.fareRules].sort((a, b) => {
@@ -47,7 +49,8 @@ export class FareConfiguration {
       params.platformFeeTaxPercentage,
       true,
       params.effectiveFrom,
-      params.effectiveTill || null
+      params.effectiveTill || null,
+      params.maxCancellationCharge,
     );
   }
 
@@ -62,6 +65,7 @@ export class FareConfiguration {
     isActive: boolean;
     effectiveFrom: Date;
     effectiveTill: Date | null;
+    maxCancellationCharge: number;
     createdAt: Date;
     updatedAt: Date;
   }): FareConfiguration {
@@ -76,8 +80,9 @@ export class FareConfiguration {
       data.isActive,
       data.effectiveFrom,
       data.effectiveTill,
+      data.maxCancellationCharge,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
@@ -107,6 +112,10 @@ export class FareConfiguration {
 
   getPlatformFeeTaxPercentage(): number {
     return this.platformFeeTaxPercentage;
+  }
+
+  getMaxCancellationCharge(): number {
+    return this.maxCancellationCharge;
   }
 
   getEffectiveFrom(): Date {

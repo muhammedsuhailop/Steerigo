@@ -69,6 +69,13 @@ export class Wallet {
     this.updatedAt = new Date();
   }
 
+  forceDebit(amount: Money): void {
+    this.ensureCurrencyMatch(amount);
+    this.availableBalance =
+      this.availableBalance.subtractAllowingNegative(amount);
+    this.updatedAt = new Date();
+  }
+
   hold(amount: Money): void {
     this.ensureCurrencyMatch(amount);
     this.pendingBalance = this.pendingBalance.add(amount);

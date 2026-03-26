@@ -9,6 +9,8 @@ import {
   RideArrivedEvent,
   RideStartedEvent,
   RideCompletedEvent,
+  RideCancelledEvent,
+  RideCancelledByDriverEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -27,21 +29,23 @@ import {
 import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
 import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
 import { NotificationSocketAdapter } from "@infrastructure/adapters/NotificationSocketAdapter";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
   constructor(
     @inject(TYPES.RideNotificationService)
     private readonly notificationService: IRideNotificationService,
-
     @inject(TYPES.CreateNotificationUseCase)
     private readonly createNotificationUseCase: IUseCase<
       CreateNotificationDto,
       Promise<Result<CreateNotificationResponseDto>>
     >,
-
     @inject(TYPES.PaymentNotificationService)
     private readonly paymentNotificationService: IPaymentNotificationService,
+    @inject(TYPES.DriverAvailabilityRepository)
+    private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
   ) {}
 
   async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
@@ -75,6 +79,10 @@ export class InMemoryEventBus implements IEventBus {
 
       case "PaymentCashConfirmed":
         return this.handlePaymentCashConfirmed(event);
+      case "RideCancelled":
+        return this.handleRideCancelled(event);
+      case "RideCancelledByDriver":
+        return this.handleRideCancelledByDriver(event);
     }
   }
 
@@ -295,5 +303,157 @@ export class InMemoryEventBus implements IEventBus {
         error,
       });
     }
+  }
+
+  private async handleRideCancelled(event: RideCancelledEvent) {
+    const {
+      riderId,
+      driverId,
+      driverUserId,
+      rideId,
+      reason,
+      cancellationFeeAmount,
+      cancellationFeeCurrency,
+      cancelledAt,
+      pickup,
+      drop,
+    } = event.payload;
+
+    await this.notificationService.notifyRiderRideCancelled(riderId, {
+      rideId,
+      driverId,
+      reason,
+      cancellationFeeAmount,
+      cancellationFeeCurrency,
+      cancelledAt,
+      pickup,
+      drop,
+    });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_CANCELLED,
+      title: "Ride cancelled",
+      body:
+        cancellationFeeAmount > 0
+          ? `Your ride was cancelled. A fee of ${cancellationFeeCurrency} ${cancellationFeeAmount} may apply.`
+          : "Your ride has been cancelled with no charge.",
+      metadata: { rideId, reason, cancellationFeeAmount, cancelledAt },
+    });
+
+    if (driverId && driverUserId) {
+      await this.notificationService.notifyDriverRideCancelled(driverId, {
+        rideId,
+        riderId,
+        reason,
+        cancelledAt,
+        pickup,
+        drop,
+      });
+
+      await this.persistNotification(driverUserId, {
+        type: NotificationType.RIDE_CANCELLED,
+        title: "Rider cancelled the ride",
+        body: "The rider has cancelled the ride.",
+        metadata: { rideId, riderId, reason, cancelledAt },
+      });
+    }
+
+    await this.updateDriverAvailability(driverId);
+  }
+
+  private async updateDriverAvailability(driverId?: string | null) {
+    if (!driverId) return;
+
+    try {
+      const availability =
+        await this.driverAvailabilityRepository.findActiveByDriverId(driverId);
+
+      if (!availability) return;
+
+      if (availability.getStatus() === AvailabilityStatus.SCHEDULED) return;
+
+      availability.updateStatus(AvailabilityStatus.SCHEDULED);
+      await this.driverAvailabilityRepository.save(availability);
+    } catch (error) {
+      Logger.error("Failed to update driver availability after cancellation", {
+        driverId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async handleRideCancelledByDriver(event: RideCancelledByDriverEvent) {
+    const {
+      rideId,
+      riderId,
+      driverId,
+      driverUserId,
+      reason,
+      riderChargeAmount,
+      riderChargeCurrency,
+      driverPenaltyAmount,
+      driverPenaltyCurrency,
+      penaltyDeducted,
+      cancelledAt,
+      pickup,
+      drop,
+    } = event.payload;
+
+    await this.notificationService.notifyRiderRideCancelledByDriver(riderId, {
+      rideId,
+      driverId,
+      reason,
+      riderChargeAmount,
+      riderChargeCurrency,
+      cancelledAt,
+      pickup,
+      drop,
+    });
+
+    await this.persistNotification(riderId, {
+      type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
+      title: "Your driver cancelled the ride",
+      body:
+        riderChargeAmount > 0
+          ? `Your ride was cancelled by the driver. A charge of ${riderChargeCurrency} ${riderChargeAmount} may apply.`
+          : "Your ride was cancelled by the driver. No charge applied.",
+      metadata: { rideId, driverId, reason, riderChargeAmount, cancelledAt },
+    });
+
+    await this.notificationService.notifyDriverRideCancelledConfirmation(
+      driverUserId,
+      {
+        rideId,
+        riderId,
+        reason,
+        driverPenaltyAmount,
+        driverPenaltyCurrency,
+        penaltyDeducted,
+        cancelledAt,
+        pickup,
+        drop,
+      },
+    );
+
+    await this.persistNotification(driverUserId, {
+      type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
+      title: "Ride cancelled",
+      body:
+        driverPenaltyAmount > 0
+          ? penaltyDeducted
+            ? `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} was deducted from your wallet.`
+            : `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} will be applied later.`
+          : "Ride cancelled with no penalty.",
+      metadata: {
+        rideId,
+        riderId,
+        reason,
+        driverPenaltyAmount,
+        penaltyDeducted,
+        cancelledAt,
+      },
+    });
+
+    await this.updateDriverAvailability(driverId);
   }
 }

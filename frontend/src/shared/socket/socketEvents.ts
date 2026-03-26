@@ -17,6 +17,14 @@ export const SOCKET_EVENTS = {
     ARRIVED: "ride:arrived",
     STARTED: "ride:started",
     COMPLETED: "ride:completed",
+
+    RIDE_CANCELLED_RIDER: "ride:cancelled:rider",
+
+    RIDE_CANCELLED_DRIVER: "ride:cancelled:driver",
+
+    RIDE_CANCELLED_BY_DRIVER_TO_RIDER: "ride:cancelled:by_driver:to_rider",
+
+    RIDE_CANCELLED_BY_DRIVER_TO_DRIVER: "ride:cancelled:by_driver:to_driver",
   },
   PAYMENT: {
     PAYMENT_INITIATED: "payment:initiated",

@@ -2,6 +2,8 @@ import {
   DriverRequestNotificationPayload,
   RideFareBreakdownJson,
 } from "@application/services/IRideNotificationService";
+import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
+import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 export interface BaseRideEvent<TType extends string, TPayload> {
   type: TType;
@@ -101,6 +103,50 @@ export interface RideCompletedEventPayload {
   fareBreakdown: RideFareBreakdownJson;
 }
 
+export interface RideCancelledEventPayload {
+  rideId: string;
+  riderId: string;
+  driverId: string;
+  driverUserId: string;
+  status: string;
+  reason: RideCancellationReason;
+  cancellationFeeAmount: number;
+  cancellationFeeCurrency: string;
+  cancelledAt: string;
+  pickup: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  drop: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
+export interface RideCancelledByDriverEventPayload {
+  rideId: string;
+  riderId: string;
+  driverId: string;
+  driverUserId: string;
+  status: string;
+  reason: DriverCancellationReason;
+  riderChargeAmount: number;
+  riderChargeCurrency: string;
+  driverPenaltyAmount: number;
+  driverPenaltyCurrency: string;
+  penaltyDeducted: boolean;
+  cancelledAt: string;
+  pickup: { latitude: number; longitude: number; address?: string };
+  drop: { latitude: number; longitude: number; address?: string };
+}
+
+export type RideCancelledByDriverEvent = BaseRideEvent<
+  "RideCancelledByDriver",
+  RideCancelledByDriverEventPayload
+>;
+
 export type RideArrivedEvent = BaseRideEvent<
   "RideArrived",
   RideArrivedEventPayload
@@ -114,10 +160,17 @@ export type RideCompletedEvent = BaseRideEvent<
   RideCompletedEventPayload
 >;
 
+export type RideCancelledEvent = BaseRideEvent<
+  "RideCancelled",
+  RideCancelledEventPayload
+>;
+
 export type RideDomainEvent =
   | RideRequestCreatedEvent
   | RideMatchedEvent
   | RideRequestGroupExhaustedEvent
   | RideArrivedEvent
   | RideStartedEvent
-  | RideCompletedEvent;
+  | RideCompletedEvent
+  | RideCancelledEvent
+  | RideCancelledByDriverEvent;

@@ -13,6 +13,8 @@ import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedD
 import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
 import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsCompletedDto";
 import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
+import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
+import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
 
 @injectable()
 export class DriverRideActionsController {
@@ -32,6 +34,11 @@ export class DriverRideActionsController {
       MarkRideAsCompletedDto,
       Promise<Result<MarkRideAsCompletedResponseDto>>
     >,
+    @inject(TYPES.DriverCancelRideUseCase)
+    private readonly driverCancelRideUseCase: IUseCase<
+      DriverCancelRideDto,
+      Promise<Result<DriverCancelRideResponseDto>>
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -41,23 +48,9 @@ export class DriverRideActionsController {
 
   async markRideAsArrived(req: Request, res: Response): Promise<void> {
     try {
-      const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: DRIVER_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
+      const userId = this.getUserId(req) as string;
 
       const rideId = req.params.rideId;
-      if (!rideId) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: DRIVER_MESSAGES.RIDE_ID_REQUIRED,
-        });
-        return;
-      }
 
       Logger.info("Mark ride as arrived request received", {
         userId,
@@ -109,23 +102,9 @@ export class DriverRideActionsController {
 
   async markRideAsStarted(req: Request, res: Response): Promise<void> {
     try {
-      const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: DRIVER_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
+      const userId = this.getUserId(req) as string;
 
       const rideId = req.params.rideId;
-      if (!rideId) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: DRIVER_MESSAGES.RIDE_ID_REQUIRED,
-        });
-        return;
-      }
 
       Logger.info("Mark ride as started request received", { userId, rideId });
 
@@ -172,23 +151,9 @@ export class DriverRideActionsController {
 
   async markRideAsCompleted(req: Request, res: Response): Promise<void> {
     try {
-      const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: DRIVER_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
+      const userId = this.getUserId(req) as string;
 
       const rideId = req.params.rideId;
-      if (!rideId) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: DRIVER_MESSAGES.RIDE_ID_REQUIRED,
-        });
-        return;
-      }
 
       Logger.info("Mark ride as completed received", { userId, rideId });
 
@@ -229,6 +194,66 @@ export class DriverRideActionsController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "mark_ride_as_completed",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async cancelRide(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req) as string;
+
+      const rideId = req.params.rideId;
+
+      Logger.info("Driver cancel ride request received", {
+        userId,
+        rideId,
+        body: req.body,
+      });
+
+      const dto = DriverCancelRideDto.fromRequest(userId, { rideId }, req.body);
+      const result = await this.driverCancelRideUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Driver cancel ride failed", {
+          userId,
+          rideId,
+          error: error?.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "driver_cancel_ride",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      Logger.info("Ride cancelled by driver successfully", {
+        userId,
+        rideId: data.rideId,
+        penaltyAmount: data.driverPenalty.amount,
+        penaltyDeducted: data.penaltyDeducted,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: data.message,
+        data,
+      });
+    } catch (error) {
+      Logger.error("Driver cancel ride controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "driver_cancel_ride",
       );
       res.status(statusCode).json(response);
     }

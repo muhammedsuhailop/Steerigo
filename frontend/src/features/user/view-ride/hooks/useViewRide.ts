@@ -13,6 +13,8 @@ import {
   RideStatus,
   PaymentSucceededPayload,
   PaymentFailedPayload,
+  RideCancelledEventPayload,
+  RideCancelledByDriverEventPayload,
 } from "@/shared/types/ride.types";
 import {
   PaymentStatus,
@@ -87,6 +89,34 @@ export const useViewRide = (rideId: string | undefined) => {
       }
     };
 
+    const onRiderCancelled = (data: RideCancelledEventPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+
+      if (payload.rideId === rideId) {
+        dispatch(
+          updateRideStatusLocal({
+            status: payload.status as RideStatus,
+            timestampField: "cancelledAt",
+            timestampValue: payload.cancelledAt,
+          }),
+        );
+      }
+    };
+
+    const onDriverCancelled = (data: RideCancelledByDriverEventPayload) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+
+      if (payload.rideId === rideId) {
+        dispatch(
+          updateRideStatusLocal({
+            status: RideStatus.CANCELLED,
+            timestampField: "cancelledAt",
+            timestampValue: payload.cancelledAt,
+          }),
+        );
+      }
+    };
+
     const onPaymentSucceeded = (data: PaymentSucceededPayload) => {
       const payload = Array.isArray(data) ? data[0] : data;
       if (payload.rideId === rideId) {
@@ -130,6 +160,11 @@ export const useViewRide = (rideId: string | undefined) => {
     socket.on(SOCKET_EVENTS.RIDE.STARTED, onStarted);
     socket.on(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
     socket.on(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
+    socket.on(SOCKET_EVENTS.RIDE.RIDE_CANCELLED_RIDER, onRiderCancelled);
+    socket.on(
+      SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_RIDER,
+      onDriverCancelled,
+    );
 
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
@@ -140,6 +175,11 @@ export const useViewRide = (rideId: string | undefined) => {
       socket.off(SOCKET_EVENTS.RIDE.STARTED, onStarted);
       socket.off(SOCKET_EVENTS.RIDE.COMPLETED, onCompleted);
       socket.off(SOCKET_EVENTS.RIDE.DRIVER_LOCATION, handleLocationUpdate);
+      socket.off(SOCKET_EVENTS.RIDE.RIDE_CANCELLED_RIDER, onRiderCancelled);
+      socket.off(
+        SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_RIDER,
+        onDriverCancelled,
+      );
 
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);

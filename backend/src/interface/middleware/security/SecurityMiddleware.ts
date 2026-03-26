@@ -27,9 +27,10 @@ export class SecurityMiddleware {
         process.env.NODE_ENV === "production"
           ? ["https://steerigo.com", "https://www.steerigo.com"]
           : [
-              "http://localhost:5173", 
+              "http://localhost:5173",
               "http://localhost:4000",
               "http://localhost:4001",
+              /https:\/\/.*\.ngrok-free\.app$/,
             ],
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -44,7 +45,7 @@ export class SecurityMiddleware {
     res.on("finish", () => {
       const duration = Date.now() - start;
       console.log(
-        `${req.method} ${req.url} - ${res.statusCode} - ${duration}ms`
+        `${req.method} ${req.url} - ${res.statusCode} - ${duration}ms`,
       );
     });
 
