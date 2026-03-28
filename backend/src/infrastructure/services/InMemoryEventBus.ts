@@ -235,9 +235,14 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentCashConfirmed(event: PaymentCashConfirmedEvent) {
-    const { riderId, driverId } = event.payload;
+    const { riderId, driverId, driverUserId } = event.payload;
 
-    await this.persistNotification(driverId, {
+    await this.paymentNotificationService.notifyPaymentCashConfirmed(
+      driverId,
+      event.payload,
+    );
+
+    await this.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Cash received",
       body: "You confirmed cash payment.",

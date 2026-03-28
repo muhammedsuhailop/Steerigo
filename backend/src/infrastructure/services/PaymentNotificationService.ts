@@ -92,7 +92,7 @@ export class PaymentNotificationService {
       );
 
       io.to(`driver:${driverUserId}`).emit(
-        SOCKET_EVENTS.PAYMENT_COMPLETED,
+        SOCKET_EVENTS.PAYMENT_FAILED,
         payload,
       );
 
@@ -114,6 +114,7 @@ export class PaymentNotificationService {
     payload: {
       paymentId: string;
       rideId: string;
+      riderId: string;
       amount: number;
       currency: string;
       paidAt: string;
@@ -124,6 +125,11 @@ export class PaymentNotificationService {
 
       io.to(`driver:${driverId}`).emit(
         SOCKET_EVENTS.PAYMENT_CASH_CONFIRMED,
+        payload,
+      );
+
+      io.to(`rider:${payload.riderId}`).emit(
+        SOCKET_EVENTS.PAYMENT_COMPLETED,
         payload,
       );
 

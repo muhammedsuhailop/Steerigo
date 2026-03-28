@@ -52,6 +52,7 @@ export interface PaymentCashConfirmedPayload {
   paymentId: string;
   rideId: string;
   driverId: string;
+  driverUserId: string;
   riderId: string;
   amount: number;
   currency: string;

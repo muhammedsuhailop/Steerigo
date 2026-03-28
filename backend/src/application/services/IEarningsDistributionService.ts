@@ -27,5 +27,7 @@ export interface IEarningsDistributionService {
     params: DistributeEarningsParams,
   ): Promise<EarningsDistributionResult>;
 
+  distributeCashPayment(params: DistributeEarningsParams): Promise<void>;
+
   distributeCancellation(params: DistributeCancellationParams): Promise<void>;
 }

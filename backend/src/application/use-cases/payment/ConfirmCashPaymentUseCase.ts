@@ -59,6 +59,7 @@ export class ConfirmCashPaymentUseCase
       }
 
       const driverId = driver.getId().toString();
+      let driverUserId: string | null = null;
 
       const ride = await this.rideRepository.findByRideId(rideId);
       if (!ride) {
@@ -74,6 +75,8 @@ export class ConfirmCashPaymentUseCase
       if (!ride.isCompleted()) {
         return Result.failure(PaymentErrors.rideNotCompleted(rideId));
       }
+
+      driverUserId = driver?.getUserId() ?? null;
 
       const existingPayment =
         await this.paymentRepository.findSuccessfulByRideId(rideId);
@@ -122,7 +125,7 @@ export class ConfirmCashPaymentUseCase
       const fareBreakdown = ride.getFareBreakdown();
 
       await this.earningsDistributionService
-        .distribute({
+        .distributeCashPayment({
           rideId: ride.getRideId(),
           driverId: ride.getDriverId(),
           totalFare: fareBreakdown.getTotalFare(),
@@ -151,6 +154,7 @@ export class ConfirmCashPaymentUseCase
           rideId,
           driverId,
           riderId: ride.getRiderId(),
+          driverUserId: driverUserId as string,
           amount: amount.getAmount(),
           currency: amount.getCurrency(),
           paidAt: paidAt.toISOString(),
