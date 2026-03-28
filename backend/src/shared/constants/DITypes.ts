@@ -37,6 +37,7 @@ export const TYPES = {
   IDGenerator: Symbol.for("IDGenerator"),
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
+  PaymentStrategies:Symbol.for("PaymentStrategies"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
