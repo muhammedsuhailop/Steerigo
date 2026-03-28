@@ -5,19 +5,18 @@ import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IWalletRepository } from "@domain/repositories/IWalletRepository";
 import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
 import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
 import {
   ICancellationChargeService,
   DriverCancellationContext,
 } from "@application/services/ICancellationChargeService";
+import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
 import { IEventBus } from "@application/services/IEventBus";
 import { Logger } from "@shared/utils/Logger";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { RideCancellationErrors } from "@domain/errors/RideCancellationErrors";
-import { WalletOwnerType } from "@domain/value-objects/WalletOwnerType";
 
 @injectable()
 export class DriverCancelRideUseCase
@@ -31,8 +30,8 @@ export class DriverCancelRideUseCase
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
 
-    @inject(TYPES.WalletRepository)
-    private readonly walletRepository: IWalletRepository,
+    @inject(TYPES.EarningsDistributionService)
+    private readonly earningsDistributionService: IEarningsDistributionService,
 
     @inject(TYPES.CancellationChargeService)
     private readonly cancellationChargeService: ICancellationChargeService,
@@ -143,27 +142,21 @@ export class DriverCancelRideUseCase
 
       let penaltyDeducted = false;
 
-      if (driverPenalty.getAmount() > 0) {
+      if (riderCharge.getAmount() > 0 || driverPenalty.getAmount() > 0) {
         try {
-          const wallet = await this.walletRepository.findByOwner(
+          await this.earningsDistributionService.distributeCancellation({
+            rideId: ride.getRideId(),
             driverId,
-            WalletOwnerType.DRIVER,
-          );
+            riderId: ride.getRiderId(),
+            riderCharge,
+            driverPenalty,
+          });
 
-          if (!wallet) {
-            Logger.error("Driver wallet not found for penalty application", {
-              driverId,
-              rideId,
-              penaltyAmount: driverPenalty.getAmount(),
-            });
-          } else {
-            wallet.forceDebit(driverPenalty);
-
-            await this.walletRepository.save(wallet);
+          if (driverPenalty.getAmount() > 0) {
             penaltyDeducted = true;
           }
         } catch (err) {
-          Logger.error("Failed to persist driver penalty to wallet", {
+          Logger.error("Failed to distribute cancellation charges/penalties", {
             driverId,
             rideId,
             error: err instanceof Error ? err.message : String(err),
