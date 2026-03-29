@@ -18,6 +18,7 @@ export const TYPES = {
   TransactionRepository: Symbol.for("TransactionRepository"),
   PayoutRepository: Symbol.for("PayoutRepository"),
   WalletRepository: Symbol.for("WalletRepository"),
+  RatingRepository: Symbol.for("RatingRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -37,7 +38,7 @@ export const TYPES = {
   IDGenerator: Symbol.for("IDGenerator"),
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
-  PaymentStrategies:Symbol.for("PaymentStrategies"),
+  PaymentStrategies: Symbol.for("PaymentStrategies"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
