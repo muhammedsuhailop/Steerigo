@@ -34,7 +34,7 @@ export class RatingRepositoryImpl implements IRatingRepository {
   ): Promise<boolean> {
     try {
       const count = await RatingModel.countDocuments({
-        rideId: new Types.ObjectId(rideId),
+        rideId: rideId,
         reviewerId: new Types.ObjectId(reviewerId),
       });
       return count > 0;
@@ -99,7 +99,7 @@ export class RatingRepositoryImpl implements IRatingRepository {
   async findAllByRideId(rideId: string): Promise<Rating[]> {
     try {
       const docs = await RatingModel.find({
-        rideId: new Types.ObjectId(rideId),
+        rideId: rideId,
       });
 
       return docs.map(RatingMapper.toDomain);

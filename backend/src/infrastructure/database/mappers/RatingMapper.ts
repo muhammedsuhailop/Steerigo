@@ -36,7 +36,7 @@ export class RatingMapper {
     );
 
     return {
-      rideId: toObjectId(entity.getRideId()),
+      rideId: entity.getRideId(),
       reviewerId: toObjectId(entity.getReviewerId()),
       reviewerName: entity.getReviewerName(),
       revieweeId: toObjectId(entity.getRevieweeId()),

@@ -200,7 +200,7 @@ export class Driver {
 
     const newAverage = (totalWeight + newRating) / this.numberOfRatings;
 
-    this.averageRating = Math.round(newAverage * 100) / 10;
+    this.averageRating = Math.round(newAverage * 10) / 10;
     this.updatedAt = new Date();
   }
 }

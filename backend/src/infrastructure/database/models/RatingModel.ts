@@ -3,7 +3,7 @@ import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRatingDocument extends Document {
   _id: Types.ObjectId;
-  rideId: Types.ObjectId;
+  rideId: String;
   reviewerId: Types.ObjectId;
   reviewerName: string;
   revieweeId: Types.ObjectId;
@@ -18,7 +18,7 @@ export interface IRatingDocument extends Document {
 const ratingSchema = new Schema<IRatingDocument>(
   {
     rideId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Ride",
       required: true,
       index: true,

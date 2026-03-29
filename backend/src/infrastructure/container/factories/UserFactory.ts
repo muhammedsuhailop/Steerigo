@@ -30,6 +30,9 @@ import { GetUserRidesUseCase } from "@application/use-cases/user/GetUserRidesUse
 import { CancelRideDto } from "@application/dto/user/CancelRideDto";
 import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseDto";
 import { CancelRideUseCase } from "@application/use-cases/user/CancelRideUseCase";
+import { RateDriverDto } from "@application/dto/user/RateDriverDto";
+import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
+import { RateDriverUseCase } from "@application/use-cases/user/RateDriverUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -89,6 +92,12 @@ export class UserFactory {
         IUseCase<CancelRideDto, Promise<Result<CancelRideResponseDto>>>
       >(TYPES.CancelRideUseCase)
       .to(CancelRideUseCase);
+
+    container
+      .bind<
+        IUseCase<RateDriverDto, Promise<Result<RateDriverResponseDto>>>
+      >(TYPES.RateDriverUseCase)
+      .to(RateDriverUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

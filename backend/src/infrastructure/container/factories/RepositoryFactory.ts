@@ -20,6 +20,8 @@ import { IWalletRepository } from "@domain/repositories/IWalletRepository";
 import { WalletRepositoryImpl } from "@infrastructure/database/repositories/WalletRepositoryImpl";
 import { IRatingRepository } from "@domain/repositories/IRatingRepository";
 import { RatingRepositoryImpl } from "@infrastructure/database/repositories/RatingRepositoryImpl";
+import { IUnitOfWork } from "@domain/repositories/IUnitOfWork";
+import { MongoUnitOfWork } from "@infrastructure/database/repositories/MongoUnitOfWork";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -47,6 +49,7 @@ export class RepositoryFactory {
     container
       .bind<IPayoutRepository>(TYPES.PayoutRepository)
       .to(PayoutRepositoryImpl);
+    container.bind<IUnitOfWork>(TYPES.UnitOfWork).to(MongoUnitOfWork);
     container
       .bind<IWalletRepository>(TYPES.WalletRepository)
       .to(WalletRepositoryImpl);

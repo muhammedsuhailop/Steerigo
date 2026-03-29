@@ -19,6 +19,8 @@ export class DriverMapper {
       licenseExpiryDate: raw.licenseExpiryDate,
       kycStatus: raw.kycStatus as KYCStatus,
       status: raw.status as DriverStatus,
+      averageRating: raw.averageRating ?? 0,
+      numberOfRatings: raw.numberOfRatings ?? 0,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     });
@@ -36,6 +38,8 @@ export class DriverMapper {
       licenseExpiryDate: driver.getLicenseExpiryDate(),
       kycStatus: driver.getKycStatus(),
       status: driver.getStatus(),
+      averageRating: driver.getAverageRating(),
+      numberOfRatings: driver.getNumberOfRatings(),
       updatedAt: driver.getUpdatedAt(),
     };
   }

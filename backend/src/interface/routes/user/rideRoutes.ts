@@ -10,6 +10,7 @@ import { autoSearchAndRequestSchema } from "@interface/validators/user/autoSearc
 import { rideIdParamSchema } from "@interface/validators/user/rideIdParamSchema";
 import { getUserRidesSchema } from "@interface/validators/user/getUserRidesSchema";
 import { cancelRideSchema } from "@interface/validators/user/cancelRideSchema";
+import { rateRideSchema } from "@interface/validators/user/rateRideSchema";
 
 const router = Router();
 
@@ -65,6 +66,14 @@ router.post(
   validateSchema(cancelRideSchema),
   handleValidationErrors,
   (req: Request, res: Response) => rideController.cancelRide(req, res),
+);
+
+// POST /api/user/ride/:rideId/rating - Rider rates a completed ride
+router.post(
+  "/ride/:rideId/rating",
+  validateSchema(rateRideSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => rideController.rateDriver(req, res),
 );
 
 export { router as rideRoutes };

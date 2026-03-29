@@ -16,6 +16,7 @@ export const TYPES = {
   DriverLocationRepository: Symbol.for("DriverLocationRepository"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   TransactionRepository: Symbol.for("TransactionRepository"),
+  UnitOfWork: Symbol.for("IUnitOfWork"),
   PayoutRepository: Symbol.for("PayoutRepository"),
   WalletRepository: Symbol.for("WalletRepository"),
   RatingRepository: Symbol.for("RatingRepository"),
@@ -129,6 +130,7 @@ export const TYPES = {
   GetUserRideByIdUseCase: Symbol.for("GetUserRideByIdUseCase"),
   GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
+  RateDriverUseCase: Symbol.for("RateDriverUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
