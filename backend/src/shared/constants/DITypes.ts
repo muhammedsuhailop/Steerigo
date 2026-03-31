@@ -86,6 +86,7 @@ export const TYPES = {
   CreateCouponUseCase: Symbol.for("CreateCouponUseCase"),
   EditCouponUseCase: Symbol.for("EditCouponUseCase"),
   GetAdminCouponsUseCase: Symbol.for("GetAdminCouponsUseCase"),
+  GetAdminRatingsUseCase: Symbol.for("GetAdminRatingsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),

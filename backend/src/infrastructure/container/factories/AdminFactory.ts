@@ -35,6 +35,9 @@ import { AdminCouponController } from "@interface/controllers/admin/AdminCouponC
 import { GetAdminCouponsDto } from "@application/dto/admin/GetAdminCouponsDto";
 import { GetAdminCouponsResponseDto } from "@application/dto/admin/GetAdminCouponsResponseDto";
 import { GetAdminCouponsUseCase } from "@application/use-cases/admin/GetAdminCouponsUseCase";
+import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
+import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
+import { GetAdminRatingsUseCase } from "@application/use-cases/admin/GetAdminRatingsUseCase";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -93,6 +96,15 @@ export class AdminFactory {
         >
       >(TYPES.GetAdminCouponsUseCase)
       .to(GetAdminCouponsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminRatingsDto,
+          Promise<Result<GetAdminRatingsResponseDto>>
+        >
+      >(TYPES.GetAdminRatingsUseCase)
+      .to(GetAdminRatingsUseCase);
 
     // Controller bindings
     container
