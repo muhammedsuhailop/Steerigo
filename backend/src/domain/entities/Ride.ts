@@ -296,24 +296,22 @@ export class Ride {
     code: string,
     discountAmount: number,
     discountType: CouponDiscountType,
+    recalculate: boolean = false,
   ): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
-      throw new Error(
-        "Cannot apply coupon: Payment is already processed or completed.",
-      );
+      throw new Error("Payment already processed.");
     }
 
-    if (this.couponDetails) {
-      throw new Error("Coupon already applied to this ride.");
+    if (this.couponDetails && !recalculate) {
+      throw new Error("Coupon already applied.");
     }
 
     if (discountAmount <= 0) {
-      throw new Error("Discount amount must be greater than zero.");
+      throw new Error("Discount must be greater than zero.");
     }
 
-    const fare = this.getFare();
-    if (discountAmount > fare) {
-      throw new Error("Discount cannot exceed total fare.");
+    if (discountAmount > this.getFare()) {
+      throw new Error("Discount exceeds fare.");
     }
 
     this.couponDetails = {
@@ -323,7 +321,7 @@ export class Ride {
       discountType,
     };
   }
-
+  
   removeCoupon(): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
       throw new Error(
