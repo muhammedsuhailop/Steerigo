@@ -1,4 +1,5 @@
 import { CouponDetails } from "@domain/value-objects/CouponDetails";
+import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { Location } from "@domain/value-objects/Location";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
@@ -290,20 +291,36 @@ export class Ride {
     this.timeline.setCancelledAt(new Date());
   }
 
-  applyCoupon(code: string, discountAmount: number): void {
+  applyCoupon(
+    couponId: string,
+    code: string,
+    discountAmount: number,
+    discountType: CouponDiscountType,
+  ): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
       throw new Error(
         "Cannot apply coupon: Payment is already processed or completed.",
       );
     }
 
-    if (discountAmount < 0) {
-      throw new Error("Discount amount cannot be negative.");
+    if (this.couponDetails) {
+      throw new Error("Coupon already applied to this ride.");
+    }
+
+    if (discountAmount <= 0) {
+      throw new Error("Discount amount must be greater than zero.");
+    }
+
+    const fare = this.getFare();
+    if (discountAmount > fare) {
+      throw new Error("Discount cannot exceed total fare.");
     }
 
     this.couponDetails = {
+      couponId,
       code,
       discountAmount,
+      discountType,
     };
   }
 
@@ -314,7 +331,21 @@ export class Ride {
       );
     }
 
+    if (!this.couponDetails) {
+      throw new Error("No coupon applied to remove.");
+    }
+
     this.couponDetails = undefined;
+  }
+
+  getDiscountAmount(): number {
+    return this.couponDetails?.discountAmount ?? 0;
+  }
+
+  getPayableAmount(): number {
+    const payable = this.getFare() - this.getDiscountAmount();
+
+    return Math.max(0, payable);
   }
 
   updatePaymentStatus(status: PaymentStatus): void {
