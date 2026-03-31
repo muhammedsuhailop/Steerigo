@@ -1,9 +1,14 @@
 import { injectable } from "inversify";
-import { ICouponRepository } from "@domain/repositories/ICouponRepository";
+import {
+  CouponQueryOptions,
+  ICouponRepository,
+  PaginatedCoupons,
+} from "@domain/repositories/ICouponRepository";
 import { Coupon } from "@domain/entities/Coupon";
 import { CouponModel } from "../models/CouponModel";
 import { CouponMapper } from "../mappers/CouponMapper";
 import { Logger } from "@shared/utils/Logger";
+import { FilterQuery, SortOrder } from "mongoose";
 
 @injectable()
 export class CouponRepositoryImpl implements ICouponRepository {
@@ -70,6 +75,80 @@ export class CouponRepositoryImpl implements ICouponRepository {
     } catch (error) {
       Logger.error("Error saving coupon", {
         code: coupon.getCode(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  async findAll(options: CouponQueryOptions): Promise<PaginatedCoupons> {
+    try {
+      const { filters, sortBy, sortOrder, page, limit } = options;
+
+      const query: FilterQuery<typeof CouponModel> = {};
+
+      if (filters.code) {
+        query["code"] = {
+          $regex: filters.code.trim().toUpperCase(),
+          $options: "i",
+        };
+      }
+
+      if (filters.discountType) {
+        query["discountType"] = filters.discountType;
+      }
+
+      if (filters.isActive !== undefined) {
+        query["isActive"] = filters.isActive;
+      }
+
+      if (filters.validFromStart || filters.validFromEnd) {
+        query["validFrom"] = {};
+        if (filters.validFromStart) {
+          (query["validFrom"] as Record<string, Date>)["$gte"] =
+            filters.validFromStart;
+        }
+        if (filters.validFromEnd) {
+          (query["validFrom"] as Record<string, Date>)["$lte"] =
+            filters.validFromEnd;
+        }
+      }
+
+      if (filters.validToStart || filters.validToEnd) {
+        query["validTo"] = {};
+        if (filters.validToStart) {
+          (query["validTo"] as Record<string, Date>)["$gte"] =
+            filters.validToStart;
+        }
+        if (filters.validToEnd) {
+          (query["validTo"] as Record<string, Date>)["$lte"] =
+            filters.validToEnd;
+        }
+      }
+
+      const mongoSortOrder: SortOrder = sortOrder === "asc" ? 1 : -1;
+      const skip = (page - 1) * limit;
+
+      const [docs, total] = await Promise.all([
+        CouponModel.find(query)
+          .sort({ [sortBy]: mongoSortOrder })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        CouponModel.countDocuments(query),
+      ]);
+
+      const coupons = docs.map((doc) => CouponMapper.toDomain(doc));
+
+      return {
+        coupons,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      Logger.error("Error finding all coupons", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
