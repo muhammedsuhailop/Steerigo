@@ -3,6 +3,7 @@ import {
   IEarningsDistributionService,
   DistributeEarningsParams,
   EarningsDistributionResult,
+  DistributeCancellationParams,
 } from "@application/services/IEarningsDistributionService";
 import { IWalletRepository } from "@domain/repositories/IWalletRepository";
 import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
@@ -55,6 +56,104 @@ export class EarningsDistributionService
     };
   }
 
+  async distributeCashPayment(params: DistributeEarningsParams): Promise<void> {
+    const { rideId, driverId, totalFare, platformFee, platformFeeTax } = params;
+    const platformRevenue = platformFee.add(platformFeeTax);
+
+    Logger.info("Processing cash earnings distribution", {
+      rideId,
+      driverId,
+      platformRevenue: platformRevenue.getAmount(),
+    });
+
+    await this.debitWallet(
+      driverId,
+      WalletOwnerType.DRIVER,
+      platformRevenue,
+      rideId,
+      TransactionType.PLATFORM_COMMISSION_CASH_RIDE,
+      `Platform fee deduction for cash ride: ${rideId}`,
+    );
+
+    await this.creditPlatformWallet(platformRevenue, rideId);
+
+    await this.recordAuditOnlyTransaction(
+      driverId,
+      WalletOwnerType.DRIVER,
+      totalFare,
+      rideId,
+      TransactionType.RIDE_PAYMENT_CASH,
+      `Cash collected from rider for ride: ${rideId}`,
+    );
+  }
+
+  async distributeCancellation(
+    params: DistributeCancellationParams,
+  ): Promise<void> {
+    const { rideId, driverId, riderId, riderCharge, driverPenalty } = params;
+
+    if (driverPenalty.getAmount() > 0) {
+      await this.debitWallet(
+        driverId,
+        WalletOwnerType.DRIVER,
+        driverPenalty,
+        rideId,
+        TransactionType.DRIVER_PENALTY,
+        `Penalty for driver cancellation: ${rideId}`,
+      );
+      await this.creditPlatformWallet(
+        driverPenalty,
+        rideId,
+        TransactionType.DRIVER_PENALTY_REVENUE,
+        `Revenue from driver penalty: ${rideId}`,
+      );
+    }
+
+    if (riderCharge.getAmount() > 0) {
+      await this.debitWallet(
+        riderId,
+        WalletOwnerType.RIDER,
+        riderCharge,
+        rideId,
+        TransactionType.RIDER_CANCELLATION_FEE,
+        `Cancellation fee for ride: ${rideId}`,
+      );
+      await this.creditPlatformWallet(riderCharge, rideId);
+    }
+  }
+
+  private async debitWallet(
+    ownerId: string,
+    ownerType: WalletOwnerType,
+    amount: Money,
+    rideId: string,
+    type: TransactionType,
+    note: string,
+  ): Promise<void> {
+    const wallet = await this.walletRepository.findByOwner(ownerId, ownerType);
+    if (!wallet) {
+      throw new Error(
+        `${ownerType} wallet not found for debiting ${amount.getAmount()}`,
+      );
+    }
+
+    wallet.forceDebit(amount);
+    await this.walletRepository.save(wallet);
+
+    const transaction = Transaction.create({
+      id: new Types.ObjectId().toString(),
+      walletId: wallet.getId(),
+      type: type,
+      direction: TransactionDirection.DEBIT,
+      amount,
+      relatedEntityId: rideId,
+      relatedEntityType: "Ride",
+      note: note,
+    });
+
+    await this.transactionRepository.save(transaction);
+  }
+
   private async creditDriverWallet(
     driverId: string,
     amount: Money,
@@ -100,6 +199,8 @@ export class EarningsDistributionService
   private async creditPlatformWallet(
     amount: Money,
     rideId: string,
+    type: TransactionType = TransactionType.PLATFORM_COMMISSION,
+    note?: string,
   ): Promise<void> {
     let wallet = await this.walletRepository.findByOwner(
       PLATFORM_OWNER_ID,
@@ -121,12 +222,12 @@ export class EarningsDistributionService
     const transaction = Transaction.create({
       id: new Types.ObjectId().toString(),
       walletId: wallet.getId(),
-      type: TransactionType.PLATFORM_COMMISSION,
+      type: type,
       direction: TransactionDirection.CREDIT,
       amount,
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
-      note: `Platform commission for ride ${rideId}`,
+      note: note ?? `Platform commission for ride ${rideId}`,
     });
 
     await this.transactionRepository.save(transaction);
@@ -135,5 +236,30 @@ export class EarningsDistributionService
       amount: amount.getAmount(),
       rideId,
     });
+  }
+
+  private async recordAuditOnlyTransaction(
+    ownerId: string,
+    ownerType: WalletOwnerType,
+    amount: Money,
+    rideId: string,
+    type: TransactionType,
+    note: string,
+  ): Promise<void> {
+    const wallet = await this.walletRepository.findByOwner(ownerId, ownerType);
+    if (!wallet) return;
+
+    const transaction = Transaction.create({
+      id: new Types.ObjectId().toString(),
+      walletId: wallet.getId(),
+      type: type,
+      direction: TransactionDirection.CREDIT,
+      amount,
+      relatedEntityId: rideId,
+      relatedEntityType: "Ride",
+      note: note,
+    });
+
+    await this.transactionRepository.save(transaction);
   }
 }

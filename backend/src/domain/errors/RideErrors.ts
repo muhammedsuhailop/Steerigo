@@ -185,4 +185,78 @@ export class RideErrors {
       },
     );
   }
+
+  static cannotRateIncompleteRide(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.CANNOT_RATE_INCOMPLETE_RIDE, {
+        rideId,
+      }),
+      "CANNOT_RATE_INCOMPLETE_RIDE",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static rideAlreadyRated(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_ALREADY_RATED, { rideId }),
+      "RIDE_ALREADY_RATED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static driverNotFoundForRide(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.DRIVER_NOT_FOUND_FOR_RIDE, {
+        rideId,
+      }),
+      "DRIVER_NOT_FOUND_FOR_RIDE",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "NOT_FOUND",
+      },
+    );
+  }
+
+  static invalidRatingValue(): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.INVALID_RATING_VALUE, {}),
+      "INVALID_RATING_VALUE",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static invalidRatingData(reason: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.INVALID_RATING_DATA, { reason }),
+      "INVALID_RATING_DATA",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

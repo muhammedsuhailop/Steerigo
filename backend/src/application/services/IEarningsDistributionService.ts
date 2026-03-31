@@ -8,6 +8,14 @@ export interface DistributeEarningsParams {
   platformFeeTax: Money;
 }
 
+export interface DistributeCancellationParams {
+  rideId: string;
+  driverId: string;
+  riderId: string;
+  riderCharge: Money;
+  driverPenalty: Money;
+}
+
 export interface EarningsDistributionResult {
   driverEarnings: number;
   platformRevenue: number;
@@ -18,4 +26,8 @@ export interface IEarningsDistributionService {
   distribute(
     params: DistributeEarningsParams,
   ): Promise<EarningsDistributionResult>;
+
+  distributeCashPayment(params: DistributeEarningsParams): Promise<void>;
+
+  distributeCancellation(params: DistributeCancellationParams): Promise<void>;
 }

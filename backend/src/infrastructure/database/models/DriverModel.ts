@@ -15,6 +15,8 @@ export interface IDriverModel extends Document {
   licenseExpiryDate: Date;
   kycStatus: string;
   status: string;
+  averageRating: number;
+  numberOfRatings: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,11 +70,22 @@ const driverSchema = new Schema<IDriverModel>(
       enum: DriverStatus,
       default: DriverStatus.ACTIVE,
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    numberOfRatings: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
     collection: "drivers",
-  }
+  },
 );
 
 // Indexes

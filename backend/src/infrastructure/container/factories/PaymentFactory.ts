@@ -11,6 +11,10 @@ import { EarningsDistributionService } from "@infrastructure/services/EarningsDi
 import { MarkPaymentFailedUseCase } from "@application/use-cases/payment/MarkPaymentFailedUseCase";
 import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
 import { PaymentNotificationService } from "@infrastructure/services/PaymentNotificationService";
+import { IPaymentStrategy } from "@application/services/payment/IPaymentStrategy";
+import { OnlinePaymentStrategy } from "@infrastructure/services/payment/OnlinePaymentStrategy";
+import { WalletPaymentStrategy } from "@infrastructure/services/payment/WalletPaymentStrategy";
+import { CashPaymentStrategy } from "@infrastructure/services/payment/CashPaymentStrategy";
 
 export class PaymentFactory {
   static register(container: Container): void {
@@ -28,6 +32,18 @@ export class PaymentFactory {
     container
       .bind<IPaymentNotificationService>(TYPES.PaymentNotificationService)
       .to(PaymentNotificationService);
+
+      container
+        .bind<IPaymentStrategy<unknown>>(TYPES.PaymentStrategies)
+        .to(OnlinePaymentStrategy);
+
+      container
+        .bind<IPaymentStrategy<unknown>>(TYPES.PaymentStrategies)   
+        .to(WalletPaymentStrategy);
+
+      container
+        .bind<IPaymentStrategy<unknown>>(TYPES.PaymentStrategies)
+        .to(CashPaymentStrategy);
 
     // Use Cases
     container

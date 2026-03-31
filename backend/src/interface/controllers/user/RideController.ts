@@ -16,6 +16,9 @@ import { GetUserRidesDto } from "@application/dto/user/GetUserRidesDto";
 import { GetUserRidesResponseDto } from "@application/dto/user/GetUserRidesResponseDto";
 import { CancelRideDto } from "@application/dto/user/CancelRideDto";
 import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseDto";
+import { RateDriverDto } from "@application/dto/user/RateDriverDto";
+import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
+import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
 export class RideController {
@@ -41,6 +44,12 @@ export class RideController {
     private readonly cancelRideUseCase: IUseCase<
       CancelRideDto,
       Promise<Result<CancelRideResponseDto>>
+    >,
+
+    @inject(TYPES.RateDriverUseCase)
+    private readonly rateDriverUseCase: IUseCase<
+      RateDriverDto,
+      Promise<Result<RateDriverResponseDto>>
     >,
   ) {}
 
@@ -298,6 +307,68 @@ export class RideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "cancel_ride",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async rateDriver(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req) as string;
+      const rideId = req.params.rideId;
+
+      Logger.info("Rate driver request received from rider", {
+        userId,
+        rideId,
+        body: req.body,
+      });
+
+      const dto = RateDriverDto.fromRequest(userId, { rideId }, req.body);
+
+      const result = await this.rateDriverUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Rate driver failed", {
+          userId,
+          rideId,
+          error: error?.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "rate_driver",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      Logger.info("Driver rated successfully", {
+        userId,
+        rideId: data.rideId,
+        driverId: data.driverId,
+        overallRating: data.overallRating,
+        averageRating: data.driver.averageRating,
+        numberOfRatings: data.driver.numberOfRatings,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: RIDE_MESSAGES.RIDE_RATED,
+        data,
+      } as ApiResponse);
+    } catch (error) {
+      Logger.error("Rate driver controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "rate_driver",
       );
       res.status(statusCode).json(response);
     }

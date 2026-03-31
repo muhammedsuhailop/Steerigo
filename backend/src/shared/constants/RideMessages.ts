@@ -9,6 +9,7 @@ export const RIDE_MESSAGES = {
   RIDE_STARTED_WITH_AUTO_ARRIVED:
     "Ride has started. Driver arrival has been automatically recorded",
   RIDE_COMPLETED: "Ride completed successfully",
+  RIDE_RATED: "Ride rated successfully",
 };
 export const RIDE_ERROR_MESSAGES = {
   RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",
@@ -26,6 +27,12 @@ export const RIDE_ERROR_MESSAGES = {
   UNAUTHORIZED_RIDE_ACCESS: "You are not authorized to access ride {rideId}",
   CANNOT_MARK_AS_ARRIVED:
     "Cannot mark ride {{rideId}} as arrived from status {{currentStatus}}. Only accepted rides can be marked as arrived.",
+  CANNOT_RATE_INCOMPLETE_RIDE:
+    "Cannot rate ride {{rideId}} because it is not yet completed",
+  RIDE_ALREADY_RATED: "Ride {{rideId}} has already been rated by you",
+  DRIVER_NOT_FOUND_FOR_RIDE: "No driver found associated with ride {{rideId}}",
+  INVALID_RATING_VALUE: "Rating values must be between 1 and 5",
+  INVALID_RATING_DATA: "Invalid rating data provided: {{reason}}",
 } as const;
 
 export const RIDE_CANCELLATION_ERROR_MESSAGES = {

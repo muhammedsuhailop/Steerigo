@@ -15,8 +15,10 @@ export class Driver {
     private licenseExpiryDate: Date,
     private kycStatus: KYCStatus,
     private status: DriverStatus,
+    private averageRating: number = 0,
+    private numberOfRatings: number = 0,
     private readonly createdAt: Date = new Date(),
-    private updatedAt: Date = new Date()
+    private updatedAt: Date = new Date(),
   ) {}
 
   // Factory method for creating new drivers
@@ -28,7 +30,7 @@ export class Driver {
     licenseNumber: string,
     licenceCategory: LicenseCategory,
     licenseIssueDate: Date,
-    licenseExpiryDate: Date
+    licenseExpiryDate: Date,
   ): Driver {
     return new Driver(
       id,
@@ -40,7 +42,9 @@ export class Driver {
       licenseIssueDate,
       licenseExpiryDate,
       KYCStatus.IN_REVIEW,
-      DriverStatus.ACTIVE
+      DriverStatus.ACTIVE,
+      0,
+      0,
     );
   }
 
@@ -56,6 +60,8 @@ export class Driver {
     licenseExpiryDate: Date;
     kycStatus: KYCStatus;
     status: DriverStatus;
+    averageRating: number;
+    numberOfRatings: number;
     createdAt: Date;
     updatedAt: Date;
   }): Driver {
@@ -70,8 +76,10 @@ export class Driver {
       data.licenseExpiryDate,
       data.kycStatus,
       data.status,
+      data.averageRating,
+      data.numberOfRatings,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
@@ -106,8 +114,15 @@ export class Driver {
   getStatus(): DriverStatus {
     return this.status;
   }
-  getisAvailable():boolean{
-    return this.status=== DriverStatus.ACTIVE;
+  getisAvailable(): boolean {
+    return this.status === DriverStatus.ACTIVE;
+  }
+  getAverageRating(): number {
+    return this.averageRating;
+  }
+
+  getNumberOfRatings(): number {
+    return this.numberOfRatings;
   }
   getCreatedAt(): Date {
     return this.createdAt;
@@ -155,7 +170,7 @@ export class Driver {
   updateLicenseInfo(
     category: LicenseCategory,
     issueDate: Date,
-    expiryDate: Date
+    expiryDate: Date,
   ): void {
     this.licenceCategory = category;
     this.licenseIssueDate = issueDate;
@@ -173,5 +188,19 @@ export class Driver {
 
   canBeActioned(): boolean {
     return true;
+  }
+
+  updateRating(newRating: number): void {
+    if (newRating < 0 || newRating > 5) {
+      throw new Error("Rating must be between 0 and 5");
+    }
+
+    const totalWeight = this.averageRating * this.numberOfRatings;
+    this.numberOfRatings += 1;
+
+    const newAverage = (totalWeight + newRating) / this.numberOfRatings;
+
+    this.averageRating = Math.round(newAverage * 10) / 10;
+    this.updatedAt = new Date();
   }
 }
