@@ -168,7 +168,7 @@ export const RideTimelineStatus: React.FC<{ timeline: RideTimeline }> = ({
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
           <FaClock className="text-gray-300" />
           Ride Timeline
         </h3>

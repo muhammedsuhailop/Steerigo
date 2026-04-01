@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import {
+  CouponResponse,
   InitiatePaymentRequest,
   InitiatePaymentResponse,
   VerifyPaymentRequest,
@@ -56,6 +57,26 @@ export const viewRideApi = createApi({
       }),
     }),
 
+    applyCoupon: builder.mutation<
+      CouponResponse,
+      { rideId: string; couponCode: string }
+    >({
+      query: ({ rideId, couponCode }) => ({
+        url: `${API_ENDPOINTS.USER.RIDE}/${rideId}/coupon`,
+        method: "POST",
+        data: { couponCode },
+        skipErrorHandling: true,
+      }),
+    }),
+
+    removeCoupon: builder.mutation<CouponResponse, string>({
+      query: (rideId) => ({
+        url: `${API_ENDPOINTS.USER.RIDE}/${rideId}/coupon`,
+        method: "DELETE",
+        skipErrorHandling: true,
+      }),
+    }),
+
     cancelActiveRide: builder.mutation<
       {
         success: boolean;
@@ -84,5 +105,7 @@ export const {
   useInitiatePaymentMutation,
   useVerifyPaymentMutation,
   useMarkPaymentFailedMutation,
+  useApplyCouponMutation,
+  useRemoveCouponMutation,
   useCancelActiveRideMutation,
 } = viewRideApi;

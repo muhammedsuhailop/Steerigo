@@ -9,6 +9,13 @@ export interface FareDetails {
   platformFee: number;
   totalFare: number;
   currency: string;
+  payableAmount?: number;
+}
+
+export interface CouponDetails {
+  couponCode: string;
+  discountType: string;
+  discountAmount: number;
 }
 
 export interface DriverInfo {
@@ -31,6 +38,7 @@ export interface RideDetails {
   distance: number;
   fare: FareDetails;
   timeline: RideTimeline;
+  couponDetails?: CouponDetails;
   createdAt: string;
   updatedAt: string;
 }
@@ -86,5 +94,20 @@ export interface VerifyPaymentResponse {
     paidAt: string;
     amount: number;
     currency: string;
+  };
+}
+
+export interface CouponResponse {
+  success: boolean;
+  message: string;
+  data: {
+    rideId: string;
+    couponCode?: string;
+    discountType?: string;
+    originalFare: number;
+    discountAmount: number;
+    payableAmount: number;
+    currency: string;
+    message: string;
   };
 }

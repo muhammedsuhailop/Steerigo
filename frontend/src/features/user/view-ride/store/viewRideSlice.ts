@@ -4,6 +4,7 @@ import {
   RideDetails,
   DriverInfo,
   FareDetails,
+  CouponDetails,
 } from "../types/viewRide.types";
 import { RideStatus, RideTimeline } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
@@ -80,6 +81,18 @@ export const viewRideSlice = createSlice({
       state.activeRide = null;
       state.activeDriver = null;
     },
+    updateCouponData: (
+      state,
+      action: PayloadAction<{
+        couponDetails?: CouponDetails;
+        payableAmount: number;
+      }>,
+    ) => {
+      if (state.activeRide) {
+        state.activeRide.couponDetails = action.payload.couponDetails;
+        state.activeRide.fare.payableAmount = action.payload.payableAmount;
+      }
+    },
   },
 });
 
@@ -87,6 +100,7 @@ export const {
   setRideData,
   updateRideStatusLocal,
   updatePaymentStatusLocal,
+  updateCouponData,
   clearRideData,
 } = viewRideSlice.actions;
 
