@@ -19,10 +19,6 @@ import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseD
 import { RateDriverDto } from "@application/dto/user/RateDriverDto";
 import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
-import { ApplyCouponDto } from "@application/dto/user/ApplyCouponDto";
-import { ApplyCouponResponseDto } from "@application/dto/user/ApplyCouponResponseDto";
-import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
-import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
 
 @injectable()
 export class RideController {
@@ -54,18 +50,6 @@ export class RideController {
     private readonly rateDriverUseCase: IUseCase<
       RateDriverDto,
       Promise<Result<RateDriverResponseDto>>
-    >,
-
-    @inject(TYPES.ApplyCouponUseCase)
-    private readonly applyCouponUseCase: IUseCase<
-      ApplyCouponDto,
-      Promise<Result<ApplyCouponResponseDto>>
-    >,
-
-    @inject(TYPES.RemoveCouponUseCase)
-    private readonly removeCouponUseCase: IUseCase<
-      RemoveCouponDto,
-      Promise<Result<RemoveCouponResponseDto>>
     >,
   ) {}
 
@@ -385,125 +369,6 @@ export class RideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "rate_driver",
-      );
-      res.status(statusCode).json(response);
-    }
-  }
-
-  async applyCoupon(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = this.getUserId(req) as string;
-      const rideId = req.params.rideId;
-
-      Logger.info("Apply coupon request received from rider", {
-        userId,
-        rideId,
-        body: req.body,
-      });
-
-      const dto = ApplyCouponDto.fromRequest(userId, { rideId }, req.body);
-
-      const result = await this.applyCouponUseCase.execute(dto);
-
-      if (result.isFailure()) {
-        const error = result.getError();
-        Logger.warn("Apply coupon failed", {
-          userId,
-          rideId,
-          error: error?.message,
-        });
-
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "apply_coupon",
-        );
-        res.status(statusCode).json(response);
-        return;
-      }
-
-      const data = result.getValue();
-
-      Logger.info("Coupon applied successfully", {
-        userId,
-        rideId: data.rideId,
-        couponCode: data.couponCode,
-        discountAmount: data.discountAmount,
-        payableAmount: data.payableAmount,
-      });
-
-      res.status(HttpStatusCodes.OK).json({
-        success: true,
-        message: data.message,
-        data,
-      } as ApiResponse);
-    } catch (error) {
-      Logger.error("Apply coupon controller error", {
-        userId: this.getUserId(req),
-        rideId: req.params.rideId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "apply_coupon",
-      );
-      res.status(statusCode).json(response);
-    }
-  }
-
-  async removeCoupon(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = this.getUserId(req) as string;
-      const rideId = req.params.rideId;
-
-      Logger.info("Remove coupon request received from rider", {
-        userId,
-        rideId,
-      });
-
-      const dto = RemoveCouponDto.fromRequest(userId, { rideId });
-
-      const result = await this.removeCouponUseCase.execute(dto);
-
-      if (result.isFailure()) {
-        const error = result.getError();
-        Logger.warn("Remove coupon failed", {
-          userId,
-          rideId,
-          error: error?.message,
-        });
-
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "remove_coupon",
-        );
-        res.status(statusCode).json(response);
-        return;
-      }
-
-      const data = result.getValue();
-
-      Logger.info("Coupon removed successfully", {
-        userId,
-        rideId: data.rideId,
-        payableAmount: data.payableAmount,
-      });
-
-      res.status(HttpStatusCodes.OK).json({
-        success: true,
-        message: data.message,
-        data,
-      } as ApiResponse);
-    } catch (error) {
-      Logger.error("Remove coupon controller error", {
-        userId: this.getUserId(req),
-        rideId: req.params.rideId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "remove_coupon",
       );
       res.status(statusCode).json(response);
     }

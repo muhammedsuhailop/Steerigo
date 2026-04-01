@@ -194,4 +194,5 @@ export const TYPES = {
   AdminPayoutController: Symbol.for("AdminPayoutController"),
   DriverWalletController: Symbol.for("DriverWalletController"),
   AdminCouponController: Symbol.for("AdminCouponController"),
+  CouponController: Symbol.for("CouponController"),
 };
