@@ -21,6 +21,7 @@ export const TYPES = {
   WalletRepository: Symbol.for("WalletRepository"),
   RatingRepository: Symbol.for("RatingRepository"),
   CouponRepository: Symbol.for("CouponRepository"),
+  CouponUsageRepository: Symbol.for("CouponUsageRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -41,6 +42,7 @@ export const TYPES = {
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
   PaymentStrategies: Symbol.for("PaymentStrategies"),
+  CouponValidationService: Symbol.for("CouponValidationService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -137,6 +139,7 @@ export const TYPES = {
   GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
   RateDriverUseCase: Symbol.for("RateDriverUseCase"),
+  ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),

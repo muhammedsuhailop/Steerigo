@@ -19,6 +19,8 @@ import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseD
 import { RateDriverDto } from "@application/dto/user/RateDriverDto";
 import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { ApplyCouponDto } from "@application/dto/user/ApplyCouponDto";
+import { ApplyCouponResponseDto } from "@application/dto/user/ApplyCouponResponseDto";
 
 @injectable()
 export class RideController {
@@ -50,6 +52,12 @@ export class RideController {
     private readonly rateDriverUseCase: IUseCase<
       RateDriverDto,
       Promise<Result<RateDriverResponseDto>>
+    >,
+
+    @inject(TYPES.ApplyCouponUseCase)
+    private readonly applyCouponUseCase: IUseCase<
+      ApplyCouponDto,
+      Promise<Result<ApplyCouponResponseDto>>
     >,
   ) {}
 
@@ -369,6 +377,67 @@ export class RideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "rate_driver",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async applyCoupon(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req) as string;
+      const rideId = req.params.rideId;
+
+      Logger.info("Apply coupon request received from rider", {
+        userId,
+        rideId,
+        body: req.body,
+      });
+
+      const dto = ApplyCouponDto.fromRequest(userId, { rideId }, req.body);
+
+      const result = await this.applyCouponUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Apply coupon failed", {
+          userId,
+          rideId,
+          error: error?.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "apply_coupon",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      Logger.info("Coupon applied successfully", {
+        userId,
+        rideId: data.rideId,
+        couponCode: data.couponCode,
+        discountAmount: data.discountAmount,
+        payableAmount: data.payableAmount,
+      });
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: data.message,
+        data,
+      } as ApiResponse);
+    } catch (error) {
+      Logger.error("Apply coupon controller error", {
+        userId: this.getUserId(req),
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "apply_coupon",
       );
       res.status(statusCode).json(response);
     }

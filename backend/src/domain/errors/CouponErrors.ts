@@ -90,4 +90,84 @@ export class CouponErrors {
       },
     );
   }
+
+  static couponNotValid(code: string): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.COUPON_NOT_VALID, { code }),
+      "COUPON_NOT_VALID",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static minimumAmountNotSatisfied(
+    minAmount: number,
+    rideAmount: number,
+  ): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.MINIMUM_AMOUNT_NOT_SATISFIED, {
+        minAmount: String(minAmount),
+        rideAmount: String(rideAmount),
+      }),
+      "MINIMUM_AMOUNT_NOT_SATISFIED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static couponAlreadyAppliedToRide(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.COUPON_ALREADY_APPLIED, { rideId }),
+      "COUPON_ALREADY_APPLIED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static cannotApplyCouponAfterPayment(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.CANNOT_APPLY_COUPON_AFTER_PAYMENT, {
+        rideId,
+      }),
+      "CANNOT_APPLY_COUPON_AFTER_PAYMENT",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static couponUsageLimitExceeded(code: string): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.COUPON_USAGE_LIMIT_EXCEEDED, {
+        code,
+      }),
+      "COUPON_USAGE_LIMIT_EXCEEDED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

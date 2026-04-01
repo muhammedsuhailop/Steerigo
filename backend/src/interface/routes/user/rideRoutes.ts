@@ -11,6 +11,7 @@ import { rideIdParamSchema } from "@interface/validators/user/rideIdParamSchema"
 import { getUserRidesSchema } from "@interface/validators/user/getUserRidesSchema";
 import { cancelRideSchema } from "@interface/validators/user/cancelRideSchema";
 import { rateRideSchema } from "@interface/validators/user/rateRideSchema";
+import { applyCouponSchema } from "@interface/validators/user/couponSchema";
 
 const router = Router();
 
@@ -74,6 +75,14 @@ router.post(
   validateSchema(rateRideSchema),
   handleValidationErrors,
   (req: Request, res: Response) => rideController.rateDriver(req, res),
+);
+
+// POST /api/user/ride/:rideId/coupon - Apply coupon on ride
+router.post(
+  "/ride/:rideId/coupon",
+  validateSchema(applyCouponSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => rideController.applyCoupon(req, res),
 );
 
 export { router as rideRoutes };

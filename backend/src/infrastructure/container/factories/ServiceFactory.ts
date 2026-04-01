@@ -34,6 +34,8 @@ import { IIdGenerator } from "@application/services/IIdGenerator";
 import { MongoIdGenerator } from "@infrastructure/services/MongoIdGenerator";
 import { ICancellationChargeService } from "@application/services/ICancellationChargeService";
 import { CancellationChargeService } from "@infrastructure/services/CancellationChargeService";
+import { ICouponValidationService } from "@application/services/ICouponValidationService";
+import { CouponValidationService } from "@infrastructure/services/CouponValidationService";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -80,5 +82,8 @@ export class ServiceFactory {
       .to(RedisService)
       .inSingletonScope();
     container.bind<IIdGenerator>(TYPES.IDGenerator).to(MongoIdGenerator);
+    container
+      .bind<ICouponValidationService>(TYPES.CouponValidationService)
+      .to(CouponValidationService);
   }
 }

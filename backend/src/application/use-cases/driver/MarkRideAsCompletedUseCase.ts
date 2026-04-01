@@ -17,6 +17,7 @@ import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { RideFareBreakdownJson } from "@application/services/IRideNotificationService";
+import { ICouponValidationService } from "@application/services/ICouponValidationService";
 
 @injectable()
 export class MarkRideAsCompletedUseCase
@@ -37,6 +38,8 @@ export class MarkRideAsCompletedUseCase
     private fareCalculationService: IFareCalculationService,
     @inject(TYPES.EventBus)
     private eventBus: IEventBus,
+    @inject(TYPES.CouponValidationService)
+    private couponValidationService: ICouponValidationService,
   ) {}
 
   async execute(
@@ -106,6 +109,45 @@ export class MarkRideAsCompletedUseCase
         });
 
       ride.completeWithFareBreakdown(finalFareBreakdown);
+
+      if (ride.hasCouponApplied()) {
+        const couponDetails = ride.getCouponDetails();
+
+        try {
+          const validationResult =
+            await this.couponValidationService.validateAndCalculate(
+              couponDetails!.code,
+              ride.getFare(),
+              ride.getRiderId(),
+              new Date(),
+            );
+
+          const { coupon, discountAmount } = validationResult;
+
+          ride.applyCoupon(
+            coupon.getId(),
+            coupon.getCode(),
+            discountAmount,
+            coupon.getDiscountType(),
+            true,
+          );
+
+          Logger.info("Coupon recalculated after ride completion", {
+            rideId,
+            couponCode: coupon.getCode(),
+            newDiscount: discountAmount,
+            payableAmount: ride.getPayableAmount(),
+          });
+        } catch (error) {
+          ride.removeCoupon();
+
+          Logger.warn("Coupon removed after ride completion (invalid)", {
+            rideId,
+            couponCode: couponDetails?.code,
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
 
       const updatedRide = await this.rideRepository.save(ride);
 
