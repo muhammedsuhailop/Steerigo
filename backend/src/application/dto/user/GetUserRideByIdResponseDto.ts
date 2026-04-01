@@ -1,4 +1,5 @@
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+import { ReviewType } from "@domain/value-objects/ReviewType";
 
 export interface DriverDetails {
   driverId: string;
@@ -34,6 +35,14 @@ export interface CouponDetails {
   discountAmount: number;
 }
 
+export interface RatingDetails {
+  overallRating: number;
+  reviewType: ReviewType;
+  review?: string;
+  reviewerName?: string;
+  createdAt: string;
+}
+
 export interface TimelineDetails {
   requestedAt: string;
   acceptedAt?: string;
@@ -61,6 +70,7 @@ export interface RideDetails {
   fare: FareDetails;
   timeline: TimelineDetails;
   couponDetails?: CouponDetails;
+  rating?: RatingDetails;
   createdAt: string;
   updatedAt: string;
 }

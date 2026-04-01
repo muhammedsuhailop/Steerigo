@@ -22,6 +22,9 @@ import { User } from "@domain/entities/User";
 import { Driver } from "@domain/entities/Driver";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { TaxBreakdown } from "@domain/value-objects/FareBreakdown";
+import { IRatingRepository } from "@domain/repositories/IRatingRepository";
+import { Rating } from "@domain/entities/Rating";
+import { ReviewType } from "@domain/value-objects/ReviewType";
 
 @injectable()
 export class GetUserRideByIdUseCase
@@ -35,6 +38,8 @@ export class GetUserRideByIdUseCase
     private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
     private userRepository: IUserRepository,
+    @inject(TYPES.RatingRepository)
+    private ratingRepository: IRatingRepository,
   ) {}
 
   async execute(
@@ -84,7 +89,15 @@ export class GetUserRideByIdUseCase
         );
       }
 
-      const rideDetails = this.mapRideToDetails(ride);
+      const ratings = await this.ratingRepository.findAllByRideId(
+        ride.getRideId(),
+      );
+
+      const riderToDriverRating = ratings.find(
+        (r) => r.getReviewType() === ReviewType.USER_REVIEW,
+      );
+
+      const rideDetails = this.mapRideToDetails(ride, riderToDriverRating);
       const driverDetails = this.mapDriverToDetails(driver, driverUser);
 
       const response: GetUserRideByIdResponseDto = {
@@ -114,7 +127,7 @@ export class GetUserRideByIdUseCase
     }
   }
 
-  private mapRideToDetails(ride: Ride): RideDetails {
+  private mapRideToDetails(ride: Ride, rating?: Rating): RideDetails {
     const fareBreakdown = ride.getFareBreakdown();
     const timeline = ride.getTimeline();
 
@@ -175,6 +188,16 @@ export class GetUserRideByIdUseCase
         }
       : undefined;
 
+    const ratingDetails = rating
+      ? {
+          overallRating: rating.getOverallRating(),
+          reviewType: rating.getReviewType(),
+          review: rating.getReview(),
+          reviewerName: rating.getReviewerName(),
+          createdAt: rating.getCreatedAt().toISOString(),
+        }
+      : undefined;
+
     return {
       id: ride.getId(),
       rideId: ride.getRideId(),
@@ -187,6 +210,7 @@ export class GetUserRideByIdUseCase
       fare: fareDetails,
       timeline: timelineDetails,
       couponDetails: couponDetails,
+      rating: ratingDetails,
       createdAt: ride.getCreatedAt().toISOString(),
       updatedAt: ride.getUpdatedAt().toISOString(),
     };
