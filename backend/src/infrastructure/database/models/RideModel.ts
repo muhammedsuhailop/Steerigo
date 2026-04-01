@@ -55,7 +55,7 @@ export interface IRideDocument extends Document {
     code: string;
     discountAmount: number;
     discountType: CouponDiscountType;
-  };
+  } | null;
 
   rating?: number;
   feedback?: string;

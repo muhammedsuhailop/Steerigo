@@ -129,7 +129,7 @@ export class RideMapper {
               discountAmount: coupon.discountAmount,
               discountType: coupon.discountType,
             }
-          : undefined,
+          : null,
 
       currency: entity.getCurrency(),
 
