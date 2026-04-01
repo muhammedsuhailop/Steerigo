@@ -8,37 +8,34 @@ import {
 } from "react-icons/fa";
 import { RideStatus, RideTimeline } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
-import { FareDetails, DriverInfo } from "../types/viewRide.types";
+import { DriverInfo, RideDetails } from "../types/viewRide.types";
 import FareBreakdown from "./FareBreakdown";
 import RideTimelineExpandable from "./RideTimelineExpandable";
 import HorizontalDriverCard from "./HorizontalDriverCard";
 import { usePayment } from "../hooks/usePayment";
+import RideRating from "./RideRating";
 
 interface CompletedRideSummaryProps {
-  rideId: string;
-  fare: FareDetails;
-  timeline: RideTimeline;
-  pickup: { address: string };
-  drop: { address: string };
-  distance: number;
+  activeRide: RideDetails;
   driver?: DriverInfo | null;
-  status: RideStatus;
-  paymentStatus: PaymentStatus | undefined;
   user: { name: string; email: string };
 }
 
 const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
-  rideId,
-  fare,
-  timeline,
-  pickup,
-  drop,
-  distance,
+  activeRide,
   driver,
-  status,
-  paymentStatus,
   user,
 }) => {
+  const {
+    rideId,
+    fare,
+    timeline,
+    pickup,
+    drop,
+    distance,
+    status,
+    paymentStatus,
+  } = activeRide;
   const { handlePayment, isLoading } = usePayment();
 
   const isCompleted = status === RideStatus.COMPLETED;
@@ -47,6 +44,9 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
     (!paymentStatus ||
       paymentStatus === PaymentStatus.FAILED ||
       paymentStatus === PaymentStatus.PENDING);
+
+  const isEligibleForRating =
+    status === RideStatus.COMPLETED && paymentStatus === PaymentStatus.SUCCESS;
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-20 px-4">
@@ -163,6 +163,12 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
       {driver && <HorizontalDriverCard driver={driver} />}
 
       <RideTimelineExpandable timeline={timeline} />
+
+      {isEligibleForRating && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+          <RideRating rideId={rideId} existingRating={activeRide?.rating} />
+        </div>
+      )}
     </div>
   );
 };

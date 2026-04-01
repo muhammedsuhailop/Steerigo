@@ -9,7 +9,7 @@ export interface FareDetails {
   platformFee: number;
   totalFare: number;
   currency: string;
-  payableAmount?: number;
+  payableAmount: number;
 }
 
 export interface CouponDetails {
@@ -25,6 +25,8 @@ export interface DriverInfo {
   email: string;
   phoneNumber: string;
   profilePicture: string;
+  rating?: number;
+  totalRides?: number;
 }
 
 export interface RideDetails {
@@ -39,6 +41,8 @@ export interface RideDetails {
   fare: FareDetails;
   timeline: RideTimeline;
   couponDetails?: CouponDetails;
+  duration?: number;
+  rating?: RatingDetails;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,4 +114,50 @@ export interface CouponResponse {
     currency: string;
     message: string;
   };
+}
+
+export interface RideRatingCriteria {
+  Behavior: number;
+  Punctuality: number;
+  Safety: number;
+  Comfort: number;
+  Communication: number;
+}
+
+export interface RideRating {
+  criteria: RideRatingCriteria;
+  review?: string;
+  createdAt?: string;
+}
+
+export interface RatingRequest {
+  rideId: string;
+  criteria: RideRatingCriteria;
+  review?: string;
+}
+
+export interface RatingDetails {
+  overallRating: number;
+  reviewType: string;
+  review?: string;
+  reviewerName?: string;
+  createdAt: string;
+}
+
+export interface RateDriverResponseData {
+  rideId: string;
+  driverId: string;
+  ratingId: string;
+  overallRating: number;
+  driver: {
+    driverId: string;
+    averageRating: number;
+    numberOfRatings: number;
+  };
+}
+
+export interface RateDriverResponse {
+  success: boolean;
+  message: string;
+  data: RateDriverResponseData;
 }

@@ -93,6 +93,33 @@ export const viewRideSlice = createSlice({
         state.activeRide.fare.payableAmount = action.payload.payableAmount;
       }
     },
+    updateRideRatingLocal: (
+      state,
+      action: PayloadAction<{
+        overallRating: number;
+        review?: string;
+        reviewType: string;
+        createdAt: string;
+        driverStats: {
+          averageRating: number;
+          numberOfRatings: number;
+        };
+      }>,
+    ) => {
+      if (state.activeRide) {
+        state.activeRide.rating = {
+          overallRating: action.payload.overallRating,
+          review: action.payload.review,
+          reviewType: action.payload.reviewType,
+          createdAt: action.payload.createdAt,
+        };
+      }
+      if (state.activeDriver) {
+        state.activeDriver.rating = action.payload.driverStats.averageRating;
+        state.activeDriver.totalRides =
+          action.payload.driverStats.numberOfRatings;
+      }
+    },
   },
 });
 
@@ -102,6 +129,7 @@ export const {
   updatePaymentStatusLocal,
   updateCouponData,
   clearRideData,
+  updateRideRatingLocal,
 } = viewRideSlice.actions;
 
 export const selectActiveRide = (state: { viewRide: ViewRideState }) =>

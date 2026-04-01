@@ -5,6 +5,8 @@ import {
   CouponResponse,
   InitiatePaymentRequest,
   InitiatePaymentResponse,
+  RateDriverResponse,
+  RatingRequest,
   VerifyPaymentRequest,
   VerifyPaymentResponse,
   ViewRideResponse,
@@ -77,6 +79,14 @@ export const viewRideApi = createApi({
       }),
     }),
 
+    submitRideRating: builder.mutation<RateDriverResponse, RatingRequest>({
+      query: ({ rideId, ...data }) => ({
+        url: `${API_ENDPOINTS.USER.RIDE}/${rideId}/rating`,
+        method: "POST",
+        data,
+      }),
+    }),
+
     cancelActiveRide: builder.mutation<
       {
         success: boolean;
@@ -107,5 +117,6 @@ export const {
   useMarkPaymentFailedMutation,
   useApplyCouponMutation,
   useRemoveCouponMutation,
+  useSubmitRideRatingMutation,
   useCancelActiveRideMutation,
 } = viewRideApi;

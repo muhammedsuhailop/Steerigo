@@ -146,15 +146,8 @@ const ViewRidePage: React.FC = () => {
 
         {isEndState && (
           <CompletedRideSummary
-            rideId={activeRide.rideId}
-            fare={activeRide.fare}
-            timeline={activeRide.timeline}
-            pickup={activeRide.pickup}
-            drop={activeRide.drop}
-            distance={activeRide.distance}
+            activeRide={activeRide}
             driver={activeDriver}
-            status={activeRide.status as RideStatus}
-            paymentStatus={activeRide.paymentStatus}
             user={{ name: user?.name || "", email: user?.email || "" }}
           />
         )}
