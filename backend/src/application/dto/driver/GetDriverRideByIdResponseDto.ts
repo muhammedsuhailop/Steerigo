@@ -21,7 +21,14 @@ export interface FareDetails {
   };
   platformFee: number;
   totalFare: number;
+  payableAmount: number;
   currency: string;
+}
+
+export interface CouponDeatils {
+  couponCode: string;
+  discountType: string;
+  discountAmount: number;
 }
 
 export interface TimelineDetails {
@@ -50,6 +57,7 @@ export interface RideDetails {
   duration?: number;
   fare: FareDetails;
   timeline: TimelineDetails;
+  couponDeatils?: CouponDeatils;
   createdAt: string;
   updatedAt: string;
 }
