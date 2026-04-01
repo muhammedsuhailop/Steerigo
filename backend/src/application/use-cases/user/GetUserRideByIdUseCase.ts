@@ -8,7 +8,7 @@ import {
   LocationDetails,
   FareDetails,
   TimelineDetails,
-  CouponDeatils,
+  CouponDetails,
 } from "@application/dto/user/GetUserRideByIdResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
@@ -167,7 +167,7 @@ export class GetUserRideByIdUseCase
     };
 
     const couponData = ride.getCouponDetails();
-    const couponDeatils: CouponDeatils | undefined = couponData
+    const couponDetails: CouponDetails | undefined = couponData
       ? {
           couponCode: couponData.code,
           discountType: couponData.discountType,
@@ -186,7 +186,7 @@ export class GetUserRideByIdUseCase
       distance: ride.getPickup().distanceTo(ride.getDrop()),
       fare: fareDetails,
       timeline: timelineDetails,
-      couponDeatils: couponDeatils,
+      couponDetails: couponDetails,
       createdAt: ride.getCreatedAt().toISOString(),
       updatedAt: ride.getUpdatedAt().toISOString(),
     };

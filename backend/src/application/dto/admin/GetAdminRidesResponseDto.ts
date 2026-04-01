@@ -13,7 +13,7 @@ export interface DriverDetails {
   profilePicture?: string;
 }
 
-export interface CouponDeatils {
+export interface CouponDetails {
   couponCode: string;
   discountType: string;
   discountAmount: number;
@@ -48,7 +48,7 @@ export interface AdminRideData {
     cancelledAt?: string;
   };
   durationFormatted?: string;
-  couponDeatils?: CouponDeatils;
+  couponDetails?: CouponDetails;
   createdAt: string;
   updatedAt: string;
 }

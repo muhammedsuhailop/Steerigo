@@ -25,7 +25,7 @@ export interface FareDetails {
   currency: string;
 }
 
-export interface CouponDeatils {
+export interface CouponDetails {
   couponCode: string;
   discountType: string;
   discountAmount: number;
@@ -57,7 +57,7 @@ export interface RideDetails {
   duration?: number;
   fare: FareDetails;
   timeline: TimelineDetails;
-  couponDeatils?: CouponDeatils;
+  couponDetails?: CouponDetails;
   createdAt: string;
   updatedAt: string;
 }
