@@ -170,4 +170,18 @@ export class CouponErrors {
       },
     );
   }
+
+  static noCouponApplied(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(COUPON_ERROR_MESSAGES.NO_COUPON_APPLIED, { rideId }),
+      "NO_COUPON_APPLIED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

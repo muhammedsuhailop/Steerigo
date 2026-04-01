@@ -8,3 +8,9 @@ export const applyCouponSchema = z.object({
     couponCode: z.string().min(1, "Coupon code is required"),
   }),
 });
+
+export const removeCouponSchema = z.object({
+  params: z.object({
+    rideId: z.string().min(1, "Ride ID is required"),
+  }),
+});

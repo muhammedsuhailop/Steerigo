@@ -8,11 +8,12 @@ export const COUPON_ERROR_MESSAGES = {
   COUPON_NOT_VALID: "Coupon '{{code}}' is expired or inactive",
   MINIMUM_AMOUNT_NOT_SATISFIED:
     "Minimum ride amount of {{minAmount}} is required. Current fare: {{rideAmount}}",
-  COUPON_ALREADY_APPLIED: "A coupon is already applied to ride '{rideId}'",
+  COUPON_ALREADY_APPLIED: "A coupon is already applied to ride '{{rideId}}'",
   CANNOT_APPLY_COUPON_AFTER_PAYMENT:
     "Cannot apply coupon for ride {{rideId}} after payment is completed.",
   COUPON_USAGE_LIMIT_EXCEEDED:
     "You have already reached the maximum usage limit for coupon '{{code}}'.",
+  NO_COUPON_APPLIED: "No coupon is applied to ride '{{rideId}}'",
 } as const;
 
 export const COUPON_MESSAGES = {

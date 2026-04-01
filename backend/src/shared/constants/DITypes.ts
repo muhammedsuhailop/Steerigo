@@ -140,6 +140,7 @@ export const TYPES = {
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
   RateDriverUseCase: Symbol.for("RateDriverUseCase"),
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
+  RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
