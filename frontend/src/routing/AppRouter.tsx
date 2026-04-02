@@ -35,6 +35,7 @@ import DriverRidesPage from "@/features/driver/driver-rides/pages/DriverRidesPag
 import UserRidesPage from "@/features/user/rides/pages/UserRidesPage";
 import TransactionPage from "@/features/admin/transactions/pages/TransactionsPage";
 import RideManagement from "@/features/admin/rides/pages/RideManagement";
+import { RideView } from "@/features/admin/rides/pages/RideView";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -184,6 +185,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <RideManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/rides/:rideId"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <RideView />
           </ProtectedRoute>
         }
       />
