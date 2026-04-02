@@ -42,6 +42,9 @@ import { GetAdminTransactionsDto } from "@application/dto/admin/GetAdminTransact
 import { GetAdminTransactionsResponseDto } from "@application/dto/admin/GetAdminTransactionsResponseDto";
 import { GetAdminTransactionsUseCase } from "@application/use-cases/admin/GetAdminTransactionsUseCase";
 import { AdminTransactionController } from "@interface/controllers/admin/AdminTransactionController";
+import { GetAdminRideByIdDto } from "@application/dto/admin/GetAdminRideByIdDto";
+import { GetAdminRideByIdResponseDto } from "@application/dto/admin/GetAdminRideByIdResponseDto";
+import { GetAdminRideByIdUseCase } from "@application/use-cases/admin/GetAdminRideByIdUseCase";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -118,6 +121,15 @@ export class AdminFactory {
         >
       >(TYPES.GetAdminTransactionsUseCase)
       .to(GetAdminTransactionsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminRideByIdDto,
+          Promise<Result<GetAdminRideByIdResponseDto>>
+        >
+      >(TYPES.GetAdminRideByIdUseCase)
+      .to(GetAdminRideByIdUseCase);
 
     // Controller bindings
     container
