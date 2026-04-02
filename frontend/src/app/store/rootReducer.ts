@@ -30,6 +30,7 @@ import driverSearchReducer from "@/features/user/driver-search/store/driverSearc
 import viewRideReducer from "@/features/user/view-ride/store/viewRideSlice";
 import viewDriverRideReducer from "@/features/driver/view-ride/store/viewDriverRideSlice";
 import errorReducer from "@/shared/components/ui/ErrorHandling/errorSlice";
+import { adminTransactionApi } from "@/features/admin/transactions/services/adminTransactionApi";
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -40,6 +41,7 @@ const appReducer = combineReducers({
   adminKYC: adminKYCReducer,
   [adminApi.reducerPath]: adminApi.reducer,
   [adminPayoutApi.reducerPath]: adminPayoutApi.reducer,
+  [adminTransactionApi.reducerPath]: adminTransactionApi.reducer,
 
   driver: driverReducer,
   driverRegistration: driverRegistrationReducer,
@@ -94,4 +96,5 @@ export const apiMiddlewares = [
   driverPayoutApi.middleware,
   driverRidesApi.middleware,
   userRidesApi.middleware,
+  adminTransactionApi.middleware,
 ];

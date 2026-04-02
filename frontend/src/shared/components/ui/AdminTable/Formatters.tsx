@@ -1,5 +1,4 @@
-// Standalone format utilities (pure functions)
-
+// Standalone format utilities
 import React from "react";
 import type {
   DateFormatOptions,

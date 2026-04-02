@@ -33,6 +33,7 @@ import PayoutManagement from "@/features/admin/payouts/pages/PayoutManagement";
 import { useNotificationSocket } from "@/features/notifications/hooks/useNotificationSocket";
 import DriverRidesPage from "@/features/driver/driver-rides/pages/DriverRidesPage";
 import UserRidesPage from "@/features/user/rides/pages/UserRidesPage";
+import TransactionPage from "@/features/admin/transactions/pages/TransactionsPage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -169,6 +170,15 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/transactions"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <TransactionPage />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/search"
         element={
