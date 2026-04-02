@@ -51,13 +51,11 @@ export class EarningsDistributionService
     const payable = payableAmount ?? totalFare;
 
     if (await this.transactionRepository.existsByGroupId(groupId as string)) {
-      Logger.warn("Settlement already processed, skipping", {
-        groupId: params.groupId,
-      });
+      Logger.warn("Settlement already processed, skipping", { groupId });
       return {
         driverEarnings: 0,
         platformRevenue: 0,
-        currency: params.totalFare.getCurrency(),
+        currency: totalFare.getCurrency(),
       };
     }
 
@@ -71,7 +69,7 @@ export class EarningsDistributionService
       groupId,
     );
 
-    Logger.info("Distributing ONLINE earnings (coupon-aware)", {
+    Logger.info("Distributing ONLINE earnings", {
       rideId,
       driverId,
       totalFare: totalFare.getAmount(),
@@ -83,7 +81,7 @@ export class EarningsDistributionService
 
     if (discountMoney.getAmount() > 0) {
       await this.debitWallet(
-        "platform",
+        PLATFORM_OWNER_ID,
         WalletOwnerType.PLATFORM,
         discountMoney,
         rideId,
@@ -91,16 +89,16 @@ export class EarningsDistributionService
         `Coupon expense for ride: ${rideId}`,
         groupId,
       );
-
-      await this.creditDriverWallet(
-        driverId,
-        discountMoney,
-        rideId,
-        TransactionType.DRIVER_COUPON_CREDIT,
-        `Coupon compensation for ride: ${rideId}`,
-        groupId,
-      );
     }
+    await this.debitWallet(
+      PLATFORM_OWNER_ID,
+      WalletOwnerType.PLATFORM,
+      driverEarnings,
+      rideId,
+      TransactionType.DRIVER_SETTLEMENT,
+      `Driver payout for ride: ${rideId}`,
+      groupId,
+    );
 
     await this.creditDriverWallet(
       driverId,
@@ -108,6 +106,7 @@ export class EarningsDistributionService
       rideId,
       TransactionType.DRIVER_EARNING,
       `Online ride earning for ride: ${rideId}`,
+      groupId,
     );
 
     await this.creditPlatformWallet(
@@ -115,6 +114,7 @@ export class EarningsDistributionService
       rideId,
       TransactionType.PLATFORM_COMMISSION,
       `Platform commission for online ride: ${rideId}`,
+      groupId,
     );
 
     return {
@@ -269,6 +269,7 @@ export class EarningsDistributionService
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
       note: note,
+      groupId,
     });
 
     await this.transactionRepository.save(transaction);
@@ -308,6 +309,7 @@ export class EarningsDistributionService
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
       note: note ?? `Driver earnings for ride ${rideId}`,
+      groupId,
     });
 
     await this.transactionRepository.save(transaction);
@@ -352,6 +354,7 @@ export class EarningsDistributionService
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
       note: note ?? `Platform commission for ride ${rideId}`,
+      groupId,
     });
 
     await this.transactionRepository.save(transaction);
@@ -383,6 +386,7 @@ export class EarningsDistributionService
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
       note: note,
+      groupId,
     });
 
     await this.transactionRepository.save(transaction);

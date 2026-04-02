@@ -193,6 +193,7 @@ export class MarkRideAsCompletedUseCase
           startedAt: updatedRide.getStartedAt()!.toISOString(),
           completedAt: updatedRide.getCompletedAt()!.toISOString(),
           fareBreakdown: fareBreakdownJson,
+          payableAmount: updatedRide.getPayableAmount(),
         },
       };
 

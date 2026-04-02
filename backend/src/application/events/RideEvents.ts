@@ -101,6 +101,7 @@ export interface RideCompletedEventPayload {
   startedAt: string;
   completedAt: string;
   fareBreakdown: RideFareBreakdownJson;
+  payableAmount: number;
 }
 
 export interface RideCancelledEventPayload {

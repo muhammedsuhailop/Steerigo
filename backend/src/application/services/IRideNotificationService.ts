@@ -120,6 +120,7 @@ export interface RideCompletedPayload {
   startedAt: string;
   completedAt: string;
   fareBreakdown: RideFareBreakdownJson;
+  payableAmount: number;
 }
 
 export interface RideCancelledRiderPayload {
