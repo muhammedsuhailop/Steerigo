@@ -9,6 +9,9 @@ import { RideErrors } from "@domain/errors/RideErrors";
 import { CouponErrors } from "@domain/errors/CouponErrors";
 import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
 import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideFareUpdatedEvent } from "@application/events/RideEvents";
 
 @injectable()
 export class RemoveCouponUseCase
@@ -17,6 +20,10 @@ export class RemoveCouponUseCase
   constructor(
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -38,7 +45,12 @@ export class RemoveCouponUseCase
         return Result.failure(RideErrors.unauthorizedRideAccess(rideId));
       }
 
-      if (!ride.isAccepted() && !ride.isArrived() && !ride.isStarted()) {
+      if (
+        !ride.isAccepted() &&
+        !ride.isArrived() &&
+        !ride.isStarted() &&
+        !ride.isCompleted()
+      ) {
         return Result.failure(
           RideErrors.rideNotEligibleForCoupon(rideId, ride.getStatus()),
         );
@@ -69,6 +81,29 @@ export class RemoveCouponUseCase
       }
 
       await this.rideRepository.save(ride);
+
+      const isRecalculation = ride.isCompleted();
+
+      if (isRecalculation) {
+        const driver = await this.driverRepository.findById(ride.getDriverId());
+        const driverUserId = driver?.getUserId() ?? "";
+
+        const fareUpdatedEvent: RideFareUpdatedEvent = {
+          type: "RideFareUpdated",
+          occurredAt: new Date(),
+          payload: {
+            rideId: ride.getRideId(),
+            driverId: ride.getDriverId(),
+            driverUserId: driverUserId,
+            couponCode: "",
+            discountAmount: 0,
+            payableAmount: ride.getPayableAmount(),
+            totalFare: ride.getFare(),
+            currency: ride.getCurrency(),
+          },
+        };
+        await this.eventBus.publish(fareUpdatedEvent);
+      }
 
       Logger.info("Coupon removed successfully", {
         riderId,

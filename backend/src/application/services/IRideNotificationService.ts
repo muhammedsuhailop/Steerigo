@@ -1,3 +1,4 @@
+import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
@@ -165,6 +166,15 @@ export interface RideCancelledByDriverDriverPayload {
   pickup: { latitude: number; longitude: number; address?: string };
   drop: { latitude: number; longitude: number; address?: string };
 }
+
+export interface DriverFareUpdatedPayload {
+  rideId: string;
+  payableAmount: number;
+  discountAmount: number;
+  couponCode?: string;
+  couponType?: CouponDiscountType;
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -219,5 +229,10 @@ export interface IRideNotificationService {
   notifyDriverRideCancelledConfirmation(
     driverUserId: string,
     payload: RideCancelledByDriverDriverPayload,
+  ): Promise<void>;
+
+  notifyDriverFareUpdated(
+    driverUserId: string,
+    payload: DriverFareUpdatedPayload,
   ): Promise<void>;
 }

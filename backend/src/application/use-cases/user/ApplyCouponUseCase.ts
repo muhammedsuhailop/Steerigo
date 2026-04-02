@@ -14,6 +14,9 @@ import { CouponErrors } from "@domain/errors/CouponErrors";
 import { ApplyCouponDto } from "@application/dto/user/ApplyCouponDto";
 import { ApplyCouponResponseDto } from "@application/dto/user/ApplyCouponResponseDto";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+import { IEventBus } from "@application/services/IEventBus";
+import { RideFareUpdatedEvent } from "@application/events/RideEvents";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 
 @injectable()
 export class ApplyCouponUseCase
@@ -25,6 +28,10 @@ export class ApplyCouponUseCase
 
     @inject(TYPES.CouponValidationService)
     private readonly couponValidationService: ICouponValidationService,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
   ) {}
 
   async execute(dto: ApplyCouponDto): Promise<Result<ApplyCouponResponseDto>> {
@@ -115,6 +122,28 @@ export class ApplyCouponUseCase
       }
 
       await this.rideRepository.save(ride);
+
+      const driver = await this.driverRepository.findById(ride.getDriverId());
+      const driverUserId = driver?.getUserId() ?? "";
+
+      if (isRecalculation) {
+        const fareUpdatedEvent: RideFareUpdatedEvent = {
+          type: "RideFareUpdated",
+          occurredAt: new Date(),
+          payload: {
+            rideId: ride.getRideId(),
+            driverUserId: driverUserId,
+            driverId: ride.getDriverId(),
+            couponCode: coupon.getCode(),
+            discountAmount: discountAmount,
+            payableAmount: ride.getPayableAmount(),
+            totalFare: ride.getFare(),
+            currency: ride.getCurrency(),
+            couponType: coupon.getDiscountType(),
+          },
+        };
+        await this.eventBus.publish(fareUpdatedEvent);
+      }
 
       Logger.info("Coupon applied successfully", {
         riderId,
