@@ -3,7 +3,7 @@ import {
   DriverRideDetails,
   RiderInfo,
   ViewDriverRideState,
-} from "../viewDriverRide.types";
+} from "../types/viewDriverRide.types";
 import { RideStatus } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
 

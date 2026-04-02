@@ -194,6 +194,7 @@ export class GetDriverRideByIdUseCase
       ? {
           overallRating: rating.getOverallRating(),
           reviewType: rating.getReviewType(),
+          criteria: rating.getCriteria().toObject(),
           review: rating.getReview(),
           reviewerName: rating.getReviewerName(),
           createdAt: rating.getCreatedAt().toISOString(),

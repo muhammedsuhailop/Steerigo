@@ -35,6 +35,7 @@ export interface CouponDetails {
 export interface RatingDetails {
   overallRating: number;
   reviewType: ReviewType;
+  criteria: Record<string, number>;
   review?: string;
   reviewerName?: string;
   createdAt: string;

@@ -6,7 +6,7 @@ import {
   ConfirmCashRequest,
   RideStatusResponse,
   ViewDriverRideResponse,
-} from "../viewDriverRide.types";
+} from "../types/viewDriverRide.types";
 
 export const viewDriverRideApi = createApi({
   reducerPath: "viewDriverRideApi",

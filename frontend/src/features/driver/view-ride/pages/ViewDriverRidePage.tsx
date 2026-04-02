@@ -21,6 +21,7 @@ import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
 import { RideStatus } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
 import RideStatsCard from "../components/RideStatsCard";
+import DriverRideRating from "../components/DriverRideRating";
 
 const ViewDriverRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -201,6 +202,10 @@ const ViewDriverRidePage: React.FC = () => {
               />
 
               <FareBreakdown fare={activeRide.fare} />
+
+              {activeRide?.rating && (
+                <DriverRideRating rating={activeRide.rating} />
+              )}
             </div>
           </div>
         </main>
