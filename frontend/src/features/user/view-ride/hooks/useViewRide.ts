@@ -76,6 +76,7 @@ export const useViewRide = (rideId: string | undefined) => {
           platformFee: payload.fareBreakdown?.platformFee?.amount ?? 0,
           totalFare: payload.fareBreakdown?.totalFare?.amount ?? 0,
           currency: payload.fareBreakdown?.totalFare?.currency ?? "INR",
+          payableAmount: payload.payableAmount ?? 0,
         };
 
         dispatch(

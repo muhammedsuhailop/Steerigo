@@ -15,6 +15,7 @@ import { PAYMENT_MESSAGES } from "@shared/constants/PaymentMessages";
 import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
 import { IEventBus } from "@application/services/IEventBus";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { Money } from "@domain/value-objects/Money";
 
 @injectable()
 export class VerifyPaymentUseCase
@@ -116,6 +117,11 @@ export class VerifyPaymentUseCase
         driverUserId = driver?.getUserId() ?? null;
 
         const fareBreakdown = ride.getFareBreakdown();
+        const payableAmount = ride.getPayableAmount();
+        const discountAmount = ride.getDiscountAmount();
+
+        const groupId = `settlement_${ride.getRideId()}_${Date.now()}`;
+
         await this.earningsDistributionService
           .distribute({
             rideId: ride.getRideId(),
@@ -123,6 +129,9 @@ export class VerifyPaymentUseCase
             totalFare: ride.getFareBreakdown().getTotalFare(),
             platformFee: fareBreakdown.getPlatformFee(),
             platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+            payableAmount: Money.create(payableAmount, ride.getCurrency()),
+            discount: Money.create(discountAmount, ride.getCurrency()),
+            groupId,
           })
           .catch((err: Error) => {
             Logger.error("Earnings distribution failed after online payment", {

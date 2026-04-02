@@ -1,6 +1,6 @@
 import React from "react";
 import { FaPhone, FaEnvelope, FaCommentDots } from "react-icons/fa";
-import { RiderInfo } from "../viewDriverRide.types";
+import { RiderInfo } from "../types/viewDriverRide.types";
 
 interface RideRiderCardProps {
   rider: RiderInfo;

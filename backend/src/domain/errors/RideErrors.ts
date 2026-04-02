@@ -259,4 +259,24 @@ export class RideErrors {
       },
     );
   }
+
+  static rideNotEligibleForCoupon(
+    rideId: string,
+    currentStatus: string,
+  ): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.RIDE_NOT_ELIGIBLE_FOR_COUPON, {
+        rideId,
+        currentStatus,
+      }),
+      "RIDE_NOT_ELIGIBLE_FOR_COUPON",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

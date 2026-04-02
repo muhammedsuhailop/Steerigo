@@ -33,6 +33,12 @@ import { CancelRideUseCase } from "@application/use-cases/user/CancelRideUseCase
 import { RateDriverDto } from "@application/dto/user/RateDriverDto";
 import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
 import { RateDriverUseCase } from "@application/use-cases/user/RateDriverUseCase";
+import { ApplyCouponDto } from "@application/dto/user/ApplyCouponDto";
+import { ApplyCouponResponseDto } from "@application/dto/user/ApplyCouponResponseDto";
+import { ApplyCouponUseCase } from "@application/use-cases/user/ApplyCouponUseCase";
+import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
+import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
+import { RemoveCouponUseCase } from "@application/use-cases/user/RemoveCouponUseCase";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -98,6 +104,18 @@ export class UserFactory {
         IUseCase<RateDriverDto, Promise<Result<RateDriverResponseDto>>>
       >(TYPES.RateDriverUseCase)
       .to(RateDriverUseCase);
+
+    container
+      .bind<
+        IUseCase<ApplyCouponDto, Promise<Result<ApplyCouponResponseDto>>>
+      >(TYPES.ApplyCouponUseCase)
+      .to(ApplyCouponUseCase);
+
+    container
+      .bind<
+        IUseCase<RemoveCouponDto, Promise<Result<RemoveCouponResponseDto>>>
+      >(TYPES.RemoveCouponUseCase)
+      .to(RemoveCouponUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

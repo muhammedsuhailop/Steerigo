@@ -6,6 +6,7 @@ import {
   AdminRideData,
   DriverDetails,
   RiderDetails,
+  CouponDetails,
 } from "@application/dto/admin/GetAdminRidesResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
@@ -130,6 +131,16 @@ export class GetAdminRidesUseCase
             profilePicture: riderUser?.getProfilePicture(),
           };
 
+          const couponData = ride.getCouponDetails();
+
+          const couponDetails: CouponDetails | undefined = couponData
+            ? {
+                couponCode: couponData.code,
+                discountType: couponData.discountType,
+                discountAmount: couponData.discountAmount,
+              }
+            : undefined;
+
           return {
             id: ride.getId(),
             rideId: ride.getRideId(),
@@ -161,6 +172,7 @@ export class GetAdminRidesUseCase
             durationFormatted: ride.isCompleted()
               ? ride.getFormattedRideDuration()
               : undefined,
+            couponDetails: couponDetails,
             createdAt: ride.getCreatedAt().toISOString(),
             updatedAt: ride.getUpdatedAt().toISOString(),
           };

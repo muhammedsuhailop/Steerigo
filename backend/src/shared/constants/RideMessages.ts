@@ -24,7 +24,7 @@ export const RIDE_ERROR_MESSAGES = {
   INVALID_STATUS_TRANSITION:
     "Cannot transition ride {{rideId}} from {{from}} to {{to}}",
   RIDE_CREATION_FAILED: "Failed to create ride: {{reason}}",
-  UNAUTHORIZED_RIDE_ACCESS: "You are not authorized to access ride {rideId}",
+  UNAUTHORIZED_RIDE_ACCESS: "You are not authorized to access ride {{rideId}}",
   CANNOT_MARK_AS_ARRIVED:
     "Cannot mark ride {{rideId}} as arrived from status {{currentStatus}}. Only accepted rides can be marked as arrived.",
   CANNOT_RATE_INCOMPLETE_RIDE:
@@ -33,6 +33,8 @@ export const RIDE_ERROR_MESSAGES = {
   DRIVER_NOT_FOUND_FOR_RIDE: "No driver found associated with ride {{rideId}}",
   INVALID_RATING_VALUE: "Rating values must be between 1 and 5",
   INVALID_RATING_DATA: "Invalid rating data provided: {{reason}}",
+  RIDE_NOT_ELIGIBLE_FOR_COUPON:
+    "Ride '{rideId}' with status {{currentStatus}} is not eligible for a coupon",
 } as const;
 
 export const RIDE_CANCELLATION_ERROR_MESSAGES = {

@@ -29,4 +29,6 @@ export interface ITransactionRepository {
     walletId: string,
     filters: TransactionQueryFilters,
   ): Promise<TransactionQueryResult>;
+  findByGroupId(groupId: string): Promise<Transaction[]>;
+  existsByGroupId(groupId: string): Promise<boolean>;
 }

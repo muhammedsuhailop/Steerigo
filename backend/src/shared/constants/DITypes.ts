@@ -20,6 +20,8 @@ export const TYPES = {
   PayoutRepository: Symbol.for("PayoutRepository"),
   WalletRepository: Symbol.for("WalletRepository"),
   RatingRepository: Symbol.for("RatingRepository"),
+  CouponRepository: Symbol.for("CouponRepository"),
+  CouponUsageRepository: Symbol.for("CouponUsageRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -40,6 +42,8 @@ export const TYPES = {
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
   PaymentStrategies: Symbol.for("PaymentStrategies"),
+  CouponValidationService: Symbol.for("CouponValidationService"),
+  CouponUsageService: Symbol.for("CouponUsageService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -81,6 +85,11 @@ export const TYPES = {
   ApprovePayoutUseCase: Symbol.for("ApprovePayoutUseCase"),
   RejectPayoutUseCase: Symbol.for("RejectPayoutUseCase"),
   GetAdminPayoutsUseCase: Symbol.for("GetAdminPayoutsUseCase"),
+
+  CreateCouponUseCase: Symbol.for("CreateCouponUseCase"),
+  EditCouponUseCase: Symbol.for("EditCouponUseCase"),
+  GetAdminCouponsUseCase: Symbol.for("GetAdminCouponsUseCase"),
+  GetAdminRatingsUseCase: Symbol.for("GetAdminRatingsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -131,6 +140,8 @@ export const TYPES = {
   GetUserRidesUseCase: Symbol.for("GetUserRidesUseCase"),
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
   RateDriverUseCase: Symbol.for("RateDriverUseCase"),
+  ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
+  RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
@@ -183,4 +194,6 @@ export const TYPES = {
   DriverPayoutController: Symbol.for("DriverPayoutController"),
   AdminPayoutController: Symbol.for("AdminPayoutController"),
   DriverWalletController: Symbol.for("DriverWalletController"),
+  AdminCouponController: Symbol.for("AdminCouponController"),
+  CouponController: Symbol.for("CouponController"),
 };

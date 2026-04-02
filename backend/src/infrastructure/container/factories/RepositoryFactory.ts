@@ -22,6 +22,10 @@ import { IRatingRepository } from "@domain/repositories/IRatingRepository";
 import { RatingRepositoryImpl } from "@infrastructure/database/repositories/RatingRepositoryImpl";
 import { IUnitOfWork } from "@domain/repositories/IUnitOfWork";
 import { MongoUnitOfWork } from "@infrastructure/database/repositories/MongoUnitOfWork";
+import { CouponRepositoryImpl } from "@infrastructure/database/repositories/CouponRepositoryImpl";
+import { ICouponRepository } from "@domain/repositories/ICouponRepository";
+import { CouponUsageRepositoryImpl } from "@infrastructure/database/repositories/CouponUsageRepositoryImpl";
+import { ICouponUsageRepository } from "@domain/repositories/ICouponUsageRepository";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -56,5 +60,11 @@ export class RepositoryFactory {
     container
       .bind<IRatingRepository>(TYPES.RatingRepository)
       .to(RatingRepositoryImpl);
+    container
+      .bind<ICouponRepository>(TYPES.CouponRepository)
+      .to(CouponRepositoryImpl);
+    container
+      .bind<ICouponUsageRepository>(TYPES.CouponUsageRepository)
+      .to(CouponUsageRepositoryImpl);
   }
 }

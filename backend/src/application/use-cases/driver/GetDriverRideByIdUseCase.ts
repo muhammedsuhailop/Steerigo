@@ -8,6 +8,7 @@ import {
   LocationDetails,
   FareDetails,
   TimelineDetails,
+  CouponDetails,
 } from "@application/dto/driver/GetDriverRideByIdResponseDto";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
@@ -20,6 +21,9 @@ import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities/User";
 import { RideErrors } from "@domain/errors/RideErrors";
+import { IRatingRepository } from "@domain/repositories/IRatingRepository";
+import { ReviewType } from "@domain/value-objects/ReviewType";
+import { Rating } from "@domain/entities/Rating";
 
 @injectable()
 export class GetDriverRideByIdUseCase
@@ -36,6 +40,8 @@ export class GetDriverRideByIdUseCase
     private rideRepository: IRideRepository,
     @inject(TYPES.UserRepository)
     private userRepository: IUserRepository,
+    @inject(TYPES.RatingRepository)
+    private ratingRepository: IRatingRepository,
   ) {}
 
   async execute(
@@ -86,7 +92,15 @@ export class GetDriverRideByIdUseCase
         );
       }
 
-      const rideDetails = this.mapRideToDetails(ride);
+      const ratings = await this.ratingRepository.findAllByRideId(
+        ride.getRideId(),
+      );
+
+      const riderToDriverRating = ratings.find(
+        (r) => r.getReviewType() === ReviewType.USER_REVIEW,
+      );
+
+      const rideDetails = this.mapRideToDetails(ride, riderToDriverRating);
       const riderDetails = this.mapRiderToDetails(rider);
 
       const response: GetDriverRideByIdResponseDto = {
@@ -115,7 +129,7 @@ export class GetDriverRideByIdUseCase
     }
   }
 
-  private mapRideToDetails(ride: Ride): RideDetails {
+  private mapRideToDetails(ride: Ride, rating?: Rating): RideDetails {
     const fareBreakdown = ride.getFareBreakdown();
     const timeline = ride.getTimeline();
 
@@ -138,6 +152,8 @@ export class GetDriverRideByIdUseCase
       totalFare: fareBreakdown.getTotalFare().getAmount(),
 
       currency: ride.getCurrency(),
+
+      payableAmount: ride.getPayableAmount(),
     };
 
     const timelineDetails: TimelineDetails = {
@@ -165,6 +181,26 @@ export class GetDriverRideByIdUseCase
       address: ride.getDrop().getAddress(),
     };
 
+    const couponData = ride.getCouponDetails();
+    const couponDetails: CouponDetails | undefined = couponData
+      ? {
+          couponCode: couponData.code,
+          discountType: couponData.discountType,
+          discountAmount: couponData.discountAmount,
+        }
+      : undefined;
+
+    const ratingDetails = rating
+      ? {
+          overallRating: rating.getOverallRating(),
+          reviewType: rating.getReviewType(),
+          criteria: rating.getCriteria().toObject(),
+          review: rating.getReview(),
+          reviewerName: rating.getReviewerName(),
+          createdAt: rating.getCreatedAt().toISOString(),
+        }
+      : undefined;
+
     return {
       id: ride.getId(),
       rideId: ride.getRideId(),
@@ -176,6 +212,8 @@ export class GetDriverRideByIdUseCase
       distance: ride.getPickup().distanceTo(ride.getDrop()),
       fare: fareDetails,
       timeline: timelineDetails,
+      couponDetails: couponDetails,
+      rating: ratingDetails,
       createdAt: ride.getCreatedAt().toISOString(),
       updatedAt: ride.getUpdatedAt().toISOString(),
     };

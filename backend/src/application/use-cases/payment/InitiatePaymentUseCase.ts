@@ -86,7 +86,7 @@ export class InitiatePaymentUseCase
       const now = new Date();
       ride.getTimeline().setPaymentInitiatedAt(now);
 
-      const amount = Money.create(ride.getFare(), ride.getCurrency());
+      const amount = Money.create(ride.getPayableAmount(), ride.getCurrency());
 
       const paymentId = this.idGenerator.generate();
 

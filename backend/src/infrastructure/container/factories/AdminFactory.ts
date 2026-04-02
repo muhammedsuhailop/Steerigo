@@ -25,6 +25,19 @@ import { AdminRideController } from "@interface/controllers/admin/AdminRideContr
 import { ApprovePayoutUseCase } from "@application/use-cases/admin/ApprovePayoutUseCase";
 import { RejectPayoutUseCase } from "@application/use-cases/admin/RejectPayoutUseCase";
 import { GetAdminPayoutsUseCase } from "@application/use-cases/admin/GetAdminPayoutsUseCase";
+import { CreateCouponDto } from "@application/dto/admin/CreateCouponDto";
+import { CreateCouponResponseDto } from "@application/dto/admin/CreateCouponResponseDto";
+import { CreateCouponUseCase } from "@application/use-cases/admin/CreateCouponUseCase";
+import { EditCouponDto } from "@application/dto/admin/EditCouponDto";
+import { EditCouponResponseDto } from "@application/dto/admin/EditCouponResponseDto";
+import { EditCouponUseCase } from "@application/use-cases/admin/EditCouponUseCase";
+import { AdminCouponController } from "@interface/controllers/admin/AdminCouponController";
+import { GetAdminCouponsDto } from "@application/dto/admin/GetAdminCouponsDto";
+import { GetAdminCouponsResponseDto } from "@application/dto/admin/GetAdminCouponsResponseDto";
+import { GetAdminCouponsUseCase } from "@application/use-cases/admin/GetAdminCouponsUseCase";
+import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
+import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
+import { GetAdminRatingsUseCase } from "@application/use-cases/admin/GetAdminRatingsUseCase";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -63,6 +76,35 @@ export class AdminFactory {
     container.bind(TYPES.ApprovePayoutUseCase).to(ApprovePayoutUseCase);
     container.bind(TYPES.RejectPayoutUseCase).to(RejectPayoutUseCase);
     container.bind(TYPES.GetAdminPayoutsUseCase).to(GetAdminPayoutsUseCase);
+    container
+      .bind<
+        IUseCase<CreateCouponDto, Promise<Result<CreateCouponResponseDto>>>
+      >(TYPES.CreateCouponUseCase)
+      .to(CreateCouponUseCase);
+
+    container
+      .bind<
+        IUseCase<EditCouponDto, Promise<Result<EditCouponResponseDto>>>
+      >(TYPES.EditCouponUseCase)
+      .to(EditCouponUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminCouponsDto,
+          Promise<Result<GetAdminCouponsResponseDto>>
+        >
+      >(TYPES.GetAdminCouponsUseCase)
+      .to(GetAdminCouponsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminRatingsDto,
+          Promise<Result<GetAdminRatingsResponseDto>>
+        >
+      >(TYPES.GetAdminRatingsUseCase)
+      .to(GetAdminRatingsUseCase);
 
     // Controller bindings
     container
@@ -72,5 +114,8 @@ export class AdminFactory {
     container
       .bind<AdminRideController>(TYPES.AdminRideController)
       .to(AdminRideController);
+    container
+      .bind<AdminCouponController>(TYPES.AdminCouponController)
+      .to(AdminCouponController);
   }
 }

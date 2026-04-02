@@ -8,6 +8,8 @@ import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
+import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
+import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
 
 @injectable()
 export class AdminRideController {
@@ -16,6 +18,12 @@ export class AdminRideController {
     private readonly getAdminRidesUseCase: IUseCase<
       GetAdminRidesDto,
       Promise<Result<GetAdminRidesResponseDto>>
+    >,
+
+    @inject(TYPES.GetAdminRatingsUseCase)
+    private readonly getAdminRatingsUseCase: IUseCase<
+      GetAdminRatingsDto,
+      Promise<Result<GetAdminRatingsResponseDto>>
     >,
   ) {}
 
@@ -47,6 +55,39 @@ export class AdminRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "admin_get_rides",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getRatings(req: Request, res: Response): Promise<void> {
+    try {
+      Logger.info("Admin get ratings received", { query: req.query });
+
+      const dto = GetAdminRatingsDto.fromRequest(req.query);
+      const result = await this.getAdminRatingsUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Admin get ratings failed", { error: error.message });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "admin_get_ratings",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json(result.getValue());
+    } catch (error) {
+      Logger.error("Admin get ratings controller error", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "admin_get_ratings",
       );
       res.status(statusCode).json(response);
     }

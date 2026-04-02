@@ -12,6 +12,7 @@ export class Transaction {
 
     private readonly relatedEntityId?: string,
     private readonly relatedEntityType?: string,
+    private readonly groupId?: string,
     private readonly note?: string,
     private readonly metadata: Readonly<Record<string, string>> = {},
 
@@ -26,6 +27,7 @@ export class Transaction {
     amount: Money;
     relatedEntityId?: string;
     relatedEntityType?: string;
+    groupId?: string;
     note?: string;
     metadata?: Record<string, string>;
   }): Transaction {
@@ -41,6 +43,7 @@ export class Transaction {
       params.amount,
       params.relatedEntityId,
       params.relatedEntityType,
+      params.groupId,
       params.note,
       params.metadata ?? {},
       new Date(),
@@ -55,6 +58,7 @@ export class Transaction {
     amount: Money;
     relatedEntityId?: string;
     relatedEntityType?: string;
+    groupId?: string;
     note?: string;
     metadata?: Record<string, string>;
     createdAt: Date;
@@ -67,6 +71,7 @@ export class Transaction {
       data.amount,
       data.relatedEntityId,
       data.relatedEntityType,
+      data.groupId,
       data.note,
       data.metadata ?? {},
       data.createdAt,
@@ -99,6 +104,10 @@ export class Transaction {
 
   getRelatedEntityType(): string | undefined {
     return this.relatedEntityType;
+  }
+
+  getGroupId(): string | undefined {
+    return this.groupId;
   }
 
   getNote(): string | undefined {

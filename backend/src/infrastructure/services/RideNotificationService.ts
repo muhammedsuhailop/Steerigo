@@ -12,6 +12,7 @@ import {
   RideCancelledRiderPayload,
   RideCancelledByDriverRiderPayload,
   RideCancelledByDriverDriverPayload,
+  DriverFareUpdatedPayload,
 } from "../../application/services/IRideNotificationService";
 import { getRideSocketServer } from "../realtime/socket";
 import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
@@ -258,6 +259,35 @@ export class RideNotificationService implements IRideNotificationService {
       Logger.error("Error sending driver cancellation confirmation", {
         driverUserId,
         rideId: payload.rideId,
+        error,
+      });
+    }
+  }
+
+  async notifyDriverFareUpdated(
+    driverUserId: string,
+    payload: DriverFareUpdatedPayload,
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+
+      io.to(`driver:${driverUserId}`).emit(
+        SOCKET_EVENTS.RIDE_FARE_RECALCULATED,
+        payload,
+      );
+
+      io.to(`ride:${payload.rideId}`).emit(
+        SOCKET_EVENTS.RIDE_FARE_RECALCULATED,
+        payload,
+      );
+
+      Logger.info("Notified driver of fare update", {
+        driverUserId,
+        rideId: payload.rideId,
+      });
+    } catch (error) {
+      Logger.error("Error notifying driver of fare update", {
+        driverUserId,
         error,
       });
     }

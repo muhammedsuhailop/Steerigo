@@ -18,6 +18,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { RideStatus } from "@/shared/types/ride.types";
 import CompletedRideSummary from "../components/CompletedRideSummary";
 import CancelRideButton from "../components/CancelRideButton";
+import CouponSection from "../components/CouponSection";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -127,6 +128,13 @@ const ViewRidePage: React.FC = () => {
                   paymentStatus={activeRide.paymentStatus}
                 />
 
+                <CouponSection
+                  rideId={id as string}
+                  status={activeRide.status as RideStatus}
+                  paymentStatus={activeRide.paymentStatus}
+                  couponDetails={activeRide.couponDetails}
+                />
+
                 <CancelRideButton
                   rideId={id as string}
                   status={activeRide.status as RideStatus}
@@ -138,15 +146,8 @@ const ViewRidePage: React.FC = () => {
 
         {isEndState && (
           <CompletedRideSummary
-            rideId={activeRide.rideId}
-            fare={activeRide.fare}
-            timeline={activeRide.timeline}
-            pickup={activeRide.pickup}
-            drop={activeRide.drop}
-            distance={activeRide.distance}
+            activeRide={activeRide}
             driver={activeDriver}
-            status={activeRide.status as RideStatus}
-            paymentStatus={activeRide.paymentStatus}
             user={{ name: user?.name || "", email: user?.email || "" }}
           />
         )}

@@ -6,11 +6,13 @@ import {
   FaExclamationCircle,
   FaClock,
   FaUndo,
+  FaTag,
 } from "react-icons/fa";
 
 interface FareBreakdownProps {
   fare: FareDetails;
   paymentStatus?: PaymentStatus;
+  couponCode?: string;
 }
 
 const PAYMENT_STATUS_CONFIG = {
@@ -44,40 +46,70 @@ const PAYMENT_STATUS_CONFIG = {
 const FareBreakdown: React.FC<FareBreakdownProps> = ({
   fare,
   paymentStatus,
+  couponCode,
 }) => {
   const taxAndFees = fare.tax.total + fare.platformFee;
   const currentStatusUI = paymentStatus
     ? PAYMENT_STATUS_CONFIG[paymentStatus]
     : null;
 
+  const hasDiscount =
+    !!fare.payableAmount && fare.payableAmount < fare.totalFare;
+  const discountValue = fare.totalFare - (fare.payableAmount ?? fare.totalFare);
+  const finalDisplayAmount = fare.payableAmount ?? fare.totalFare;
+
   return (
     <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
+      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">
         Fare Summary
       </h4>
 
       <div className="space-y-4">
+        {/* Base Fare Row */}
         <div className="flex justify-between text-sm font-medium text-gray-500">
-          <span>Base Fare</span>
+          <span>Fare</span>
           <span className="text-gray-900">₹{fare.baseFare.toFixed(2)}</span>
         </div>
 
+        {/* Taxes & Fees Row */}
         <div className="flex justify-between text-sm font-medium text-gray-500">
           <span>Taxes & Fees</span>
           <span className="text-gray-900">₹{taxAndFees.toFixed(2)}</span>
         </div>
 
+        {/* Discount Row */}
+        {hasDiscount && (
+          <div className="flex justify-between text-sm font-bold text-green-600 bg-green-50/50 p-2 rounded-2xl border border-dashed border-green-200 animate-in fade-in duration-500">
+            <span className="flex items-center gap-2">
+              <FaTag className="text-[10px]" />
+              Discount {couponCode ? `(${couponCode})` : ""}
+            </span>
+            <span>- ₹{discountValue.toFixed(2)}</span>
+          </div>
+        )}
+
+        {/* Total Payable Row */}
         <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
-          <span className="font-bold text-gray-900">Total Amount</span>
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-900 text-sm">
+              Total Amount
+            </span>
+            {hasDiscount && (
+              <span className="text-[10px] text-gray-400 line-through font-bold">
+                ₹{fare.totalFare.toFixed(2)}
+              </span>
+            )}
+          </div>
           <span className="text-2xl font-black text-gray-900">
             {fare.currency === "INR" ? "₹" : fare.currency}{" "}
-            {fare.totalFare.toFixed(2)}
+            {finalDisplayAmount.toFixed(2)}
           </span>
         </div>
 
+        {/* Payment Status Badge */}
         {currentStatusUI && (
           <div
-            className={`mt-2 flex items-center justify-center gap-3 p-4 border rounded-2xl font-bold text-sm transition-all ${currentStatusUI.container}`}
+            className={`mt-2 flex items-center justify-center gap-3 p-2 border rounded-2xl font-bold text-sm transition-all ${currentStatusUI.container}`}
           >
             {currentStatusUI.icon}
             <span className="uppercase tracking-wide">

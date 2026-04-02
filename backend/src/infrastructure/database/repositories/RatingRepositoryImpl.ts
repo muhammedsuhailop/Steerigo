@@ -1,10 +1,14 @@
 import { injectable } from "inversify";
-import { IRatingRepository } from "@domain/repositories/IRatingRepository";
+import {
+  IRatingRepository,
+  PaginatedRatings,
+  RatingQueryOptions,
+} from "@domain/repositories/IRatingRepository";
 import { Rating } from "@domain/entities/Rating";
 import { RatingModel } from "../models/RatingModel";
 import { RatingMapper } from "../mappers/RatingMapper";
 import { Logger } from "@shared/utils/Logger";
-import { Types } from "mongoose";
+import { FilterQuery, SortOrder, Types } from "mongoose";
 
 @injectable()
 export class RatingRepositoryImpl implements IRatingRepository {
@@ -120,6 +124,79 @@ export class RatingRepositoryImpl implements IRatingRepository {
       Logger.error("Error finding ratings by revieweeId", {
         revieweeId,
         error,
+      });
+      throw error;
+    }
+  }
+
+  async findAll(options: RatingQueryOptions): Promise<PaginatedRatings> {
+    try {
+      const { filters, sortBy, sortOrder, page, limit } = options;
+
+      const query: FilterQuery<typeof RatingModel> = {};
+
+      if (filters.reviewType) {
+        query["reviewType"] = filters.reviewType;
+      }
+
+      if (filters.reviewerId) {
+        query["reviewerId"] = filters.reviewerId;
+      }
+
+      if (filters.revieweeId) {
+        query["revieweeId"] = filters.revieweeId;
+      }
+
+      if (filters.rideId) {
+        query["rideId"] = filters.rideId;
+      }
+
+      if (filters.minRating !== undefined || filters.maxRating !== undefined) {
+        query["overallRating"] = {};
+        if (filters.minRating !== undefined) {
+          (query["overallRating"] as Record<string, number>)["$gte"] =
+            filters.minRating;
+        }
+        if (filters.maxRating !== undefined) {
+          (query["overallRating"] as Record<string, number>)["$lte"] =
+            filters.maxRating;
+        }
+      }
+
+      if (filters.fromDate || filters.toDate) {
+        query["createdAt"] = {};
+        if (filters.fromDate) {
+          (query["createdAt"] as Record<string, Date>)["$gte"] =
+            filters.fromDate;
+        }
+        if (filters.toDate) {
+          (query["createdAt"] as Record<string, Date>)["$lte"] = filters.toDate;
+        }
+      }
+
+      const mongoSortOrder: SortOrder = sortOrder === "asc" ? 1 : -1;
+      const skip = (page - 1) * limit;
+
+      const [docs, total] = await Promise.all([
+        RatingModel.find(query)
+          .sort({ [sortBy]: mongoSortOrder })
+          .skip(skip)
+          .limit(limit),
+        RatingModel.countDocuments(query),
+      ]);
+
+      const ratings = docs.map((doc) => RatingMapper.toDomain(doc));
+
+      return {
+        ratings,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      Logger.error("Error finding all ratings", {
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

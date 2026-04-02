@@ -1,4 +1,5 @@
 import { CouponDetails } from "@domain/value-objects/CouponDetails";
+import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { Location } from "@domain/value-objects/Location";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
@@ -290,23 +291,37 @@ export class Ride {
     this.timeline.setCancelledAt(new Date());
   }
 
-  applyCoupon(code: string, discountAmount: number): void {
+  applyCoupon(
+    couponId: string,
+    code: string,
+    discountAmount: number,
+    discountType: CouponDiscountType,
+    recalculate: boolean = false,
+  ): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
-      throw new Error(
-        "Cannot apply coupon: Payment is already processed or completed.",
-      );
+      throw new Error("Payment already processed.");
     }
 
-    if (discountAmount < 0) {
-      throw new Error("Discount amount cannot be negative.");
+    if (this.couponDetails && !recalculate) {
+      throw new Error("Coupon already applied.");
+    }
+
+    if (discountAmount <= 0) {
+      throw new Error("Discount must be greater than zero.");
+    }
+
+    if (discountAmount > this.getFare()) {
+      throw new Error("Discount exceeds fare.");
     }
 
     this.couponDetails = {
+      couponId,
       code,
       discountAmount,
+      discountType,
     };
   }
-
+  
   removeCoupon(): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
       throw new Error(
@@ -314,7 +329,21 @@ export class Ride {
       );
     }
 
+    if (!this.couponDetails) {
+      throw new Error("No coupon applied to remove.");
+    }
+
     this.couponDetails = undefined;
+  }
+
+  getDiscountAmount(): number {
+    return this.couponDetails?.discountAmount ?? 0;
+  }
+
+  getPayableAmount(): number {
+    const payable = this.getFare() - this.getDiscountAmount();
+
+    return Math.max(0, payable);
   }
 
   updatePaymentStatus(status: PaymentStatus): void {

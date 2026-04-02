@@ -11,6 +11,11 @@ import { rideIdParamSchema } from "@interface/validators/user/rideIdParamSchema"
 import { getUserRidesSchema } from "@interface/validators/user/getUserRidesSchema";
 import { cancelRideSchema } from "@interface/validators/user/cancelRideSchema";
 import { rateRideSchema } from "@interface/validators/user/rateRideSchema";
+import {
+  applyCouponSchema,
+  removeCouponSchema,
+} from "@interface/validators/user/couponSchema";
+import { CouponController } from "@interface/controllers/user/CouponController";
 
 const router = Router();
 
@@ -23,6 +28,10 @@ const autoRideController = container.get<AutoRideController>(
 );
 
 const rideController = container.get<RideController>(TYPES.RideController);
+
+const couponController = container.get<CouponController>(
+  TYPES.CouponController,
+);
 
 // POST /api/users/ride/request-send
 router.post(
@@ -74,6 +83,22 @@ router.post(
   validateSchema(rateRideSchema),
   handleValidationErrors,
   (req: Request, res: Response) => rideController.rateDriver(req, res),
+);
+
+// POST /api/user/ride/:rideId/coupon - Apply coupon on ride
+router.post(
+  "/ride/:rideId/coupon",
+  validateSchema(applyCouponSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => couponController.applyCoupon(req, res),
+);
+
+// DELETE /api/user/ride/:rideId/coupon - Remove applied coupon
+router.delete(
+  "/ride/:rideId/coupon",
+  validateSchema(removeCouponSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => couponController.removeCoupon(req, res),
 );
 
 export { router as rideRoutes };

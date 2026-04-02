@@ -11,6 +11,7 @@ import {
   RideCompletedEvent,
   RideCancelledEvent,
   RideCancelledByDriverEvent,
+  RideFareUpdatedEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -31,6 +32,7 @@ import { CreateNotificationResponseDto } from "@application/dto/notification/Cre
 import { NotificationSocketAdapter } from "@infrastructure/adapters/NotificationSocketAdapter";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { ICouponUsageService } from "@application/services/ICouponUsageService";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -46,6 +48,8 @@ export class InMemoryEventBus implements IEventBus {
     private readonly paymentNotificationService: IPaymentNotificationService,
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
+    @inject(TYPES.CouponUsageService)
+    private readonly couponUsageService: ICouponUsageService,
   ) {}
 
   async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
@@ -83,6 +87,8 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleRideCancelled(event);
       case "RideCancelledByDriver":
         return this.handleRideCancelledByDriver(event);
+      case "RideFareUpdated":
+        return this.handleRideFareUpdated(event);
     }
   }
 
@@ -186,7 +192,9 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentSucceeded(event: PaymentSucceededEvent) {
-    const { riderId, driverId, driverUserId } = event.payload;
+    const { riderId, driverId, driverUserId, rideId } = event.payload;
+
+    await this.couponUsageService.recordUsage(rideId);
 
     await this.paymentNotificationService.notifyPaymentSucceeded(
       riderId,
@@ -235,7 +243,9 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentCashConfirmed(event: PaymentCashConfirmedEvent) {
-    const { riderId, driverId, driverUserId } = event.payload;
+    const { riderId, driverId, driverUserId, rideId } = event.payload;
+
+    await this.couponUsageService.recordUsage(rideId);
 
     await this.paymentNotificationService.notifyPaymentCashConfirmed(
       driverId,
@@ -460,5 +470,14 @@ export class InMemoryEventBus implements IEventBus {
     });
 
     await this.updateDriverAvailability(driverId);
+  }
+
+  private async handleRideFareUpdated(event: RideFareUpdatedEvent) {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverFareUpdated(
+      driverUserId,
+      payload,
+    );
   }
 }

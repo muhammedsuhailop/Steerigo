@@ -2,16 +2,18 @@ import { z } from "zod";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 
 const getAdminRidesSchema = z.object({
-  page: z.number().positive().optional().default(1),
-  limit: z.number().positive().max(100).optional().default(10),
-  sortBy: z
-    .enum(["createdAt", "updatedAt", "fare"])
-    .optional()
-    .default("createdAt"),
-  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+  page: z.coerce.number().positive().default(1),
+  limit: z.coerce.number().positive().max(100).default(10),
+
+  sortBy: z.enum(["createdAt", "updatedAt", "fare"]).default("createdAt"),
+
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+
   status: z.nativeEnum(RideStatus).optional(),
-  fromDate: z.string().datetime().optional(),
-  toDate: z.string().datetime().optional(),
+
+  fromDate: z.coerce.date().optional(),
+  toDate: z.coerce.date().optional(),
+
   riderId: z.string().optional(),
   driverId: z.string().optional(),
 });

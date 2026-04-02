@@ -9,6 +9,7 @@ import { validateSchema } from "@interface/middleware";
 import { handleValidationErrors } from "@interface/middleware/errorHandler";
 import { TYPES } from "@shared/constants/DITypes";
 import { getAdminRidesSchema } from "@application/dto/admin/GetAdminRidesDto";
+import { getAdminRatingsSchema } from "@application/dto/admin/GetAdminRatingsDto";
 
 const router = Router();
 
@@ -25,6 +26,14 @@ router.get(
   validateSchema(getAdminRidesSchema),
   handleValidationErrors,
   (req: Request, res: Response) => adminRideController.getRides(req, res),
+);
+
+// GET /admin/rides/ratings
+router.get(
+  "/ratings",
+  validateSchema(getAdminRatingsSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) => adminRideController.getRatings(req, res),
 );
 
 export { router as adminRideRoutes };
