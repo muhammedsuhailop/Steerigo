@@ -129,13 +129,13 @@ const ViewDriverRidePage: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-black text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900">
                 {isInactive ? "Trip Summary" : "Active Trip"}
               </h1>
               <p className="text-sm text-gray-500">{activeRide.rideId}</p>
             </div>
             <span
-              className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest 
+              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest 
               ${isInactive ? "bg-gray-200 text-gray-700" : "bg-blue-600 text-white"}`}
             >
               {activeRide.status}
@@ -173,7 +173,7 @@ const ViewDriverRidePage: React.FC = () => {
                 <RideActionControls
                   rideId={activeRide.rideId}
                   status={activeRide.status}
-                  amount={activeRide.fare.totalFare}
+                  amount={activeRide.fare.payableAmount}
                 />
               ) : (
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex items-center gap-4">

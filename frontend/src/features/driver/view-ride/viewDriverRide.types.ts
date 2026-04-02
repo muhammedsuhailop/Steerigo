@@ -23,6 +23,9 @@ export interface DriverRideDetails {
   timeline: RideTimeline;
   createdAt: string;
   updatedAt: string;
+  couponDetails?: CouponDetails;
+  duration?: number;
+  rating?: RatingDetails;
 }
 
 export interface ViewDriverRideResponse {
@@ -64,4 +67,18 @@ export interface ConfirmCashPaymentResponse {
     amount: number;
     currency: string;
   };
+}
+
+export interface CouponDetails {
+  couponCode: string;
+  discountType: string;
+  discountAmount: number;
+}
+
+export interface RatingDetails {
+  overallRating: number;
+  reviewType: string;
+  review?: string;
+  reviewerName?: string;
+  createdAt: string;
 }

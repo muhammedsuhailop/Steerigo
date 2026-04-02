@@ -45,6 +45,26 @@ export const viewDriverRideSlice = createSlice({
         }
       }
     },
+
+    updateDriverRideFareLocal: (
+      state,
+      action: PayloadAction<{
+        payableAmount: number;
+        discountAmount: number;
+        couponCode: string;
+        couponType: string;
+      }>,
+    ) => {
+      if (state.activeRide) {
+        state.activeRide.fare.payableAmount = action.payload.payableAmount;
+
+        state.activeRide.couponDetails = {
+          couponCode: action.payload.couponCode,
+          discountAmount: action.payload.discountAmount,
+          discountType: action.payload.couponType,
+        };
+      }
+    },
     clearDriverRideData: (state) => {
       state.activeRide = null;
       state.activeRider = null;
@@ -56,6 +76,7 @@ export const {
   setDriverRideData,
   updateDriverRideStatusLocal,
   updateDriverPaymentStatusLocal,
+  updateDriverRideFareLocal,
   clearDriverRideData,
 } = viewDriverRideSlice.actions;
 

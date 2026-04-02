@@ -5,6 +5,7 @@ import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
 import {
   updateDriverRideStatusLocal,
   updateDriverPaymentStatusLocal,
+  updateDriverRideFareLocal,
 } from "../store/viewDriverRideSlice";
 import {
   PaymentCashConfirmedPayload,
@@ -86,6 +87,20 @@ export const useViewDriverRide = (rideId: string | undefined) => {
       }
     };
 
+    const onFareRecalculated = (data: any) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
+        dispatch(
+          updateDriverRideFareLocal({
+            payableAmount: payload.payableAmount,
+            discountAmount: payload.discountAmount,
+            couponCode: payload.couponCode,
+            couponType: payload.discountType,
+          }),
+        );
+      }
+    };
+
     // Binding Listeners
     socket.on(SOCKET_EVENTS.RIDE.STATUS_UPDATED, handleStatusUpdate);
     socket.on(SOCKET_EVENTS.RIDE.RIDE_CANCELLED_RIDER, onRiderCancelled);
@@ -93,6 +108,7 @@ export const useViewDriverRide = (rideId: string | undefined) => {
       SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
       onDriverCancelledBySelf,
     );
+    socket.on(SOCKET_EVENTS.RIDE.RIDE_FARE_RECALCULATED, onFareRecalculated);
 
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
@@ -106,6 +122,7 @@ export const useViewDriverRide = (rideId: string | undefined) => {
         SOCKET_EVENTS.RIDE.RIDE_CANCELLED_BY_DRIVER_TO_DRIVER,
         onDriverCancelledBySelf,
       );
+      socket.off(SOCKET_EVENTS.RIDE.RIDE_FARE_RECALCULATED, onFareRecalculated);
 
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
