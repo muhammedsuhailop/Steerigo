@@ -45,6 +45,10 @@ import { AdminTransactionController } from "@interface/controllers/admin/AdminTr
 import { GetAdminRideByIdDto } from "@application/dto/admin/GetAdminRideByIdDto";
 import { GetAdminRideByIdResponseDto } from "@application/dto/admin/GetAdminRideByIdResponseDto";
 import { GetAdminRideByIdUseCase } from "@application/use-cases/admin/GetAdminRideByIdUseCase";
+import { GetAdminWalletUseCase } from "@application/use-cases/admin/GetAdminWalletUseCase";
+import { GetAdminWalletDto } from "@application/dto/admin/GetAdminWalletDto";
+import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWalletResponseDto";
+import { AdminWalletController } from "@interface/controllers/admin/AdminWalletController";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -121,7 +125,6 @@ export class AdminFactory {
         >
       >(TYPES.GetAdminTransactionsUseCase)
       .to(GetAdminTransactionsUseCase);
-
     container
       .bind<
         IUseCase<
@@ -130,6 +133,11 @@ export class AdminFactory {
         >
       >(TYPES.GetAdminRideByIdUseCase)
       .to(GetAdminRideByIdUseCase);
+    container
+      .bind<
+        IUseCase<GetAdminWalletDto, Promise<Result<GetAdminWalletResponseDto>>>
+      >(TYPES.GetAdminWalletUseCase)
+      .to(GetAdminWalletUseCase);
 
     // Controller bindings
     container
@@ -145,5 +153,8 @@ export class AdminFactory {
     container
       .bind<AdminTransactionController>(TYPES.AdminTransactionController)
       .to(AdminTransactionController);
+    container
+      .bind<AdminWalletController>(TYPES.AdminWalletController)
+      .to(AdminWalletController);
   }
 }

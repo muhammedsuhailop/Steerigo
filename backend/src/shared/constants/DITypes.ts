@@ -92,6 +92,7 @@ export const TYPES = {
   GetAdminRatingsUseCase: Symbol.for("GetAdminRatingsUseCase"),
   GetAdminTransactionsUseCase: Symbol.for("GetAdminTransactionsUseCase"),
   GetAdminRideByIdUseCase: Symbol.for("GetAdminRideByIdUseCase"),
+  GetAdminWalletUseCase: Symbol.for("GetAdminWalletUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -199,4 +200,5 @@ export const TYPES = {
   AdminCouponController: Symbol.for("AdminCouponController"),
   CouponController: Symbol.for("CouponController"),
   AdminTransactionController: Symbol.for("AdminTransactionController"),
+  AdminWalletController: Symbol.for("AdminWalletController"),
 };

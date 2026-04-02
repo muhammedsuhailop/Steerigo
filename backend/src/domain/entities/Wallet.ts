@@ -133,6 +133,8 @@ export class Wallet {
   }
 
   getTotalBalance(): Money {
-    return this.availableBalance.add(this.pendingBalance);
+    const total =
+      this.availableBalance.getAmount() + this.pendingBalance.getAmount();
+    return Money.forceCreate(total, this.currency);
   }
 }
