@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { AdminTopbarProps } from "./AdminTopbar.types";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 import { FaRegBell } from "react-icons/fa";
 import {
   RiMenuLine,

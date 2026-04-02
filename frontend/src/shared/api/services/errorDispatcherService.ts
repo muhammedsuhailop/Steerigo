@@ -1,4 +1,4 @@
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/app/store/store";
 import { addError } from "@/shared/components/ui/ErrorHandling/errorSlice";
 import {
   BaseError,

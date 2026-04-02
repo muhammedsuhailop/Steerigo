@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
 import { notificationApi } from "../services/notificationApi";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 import type {
   NotificationSocketPayload,
   Notification,

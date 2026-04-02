@@ -10,7 +10,7 @@ import {
   selectPage,
   selectLimit,
 } from "@/features/admin/shared/store/adminUsersSlice";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 import type { UserFilters as UserFiltersType } from "./UserManagement.types";
 
 //  Debounce hook for search input

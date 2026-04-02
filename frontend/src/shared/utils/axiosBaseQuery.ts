@@ -38,7 +38,7 @@ export interface AxiosBaseQueryError extends BaseError {
 // Update Redux store tokens
 const updateReduxTokens = async (accessToken: string, refreshToken: string) => {
   try {
-    const { store } = await import("@/app/store");
+    const { store } = await import("@/app/store/store");
     const { setTokens } = await import("@/features/auth/store/authSlice");
     store.dispatch(setTokens({ accessToken, refreshToken }));
     updateSocketAuth(accessToken);
@@ -50,7 +50,7 @@ const updateReduxTokens = async (accessToken: string, refreshToken: string) => {
 // Clear Redux auth state
 const clearReduxAuth = async () => {
   try {
-    const { store } = await import("@/app/store");
+    const { store } = await import("@/app/store/store");
     const { logout } = await import("@/features/auth/store/authSlice");
     store.dispatch(logout());
   } catch (error) {

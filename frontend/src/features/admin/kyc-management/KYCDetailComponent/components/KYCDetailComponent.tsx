@@ -9,7 +9,7 @@ import {
   setSelectedKYC,
   selectSelectedKYC,
 } from "../../../shared/store/adminKYCSlice";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 
 import { LoadingSpinner } from "@/shared/components/ui";
 import { Alert } from "@/shared/components/ui/Alert";

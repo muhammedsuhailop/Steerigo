@@ -21,7 +21,7 @@ import {
   selectUserProfileUpdateError,
 } from "../store/userProfileSlice";
 import type { UserProfileFormData } from "../types/userProfile.types";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/app/store/store";
 
 export const useUserProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
