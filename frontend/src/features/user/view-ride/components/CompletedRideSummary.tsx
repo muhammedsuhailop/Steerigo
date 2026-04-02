@@ -14,6 +14,7 @@ import RideTimelineExpandable from "./RideTimelineExpandable";
 import HorizontalDriverCard from "./HorizontalDriverCard";
 import { usePayment } from "../hooks/usePayment";
 import RideRating from "./RideRating";
+import CouponSection from "./CouponSection";
 
 interface CompletedRideSummaryProps {
   activeRide: RideDetails;
@@ -85,7 +86,7 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
                 Amount to Pay
               </p>
               <h3 className="text-4xl font-black text-gray-900 tracking-tight">
-                ₹{fare.totalFare.toFixed(2)}
+                ₹{fare.payableAmount.toFixed(2)}
               </h3>
             </div>
           </div>
@@ -157,6 +158,12 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
 
         <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100 flex flex-col h-full">
           <FareBreakdown fare={fare} paymentStatus={paymentStatus} />
+          <CouponSection
+            rideId={activeRide.rideId}
+            status={activeRide.status as RideStatus}
+            paymentStatus={activeRide.paymentStatus}
+            couponDetails={activeRide.couponDetails}
+          />
         </div>
       </div>
 
