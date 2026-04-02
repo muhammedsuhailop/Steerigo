@@ -6,6 +6,8 @@ export interface DistributeEarningsParams {
   totalFare: Money;
   platformFee: Money;
   platformFeeTax: Money;
+  payableAmount?: Money;
+  discount?: Money;
 }
 
 export interface DistributeCancellationParams {

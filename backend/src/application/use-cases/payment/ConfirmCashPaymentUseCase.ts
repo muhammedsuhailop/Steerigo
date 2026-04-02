@@ -84,19 +84,23 @@ export class ConfirmCashPaymentUseCase
         return Result.failure(PaymentErrors.paymentAlreadyExists(rideId));
       }
 
-      const rideFare = ride.getFare();
+      const payableAmount = ride.getPayableAmount();
+      const totalFare = ride.getFare();
+      const discountAmount = ride.getDiscountAmount();
+
       const providedAmount = dto.getAmount();
 
-      if (Math.abs(rideFare - providedAmount) > 1) {
+      if (Math.abs(payableAmount - providedAmount) > 1) {
         return Result.failure(
           PaymentErrors.invalidPaymentAmount(
-            rideFare.toString(),
+            payableAmount.toString(),
             providedAmount.toString(),
           ),
         );
       }
 
-      const amount = Money.create(rideFare, ride.getCurrency());
+      const amount = Money.create(payableAmount, ride.getCurrency());
+
       const paymentId = this.idGenerator.generate();
       const paidAt = new Date();
 
@@ -131,6 +135,8 @@ export class ConfirmCashPaymentUseCase
           totalFare: fareBreakdown.getTotalFare(),
           platformFee: fareBreakdown.getPlatformFee(),
           platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
+          payableAmount: Money.create(payableAmount, ride.getCurrency()),
+          discount: Money.create(discountAmount, ride.getCurrency()),
         })
         .catch((err: Error) => {
           Logger.error("Earnings distribution failed after cash payment", {
@@ -144,6 +150,9 @@ export class ConfirmCashPaymentUseCase
         rideId,
         driverId,
         paidAt: paidAt.toISOString(),
+        payableAmount,
+        totalFare,
+        discountAmount,
       });
 
       await this.eventBus.publish({
@@ -155,8 +164,8 @@ export class ConfirmCashPaymentUseCase
           driverId,
           riderId: ride.getRiderId(),
           driverUserId: driverUserId as string,
-          amount: amount.getAmount(),
-          currency: amount.getCurrency(),
+          amount: payableAmount,
+          currency: ride.getCurrency(),
           paidAt: paidAt.toISOString(),
         },
       });
@@ -169,8 +178,8 @@ export class ConfirmCashPaymentUseCase
           rideId: savedPayment.getRideId(),
           status: savedPayment.getStatus(),
           paidAt: paidAt.toISOString(),
-          amount: savedPayment.getAmount().getAmount(),
-          currency: savedPayment.getAmount().getCurrency(),
+          amount: payableAmount,
+          currency: ride.getCurrency(),
         },
       });
     } catch (error) {

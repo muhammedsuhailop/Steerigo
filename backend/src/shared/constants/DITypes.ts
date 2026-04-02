@@ -43,6 +43,7 @@ export const TYPES = {
   CancellationChargeService: Symbol.for("CancellationChargeService"),
   PaymentStrategies: Symbol.for("PaymentStrategies"),
   CouponValidationService: Symbol.for("CouponValidationService"),
+  CouponUsageService: Symbol.for("CouponUsageService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

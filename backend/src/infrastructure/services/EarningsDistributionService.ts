@@ -33,38 +33,125 @@ export class EarningsDistributionService
   async distribute(
     params: DistributeEarningsParams,
   ): Promise<EarningsDistributionResult> {
-    const { rideId, driverId, totalFare, platformFee, platformFeeTax } = params;
+    const {
+      rideId,
+      driverId,
+      totalFare,
+      platformFee,
+      platformFeeTax,
+      payableAmount,
+      discount,
+    } = params;
 
-    const platformRevenueMoney = platformFee.add(platformFeeTax);
-    const driverEarningsMoney = totalFare.subtract(platformRevenueMoney);
+    const platformRevenue = platformFee.add(platformFeeTax);
+    const discountMoney = discount ?? Money.zero(totalFare.getCurrency());
 
-    Logger.info("Distributing ride earnings", {
+    const driverEarnings = totalFare.subtract(platformRevenue);
+    const payable = payableAmount ?? totalFare;
+
+    await this.recordAuditOnlyTransaction(
+      PLATFORM_OWNER_ID,
+      WalletOwnerType.PLATFORM,
+      payable,
+      rideId,
+      TransactionType.RIDER_PAYMENT_ONLINE,
+      `Online payment received from rider for ride: ${rideId}`,
+    );
+
+    Logger.info("Distributing ONLINE earnings (coupon-aware)", {
       rideId,
       driverId,
       totalFare: totalFare.getAmount(),
-      platformRevenue: platformRevenueMoney.getAmount(),
-      driverEarnings: driverEarningsMoney.getAmount(),
+      payableAmount: payableAmount?.getAmount(),
+      discount: discountMoney.getAmount(),
+      platformRevenue: platformRevenue.getAmount(),
+      driverEarnings: driverEarnings.getAmount(),
     });
 
-    await this.creditDriverWallet(driverId, driverEarningsMoney, rideId);
-    await this.creditPlatformWallet(platformRevenueMoney, rideId);
+    if (discountMoney.getAmount() > 0) {
+      await this.debitWallet(
+        "platform",
+        WalletOwnerType.PLATFORM,
+        discountMoney,
+        rideId,
+        TransactionType.COUPON_EXPENSE,
+        `Coupon expense for ride: ${rideId}`,
+      );
+
+      await this.creditDriverWallet(
+        driverId,
+        discountMoney,
+        rideId,
+        TransactionType.DRIVER_COUPON_CREDIT,
+        `Coupon compensation for ride: ${rideId}`,
+      );
+    }
+
+    await this.creditDriverWallet(
+      driverId,
+      driverEarnings,
+      rideId,
+      TransactionType.DRIVER_EARNING,
+      `Online ride earning for ride: ${rideId}`,
+    );
+
+    await this.creditPlatformWallet(
+      platformRevenue,
+      rideId,
+      TransactionType.PLATFORM_COMMISSION,
+      `Platform commission for online ride: ${rideId}`,
+    );
 
     return {
-      driverEarnings: driverEarningsMoney.getAmount(),
-      platformRevenue: platformRevenueMoney.getAmount(),
+      driverEarnings: driverEarnings.getAmount(),
+      platformRevenue: platformRevenue.getAmount() - discountMoney.getAmount(),
       currency: totalFare.getCurrency(),
     };
   }
 
   async distributeCashPayment(params: DistributeEarningsParams): Promise<void> {
-    const { rideId, driverId, totalFare, platformFee, platformFeeTax } = params;
+    const {
+      rideId,
+      driverId,
+      totalFare,
+      payableAmount,
+      discount,
+      platformFee,
+      platformFeeTax,
+    } = params;
+
     const platformRevenue = platformFee.add(platformFeeTax);
+
+    const discountMoney = discount ?? Money.create(0, totalFare.getCurrency());
+    const payable = payableAmount ?? totalFare;
 
     Logger.info("Processing cash earnings distribution", {
       rideId,
       driverId,
+      totalFare: totalFare.getAmount(),
+      payableAmount: payableAmount?.getAmount(),
+      discount: discount?.getAmount(),
       platformRevenue: platformRevenue.getAmount(),
     });
+
+    if (discountMoney.getAmount() > 0) {
+      await this.debitWallet(
+        "platform",
+        WalletOwnerType.PLATFORM,
+        discountMoney,
+        rideId,
+        TransactionType.COUPON_EXPENSE,
+        `Coupon discount compensated to driver for ride: ${rideId}`,
+      );
+
+      await this.creditDriverWallet(
+        driverId,
+        discountMoney,
+        rideId,
+        TransactionType.DRIVER_COUPON_CREDIT,
+        `Coupon compensation for ride: ${rideId}`,
+      );
+    }
 
     await this.debitWallet(
       driverId,
@@ -75,16 +162,33 @@ export class EarningsDistributionService
       `Platform fee deduction for cash ride: ${rideId}`,
     );
 
-    await this.creditPlatformWallet(platformRevenue, rideId);
+    await this.creditPlatformWallet(
+      platformRevenue,
+      rideId,
+      TransactionType.PLATFORM_COMMISSION,
+      `Platform commission for cash ride: ${rideId}`,
+    );
 
     await this.recordAuditOnlyTransaction(
       driverId,
       WalletOwnerType.DRIVER,
-      totalFare,
+      payable,
       rideId,
       TransactionType.RIDE_PAYMENT_CASH,
-      `Cash collected from rider for ride: ${rideId}`,
+      `Cash collected from rider (after discount) for ride: ${rideId}`,
     );
+
+    const driverNet = totalFare.getAmount() - platformRevenue.getAmount();
+
+    const platformNet = platformRevenue.getAmount() - discountMoney.getAmount();
+
+    Logger.info("Cash distribution completed", {
+      rideId,
+      driverId,
+      driverExpectedEarnings: driverNet,
+      platformNetRevenue: platformNet,
+      note: "Driver earnings unaffected by coupon; platform bears discount",
+    });
   }
 
   async distributeCancellation(
@@ -158,6 +262,8 @@ export class EarningsDistributionService
     driverId: string,
     amount: Money,
     rideId: string,
+    type: TransactionType = TransactionType.DRIVER_EARNING,
+    note?: string,
   ): Promise<void> {
     let wallet = await this.walletRepository.findByOwner(
       driverId,
@@ -179,12 +285,12 @@ export class EarningsDistributionService
     const transaction = Transaction.create({
       id: new Types.ObjectId().toString(),
       walletId: wallet.getId(),
-      type: TransactionType.DRIVER_EARNING,
+      type: type,
       direction: TransactionDirection.CREDIT,
       amount,
       relatedEntityId: rideId,
       relatedEntityType: "Ride",
-      note: `Driver earnings for ride ${rideId}`,
+      note: note ?? `Driver earnings for ride ${rideId}`,
     });
 
     await this.transactionRepository.save(transaction);
