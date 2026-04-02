@@ -34,6 +34,7 @@ import { useNotificationSocket } from "@/features/notifications/hooks/useNotific
 import DriverRidesPage from "@/features/driver/driver-rides/pages/DriverRidesPage";
 import UserRidesPage from "@/features/user/rides/pages/UserRidesPage";
 import TransactionPage from "@/features/admin/transactions/pages/TransactionsPage";
+import RideManagement from "@/features/admin/rides/pages/RideManagement";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -175,6 +176,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <TransactionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/rides"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <RideManagement />
           </ProtectedRoute>
         }
       />
