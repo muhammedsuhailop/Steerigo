@@ -120,6 +120,8 @@ export class VerifyPaymentUseCase
         const payableAmount = ride.getPayableAmount();
         const discountAmount = ride.getDiscountAmount();
 
+        const groupId = `settlement_${ride.getRideId()}_${Date.now()}`;
+
         await this.earningsDistributionService
           .distribute({
             rideId: ride.getRideId(),
@@ -129,6 +131,7 @@ export class VerifyPaymentUseCase
             platformFeeTax: fareBreakdown.getPlatformFeeTax().amount,
             payableAmount: Money.create(payableAmount, ride.getCurrency()),
             discount: Money.create(discountAmount, ride.getCurrency()),
+            groupId,
           })
           .catch((err: Error) => {
             Logger.error("Earnings distribution failed after online payment", {

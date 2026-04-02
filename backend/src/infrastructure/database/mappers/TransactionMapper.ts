@@ -16,6 +16,7 @@ export class TransactionMapper {
       amount,
       relatedEntityId: doc.relatedEntityId,
       relatedEntityType: doc.relatedEntityType,
+      groupId: doc.groupId,
       note: doc.note,
       metadata: doc.metadata ?? {},
       createdAt: doc.createdAt,
@@ -37,6 +38,7 @@ export class TransactionMapper {
 
       relatedEntityId: entity.getRelatedEntityId(),
       relatedEntityType: entity.getRelatedEntityType(),
+      groupId: entity.getGroupId(),
 
       note: entity.getNote(),
 

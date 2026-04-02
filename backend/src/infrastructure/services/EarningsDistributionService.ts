@@ -41,6 +41,7 @@ export class EarningsDistributionService
       platformFeeTax,
       payableAmount,
       discount,
+      groupId,
     } = params;
 
     const platformRevenue = platformFee.add(platformFeeTax);
@@ -49,6 +50,17 @@ export class EarningsDistributionService
     const driverEarnings = totalFare.subtract(platformRevenue);
     const payable = payableAmount ?? totalFare;
 
+    if (await this.transactionRepository.existsByGroupId(groupId as string)) {
+      Logger.warn("Settlement already processed, skipping", {
+        groupId: params.groupId,
+      });
+      return {
+        driverEarnings: 0,
+        platformRevenue: 0,
+        currency: params.totalFare.getCurrency(),
+      };
+    }
+
     await this.recordAuditOnlyTransaction(
       PLATFORM_OWNER_ID,
       WalletOwnerType.PLATFORM,
@@ -56,6 +68,7 @@ export class EarningsDistributionService
       rideId,
       TransactionType.RIDER_PAYMENT_ONLINE,
       `Online payment received from rider for ride: ${rideId}`,
+      groupId,
     );
 
     Logger.info("Distributing ONLINE earnings (coupon-aware)", {
@@ -76,6 +89,7 @@ export class EarningsDistributionService
         rideId,
         TransactionType.COUPON_EXPENSE,
         `Coupon expense for ride: ${rideId}`,
+        groupId,
       );
 
       await this.creditDriverWallet(
@@ -84,6 +98,7 @@ export class EarningsDistributionService
         rideId,
         TransactionType.DRIVER_COUPON_CREDIT,
         `Coupon compensation for ride: ${rideId}`,
+        groupId,
       );
     }
 
@@ -233,6 +248,7 @@ export class EarningsDistributionService
     rideId: string,
     type: TransactionType,
     note: string,
+    groupId?: string,
   ): Promise<void> {
     const wallet = await this.walletRepository.findByOwner(ownerId, ownerType);
     if (!wallet) {
@@ -264,6 +280,7 @@ export class EarningsDistributionService
     rideId: string,
     type: TransactionType = TransactionType.DRIVER_EARNING,
     note?: string,
+    groupId?: string,
   ): Promise<void> {
     let wallet = await this.walletRepository.findByOwner(
       driverId,
@@ -307,6 +324,7 @@ export class EarningsDistributionService
     rideId: string,
     type: TransactionType = TransactionType.PLATFORM_COMMISSION,
     note?: string,
+    groupId?: string,
   ): Promise<void> {
     let wallet = await this.walletRepository.findByOwner(
       PLATFORM_OWNER_ID,
@@ -351,6 +369,7 @@ export class EarningsDistributionService
     rideId: string,
     type: TransactionType,
     note: string,
+    groupId?: string,
   ): Promise<void> {
     const wallet = await this.walletRepository.findByOwner(ownerId, ownerType);
     if (!wallet) return;

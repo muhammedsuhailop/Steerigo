@@ -16,6 +16,7 @@ export interface ITransactionDocument extends Document {
 
   relatedEntityId?: string;
   relatedEntityType?: string;
+  groupId?: string;
 
   note?: string;
 
@@ -69,6 +70,11 @@ const transactionSchema = new Schema<ITransactionDocument>(
 
     relatedEntityType: {
       type: String,
+    },
+
+    groupId: {
+      type: String,
+      index: true,
     },
 
     note: {

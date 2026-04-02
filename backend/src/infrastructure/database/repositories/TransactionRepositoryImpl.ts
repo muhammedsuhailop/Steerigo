@@ -126,4 +126,36 @@ export class TransactionRepositoryImpl implements ITransactionRepository {
       totalPages: Math.ceil(total / filters.limit),
     };
   }
+
+  async findByGroupId(groupId: string): Promise<Transaction[]> {
+    try {
+      const docs = await TransactionModel.find({ groupId })
+        .sort({ createdAt: -1 })
+        .exec();
+
+      return docs.map(TransactionMapper.toDomain);
+    } catch (error) {
+      Logger.error("Error finding transactions by groupId", {
+        groupId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async existsByGroupId(groupId: string): Promise<boolean> {
+    try {
+      const count = await TransactionModel.countDocuments({
+        groupId,
+      }).exec();
+
+      return count > 0;
+    } catch (error) {
+      Logger.error("Error checking groupId existence", {
+        groupId,
+        error,
+      });
+      throw error;
+    }
+  }
 }

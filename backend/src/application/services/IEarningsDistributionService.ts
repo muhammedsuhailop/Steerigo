@@ -8,6 +8,7 @@ export interface DistributeEarningsParams {
   platformFeeTax: Money;
   payableAmount?: Money;
   discount?: Money;
+  groupId?: string;
 }
 
 export interface DistributeCancellationParams {
