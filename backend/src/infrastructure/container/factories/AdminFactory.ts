@@ -38,6 +38,10 @@ import { GetAdminCouponsUseCase } from "@application/use-cases/admin/GetAdminCou
 import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
 import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
 import { GetAdminRatingsUseCase } from "@application/use-cases/admin/GetAdminRatingsUseCase";
+import { GetAdminTransactionsDto } from "@application/dto/admin/GetAdminTransactionsDto";
+import { GetAdminTransactionsResponseDto } from "@application/dto/admin/GetAdminTransactionsResponseDto";
+import { GetAdminTransactionsUseCase } from "@application/use-cases/admin/GetAdminTransactionsUseCase";
+import { AdminTransactionController } from "@interface/controllers/admin/AdminTransactionController";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -106,6 +110,15 @@ export class AdminFactory {
       >(TYPES.GetAdminRatingsUseCase)
       .to(GetAdminRatingsUseCase);
 
+    container
+      .bind<
+        IUseCase<
+          GetAdminTransactionsDto,
+          Promise<Result<GetAdminTransactionsResponseDto>>
+        >
+      >(TYPES.GetAdminTransactionsUseCase)
+      .to(GetAdminTransactionsUseCase);
+
     // Controller bindings
     container
       .bind<AdminUserController>(TYPES.AdminUserController)
@@ -117,5 +130,8 @@ export class AdminFactory {
     container
       .bind<AdminCouponController>(TYPES.AdminCouponController)
       .to(AdminCouponController);
+    container
+      .bind<AdminTransactionController>(TYPES.AdminTransactionController)
+      .to(AdminTransactionController);
   }
 }

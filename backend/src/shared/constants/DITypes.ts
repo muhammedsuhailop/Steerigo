@@ -90,6 +90,7 @@ export const TYPES = {
   EditCouponUseCase: Symbol.for("EditCouponUseCase"),
   GetAdminCouponsUseCase: Symbol.for("GetAdminCouponsUseCase"),
   GetAdminRatingsUseCase: Symbol.for("GetAdminRatingsUseCase"),
+  GetAdminTransactionsUseCase: Symbol.for("GetAdminTransactionsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -196,4 +197,5 @@ export const TYPES = {
   DriverWalletController: Symbol.for("DriverWalletController"),
   AdminCouponController: Symbol.for("AdminCouponController"),
   CouponController: Symbol.for("CouponController"),
+  AdminTransactionController: Symbol.for("AdminTransactionController"),
 };
