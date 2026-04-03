@@ -26,7 +26,7 @@ export const PaymentStatusCard: React.FC<PaymentStatusCardProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <MdPayment className="text-gray-400 text-xl" />
-          <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
             Payment Status
           </h3>
         </div>

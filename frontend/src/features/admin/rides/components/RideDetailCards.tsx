@@ -30,7 +30,7 @@ export const SectionHeader: React.FC<{
 }> = ({ icon, title }) => (
   <div className="flex items-center gap-2 mb-6 pb-2 border-b border-gray-100">
     <span className="text-blue-600 text-xl">{icon}</span>
-    <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">
+    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
       {title}
     </h3>
   </div>

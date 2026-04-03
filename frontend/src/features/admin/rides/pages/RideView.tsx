@@ -76,7 +76,7 @@ export const RideView: React.FC = () => {
           <div className="lg:col-span-7 flex flex-col gap-6 h-full">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[320px] flex flex-col">
               <div className="p-6 flex-1">
-                <SectionHeader icon={<MdMap />} title="Logistics Path" />
+                <SectionHeader icon={<MdMap />} title="Ride Path" />
                 <div className="space-y-10 relative mt-4">
                   <div className="absolute left-[15px] top-[30px] bottom-[30px] w-[2px] border-l-2 border-dashed border-gray-200"></div>
                   <div className="flex gap-4 relative z-10">
