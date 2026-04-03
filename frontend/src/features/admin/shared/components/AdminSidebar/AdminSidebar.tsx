@@ -68,19 +68,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: "GrTransaction",
       path: "/admin/transactions",
     },
-    {
-      id: "tickets",
-      label: "Tickets",
-      icon: "RiHeadphoneLine",
-      path: "/admin/tickets",
-      badge: 12,
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: "RiSettingsLine",
-      path: "/admin/settings",
-    },
   ];
 
   return (
