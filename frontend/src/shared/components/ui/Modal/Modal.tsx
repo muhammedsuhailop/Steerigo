@@ -28,7 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/30 shadow-xl"
       onClick={onClose}
     >
       <div
@@ -49,6 +49,6 @@ export const Modal: React.FC<ModalProps> = ({
         <div className="p-4">{children}</div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };

@@ -42,3 +42,27 @@ export interface GetAdminCouponsResponse {
     pagination: CouponPagination;
   };
 }
+
+export interface CreateCouponRequest {
+  code: string;
+  discountType: CouponDiscountType;
+  discountValue: number | "";
+  maxDiscount?: number | "";
+  minRideAmount?: number | "";
+  usageLimit?: number | "";
+  usagePerUser?: number | "";
+  validFrom: string;
+  validTo: string;
+}
+
+export interface CreateCouponResponse {
+  success: boolean;
+  message: string;
+  data: {
+    coupon: CouponData;
+  };
+}
+
+export type CouponFormErrors = Partial<
+  Record<keyof CreateCouponRequest, string>
+>;

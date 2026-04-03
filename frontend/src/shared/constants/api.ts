@@ -58,6 +58,7 @@ export const API_ENDPOINTS = {
     PAYOUTS: "/admin/payouts",
     TRANSACTIONS: "/admin/transactions",
     RIDES: "/admin/rides",
+    COUPONS:"/admin/coupons",
   },
   FILE: {
     UPLOAD: "/file/upload",

@@ -7,9 +7,11 @@ import { CouponFilters } from "../componenets/CouponFilters";
 import { CouponTable } from "../componenets/CouponTable";
 import { MdAdd, MdArrowBack } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { CreateCouponModal } from "../componenets/CreateCouponModal";
 
 export const CouponManagement: React.FC = () => {
   const navigate = useNavigate();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<AdminCouponFilters>({
     page: 1,
@@ -57,7 +59,10 @@ export const CouponManagement: React.FC = () => {
             />
           </div>
 
-          <button className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+          <button
+            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all w-full sm:w-auto"
+            onClick={() => setIsAddModalOpen(true)}
+          >
             <MdAdd size={18} />
             <span>Add New Coupon</span>
           </button>
@@ -80,6 +85,10 @@ export const CouponManagement: React.FC = () => {
             }
           />
         )}
+        <CreateCouponModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+        />
       </main>
     </AdminLayout>
   );
