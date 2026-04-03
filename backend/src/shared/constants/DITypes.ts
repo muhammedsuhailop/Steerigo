@@ -22,6 +22,7 @@ export const TYPES = {
   RatingRepository: Symbol.for("RatingRepository"),
   CouponRepository: Symbol.for("CouponRepository"),
   CouponUsageRepository: Symbol.for("CouponUsageRepository"),
+  RideRequestGroupRepository: Symbol.for("RideRequestGroupRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),

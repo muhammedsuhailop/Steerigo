@@ -26,6 +26,8 @@ import { AppConstants } from "@shared/constants/AppConstants";
 import { IEventBus } from "@application/services/IEventBus";
 import { RideRequestCreatedEvent } from "@application/events/RideEvents";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
+import { RideRequestGroup } from "@domain/entities/RideRequestGroup";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -37,25 +39,21 @@ export class AutoSearchAndSendRideRequestUseCase
 {
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
-    private driverAvailabilityRepository: IDriverAvailabilityRepository,
-
+    private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: IDriverRepository,
-
+    private readonly driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
-    private userRepository: IUserRepository,
-
+    private readonly userRepository: IUserRepository,
     @inject(TYPES.RideRequestRepository)
-    private rideRequestRepository: IRideRequestRepository,
-
+    private readonly rideRequestRepository: IRideRequestRepository,
     @inject(TYPES.FareCalculationService)
-    private fareCalculationService: IFareCalculationService,
-
+    private readonly fareCalculationService: IFareCalculationService,
     @inject(TYPES.AvailabilityCheckService)
-    private availabilityCheckService: IAvailabilityCheckService,
-
+    private readonly availabilityCheckService: IAvailabilityCheckService,
     @inject(TYPES.EventBus)
-    private eventBus: IEventBus,
+    private readonly eventBus: IEventBus,
+    @inject(TYPES.RideRequestGroupRepository)
+    private readonly rideRequestGroupRepository: IRideRequestGroupRepository,
   ) {}
 
   async execute(
@@ -100,9 +98,6 @@ export class AutoSearchAndSendRideRequestUseCase
           fetchLimit,
         );
 
-      const successfulRequests: SuccessfulRequestInfo[] = [];
-      const failedRequests: FailedRequestInfo[] = [];
-
       const pickup = Location.create({
         latitude: dto.latitude,
         longitude: dto.longitude,
@@ -114,6 +109,41 @@ export class AutoSearchAndSendRideRequestUseCase
         longitude: dto.dropLongitude,
         address: dto.dropAddress,
       });
+
+      const candidateDriverIds = nearbyAvailabilities.map((item) =>
+        item.driver.getDriverId(),
+      );
+
+      if (candidateDriverIds.length === 0) {
+        Logger.info("No nearby candidate drivers found for search session", {
+          riderId: userId,
+        });
+        //can fail - todo
+      } else {
+        const rideRequestGroup = RideRequestGroup.create(
+          dto.requestGroupId,
+          userId,
+          pickup,
+          drop,
+          dto.rideType as RideType,
+          fareBreakdown.getTotalFare().getAmount(),
+          fareBreakdown.getTotalFare().getCurrency(),
+          candidateDriverIds,
+        );
+
+        const savedGroup =
+          await this.rideRequestGroupRepository.save(rideRequestGroup);
+
+        Logger.info("RideRequestGroup created", {
+          requestGroupId: savedGroup.getId(),
+          riderId: savedGroup.getRiderId(),
+          candidateCount: savedGroup.getCandidateDriverIds().length,
+          status: savedGroup.getStatus(),
+        });
+      }
+
+      const successfulRequests: SuccessfulRequestInfo[] = [];
+      const failedRequests: FailedRequestInfo[] = [];
 
       const pendingRequests =
         await this.rideRequestRepository.findPendingByRiderId(userId);
