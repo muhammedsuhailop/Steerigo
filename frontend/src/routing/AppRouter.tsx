@@ -36,6 +36,7 @@ import UserRidesPage from "@/features/user/rides/pages/UserRidesPage";
 import TransactionPage from "@/features/admin/transactions/pages/TransactionsPage";
 import RideManagement from "@/features/admin/rides/pages/RideManagement";
 import { RideView } from "@/features/admin/rides/pages/RideView";
+import CouponManagement from "@/features/admin/coupons/pages/CouponManagement";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -193,6 +194,14 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <RideView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/coupons"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <CouponManagement />
           </ProtectedRoute>
         }
       />
