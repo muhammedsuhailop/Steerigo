@@ -12,15 +12,66 @@ import {
 import { DriverAvailabilityMapper } from "../mappers/DriverAvailabilityMapper";
 import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
 import { Logger } from "@shared/utils/Logger";
-import { SortOrder, Types, FilterQuery } from "mongoose";
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import {
+  SortOrder,
+  Types,
+  FilterQuery,
+  PipelineStage,
+  HydratedDocument,
+} from "mongoose";
 import { AvailabilityException } from "@domain/entities/AvailabilityException";
+import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { RideRequestGroupModel } from "../models/RideRequestGroupModel";
+import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+
+type DriverLookupDocument = {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  licenseNumber: string;
+  licenceCategory: string;
+  licenseIssueDate: Date;
+  licenseExpiryDate: Date;
+  kycStatus: string;
+  status: string;
+  averageRating: number;
+  numberOfRatings: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type NearbyAvailableDriverAggregationResult = {
+  _id: Types.ObjectId;
+  driverId: Types.ObjectId;
+  status: string;
+  currentLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    updatedAt?: Date;
+  };
+  locationPoint: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  recurringSchedule?: IDriverAvailabilityModel["recurringSchedule"];
+  exceptions?: IDriverAvailabilityModel["exceptions"];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  distanceMeters: number;
+  averageRating: number;
+  driverDoc: DriverLookupDocument;
+};
 
 @injectable()
 export class DriverAvailabilityRepositoryImpl
   implements IDriverAvailabilityRepository
 {
   private readonly HAVERSINE_RADIUS_KM = 6371;
+  private readonly AVERAGE_SPEED_KM_PER_HOUR = 30;
 
   // Basic Repository Operations
 
@@ -62,12 +113,12 @@ export class DriverAvailabilityRepositoryImpl
           new: true,
           upsert: true,
           runValidators: true,
-        }
+        },
       ).exec();
 
       if (!savedDoc) {
         throw new Error(
-          `Failed to save driver availability: ${availabilityId}`
+          `Failed to save driver availability: ${availabilityId}`,
         );
       }
 
@@ -166,7 +217,7 @@ export class DriverAvailabilityRepositoryImpl
   async findPaginated(
     options: QueryOptions<DriverAvailability> & {
       filters?: IDriverAvailabilityFilters;
-    }
+    },
   ): Promise<PaginatedResult<DriverAvailability>> {
     const {
       page = 1,
@@ -229,7 +280,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findActiveByDriverId(
-    driverId: string
+    driverId: string,
   ): Promise<DriverAvailability | null> {
     try {
       const driverIdObjectId = new Types.ObjectId(driverId);
@@ -271,14 +322,14 @@ export class DriverAvailabilityRepositoryImpl
   // Exception Management
   async addException(
     driverId: string,
-    exception: AvailabilityException
+    exception: AvailabilityException,
   ): Promise<DriverAvailability | null> {
     try {
       const driverIdObjectId = new Types.ObjectId(driverId);
       const updatedDoc = await DriverAvailabilityModel.findOneAndUpdate(
         { driverId: driverIdObjectId, isActive: true },
         { $push: { exceptions: exception } },
-        { new: true }
+        { new: true },
       ).exec();
 
       if (!updatedDoc) {
@@ -304,14 +355,14 @@ export class DriverAvailabilityRepositoryImpl
 
   async removeException(
     driverId: string,
-    exceptionId: string
+    exceptionId: string,
   ): Promise<DriverAvailability | null> {
     try {
       const driverIdObjectId = new Types.ObjectId(driverId);
       const updatedDoc = await DriverAvailabilityModel.findOneAndUpdate(
         { driverId: driverIdObjectId },
         { $pull: { exceptions: { _id: exceptionId } } },
-        { new: true }
+        { new: true },
       ).exec();
 
       if (!updatedDoc) {
@@ -350,7 +401,7 @@ export class DriverAvailabilityRepositoryImpl
     }
 
     return doc.exceptions.map((exception) =>
-      DriverAvailabilityMapper.mapRawExceptionToDomain(exception)
+      DriverAvailabilityMapper.mapRawExceptionToDomain(exception),
     );
   }
 
@@ -358,7 +409,7 @@ export class DriverAvailabilityRepositoryImpl
 
   async findByStatus(
     status: AvailabilityStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<DriverAvailability[]> {
     try {
       let query = DriverAvailabilityModel.find({ status });
@@ -385,7 +436,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   async findAvailableDrivers(
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<DriverAvailability[]> {
     try {
       let query = DriverAvailabilityModel.find({
@@ -417,7 +468,7 @@ export class DriverAvailabilityRepositoryImpl
     latitude: number,
     longitude: number,
     radiusKm: number,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<DriverAvailability[]> {
     try {
       const docs = await DriverAvailabilityModel.find({
@@ -431,7 +482,7 @@ export class DriverAvailabilityRepositoryImpl
             latitude,
             longitude,
             doc.currentLocation.latitude,
-            doc.currentLocation.longitude
+            doc.currentLocation.longitude,
           );
 
           return { doc, distance };
@@ -451,7 +502,7 @@ export class DriverAvailabilityRepositoryImpl
       }
 
       return filteredDrivers.map((item) =>
-        DriverAvailabilityMapper.toDomain(item.doc)
+        DriverAvailabilityMapper.toDomain(item.doc),
       );
     } catch (error) {
       Logger.error("Error finding drivers near location", {
@@ -470,7 +521,7 @@ export class DriverAvailabilityRepositoryImpl
     searchDate: Date,
     radiusKm: number = 10,
     timeRequiredMinutes: number = 60,
-    limit: number = 20
+    limit: number = 20,
   ): Promise<
     Array<{
       driver: DriverAvailability;
@@ -481,7 +532,7 @@ export class DriverAvailabilityRepositoryImpl
     try {
       const rideStart = new Date(searchDate);
       const rideEnd = new Date(
-        rideStart.getTime() + timeRequiredMinutes * 60 * 1000
+        rideStart.getTime() + timeRequiredMinutes * 60 * 1000,
       );
 
       Logger.debug("findNearbyAvailableDrivers called", {
@@ -493,45 +544,102 @@ export class DriverAvailabilityRepositoryImpl
         timeRequiredMinutes,
       });
 
-      // Get all active available drivers
-      const docs = await DriverAvailabilityModel.find({
-        isActive: true,
-        status: {
-          $in: [AvailabilityStatus.AVAILABLE, AvailabilityStatus.SCHEDULED],
+      const onTheClockDriverIds = await this.getOnTheClockDriverIds();
+
+      const pipeline: PipelineStage[] = [
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [longitude, latitude],
+            },
+            distanceField: "distanceMeters",
+            maxDistance: radiusKm * 1000,
+            spherical: true,
+            query: {
+              isActive: true,
+              status: {
+                $in: [
+                  AvailabilityStatus.AVAILABLE,
+                  AvailabilityStatus.SCHEDULED,
+                ],
+              },
+              ...(onTheClockDriverIds.length > 0
+                ? {
+                    driverId: {
+                      $nin: onTheClockDriverIds,
+                    },
+                  }
+                : {}),
+            },
+          },
         },
-      }).exec();
+        {
+          $lookup: {
+            from: "drivers",
+            localField: "driverId",
+            foreignField: "_id",
+            as: "driverDoc",
+          },
+        },
+        {
+          $unwind: "$driverDoc",
+        },
+        {
+          $match: {
+            "driverDoc.status": DriverStatus.ACTIVE,
+            "driverDoc.kycStatus": KYCStatus.APPROVED,
+          },
+        },
+        {
+          $addFields: {
+            averageRating: {
+              $ifNull: ["$driverDoc.averageRating", 0],
+            },
+          },
+        },
+        {
+          $sort: {
+            distanceMeters: 1,
+            averageRating: -1,
+          },
+        },
+        {
+          $limit: limit,
+        },
+      ];
 
-      Logger.info("Found drivers to check proximity", { count: docs.length });
+      const aggregatedDocs =
+        await DriverAvailabilityModel.aggregate<NearbyAvailableDriverAggregationResult>(
+          pipeline,
+        ).exec();
 
-      // Calculate distances and ETAs
-      const driversWithDetails = docs
+      const rankedDrivers = aggregatedDocs
         .map((doc) => {
-          const distanceKm = this.calculateHaversineDistance(
-            latitude,
-            longitude,
-            doc.currentLocation.latitude,
-            doc.currentLocation.longitude
+          const domainDriver = DriverAvailabilityMapper.toDomain(
+            this.toDriverAvailabilityDocument(doc),
           );
 
-          // Calculate ETA (assuming average speed of 30 km/h)
-          const etaMinutes = Math.ceil((distanceKm / 30) * 60);
+          const distanceKm = this.roundToTwoDecimals(doc.distanceMeters / 1000);
+          const etaMinutes = this.calculateEtaMinutes(distanceKm);
 
           return {
-            driver: DriverAvailabilityMapper.toDomain(doc),
-            distanceKm: Math.round(distanceKm * 100) / 100,
+            driver: domainDriver,
+            distanceKm,
             etaMinutes,
           };
         })
-        .filter((item) => item.distanceKm <= radiusKm)
-        .sort((a, b) => a.distanceKm - b.distanceKm)
-        .slice(0, limit);
+        .filter((item) =>
+          this.isAvailableForRequestedDuration(item.driver, rideStart, rideEnd),
+        );
 
       Logger.info("Filtered nearby available drivers", {
-        totalFound: docs.length,
-        nearbyCount: driversWithDetails.length,
+        totalFound: aggregatedDocs.length,
+        nearbyCount: rankedDrivers.length,
+        excludedOnTheClockCount: onTheClockDriverIds.length,
       });
 
-      return driversWithDetails;
+      return rankedDrivers;
     } catch (error) {
       Logger.error("Error finding nearby available drivers", {
         latitude,
@@ -577,7 +685,7 @@ export class DriverAvailabilityRepositoryImpl
             status: AvailabilityStatus.OFFLINE,
             updatedAt: now,
           },
-        }
+        },
       ).exec();
 
       Logger.info("Deactivated expired availabilities", {
@@ -617,7 +725,7 @@ export class DriverAvailabilityRepositoryImpl
   async findConflictingSchedule(
     driverId: string,
     availableFrom: Date,
-    availableTill: Date
+    availableTill: Date,
   ): Promise<DriverAvailability | null> {
     try {
       const driverIdObjectId = new Types.ObjectId(driverId);
@@ -644,11 +752,65 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
+  private async getOnTheClockDriverIds(): Promise<Types.ObjectId[]> {
+    const groups = await RideRequestGroupModel.find({
+      status: RideRequestGroupStatus.SEARCHING,
+    })
+      .select("candidateDriverIds currentIndex")
+      .lean()
+      .exec();
+
+    const activeDriverIds: Types.ObjectId[] = [];
+
+    for (const group of groups) {
+      const currentDriverId = group.candidateDriverIds[group.currentIndex];
+
+      if (currentDriverId) {
+        activeDriverIds.push(currentDriverId);
+      }
+    }
+
+    return activeDriverIds;
+  }
+
+  private toDriverAvailabilityDocument(
+    doc: NearbyAvailableDriverAggregationResult,
+  ): HydratedDocument<IDriverAvailabilityModel> {
+    return new DriverAvailabilityModel({
+      _id: doc._id,
+      driverId: doc.driverId,
+      status: doc.status,
+      currentLocation: doc.currentLocation,
+      locationPoint: doc.locationPoint,
+      recurringSchedule: doc.recurringSchedule,
+      exceptions: doc.exceptions ?? [],
+      isActive: doc.isActive,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    });
+  }
+
+  private calculateEtaMinutes(distanceKm: number): number {
+    return Math.ceil((distanceKm / this.AVERAGE_SPEED_KM_PER_HOUR) * 60);
+  }
+
+  private roundToTwoDecimals(value: number): number {
+    return Math.round(value * 100) / 100;
+  }
+
+  private isAvailableForRequestedDuration(
+    availability: DriverAvailability,
+    rideStart: Date,
+    rideEnd: Date,
+  ): boolean {
+    return availability.isAvailableForTimeRange(rideStart, rideEnd);
+  }
+
   private calculateHaversineDistance(
     lat1: number,
     lon1: number,
     lat2: number,
-    lon2: number
+    lon2: number,
   ): number {
     const toRad = (value: number): number => (value * Math.PI) / 180;
 
@@ -667,7 +829,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   private buildFilterQuery(
-    filters: IDriverAvailabilityFilters
+    filters: IDriverAvailabilityFilters,
   ): FilterQuery<IDriverAvailabilityModel> {
     const query: FilterQuery<IDriverAvailabilityModel> = {};
 

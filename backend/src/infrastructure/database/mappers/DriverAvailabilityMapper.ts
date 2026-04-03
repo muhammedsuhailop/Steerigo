@@ -3,7 +3,10 @@ import {
   RecurringScheduleData,
 } from "@domain/entities/DriverAvailability";
 import { AvailabilityException } from "@domain/entities/AvailabilityException";
-import { ExceptionDocument, IDriverAvailabilityModel } from "../models/DriverAvailabilityModel";
+import {
+  ExceptionDocument,
+  IDriverAvailabilityModel,
+} from "../models/DriverAvailabilityModel";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
 import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
 import { Location } from "@domain/value-objects/Location";
@@ -20,13 +23,13 @@ export class DriverAvailabilityMapper {
 
     const timeSlots =
       raw.recurringSchedule?.dailyRecurrence.timeSlots.map((slot) =>
-        TimeSlot.create(slot.startTime, slot.endTime)
+        TimeSlot.create(slot.startTime, slot.endTime),
       ) || [];
 
     const excludedTimeSlots = raw.recurringSchedule?.dailyRecurrence
       .excludedTimeSlots
       ? raw.recurringSchedule.dailyRecurrence.excludedTimeSlots.map((slot) =>
-          TimeSlot.create(slot.startTime, slot.endTime)
+          TimeSlot.create(slot.startTime, slot.endTime),
         )
       : undefined;
 
@@ -51,7 +54,7 @@ export class DriverAvailabilityMapper {
         startTime: new Date(exception.startTime),
         endTime: new Date(exception.endTime),
         createdAt: new Date(exception.createdAt),
-      })
+      }),
     );
 
     return DriverAvailability.fromData({
@@ -68,21 +71,25 @@ export class DriverAvailabilityMapper {
   }
 
   static toPersistence(
-    availability: DriverAvailability
+    availability: DriverAvailability,
   ): Partial<IDriverAvailabilityModel> {
     const location = availability.getCurrentLocation();
     const coordinates = location.getCoordinates();
     const recurringSchedule = availability.getRecurringSchedule();
 
     const persistenceData: Partial<IDriverAvailabilityModel> = {
-      id: availability.getId() as unknown as Types.ObjectId,
+      _id: new Types.ObjectId(availability.getId()),
       driverId: new Types.ObjectId(availability.getDriverId()),
-      status: availability.getStatus() as unknown as string,
+      status: availability.getStatus(),
       currentLocation: {
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
         address: coordinates.address,
         updatedAt: new Date(),
+      },
+      locationPoint: {
+        type: "Point",
+        coordinates: [coordinates.longitude, coordinates.latitude],
       },
       exceptions: availability.getExceptions().map((exception) => ({
         id: exception.id,
@@ -104,28 +111,28 @@ export class DriverAvailabilityMapper {
             (slot) => ({
               startTime: slot.getStartTime(),
               endTime: slot.getEndTime(),
-            })
+            }),
           ),
           excludedTimeSlots:
             recurringSchedule.dailyRecurrence.excludedTimeSlots?.map(
               (slot) => ({
                 startTime: slot.getStartTime(),
                 endTime: slot.getEndTime(),
-              })
+              }),
             ),
         },
         validity: recurringSchedule.validity,
         notes: recurringSchedule.notes,
       };
     } else {
-      persistenceData.recurringSchedule = null as unknown as undefined;
+      persistenceData.recurringSchedule = null as never;
     }
 
     return persistenceData;
   }
 
   static mapRawExceptionToDomain(
-    rawException: ExceptionDocument
+    rawException: ExceptionDocument,
   ): AvailabilityException {
     return {
       id: rawException.id,
@@ -137,4 +144,3 @@ export class DriverAvailabilityMapper {
     };
   }
 }
-
