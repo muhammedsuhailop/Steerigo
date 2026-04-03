@@ -5,15 +5,11 @@ import {
   MdDirectionsCar,
   MdPerson,
   MdMap,
-  MdHistory,
   MdPayments,
-  MdInfoOutline,
   MdLocalOffer,
-  MdAccessTime,
 } from "react-icons/md";
 import { useGetAdminRideByIdQuery } from "../services/adminRideApi";
 import { AdminSidebar, AdminTopbar } from "@/features/admin/shared/components";
-import { Button } from "@/shared/components/ui";
 import { Formatters } from "@/shared/components/ui/AdminTable/Formatters";
 import {
   StatusBadge,
@@ -22,6 +18,7 @@ import {
 } from "../components/RideDetailCards";
 import { RideTimeline } from "../components/RideTimeline";
 import { PaymentStatusCard } from "../components/PaymentStatusCard";
+import { RideRatingCard } from "../components/RideRatingCard";
 
 export const RideView: React.FC = () => {
   const { rideId } = useParams<{ rideId: string }>();
@@ -32,12 +29,19 @@ export const RideView: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
+      <div className="flex h-screen items-center justify-center bg-[#f8f9fc]">
+        <div className="animate-pulse font-black text-gray-400">
+          Loading Ride Intelligence...
+        </div>
       </div>
     );
+
   if (!data?.data)
-    return <div className="p-10 text-center">Ride not found.</div>;
+    return (
+      <div className="p-10 text-center font-bold text-red-500">
+        Ride data context not found.
+      </div>
+    );
 
   const { ride, rider } = data.data;
 
@@ -53,102 +57,78 @@ export const RideView: React.FC = () => {
         style={{ marginLeft: sidebarCollapsed ? "64px" : "256px" }}
       >
         <AdminTopbar
-          title="Ride Details"
+          title="Ride Analysis"
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
 
-        <main className="p-4 lg:p-8 space-y-6">
-          {/* Top Header Bar */}
+        <main className="mx-auto max-w-[1440px] p-4 lg:p-8 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-white rounded-full border border-transparent hover:border-gray-200 transition-all"
+                className="p-2 hover:bg-white rounded-full border border-transparent hover:border-gray-200 transition-all shadow-sm"
               >
                 <MdArrowBack className="text-xl text-gray-600" />
               </button>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-black text-gray-900">
+                  <h1 className="text-2xl font-black text-gray-900 tracking-tight">
                     {ride.rideId}
                   </h1>
                   <StatusBadge status={ride.status} />
                 </div>
-                <p className="text-sm text-gray-500">
-                  Created on{" "}
+                <p className="text-sm font-medium text-gray-400">
+                  Logged on{" "}
                   {Formatters.formatDate(ride.createdAt, { includeTime: true })}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8 space-y-6">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <SectionHeader icon={<MdPerson />} title="Rider Info" />
-                <div className="flex items-center gap-4">
-                  <img
-                    src={
-                      rider.profilePicture ||
-                      "https://ui-avatars.com/api/?name=" + rider.name
-                    }
-                    className="h-14 w-14 rounded-2xl object-cover border-2 border-white shadow-md"
-                    alt="profile"
-                  />
-                  <div>
-                    <h4 className="font-black text-gray-900">{rider.name}</h4>
-                    <p className="text-xs text-gray-500 font-medium">
-                      {rider.email}
-                    </p>
-                    <p className="text-xs text-blue-600 font-bold mt-1">
-                      {rider.phoneNumber}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <SectionHeader icon={<MdMap />} title="Trip Route" />
-
-                  <div className="grid md:grid-cols-2 gap-8 relative">
-                    <div className="hidden md:block absolute left-[15px] top-[45px] bottom-[45px] w-[2px] bg-dashed border-l-2 border-dashed border-gray-200"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div className="lg:col-span-7 flex flex-col gap-6 h-full">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[320px] flex flex-col">
+                <div className="p-6 flex-1">
+                  <SectionHeader icon={<MdMap />} title="Logistics Path" />
+                  <div className="space-y-10 relative mt-4">
+                    <div className="absolute left-[15px] top-[30px] bottom-[30px] w-[2px] border-l-2 border-dashed border-gray-200"></div>
 
                     <div className="flex gap-4 relative z-10">
-                      <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-green-100">
+                      <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0 font-black shadow-lg shadow-green-100">
                         A
                       </div>
                       <DataItem
-                        label="Pickup Point"
+                        label="Pickup Location"
                         value={ride.pickup.address}
-                        subValue={`Lat: ${ride.pickup.latitude}, Lng: ${ride.pickup.longitude}`}
+                        subValue={`Lat: ${ride.pickup.latitude.toFixed(4)}, Lng: ${ride.pickup.longitude.toFixed(4)}`}
                       />
                     </div>
 
                     <div className="flex gap-4 relative z-10">
-                      <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-100">
+                      <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center text-white shrink-0 font-black shadow-lg shadow-red-100">
                         B
                       </div>
                       <DataItem
-                        label="Drop Point"
+                        label="Destination"
                         value={ride.drop.address}
-                        subValue={`Lat: ${ride.drop.latitude}, Lng: ${ride.drop.longitude}`}
+                        subValue={`Lat: ${ride.drop.latitude.toFixed(4)}, Lng: ${ride.drop.longitude.toFixed(4)}`}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-6 py-3 flex gap-6 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-xs font-bold text-gray-500">
-                    <MdDirectionsCar /> {ride.rideType}
+                <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest">
+                    <MdDirectionsCar className="text-blue-500" />{" "}
+                    {ride.rideType}
+                  </div>
+                  <div className="text-[10px] font-bold text-gray-300 uppercase">
+                    System Verified Route
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <SectionHeader
-                  icon={<MdPayments />}
-                  title="Payment Breakdown"
-                />
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 min-h-[280px] flex-1">
+                <SectionHeader icon={<MdPayments />} title="Financial Audit" />
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                   <DataItem
                     label="Base Fare"
@@ -165,17 +145,17 @@ export const RideView: React.FC = () => {
                     )}
                   />
                   <DataItem
-                    label="Tax (GST)"
+                    label="Tax Component"
                     value={Formatters.formatCurrency(
                       ride.fare.tax.total.amount,
                       ride.fare.tax.total.currency,
                     )}
                   />
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 shadow-inner">
                     <DataItem
-                      label="Total Payable"
+                      label="Final Payable"
                       value={
-                        <span className="text-blue-700 text-lg">
+                        <span className="text-blue-700 text-xl font-black">
                           {Formatters.formatCurrency(
                             ride.fare.payableAmount,
                             ride.fare.currency,
@@ -187,19 +167,21 @@ export const RideView: React.FC = () => {
                 </div>
 
                 {ride.couponDetails && (
-                  <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <MdLocalOffer className="text-orange-500 text-xl" />
+                  <div className="flex items-center justify-between p-5 bg-orange-50 border border-orange-100 rounded-2xl">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <MdLocalOffer className="text-orange-500 text-xl" />
+                      </div>
                       <div>
-                        <p className="text-sm font-black text-orange-900">
-                          Promo Applied: {ride.couponDetails.couponCode}
+                        <p className="text-sm font-black text-orange-900 uppercase">
+                          Code: {ride.couponDetails.couponCode}
                         </p>
-                        <p className="text-xs text-orange-700">
-                          {ride.couponDetails.discountType} Discount
+                        <p className="text-[10px] font-bold text-orange-700 uppercase">
+                          {ride.couponDetails.discountType} Reduction applied
                         </p>
                       </div>
                     </div>
-                    <span className="text-lg font-bold text-orange-600">
+                    <span className="text-xl font-black text-orange-600">
                       -
                       {Formatters.formatCurrency(
                         ride.couponDetails.discountAmount,
@@ -209,9 +191,38 @@ export const RideView: React.FC = () => {
                   </div>
                 )}
               </div>
+              <RideRatingCard rating={ride.rating} />
             </div>
 
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-5 flex flex-col gap-6 h-full">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-full">
+                <SectionHeader icon={<MdPerson />} title="Participant" />
+                <div className="flex items-center gap-5 ">
+                  <div className="relative">
+                    <img
+                      src={
+                        rider.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${rider.name}&background=6366f1&color=fff&bold=true`
+                      }
+                      className="h-16 w-16 rounded-2xl object-cover border-4 border-white shadow-xl"
+                      alt="rider-avatar"
+                    />
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 border-2 border-white rounded-full"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-black text-gray-900 text-lg truncate">
+                      {rider.name}
+                    </h4>
+                    <p className="text-xs text-gray-400 font-medium truncate mb-2">
+                      {rider.email}
+                    </p>
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-full border border-blue-100">
+                      {rider.phoneNumber}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <PaymentStatusCard
                 status={ride.paymentStatus}
                 amount={ride.fare.payableAmount}

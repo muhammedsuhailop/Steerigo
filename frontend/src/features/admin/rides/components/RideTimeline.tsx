@@ -22,7 +22,7 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
   isError,
   isLast,
 }) => (
-  <div className="flex gap-4 min-h-[70px]">
+  <div className="flex gap-4 min-h-[70px] flex-1">
     <div className="flex flex-col items-center">
       <div
         className={`z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-white ${

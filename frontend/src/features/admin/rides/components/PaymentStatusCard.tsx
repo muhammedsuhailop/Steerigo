@@ -22,7 +22,7 @@ export const PaymentStatusCard: React.FC<PaymentStatusCardProps> = ({
   const isFailed = status === "FAILED";
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex-1">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <MdPayment className="text-gray-400 text-xl" />

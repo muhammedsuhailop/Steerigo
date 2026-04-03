@@ -1,3 +1,8 @@
+export enum ReviewType {
+  USER_REVIEW = "User Review",
+  DRIVER_REVIEW = "Driver Review",
+}
+
 export interface Money {
   amount: number;
   currency: string;
@@ -15,6 +20,20 @@ export interface LocationDetails {
   latitude: number;
   longitude: number;
   address?: string;
+}
+
+export interface RatingDetails {
+  overallRating: number;
+
+  reviewType: ReviewType;
+
+  criteria: Record<string, number>;
+
+  review?: string;
+
+  reviewerName?: string;
+
+  createdAt: string;
 }
 
 export interface FareDetails {
@@ -59,6 +78,7 @@ export interface RideDetails {
     discountType: string;
     discountAmount: number;
   };
+  rating?: RatingDetails;
   createdAt: string;
   updatedAt: string;
 }
