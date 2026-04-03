@@ -9,7 +9,7 @@ import { MobileMenu } from "./MobileMenu";
 import { NavigateDropdown } from "./NavigateDropdown";
 import { ProfileDropdown } from "./ProfileDropdown";
 import type { HeaderProps } from "./Header.types";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { FaRegBell } from "react-icons/fa6";
 import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";

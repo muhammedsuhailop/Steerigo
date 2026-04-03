@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BaseError, ErrorSeverity } from "./ErrorHandling.types";
 import { clearErrorByIndex } from "./errorSlice";
-import type { RootState } from "../../../../app/store";
+import type { RootState } from "../../../../app/store/store";
 import {
   FiCheckCircle,
   FiInfo,

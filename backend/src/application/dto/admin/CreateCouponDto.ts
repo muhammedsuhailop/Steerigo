@@ -93,21 +93,21 @@ export class CreateCouponDto {
       );
     }
 
-    if (this.maxDiscount !== undefined && this.maxDiscount <= 0) {
+    if (this.maxDiscount !== undefined && this.maxDiscount < 0) {
       throw CouponErrors.invalidCouponData(
-        "Max discount must be greater than 0",
+        "Max discount must be a positive value",
       );
     }
 
-    if (this.minRideAmount !== undefined && this.minRideAmount <= 0) {
+    if (this.minRideAmount !== undefined && this.minRideAmount < 0) {
       throw CouponErrors.invalidCouponData(
-        "Min ride amount must be greater than 0",
+        "Min ride amount must be a positive value",
       );
     }
 
-    if (this.usageLimit !== undefined && this.usageLimit <= 0) {
+    if (this.usageLimit !== undefined && this.usageLimit < 0) {
       throw CouponErrors.invalidCouponData(
-        "Usage limit must be greater than 0",
+        "Usage limit must be a positive value",
       );
     }
 

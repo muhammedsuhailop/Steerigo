@@ -17,6 +17,10 @@ export const ADMIN_MESSAGES = {
     APPROVED: "Payout approved and processed successfully.",
     REJECTED: "Payout request rejected.",
   },
+
+  WALLET: {
+    FETCHED: "Admin wallet fetched successfully",
+  },
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {

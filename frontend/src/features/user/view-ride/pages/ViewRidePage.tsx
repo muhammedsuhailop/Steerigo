@@ -23,7 +23,7 @@ import CouponSection from "../components/CouponSection";
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const { data, isLoading, isFetching, error } = useGetRideDetailsQuery(
     id as string,

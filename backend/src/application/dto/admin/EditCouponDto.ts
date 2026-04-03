@@ -122,7 +122,7 @@ export class EditCouponDto {
     if (
       this.minRideAmount !== undefined &&
       this.minRideAmount !== null &&
-      this.minRideAmount <= 0
+      this.minRideAmount < 0
     ) {
       throw CouponErrors.invalidCouponData(
         "Min ride amount must be greater than 0",
@@ -132,7 +132,7 @@ export class EditCouponDto {
     if (
       this.usageLimit !== undefined &&
       this.usageLimit !== null &&
-      this.usageLimit <= 0
+      this.usageLimit < 0
     ) {
       throw CouponErrors.invalidCouponData(
         "Usage limit must be greater than 0",
@@ -145,7 +145,7 @@ export class EditCouponDto {
       this.usagePerUser <= 0
     ) {
       throw CouponErrors.invalidCouponData(
-        "Usage per user must be greater than 0",
+        "Usage per user must be a positive value",
       );
     }
 

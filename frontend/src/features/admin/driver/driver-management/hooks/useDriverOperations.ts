@@ -11,7 +11,7 @@ import {
   useGetAllDriversQuery,
   useUpdateDriverStatusMutation,
 } from "@/features/admin/shared/services/adminApi";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/app/store/store";
 
 export type DriverAction =
   | "activate"

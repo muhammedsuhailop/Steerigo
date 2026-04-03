@@ -7,7 +7,7 @@ import {
   resetFilters,
 } from "@/features/admin/shared/store/adminUsersSlice";
 import { useUpdateUserStatusMutation } from "@/features/admin/shared/services/adminApi";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/app/store/store";
 import type {
   UserAction,
   UserFilters,

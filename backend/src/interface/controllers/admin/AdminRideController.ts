@@ -10,6 +10,8 @@ import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
 import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
+import { GetAdminRideByIdDto } from "@application/dto/admin/GetAdminRideByIdDto";
+import { GetAdminRideByIdResponseDto } from "@application/dto/admin/GetAdminRideByIdResponseDto";
 
 @injectable()
 export class AdminRideController {
@@ -19,11 +21,15 @@ export class AdminRideController {
       GetAdminRidesDto,
       Promise<Result<GetAdminRidesResponseDto>>
     >,
-
     @inject(TYPES.GetAdminRatingsUseCase)
     private readonly getAdminRatingsUseCase: IUseCase<
       GetAdminRatingsDto,
       Promise<Result<GetAdminRatingsResponseDto>>
+    >,
+    @inject(TYPES.GetAdminRideByIdUseCase)
+    private readonly getAdminRideByIdUseCase: IUseCase<
+      GetAdminRideByIdDto,
+      Promise<Result<GetAdminRideByIdResponseDto>>
     >,
   ) {}
 
@@ -88,6 +94,45 @@ export class AdminRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "admin_get_ratings",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async getRideById(req: Request, res: Response): Promise<void> {
+    try {
+      const rideId = req.params.rideId;
+
+      Logger.info("Admin get ride by ID received", { rideId });
+
+      const dto = GetAdminRideByIdDto.fromRequest({ rideId });
+      const result = await this.getAdminRideByIdUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        Logger.warn("Admin get ride by ID failed", {
+          rideId,
+          error: error?.message,
+        });
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "admin_get_ride_by_id",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json(result.getValue());
+    } catch (error) {
+      Logger.error("Admin get ride by ID controller error", {
+        rideId: req.params.rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "admin_get_ride_by_id",
       );
       res.status(statusCode).json(response);
     }

@@ -1,7 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { BaseError, ErrorType, ErrorSeverity } from "./ErrorHandling.types";
 import { errorHandler } from "../../../utils/errorHandler";
-import { store } from "../../../../app/store";
+import { store } from "../../../../app/store/store";
 import { addError } from "./errorSlice";
 
 interface Props {

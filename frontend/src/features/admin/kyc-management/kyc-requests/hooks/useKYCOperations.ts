@@ -11,7 +11,7 @@ import {
   useUpdateKYCStatusMutation,
   useGetKYCByIdQuery,
 } from "@/features/admin/shared/services/adminApi";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/app/store/store";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 type KYCAction = "Approved" | "Rejected" | "Expired";

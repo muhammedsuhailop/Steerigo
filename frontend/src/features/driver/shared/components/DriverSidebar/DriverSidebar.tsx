@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Logo } from "@/shared/components/ui";
 import type { DriverSidebarProps, SidebarItem } from "./DriverSidebar.types";
-import type { RootState } from "@/app/store";
+import type { RootState } from "@/app/store/store";
 import { SidebarItem as Item } from "./SidebarItem";
 import {
   RiUserLine,
