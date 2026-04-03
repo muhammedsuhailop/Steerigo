@@ -3,6 +3,8 @@ import {
   AdminCouponFilters,
   CreateCouponRequest,
   CreateCouponResponse,
+  EditCouponRequestBody,
+  EditCouponResponse,
   GetAdminCouponsResponse,
 } from "../types/coupon.types";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
@@ -32,7 +34,23 @@ export const adminCouponApi = createApi({
       }),
       invalidatesTags: ["Coupons"],
     }),
+    updateCoupon: builder.mutation<
+      EditCouponResponse,
+      { couponId: string; body: EditCouponRequestBody }
+    >({
+      query: ({ couponId, body }) => ({
+        url: `${API_ENDPOINTS.ADMIN.COUPONS}/${couponId}`,
+        method: "PATCH",
+        data: body,
+        skipErrorHandling: true,
+      }),
+      invalidatesTags: ["Coupons"],
+    }),
   }),
 });
 
-export const { useGetAdminCouponsQuery, useAddCouponMutation } = adminCouponApi;
+export const {
+  useGetAdminCouponsQuery,
+  useAddCouponMutation,
+  useUpdateCouponMutation,
+} = adminCouponApi;

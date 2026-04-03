@@ -1,17 +1,19 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AdminLayout } from "@/features/admin/shared/components/AdminLayout/AdminLayout";
 import { useGetAdminCouponsQuery } from "../services/adminCouponApi";
-import { AdminCouponFilters } from "../types/coupon.types";
+import { AdminCouponFilters, CouponData } from "../types/coupon.types";
 import { TablePagination } from "@/shared/components/ui/Table";
 import { CouponFilters } from "../componenets/CouponFilters";
 import { CouponTable } from "../componenets/CouponTable";
 import { MdAdd, MdArrowBack } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { CreateCouponModal } from "../componenets/CreateCouponModal";
+import { EditCouponModal } from "../componenets/EditCouponModal";
 
 export const CouponManagement: React.FC = () => {
   const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<CouponData | null>(null);
 
   const [filters, setFilters] = useState<AdminCouponFilters>({
     page: 1,
@@ -37,6 +39,15 @@ export const CouponManagement: React.FC = () => {
       isActive: undefined,
     });
   };
+
+  const couponsWithId = useMemo(() => {
+    return (
+      data?.data.coupons.map((coupon) => ({
+        ...coupon,
+        id: coupon.couponId,
+      })) || []
+    );
+  }, [data]);
 
   return (
     <AdminLayout title="Coupon Management">
@@ -69,8 +80,9 @@ export const CouponManagement: React.FC = () => {
         </header>
 
         <CouponTable
-          coupons={data?.data.coupons || []}
+          coupons={couponsWithId || []}
           loading={isLoading || isFetching}
+          onEdit={(coupon) => setEditingCoupon(coupon)}
         />
 
         {data?.data.pagination && (
@@ -88,6 +100,11 @@ export const CouponManagement: React.FC = () => {
         <CreateCouponModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
+        />
+        <EditCouponModal
+          isOpen={!!editingCoupon}
+          onClose={() => setEditingCoupon(null)}
+          coupon={editingCoupon}
         />
       </main>
     </AdminLayout>

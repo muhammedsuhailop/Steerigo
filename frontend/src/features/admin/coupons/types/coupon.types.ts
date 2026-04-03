@@ -1,4 +1,5 @@
 export type CouponDiscountType = "PERCENTAGE" | "FIXED";
+export type FormErrors<T> = Partial<Record<keyof T, string>>;
 
 export interface CouponData {
   couponId: string;
@@ -66,3 +67,22 @@ export interface CreateCouponResponse {
 export type CouponFormErrors = Partial<
   Record<keyof CreateCouponRequest, string>
 >;
+export interface EditCouponRequestBody {
+  discountType?: CouponDiscountType;
+  discountValue?: number;
+  maxDiscount?: number | null;
+  minRideAmount?: number | null;
+  usageLimit?: number | null;
+  usagePerUser?: number | null;
+  validFrom?: string | null;
+  validTo?: string | null;
+  isActive?: boolean;
+}
+
+export interface EditCouponResponse {
+  success: boolean;
+  message: string;
+  data: {
+    coupon: CouponData;
+  };
+}

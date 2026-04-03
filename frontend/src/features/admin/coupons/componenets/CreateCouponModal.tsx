@@ -34,7 +34,13 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const newErrors: CouponFormErrors = {};
     if (!formData.code.trim()) newErrors.code = "Coupon code is required";
     if (!formData.discountValue || formData.discountValue <= 0)
-      newErrors.discountValue = "Value must be greater than 0";
+      newErrors.discountValue = "Discount value must be greater than 0";
+    if (!formData.maxDiscount || formData.maxDiscount <= 0)
+      newErrors.maxDiscount = "max discount must be greater than 0";
+    if (!formData.minRideAmount || formData.minRideAmount <= 0)
+      newErrors.minRideAmount = "min fare must be greater than 0";
+    if (!formData.usagePerUser || formData.usagePerUser <= 0)
+      newErrors.usagePerUser = "Usage limit must be greater than 0";
     if (!formData.validFrom) newErrors.validFrom = "Start date is required";
     if (!formData.validTo) newErrors.validTo = "Expiry date is required";
 
@@ -122,7 +128,7 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 border-t pt-4">
           <Input
             label="Discount Value"
             type="number"
@@ -140,6 +146,7 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
             label="Max Discount (Cap)"
             type="number"
             value={formData.maxDiscount}
+            error={errors.maxDiscount}
             placeholder="max discount"
             onChange={(e) =>
               handleChange(
@@ -148,10 +155,14 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
               )
             }
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 border-t pt-4">
           <Input
             label="Min Ride Fare"
             type="number"
             value={formData.minRideAmount}
+            error={errors.minRideAmount}
             placeholder="min fare amount"
             onChange={(e) =>
               handleChange(
@@ -160,25 +171,11 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
               )
             }
           />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 border-t pt-4">
-          <Input
-            label="Usage Limit (Total)"
-            type="number"
-            value={formData.usageLimit}
-            placeholder="total limit"
-            onChange={(e) =>
-              handleChange(
-                "usageLimit",
-                e.target.value === "" ? "" : Number(e.target.value),
-              )
-            }
-          />
           <Input
             label="Usage Per User"
             type="number"
             value={formData.usagePerUser}
+            error={errors.usagePerUser}
             onChange={(e) =>
               handleChange(
                 "usagePerUser",
@@ -191,7 +188,7 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className="grid grid-cols-2 gap-4 border-t pt-4">
           <Input
             label="Valid From"
-            type="datetime-local"
+            type="date"
             value={formData.validFrom.split(".")[0]}
             error={errors.validFrom}
             onChange={(e) =>
@@ -200,7 +197,7 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
           />
           <Input
             label="Valid To"
-            type="datetime-local"
+            type="date"
             value={formData.validTo.split(".")[0]}
             error={errors.validTo}
             onChange={(e) =>

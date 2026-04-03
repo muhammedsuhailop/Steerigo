@@ -6,15 +6,19 @@ import {
   AdminTable,
   createColumnBuilder,
 } from "@/shared/components/ui/AdminTable/AdminTable";
+import { AdminTableRow } from "@/shared/components/ui/AdminTable/AdminTable.types";
+
+interface CouponRow extends CouponData, AdminTableRow {}
 
 interface Props {
-  coupons: CouponData[];
+  coupons: CouponRow[];
+  onEdit: (coupon: CouponData) => void;
   loading: boolean;
 }
 
-export const CouponTable: React.FC<Props> = ({ coupons, loading }) => {
+export const CouponTable: React.FC<Props> = ({ coupons, loading, onEdit }) => {
   const columns = useMemo(() => {
-    return createColumnBuilder()
+    return createColumnBuilder<CouponRow>()
       .addTextColumn("code", "Code", { width: "150px" })
       .addCustomColumn(
         "discount",
@@ -41,12 +45,7 @@ export const CouponTable: React.FC<Props> = ({ coupons, loading }) => {
         (_, row) => (
           <div className="flex flex-col">
             <span className="font-semibold text-gray-700 text-sm">
-              {row.usagePerUser ? `${row.usagePerUser} per User` : ""}
-            </span>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-              {row.usageLimit
-                ? `${row.usageLimit} Max Redemptions`
-                : "No Overall Limit"}
+              {row.usagePerUser ? `${row.usagePerUser} per User` : "∞ per User"}
             </span>
           </div>
         ),
@@ -92,8 +91,7 @@ export const CouponTable: React.FC<Props> = ({ coupons, loading }) => {
             title={`Edit ${row.code}`}
             onClick={(e) => {
               e.stopPropagation();
-              console.log("Edit coupon:", row.couponId);
-              // todo
+              onEdit(row);
             }}
           >
             <span>Edit</span>
@@ -103,7 +101,7 @@ export const CouponTable: React.FC<Props> = ({ coupons, loading }) => {
         { width: "120px" },
       )
       .build();
-  }, []);
+  }, [onEdit]);
 
   return (
     <AdminTable
