@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { useGetAdminTransactionsQuery } from "../services/adminTransactionApi";
 import { TransactionTable } from "../components/TransactionTable";
 import { TablePagination } from "@/shared/components/ui/Table";
-import { AdminSidebar, AdminTopbar } from "@/features/admin/shared/components";
 import { AdminTransactionFilters } from "../types/transaction.types";
 import { TransactionFilters } from "../components/TransactionFilters";
+import { AdminLayout } from "../../shared/components/AdminLayout/AdminLayout";
 
 export const TransactionsPage: React.FC = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
+  // Data Fetching and Filtering Logic
   const [filters, setFilters] = useState<AdminTransactionFilters>({
     page: 1,
     limit: 20,
@@ -47,47 +46,32 @@ export const TransactionsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AdminSidebar
-        isCollapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
-
-      <div
-        className="flex-1 flex flex-col transition-all duration-300"
-        style={{ marginLeft: sidebarCollapsed ? "64px" : "256px" }}
-      >
-        <AdminTopbar
-          title="Transactions"
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+    <AdminLayout title="Transactions">
+      <main className="p-6 space-y-6">
+        <TransactionFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onResetFilters={handleResetFilters}
+          loading={isLoading || isFetching}
         />
 
-        <main className="p-6 space-y-6">
-          <TransactionFilters
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onResetFilters={handleResetFilters}
-            loading={isLoading || isFetching}
-          />
+        <TransactionTable
+          transactions={data?.data.transactions || []}
+          loading={isLoading || isFetching}
+        />
 
-          <TransactionTable
-            transactions={data?.data.transactions || []}
-            loading={isLoading || isFetching}
+        {data?.data.pagination && (
+          <TablePagination
+            currentPage={data.data.pagination.page}
+            totalPages={data.data.pagination.totalPages}
+            totalItems={data.data.pagination.total}
+            pageSize={data.data.pagination.limit}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handleLimitChange}
           />
-
-          {data?.data.pagination && (
-            <TablePagination
-              currentPage={data.data.pagination.page}
-              totalPages={data.data.pagination.totalPages}
-              totalItems={data.data.pagination.total}
-              pageSize={data.data.pagination.limit}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handleLimitChange}
-            />
-          )}
-        </main>
-      </div>
-    </div>
+        )}
+      </main>
+    </AdminLayout>
   );
 };
 

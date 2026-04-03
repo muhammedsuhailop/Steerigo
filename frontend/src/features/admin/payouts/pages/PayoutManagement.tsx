@@ -7,16 +7,15 @@ import {
 import { PayoutTable } from "../components/PayoutTable";
 import { TablePagination } from "@/shared/components/ui/Table";
 import { AdminPayoutFilters } from "../types/payout.types";
-import { AdminSidebar, AdminTopbar } from "@/features/admin/shared/components";
 import ApprovePayoutModal from "../components/ApprovePayoutModal";
 import RejectPayoutModal from "../components/RejectPayoutModal";
+import { AdminLayout } from "../../shared/components/AdminLayout/AdminLayout";
 
 export const PayoutManagement: React.FC = () => {
   const [filters, setFilters] = useState<AdminPayoutFilters>({
     page: 1,
     limit: 10,
   });
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
@@ -25,16 +24,8 @@ export const PayoutManagement: React.FC = () => {
   const [approvePayout] = useApprovePayoutMutation();
   const [rejectPayout] = useRejectPayoutMutation();
 
-  const handleApprove = (id: string) => {
-    setApproveId(id);
-  };
-  const handleReject = (id: string) => {
-    setRejectId(id);
-  };
-
   const confirmApprove = async () => {
     if (!approveId) return;
-
     setActionLoadingId(approveId);
     try {
       await approvePayout(approveId).unwrap();
@@ -46,7 +37,6 @@ export const PayoutManagement: React.FC = () => {
 
   const submitReject = async (reason: string) => {
     if (!rejectId) return;
-
     setActionLoadingId(rejectId);
     try {
       await rejectPayout({ payoutId: rejectId, reason }).unwrap();
@@ -64,65 +54,46 @@ export const PayoutManagement: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AdminSidebar
-        isCollapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+    <AdminLayout title="Payout Management">
+      <main className="p-6 space-y-6">
+        <header>
+          <h1 className="text-2xl font-black text-gray-900">Payout Requests</h1>
+          <p className="text-sm text-gray-500">
+            Review and process driver withdrawal requests
+          </p>
+        </header>
 
-      <div
-        className="flex-1 flex flex-col transition-all duration-300"
-        style={{ marginLeft: sidebarCollapsed ? "64px" : "256px" }}
-      >
-        <AdminTopbar
-          title="Admin - Payout Requests"
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+        <PayoutTable
+          payouts={data?.data.payouts || []}
+          loading={isLoading || isFetching}
+          onApprove={(id) => setApproveId(id)}
+          onReject={(id) => setRejectId(id)}
+          actionLoading={actionLoadingId}
         />
 
-        <main className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-black text-gray-900">
-                Payout Requests
-              </h1>
-              <p className="text-sm text-gray-500">
-                Review and process driver withdrawal requests
-              </p>
-            </div>
-          </div>
+        <TablePagination
+          {...pagination}
+          onPageChange={(page) => setFilters({ ...filters, page })}
+          onPageSizeChange={(limit) =>
+            setFilters({ ...filters, limit, page: 1 })
+          }
+        />
 
-          <PayoutTable
-            payouts={data?.data.payouts || []}
-            loading={isLoading || isFetching}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            actionLoading={actionLoadingId}
-          />
+        <ApprovePayoutModal
+          isOpen={!!approveId}
+          onClose={() => setApproveId(null)}
+          onConfirm={confirmApprove}
+          loading={actionLoadingId === approveId}
+        />
 
-          <TablePagination
-            {...pagination}
-            onPageChange={(page) => setFilters({ ...filters, page })}
-            onPageSizeChange={(limit) =>
-              setFilters({ ...filters, limit, page: 1 })
-            }
-          />
-
-          <ApprovePayoutModal
-            isOpen={!!approveId}
-            onClose={() => setApproveId(null)}
-            onConfirm={confirmApprove}
-            loading={actionLoadingId === approveId}
-          />
-
-          <RejectPayoutModal
-            isOpen={!!rejectId}
-            onClose={() => setRejectId(null)}
-            onSubmit={submitReject}
-            loading={actionLoadingId === rejectId}
-          />
-        </main>
-      </div>
-    </div>
+        <RejectPayoutModal
+          isOpen={!!rejectId}
+          onClose={() => setRejectId(null)}
+          onSubmit={submitReject}
+          loading={actionLoadingId === rejectId}
+        />
+      </main>
+    </AdminLayout>
   );
 };
 
