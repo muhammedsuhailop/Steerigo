@@ -161,3 +161,10 @@ export interface RateDriverResponse {
   message: string;
   data: RateDriverResponseData;
 }
+
+export interface LocationUpdatePayload {
+  rideId: string;
+  lat: number;
+  lng: number;
+  bearing?: number;
+}
