@@ -31,6 +31,7 @@ interface LiveNavigationMapProps {
   dropLocation: Location;
   driverLocation: { lat: number; lng: number; bearing: number } | null;
   status: string;
+  showInstructions?: boolean;
 }
 
 const MapController: React.FC<{
@@ -58,6 +59,7 @@ const LiveNavigationMap: React.FC<LiveNavigationMapProps> = ({
   dropLocation,
   driverLocation,
   status,
+  showInstructions = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -141,7 +143,7 @@ const LiveNavigationMap: React.FC<LiveNavigationMapProps> = ({
         )}
       </button>
 
-      {instructions.length > 0 && (
+      {showInstructions && instructions.length > 0 && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-sm bg-blue-600/90 backdrop-blur-md text-white p-4 rounded-2xl shadow-xl flex items-center gap-4">
           <div className="bg-white/20 p-2 rounded-lg">
             <FaLocationArrow className="text-lg rotate-45" />

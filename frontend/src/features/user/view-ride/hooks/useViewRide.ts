@@ -20,7 +20,7 @@ import {
   PaymentStatus,
   PaymentFailureReason,
 } from "@/shared/types/payment.types";
-import { FareDetails } from "../types/viewRide.types";
+import { FareDetails, LocationUpdatePayload } from "../types/viewRide.types";
 
 export const useViewRide = (rideId: string | undefined) => {
   const dispatch = useDispatch();
@@ -141,17 +141,14 @@ export const useViewRide = (rideId: string | undefined) => {
       }
     };
 
-    const handleLocationUpdate = (data: {
-      rideId: string;
-      lat: number;
-      lng: number;
-      bearing?: number;
-    }) => {
-      if (data.rideId === rideId) {
+    const handleLocationUpdate = (data: LocationUpdatePayload
+    ) => {
+      const payload = Array.isArray(data) ? data[0] : data;
+      if (payload.rideId === rideId) {
         setDriverLocation({
-          lat: data.lat,
-          lng: data.lng,
-          bearing: data.bearing || 0,
+          lat: payload.lat,
+          lng: payload.lng,
+          bearing: payload.bearing || 0,
         });
       }
     };
@@ -185,7 +182,7 @@ export const useViewRide = (rideId: string | undefined) => {
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
 
-      socket.offAny();
+      // socket.offAny();
     };
   }, [rideId, dispatch]);
 
