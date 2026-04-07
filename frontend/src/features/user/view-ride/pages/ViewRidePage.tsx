@@ -19,6 +19,7 @@ import { RideStatus } from "@/shared/types/ride.types";
 import CompletedRideSummary from "../components/CompletedRideSummary";
 import CancelRideButton from "../components/CancelRideButton";
 import CouponSection from "../components/CouponSection";
+import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -106,10 +107,12 @@ const ViewRidePage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 space-y-6">
                 <div className="h-[500px] rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl">
-                  <LiveTrackingMap
+                  <LiveNavigationMap
                     pickupLocation={activeRide.pickup}
                     dropLocation={activeRide.drop}
                     driverLocation={driverLocation}
+                    status={activeRide.status}
+                    showInstructions={false}
                   />
                 </div>
                 <RideTimelineStatus timeline={activeRide.timeline} />
