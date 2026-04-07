@@ -10,7 +10,10 @@ export const useDriverLocationUpdate = (
 ) => {
   useEffect(() => {
     const isTrackingActive =
-      status === RideStatus.ACCEPTED || RideStatus.ARRIVED || RideStatus.STARTED;
+      status &&
+      [RideStatus.ACCEPTED, RideStatus.ARRIVED, RideStatus.STARTED].includes(
+        status,
+      );
 
     if (!rideId || !isTrackingActive || isInactive) return;
 
@@ -47,7 +50,7 @@ export const useDriverLocationUpdate = (
     };
 
     sendLocation();
-    const interval = setInterval(sendLocation, 50000);
+    const interval = setInterval(sendLocation, 5000);
 
     return () => {
       clearInterval(interval);
