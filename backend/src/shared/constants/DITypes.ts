@@ -45,6 +45,10 @@ export const TYPES = {
   PaymentStrategies: Symbol.for("PaymentStrategies"),
   CouponValidationService: Symbol.for("CouponValidationService"),
   CouponUsageService: Symbol.for("CouponUsageService"),
+  RideSearchQueueProducer: Symbol.for("RideSearchQueueProducer"),
+  RideRequestTimeoutWorker: Symbol.for("RideRequestTimeoutWorker"),
+  RideSearchDispatchService: Symbol.for("RideSearchDispatchService"),
+  RideSearchQueue: Symbol.for("RideSearchQueue"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

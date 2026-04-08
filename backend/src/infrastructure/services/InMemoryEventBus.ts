@@ -12,6 +12,7 @@ import {
   RideCancelledEvent,
   RideCancelledByDriverEvent,
   RideFareUpdatedEvent,
+  RideSearchProgressUpdatedEvent,
 } from "@application/events/RideEvents";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
@@ -89,6 +90,8 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleRideCancelledByDriver(event);
       case "RideFareUpdated":
         return this.handleRideFareUpdated(event);
+      case "RideSearchProgressUpdated":
+        return this.handleRideSearchProgressUpdated(event);
     }
   }
 
@@ -479,5 +482,13 @@ export class InMemoryEventBus implements IEventBus {
       driverUserId,
       payload,
     );
+  }
+
+  private async handleRideSearchProgressUpdated(
+    event: RideSearchProgressUpdatedEvent,
+  ) {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRiderSearchProgress(riderId, payload);
   }
 }

@@ -36,6 +36,15 @@ export interface RideMatchedEventPayload {
   };
 }
 
+export interface RideSearchProgressUpdatedPayload {
+  requestGroupId: string;
+  riderId: string;
+  currentIndex: number;
+  totalCandidates: number;
+  message: string;
+  status: "SEARCHING" | "COMPLETED" | "EXPIRED";
+}
+
 export interface RideRequestCreatedPayload
   extends DriverRequestNotificationPayload {
   driverId: string;
@@ -58,6 +67,11 @@ export interface RideRequestGroupExhaustedPayload {
 export type RideRequestGroupExhaustedEvent = BaseRideEvent<
   "RideRequestGroupExhausted",
   RideRequestGroupExhaustedPayload
+>;
+
+export type RideSearchProgressUpdatedEvent = BaseRideEvent<
+  "RideSearchProgressUpdated",
+  RideSearchProgressUpdatedPayload
 >;
 
 export interface RideArrivedEventPayload {
@@ -188,6 +202,7 @@ export type RideDomainEvent =
   | RideRequestCreatedEvent
   | RideMatchedEvent
   | RideRequestGroupExhaustedEvent
+  | RideSearchProgressUpdatedEvent
   | RideArrivedEvent
   | RideStartedEvent
   | RideCompletedEvent

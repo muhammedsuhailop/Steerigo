@@ -602,6 +602,55 @@ export class RideRequestRepositoryImpl implements IRideRequestRepository {
     }
   }
 
+  async findLatestPendingByGroupId(
+    requestGroupId: string,
+  ): Promise<RideRequest | null> {
+    try {
+      const doc = await RideRequestModel.findOne({
+        requestGroupId,
+        status: RideRequestStatus.PENDING,
+      })
+        .sort({ createdAt: -1 })
+        .exec();
+
+      return doc ? RideRequestMapper.toDomain(doc) : null;
+    } catch (error) {
+      Logger.error("Error finding latest pending request by group", {
+        requestGroupId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async atomicExpireRideRequest(
+    requestId: string,
+  ): Promise<RideRequest | null> {
+    try {
+      const doc = await RideRequestModel.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(requestId),
+          status: RideRequestStatus.PENDING,
+        },
+        {
+          $set: {
+            status: RideRequestStatus.EXPIRED,
+            updatedAt: new Date(),
+          },
+        },
+        { new: true },
+      ).exec();
+
+      return doc ? RideRequestMapper.toDomain(doc) : null;
+    } catch (error) {
+      Logger.error("Error atomically expiring ride request", {
+        requestId,
+        error,
+      });
+      throw error;
+    }
+  }
+
   // Helper methods
   private buildFilterQuery(
     filters: IRideRequestFilters,

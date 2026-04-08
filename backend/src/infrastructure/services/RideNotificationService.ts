@@ -292,4 +292,35 @@ export class RideNotificationService implements IRideNotificationService {
       });
     }
   }
+
+  async notifyRiderSearchProgress(
+    riderId: string,
+    payload: {
+      requestGroupId: string;
+      currentIndex: number;
+      totalCandidates: number;
+      message: string;
+      status: "SEARCHING" | "COMPLETED" | "EXPIRED";
+    },
+  ): Promise<void> {
+    try {
+      const io = getRideSocketServer();
+      io.to(`rider:${riderId}`).emit(
+        SOCKET_EVENTS.RIDE_SEARCH_PROGRESS_UPDATED,
+        payload,
+      );
+      Logger.info("Notified rider of ride search progress", {
+        riderId,
+        requestGroupId: payload.requestGroupId,
+        currentIndex: payload.currentIndex,
+        status: payload.status,
+      });
+    } catch (error) {
+      Logger.error("Error notifying rider of ride search progress", {
+        riderId,
+        payload,
+        error,
+      });
+    }
+  }
 }

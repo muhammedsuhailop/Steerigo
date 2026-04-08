@@ -6,6 +6,7 @@ import { IRideRequestRepository } from "@domain/repositories/IRideRequestReposit
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
+import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -21,6 +22,8 @@ import { IDistributedLockService } from "@application/services/IDistributedLockS
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { IEventBus } from "@application/services/IEventBus";
 import { RideMatchedEvent } from "@application/events/RideEvents";
+import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -43,6 +46,10 @@ export class AcceptRideRequestUseCase
     private rideRepository: IRideRepository,
     @inject(TYPES.DriverAvailabilityRepository)
     private driverAvailabilityRepository: IDriverAvailabilityRepository,
+    @inject(TYPES.RideRequestGroupRepository)
+    private rideRequestGroupRepository: IRideRequestGroupRepository,
+    @inject(TYPES.RideSearchDispatchService)
+    private rideSearchDispatchService: IRideSearchDispatchService,
     @inject(TYPES.DistributedLockService)
     private lockService: IDistributedLockService,
     @inject(TYPES.EventBus)
@@ -139,20 +146,30 @@ export class AcceptRideRequestUseCase
         );
       }
 
-      Logger.info("Ride request accepted", {
-        requestId,
-        driverId,
-        requestGroupId: acceptedRequest.getRequestGroupId(),
-      });
+      const groupId = acceptedRequest.getRequestGroupId();
+
+      const group =
+        await this.rideRequestGroupRepository.findActiveById(groupId);
+
+      if (group) {
+        await this.rideRequestGroupRepository.updateStatus(
+          groupId,
+          RideRequestGroupStatus.COMPLETED,
+        );
+
+        await this.rideSearchDispatchService.cancelGroupJobs(groupId);
+      }
 
       const cancelledCount =
         await this.rideRequestRepository.cancelOtherPendingRequestsInGroup(
-          acceptedRequest.getRequestGroupId(),
+          groupId,
           acceptedRequest.getId(),
         );
 
-      Logger.info("Cancelled other pending group requests", {
-        requestGroupId: acceptedRequest.getRequestGroupId(),
+      Logger.info("Ride request accepted", {
+        requestId,
+        driverId,
+        requestGroupId: groupId,
         cancelledCount,
       });
 
@@ -269,9 +286,7 @@ export class AcceptRideRequestUseCase
       if (!availability) {
         Logger.warn(
           "No active availability record found when marking driver busy",
-          {
-            driverId,
-          },
+          { driverId },
         );
         return;
       }

@@ -100,7 +100,11 @@ export const autoSearchAndRequestSchema = z.object({
       }),
       requestGroupId: z
         .string()
-        .uuid({ message: "requestGroupId must be a valid UUID" }),
+        .min(1, { message: "requestGroupId is required" })
+        .regex(/^[0-9a-fA-F]{24}$/, {
+          message:
+            "requestGroupId must be a 24-character hex string (MongoDB ObjectId)",
+        }),
     })
     .strict(),
 });

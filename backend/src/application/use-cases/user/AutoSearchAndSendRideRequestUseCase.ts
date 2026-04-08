@@ -1,33 +1,22 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
 import { AutoSearchAndRequestDto } from "@application/dto/user/AutoSearchAndRequestDto";
-import {
-  AutoSearchAndRequestResponseDto,
-  SuccessfulRequestInfo,
-  FailedRequestInfo,
-} from "@application/dto/user/AutoSearchAndRequestResponseDto";
+import { AutoSearchAndRequestResponseDto } from "@application/dto/user/AutoSearchAndRequestResponseDto";
 import { IUseCase } from "../interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
 import { DomainError } from "@domain/errors/DomainError";
 import { Logger } from "@shared/utils/Logger";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
-import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
-import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
-import { DriverSearchFilter } from "@domain/value-objects/DriverSearchFilter";
-import { RideRequest } from "@domain/entities/RideRequest";
-import { Location } from "@domain/value-objects/Location";
-import { RideType } from "@domain/value-objects/RideType";
-import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
-import { DriverStatus } from "@domain/value-objects/DriverStatus";
-import { AppConstants } from "@shared/constants/AppConstants";
-import { IEventBus } from "@application/services/IEventBus";
-import { RideRequestCreatedEvent } from "@application/events/RideEvents";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { SearchCriteria } from "@domain/value-objects/SearchCriteria";
+import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
+import { AppConstants } from "@shared/constants/AppConstants";
 import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
 import { RideRequestGroup } from "@domain/entities/RideRequestGroup";
+import { Location } from "@domain/value-objects/Location";
+import { RideType } from "@domain/value-objects/RideType";
+import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
 
 @injectable()
 export class AutoSearchAndSendRideRequestUseCase
@@ -40,20 +29,14 @@ export class AutoSearchAndSendRideRequestUseCase
   constructor(
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
-    @inject(TYPES.DriverRepository)
-    private readonly driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(TYPES.RideRequestRepository)
-    private readonly rideRequestRepository: IRideRequestRepository,
     @inject(TYPES.FareCalculationService)
     private readonly fareCalculationService: IFareCalculationService,
-    @inject(TYPES.AvailabilityCheckService)
-    private readonly availabilityCheckService: IAvailabilityCheckService,
-    @inject(TYPES.EventBus)
-    private readonly eventBus: IEventBus,
     @inject(TYPES.RideRequestGroupRepository)
     private readonly rideRequestGroupRepository: IRideRequestGroupRepository,
+    @inject(TYPES.RideSearchDispatchService)
+    private readonly rideSearchDispatchService: IRideSearchDispatchService,
   ) {}
 
   async execute(
@@ -79,11 +62,6 @@ export class AutoSearchAndSendRideRequestUseCase
         dto.searchDate,
         dto.radiusKm,
         dto.timeRequired,
-      );
-
-      const searchFilter = DriverSearchFilter.create(
-        dto.gearType,
-        dto.bodyType,
       );
 
       const fetchLimit = dto.maxRideRequests * AppConstants.FETCH_MULTIPLIER;
@@ -117,173 +95,48 @@ export class AutoSearchAndSendRideRequestUseCase
       if (candidateDriverIds.length === 0) {
         Logger.info("No nearby candidate drivers found for search session", {
           riderId: userId,
+          requestGroupId: dto.requestGroupId,
         });
-        //can fail - todo
-      } else {
-        const rideRequestGroup = RideRequestGroup.create(
-          dto.requestGroupId,
-          userId,
-          pickup,
-          drop,
-          dto.rideType as RideType,
-          fareBreakdown.getTotalFare().getAmount(),
-          fareBreakdown.getTotalFare().getCurrency(),
-          candidateDriverIds,
+
+        return Result.success(
+          AutoSearchAndRequestResponseDto.create(dto.requestGroupId, [], [], 0),
         );
-
-        const savedGroup =
-          await this.rideRequestGroupRepository.save(rideRequestGroup);
-
-        Logger.info("RideRequestGroup created", {
-          requestGroupId: savedGroup.getId(),
-          riderId: savedGroup.getRiderId(),
-          candidateCount: savedGroup.getCandidateDriverIds().length,
-          status: savedGroup.getStatus(),
-        });
       }
 
-      const successfulRequests: SuccessfulRequestInfo[] = [];
-      const failedRequests: FailedRequestInfo[] = [];
+      const rideRequestGroup = RideRequestGroup.create(
+        dto.requestGroupId,
+        userId,
+        pickup,
+        drop,
+        dto.rideType as RideType,
+        fareBreakdown.getTotalFare().getAmount(),
+        fareBreakdown.getTotalFare().getCurrency(),
+        candidateDriverIds,
+      );
 
-      const pendingRequests =
-        await this.rideRequestRepository.findPendingByRiderId(userId);
+      const savedGroup =
+        await this.rideRequestGroupRepository.save(rideRequestGroup);
 
-      for (const item of nearbyAvailabilities) {
-        if (successfulRequests.length >= dto.maxRideRequests) break;
-
-        const availability = item.driver;
-        const driverId = availability.getDriverId();
-
-        const startDate = searchCriteria.getSearchDate();
-        const endDate = new Date(
-          startDate.getTime() +
-            searchCriteria.getTimeRequiredMinutes() * 60 * 1000,
-        );
-
-        const isAvailable =
-          await this.availabilityCheckService.isAvailableDuring(
-            driverId,
-            startDate,
-            endDate,
-          );
-
-        if (!isAvailable) {
-          failedRequests.push({
-            driverId,
-            driverName: await this.getDriverName(driverId),
-            reason: "Driver unavailable for requested duration",
-          });
-          continue;
-        }
-
-        const driver = await this.driverRepository.findById(driverId);
-        if (!driver || driver.getStatus() !== DriverStatus.ACTIVE) {
-          failedRequests.push({
-            driverId,
-            driverName: await this.getDriverName(driverId),
-            reason: "Driver not active",
-          });
-          continue;
-        }
-
-        const driverUserId = driver.getUserId();
-
-        if (
-          searchFilter.hasFilters() &&
-          !searchFilter.matches(
-            driver.getEligibleGearTypes(),
-            driver.getEligibleBodyTypes(),
-            0,
-          )
-        ) {
-          failedRequests.push({
-            driverId,
-            driverName: await this.getDriverName(driverId),
-            reason: "Does not match vehicle preferences",
-          });
-          continue;
-        }
-
-        if (pendingRequests.some((r) => r.getDriverId() === driverId)) {
-          failedRequests.push({
-            driverId,
-            driverName: await this.getDriverName(driverId),
-            reason: "Request already pending",
-          });
-          continue;
-        }
-
-        const rideRequest = RideRequest.create(
-          driverId,
-          userId,
-          dto.requestGroupId,
-          pickup,
-          drop,
-          dto.searchDate,
-          dto.rideType as RideType,
-          fareBreakdown,
-          `${item.etaMinutes} mins`,
-        );
-
-        const saved = await this.rideRequestRepository.save(rideRequest);
-        if (!saved) {
-          failedRequests.push({
-            driverId,
-            driverName: await this.getDriverName(driverId),
-            reason: "Failed to create request",
-          });
-          continue;
-        }
-
-        const rideRequestCreatedEvent: RideRequestCreatedEvent = {
-          type: "RideRequestCreated",
-          occurredAt: new Date(),
-          payload: {
-            requestId: saved.getId(),
-            requestGroupId: dto.requestGroupId,
-            riderId: userId,
-            driverId: driverUserId,
-            pickup: {
-              latitude: pickup.getLatitude(),
-              longitude: pickup.getLongitude(),
-              address: pickup.getAddress(),
-            },
-            drop: {
-              latitude: drop.getLatitude(),
-              longitude: drop.getLongitude(),
-              address: drop.getAddress(),
-            },
-            pickupTime: dto.searchDate.toISOString(),
-            rideType: dto.rideType,
-            pickupETA: `${item.etaMinutes} mins`,
-            fare: {
-              amount: fareBreakdown.getTotalFare().getAmount(),
-              currency: fareBreakdown.getTotalFare().getCurrency(),
-            },
-            searchedAt: new Date().toISOString(),
-            expiresAt: new Date(
-              Date.now() + AppConstants.RIDE_REQUEST_TIMEOUT_MS,
-            ).toISOString(),
-          },
-        };
-
-        await this.eventBus.publish(rideRequestCreatedEvent);
-
-        successfulRequests.push({
-          requestId: saved.getId(),
-          driverId,
-          driverName: await this.getDriverName(driverId),
-          pickupETA: `${item.etaMinutes} mins`,
-          totalFare: fareBreakdown.getTotalFare().getAmount(),
-          currency: fareBreakdown.getTotalFare().getCurrency(),
-        });
-      }
+      Logger.info("Ride search group created", {
+        requestGroupId: savedGroup.getId(),
+        riderId: savedGroup.getRiderId(),
+        candidateCount: savedGroup.getCandidateDriverIds().length,
+        candidateDriverIds: savedGroup.getCandidateDriverIds(),
+      });
+      
+      await this.rideSearchDispatchService.scheduleGroupGuards(
+        savedGroup.getId(),
+      );
+      await this.rideSearchDispatchService.dispatchNextRequest(
+        savedGroup.getId(),
+        0,
+      );
 
       return Result.success(
         AutoSearchAndRequestResponseDto.create(
-          dto.requestGroupId,
-          successfulRequests,
-          failedRequests,
+          savedGroup.getId(),
+          [],
+          [],
           nearbyAvailabilities.length,
         ),
       );
@@ -299,18 +152,6 @@ export class AutoSearchAndSendRideRequestUseCase
           error instanceof Error ? error.message : "Unknown error",
         ),
       );
-    }
-  }
-
-  private async getDriverName(driverId: string): Promise<string> {
-    try {
-      const driver = await this.driverRepository.findById(driverId);
-      if (!driver) return "Unknown Driver";
-
-      const user = await this.userRepository.findById(driver.getUserId());
-      return user?.getName?.() ?? "Unknown Driver";
-    } catch {
-      return "Unknown Driver";
     }
   }
 }

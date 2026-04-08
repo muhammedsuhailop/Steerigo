@@ -68,4 +68,43 @@ export class RideRequestGroupRepositoryImpl
     }).exec();
     return result.deletedCount === 1;
   }
+
+  async updateCurrentIndex(
+    id: string,
+    newIndex: number,
+  ): Promise<RideRequestGroup | null> {
+    const doc = await RideRequestGroupModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(id),
+        status: RideRequestGroupStatus.SEARCHING,
+      },
+      {
+        $set: {
+          currentIndex: newIndex,
+          updatedAt: new Date(),
+        },
+      },
+      { new: true },
+    ).exec();
+
+    return doc ? RideRequestGroupMapper.toDomain(doc) : null;
+  }
+
+  async updateStatus(
+    id: string,
+    status: RideRequestGroupStatus,
+  ): Promise<RideRequestGroup | null> {
+    const doc = await RideRequestGroupModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id) },
+      {
+        $set: {
+          status,
+          updatedAt: new Date(),
+        },
+      },
+      { new: true },
+    ).exec();
+
+    return doc ? RideRequestGroupMapper.toDomain(doc) : null;
+  }
 }
