@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FaCar, FaCalendarAlt, FaClock, FaCog, FaRoute } from "react-icons/fa";
 import MapLocationInput from "@/shared/components/maps";
-import { TripFormData, Location } from "../types/driverSearch.types";
+import { TripFormData } from "../types/driverSearch.types";
 import { GiSteeringWheel } from "react-icons/gi";
+import { Location } from "@/shared/types/ride.types";
 
 interface DriverSearchFormProps {
   onSubmit: (formData: TripFormData) => void;

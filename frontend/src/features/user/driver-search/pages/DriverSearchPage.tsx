@@ -25,7 +25,6 @@ import type { TripFormData, Driver } from "../types/driverSearch.types";
 import { useRideRequest } from "../hooks/useRideRequest";
 import { Alert } from "@/shared/components/ui/Alert";
 import type { RideRequestError } from "../types/rideRequest.types";
-import { v4 as uuidv4 } from "uuid";
 
 import {
   FaMap,
@@ -38,6 +37,20 @@ import {
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
 import { useAutoRideRequest } from "../hooks/useAutoRideRequest";
+
+const generateMongoObjectId = () => {
+  const timestamp = Math.floor(Date.now() / 1000)
+    .toString(16)
+    .padStart(8, "0");
+
+  const randomBytes = crypto.getRandomValues(new Uint8Array(8));
+
+  const randomPart = Array.from(randomBytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return timestamp + randomPart;
+};
 
 const DriverSearchPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -131,7 +144,7 @@ const DriverSearchPage: React.FC = () => {
       dispatch(setError(null));
       setHasSearched(true);
 
-      const newRequestGroupId = uuidv4();
+      const newRequestGroupId = generateMongoObjectId();
       dispatch(setRequestGroupId(newRequestGroupId));
 
       // Clear requested drivers when doing a new search
@@ -213,7 +226,7 @@ const DriverSearchPage: React.FC = () => {
 
   const handleAutoRequestSubmit = (formData: TripFormData) => {
     setLocalError(null);
-    const newId = uuidv4();
+    const newId = generateMongoObjectId();
     dispatch(setRequestGroupId(newId));
     startAutoRequest(formData, newId);
   };
