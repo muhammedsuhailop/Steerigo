@@ -8,11 +8,27 @@ import {
   ServerError,
 } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
 
-// Centralized error handling and parsing. Converts Axios errors to BaseError objects.
+interface PotentialAxiosError {
+  message?: string;
+  code?: string;
+  config?: { url?: string };
+  response?: {
+    status: number;
+    headers?: Record<string, string>;
+    data?: unknown;
+  };
+}
+
+interface PotentialBaseError {
+  type?: ErrorType;
+  code?: string;
+  userMessage?: string;
+  timestamp?: string | { toISOString: () => string };
+}
+
 export class ErrorHandler {
   private static instance: ErrorHandler;
 
-  // Singleton instance
   public static getInstance(): ErrorHandler {
     if (!ErrorHandler.instance) {
       ErrorHandler.instance = new ErrorHandler();
@@ -20,21 +36,21 @@ export class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  // Type guard for ApiErrorResponse
-  private isApiErrorResponse(data: any): data is ApiErrorResponse {
+  // Type guard for ApiErrorResponse using unknown
+  private isApiErrorResponse(data: unknown): data is ApiErrorResponse {
+    if (!data || typeof data !== "object") return false;
+    const d = data as ApiErrorResponse;
     return (
-      data &&
-      typeof data === "object" &&
-      "error" in data &&
-      typeof data.error === "object" &&
-      "code" in data.error &&
-      "message" in data.error &&
-      "userMessage" in data.error
+      d.error &&
+      typeof d.error === "object" &&
+      "code" in d.error &&
+      "message" in d.error &&
+      "userMessage" in d.error
     );
   }
 
-  // Detect common network error codes
-  private isNetworkError(error: any): boolean {
+  // Detect common network error codes safely
+  private isNetworkError(error: PotentialAxiosError): boolean {
     const networkErrorCodes = [
       "ECONNABORTED",
       "ERR_NETWORK",
@@ -43,32 +59,43 @@ export class ErrorHandler {
       "ENOTFOUND",
       "ERR_NETWORK_UNREACHABLE",
     ];
-    return networkErrorCodes.includes(error?.code);
+    return !!error.code && networkErrorCodes.includes(error.code);
   }
 
-  // Extract or generate a request ID
-  private extractRequestId(error: any): string {
+  // Extract or generate a request ID safely
+  private extractRequestId(error: PotentialAxiosError): string {
+    const dataAsRecord = error.response?.data as
+      | Record<string, unknown>
+      | undefined;
+
     return (
-      error?.response?.headers?.["x-request-id"] ||
-      error?.response?.data?.requestId ||
+      error.response?.headers?.["x-request-id"] ||
+      (typeof dataAsRecord?.requestId === "string"
+        ? dataAsRecord.requestId
+        : "") ||
       this.generateRequestId()
     );
   }
 
-  // Parse Axios or normalized error into BaseError
-  public parseApiError(error: any, context?: string): BaseError {
-    // if already parsed into BaseError-like, return as-is
+  // Main entry point for parsing errors
+  public parseApiError(error: unknown, context?: string): BaseError {
+    // 1. Check if it's already a BaseError
+    const potential = error as PotentialBaseError;
     if (
-      error &&
-      (error.type || error.code === "NO_RESPONSE" || error.userMessage)
+      potential &&
+      (potential.type ||
+        potential.code === "NO_RESPONSE" ||
+        potential.userMessage)
     ) {
       return error as BaseError;
     }
 
+    const err = error as PotentialAxiosError;
     const timestamp = new Date().toISOString();
-    const requestId = this.extractRequestId(error);
+    const requestId = this.extractRequestId(err);
 
-    if (this.isNetworkError(error)) {
+    //  Handle Network Errors
+    if (this.isNetworkError(err)) {
       return {
         type: ErrorType.NETWORK,
         code: "NETWORK_ERROR",
@@ -78,12 +105,12 @@ export class ErrorHandler {
         timestamp,
         requestId,
         context,
-        details: { originalError: error?.message ?? error },
-      } as unknown as NetworkError;
+        details: { originalError: err.message ?? "Unknown Network Error" },
+      } as NetworkError;
     }
 
-    // no response -> network/no-response
-    if (!error?.response) {
+    // Handle "No Response"
+    if (!err.response) {
       return {
         type: ErrorType.NETWORK,
         code: "NO_RESPONSE",
@@ -94,39 +121,39 @@ export class ErrorHandler {
         timestamp,
         requestId,
         context,
-      } as unknown as NetworkError;
+      } as NetworkError;
     }
 
-    const { status, data } = error.response;
+    const { status, data } = err.response;
     const apiError = this.isApiErrorResponse(data) ? data : null;
 
+    // Status-based Routing
     switch (status) {
       case 400:
         return this.handleBadRequest(apiError, timestamp, requestId, context);
-
       case 401:
         return this.handleUnauthorized(apiError, timestamp, requestId, context);
-
       case 403:
         return this.handleForbidden(apiError, timestamp, requestId, context);
-
       case 404:
         return this.handleNotFound(apiError, timestamp, requestId, context);
-
       case 409:
-        return this.handleConflict(apiError, timestamp, requestId, context);
-
+        return this.handleConflict(
+          apiError,
+          data,
+          timestamp,
+          requestId,
+          context,
+        );
       case 422:
         return this.handleValidationError(
           apiError,
           timestamp,
           requestId,
-          context
+          context,
         );
-
       case 429:
         return this.handleRateLimit(apiError, timestamp, requestId, context);
-
       case 500:
       case 502:
       case 503:
@@ -136,17 +163,16 @@ export class ErrorHandler {
           apiError,
           timestamp,
           requestId,
-          error.config?.url,
-          context
+          err.config?.url,
+          context,
         );
-
       default:
         return this.handleUnknownError(
           status,
           apiError,
           timestamp,
           requestId,
-          context
+          context,
         );
     }
   }
@@ -155,7 +181,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
     return {
       type: ErrorType.CLIENT,
@@ -172,25 +198,19 @@ export class ErrorHandler {
     };
   }
 
-  // handleUnauthorized respects backend messages
   private handleUnauthorized(
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
-    const backendMessage = data?.error.message;
-    const backendUserMessage = data?.error.userMessage;
-
-    const defaultMessage = backendMessage ?? "Authentication failed";
-    const defaultUserMessage =
-      backendUserMessage ?? "Your session has expired. Please log in again.";
-
     return {
       type: ErrorType.AUTHENTICATION,
       code: "UNAUTHORIZED",
-      message: defaultMessage,
-      userMessage: defaultUserMessage,
+      message: data?.error.message ?? "Authentication failed",
+      userMessage:
+        data?.error.userMessage ??
+        "Your session has expired. Please log in again.",
       severity: ErrorSeverity.HIGH,
       timestamp,
       requestId,
@@ -202,7 +222,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
     return {
       type: ErrorType.AUTHORIZATION,
@@ -221,7 +241,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
     return {
       type: ErrorType.CLIENT,
@@ -237,36 +257,33 @@ export class ErrorHandler {
 
   private handleConflict(
     data: ApiErrorResponse | null,
+    rawData: unknown,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
-
     if (import.meta.env.DEV) {
       console.log(
         "%c[ErrorHandler] handleConflict invoked",
         "color:#f39c12;font-weight:bold;",
-        { data, context }
+        { data, context },
       );
     }
-    let backendMessage = "Resource conflict";
 
+    let backendMessage = "Resource conflict";
     if (data?.error?.message) {
       backendMessage = data.error.message;
-    } else if (typeof (data as any)?.message === "string") {
-      backendMessage = (data as any).message;
-    } else if (typeof (data as any)?.error === "string") {
-      backendMessage = (data as any).error;
+    } else if (rawData && typeof rawData === "object") {
+      const r = rawData as Record<string, unknown>;
+      if (typeof r.message === "string") backendMessage = r.message;
+      else if (typeof r.error === "string") backendMessage = r.error;
     }
 
     return {
       type: ErrorType.CLIENT,
       code: "CONFLICT",
       message: backendMessage,
-      userMessage:
-        data?.error.userMessage ??
-        backendMessage ??
-        "This action conflicts with existing data.",
+      userMessage: data?.error.userMessage ?? backendMessage,
       severity: ErrorSeverity.MEDIUM,
       timestamp,
       requestId,
@@ -278,7 +295,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): ValidationError {
     return {
       type: ErrorType.VALIDATION,
@@ -301,7 +318,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
     return {
       type: ErrorType.CLIENT,
@@ -312,7 +329,10 @@ export class ErrorHandler {
       timestamp,
       requestId,
       context,
-      details: { retryAfter: data?.error.details?.retryAfter },
+      details: {
+        retryAfter: (data?.error.details as Record<string, unknown>)
+          ?.retryAfter,
+      },
     };
   }
 
@@ -322,7 +342,7 @@ export class ErrorHandler {
     timestamp: string,
     requestId: string,
     url?: string,
-    context?: string
+    context?: string,
   ): ServerError {
     return {
       type: ErrorType.SERVER,
@@ -343,7 +363,7 @@ export class ErrorHandler {
     data: ApiErrorResponse | null,
     timestamp: string,
     requestId: string,
-    context?: string
+    context?: string,
   ): BaseError {
     return {
       type: ErrorType.UNKNOWN,
@@ -358,7 +378,6 @@ export class ErrorHandler {
     };
   }
 
-  // Generate a unique request ID
   private generateRequestId(): string {
     return (
       Math.random().toString(36).substring(2, 15) +
@@ -366,27 +385,25 @@ export class ErrorHandler {
     );
   }
 
-  // Log error for debugging and monitoring
   public logError(error: BaseError): void {
+    const timestampStr =
+      typeof error.timestamp === "string"
+        ? error.timestamp
+        : (error.timestamp as any)?.toISOString?.() || new Date().toISOString();
+
     const logData = {
       ...error,
       userAgent: navigator.userAgent,
       url: window.location.href,
-      timestamp:
-        typeof error.timestamp === "string"
-          ? error.timestamp
-          : (error.timestamp as any)?.toISOString?.() ||
-            new Date().toISOString(),
+      timestamp: timestampStr,
     };
 
     if (import.meta.env.DEV) {
       console.group(
-        `[${error.severity.toUpperCase()}] ${error.type.toUpperCase()}`
+        `[${error.severity.toUpperCase()}] ${error.type.toUpperCase()}`,
       );
       console.error("Error:", error.message);
       console.error("User Message:", error.userMessage);
-      console.error("Context:", error.context);
-      console.error("Details:", logData);
       console.groupEnd();
     }
 
@@ -395,27 +412,18 @@ export class ErrorHandler {
     }
   }
 
-  // Send error data to monitoring endpoint
-  private sendToMonitoring(errorData: any): void {
-    try {
-      fetch("/api/logs/errors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(errorData),
-      }).catch(() => {
-        // ignore failures
-      });
-    } catch {
-      // ignore failures
-    }
+  private sendToMonitoring(errorData: Record<string, unknown>): void {
+    fetch("/api/logs/errors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(errorData),
+    }).catch(() => {});
   }
 
-  // Get a user-facing message for an error
   public getUserMessage(error: BaseError): string {
     return error.userMessage || this.getDefaultUserMessage(error.type);
   }
 
-  // Default messages per error type
   private getDefaultUserMessage(type: ErrorType): string {
     const defaultMessages: Record<ErrorType, string> = {
       [ErrorType.VALIDATION]: "Please check your input and try again.",
@@ -426,10 +434,8 @@ export class ErrorHandler {
       [ErrorType.CLIENT]: "Invalid request. Please try again.",
       [ErrorType.UNKNOWN]: "An unexpected error occurred.",
     };
-
     return defaultMessages[type];
   }
 }
 
-// Export singleton instance
 export const errorHandler = ErrorHandler.getInstance();

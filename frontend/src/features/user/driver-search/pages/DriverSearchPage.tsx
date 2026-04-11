@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaMap } from "react-icons/fa";
+import { FaCalendarAlt, FaClock, FaMap, FaMapMarkerAlt } from "react-icons/fa";
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
-import { Alert } from "@/shared/components/ui/Alert";
-import MapLocationInput from "@/shared/components/maps";
 import TripLocationMap from "@/shared/components/maps/TripLocationMap";
 import DriverSearchForm from "../components/DriverSearchForm";
 import DriverSearchResults from "../components/DriverSearchResults";
@@ -31,16 +29,19 @@ import {
 import { useRideRequest } from "../hooks/useRideRequest";
 import { useAutoRideRequest } from "../hooks/useAutoRideRequest";
 import type { TripFormData, Driver } from "../types/driverSearch.types";
-import type { RideRequestError } from "../types/rideRequest.types";
+import type { SearchModalState } from "../components/SearchStatusModal";
+import SearchStatusModal from "../components/SearchStatusModal";
 
 const generateMongoObjectId = (): string => {
   const timestamp = Math.floor(Date.now() / 1000)
     .toString(16)
     .padStart(8, "0");
+
   const randomBytes = crypto.getRandomValues(new Uint8Array(8));
   const randomPart = Array.from(randomBytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+
   return timestamp + randomPart;
 };
 
@@ -60,79 +61,73 @@ const DriverSearchPage: React.FC = () => {
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
     null,
   );
+
   const [hasSearched, setHasSearched] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedDriverForRequest, setSelectedDriverForRequest] =
-    useState<Driver | null>(null);
   const [requestedDriverIds, setRequestedDriverIds] = useState<Set<string>>(
     new Set(),
   );
+
+  const [modalState, setModalState] = useState<SearchModalState>(null);
+
+  const modalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
 
   const { startAutoRequest, cancel } = useAutoRideRequest({
     onSuccess: (rideId: string) => {
-      window.location.href = `/ride/${rideId}`;
+      setModalState("SUCCESS");
+
+      modalTimerRef.current = setTimeout(() => {
+        window.location.href = `/ride/${rideId}`;
+      }, 2000);
+    },
+
+    onNoDriverFound: () => {
+      setModalState("NO_DRIVER");
+
+      modalTimerRef.current = setTimeout(() => {
+        setModalState(null);
+      }, 3000);
+    },
+
+    onCancelled: () => {
+      setModalState(null);
+      setRequestedDriverIds(new Set());
+      dispatch(setError(null));
     },
   });
 
-  const {
-    sendRequest,
-    isLoading: isRequestLoading,
-    error: requestError,
-    reset: resetRequest,
-  } = useRideRequest({
+  const handleCloseModal = () => {
+    setModalState(null);
+  };
+
+  const { sendRequest, isLoading: isRequestLoading } = useRideRequest({
     formData: currentFormData,
     estimatedFare,
     requestGroupId,
-    onSuccess: () => {
-      if (selectedDriverForRequest) {
-        setSuccessMessage(
-          `Request sent to ${selectedDriverForRequest.name}. You'll be notified once they respond.`,
-        );
-        setSelectedDriverForRequest(null);
-        setTimeout(() => setSuccessMessage(null), 5000);
-      }
-    },
-    onError: () => {
-      if (selectedDriverForRequest) {
-        setRequestedDriverIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(selectedDriverForRequest.id);
-          return newSet;
-        });
-      }
-    },
   });
 
   const handleFormChange = (formData: TripFormData) =>
     setCurrentFormData(formData);
 
   const handleManualSearch = async (formData: TripFormData) => {
-    if (
-      !formData.pickupLocation ||
-      !formData.rideStartDate ||
-      !formData.rideStartTime
-    ) {
-      dispatch(setError("Please fill in all required fields"));
+    if (!formData.pickupLocation) {
+      dispatch(setError("Pickup required"));
       return;
     }
 
     try {
       dispatch(setLoading(true));
-      dispatch(setError(null));
       setHasSearched(true);
       setRequestedDriverIds(new Set());
 
       const newId = generateMongoObjectId();
       dispatch(setRequestGroupId(newId));
 
-      const rideStartDateTime = `${formData.rideStartDate}T${formData.rideStartTime}:00.000Z`;
-
       const response = await searchNearbyDrivers({
         latitude: formData.pickupLocation.latitude,
         longitude: formData.pickupLocation.longitude,
-        searchDate: rideStartDateTime,
+        searchDate: new Date().toISOString(),
         timeRequired: formData.timeRequired,
         radiusKm: formData.searchRadiusKm,
         gearType: formData.gearType,
@@ -151,15 +146,13 @@ const DriverSearchPage: React.FC = () => {
             tripType: formData.tripType,
             pickupLocation: formData.pickupLocation,
             dropLocation: formData.dropLocation || undefined,
-            rideStartDateTime: rideStartDateTime,
+            rideStartDateTime: new Date().toISOString(),
             searchRadiusKm: formData.searchRadiusKm,
             gearType: formData.gearType,
             bodyType: formData.bodyType,
           }),
         );
       }
-    } catch (err: any) {
-      dispatch(setError(err?.data?.message || "Failed to search for drivers"));
     } finally {
       dispatch(setLoading(false));
     }
@@ -168,23 +161,28 @@ const DriverSearchPage: React.FC = () => {
   const handleAutoRequestSubmit = (formData: TripFormData) => {
     const newId = generateMongoObjectId();
     dispatch(setRequestGroupId(newId));
+
+    setModalState("SEARCHING");
+
     startAutoRequest(formData, newId);
   };
 
   const handleDriverSelect = useCallback(
     async (driver: Driver) => {
       if (requestedDriverIds.has(driver.id)) return;
+
       setRequestedDriverIds((prev) => new Set(prev).add(driver.id));
-      setSelectedDriverForRequest(driver);
       await sendRequest(driver);
     },
-    [sendRequest, requestedDriverIds],
+    [requestedDriverIds, sendRequest],
   );
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Find Your Driver
@@ -194,27 +192,10 @@ const DriverSearchPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Alerts */}
-        {successMessage && (
-          <div className="mb-6">
-            <Alert type="success" onClose={() => setSuccessMessage(null)}>
-              <p className="font-semibold">{successMessage}</p>
-            </Alert>
-          </div>
-        )}
-
-        {requestError && (
-          <div className="mb-6">
-            <Alert type="danger" onClose={resetRequest}>
-              <p className="font-semibold">Request Failed</p>
-              <p className="text-sm">{requestError.message}</p>
-            </Alert>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 h-fit border border-gray-200">
               <DriverSearchForm
                 onSubmit={handleManualSearch}
                 onAutoRequest={handleAutoRequestSubmit}
@@ -231,9 +212,7 @@ const DriverSearchPage: React.FC = () => {
                 estimatedFare={estimatedFare}
                 totalFound={totalFound}
                 searchRadius={searchCriteria?.searchRadiusKm || 0}
-                pickupAddress={
-                  searchCriteria?.pickupLocation?.address || "Unknown"
-                }
+                pickupAddress={searchCriteria?.pickupLocation?.address || ""}
                 error={apiError}
                 onDriverSelect={handleDriverSelect}
                 onDriverCall={(d) => (window.location.href = `tel:${d.mobile}`)}
@@ -242,33 +221,125 @@ const DriverSearchPage: React.FC = () => {
             )}
           </div>
 
+          {/* RIGHT SIDE */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 h-fit border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <FaMap className="text-gray-600" />
                 <span>Trip Preview</span>
               </h3>
 
-              <div className="h-80 rounded-lg overflow-hidden mb-4 border border-gray-200">
-                <TripLocationMap
-                  pickupLocation={currentFormData?.pickupLocation || null}
-                  dropLocation={currentFormData?.dropLocation || null}
-                  tripType={currentFormData?.tripType || "oneway"}
-                />
-              </div>
+              {/* Live Map Display  */}
+              {currentFormData?.pickupLocation ||
+              currentFormData?.dropLocation ? (
+                <div className="h-80 rounded-lg overflow-hidden mb-4 border border-gray-200">
+                  <TripLocationMap
+                    pickupLocation={currentFormData?.pickupLocation || null}
+                    dropLocation={currentFormData?.dropLocation || null}
+                    tripType={currentFormData?.tripType || "oneway"}
+                  />
+                </div>
+              ) : (
+                <div className="h-80 bg-gray-100 rounded-lg flex items-center justify-center mb-4 border border-dashed border-gray-300">
+                  <div className="text-center">
+                    <FaMapMarkerAlt className="mx-auto text-gray-400 mb-2 text-3xl" />
+                    <p className="text-sm text-gray-600 font-medium">
+                      Select locations to see them on the map
+                    </p>
+                  </div>
+                </div>
+              )}
 
+              {/* Trip Details Summary */}
               {currentFormData && (
-                <div className="space-y-3 text-sm border-t pt-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Vehicle:</span>
-                    <span className="font-bold">
-                      {currentFormData.bodyType} ({currentFormData.gearType})
+                <div className="space-y-3 text-sm">
+                  {/* Trip Type */}
+                  {currentFormData.tripType === "roundtrip" && (
+                    <div className="flex items-center justify-between py-2 border-t border-gray-200">
+                      <span className="text-gray-600 font-medium">
+                        Trip Type:
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        Round Trip
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Pickup Section */}
+                  {currentFormData.pickupLocation && (
+                    <div className="py-2 border-t border-gray-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FaMapMarkerAlt className="text-green-600" />
+                        <span className="text-gray-600 font-medium">
+                          Pickup
+                        </span>
+                      </div>
+
+                      {/* Address */}
+                      <p className="text-xs text-gray-700 break-words">
+                        {currentFormData.pickupLocation.address}
+                      </p>
+
+                      {/* Date & Time */}
+                      <p className="text-xs mt-1 text-gray-500 flex items-center gap-1">
+                        <FaCalendarAlt className="text-gray-600" />
+                        {currentFormData.rideStartDate}
+
+                        <span className="mx-1">•</span>
+
+                        <FaClock className="text-gray-600" />
+                        {currentFormData.rideStartTime}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Drop Section */}
+                  {currentFormData.dropLocation && (
+                    <div className="py-2 border-t border-gray-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FaMapMarkerAlt className="text-red-600" />
+                        <span className="text-gray-600 font-medium">Drop</span>
+                      </div>
+
+                      {/* Address */}
+                      <p className="text-xs text-gray-700 break-words">
+                        {currentFormData.dropLocation.address}
+                      </p>
+
+                      {/* Drop Date/Time*/}
+                      <p className="text-xs mt-1 text-gray-500 flex items-center gap-1">
+                        <FaCalendarAlt className="text-gray-600" />
+                        {currentFormData.rideEndDate
+                          ? currentFormData.rideEndDate
+                          : currentFormData.rideStartDate}
+
+                        <span className="mx-1">•</span>
+
+                        <FaClock className="text-gray-600" />
+                        {currentFormData.rideEndTime
+                          ? currentFormData.rideEndTime
+                          : currentFormData.rideStartTime}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Duration */}
+                  <div className="flex items-center justify-between py-2 border-t border-gray-200">
+                    <span className="text-gray-600 font-medium">
+                      Required Duration:
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {currentFormData.timeRequired * 60} mins
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Duration:</span>
-                    <span className="font-bold">
-                      {currentFormData.timeRequired} hrs
+
+                  {/* Radius */}
+                  <div className="flex items-center justify-between py-2 border-t border-gray-200">
+                    <span className="text-gray-600 font-medium">
+                      Search Radius:
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {currentFormData.searchRadiusKm} km
                     </span>
                   </div>
                 </div>
@@ -278,51 +349,12 @@ const DriverSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Live Search Session Overlay */}
-      {sessionStatus === "SEARCHING" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl bg-white px-8 py-7 shadow-2xl text-center">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" />
-            </div>
-
-            <h3 className="text-base font-semibold text-gray-900">
-              {progress && progress.currentIndex > 0
-                ? "Finding another nearby driver..."
-                : "Searching for nearby drivers..."}
-            </h3>
-
-            <p className="mt-2 text-sm text-gray-500">
-              {progress?.message ||
-                "We're notifying drivers in your area. This usually takes less than a minute."}
-            </p>
-
-            {progress && progress.totalCandidates > 0 && (
-              <div className="mt-4">
-                <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
-                  <div
-                    className="bg-gray-900 h-1.5 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${((progress.currentIndex + 1) / progress.totalCandidates) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="text-[11px] font-medium text-gray-500">
-                  Attempt {progress.currentIndex + 1} of{" "}
-                  {progress.totalCandidates}
-                </span>
-              </div>
-            )}
-
-            <button
-              onClick={cancel}
-              className="mt-6 text-sm font-medium text-rose-600 hover:underline"
-            >
-              Cancel Request
-            </button>
-          </div>
-        </div>
-      )}
+      <SearchStatusModal
+        state={modalState}
+        message={progress?.message}
+        onCancel={cancel}
+        onClose={handleCloseModal}
+      />
 
       <Footer />
     </div>

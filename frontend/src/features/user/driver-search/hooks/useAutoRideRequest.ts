@@ -20,15 +20,21 @@ import { AutoRideRequestPayload } from "../types/rideRequest.types";
 
 interface UseAutoRideOptions {
   onSuccess: (rideId: string) => void;
+  onCancelled?: () => void;
+  onNoDriverFound?: () => void;
 }
 
-export const useAutoRideRequest = ({ onSuccess }: UseAutoRideOptions) => {
+export const useAutoRideRequest = ({
+  onSuccess,
+  onNoDriverFound,
+  onCancelled,
+}: UseAutoRideOptions) => {
   const dispatch = useDispatch();
   const [sendAutoRequest] = useSendAutoRideRequestMutation();
   const [cancelRideRequest] = useCancelRideRequestMutation();
   const currentGroupId = useSelector(selectRequestGroupId);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stopSession = useCallback(() => {
     if (timerRef.current) {
@@ -42,28 +48,30 @@ export const useAutoRideRequest = ({ onSuccess }: UseAutoRideOptions) => {
       const rideId = data?.rideId ?? data?.data?.rideId;
       if (rideId) {
         stopSession();
+        dispatch(setSessionStatus("MATCHED"));
         onSuccess(rideId);
       }
     },
-    [stopSession, onSuccess],
+    [stopSession, onSuccess, dispatch],
   );
 
   const handleProgress = useCallback(
     (data: SearchProgressUpdate) => {
       dispatch(updateProgress(data));
-      if (data.status === "EXPIRED") {
-        stopSession();
-        dispatch(setSessionStatus("EXPIRED"));
-      }
+
+      if (data.status === "EXPIRED") return;
     },
-    [dispatch, stopSession],
+    [dispatch],
   );
 
   const handleNoDriver = useCallback(() => {
     stopSession();
+
     dispatch(setSessionStatus("EXPIRED"));
     dispatch(setError("No drivers found in your area."));
-  }, [dispatch, stopSession]);
+
+    onNoDriverFound?.();
+  }, [dispatch, stopSession, onNoDriverFound]);
 
   useRiderRealtime({
     onMatched: handleMatched,
@@ -104,7 +112,7 @@ export const useAutoRideRequest = ({ onSuccess }: UseAutoRideOptions) => {
       timerRef.current = setTimeout(() => {
         handleNoDriver();
       }, 95000);
-    } catch (err) {
+    } catch {
       dispatch(setSessionStatus("IDLE"));
       dispatch(setError("Failed to start automated search."));
     }
@@ -112,14 +120,19 @@ export const useAutoRideRequest = ({ onSuccess }: UseAutoRideOptions) => {
 
   const cancel = useCallback(async () => {
     if (!currentGroupId) return;
+
     try {
       stopSession();
+
       await cancelRideRequest({ requestGroupId: currentGroupId }).unwrap();
+
       dispatch(setSessionStatus("CANCELLED"));
+
+      onCancelled?.();
     } catch (error) {
       console.error("Cancel failed", error);
     }
-  }, [currentGroupId, cancelRideRequest, stopSession, dispatch]);
+  }, [currentGroupId, cancelRideRequest, stopSession, dispatch, onCancelled]);
 
   return { startAutoRequest, cancel };
 };

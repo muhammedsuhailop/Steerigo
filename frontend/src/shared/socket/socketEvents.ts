@@ -1,7 +1,7 @@
 export const SOCKET_EVENTS = {
   RIDER: {
     MATCHED: "ride:matched",
-    NO_DRIVER: "ride:no_driver_found",
+    NO_DRIVER: "ride:no-driver-found",
   },
   DRIVER: {
     NEW_REQUEST: "ride:request:created",

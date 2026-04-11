@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { useSendRideRequestMutation } from "../services/driverSearchApi";
-import { parseRideRequestError } from "../utils/errorHandler";
 import type {
   RideRequestPayload,
   RideRequestError,
@@ -10,6 +9,7 @@ import type {
   TripFormData,
   EstimatedFare,
 } from "../types/driverSearch.types";
+import { errorHandler } from "@/shared/utils/errorHandler";
 
 interface UseRideRequestReturn {
   sendRequest: (driver: Driver) => Promise<void>;
@@ -45,7 +45,6 @@ export function useRideRequest({
       }
 
       const dropLoc = formData.dropLocation ?? formData.pickupLocation;
-      // Combine date and time into ISO string
       const pickupDateTime = new Date(
         `${formData.rideStartDate}T${formData.rideStartTime}`,
       ).toISOString();
@@ -72,7 +71,6 @@ export function useRideRequest({
         setError(null);
         setIsSuccess(false);
 
-        // Validate required data
         if (!formData) {
           setError({
             code: "VALIDATION_ERROR",
@@ -106,7 +104,6 @@ export function useRideRequest({
           return;
         }
 
-        // Build payload
         const payload = buildPayload(driver);
         if (!payload) {
           setError({
@@ -116,13 +113,13 @@ export function useRideRequest({
           return;
         }
 
-        // Send request
         const result = await sendRideRequestMutation(payload).unwrap();
 
         setIsSuccess(true);
         onSuccess?.(result.data.requestId);
-      } catch (err: any) {
-        const parsedError = parseRideRequestError(err);
+      } catch (err: unknown) {
+        const parsedError = errorHandler.parseApiError(err, "AutoRideRequest");
+        errorHandler.logError(parsedError);
         setError(parsedError);
         onError?.(parsedError);
       }
@@ -135,7 +132,7 @@ export function useRideRequest({
       sendRideRequestMutation,
       onSuccess,
       onError,
-    ]
+    ],
   );
 
   const reset = useCallback(() => {
