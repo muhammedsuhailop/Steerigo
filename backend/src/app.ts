@@ -17,19 +17,23 @@ import {
 import { Logger } from "@shared/utils/Logger";
 import { initializeRideSocketServer } from "@infrastructure/realtime/socket";
 import { TokenService } from "@infrastructure/services";
+import { NotificationFactory } from "@infrastructure/container/factories/NotificationFactory";
+import { container } from "@infrastructure/container/DIContainer";
+import { WorkerSocketBridge } from "@infrastructure/realtime/WorkerSocketBridge";
 
 class App {
   private app: Application;
   private httpServer: http.Server;
   private database: DatabaseConnection;
+  private workerSocketBridge: WorkerSocketBridge;
 
   constructor() {
     this.app = express();
     this.httpServer = http.createServer(this.app);
     this.database = DatabaseConnection.getInstance();
+    this.workerSocketBridge = new WorkerSocketBridge();
     this.initializeMiddleware();
     this.initializeRoutes();
-    this.initializeSocket();
     this.initializeErrorHandling();
   }
 
@@ -86,27 +90,32 @@ class App {
     Logger.info("Routes initialized successfully");
   }
 
-  private initializeSocket(): void {
+  private async initializeSocket(): Promise<void> {
     const corsOrigins = process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(",")
       : ["http://localhost:4000", "http://localhost:5173"];
 
     const tokenService = new TokenService();
-
     initializeRideSocketServer(this.httpServer, corsOrigins, tokenService);
 
-    Logger.info("Socket.IO initialized successfully");
+    // Start Redis bridge — subscribes to worker events and forwards to Socket.IO
+    await this.workerSocketBridge.start();
+
+    Logger.info("Socket.IO and WorkerSocketBridge initialized successfully");
+  }
+
+  private initializeNotificationPublisher(): void {
+    NotificationFactory.registerRealtimePublisher(container);
+    Logger.info("Notification realtime publisher registered");
   }
 
   private initializeErrorHandling(): void {
-    // Global error handler
     this.app.use(ErrorHandlerMiddleware.handle);
     Logger.info("Error handling initialized successfully");
   }
 
   async initialize(): Promise<void> {
     try {
-      // Connect to database
       await this.database.connect();
       Logger.info("Application initialized successfully");
     } catch (error) {
@@ -118,6 +127,8 @@ class App {
   async start(): Promise<void> {
     try {
       await this.initialize();
+      await this.initializeSocket();
+      this.initializeNotificationPublisher();
 
       const PORT = process.env.PORT || 3000;
 
@@ -129,7 +140,6 @@ class App {
         Logger.info(`Socket.IO URL: ws://localhost:${PORT}`);
       });
 
-      // Handle graceful shutdown
       this.handleShutdown();
     } catch (error) {
       Logger.error("Failed to start server", error);
@@ -146,7 +156,7 @@ class App {
         Logger.info("HTTP server closed");
       });
 
-      // Disconnect database
+      await this.workerSocketBridge.stop();
       await this.database.disconnect();
 
       Logger.info("Shutdown complete");

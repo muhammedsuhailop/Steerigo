@@ -1,33 +1,41 @@
-import { getRideSocketServer } from "../realtime/socket";
-import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
-import { NotificationSocketPayload } from "../../application/dto/notification/NotificationSocketPayload";
 import { Logger } from "@shared/utils/Logger";
+import { getRideSocketServer } from "@infrastructure/realtime/socket";
+import { NotificationSocketPayload } from "@application/dto/notification/NotificationSocketPayload";
+import { SOCKET_EVENTS } from "@infrastructure/realtime/constants/SocketEvents";
 
 export class NotificationSocketAdapter {
-  static emitToUser(userId: string, payload: NotificationSocketPayload) {
+  private static tryGetSocketServer() {
     try {
-      const io = getRideSocketServer();
+      return getRideSocketServer();
+    } catch (error) {
+      Logger.debug("Socket.IO unavailable in this process", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  static emitToUser(userId: string, payload: NotificationSocketPayload): void {
+    try {
+      const io = this.tryGetSocketServer();
+      if (!io) {
+        return;
+      }
 
       const room = `user:${userId}`;
 
-      Logger.debug("Emitting notification to socket", {
+      io.to(room).emit(SOCKET_EVENTS.NOTIFICATION_CREATED, payload);
+
+      Logger.debug("Notification emitted to socket", {
         userId,
         room,
         notificationId: payload.notificationId,
         type: payload.type,
       });
-
-      io.to(room).emit(SOCKET_EVENTS.NOTIFICATION_CREATED, payload);
-
-      Logger.debug("Notification emitted successfully", {
-        userId,
-        room,
-        notificationId: payload.notificationId,
-      });
     } catch (error) {
       Logger.error("Notification socket emit failed", {
         userId,
-        payload,
+        notificationId: payload.notificationId,
         error: error instanceof Error ? error.message : String(error),
       });
     }

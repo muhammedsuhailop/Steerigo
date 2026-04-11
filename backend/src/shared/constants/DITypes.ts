@@ -49,6 +49,8 @@ export const TYPES = {
   RideRequestTimeoutWorker: Symbol.for("RideRequestTimeoutWorker"),
   RideSearchDispatchService: Symbol.for("RideSearchDispatchService"),
   RideSearchQueue: Symbol.for("RideSearchQueue"),
+  NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
+  NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

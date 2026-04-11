@@ -149,10 +149,8 @@ export function initializeRideSocketServer(
 
 export function getRideSocketServer() {
   if (!ioInstance) {
-    Logger.error("Attempted to access Socket.IO before initialization");
     throw new Error("Ride Socket.IO server not initialized");
   }
-
   return ioInstance;
 }
 
