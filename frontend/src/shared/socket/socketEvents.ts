@@ -27,6 +27,8 @@ export const SOCKET_EVENTS = {
     RIDE_CANCELLED_BY_DRIVER_TO_DRIVER: "ride:cancelled:by_driver:to_driver",
 
     RIDE_FARE_RECALCULATED: "ride:fare_recalculated",
+
+    RIDE_SEARCH_PROGRESS_UPDATED: "ride:search:progress-updated",
   },
   PAYMENT: {
     PAYMENT_INITIATED: "payment:initiated",
