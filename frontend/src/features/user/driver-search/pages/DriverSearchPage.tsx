@@ -4,6 +4,7 @@ import { FaCalendarAlt, FaClock, FaMap, FaMapMarkerAlt } from "react-icons/fa";
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
 import TripLocationMap from "@/shared/components/maps/TripLocationMap";
+import MapLocationInput from "@/shared/components/maps";
 import DriverSearchForm from "../components/DriverSearchForm";
 import DriverSearchResults from "../components/DriverSearchResults";
 import { useSearchNearbyDriversMutation } from "../services/driverSearchApi";
@@ -31,6 +32,7 @@ import { useAutoRideRequest } from "../hooks/useAutoRideRequest";
 import type { TripFormData, Driver } from "../types/driverSearch.types";
 import type { SearchModalState } from "../components/SearchStatusModal";
 import SearchStatusModal from "../components/SearchStatusModal";
+import { Location } from "@/shared/types/ride.types";
 
 const generateMongoObjectId = (): string => {
   const timestamp = Math.floor(Date.now() / 1000)
@@ -66,6 +68,12 @@ const DriverSearchPage: React.FC = () => {
   const [requestedDriverIds, setRequestedDriverIds] = useState<Set<string>>(
     new Set(),
   );
+
+  const [pickup, setPickup] = useState<Location | null>(null);
+  const [drop, setDrop] = useState<Location | null>(null);
+  const [activeSearchType, setActiveSearchType] = useState<
+    "pickup" | "drop" | null
+  >(null);
 
   const [modalState, setModalState] = useState<SearchModalState>(null);
 
@@ -107,8 +115,20 @@ const DriverSearchPage: React.FC = () => {
     requestGroupId,
   });
 
-  const handleFormChange = (formData: TripFormData) =>
+  const handleFormChange = useCallback((formData: TripFormData) => {
     setCurrentFormData(formData);
+  }, []);
+
+  const handleLocationSelect = (location: Location | null) => {
+    if (activeSearchType === "pickup") setPickup(location);
+    else setDrop(location);
+    setActiveSearchType(null);
+  };
+
+  const handleClearLocation = (type: "pickup" | "drop") => {
+    if (type === "pickup") setPickup(null);
+    else setDrop(null);
+  };
 
   const handleManualSearch = async (formData: TripFormData) => {
     if (!formData.pickupLocation) {
@@ -200,9 +220,11 @@ const DriverSearchPage: React.FC = () => {
                 onSubmit={handleManualSearch}
                 onAutoRequest={handleAutoRequestSubmit}
                 onChange={handleFormChange}
-                isLoading={
-                  isLoading || isRequestLoading || sessionStatus === "SEARCHING"
-                }
+                externalPickup={pickup}
+                externalDrop={drop}
+                onOpenLocationSearch={setActiveSearchType}
+                onClearLocation={handleClearLocation}
+                isLoading={isLoading || sessionStatus === "SEARCHING"}
               />
             </div>
 
@@ -348,6 +370,29 @@ const DriverSearchPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {activeSearchType && (
+        <div className="fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 p-4">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative p-6">
+            <button
+              onClick={() => setActiveSearchType(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <h3 className="text-lg font-bold mb-4">
+              Search {activeSearchType === "pickup" ? "Pickup" : "Drop"}
+            </h3>
+            <MapLocationInput
+              label=""
+              value={activeSearchType === "pickup" ? pickup : drop}
+              onChange={handleLocationSelect}
+              placeholder="Enter address..."
+              required
+            />
+          </div>
+        </div>
+      )}
 
       <SearchStatusModal
         state={modalState}

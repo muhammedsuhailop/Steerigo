@@ -101,7 +101,7 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
     lat: value?.latitude || 11.2815,
     lng: value?.longitude || 75.8436,
   });
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // geolocation related
@@ -124,7 +124,7 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
         console.error("Error getting address:", error);
       }
     },
-    [getAddressFromCoordinates, onChange]
+    [getAddressFromCoordinates, onChange],
   );
 
   // Search for locations
@@ -139,13 +139,13 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
       const NOMINATIM_BASE_URL = import.meta.env.VITE_NOMINATIM_BASE_URL;
       const response = await fetch(
         `${NOMINATIM_BASE_URL}/search?format=json&q=${encodeURIComponent(
-          query
+          query,
         )}&addressdetails=1&limit=5`,
         {
           headers: {
             "User-Agent": "SteeriGo-App/1.0",
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -251,7 +251,7 @@ const MapLocationInput: React.FC<MapLocationInputProps> = ({
           setGeoError(err.message || "Unable to get current location");
           setGeoLoading(false);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60 * 1000 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60 * 1000 },
       );
     } catch (err) {
       console.error(err);
