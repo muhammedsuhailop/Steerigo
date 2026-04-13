@@ -4,8 +4,8 @@ import { DayOfWeek } from "@domain/value-objects/DayOfWeek";
 import { Schema, model, Document, Types } from "mongoose";
 
 interface TimeSlot {
-  startTime: number; // 0-1439 minutes
-  endTime: number; // 0-1439 minutes
+  startTime: number;
+  endTime: number;
 }
 
 interface DailyRecurrence {
@@ -28,8 +28,13 @@ interface ExceptionDocument {
   createdAt: Date;
 }
 
+export interface IGeoPoint {
+  type: "Point";
+  coordinates: [number, number];
+}
+
 export interface IDriverAvailabilityModel extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   driverId: Types.ObjectId;
   status: string;
   currentLocation: {
@@ -38,6 +43,7 @@ export interface IDriverAvailabilityModel extends Document {
     address?: string;
     updatedAt?: Date;
   };
+  locationPoint: IGeoPoint;
   recurringSchedule?: {
     dailyRecurrence: DailyRecurrence;
     validity: ScheduleValidity;
@@ -73,7 +79,27 @@ const locationSchema = new Schema(
       default: Date.now,
     },
   },
-  { _id: false }
+  { _id: false },
+);
+
+const geoPointSchema = new Schema<IGeoPoint>(
+  {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      validate: {
+        validator: (value: number[]): boolean => value.length === 2,
+        message: "GeoJSON point must have exactly 2 coordinates",
+      },
+    },
+  },
+  { _id: false },
 );
 
 const timeSlotSchema = new Schema(
@@ -81,7 +107,7 @@ const timeSlotSchema = new Schema(
     startTime: { type: Number, required: true, min: 0, max: 1440 },
     endTime: { type: Number, required: true, min: 0, max: 1440 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const dailyRecurrenceSchema = new Schema(
@@ -104,7 +130,7 @@ const dailyRecurrenceSchema = new Schema(
       default: [],
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const scheduleValiditySchema = new Schema(
@@ -118,7 +144,7 @@ const scheduleValiditySchema = new Schema(
       default: null,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const recurringScheduleSchema = new Schema(
@@ -137,7 +163,7 @@ const recurringScheduleSchema = new Schema(
       trim: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const availabilityExceptionSchema = new Schema(
@@ -167,7 +193,7 @@ const availabilityExceptionSchema = new Schema(
       default: Date.now,
     },
   },
-  { _id: true, timestamps: false }
+  { _id: true, timestamps: false },
 );
 
 const driverAvailabilitySchema = new Schema(
@@ -188,6 +214,10 @@ const driverAvailabilitySchema = new Schema(
       type: locationSchema,
       required: true,
     },
+    locationPoint: {
+      type: geoPointSchema,
+      required: true,
+    },
     recurringSchedule: {
       type: recurringScheduleSchema,
       default: null,
@@ -205,94 +235,88 @@ const driverAvailabilitySchema = new Schema(
   {
     timestamps: true,
     collection: "driver_availability",
-  }
+  },
 );
 
-// Composite index for driver + active status
 driverAvailabilitySchema.index({ driverId: 1, isActive: 1 });
-
-// Status index for fast filtering
 driverAvailabilitySchema.index({ status: 1 });
-
-// Schedule validity indexes for time-based queries
 driverAvailabilitySchema.index({
   "recurringSchedule.validity.startDate": 1,
 });
-
 driverAvailabilitySchema.index({
   "recurringSchedule.validity.endDate": 1,
 });
-
-// Location indexes for geo-queries
 driverAvailabilitySchema.index({
   "currentLocation.latitude": 1,
   "currentLocation.longitude": 1,
 });
-
-// Compound index for common queries
 driverAvailabilitySchema.index({
   driverId: 1,
   isActive: 1,
   status: 1,
 });
-
-// Unique constraint for active availability per driver
+driverAvailabilitySchema.index({
+  locationPoint: "2dsphere",
+});
 driverAvailabilitySchema.index(
   { driverId: 1, isActive: 1 },
   {
     unique: true,
     partialFilterExpression: { isActive: true },
     name: "unique_active_availability_per_driver",
-  }
+  },
 );
-
 driverAvailabilitySchema.index({
   "exceptions.startTime": 1,
   "exceptions.endTime": 1,
 });
 
-driverAvailabilitySchema.pre("save", function (next) {
-  // Validate recurring schedule if present
+driverAvailabilitySchema.pre("validate", function (next) {
+  if (this.currentLocation) {
+    this.locationPoint = {
+      type: "Point",
+      coordinates: [
+        this.currentLocation.longitude,
+        this.currentLocation.latitude,
+      ],
+    };
+  }
+
   if (this.recurringSchedule?.dailyRecurrence) {
     const { timeSlots, excludedTimeSlots } =
       this.recurringSchedule.dailyRecurrence;
 
-    // Validate time slots
     for (const slot of timeSlots) {
       if (slot.startTime >= slot.endTime) {
         return next(new Error("Time slot startTime must be less than endTime"));
       }
     }
 
-    // Validate excluded time slots
     if (excludedTimeSlots) {
       for (const slot of excludedTimeSlots) {
         if (slot.startTime === slot.endTime) {
           return next(
-            new Error("Excluded time slot cannot have same start and end time")
+            new Error("Excluded time slot cannot have same start and end time"),
           );
         }
       }
     }
 
-    // Validate days of week
     if (this.recurringSchedule.dailyRecurrence.daysOfWeek.length === 0) {
       return next(new Error("At least one day of week must be selected"));
     }
 
-    // Validate schedule validity
     if (
       this.recurringSchedule.validity.endDate &&
       this.recurringSchedule.validity.startDate >=
         this.recurringSchedule.validity.endDate
     ) {
       return next(
-        new Error("Schedule validity end date must be after start date")
+        new Error("Schedule validity end date must be after start date"),
       );
     }
   }
 
-  // Validate exceptions
   if (this.exceptions && this.exceptions.length > 0) {
     for (const exception of this.exceptions) {
       if (exception.startTime >= exception.endTime) {
@@ -301,7 +325,6 @@ driverAvailabilitySchema.pre("save", function (next) {
     }
   }
 
-  // Validate location coordinates
   if (this.currentLocation) {
     const { latitude, longitude } = this.currentLocation;
 
@@ -319,7 +342,7 @@ driverAvailabilitySchema.pre("save", function (next) {
 
 export const DriverAvailabilityModel = model<IDriverAvailabilityModel>(
   "DriverAvailability",
-  driverAvailabilitySchema
+  driverAvailabilitySchema,
 );
 
 export type { TimeSlot, DailyRecurrence, ScheduleValidity, ExceptionDocument };

@@ -26,6 +26,8 @@ import { CouponRepositoryImpl } from "@infrastructure/database/repositories/Coup
 import { ICouponRepository } from "@domain/repositories/ICouponRepository";
 import { CouponUsageRepositoryImpl } from "@infrastructure/database/repositories/CouponUsageRepositoryImpl";
 import { ICouponUsageRepository } from "@domain/repositories/ICouponUsageRepository";
+import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
+import { RideRequestGroupRepositoryImpl } from "@infrastructure/database/repositories/RideRequestGroupRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -66,5 +68,8 @@ export class RepositoryFactory {
     container
       .bind<ICouponUsageRepository>(TYPES.CouponUsageRepository)
       .to(CouponUsageRepositoryImpl);
+    container
+      .bind<IRideRequestGroupRepository>(TYPES.RideRequestGroupRepository)
+      .to(RideRequestGroupRepositoryImpl);
   }
 }

@@ -1,14 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { FaCar, FaCalendarAlt, FaClock, FaCog, FaRoute } from "react-icons/fa";
-import MapLocationInput from "@/shared/components/maps";
-import { TripFormData, Location } from "../types/driverSearch.types";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FaCar,
+  FaCalendarAlt,
+  FaClock,
+  FaCog,
+  FaSearch,
+  FaCircle,
+  FaSquareFull,
+} from "react-icons/fa";
+import { TripFormData } from "../types/driverSearch.types";
 import { GiSteeringWheel } from "react-icons/gi";
+import { Location } from "@/shared/types/ride.types";
+import LocationPreview from "./LocationPreview";
 
 interface DriverSearchFormProps {
   onSubmit: (formData: TripFormData) => void;
   onAutoRequest: (formData: TripFormData) => void;
   onChange?: (formData: TripFormData) => void;
   isLoading?: boolean;
+  onOpenLocationSearch: (type: "pickup" | "drop") => void;
+  externalPickup: Location | null;
+  externalDrop: Location | null;
+  onClearLocation: (type: "pickup" | "drop") => void;
 }
 
 const Pill: React.FC<{ children: React.ReactNode; active: boolean }> = ({
@@ -26,47 +39,18 @@ const Pill: React.FC<{ children: React.ReactNode; active: boolean }> = ({
   </button>
 );
 
-/* location preview  */
-const LocationPreview: React.FC<{
-  label: string;
-  location: Location | null;
-  onEdit: () => void;
-  onClear: () => void;
-}> = ({ label, location, onEdit, onClear }) => {
-  return (
-    <div className="p-3 bg-gray-50 ring-1 ring-gray-100 rounded-lg">
-      <p className="text-[11px] font-medium text-gray-600 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-gray-900 mb-3">
-        {location?.address || "Selected location"}
-      </p>
-      <div className="flex gap-2">
-        <button
-          onClick={onEdit}
-          className="flex-1 px-2 py-1 text-xs bg-gray-800 text-white rounded-md hover:opacity-95 transition"
-        >
-          Change
-        </button>
-        <button
-          onClick={onClear}
-          className="flex-1 px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition"
-        >
-          Clear
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   onSubmit,
   onAutoRequest,
   onChange,
   isLoading = false,
+  onOpenLocationSearch,
+  externalPickup,
+  externalDrop,
+  onClearLocation,
 }) => {
-  const [formData, setFormData] = useState<TripFormData>({
-    tripType: "oneway",
-    pickupLocation: null,
-    dropLocation: null,
+  const [formData, setFormData] = useState({
+    tripType: "oneway" as "oneway" | "roundtrip",
     rideStartDate: "",
     rideStartTime: "",
     rideEndDate: "",
@@ -74,7 +58,7 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     searchRadiusKm: 25,
     gearType: "Manual",
     bodyType: "Sedan",
-    timeRequired: 1, // hours
+    timeRequired: 1,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,30 +67,34 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   const formatDate = (d: Date) => d.toISOString().slice(0, 10);
   const formatTime = (d: Date) => d.toTimeString().slice(0, 5);
 
+  const getFullData = (): TripFormData => ({
+    ...formData,
+    pickupLocation: externalPickup,
+    dropLocation: externalDrop,
+  });
+
   useEffect(() => {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 30);
     setFormData((p) => ({
       ...p,
-      rideStartDate: formatDate(now),
-      rideStartTime: formatTime(now),
+      rideStartDate: now.toISOString().slice(0, 10),
+      rideStartTime: now.toTimeString().slice(0, 5),
     }));
   }, []);
 
   useEffect(() => {
-    if (isManualEnd) return;
-    if (!formData.rideStartDate || !formData.rideStartTime) return;
-
+    if (isManualEnd || !formData.rideStartDate || !formData.rideStartTime)
+      return;
     const startISO = `${formData.rideStartDate}T${formData.rideStartTime}:00`;
     const startDate = new Date(startISO);
     if (Number.isNaN(startDate.getTime())) return;
-
     const ms = (formData.timeRequired ?? 1) * 60 * 60 * 1000;
     const endDate = new Date(startDate.getTime() + ms);
     setFormData((p) => ({
       ...p,
-      rideEndDate: formatDate(endDate),
-      rideEndTime: formatTime(endDate),
+      rideEndDate: endDate.toISOString().slice(0, 10),
+      rideEndTime: endDate.toTimeString().slice(0, 5),
     }));
   }, [
     formData.rideStartDate,
@@ -115,94 +103,36 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     isManualEnd,
   ]);
 
+  const lastEmitted = useRef("");
   useEffect(() => {
-    if (!isManualEnd) return;
-    if (!formData.rideStartDate || !formData.rideStartTime) return;
-    if (!formData.rideEndDate || !formData.rideEndTime) return;
-
-    const start = new Date(
-      `${formData.rideStartDate}T${formData.rideStartTime}:00`,
-    );
-    const end = new Date(`${formData.rideEndDate}T${formData.rideEndTime}:00`);
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
-
-    const diffMin = Math.max(
-      0,
-      Math.ceil((end.getTime() - start.getTime()) / (60 * 1000)),
-    );
-    const hours = Math.max(1, Math.min(24, Math.ceil(diffMin / 60)));
-    setFormData((p) => ({ ...p, timeRequired: hours }));
-  }, [
-    formData.rideEndDate,
-    formData.rideEndTime,
-    formData.rideStartDate,
-    formData.rideStartTime,
-    isManualEnd,
-  ]);
-
-  useEffect(() => {
-    onChange?.(formData);
-  }, [formData, onChange]);
+    const currentData = getFullData();
+    const dataStr = JSON.stringify(currentData);
+    if (lastEmitted.current !== dataStr) {
+      lastEmitted.current = dataStr;
+      onChange?.(currentData);
+    }
+  }, [formData, externalPickup, externalDrop, onChange]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.pickupLocation)
+    if (!externalPickup)
       newErrors.pickupLocation = "Pickup location is required";
-    if (formData.tripType === "oneway" && !formData.dropLocation)
-      newErrors.dropLocation = "Drop location is required for one-way trips";
-    if (!formData.rideStartDate)
-      newErrors.rideStartDate = "Ride start date is required";
-    if (!formData.rideStartTime)
-      newErrors.rideStartTime = "Ride start time is required";
-    if (
-      !formData.timeRequired ||
-      formData.timeRequired < 1 ||
-      formData.timeRequired > 24
-    )
-      newErrors.timeRequired = "Please select required hours (1–24)";
-
-    if (formData.rideEndDate && formData.rideEndTime) {
-      const start = new Date(
-        `${formData.rideStartDate}T${formData.rideStartTime}:00`,
-      );
-      const end = new Date(
-        `${formData.rideEndDate}T${formData.rideEndTime}:00`,
-      );
-      if (end.getTime() < start.getTime())
-        newErrors.rideEndDate = "End date/time must be after start date/time";
-    }
-
+    if (formData.tripType === "oneway" && !externalDrop)
+      newErrors.dropLocation = "Drop location is required";
+    if (!formData.rideStartDate) newErrors.rideStartDate = "Required";
+    if (!formData.rideStartTime) newErrors.rideStartTime = "Required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) onSubmit(formData);
+    if (validate()) onSubmit(getFullData());
   };
 
   const handleAutoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (validate()) onAutoRequest(formData);
-  };
-
-  const handlePickupLocationChange = (location: Location | null) => {
-    setFormData((prev) => ({ ...prev, pickupLocation: location }));
-    if (errors.pickupLocation) setErrors((p) => ({ ...p, pickupLocation: "" }));
-  };
-
-  const handleDropLocationChange = (location: Location | null) => {
-    setFormData((prev) => ({ ...prev, dropLocation: location }));
-    if (errors.dropLocation) setErrors((p) => ({ ...p, dropLocation: "" }));
-  };
-
-  const setTripType = (type: "oneway" | "roundtrip") => {
-    setFormData((p) => ({
-      ...p,
-      tripType: type,
-      dropLocation: type === "roundtrip" ? null : p.dropLocation,
-    }));
+    if (validate()) onAutoRequest(getFullData());
   };
 
   const handleToggleManualEnd = (checked: boolean) => {
@@ -234,106 +164,92 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
     setFormData((p) => ({ ...p, rideEndTime: value }));
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-gray-100">
+    <div className="bg-white rounded-2xl p-6 ring-1 ring-gray-100">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3 mb-1">
-          <FaCar className="text-gray-700" />
-          Find Your Nearest Driver
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
+          <FaCar className="text-gray-700" /> Find Your Driver
         </h2>
-        <p className="text-xs text-gray-500">
-          Fill in the details to search for available drivers
-        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Trip Type */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-2 flex items-center gap-2">
-            <FaRoute className="text-gray-500" />
+          <label className="block text-xs font-semibold text-gray-600 mb-2">
             Trip Type
           </label>
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setTripType("oneway")}
-              className={`text-sm px-3 py-1 rounded-md font-medium transition ${
-                formData.tripType === "oneway"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              One Way
-            </button>
-            <button
-              type="button"
-              onClick={() => setTripType("roundtrip")}
-              className={`text-sm px-3 py-1 rounded-md font-medium transition ${
-                formData.tripType === "roundtrip"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Round Trip
-            </button>
+            {(["oneway", "roundtrip"] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFormData((p) => ({ ...p, tripType: type }))}
+                className={`text-sm px-3 py-1 rounded-md transition ${formData.tripType === type ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-700"}`}
+              >
+                {type === "oneway" ? "One Way" : "Round Trip"}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Pickup Location */}
-        <div>
-          {formData.pickupLocation ? (
-            <LocationPreview
-              label="Pickup Location"
-              location={formData.pickupLocation}
-              onEdit={() => handlePickupLocationChange(formData.pickupLocation)}
-              onClear={() => handlePickupLocationChange(null)}
-            />
-          ) : (
-            <>
-              <MapLocationInput
-                label="Pickup Location"
-                value={formData.pickupLocation}
-                onChange={handlePickupLocationChange}
-                placeholder="Search for pickup location"
-                required
-              />
-              {errors.pickupLocation && (
-                <p className="text-rose-500 text-xs mt-1">
-                  {errors.pickupLocation}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Drop Location (Only for One Way) */}
-        {formData.tripType === "oneway" && (
+        <div className="space-y-3">
+          {/* Pickup */}
           <div>
-            {formData.dropLocation ? (
+            {externalPickup ? (
               <LocationPreview
-                label="Drop Location"
-                location={formData.dropLocation}
-                onEdit={() => handleDropLocationChange(formData.dropLocation)}
-                onClear={() => handleDropLocationChange(null)}
+                label="Pickup"
+                location={externalPickup}
+                onEdit={() => onOpenLocationSearch("pickup")}
+                onClear={() => onClearLocation("pickup")}
               />
             ) : (
-              <>
-                <MapLocationInput
-                  label="Drop Location"
-                  value={formData.dropLocation}
-                  onChange={handleDropLocationChange}
-                  placeholder="Search for drop location"
-                  required
-                />
-                {errors.dropLocation && (
-                  <p className="text-rose-500 text-xs mt-1">
-                    {errors.dropLocation}
-                  </p>
-                )}
-              </>
+              <button
+                type="button"
+                onClick={() => onOpenLocationSearch("pickup")}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm hover:bg-gray-100 transition"
+              >
+                <FaCircle className="text-green-500 text-[10px]" />
+                <span className="text-gray-500">Select pickup location</span>
+                <FaSearch className="ml-auto text-gray-400 text-xs" />
+              </button>
+            )}
+
+            {errors.pickupLocation && (
+              <p className="text-rose-500 text-xs mt-1">
+                {errors.pickupLocation}
+              </p>
             )}
           </div>
-        )}
 
+          {/* Drop */}
+          {formData.tripType === "oneway" && (
+            <div>
+              {externalDrop ? (
+                <LocationPreview
+                  label="Drop"
+                  location={externalDrop}
+                  onEdit={() => onOpenLocationSearch("drop")}
+                  onClear={() => onClearLocation("drop")}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenLocationSearch("drop")}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm hover:bg-gray-100 transition"
+                >
+                  <FaSquareFull className="text-red-500 text-[10px]" />
+                  <span className="text-gray-500">Select drop location</span>
+                  <FaSearch className="ml-auto text-gray-400 text-xs" />
+                </button>
+              )}
+
+              {errors.dropLocation && (
+                <p className="text-rose-500 text-xs mt-1">
+                  {errors.dropLocation}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
         {/* Start Date & Time */}
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -371,7 +287,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             )}
           </div>
         </div>
-
         {/* Required time | Manual checkbox | End Date | End Time */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-2">
@@ -470,7 +385,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             <p className="text-rose-500 text-xs mt-1">{errors.rideEndDate}</p>
           )}
         </div>
-
         {/* Search Radius */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-2">
@@ -498,7 +412,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             <span>50 km</span>
           </div>
         </div>
-
         {/* Gear and Body Type */}
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -535,7 +448,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             </select>
           </div>
         </div>
-
         {/* Submit Button */}
         <button
           type="button"

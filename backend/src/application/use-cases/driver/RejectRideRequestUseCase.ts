@@ -4,6 +4,7 @@ import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestD
 import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
 import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
@@ -12,6 +13,7 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
+import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
 
 @injectable()
 export class RejectRideRequestUseCase
@@ -31,6 +33,12 @@ export class RejectRideRequestUseCase
 
     @inject(TYPES.RideRequestRepository)
     private rideRequestRepository: IRideRequestRepository,
+
+    @inject(TYPES.RideRequestGroupRepository)
+    private rideRequestGroupRepository: IRideRequestGroupRepository,
+
+    @inject(TYPES.RideSearchDispatchService)
+    private rideSearchDispatchService: IRideSearchDispatchService,
 
     @inject(TYPES.DistributedLockService)
     private lockService: IDistributedLockService,
@@ -90,6 +98,32 @@ export class RejectRideRequestUseCase
 
       rideRequest.markAsRejected();
       await this.rideRequestRepository.save(rideRequest);
+
+      const groupId = rideRequest.getRequestGroupId();
+
+      const group =
+        await this.rideRequestGroupRepository.findActiveById(groupId);
+      if (group) {
+        const nextIndex = group.getCurrentIndex() + 1;
+        await this.rideRequestGroupRepository.updateCurrentIndex(
+          groupId,
+          nextIndex,
+        );
+
+        await this.rideSearchDispatchService.publishSearchProgress({
+          requestGroupId: groupId,
+          riderId: group.getRiderId(),
+          currentIndex: nextIndex,
+          totalCandidates: group.getCandidateDriverIds().length,
+          message: "Finding another nearby driver...",
+          status: "SEARCHING",
+        });
+
+        await this.rideSearchDispatchService.dispatchNextRequest(
+          groupId,
+          nextIndex,
+        );
+      }
 
       Logger.info("Ride request rejected successfully", {
         requestId,

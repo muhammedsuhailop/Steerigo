@@ -38,6 +38,11 @@ import { ICouponValidationService } from "@application/services/ICouponValidatio
 import { CouponValidationService } from "@infrastructure/services/CouponValidationService";
 import { ICouponUsageService } from "@application/services/ICouponUsageService";
 import { CouponUsageService } from "@infrastructure/services/CouponUsageService";
+import { RideSearchQueueProducer } from "@infrastructure/queues/RideSearchQueueProducer";
+import { RideSearchDispatchService } from "@application/services/ride-search/RideSearchDispatchService";
+import { RideRequestTimeoutWorker } from "@infrastructure/workers/RideRequestTimeoutWorker";
+import { IRideSearchQueue } from "@application/services/IRideSearchQueue";
+import { BullMqRideSearchQueue } from "@infrastructure/queues/BullMqRideSearchQueue";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -90,5 +95,21 @@ export class ServiceFactory {
     container
       .bind<ICouponUsageService>(TYPES.CouponUsageService)
       .to(CouponUsageService);
+
+    container
+      .bind<RideSearchQueueProducer>(TYPES.RideSearchQueueProducer)
+      .to(RideSearchQueueProducer);
+
+    container
+      .bind<RideSearchDispatchService>(TYPES.RideSearchDispatchService)
+      .to(RideSearchDispatchService);
+
+    container
+      .bind<RideRequestTimeoutWorker>(TYPES.RideRequestTimeoutWorker)
+      .to(RideRequestTimeoutWorker);
+
+    container
+      .bind<IRideSearchQueue>(TYPES.RideSearchQueue)
+      .to(BullMqRideSearchQueue);
   }
 }

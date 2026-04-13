@@ -52,7 +52,11 @@ export const sendRideRequestSchema = z.object({
     .object({
       requestGroupId: z
         .string()
-        .uuid({ message: "requestGroupId must be a valid UUID" }),
+        .min(1, { message: "requestGroupId is required" })
+        .regex(/^[0-9a-fA-F]{24}$/, {
+          message:
+            "requestGroupId must be a valid 24-character MongoDB ObjectId",
+        }),
       driverId: z
         .string()
         .min(1, { message: "Driver ID is required" })

@@ -57,6 +57,10 @@ export interface IRideRequestRepository
 
   existsAcceptedRequestInGroup(requestGroupId: string): Promise<boolean>;
 
-  // Bulk operations for sending requests to multiple drivers
+  findLatestPendingByGroupId(
+    requestGroupId: string,
+  ): Promise<RideRequest | null>;
+  atomicExpireRideRequest(requestId: string): Promise<RideRequest | null>;
+
   saveMany(requests: RideRequest[]): Promise<RideRequest[]>;
 }

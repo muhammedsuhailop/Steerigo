@@ -22,6 +22,7 @@ export const TYPES = {
   RatingRepository: Symbol.for("RatingRepository"),
   CouponRepository: Symbol.for("CouponRepository"),
   CouponUsageRepository: Symbol.for("CouponUsageRepository"),
+  RideRequestGroupRepository: Symbol.for("RideRequestGroupRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -44,6 +45,12 @@ export const TYPES = {
   PaymentStrategies: Symbol.for("PaymentStrategies"),
   CouponValidationService: Symbol.for("CouponValidationService"),
   CouponUsageService: Symbol.for("CouponUsageService"),
+  RideSearchQueueProducer: Symbol.for("RideSearchQueueProducer"),
+  RideRequestTimeoutWorker: Symbol.for("RideRequestTimeoutWorker"),
+  RideSearchDispatchService: Symbol.for("RideSearchDispatchService"),
+  RideSearchQueue: Symbol.for("RideSearchQueue"),
+  NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
+  NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

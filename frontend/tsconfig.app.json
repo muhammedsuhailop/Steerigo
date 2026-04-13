@@ -5,25 +5,26 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
 
-    "baseUrl": "./src",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
     "paths": {
-      "@/*": ["*"],
-      "@/app/*": ["app/*"],
-      "@/shared/*": ["shared/*"],
-      "@/features/*": ["features/*"],
-      "@/layouts/*": ["layouts/*"],
-      "@/routing/*": ["routing/*"]
+      "@/*": ["./src/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/layouts/*": ["./src/layouts/*"],
+      "@/routing/*": ["./src/routing/*"]
     }
   },
   "include": ["src"],

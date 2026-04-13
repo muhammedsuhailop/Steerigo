@@ -7,7 +7,8 @@ import {
   FaSearch,
   FaTimes,
 } from "react-icons/fa";
-import type { Location, SearchFormFilters } from "../types/driverSearch.types";
+import type { SearchFormFilters } from "../types/driverSearch.types";
+import { Location } from "@/shared/types/ride.types";
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFormFilters, location: Location) => void;
@@ -25,7 +26,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
   onClear,
 }) => {
   const [location, setLocation] = useState<Location | null>(
-    initialLocation || null
+    initialLocation || null,
   );
   const [filters, setFilters] = useState<SearchFormFilters>({
     radiusKm: initialFilters?.radiusKm || 10,
@@ -38,7 +39,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
   const handleFilterChange = (
     field: keyof SearchFormFilters,
-    value: string | number
+    value: string | number,
   ) => {
     setFilters((prev) => ({
       ...prev,
@@ -51,7 +52,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
   const handleLocationChange = (
     field: keyof Location,
-    value: string | number
+    value: string | number,
   ) => {
     if (!location) return;
     setLocation({
@@ -87,7 +88,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
       (error) => {
         console.error("Error getting current location:", error);
         alert("Unable to get your current location. Please enter manually.");
-      }
+      },
     );
   };
 
@@ -149,7 +150,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                   onChange={(e) =>
                     handleLocationChange(
                       "longitude",
-                      parseFloat(e.target.value)
+                      parseFloat(e.target.value),
                     )
                   }
                   placeholder="e.g., 75.8436"

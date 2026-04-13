@@ -4,6 +4,8 @@ import type {
   Driver,
   SearchCriteria,
   EstimatedFare,
+  SessionStatus,
+  SearchProgress,
 } from "../types/driverSearch.types";
 
 const initialState: DriverSearchState = {
@@ -15,6 +17,8 @@ const initialState: DriverSearchState = {
   totalFound: 0,
   searchedAt: null,
   requestGroupId: null,
+  sessionStatus: "IDLE",
+  progress: null,
 };
 
 export const driverSearchSlice = createSlice({
@@ -44,6 +48,19 @@ export const driverSearchSlice = createSlice({
     // Set requestGroupId
     setRequestGroupId: (state, action: PayloadAction<string | null>) => {
       state.requestGroupId = action.payload;
+    },
+
+    //Set setSessionStatus
+    setSessionStatus: (state, action: PayloadAction<SessionStatus>) => {
+      state.sessionStatus = action.payload;
+    },
+
+    // Set updateProgress
+    updateProgress: (state, action: PayloadAction<SearchProgress>) => {
+      state.progress = action.payload;
+      if (action.payload.status === "SEARCHING")
+        state.sessionStatus = "SEARCHING";
+      if (action.payload.status === "EXPIRED") state.sessionStatus = "EXPIRED";
     },
     // Set loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -81,6 +98,8 @@ export const {
   setError,
   clearSearch,
   clearError,
+  setSessionStatus,
+  updateProgress,
 } = driverSearchSlice.actions;
 
 // Selectors
@@ -110,5 +129,13 @@ export const selectSearchedAt = (state: { driverSearch: DriverSearchState }) =>
 export const selectRequestGroupId = (state: {
   driverSearch: DriverSearchState;
 }) => state.driverSearch.requestGroupId;
+
+export const selectSessionStatus = (state: {
+  driverSearch: DriverSearchState;
+}) => state.driverSearch.sessionStatus;
+
+export const selectSearchProgress = (state: {
+  driverSearch: DriverSearchState;
+}) => state.driverSearch.progress;
 
 export default driverSearchSlice.reducer;

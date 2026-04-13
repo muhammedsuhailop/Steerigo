@@ -175,6 +175,14 @@ export interface DriverFareUpdatedPayload {
   couponType?: CouponDiscountType;
 }
 
+export interface RideSearchProgressPayload {
+  requestGroupId: string;
+  currentIndex: number;
+  totalCandidates: number;
+  message: string;
+  status: "SEARCHING" | "COMPLETED" | "EXPIRED";
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -234,5 +242,10 @@ export interface IRideNotificationService {
   notifyDriverFareUpdated(
     driverUserId: string,
     payload: DriverFareUpdatedPayload,
+  ): Promise<void>;
+
+  notifyRiderSearchProgress(
+    riderId: string,
+    payload: RideSearchProgressPayload,
   ): Promise<void>;
 }

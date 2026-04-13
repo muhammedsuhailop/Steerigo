@@ -1,5 +1,19 @@
 import { Distance, ETA, Location } from "@/shared/types/ride.types";
 
+export type SessionStatus =
+  | "IDLE"
+  | "SEARCHING"
+  | "REQUESTED"
+  | "MATCHED"
+  | "EXPIRED"
+  | "CANCELLED";
+export interface SearchProgress {
+  currentIndex: number;
+  totalCandidates: number;
+  message: string;
+  status: "SEARCHING" | "COMPLETED" | "EXPIRED";
+}
+
 export interface Driver {
   id: string;
   userId: string;
@@ -93,6 +107,8 @@ export interface DriverSearchState {
   totalFound: number;
   requestGroupId: string | null;
   searchedAt: string | null;
+  sessionStatus: SessionStatus;
+  progress: SearchProgress | null;
 }
 
 export interface TripFormData {
@@ -107,4 +123,19 @@ export interface TripFormData {
   gearType: string;
   bodyType: string;
   timeRequired: number;
+}
+
+export interface RideMatchData {
+  rideId: string;
+  data?: {
+    rideId: string;
+  };
+}
+
+export interface SearchProgressUpdate {
+  requestGroupId: string;
+  currentIndex: number;
+  totalCandidates: number;
+  message: string;
+  status: "SEARCHING" | "COMPLETED" | "EXPIRED";
 }
