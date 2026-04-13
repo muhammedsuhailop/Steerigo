@@ -5,10 +5,13 @@ import {
   FaClock,
   FaCog,
   FaSearch,
+  FaCircle,
+  FaSquareFull,
 } from "react-icons/fa";
 import { TripFormData } from "../types/driverSearch.types";
 import { GiSteeringWheel } from "react-icons/gi";
 import { Location } from "@/shared/types/ride.types";
+import LocationPreview from "./LocationPreview";
 
 interface DriverSearchFormProps {
   onSubmit: (formData: TripFormData) => void;
@@ -35,39 +38,6 @@ const Pill: React.FC<{ children: React.ReactNode; active: boolean }> = ({
     {children}
   </button>
 );
-
-/* location preview  */
-const LocationPreview: React.FC<{
-  label: string;
-  location: Location | null;
-  onEdit: () => void;
-  onClear: () => void;
-}> = ({ label, location, onEdit, onClear }) => {
-  return (
-    <div className="p-3 bg-gray-50 ring-1 ring-gray-100 rounded-lg">
-      <p className="text-[11px] font-medium text-gray-600 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-gray-900 mb-3">
-        {location?.address || "Selected location"}
-      </p>
-      <div className="flex gap-2">
-        <button
-          type="button" 
-          onClick={onEdit}
-          className="flex-1 px-2 py-1 text-xs bg-gray-800 text-white rounded-md hover:opacity-95 transition"
-        >
-          Change
-        </button>
-        <button
-          type="button" 
-          onClick={onClear}
-          className="flex-1 px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition"
-        >
-          Clear
-        </button>
-      </div>
-    </div>
-  );
-};
 
 const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
   onSubmit,
@@ -221,58 +191,65 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
           </div>
         </div>
 
-        {/* Pickup Location */}
-        <div>
-          {externalPickup ? (
-            <LocationPreview
-              label="Pickup"
-              location={externalPickup}
-              onEdit={() => onOpenLocationSearch("pickup")}
-              onClear={() => onClearLocation("pickup")}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => onOpenLocationSearch("pickup")}
-              className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-400"
-            >
-              <FaSearch /> Search for pickup location
-            </button>
-          )}
-          {errors.pickupLocation && (
-            <p className="text-rose-500 text-xs mt-1">
-              {errors.pickupLocation}
-            </p>
-          )}
-        </div>
-
-        {/* Drop Location */}
-        {formData.tripType === "oneway" && (
+        <div className="space-y-3">
+          {/* Pickup */}
           <div>
-            {externalDrop ? (
+            {externalPickup ? (
               <LocationPreview
-                label="Drop"
-                location={externalDrop}
-                onEdit={() => onOpenLocationSearch("drop")}
-                onClear={() => onClearLocation("drop")}
+                label="Pickup"
+                location={externalPickup}
+                onEdit={() => onOpenLocationSearch("pickup")}
+                onClear={() => onClearLocation("pickup")}
               />
             ) : (
               <button
                 type="button"
-                onClick={() => onOpenLocationSearch("drop")}
-                className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-400"
+                onClick={() => onOpenLocationSearch("pickup")}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm hover:bg-gray-100 transition"
               >
-                <FaSearch /> Search for drop location
+                <FaCircle className="text-green-500 text-[10px]" />
+                <span className="text-gray-500">Select pickup location</span>
+                <FaSearch className="ml-auto text-gray-400 text-xs" />
               </button>
             )}
-            {errors.dropLocation && (
+
+            {errors.pickupLocation && (
               <p className="text-rose-500 text-xs mt-1">
-                {errors.dropLocation}
+                {errors.pickupLocation}
               </p>
             )}
           </div>
-        )}
 
+          {/* Drop */}
+          {formData.tripType === "oneway" && (
+            <div>
+              {externalDrop ? (
+                <LocationPreview
+                  label="Drop"
+                  location={externalDrop}
+                  onEdit={() => onOpenLocationSearch("drop")}
+                  onClear={() => onClearLocation("drop")}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenLocationSearch("drop")}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm hover:bg-gray-100 transition"
+                >
+                  <FaSquareFull className="text-red-500 text-[10px]" />
+                  <span className="text-gray-500">Select drop location</span>
+                  <FaSearch className="ml-auto text-gray-400 text-xs" />
+                </button>
+              )}
+
+              {errors.dropLocation && (
+                <p className="text-rose-500 text-xs mt-1">
+                  {errors.dropLocation}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
         {/* Start Date & Time */}
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -310,7 +287,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             )}
           </div>
         </div>
-
         {/* Required time | Manual checkbox | End Date | End Time */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-2">
@@ -409,7 +385,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             <p className="text-rose-500 text-xs mt-1">{errors.rideEndDate}</p>
           )}
         </div>
-
         {/* Search Radius */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-2">
@@ -437,7 +412,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             <span>50 km</span>
           </div>
         </div>
-
         {/* Gear and Body Type */}
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -474,7 +448,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
             </select>
           </div>
         </div>
-
         {/* Submit Button */}
         <button
           type="button"
@@ -502,6 +475,6 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = ({
       </form>
     </div>
   );
-};;
+};
 
 export default DriverSearchForm;

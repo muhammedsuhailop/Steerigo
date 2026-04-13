@@ -4,7 +4,7 @@ import { FaCalendarAlt, FaClock, FaMap, FaMapMarkerAlt } from "react-icons/fa";
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
 import TripLocationMap from "@/shared/components/maps/TripLocationMap";
-import MapLocationInput from "@/shared/components/maps";
+import LocationSearchInput from "@/shared/components/maps/LocationSearchInput";
 import DriverSearchForm from "../components/DriverSearchForm";
 import DriverSearchResults from "../components/DriverSearchResults";
 import { useSearchNearbyDriversMutation } from "../services/driverSearchApi";
@@ -76,7 +76,6 @@ const DriverSearchPage: React.FC = () => {
   >(null);
 
   const [modalState, setModalState] = useState<SearchModalState>(null);
-
   const modalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [searchNearbyDrivers] = useSearchNearbyDriversMutation();
@@ -84,20 +83,16 @@ const DriverSearchPage: React.FC = () => {
   const { startAutoRequest, cancel } = useAutoRideRequest({
     onSuccess: (rideId: string) => {
       setModalState("SUCCESS");
-
       modalTimerRef.current = setTimeout(() => {
         window.location.href = `/ride/${rideId}`;
       }, 2000);
     },
-
     onNoDriverFound: () => {
       setModalState("NO_DRIVER");
-
       modalTimerRef.current = setTimeout(() => {
         setModalState(null);
       }, 3000);
     },
-
     onCancelled: () => {
       setModalState(null);
       setRequestedDriverIds(new Set());
@@ -105,9 +100,7 @@ const DriverSearchPage: React.FC = () => {
     },
   });
 
-  const handleCloseModal = () => {
-    setModalState(null);
-  };
+  const handleCloseModal = () => setModalState(null);
 
   const { sendRequest, isLoading: isRequestLoading } = useRideRequest({
     formData: currentFormData,
@@ -122,7 +115,10 @@ const DriverSearchPage: React.FC = () => {
   const handleLocationSelect = (location: Location | null) => {
     if (activeSearchType === "pickup") setPickup(location);
     else setDrop(location);
-    setActiveSearchType(null);
+
+    if (location) {
+      setActiveSearchType(null);
+    }
   };
 
   const handleClearLocation = (type: "pickup" | "drop") => {
@@ -181,16 +177,13 @@ const DriverSearchPage: React.FC = () => {
   const handleAutoRequestSubmit = (formData: TripFormData) => {
     const newId = generateMongoObjectId();
     dispatch(setRequestGroupId(newId));
-
     setModalState("SEARCHING");
-
     startAutoRequest(formData, newId);
   };
 
   const handleDriverSelect = useCallback(
     async (driver: Driver) => {
       if (requestedDriverIds.has(driver.id)) return;
-
       setRequestedDriverIds((prev) => new Set(prev).add(driver.id));
       await sendRequest(driver);
     },
@@ -202,7 +195,6 @@ const DriverSearchPage: React.FC = () => {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Find Your Driver
@@ -213,7 +205,6 @@ const DriverSearchPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 h-fit border border-gray-200">
               <DriverSearchForm
@@ -243,7 +234,6 @@ const DriverSearchPage: React.FC = () => {
             )}
           </div>
 
-          {/* RIGHT SIDE */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-lg p-4 sticky top-4 h-fit border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -251,7 +241,6 @@ const DriverSearchPage: React.FC = () => {
                 <span>Trip Preview</span>
               </h3>
 
-              {/* Live Map Display  */}
               {currentFormData?.pickupLocation ||
               currentFormData?.dropLocation ? (
                 <div className="h-80 rounded-lg overflow-hidden mb-4 border border-gray-200">
@@ -272,7 +261,7 @@ const DriverSearchPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Trip Details Summary */}
+              {/* Trip details summary section remains the same... */}
               {currentFormData && (
                 <div className="space-y-3 text-sm">
                   {/* Trip Type */}
@@ -372,24 +361,27 @@ const DriverSearchPage: React.FC = () => {
       </div>
 
       {activeSearchType && (
-        <div className="fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative p-6">
+        <div className="fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative p-8">
             <button
               onClick={() => setActiveSearchType(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 p-2 rounded-full"
             >
               ✕
             </button>
-            <h3 className="text-lg font-bold mb-4">
-              Search {activeSearchType === "pickup" ? "Pickup" : "Drop"}
-            </h3>
-            <MapLocationInput
-              label=""
+
+            <LocationSearchInput
+              label={`Search ${activeSearchType === "pickup" ? "Pickup" : "Drop"} Point`}
               value={activeSearchType === "pickup" ? pickup : drop}
               onChange={handleLocationSelect}
-              placeholder="Enter address..."
+              placeholder="Start typing address (e.g., MG Road)..."
               required
             />
+
+            <p className="mt-4 text-[11px] text-gray-400 text-center italic">
+              Tip: You can also use the crosshair icon to pinpoint your exact
+              current location.
+            </p>
           </div>
         </div>
       )}

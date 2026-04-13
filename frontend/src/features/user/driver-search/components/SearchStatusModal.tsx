@@ -7,9 +7,13 @@ export type SearchModalState = "SEARCHING" | "SUCCESS" | "NO_DRIVER" | null;
 const SEARCH_MESSAGES = [
   "Finding you a great ride...",
   "Checking in with drivers nearby...",
-  "Hang tight, we're on the lookout!",
   "Matching you with a top-rated driver...",
   "Just a moment longer, nearly there...",
+];
+
+const SEARCH_FALLBACK_MESSAGES = [
+  "Still searching, this is taking a bit longer...",
+  "Hang tight, we're checking a wider area...",
   "Checking one more time for a closer match...",
 ];
 
@@ -33,16 +37,41 @@ const SearchStatusModal: React.FC<SearchStatusModalProps> = ({
   useEffect(() => {
     if (state !== "SEARCHING") return;
 
-    let index = 0;
+    let timeouts: ReturnType<typeof setTimeout>[] = [];
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     setDynamicMessage(SEARCH_MESSAGES[0]);
 
-    const interval = setInterval(() => {
-      index = (index + 1) % SEARCH_MESSAGES.length;
-      setDynamicMessage(SEARCH_MESSAGES[index]);
-    }, 5500);
+    SEARCH_MESSAGES.slice(1).forEach((msg, i) => {
+      const t = setTimeout(
+        () => {
+          setDynamicMessage(msg);
+        },
+        (i + 1) * 4000,
+      );
 
-    return () => clearInterval(interval);
+      timeouts.push(t);
+    });
+
+    const FALLBACK_DELAY = 20000;
+
+    const startFallbackLoop = setTimeout(() => {
+      let index = 0;
+
+      setDynamicMessage(SEARCH_FALLBACK_MESSAGES[0]);
+
+      interval = setInterval(() => {
+        index = (index + 1) % SEARCH_FALLBACK_MESSAGES.length;
+        setDynamicMessage(SEARCH_FALLBACK_MESSAGES[index]);
+      }, 6000);
+    }, FALLBACK_DELAY);
+
+    timeouts.push(startFallbackLoop);
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+      if (interval) clearInterval(interval);
+    };
   }, [state]);
 
   return (
