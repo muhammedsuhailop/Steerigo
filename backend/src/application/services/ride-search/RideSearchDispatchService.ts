@@ -183,7 +183,7 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
             getCurrency: () => currency,
           }),
           getPlatformFee: () => ({
-            getAmount: () => 0, 
+            getAmount: () => 0,
             getCurrency: () => currency,
           }),
           getFareTax: () => ({
@@ -317,8 +317,8 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
           totalCandidates: candidateDriverIds.length,
           message:
             index === 0
-              ? "Searching for a nearby driver..."
-              : "Finding another nearby driver...",
+              ? "Searching for a nearby driver"
+              : "Finding another nearby driver",
           status: "SEARCHING",
         },
       };
@@ -410,7 +410,7 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
       riderId,
       currentIndex: 0,
       totalCandidates: 0,
-      message: "No drivers found nearby.",
+      message: "No drivers found nearby",
       status: "EXPIRED",
     });
   }
