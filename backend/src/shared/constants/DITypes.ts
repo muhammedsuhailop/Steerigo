@@ -23,6 +23,10 @@ export const TYPES = {
   CouponRepository: Symbol.for("CouponRepository"),
   CouponUsageRepository: Symbol.for("CouponUsageRepository"),
   RideRequestGroupRepository: Symbol.for("RideRequestGroupRepository"),
+  ChatRoomRepository: Symbol.for("ChatRoomRepository"),
+  MessageRepository: Symbol.for("MessageRepository"),
+  MessageStatusRepository: Symbol.for("MessageStatusRepository"),
+  UserChatRepository: Symbol.for("UserChatRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
