@@ -96,7 +96,7 @@ export class ChatRoom {
   }
 
   isParticipant(userId: string): boolean {
-    return this.participants.some((p) => p.userId === userId);
+    return this.participants.some((p) => String(p.userId) === String(userId));
   }
 
   getId(): string {

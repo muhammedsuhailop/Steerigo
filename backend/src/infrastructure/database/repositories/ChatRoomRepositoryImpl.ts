@@ -86,7 +86,7 @@ export class ChatRoomRepositoryImpl implements IChatRoomRepository {
   async findByRideId(rideId: string): Promise<ChatRoom | null> {
     try {
       const doc = await ChatRoomModel.findOne({
-        rideId: new Types.ObjectId(rideId),
+        rideId: rideId,
       });
 
       return doc ? ChatRoomMapper.toDomain(doc) : null;

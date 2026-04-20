@@ -17,4 +17,6 @@ export interface IMessageRepository extends ICrudRepository<Message, string> {
     chatRoomId: string,
     options: IMessagePaginationOptions,
   ): Promise<PaginatedResult<Message>>;
+
+  softDelete(id: string): Promise<void>;
 }

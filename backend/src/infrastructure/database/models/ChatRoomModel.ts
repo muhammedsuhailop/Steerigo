@@ -6,7 +6,7 @@ import { ChatRoomType } from "@domain/value-objects/ChatRoomType";
 export interface IChatRoomDocument extends Document {
   _id: Types.ObjectId;
   type: ChatRoomType;
-  rideId?: Types.ObjectId;
+  rideId?: string;
 
   participants: {
     userId: Types.ObjectId;
@@ -25,7 +25,7 @@ export interface IChatRoomDocument extends Document {
 const chatRoomSchema = new Schema<IChatRoomDocument>(
   {
     rideId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Ride",
       required: true,
       unique: true,
@@ -41,7 +41,7 @@ const chatRoomSchema = new Schema<IChatRoomDocument>(
         },
         role: {
           type: String,
-          enum: ["RIDER", "DRIVER"],
+          enum: UserRole,
           required: true,
         },
       },

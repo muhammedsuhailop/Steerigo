@@ -6,6 +6,7 @@ import { fileRoutes } from "./file/fileRoutes";
 import { userRoutes } from "./user/userRoutes";
 import { notificationRoutes } from "./notification/notificationRoutes";
 import { paymentRoutes } from "./payment/paymentRoutes";
+import { chatRoomRoutes } from "./chat/chatRoutes";
 
 const router = Router();
 
@@ -22,6 +23,8 @@ router.use("/file", fileRoutes);
 router.use("/notifications", notificationRoutes);
 
 router.use("/payment", paymentRoutes);
+
+router.use("/chat-room", chatRoomRoutes);
 
 // Test Server endpoint
 router.get("/test", (req, res) => {

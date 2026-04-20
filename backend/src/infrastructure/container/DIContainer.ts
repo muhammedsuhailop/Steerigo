@@ -13,6 +13,7 @@ import { FareCalculationFactory } from "./factories/FareConfigurationFactory";
 import { RideRequestFactory } from "./factories/RideRequestFactory";
 import { NotificationFactory } from "./factories/NotificationFactory";
 import { PaymentFactory } from "./factories/PaymentFactory";
+import { ChatFactory } from "./factories/ChatFactory";
 
 const container = new Container();
 
@@ -31,5 +32,6 @@ FareCalculationFactory.register(container);
 RideRequestFactory.register(container);
 NotificationFactory.register(container);
 PaymentFactory.register(container);
+ChatFactory.register(container);
 
 export { container };

@@ -135,4 +135,26 @@ export class MessageRepositoryImpl implements IMessageRepository {
       throw error;
     }
   }
+
+  async softDelete(id: string): Promise<void> {
+    try {
+      const now = new Date();
+
+      await MessageModel.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            deletedAt: now,
+            updatedAt: now,
+          },
+        },
+        {
+          runValidators: true,
+        },
+      ).exec();
+    } catch (error) {
+      Logger.error("Error soft deleting message", { id, error });
+      throw error;
+    }
+  }
 }

@@ -157,6 +157,12 @@ export const TYPES = {
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
 
+  //Use Cases - Chat
+  CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),
+  GetRideChatRoomUseCase: Symbol.for("GetRideChatRoomUseCase"),
+  GetChatMessagesUseCase: Symbol.for("GetChatMessagesUseCase"),
+  SendChatMessageUseCase: Symbol.for("SendChatMessageUseCase"),
+
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
   GetUserFilesUseCase: Symbol.for("GetUserFilesUseCase"),
@@ -212,4 +218,6 @@ export const TYPES = {
   CouponController: Symbol.for("CouponController"),
   AdminTransactionController: Symbol.for("AdminTransactionController"),
   AdminWalletController: Symbol.for("AdminWalletController"),
+  ChatRoomController: Symbol.for("ChatRoomController"),
+  ChatMessageController: Symbol.for("ChatMessageController"),
 };

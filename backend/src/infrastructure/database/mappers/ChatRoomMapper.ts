@@ -34,9 +34,7 @@ export class ChatRoomMapper {
     return {
       type: entity.getType(),
 
-      rideId: entity.getRideId()
-        ? new Types.ObjectId(entity.getRideId())
-        : undefined,
+      rideId: entity.getRideId(),
 
       participants: entity.getParticipants().map((p) => ({
         userId: new Types.ObjectId(p.userId),

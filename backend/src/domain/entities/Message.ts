@@ -45,14 +45,17 @@ export class Message {
     private deletedAt?: Date,
   ) {}
 
+  private static readonly EDIT_WINDOW_MS = 2 * 60 * 1000;
+
   static create(params: MessageCreateParams): Message {
     if (!params.id || !params.chatRoomId || !params.senderId) {
       throw new Error("Invalid Message creation parameters");
     }
 
     const type = params.type ?? MessageType.TEXT;
+    const normalizedContent = params.content.trim();
 
-    if (type === MessageType.TEXT && !params.content) {
+    if (type === MessageType.TEXT && !normalizedContent) {
       throw new Error("Text message cannot be empty");
     }
 
@@ -72,7 +75,7 @@ export class Message {
       params.id,
       params.chatRoomId,
       params.senderId,
-      params.content,
+      normalizedContent,
       type,
       params.metadata ?? {},
     );
@@ -93,18 +96,24 @@ export class Message {
     );
   }
 
-  edit(newContent: string): void {
+  edit(newContent: string, now: Date = new Date()): void {
     if (this.deletedAt) {
       throw new Error("Cannot edit deleted message");
     }
 
-    if (!newContent) {
+    if (!this.canBeEdited(now)) {
+      throw new Error("Message edit window has expired");
+    }
+
+    const normalizedContent = newContent.trim();
+
+    if (!normalizedContent) {
       throw new Error("Message content cannot be empty");
     }
 
-    this.content = newContent;
-    this.editedAt = new Date();
-    this.updatedAt = new Date();
+    this.content = normalizedContent;
+    this.editedAt = now;
+    this.updatedAt = now;
   }
 
   delete(): void {
@@ -157,4 +166,13 @@ export class Message {
   getDeletedAt(): Date | undefined {
     return this.deletedAt;
   }
+
+  canBeEdited(now: Date = new Date()): boolean {
+    if (this.deletedAt) {
+      return false;
+    }
+
+    return now.getTime() - this.createdAt.getTime() <= Message.EDIT_WINDOW_MS;
+  }
 }
+
