@@ -162,6 +162,8 @@ export const TYPES = {
   GetRideChatRoomUseCase: Symbol.for("GetRideChatRoomUseCase"),
   GetChatMessagesUseCase: Symbol.for("GetChatMessagesUseCase"),
   SendChatMessageUseCase: Symbol.for("SendChatMessageUseCase"),
+  EditChatMessageUseCase: Symbol.for("EditChatMessageUseCase"),
+  DeleteChatMessageUseCase: Symbol.for("DeleteChatMessageUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),

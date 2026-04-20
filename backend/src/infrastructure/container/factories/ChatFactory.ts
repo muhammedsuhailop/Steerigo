@@ -16,6 +16,12 @@ import { CreateRideChatRoomDto } from "@application/dto/chat/CreateRideChatRoomD
 import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
 import { GetRideChatRoomDto } from "@application/dto/chat/GetRideChatRoomDto";
 import { GetRideChatRoomResponseDto } from "@application/dto/chat/response/GetRideChatRoomResponseDto";
+import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
+import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
+import { EditChatMessageUseCase } from "@application/use-cases/chat/EditChatMessageUseCase";
+import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
+import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
+import { DeleteChatMessageUseCase } from "@application/use-cases/chat/DeleteChatMessageUseCase";
 
 export class ChatFactory {
   static register(container: Container): void {
@@ -64,5 +70,23 @@ export class ChatFactory {
         >
       >(TYPES.SendChatMessageUseCase)
       .to(SendChatMessageUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          EditChatMessageDto,
+          Promise<Result<EditChatMessageResponseDto>>
+        >
+      >(TYPES.EditChatMessageUseCase)
+      .to(EditChatMessageUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          DeleteChatMessageDto,
+          Promise<Result<DeleteChatMessageResponseDto>>
+        >
+      >(TYPES.DeleteChatMessageUseCase)
+      .to(DeleteChatMessageUseCase);
   }
 }

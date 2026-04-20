@@ -134,4 +134,145 @@ export class ChatErrors {
       },
     );
   }
+
+  static messageNotFound(messageId: string): DomainError {
+    return new DomainError(
+      `Message not found for messageId: ${messageId}`,
+      "MESSAGE_NOT_FOUND",
+      {
+        statusCode: HttpStatusCodes.NOT_FOUND,
+        errorType: ErrorType.NOT_FOUND_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "NOT_FOUND",
+      },
+    );
+  }
+
+  static unauthorizedMessageAccess(
+    messageId: string,
+    userId: string,
+  ): DomainError {
+    return new DomainError(
+      `User ${userId} is not allowed to access message ${messageId}`,
+      "UNAUTHORIZED_MESSAGE_ACCESS",
+      {
+        statusCode: HttpStatusCodes.FORBIDDEN,
+        errorType: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "AUTH",
+      },
+    );
+  }
+
+  static cannotEditOthersMessage(
+    messageId: string,
+    userId: string,
+  ): DomainError {
+    return new DomainError(
+      `User ${userId} cannot edit message ${messageId} because it belongs to another user`,
+      "CANNOT_EDIT_OTHERS_MESSAGE",
+      {
+        statusCode: HttpStatusCodes.FORBIDDEN,
+        errorType: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "AUTH",
+      },
+    );
+  }
+
+  static cannotDeleteOthersMessage(
+    messageId: string,
+    userId: string,
+  ): DomainError {
+    return new DomainError(
+      `User ${userId} cannot delete message ${messageId} because it belongs to another user`,
+      "CANNOT_DELETE_OTHERS_MESSAGE",
+      {
+        statusCode: HttpStatusCodes.FORBIDDEN,
+        errorType: ErrorType.AUTHORIZATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "AUTH",
+      },
+    );
+  }
+
+  static messageAlreadyDeleted(messageId: string): DomainError {
+    return new DomainError(
+      `Message ${messageId} is already deleted`,
+      "MESSAGE_ALREADY_DELETED",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static cannotEditDeletedMessage(messageId: string): DomainError {
+    return new DomainError(
+      `Message ${messageId} is deleted and cannot be edited`,
+      "CANNOT_EDIT_DELETED_MESSAGE",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static messageEditWindowExpired(messageId: string): DomainError {
+    return new DomainError(
+      `Message ${messageId} can no longer be edited because the edit window has expired`,
+      "MESSAGE_EDIT_WINDOW_EXPIRED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static invalidMessageTypeForEdit(
+    messageId: string,
+    type: string,
+  ): DomainError {
+    return new DomainError(
+      `Message ${messageId} of type ${type} cannot be edited`,
+      "INVALID_MESSAGE_TYPE_FOR_EDIT",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
+
+  static invalidMessageOperation(
+    messageId: string,
+    operation: "edit" | "delete",
+  ): DomainError {
+    return new DomainError(
+      `Cannot ${operation} message ${messageId} due to its current state`,
+      "INVALID_MESSAGE_OPERATION",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

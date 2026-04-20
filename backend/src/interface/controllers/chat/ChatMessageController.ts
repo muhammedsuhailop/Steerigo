@@ -10,6 +10,10 @@ import { GetChatMessagesDto } from "@application/dto/chat/GetChatMessagesDto";
 import { SendChatMessageDto } from "@application/dto/chat/SendChatMessageDto";
 import { GetChatMessagesResponseDto } from "@application/dto/chat/response/GetChatMessagesResponseDto";
 import { SendChatMessageResponseDto } from "@application/dto/chat/response/SendChatMessageResponseDto";
+import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
+import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
+import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
+import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
 
 @injectable()
 export class ChatMessageController {
@@ -23,6 +27,16 @@ export class ChatMessageController {
     private readonly sendChatMessageUseCase: IUseCase<
       SendChatMessageDto,
       Promise<Result<SendChatMessageResponseDto>>
+    >,
+    @inject(TYPES.EditChatMessageUseCase)
+    private readonly editChatMessageUseCase: IUseCase<
+      EditChatMessageDto,
+      Promise<Result<EditChatMessageResponseDto>>
+    >,
+    @inject(TYPES.DeleteChatMessageUseCase)
+    private readonly deleteChatMessageUseCase: IUseCase<
+      DeleteChatMessageDto,
+      Promise<Result<DeleteChatMessageResponseDto>>
     >,
   ) {}
 
@@ -114,6 +128,73 @@ export class ChatMessageController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "send_chat_message",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async editMessage(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      const messageId = req.params.messageId;
+      const content =
+        typeof req.body?.content === "string" ? req.body.content : "";
+
+      const dto = EditChatMessageDto.fromRequest(userId as string, {
+        messageId,
+        content,
+      });
+
+      const result = await this.editChatMessageUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "edit_chat_message",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json(result.getValue());
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "edit_chat_message",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async deleteMessage(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      const messageId = req.params.messageId;
+
+      const dto = DeleteChatMessageDto.fromRequest(userId as string, {
+        messageId,
+      });
+
+      const result = await this.deleteChatMessageUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "delete_chat_message",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json(result.getValue());
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "delete_chat_message",
       );
       res.status(statusCode).json(response);
     }

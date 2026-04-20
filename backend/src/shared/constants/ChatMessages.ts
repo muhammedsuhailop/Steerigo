@@ -5,7 +5,9 @@ export const CHAT_MESSAGES = {
     RIDE_ROOM_FETCHED: "Ride chat room fetched successfully",
   },
   MESSAGES: {
-    FETCHED: "Chat messages fetched successfully",
-    SEND_SUCCESS: "Chat message sent successfully",
+    FETCHED: "Messages fetched successfully",
+    SEND_SUCCESS: "Message sent successfully",
+    EDITED: "Message edited successfully",
+    DELETED: "Message deleted successfully",
   },
 };
