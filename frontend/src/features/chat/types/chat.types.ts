@@ -1,8 +1,21 @@
-import { MessageType } from "@/features/chat/types/enums";
+import {
+  MessageDeliveryStatus,
+  MessageType,
+} from "@/features/chat/types/enums";
 
 export interface ChatParticipant {
   userId: string;
   role: string;
+}
+
+export interface MessageTimeline {
+  sentAt: string;
+  readAt?: string;
+}
+
+export interface MessageStatusDetail {
+  status: MessageDeliveryStatus;
+  updatedAt?: string;
 }
 
 export interface ChatRoom {
@@ -15,17 +28,32 @@ export interface ChatRoom {
   updatedAt: string;
 }
 
+export interface MessageStatusDetail {
+  id: string;
+  messageId: string;
+  userId: string;
+  status: MessageDeliveryStatus;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface MessageStatusDetail {
+  status: MessageDeliveryStatus;
+  updatedAt?: string;
+}
+
 export interface ChatMessage {
   id: string;
   chatRoomId: string;
   senderId: string;
   content: string;
   type: string;
+  isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  editedAt?: string;
-  deletedAt?: string;
-  isDeleted: boolean;
+  timeline: MessageTimeline;
+  status: MessageDeliveryStatus;
+  messageStatus: MessageStatusDetail | null;
 }
 
 export interface GetRideChatRoomResponse {
@@ -49,6 +77,8 @@ export interface GetChatMessagesResponse {
   message: string;
   data: {
     messages: ChatMessage[];
+    unreadCount: number;
+    totalUnreadCount: number;
     pagination: {
       total: number;
       page: number;
@@ -58,26 +88,22 @@ export interface GetChatMessagesResponse {
   };
 }
 
+export interface RawChatMessage {
+  id: string;
+  chatRoomId: string;
+  senderId: string;
+  content: string;
+  type: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  messageStatus: MessageStatusDetail | null;
+}
+
 export interface SendChatMessageResponse {
   success: boolean;
   message: string;
   data: ChatMessage;
-}
-
-export interface EditChatMessageResponse {
-  success: boolean;
-  message: string;
-  data: Pick<
-    ChatMessage,
-    | "id"
-    | "chatRoomId"
-    | "senderId"
-    | "content"
-    | "type"
-    | "createdAt"
-    | "updatedAt"
-    | "editedAt"
-  >;
 }
 
 export interface DeleteChatMessageResponse {
@@ -114,4 +140,12 @@ export interface ChatMessageDeletedPayload {
   messageId: string;
   senderId: string;
   deletedAt: string;
+}
+
+export interface ChatMessageViewedPayload {
+  chatRoomId: string;
+  messageId: string;
+  viewerId: string;
+  status: MessageDeliveryStatus;
+  seenAt: string;
 }

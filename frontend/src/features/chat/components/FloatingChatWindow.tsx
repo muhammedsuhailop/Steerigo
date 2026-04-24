@@ -10,8 +10,19 @@ import { Button } from "@/shared/components/ui/Button";
 
 export const FloatingChatWindow: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isOpen, isMinimized, activeChatRoomId, activeChatName, messages } =
-    useAppSelector((state) => state.chat);
+
+  const {
+    isOpen,
+    isMinimized,
+    activeChatRoomId,
+    activeChatName,
+    messages,
+    unreadCounts,
+  } = useAppSelector((state) => state.chat);
+
+  const unreadCount = activeChatRoomId
+    ? unreadCounts[activeChatRoomId] || 0
+    : 0;
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
 
   useChatRoom(activeChatRoomId || "");
@@ -46,7 +57,14 @@ export const FloatingChatWindow: React.FC = () => {
         onClick={() => dispatch(toggleMinimize())}
       >
         <div className="flex items-center gap-2">
-          <FaCommentDots className="text-blue-400" />
+          <div className="relative">
+            <FaCommentDots className="text-blue-400" />
+            {isMinimized && unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border border-gray-900">
+                {unreadCount}
+              </span>
+            )}
+          </div>
           <span className="text-sm font-bold truncate max-w-[150px]">
             {activeChatName}
           </span>
@@ -73,7 +91,6 @@ export const FloatingChatWindow: React.FC = () => {
         </div>
       </div>
 
-      {/* Body & Input (Hidden when minimized) */}
       {!isMinimized && (
         <>
           <div

@@ -4,3 +4,9 @@ export enum MessageType {
   LOCATION = "LOCATION",
   SYSTEM = "SYSTEM",
 }
+
+export enum MessageDeliveryStatus {
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  READ = "READ",
+}

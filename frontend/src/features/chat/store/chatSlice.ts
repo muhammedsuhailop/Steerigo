@@ -3,7 +3,19 @@ import {
   ChatMessage,
   ChatMessageEditedPayload,
   ChatMessageDeletedPayload,
+  ChatMessageViewedPayload,
+  MessageTimeline,
+  RawChatMessage,
 } from "../types/chat.types";
+import { MessageDeliveryStatus } from "../types/enums";
+
+const transformToTimeline = (msg: RawChatMessage): MessageTimeline => ({
+  sentAt: msg.createdAt,
+  readAt:
+    msg.messageStatus?.status === MessageDeliveryStatus.READ
+      ? msg.messageStatus.updatedAt || msg.updatedAt
+      : undefined,
+});
 
 interface ChatState {
   messages: ChatMessage[];
@@ -11,6 +23,7 @@ interface ChatState {
   isMinimized: boolean;
   activeChatRoomId: string | null;
   activeChatName: string | null;
+  unreadCounts: Record<string, number>;
 }
 
 const initialState: ChatState = {
@@ -19,6 +32,7 @@ const initialState: ChatState = {
   isMinimized: false,
   activeChatRoomId: null,
   activeChatName: null,
+  unreadCounts: {},
 };
 
 const chatSlice = createSlice({
@@ -33,40 +47,92 @@ const chatSlice = createSlice({
       state.activeChatName = action.payload.name;
       state.isOpen = true;
       state.isMinimized = false;
+      state.unreadCounts[action.payload.roomId] = 0;
     },
+
     closeChat: (state) => {
       state.isOpen = false;
       state.activeChatRoomId = null;
       state.activeChatName = null;
     },
+
     toggleMinimize: (state) => {
       state.isMinimized = !state.isMinimized;
-    },
-    setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
-      state.messages = action.payload;
-    },
-    addMessage: (state, action: PayloadAction<ChatMessage>) => {
-      if (!state.messages.find((m) => m.id === action.payload.id)) {
-        state.messages.push(action.payload);
+      if (!state.isMinimized && state.activeChatRoomId) {
+        state.unreadCounts[state.activeChatRoomId] = 0;
       }
     },
+
+    setMessages: (
+      state,
+      action: PayloadAction<{
+        messages: RawChatMessage[];
+        unreadCount: number;
+      }>,
+    ) => {
+      state.messages = action.payload.messages.map((msg) => ({
+        ...msg,
+        status: msg.messageStatus?.status ?? MessageDeliveryStatus.SENT,
+        timeline: transformToTimeline(msg),
+      }));
+
+      if (state.activeChatRoomId) {
+        state.unreadCounts[state.activeChatRoomId] = action.payload.unreadCount;
+      }
+    },
+
+    addMessage: (
+      state,
+      action: PayloadAction<{ message: RawChatMessage; currentUserId: string }>,
+    ) => {
+      const { message, currentUserId } = action.payload;
+
+      if (!state.messages.find((m) => m.id === message.id)) {
+        state.messages.push({
+          ...message,
+          status: message.messageStatus?.status ?? MessageDeliveryStatus.SENT,
+          timeline: transformToTimeline(message),
+        });
+
+        const isNotFromMe = message.senderId !== currentUserId;
+        const isNotViewing =
+          !state.isOpen ||
+          state.isMinimized ||
+          state.activeChatRoomId !== message.chatRoomId;
+
+        if (isNotFromMe && isNotViewing) {
+          state.unreadCounts[message.chatRoomId] =
+            (state.unreadCounts[message.chatRoomId] || 0) + 1;
+        }
+      }
+    },
+
+    updateMessageStatus: (
+      state,
+      action: PayloadAction<ChatMessageViewedPayload>,
+    ) => {
+      const msg = state.messages.find((m) => m.id === action.payload.messageId);
+      if (msg) {
+        msg.status = action.payload.status;
+        msg.timeline.readAt = action.payload.seenAt;
+      }
+    },
+
     updateMessage: (state, action: PayloadAction<ChatMessageEditedPayload>) => {
-      const index = state.messages.findIndex(
-        (m) => m.id === action.payload.messageId,
-      );
-      if (index !== -1) {
-        state.messages[index].content = action.payload.content;
+      const msg = state.messages.find((m) => m.id === action.payload.messageId);
+      if (msg) {
+        msg.content = action.payload.content;
+        msg.updatedAt = action.payload.updatedAt;
       }
     },
+
     removeMessage: (
       state,
       action: PayloadAction<ChatMessageDeletedPayload>,
     ) => {
-      const index = state.messages.findIndex(
-        (m) => m.id === action.payload.messageId,
-      );
-      if (index !== -1) {
-        state.messages[index].isDeleted = true;
+      const msg = state.messages.find((m) => m.id === action.payload.messageId);
+      if (msg) {
+        msg.isDeleted = true;
       }
     },
   },
@@ -80,5 +146,7 @@ export const {
   addMessage,
   updateMessage,
   removeMessage,
+  updateMessageStatus,
 } = chatSlice.actions;
+
 export default chatSlice.reducer;
