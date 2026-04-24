@@ -56,11 +56,19 @@ export class MarkChatMessagesReadUseCase
 
       if (!isAuthorized) {
         const driverProfile = await this.driverRepository.findByUserId(userId);
+
         if (driverProfile) {
           const driverId = driverProfile.getId();
+
           if (chatRoom.isParticipant(driverId)) {
             isAuthorized = true;
             resolvedUserId = driverId;
+
+            Logger.debug("Chat read access resolved via Driver Profile", {
+              userId,
+              resolvedDriverId: driverId,
+              chatRoomId,
+            });
           }
         }
       }
@@ -76,32 +84,65 @@ export class MarkChatMessagesReadUseCase
         return Result.failure(ChatErrors.messageNotFound(messageId));
       }
 
-      const userChat = await this.userChatRepository.findByUserIdAndChatRoomId(
-        resolvedUserId,
-        chatRoomId,
-      );
-
-      if (userChat) {
-        userChat.markAsRead(messageId);
-        await this.userChatRepository.save(userChat);
-      }
-
-      const status =
-        await this.messageStatusRepository.findByMessageIdAndUserId(
-          messageId,
-          resolvedUserId,
-        );
-
-      if (status) {
-        status.markRead();
-        await this.messageStatusRepository.save(status);
-      } else if (message.getSenderId() !== resolvedUserId) {
-        Logger.warn(
-          `No MessageStatus found for message ${messageId} and user ${resolvedUserId}`,
-        );
+      if (message.getSenderId() === resolvedUserId) {
+        return Result.success({
+          success: true,
+          message: "Own message does not require read-status update",
+          data: {
+            chatRoomId,
+            messageId,
+            userId: resolvedUserId,
+            status: MessageDeliveryStatus.READ,
+            seenAt: new Date().toISOString(),
+            unreadCount: 0,
+            totalUnreadCount:
+              await this.userChatRepository.getTotalUnreadCountByUserId(
+                resolvedUserId,
+              ),
+          },
+        });
       }
 
       const seenAt = new Date();
+
+      const updatedUserChat = await this.userChatRepository.markChatAsRead(
+        resolvedUserId,
+        chatRoomId,
+        messageId,
+        seenAt,
+      );
+
+      const updatedMessageIds =
+        await this.messageStatusRepository.markMessagesAsReadUpTo(
+          chatRoomId,
+          resolvedUserId,
+          messageId,
+          seenAt,
+        );
+
+      Logger.info("Marked chat messages as read", {
+        chatRoomId,
+        messageId,
+        resolvedUserId,
+        updatedCount: updatedMessageIds.length,
+      });
+
+      if (updatedMessageIds.length === 0) {
+        Logger.warn("No message status rows were updated as read", {
+          chatRoomId,
+          messageId,
+          resolvedUserId,
+        });
+      }
+
+      const unreadCount = updatedUserChat
+        ? updatedUserChat.getUnreadCount()
+        : 0;
+
+      const totalUnreadCount =
+        await this.userChatRepository.getTotalUnreadCountByUserId(
+          resolvedUserId,
+        );
 
       const event: ChatMessageViewedEvent = {
         type: "ChatMessageViewed",
@@ -126,6 +167,8 @@ export class MarkChatMessagesReadUseCase
           userId: resolvedUserId,
           status: MessageDeliveryStatus.READ,
           seenAt: seenAt.toISOString(),
+          unreadCount,
+          totalUnreadCount,
         },
       });
     } catch (error) {
@@ -136,7 +179,9 @@ export class MarkChatMessagesReadUseCase
         error: error instanceof Error ? error.message : String(error),
       });
 
-      return Result.failure(error as Error);
+      return Result.failure(
+        error instanceof Error ? error : new Error(String(error)),
+      );
     }
   }
 }

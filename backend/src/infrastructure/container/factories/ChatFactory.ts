@@ -26,6 +26,9 @@ import { IChatRealtimeService } from "@application/services/IChatRealtimeService
 import { ChatRealtimeService } from "@infrastructure/realtime/services/ChatRealtimeService";
 import { IChatEventBus } from "@application/services/IChatEventBus";
 import { InMemoryChatEventBus } from "@infrastructure/events/InMemoryChatEventBus";
+import { MarkChatMessagesReadUseCase } from "@application/use-cases/chat/MarkChatMessagesReadUseCase";
+import { MarkChatMessagesReadDto } from "@application/dto/chat/MarkChatMessagesReadDto";
+import { MarkChatMessagesReadResponseDto } from "@application/dto/chat/response/MarkChatMessagesReadResponseDto";
 
 export class ChatFactory {
   static register(container: Container): void {
@@ -102,5 +105,14 @@ export class ChatFactory {
         >
       >(TYPES.DeleteChatMessageUseCase)
       .to(DeleteChatMessageUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          MarkChatMessagesReadDto,
+          Promise<Result<MarkChatMessagesReadResponseDto>>
+        >
+      >(TYPES.MarkChatMessagesReadUseCase)
+      .to(MarkChatMessagesReadUseCase);
   }
 }

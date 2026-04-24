@@ -1,3 +1,5 @@
+import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
+
 export interface GetChatMessagesResponseDto {
   success: boolean;
   message: string;
@@ -13,7 +15,16 @@ export interface GetChatMessagesResponseDto {
       editedAt?: string;
       deletedAt?: string;
       isDeleted: boolean;
+
+      messageStatus: {
+        status: MessageDeliveryStatus;
+        readAt?: string;
+      } | null;
     }>;
+
+    unreadCount: number;
+    totalUnreadCount: number;
+
     pagination: {
       total: number;
       page: number;

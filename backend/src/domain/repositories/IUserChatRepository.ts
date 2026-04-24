@@ -20,4 +20,13 @@ export interface IUserChatRepository extends ICrudRepository<UserChat, string> {
     userId: string,
     options: IUserChatPaginationOptions,
   ): Promise<PaginatedResult<UserChat>>;
+
+  markChatAsRead(
+    userId: string,
+    chatRoomId: string,
+    lastReadMessageId: string,
+    readAt: Date,
+  ): Promise<UserChat | null>;
+
+  getTotalUnreadCountByUserId(userId: string): Promise<number>;
 }

@@ -1,3 +1,5 @@
+import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
+
 export interface MarkChatMessagesReadResponseDto {
   success: boolean;
   message: string;
@@ -5,7 +7,9 @@ export interface MarkChatMessagesReadResponseDto {
     chatRoomId: string;
     messageId: string;
     userId: string;
-    status: string;
+    status: MessageDeliveryStatus;
     seenAt: string;
+    unreadCount: number;
+    totalUnreadCount: number;
   };
 }

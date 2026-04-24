@@ -152,4 +152,92 @@ export class UserChatRepositoryImpl implements IUserChatRepository {
       throw error;
     }
   }
+
+  async getTotalUnreadCountByUserId(userId: string): Promise<number> {
+    try {
+      const result = await UserChatModel.aggregate<{
+        totalUnreadCount: number;
+      }>([
+        {
+          $match: {
+            userId: new Types.ObjectId(userId),
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalUnreadCount: { $sum: "$unreadCount" },
+          },
+        },
+      ]);
+
+      return result[0]?.totalUnreadCount ?? 0;
+    } catch (error) {
+      Logger.error("Error getting total unread count by userId", {
+        userId,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async markChatAsRead(
+    userId: string,
+    chatRoomId: string,
+    lastReadMessageId: string,
+    readAt: Date,
+  ): Promise<UserChat | null> {
+    try {
+      const existingDoc = await UserChatModel.findOne({
+        userId: new Types.ObjectId(userId),
+        chatRoomId: new Types.ObjectId(chatRoomId),
+      });
+
+      if (!existingDoc) {
+        Logger.warn("UserChat not found while marking chat as read", {
+          userId,
+          chatRoomId,
+          lastReadMessageId,
+        });
+        return null;
+      }
+
+      const userChat = UserChatMapper.toDomain(existingDoc);
+
+      userChat.markAsRead(lastReadMessageId);
+
+      const persistenceData = UserChatMapper.toPersistence(userChat);
+
+      const updatedDoc = await UserChatModel.findByIdAndUpdate(
+        existingDoc._id,
+        {
+          ...persistenceData,
+          updatedAt: readAt,
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+
+      if (!updatedDoc) {
+        Logger.warn("Failed to update UserChat while marking as read", {
+          userId,
+          chatRoomId,
+          lastReadMessageId,
+        });
+        return null;
+      }
+
+      return UserChatMapper.toDomain(updatedDoc);
+    } catch (error) {
+      Logger.error("Error marking chat as read", {
+        userId,
+        chatRoomId,
+        lastReadMessageId,
+        error,
+      });
+      throw error;
+    }
+  }
 }

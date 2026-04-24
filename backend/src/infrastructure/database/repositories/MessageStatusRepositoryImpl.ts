@@ -9,6 +9,7 @@ import {
 } from "../models/MessageStatusModel";
 import { MessageStatusMapper } from "../mappers/MessageStatusMapper";
 import { Logger } from "@shared/utils/Logger";
+import { MessageModel } from "../models/MessageModel";
 
 @injectable()
 export class MessageStatusRepositoryImpl implements IMessageStatusRepository {
@@ -109,6 +110,35 @@ export class MessageStatusRepositoryImpl implements IMessageStatusRepository {
     }
   }
 
+  async findByMessageIdsAndUserId(
+    messageIds: string[],
+    userId: string,
+  ): Promise<MessageStatus[]> {
+    try {
+      if (messageIds.length === 0) {
+        return [];
+      }
+
+      const objectIds = messageIds.map(
+        (messageId) => new Types.ObjectId(messageId),
+      );
+
+      const docs = await MessageStatusModel.find({
+        messageId: { $in: objectIds },
+        userId: new Types.ObjectId(userId),
+      });
+
+      return docs.map(MessageStatusMapper.toDomain);
+    } catch (error) {
+      Logger.error("Error finding message statuses by messageIds & userId", {
+        messageIds,
+        userId,
+        error,
+      });
+      throw error;
+    }
+  }
+
   async updateStatus(
     messageId: string,
     userId: string,
@@ -120,15 +150,89 @@ export class MessageStatusRepositoryImpl implements IMessageStatusRepository {
         userId: new Types.ObjectId(userId),
       };
 
-      await MessageStatusModel.updateOne(filter, {
+      const updateData: Partial<IMessageStatusDocument> = {
         status,
         updatedAt: new Date(),
-      });
+      };
+
+      await MessageStatusModel.updateOne(filter, updateData);
     } catch (error) {
       Logger.error("Error updating message status", {
         messageId,
         userId,
         status,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  async markMessagesAsReadUpTo(
+    chatRoomId: string,
+    userId: string,
+    messageId: string,
+    readAt: Date,
+  ): Promise<string[]> {
+    try {
+      const boundaryMessage = await MessageModel.findById(
+        new Types.ObjectId(messageId),
+      ).select({
+        _id: 1,
+        chatRoomId: 1,
+        createdAt: 1,
+      });
+
+      if (!boundaryMessage) {
+        Logger.warn("Boundary message not found for markMessagesAsReadUpTo", {
+          chatRoomId,
+          userId,
+          messageId,
+        });
+        return [];
+      }
+
+      if (boundaryMessage.chatRoomId.toString() !== chatRoomId) {
+        Logger.warn("Boundary message does not belong to chat room", {
+          chatRoomId,
+          userId,
+          messageId,
+          actualChatRoomId: boundaryMessage.chatRoomId.toString(),
+        });
+        return [];
+      }
+
+      const messagesInRange = await MessageModel.find({
+        chatRoomId: new Types.ObjectId(chatRoomId),
+        createdAt: { $lte: boundaryMessage.createdAt },
+      }).select({ _id: 1 });
+
+      const messageObjectIds = messagesInRange.map((message) => message._id);
+
+      if (messageObjectIds.length === 0) {
+        return [];
+      }
+
+      await MessageStatusModel.updateMany(
+        {
+          messageId: { $in: messageObjectIds },
+          userId: new Types.ObjectId(userId),
+          status: { $ne: MessageDeliveryStatus.READ },
+        },
+        {
+          $set: {
+            status: MessageDeliveryStatus.READ,
+            readAt,
+            updatedAt: readAt,
+          },
+        },
+      );
+
+      return messageObjectIds.map((id) => id.toString());
+    } catch (error) {
+      Logger.error("Error marking messages as read up to boundary", {
+        chatRoomId,
+        userId,
+        messageId,
         error,
       });
       throw error;

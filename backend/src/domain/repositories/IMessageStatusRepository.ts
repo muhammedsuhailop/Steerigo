@@ -11,6 +11,18 @@ export interface IMessageStatusRepository
     userId: string,
   ): Promise<MessageStatus | null>;
 
+  findByMessageIdsAndUserId(
+    messageIds: string[],
+    userId: string,
+  ): Promise<MessageStatus[]>;
+
+  markMessagesAsReadUpTo(
+    chatRoomId: string,
+    userId: string,
+    messageId: string,
+    readAt: Date,
+  ): Promise<string[]>;
+
   updateStatus(
     messageId: string,
     userId: string,

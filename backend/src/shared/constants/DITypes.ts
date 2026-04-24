@@ -166,6 +166,7 @@ export const TYPES = {
   SendChatMessageUseCase: Symbol.for("SendChatMessageUseCase"),
   EditChatMessageUseCase: Symbol.for("EditChatMessageUseCase"),
   DeleteChatMessageUseCase: Symbol.for("DeleteChatMessageUseCase"),
+  MarkChatMessagesReadUseCase: Symbol.for("MarkChatMessagesReadUseCase"),
 
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
