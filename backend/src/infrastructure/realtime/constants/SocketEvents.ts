@@ -31,6 +31,13 @@ export const SOCKET_EVENTS = {
   PAYMENT_CASH_CONFIRMED: "cash-confirmed",
 
   NOTIFICATION_CREATED: "notification:created",
+
+  CHAT_JOIN: "chat:join",
+  CHAT_LEAVE: "chat:leave",
+  CHAT_MESSAGE_SENT: "chat:message:sent",
+  CHAT_MESSAGE_EDITED: "chat:message:edited",
+  CHAT_MESSAGE_DELETED: "chat:message:deleted",
+  CHAT_MESSAGE_VIEWED: "chat:message:viewed",
 } as const;
 
 export type SocketEventKey = keyof typeof SOCKET_EVENTS;

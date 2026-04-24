@@ -55,9 +55,11 @@ export const TYPES = {
   RideSearchQueue: Symbol.for("RideSearchQueue"),
   NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
+  ChatRealtimeService: Symbol.for("ChatRealtimeService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
+  ChatEventBus: Symbol.for("ChatEventBus"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),

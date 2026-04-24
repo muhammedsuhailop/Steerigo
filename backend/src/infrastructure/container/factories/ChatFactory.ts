@@ -22,6 +22,10 @@ import { EditChatMessageUseCase } from "@application/use-cases/chat/EditChatMess
 import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
 import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
 import { DeleteChatMessageUseCase } from "@application/use-cases/chat/DeleteChatMessageUseCase";
+import { IChatRealtimeService } from "@application/services/IChatRealtimeService";
+import { ChatRealtimeService } from "@infrastructure/realtime/services/ChatRealtimeService";
+import { IChatEventBus } from "@application/services/IChatEventBus";
+import { InMemoryChatEventBus } from "@infrastructure/events/InMemoryChatEventBus";
 
 export class ChatFactory {
   static register(container: Container): void {
@@ -33,6 +37,16 @@ export class ChatFactory {
     container
       .bind<ChatMessageController>(TYPES.ChatMessageController)
       .to(ChatMessageController);
+
+    container
+      .bind<IChatRealtimeService>(TYPES.ChatRealtimeService)
+      .to(ChatRealtimeService)
+      .inSingletonScope();
+
+    container
+      .bind<IChatEventBus>(TYPES.ChatEventBus)
+      .to(InMemoryChatEventBus)
+      .inSingletonScope();
 
     //Use Cases
     container

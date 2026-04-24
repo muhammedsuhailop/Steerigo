@@ -7,6 +7,8 @@ import { IMessageRepository } from "@domain/repositories/IMessageRepository";
 import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
 import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
 import { ChatErrors } from "@domain/errors/ChatErrors";
+import { IChatEventBus } from "@application/services/IChatEventBus";
+import { ChatMessageDeletedEvent } from "@application/events/ChatEvents";
 
 @injectable()
 export class DeleteChatMessageUseCase
@@ -19,6 +21,8 @@ export class DeleteChatMessageUseCase
   constructor(
     @inject(TYPES.MessageRepository)
     private readonly messageRepository: IMessageRepository,
+    @inject(TYPES.ChatEventBus)
+    private readonly chatEventBus: IChatEventBus,
   ) {}
 
   async execute(
@@ -60,6 +64,19 @@ export class DeleteChatMessageUseCase
       await this.messageRepository.softDelete(messageId);
 
       const deletedAt = new Date();
+
+      const event: ChatMessageDeletedEvent = {
+        type: "ChatMessageDeleted",
+        occurredAt: deletedAt,
+        payload: {
+          chatRoomId: message.getChatRoomId(),
+          messageId: message.getId(),
+          senderId: message.getSenderId(),
+          deletedAt: deletedAt.toISOString(),
+        },
+      };
+
+      await this.chatEventBus.publish(event);
 
       const response: DeleteChatMessageResponseDto = {
         success: true,

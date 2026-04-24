@@ -24,6 +24,8 @@ import { IEventBus } from "@application/services/IEventBus";
 import { RideMatchedEvent } from "@application/events/RideEvents";
 import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
 import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
+import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
+import { CreateRideChatRoomDto } from "@application/dto/chat/CreateRideChatRoomDto";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -54,6 +56,11 @@ export class AcceptRideRequestUseCase
     private lockService: IDistributedLockService,
     @inject(TYPES.EventBus)
     private eventBus: IEventBus,
+    @inject(TYPES.CreateRideChatRoomUseCase)
+    private readonly createRideChatRoomUseCase: IUseCase<
+      CreateRideChatRoomDto,
+      Promise<Result<CreateRideChatRoomResponseDto>>
+    >,
   ) {}
 
   async execute(
@@ -201,6 +208,12 @@ export class AcceptRideRequestUseCase
       });
 
       await this.markDriverAsBusy(driverId);
+
+      await this.createRideChatRoomUseCase.execute(
+        new CreateRideChatRoomDto(dto.getUserId(), {
+          rideId: savedRide.getRideId(),
+        }),
+      );
 
       const response: AcceptRideRequestResponseDto = {
         success: true,

@@ -18,6 +18,8 @@ import { IIdGenerator } from "@application/services/IIdGenerator";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { UserChat } from "@domain/entities/UserChat";
 import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
+import { IChatEventBus } from "@application/services/IChatEventBus";
+import { ChatMessageSentEvent } from "@application/events/ChatEvents";
 
 @injectable()
 export class SendChatMessageUseCase
@@ -37,6 +39,8 @@ export class SendChatMessageUseCase
     private readonly messageStatusRepository: IMessageStatusRepository,
     @inject(TYPES.IDGenerator)
     private readonly idGenerator: IIdGenerator,
+    @inject(TYPES.ChatEventBus)
+    private readonly chatEventBus: IChatEventBus,
   ) {}
 
   async execute(
@@ -136,6 +140,30 @@ export class SendChatMessageUseCase
 
         await this.messageStatusRepository.save(status);
       }
+
+      const event: ChatMessageSentEvent = {
+        type: "ChatMessageSent",
+        occurredAt: new Date(),
+        payload: {
+          chatRoomId: savedMessage.getChatRoomId(),
+          rideId: chatRoom.getRideId(),
+          message: {
+            id: savedMessage.getId(),
+            senderId: savedMessage.getSenderId(),
+            content: savedMessage.getContent(),
+            type: savedMessage.getType(),
+            metadata: savedMessage.getMetadata(),
+            createdAt: savedMessage.getCreatedAt().toISOString(),
+            updatedAt: savedMessage.getUpdatedAt().toISOString(),
+          },
+          participants: chatRoom.getParticipants().map((participant) => ({
+            userId: participant.userId,
+            role: participant.role,
+          })),
+        },
+      };
+
+      await this.chatEventBus.publish(event);
 
       const response: SendChatMessageResponseDto = {
         success: true,

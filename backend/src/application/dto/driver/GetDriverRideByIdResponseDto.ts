@@ -58,6 +58,7 @@ export interface TimelineDetails {
 export interface RideDetails {
   id: string;
   rideId: string;
+  driverId: string;
   status: string;
   paymentStatus?: PaymentStatus;
   rideType: string;

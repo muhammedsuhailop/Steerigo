@@ -8,6 +8,8 @@ import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
 import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
 import { ChatErrors } from "@domain/errors/ChatErrors";
 import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
+import { IChatEventBus } from "@application/services/IChatEventBus";
+import { ChatMessageEditedEvent } from "@application/events/ChatEvents";
 
 @injectable()
 export class EditChatMessageUseCase
@@ -17,6 +19,8 @@ export class EditChatMessageUseCase
   constructor(
     @inject(TYPES.MessageRepository)
     private readonly messageRepository: IMessageRepository,
+    @inject(TYPES.ChatEventBus)
+    private readonly chatEventBus: IChatEventBus,
   ) {}
 
   async execute(
@@ -47,6 +51,21 @@ export class EditChatMessageUseCase
       message.edit(newContent);
 
       const savedMessage = await this.messageRepository.save(message);
+
+      const event: ChatMessageEditedEvent = {
+        type: "ChatMessageEdited",
+        occurredAt: new Date(),
+        payload: {
+          chatRoomId: savedMessage.getChatRoomId(),
+          messageId: savedMessage.getId(),
+          senderId: savedMessage.getSenderId(),
+          content: savedMessage.getContent(),
+          updatedAt: savedMessage.getUpdatedAt().toISOString(),
+          editedAt: savedMessage.getEditedAt()?.toISOString(),
+        },
+      };
+
+      await this.chatEventBus.publish(event);
 
       const response: EditChatMessageResponseDto = {
         success: true,
