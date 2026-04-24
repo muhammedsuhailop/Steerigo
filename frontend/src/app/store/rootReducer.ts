@@ -33,6 +33,8 @@ import errorReducer from "@/shared/components/ui/ErrorHandling/errorSlice";
 import { adminTransactionApi } from "@/features/admin/transactions/services/adminTransactionApi";
 import { adminRideApi } from "@/features/admin/rides/services/adminRideApi";
 import { adminCouponApi } from "@/features/admin/coupons/services/adminCouponApi";
+import { chatApi } from "@/features/chat/services/chatApi";
+import chatReducer from "@/features/chat/store/chatSlice";
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -67,6 +69,9 @@ const appReducer = combineReducers({
   [driverSearchApi.reducerPath]: driverSearchApi.reducer,
   [viewRideApi.reducerPath]: viewRideApi.reducer,
   [userRidesApi.reducerPath]: userRidesApi.reducer,
+
+  chat: chatReducer,
+  [chatApi.reducerPath]: chatApi.reducer,
 
   error: errorReducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
@@ -103,4 +108,5 @@ export const apiMiddlewares = [
   adminTransactionApi.middleware,
   adminRideApi.middleware,
   adminCouponApi.middleware,
+  chatApi.middleware,
 ];

@@ -29,6 +29,7 @@ import { ICouponUsageService } from "@application/services/ICouponUsageService";
 import { NotificationType } from "@domain/value-objects/NotificationType";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -42,11 +43,14 @@ export class InMemoryEventBus implements IEventBus {
     @inject(TYPES.PaymentNotificationService)
     private readonly paymentNotificationService: IPaymentNotificationService,
 
-    @inject(TYPES.DriverAvailabilityRepository)
-    private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
-
     @inject(TYPES.CouponUsageService)
     private readonly couponUsageService: ICouponUsageService,
+
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
+
+    @inject(TYPES.DriverAvailabilityRepository)
+    private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
   ) {}
 
   async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
@@ -155,6 +159,8 @@ export class InMemoryEventBus implements IEventBus {
       body: "Thank you for riding with us.",
       metadata: payload,
     });
+    await this.incrementDriverRideCount(payload.driverId);
+    await this.updateDriverAvailability(payload.driverId);
   }
 
   private async handlePaymentInitiated(event: PaymentInitiatedEvent) {
@@ -389,6 +395,32 @@ export class InMemoryEventBus implements IEventBus {
       await this.driverAvailabilityRepository.save(availability);
     } catch (error) {
       Logger.error("Failed to update driver availability after cancellation", {
+        driverId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async incrementDriverRideCount(driverId: string): Promise<void> {
+    try {
+      const driver = await this.driverRepository.findById(driverId);
+
+      if (!driver) {
+        Logger.warn("Could not find driver to increment ride count", {
+          driverId,
+        });
+        return;
+      }
+
+      driver.incrementTotalRides();
+      await this.driverRepository.save(driver);
+
+      Logger.info("Driver ride count incremented", {
+        driverId,
+        newTotal: driver.getTotalRides(),
+      });
+    } catch (error) {
+      Logger.error("Failed to increment driver ride count", {
         driverId,
         error: error instanceof Error ? error.message : String(error),
       });

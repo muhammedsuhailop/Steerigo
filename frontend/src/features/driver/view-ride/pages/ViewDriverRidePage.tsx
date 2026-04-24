@@ -166,7 +166,12 @@ const ViewDriverRidePage: React.FC = () => {
             >
               {/* Rider Info */}
               {activeRider && (
-                <RideRiderCard rider={activeRider} minimal={isInactive} />
+                <RideRiderCard
+                  rider={activeRider}
+                  minimal={isInactive}
+                  rideId={activeRide.rideId}
+                  driverId={activeRide.driverId}
+                />
               )}
 
               {/* Action Controls or Status Banner */}

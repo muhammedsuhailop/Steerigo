@@ -14,6 +14,7 @@ import { createSocketAuthMiddleware } from "./middleware/SocketAuthMiddleware";
 import { registerRideRoomHandlers } from "./handlers/RideRoomHandler";
 import { registerDriverLocationHandler } from "./handlers/DriverLocationHandler";
 import { SOCKET_EVENTS } from "./constants/SocketEvents";
+import { registerChatRoomHandlers } from "./handlers/ChatRoomHandler";
 
 export interface SocketData {
   userId: string;
@@ -117,6 +118,13 @@ export function initializeRideSocketServer(
     registerDriverLocationHandler(io, socket, driverLocationRepository);
 
     Logger.debug("Driver location handler registered", {
+      socketId: socket.id,
+      userId,
+    });
+
+    registerChatRoomHandlers(socket);
+
+    Logger.debug("Chat room handlers registered", {
       socketId: socket.id,
       userId,
     });

@@ -28,6 +28,14 @@ import { CouponUsageRepositoryImpl } from "@infrastructure/database/repositories
 import { ICouponUsageRepository } from "@domain/repositories/ICouponUsageRepository";
 import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
 import { RideRequestGroupRepositoryImpl } from "@infrastructure/database/repositories/RideRequestGroupRepositoryImpl";
+import { IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
+import { ChatRoomRepositoryImpl } from "@infrastructure/database/repositories/ChatRoomRepositoryImpl";
+import { IMessageRepository } from "@domain/repositories/IMessageRepository";
+import { MessageRepositoryImpl } from "@infrastructure/database/repositories/MessageRepositoryImpl";
+import { IMessageStatusRepository } from "@domain/repositories/IMessageStatusRepository";
+import { MessageStatusRepositoryImpl } from "@infrastructure/database/repositories/MessageStatusRepositoryImpl";
+import { IUserChatRepository } from "@domain/repositories/IUserChatRepository";
+import { UserChatRepositoryImpl } from "@infrastructure/database/repositories/UserChatRepositoryImpl";
 
 export class RepositoryFactory {
   static register(container: Container): void {
@@ -71,5 +79,17 @@ export class RepositoryFactory {
     container
       .bind<IRideRequestGroupRepository>(TYPES.RideRequestGroupRepository)
       .to(RideRequestGroupRepositoryImpl);
+    container
+      .bind<IChatRoomRepository>(TYPES.ChatRoomRepository)
+      .to(ChatRoomRepositoryImpl);
+    container
+      .bind<IMessageRepository>(TYPES.MessageRepository)
+      .to(MessageRepositoryImpl);
+    container
+      .bind<IMessageStatusRepository>(TYPES.MessageStatusRepository)
+      .to(MessageStatusRepositoryImpl);
+    container
+      .bind<IUserChatRepository>(TYPES.UserChatRepository)
+      .to(UserChatRepositoryImpl);
   }
 }

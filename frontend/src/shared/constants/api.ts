@@ -58,7 +58,7 @@ export const API_ENDPOINTS = {
     PAYOUTS: "/admin/payouts",
     TRANSACTIONS: "/admin/transactions",
     RIDES: "/admin/rides",
-    COUPONS:"/admin/coupons",
+    COUPONS: "/admin/coupons",
   },
   FILE: {
     UPLOAD: "/file/upload",
@@ -72,6 +72,12 @@ export const API_ENDPOINTS = {
     VERIFY: "/payment/verify",
     CONFIRM_CASH: "/payment/confirm-cash",
     MARK_FAILED: "/payment/mark-failed",
+  },
+  CHAT: {
+    BASE: "/chat-room",
+    BY_RIDE: (rideId: string) => `/chat-room/ride/${rideId}`,
+    MESSAGES: (roomId: string) => `/chat-room/${roomId}/messages`,
+    MESSAGE_BY_ID: (msgId: string) => `/chat-room/messages/${msgId}`,
   },
 } as const;
 

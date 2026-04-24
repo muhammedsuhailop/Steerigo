@@ -120,7 +120,10 @@ const ViewRidePage: React.FC = () => {
 
               <div className="lg:col-span-4 space-y-6">
                 {activeDriver ? (
-                  <RideDriverCard driver={activeDriver} />
+                  <RideDriverCard
+                    driver={activeDriver}
+                    rideId={activeRide.rideId}
+                  />
                 ) : (
                   <div className="bg-amber-50 border border-amber-100 rounded-3xl p-8 text-amber-900 font-bold animate-pulse text-center">
                     Finding your driver...

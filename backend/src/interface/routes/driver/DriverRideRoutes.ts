@@ -1,7 +1,7 @@
 import { container } from "@infrastructure/container/DIContainer";
 import { DriverRideActionsController } from "@interface/controllers/driver/DriverRideActionsController";
 import { DriverRideController } from "@interface/controllers/driver/DriverRideController";
-import { handleValidationErrors, validateSchema } from "@interface/middleware";
+import { validateSchema } from "@interface/middleware";
 import { driverCancelRideSchema } from "@interface/validators/driver/driverCancelRideSchema";
 import { rideIdParamSchema } from "@interface/validators/driver/rideIdParamSchema";
 import { rideRequestIdParamSchema } from "@interface/validators/driver/rideRequestIdParamSchema";
@@ -76,4 +76,5 @@ driverRideRoutes.post(
   validateSchema(driverCancelRideSchema),
   (req, res) => driverRideActionsController.cancelRide(req, res),
 );
+
 export { driverRideRoutes };

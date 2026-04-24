@@ -17,6 +17,7 @@ export interface IDriverModel extends Document {
   status: string;
   averageRating: number;
   numberOfRatings: number;
+  totalRides: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,6 +78,11 @@ const driverSchema = new Schema<IDriverModel>(
       max: 5,
     },
     numberOfRatings: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalRides: {
       type: Number,
       default: 0,
       min: 0,

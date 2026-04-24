@@ -224,6 +224,8 @@ export class GetUserRideByIdUseCase
       email: driverUser.getEmail().getValue(),
       phoneNumber: driverUser.getMobile(),
       profilePicture: driverUser.getProfilePicture(),
+      rating: driver.getAverageRating(),
+      totalRides: driver.getTotalRides(),
     };
 
     return driverDetails;

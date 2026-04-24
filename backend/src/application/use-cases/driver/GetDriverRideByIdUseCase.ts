@@ -204,6 +204,7 @@ export class GetDriverRideByIdUseCase
     return {
       id: ride.getId(),
       rideId: ride.getRideId(),
+      driverId: ride.getDriverId(),
       status: ride.getStatus(),
       paymentStatus: ride.getPaymentStatus(),
       rideType: ride.getRideType(),

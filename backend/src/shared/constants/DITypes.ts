@@ -23,6 +23,10 @@ export const TYPES = {
   CouponRepository: Symbol.for("CouponRepository"),
   CouponUsageRepository: Symbol.for("CouponUsageRepository"),
   RideRequestGroupRepository: Symbol.for("RideRequestGroupRepository"),
+  ChatRoomRepository: Symbol.for("ChatRoomRepository"),
+  MessageRepository: Symbol.for("MessageRepository"),
+  MessageStatusRepository: Symbol.for("MessageStatusRepository"),
+  UserChatRepository: Symbol.for("UserChatRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -51,9 +55,11 @@ export const TYPES = {
   RideSearchQueue: Symbol.for("RideSearchQueue"),
   NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
+  ChatRealtimeService: Symbol.for("ChatRealtimeService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
+  ChatEventBus: Symbol.for("ChatEventBus"),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
@@ -153,6 +159,15 @@ export const TYPES = {
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
 
+  //Use Cases - Chat
+  CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),
+  GetRideChatRoomUseCase: Symbol.for("GetRideChatRoomUseCase"),
+  GetChatMessagesUseCase: Symbol.for("GetChatMessagesUseCase"),
+  SendChatMessageUseCase: Symbol.for("SendChatMessageUseCase"),
+  EditChatMessageUseCase: Symbol.for("EditChatMessageUseCase"),
+  DeleteChatMessageUseCase: Symbol.for("DeleteChatMessageUseCase"),
+  MarkChatMessagesReadUseCase: Symbol.for("MarkChatMessagesReadUseCase"),
+
   // Use Cases - File
   UploadFileUseCase: Symbol.for("UploadFileUseCase"),
   GetUserFilesUseCase: Symbol.for("GetUserFilesUseCase"),
@@ -208,4 +223,6 @@ export const TYPES = {
   CouponController: Symbol.for("CouponController"),
   AdminTransactionController: Symbol.for("AdminTransactionController"),
   AdminWalletController: Symbol.for("AdminWalletController"),
+  ChatRoomController: Symbol.for("ChatRoomController"),
+  ChatMessageController: Symbol.for("ChatMessageController"),
 };
