@@ -50,8 +50,10 @@ const RideDriverCard: React.FC<RideDriverCardProps> = ({ driver, rideId }) => {
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900">{driver.name}</h3>
           <div className="flex items-center gap-1 text-amber-500 text-sm font-medium">
-            <FaStar /> 4.8
-            <span className="text-gray-400 font-normal">(120+ Rides)</span>
+            <FaStar /> {driver.rating}
+            <span className="text-gray-400 font-normal">
+              {driver.totalRides} Rides Complted
+            </span>
           </div>
         </div>
       </div>

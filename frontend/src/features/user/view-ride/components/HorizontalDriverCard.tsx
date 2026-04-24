@@ -1,6 +1,6 @@
 import React from "react";
 import { FaStar, FaEnvelope, FaCommentDots, FaPhoneAlt } from "react-icons/fa";
-import { DriverInfo } from "../types/viewRide.types";
+import { DriverInfo, RideDetails } from "../types/viewRide.types";
 import { useAppDispatch } from "@/app/store/hooks";
 import { useGetChatRoomByRideIdQuery } from "@/features/chat/services/chatApi";
 import { openChat } from "@/features/chat/store/chatSlice";
@@ -8,6 +8,7 @@ import { openChat } from "@/features/chat/store/chatSlice";
 interface HorizontalDriverCardProps {
   driver: DriverInfo;
   rideId: string;
+  activeRide: RideDetails;
 }
 
 const maskPhoneNumber = (phone?: string) => {
@@ -19,6 +20,7 @@ const maskPhoneNumber = (phone?: string) => {
 const HorizontalDriverCard: React.FC<HorizontalDriverCardProps> = ({
   driver,
   rideId,
+  activeRide,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -53,10 +55,10 @@ const HorizontalDriverCard: React.FC<HorizontalDriverCardProps> = ({
           <div className="flex items-center gap-2 mt-1">
             <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-2 py-[2px] rounded-md text-[10px] font-bold tracking-wide border border-amber-100">
               <FaStar className="text-[11px]" />
-              4.8
+              {driver.rating}
             </div>
-            <span className="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">
-              120+ rides completed
+            <span className="text-gray-400 text-[10px] font-semibold tracking-wider">
+              {driver.totalRides} Rides Complted
             </span>
           </div>
         </div>

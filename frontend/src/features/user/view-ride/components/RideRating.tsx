@@ -60,7 +60,7 @@ const RideRating: React.FC<RideRatingProps> = ({ rideId, existingRating }) => {
         updateRideRatingLocal({
           overallRating: response.data.overallRating,
           review: review,
-          reviewType: "User Revie",
+          reviewType: "User Review",
           createdAt: new Date().toISOString(),
           driverStats: {
             averageRating: response.data.driver.averageRating,
