@@ -39,4 +39,12 @@ export const SOCKET_EVENTS = {
   NOTIFICATION: {
     CREATED: "notification:created",
   },
+  CHAT: {
+    JOIN: "chat:join",
+    LEAVE: "chat:leave",
+    MESSAGE_SENT: "chat:message:sent",
+    MESSAGE_EDITED: "chat:message:edited",
+    MESSAGE_DELETED: "chat:message:deleted",
+    MESSAGE_VIEWED: "chat:message:viewed",
+  },
 } as const;

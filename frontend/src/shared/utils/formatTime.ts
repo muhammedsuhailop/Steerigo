@@ -6,3 +6,17 @@ export const formatDuration = (seconds: number): string => {
   const remainingMins = mins % 60;
   return `${hours}h ${remainingMins}m`;
 };
+
+export const formatTime = (dateString: string | Date): string => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+};

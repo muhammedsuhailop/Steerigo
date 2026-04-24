@@ -167,7 +167,9 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
         </div>
       </div>
 
-      {driver && <HorizontalDriverCard driver={driver} />}
+      {driver && (
+        <HorizontalDriverCard driver={driver} rideId={activeRide.rideId} />
+      )}
 
       <RideTimelineExpandable timeline={timeline} />
 

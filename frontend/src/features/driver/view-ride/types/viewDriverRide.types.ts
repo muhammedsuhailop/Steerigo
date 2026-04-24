@@ -13,6 +13,7 @@ export interface RiderInfo {
 export interface DriverRideDetails {
   id: string;
   rideId: string;
+  driverId: string;
   status: RideStatus;
   paymentStatus: PaymentStatus;
   rideType: string;
