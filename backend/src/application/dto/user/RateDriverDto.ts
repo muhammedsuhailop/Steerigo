@@ -94,7 +94,7 @@ export class RateDriverDto {
         );
       }
 
-      if (value < 1 || value > 5) {
+      if (value < 0.5 || value > 5) {
         throw RideErrors.invalidRatingValue();
       }
     }

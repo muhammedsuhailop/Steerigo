@@ -21,6 +21,7 @@ export class DriverMapper {
       status: raw.status as DriverStatus,
       averageRating: raw.averageRating ?? 0,
       numberOfRatings: raw.numberOfRatings ?? 0,
+      totalRides: raw.totalRides ?? 0,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     });
@@ -40,6 +41,7 @@ export class DriverMapper {
       status: driver.getStatus(),
       averageRating: driver.getAverageRating(),
       numberOfRatings: driver.getNumberOfRatings(),
+      totalRides: driver.getTotalRides(),
       updatedAt: driver.getUpdatedAt(),
     };
   }

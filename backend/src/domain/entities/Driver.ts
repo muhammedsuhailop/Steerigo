@@ -17,6 +17,7 @@ export class Driver {
     private status: DriverStatus,
     private averageRating: number = 0,
     private numberOfRatings: number = 0,
+    private totalRides: number = 0,
     private readonly createdAt: Date = new Date(),
     private updatedAt: Date = new Date(),
   ) {}
@@ -45,6 +46,7 @@ export class Driver {
       DriverStatus.ACTIVE,
       0,
       0,
+      0,
     );
   }
 
@@ -62,6 +64,7 @@ export class Driver {
     status: DriverStatus;
     averageRating: number;
     numberOfRatings: number;
+    totalRides: number;
     createdAt: Date;
     updatedAt: Date;
   }): Driver {
@@ -78,6 +81,7 @@ export class Driver {
       data.status,
       data.averageRating,
       data.numberOfRatings,
+      data.totalRides,
       data.createdAt,
       data.updatedAt,
     );
@@ -123,6 +127,9 @@ export class Driver {
 
   getNumberOfRatings(): number {
     return this.numberOfRatings;
+  }
+  getTotalRides(): number {
+    return this.totalRides;
   }
   getCreatedAt(): Date {
     return this.createdAt;
@@ -201,6 +208,11 @@ export class Driver {
     const newAverage = (totalWeight + newRating) / this.numberOfRatings;
 
     this.averageRating = Math.round(newAverage * 10) / 10;
+    this.updatedAt = new Date();
+  }
+
+  incrementTotalRides(): void {
+    this.totalRides += 1;
     this.updatedAt = new Date();
   }
 }
