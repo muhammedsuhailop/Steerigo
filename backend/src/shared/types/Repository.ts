@@ -39,9 +39,30 @@ export interface UpdateOptions<T> {
 }
 
 // Flexible filter definitions 
+
+type ComparisonOperators<T> = {
+  $eq?: T;
+  $ne?: T;
+  $in?: T[];
+};
+
+type RangeOperators<T> = T extends Date | number
+  ? {
+      $gt?: T;
+      $gte?: T;
+      $lt?: T;
+      $lte?: T;
+    }
+  : {};
+
+  type StringOperators<T> = T extends string ? { $regex?: string } : {};
+
+
 export type FilterOptions<T> = {
   [K in keyof T]?:
     | T[K]
     | T[K][]
-    | { $in?: T[K][]; $ne?: T[K]; $regex?: string };
+    | (ComparisonOperators<T[K]> &
+        RangeOperators<T[K]> &
+        StringOperators<T[K]>);
 };

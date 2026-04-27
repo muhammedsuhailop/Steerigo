@@ -107,6 +107,9 @@ export const TYPES = {
   GetAdminRideByIdUseCase: Symbol.for("GetAdminRideByIdUseCase"),
   GetAdminWalletUseCase: Symbol.for("GetAdminWalletUseCase"),
 
+  //Use Cases - Admin status
+  GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
+
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
@@ -225,4 +228,5 @@ export const TYPES = {
   AdminWalletController: Symbol.for("AdminWalletController"),
   ChatRoomController: Symbol.for("ChatRoomController"),
   ChatMessageController: Symbol.for("ChatMessageController"),
+  AdminStatsController: Symbol.for("AdminStatsController"),
 };

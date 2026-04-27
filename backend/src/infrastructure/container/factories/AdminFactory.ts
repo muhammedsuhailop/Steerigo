@@ -49,6 +49,8 @@ import { GetAdminWalletUseCase } from "@application/use-cases/admin/GetAdminWall
 import { GetAdminWalletDto } from "@application/dto/admin/GetAdminWalletDto";
 import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWalletResponseDto";
 import { AdminWalletController } from "@interface/controllers/admin/AdminWalletController";
+import { GetUserStatsUseCase } from "@application/use-cases/admin/GetUserStatsUseCase";
+import { AdminStatsController } from "@interface/controllers/admin/AdminStatsController";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -138,6 +140,7 @@ export class AdminFactory {
         IUseCase<GetAdminWalletDto, Promise<Result<GetAdminWalletResponseDto>>>
       >(TYPES.GetAdminWalletUseCase)
       .to(GetAdminWalletUseCase);
+    container.bind(TYPES.GetUserStatsUseCase).to(GetUserStatsUseCase);
 
     // Controller bindings
     container
@@ -156,5 +159,6 @@ export class AdminFactory {
     container
       .bind<AdminWalletController>(TYPES.AdminWalletController)
       .to(AdminWalletController);
+    container.bind(TYPES.AdminStatsController).to(AdminStatsController);
   }
 }

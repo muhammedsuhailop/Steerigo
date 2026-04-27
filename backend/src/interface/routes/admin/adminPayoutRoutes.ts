@@ -4,11 +4,6 @@ import { TYPES } from "@shared/constants/DITypes";
 import { AdminPayoutController } from "@interface/controllers/admin/AdminPayoutController";
 import { validateSchema } from "@interface/middleware/ValidationMiddleware";
 import {
-  authMiddleware,
-  requireRole,
-} from "@interface/middleware/auth/AuthMiddleware";
-import { UserRole } from "@shared/constants/AuthConstants";
-import {
   approvePayoutSchema,
   rejectPayoutSchema,
   getAdminPayoutsSchema,
@@ -18,9 +13,6 @@ const router = Router();
 const controller = container.get<AdminPayoutController>(
   TYPES.AdminPayoutController,
 );
-
-router.use(authMiddleware);
-router.use(requireRole([UserRole.ADMIN]));
 
 // GET /api/admin/payouts
 router.get("/", validateSchema(getAdminPayoutsSchema), (req, res) =>

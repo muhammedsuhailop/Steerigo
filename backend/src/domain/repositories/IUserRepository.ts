@@ -6,6 +6,15 @@ import { IQueryableRepository } from "./base/IQueryableRepository";
 import { IBatchRepository } from "./base/IBatchRepository";
 import { AuthProvider } from "@shared/constants/AuthConstants";
 
+export interface DateRange {
+  from?: Date;
+  to?: Date;
+}
+
+export interface UserStatsFilter {
+  createdAt?: DateRange;
+}
+
 export interface IUserRepository
   extends IReadOnlyRepository<User>,
     IWriteOnlyRepository<User>,
@@ -15,7 +24,7 @@ export interface IUserRepository
   findByEmail(email: string): Promise<User | null>;
   findByEmailAndProvider(
     email: string,
-    provider: AuthProvider
+    provider: AuthProvider,
   ): Promise<User | null>;
   findByGoogleId(googleId: string): Promise<User | null>;
   existsByEmail(email: string): Promise<boolean>;
@@ -23,5 +32,9 @@ export interface IUserRepository
   findByMobile(mobile: string): Promise<User | null>;
   findActiveUsers(options?: QueryOptions): Promise<User[]>;
   findByRole(role: string, options?: QueryOptions): Promise<User[]>;
-  updateById(id: string, updates: Partial<Record<string, unknown>>): Promise<void>;
+  updateById(
+    id: string,
+    updates: Partial<Record<string, unknown>>,
+  ): Promise<void>;
+  countByUserStats(filter: UserStatsFilter): Promise<number>;
 }
