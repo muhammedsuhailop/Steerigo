@@ -160,6 +160,7 @@ export const TYPES = {
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
   RateDriverUseCase: Symbol.for("RateDriverUseCase"),
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
+  GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
 
   //Use Cases - Chat

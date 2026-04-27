@@ -24,4 +24,7 @@ export const USER_MESSAGES = {
     UNAUTHORIZED: "You are not authorized to access this ride",
     RIDE_ID_REQUIRED: "Ride ID is required",
   },
+  COUPON: {
+    FETCHED: "Coupons fetched successfully",
+  },
 } as const;

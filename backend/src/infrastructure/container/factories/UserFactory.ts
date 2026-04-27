@@ -39,6 +39,9 @@ import { ApplyCouponUseCase } from "@application/use-cases/user/ApplyCouponUseCa
 import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
 import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
 import { RemoveCouponUseCase } from "@application/use-cases/user/RemoveCouponUseCase";
+import { GetUserCouponsUseCase } from "@application/use-cases/user/GetUserCouponsUseCase";
+import { GetUserCouponsDto } from "@application/dto/user/GetUserCouponsDto";
+import { GetUserCouponsResponseDto } from "@application/dto/user/GetUserCouponsResponseDto";
 
 export class UserFactory {
   static register(container: Container): void {
@@ -116,6 +119,12 @@ export class UserFactory {
         IUseCase<RemoveCouponDto, Promise<Result<RemoveCouponResponseDto>>>
       >(TYPES.RemoveCouponUseCase)
       .to(RemoveCouponUseCase);
+
+    container
+      .bind<
+        IUseCase<GetUserCouponsDto, Promise<Result<GetUserCouponsResponseDto>>>
+      >(TYPES.GetUserCouponsUseCase)
+      .to(GetUserCouponsUseCase);
 
     // Controller bindings
     container.bind(TYPES.UserProfileController).to(UserProfileController);

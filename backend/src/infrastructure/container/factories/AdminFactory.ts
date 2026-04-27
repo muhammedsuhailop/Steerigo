@@ -51,6 +51,8 @@ import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWallet
 import { AdminWalletController } from "@interface/controllers/admin/AdminWalletController";
 import { GetUserStatsUseCase } from "@application/use-cases/admin/GetUserStatsUseCase";
 import { AdminStatsController } from "@interface/controllers/admin/AdminStatsController";
+import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -140,7 +142,14 @@ export class AdminFactory {
         IUseCase<GetAdminWalletDto, Promise<Result<GetAdminWalletResponseDto>>>
       >(TYPES.GetAdminWalletUseCase)
       .to(GetAdminWalletUseCase);
-    container.bind(TYPES.GetUserStatsUseCase).to(GetUserStatsUseCase);
+    container
+      .bind<
+        IUseCase<
+          GetUserStatsRequestDto,
+          Promise<Result<GetUserStatsResponseDto>>
+        >
+      >(TYPES.GetUserStatsUseCase)
+      .to(GetUserStatsUseCase);
 
     // Controller bindings
     container
