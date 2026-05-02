@@ -40,7 +40,7 @@ export class Money {
 
   add(other: Money): Money {
     this.validateSameCurrency(other);
-    return Money.create(this.amount + other.amount, this.currency);
+    return Money.forceCreate(this.amount + other.amount, this.currency);
   }
 
   subtract(other: Money): Money {
@@ -48,13 +48,7 @@ export class Money {
 
     const result = this.amount - other.amount;
 
-    if (result < 0) {
-      throw new DomainError(
-        "Money subtraction cannot result in negative value",
-      );
-    }
-
-    return Money.create(result, this.currency);
+    return Money.forceCreate(result, this.currency);
   }
 
   subtractAllowingNegative(other: Money): Money {

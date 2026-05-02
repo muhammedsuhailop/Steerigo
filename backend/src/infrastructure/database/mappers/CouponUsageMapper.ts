@@ -18,7 +18,7 @@ export class CouponUsageMapper {
     return {
       userId: new Types.ObjectId(entity.getUserId()),
       couponId: new Types.ObjectId(entity.getCouponId()),
-      rideId: new Types.ObjectId(entity.getRideId()),
+      rideId: entity.getRideId(),
       discountAmount: entity.getdiscountAmount(),
       usedAt: entity.getUsedAt(),
     };

@@ -60,6 +60,12 @@ export const TYPES = {
   //Event
   EventBus: Symbol.for("EventBus"),
   ChatEventBus: Symbol.for("ChatEventBus"),
+  CouponUsageOnPaymentSucceededHandler: Symbol.for(
+    "CouponUsageOnPaymentSucceededHandler",
+  ),
+  CouponUsageOnPaymentCashConfirmedHandler: Symbol.for(
+    "CouponUsageOnPaymentCashConfirmedHandler",
+  ),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
