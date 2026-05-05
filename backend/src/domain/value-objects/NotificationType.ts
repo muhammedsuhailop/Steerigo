@@ -18,4 +18,6 @@ export enum NotificationType {
   // Promotions
   PROMO_OFFER = "PROMO_OFFER",
   SYSTEM_ANNOUNCEMENT = "SYSTEM_ANNOUNCEMENT",
+
+  NEW_MESSAGE = "NEW_MESSAGE",
 }

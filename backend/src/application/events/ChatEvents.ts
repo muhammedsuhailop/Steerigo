@@ -22,6 +22,7 @@ export interface ChatMessageMetadataPayload {
 export interface ChatMessageSentPayload {
   chatRoomId: string;
   rideId?: string;
+  senderParticipantId: string;
   message: {
     id: string;
     senderId: string;

@@ -147,6 +147,7 @@ export class SendChatMessageUseCase
         payload: {
           chatRoomId: savedMessage.getChatRoomId(),
           rideId: chatRoom.getRideId(),
+          senderParticipantId: senderIdToStore,
           message: {
             id: savedMessage.getId(),
             senderId: savedMessage.getSenderId(),
