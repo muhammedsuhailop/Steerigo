@@ -18,6 +18,7 @@ export class NotificationSocketAdapter {
   static emitToUser(userId: string, payload: NotificationSocketPayload): void {
     try {
       const io = this.tryGetSocketServer();
+
       if (!io) {
         return;
       }

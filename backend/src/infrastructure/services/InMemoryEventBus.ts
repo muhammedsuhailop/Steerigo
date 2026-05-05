@@ -6,7 +6,6 @@ import {
   RideDomainEvent,
   RideRequestCreatedEvent,
   RideMatchedEvent,
-  RideRequestGroupExhaustedEvent,
   RideArrivedEvent,
   RideStartedEvent,
   RideCompletedEvent,
@@ -41,18 +40,15 @@ export class InMemoryEventBus implements IEventBus {
   constructor(
     @inject(TYPES.RideNotificationService)
     private readonly notificationService: IRideNotificationService,
-
     @inject(TYPES.NotificationPersistenceService)
     private readonly persistence: INotificationPersistenceService,
-
     @inject(TYPES.PaymentNotificationService)
     private readonly paymentNotificationService: IPaymentNotificationService,
-
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
-
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
+
   ) {}
 
   // Generic-safe subscription
@@ -76,8 +72,6 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleRideRequestCreated(event);
       case "RideMatched":
         return this.handleRideMatched(event);
-      case "RideRequestGroupExhausted":
-        return this.handleRideRequestGroupExhausted(event);
       case "RideArrived":
         return this.handleRideArrived(event);
       case "RideStarted":
@@ -150,22 +144,6 @@ export class InMemoryEventBus implements IEventBus {
       title: "Your ride has been accepted!",
       body: "Your driver is on the way.",
       metadata: payload,
-    });
-  }
-
-  private async handleRideRequestGroupExhausted(
-    event: RideRequestGroupExhaustedEvent,
-  ) {
-    const { riderId, requestGroupId, reason } = event.payload;
-    await this.notificationService.notifyRiderNoDriverFound(riderId, {
-      requestGroupId,
-      reason,
-    });
-    await this.persistence.persistNotification(riderId, {
-      type: NotificationType.RIDE_REQUESTED,
-      title: "No drivers found",
-      body: "No drivers available at the moment.",
-      metadata: { requestGroupId, reason },
     });
   }
 

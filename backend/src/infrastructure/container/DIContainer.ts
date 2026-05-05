@@ -32,6 +32,7 @@ DriverAvailabilityFactory.register(container);
 FareCalculationFactory.register(container);
 RideRequestFactory.register(container);
 NotificationFactory.register(container);
+NotificationFactory.registerRealtimePublisher(container);
 PaymentFactory.register(container);
 ChatFactory.register(container);
 EventHandlersFactory.register(container);

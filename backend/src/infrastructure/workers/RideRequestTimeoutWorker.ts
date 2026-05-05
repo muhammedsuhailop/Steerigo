@@ -17,6 +17,8 @@ import { RideRequestGroupExhaustedEvent } from "@application/events/RideEvents";
 import { IEventBus } from "@application/services/IEventBus";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
+import { createRedisPubSubSubscriber } from "@infrastructure/realtime/RedisPubSubClient";
+import { PUBSUB_CHANNELS } from "@infrastructure/realtime/constants/PubSubChannels";
 
 @injectable()
 export class RideRequestTimeoutWorker {
@@ -165,6 +167,20 @@ export class RideRequestTimeoutWorker {
 
         await this.eventBus.publish(exhaustedEvent);
 
+        const publisher = createRedisPubSubSubscriber();
+        await publisher.connect();
+
+        await publisher.publish(
+          PUBSUB_CHANNELS.RIDE_NO_DRIVER_FOUND,
+          JSON.stringify({
+            riderId: group.getRiderId(),
+            requestGroupId,
+            reason: "No drivers accepted the request in time",
+          }),
+        );
+
+        await publisher.disconnect();
+
         await this.rideSearchDispatchService.publishSearchProgress({
           requestGroupId,
           riderId: group.getRiderId(),
@@ -270,6 +286,20 @@ export class RideRequestTimeoutWorker {
     };
 
     await this.eventBus.publish(exhaustedEvent);
+
+    const publisher = createRedisPubSubSubscriber();
+    await publisher.connect();
+
+    await publisher.publish(
+      PUBSUB_CHANNELS.RIDE_NO_DRIVER_FOUND,
+      JSON.stringify({
+        riderId: group.getRiderId(),
+        requestGroupId,
+        reason: "Search timed out without a driver match",
+      }),
+    );
+
+    await publisher.disconnect();
 
     await this.rideSearchDispatchService.publishSearchProgress({
       requestGroupId,

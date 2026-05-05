@@ -1,16 +1,29 @@
-import { injectable } from "inversify";
-import {
-  createRedisPubSubSubscriber,
-} from "./RedisPubSubClient";
+import { inject, injectable } from "inversify";
+import { createRedisPubSubSubscriber } from "./RedisPubSubClient";
 import { getRideSocketServer } from "./socket";
 import { SOCKET_EVENTS } from "./constants/SocketEvents";
 import { Logger } from "@shared/utils/Logger";
 import { RedisClientType } from "redis";
 import { PUBSUB_CHANNELS } from "./constants/PubSubChannels";
+import { TYPES } from "@shared/constants/DITypes";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
+import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
+import { Result } from "@shared/utils/Result";
+import { NotificationType } from "@domain/value-objects/NotificationType";
+import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
 
 @injectable()
 export class WorkerSocketBridge {
   private subscriber: RedisClientType | null = null;
+
+  constructor(
+    @inject(TYPES.CreateNotificationUseCase)
+    private readonly createNotificationUseCase: IUseCase<
+      CreateNotificationDto,
+      Promise<Result<CreateNotificationResponseDto>>
+    >,
+  ) {}
 
   async start(): Promise<void> {
     this.subscriber = createRedisPubSubSubscriber();
@@ -98,7 +111,7 @@ export class WorkerSocketBridge {
     // Listen for no driver found — notify rider
     await this.subscriber.subscribe(
       PUBSUB_CHANNELS.RIDE_NO_DRIVER_FOUND,
-      (message) => {
+      async (message) => {
         try {
           const payload = JSON.parse(message) as {
             riderId: string;
@@ -107,6 +120,7 @@ export class WorkerSocketBridge {
           };
 
           const io = getRideSocketServer();
+
           io.to(`rider:${payload.riderId}`).emit(
             SOCKET_EVENTS.RIDE_NO_DRIVER_FOUND,
             {
@@ -115,12 +129,26 @@ export class WorkerSocketBridge {
             },
           );
 
-          Logger.info("Forwarded no driver found to rider socket", {
+          const dto = CreateNotificationDto.fromPayload({
+            recipientId: payload.riderId,
+            type: NotificationType.RIDE_NO_DRIVER_FOUND,
+            channel: NotificationChannel.IN_APP,
+            title: "No drivers found",
+            body: "No drivers available at the moment.",
+            metadata: {
+              requestGroupId: payload.requestGroupId,
+              reason: payload.reason,
+            },
+          });
+
+          await this.createNotificationUseCase.execute(dto);
+
+          Logger.info("No driver found handled (ride + notification)", {
             riderId: payload.riderId,
             requestGroupId: payload.requestGroupId,
           });
         } catch (error) {
-          Logger.error("Failed to forward no driver found from Redis", {
+          Logger.error("Failed to handle no driver found", {
             error: error instanceof Error ? error.message : String(error),
           });
         }

@@ -20,6 +20,7 @@ import { TokenService } from "@infrastructure/services";
 import { NotificationFactory } from "@infrastructure/container/factories/NotificationFactory";
 import { container } from "@infrastructure/container/DIContainer";
 import { WorkerSocketBridge } from "@infrastructure/realtime/WorkerSocketBridge";
+import { TYPES } from "@shared/constants/DITypes";
 
 class App {
   private app: Application;
@@ -31,7 +32,9 @@ class App {
     this.app = express();
     this.httpServer = http.createServer(this.app);
     this.database = DatabaseConnection.getInstance();
-    this.workerSocketBridge = new WorkerSocketBridge();
+    this.workerSocketBridge = container.get<WorkerSocketBridge>(
+      TYPES.WorkerSocketBridge,
+    );
     this.initializeMiddleware();
     this.initializeRoutes();
     this.initializeErrorHandling();

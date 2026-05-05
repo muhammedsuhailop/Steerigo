@@ -56,6 +56,7 @@ export const TYPES = {
   NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
   ChatRealtimeService: Symbol.for("ChatRealtimeService"),
+  WorkerSocketBridge: Symbol.for("WorkerSocketBridge"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

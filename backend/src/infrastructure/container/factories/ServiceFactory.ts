@@ -43,6 +43,7 @@ import { RideSearchDispatchService } from "@application/services/ride-search/Rid
 import { RideRequestTimeoutWorker } from "@infrastructure/workers/RideRequestTimeoutWorker";
 import { IRideSearchQueue } from "@application/services/IRideSearchQueue";
 import { BullMqRideSearchQueue } from "@infrastructure/queues/BullMqRideSearchQueue";
+import { WorkerSocketBridge } from "@infrastructure/realtime/WorkerSocketBridge";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -111,5 +112,9 @@ export class ServiceFactory {
     container
       .bind<IRideSearchQueue>(TYPES.RideSearchQueue)
       .to(BullMqRideSearchQueue);
+
+    container
+      .bind<WorkerSocketBridge>(TYPES.WorkerSocketBridge)
+      .to(WorkerSocketBridge);
   }
 }

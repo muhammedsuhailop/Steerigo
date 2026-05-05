@@ -17,6 +17,7 @@ export const SOCKET_EVENTS = {
     ARRIVED: "ride:arrived",
     STARTED: "ride:started",
     COMPLETED: "ride:completed",
+    NO_DRIVER_FOUND: "NO_DRIVER_FOUND",
 
     RIDE_CANCELLED_RIDER: "ride:cancelled:rider",
 
