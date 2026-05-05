@@ -12,17 +12,14 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { INotificationRepository } from "@domain/repositories/INotificationRepository";
 import { IIdGenerator } from "@application/services/IIdGenerator";
-import { Notification } from "@domain/entities/Notification";
 import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
+import { INotificationPersistenceService } from "@application/services/NotificationPersistenceService";
 
 @injectable()
 export class ChatRealtimeService implements IChatRealtimeService {
   constructor(
-    @inject(TYPES.NotificationRepository)
-    private readonly notificationRepository: INotificationRepository,
-    @inject(TYPES.IDGenerator)
-    private readonly idGenerator: IIdGenerator,
+    @inject(TYPES.NotificationPersistenceService)
+    private readonly persistence: INotificationPersistenceService,
   ) {}
 
   private tryGetSocketServer() {
@@ -35,6 +32,7 @@ export class ChatRealtimeService implements IChatRealtimeService {
 
   async notifyMessageSent(payload: ChatMessageSentPayload): Promise<void> {
     const io = this.tryGetSocketServer();
+
     if (!io) {
       Logger.warn("Socket server unavailable for chat:message:sent", {
         chatRoomId: payload.chatRoomId,
@@ -42,60 +40,56 @@ export class ChatRealtimeService implements IChatRealtimeService {
       return;
     }
 
+    // Emit to chat room
     io.to(`chat:${payload.chatRoomId}`).emit(
       SOCKET_EVENTS.CHAT_MESSAGE_SENT,
       payload,
     );
 
-    for (const participant of payload.participants) {
-      io.to(`user:${participant.userId}`).emit(
-        SOCKET_EVENTS.CHAT_MESSAGE_SENT,
-        payload,
-      );
-      Logger.debug(`Emitted socket event to user:${participant.userId}`);
-    }
-
     const senderParticipantId = String(payload.senderParticipantId);
 
-    for (const participant of payload.participants) {
-      const currentParticipantId = String(participant.userId);
+    await Promise.all(
+      payload.participants
+        .filter(
+          (participant) => String(participant.userId) !== senderParticipantId,
+        )
+        .map(async (participant) => {
+          try {
+            const result = await this.persistence.persistNotification(
+              participant.userId,
+              {
+                type: NotificationType.NEW_MESSAGE,
+                title: "New Message",
+                body: payload.message.content,
+                metadata: {
+                  chatRoomId: payload.chatRoomId,
+                  messageId: payload.message.id,
+                  rideId: payload.rideId,
+                },
+              },
+            );
 
-      if (currentParticipantId === senderParticipantId) {
-        Logger.debug("Skipping notification persistence for sender", {
-          senderParticipantId,
-        });
-        continue;
-      }
+            if (!result) {
+              Logger.warn("Notification persistence returned null", {
+                recipientId: participant.userId,
+                chatRoomId: payload.chatRoomId,
+              });
+              return;
+            }
 
-      try {
-        const notification = Notification.create({
-          id: this.idGenerator.generate(),
-          recipientId: participant.userId,
-          type: NotificationType.NEW_MESSAGE,
-          channel: NotificationChannel.PUSH,
-          title: "New Message",
-          body: payload.message.content,
-          metadata: {
-            chatRoomId: payload.chatRoomId,
-            messageId: payload.message.id,
-            rideId: payload.rideId,
-          },
-        });
-
-        await this.notificationRepository.save(notification);
-
-        Logger.info("Chat notification persisted successfully", {
-          notificationId: notification.getId(),
-          recipientId: participant.userId,
-          chatRoomId: payload.chatRoomId,
-        });
-      } catch (error) {
-        Logger.error("Failed to persist chat notification", {
-          recipientId: participant.userId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
+            Logger.info("Chat notification persisted successfully", {
+              notificationId: result.notificationId,
+              recipientId: participant.userId,
+              chatRoomId: payload.chatRoomId,
+            });
+          } catch (error) {
+            Logger.error("Failed to persist chat notification", {
+              recipientId: participant.userId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }),
+    );
 
     Logger.info("Completed chat message notification flow", {
       chatRoomId: payload.chatRoomId,
