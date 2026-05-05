@@ -14,12 +14,16 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { FaRegBell } from "react-icons/fa6";
 import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
 import { NotificationDropdown } from "@/shared/components/ui/Notification";
+import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
+import { getSocket } from "@/shared/socket/socket";
 
 export const Header: React.FC<HeaderProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNavigateDropdownOpen, setIsNavigateDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  const [liveUnreadCount, setLiveUnreadCount] = useState(0);
 
   const navigateDropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -71,7 +75,34 @@ export const Header: React.FC<HeaderProps> = () => {
     pollingInterval: 0,
   });
 
-  const unreadCount = data?.data?.unreadCount || 0;
+  useEffect(() => {
+    if (data?.data?.unreadCount !== undefined) {
+      setLiveUnreadCount(data.data.unreadCount);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewNotification = () => {
+      setLiveUnreadCount((prev) => Math.min(prev + 1, 99));
+    };
+
+    socket.on(SOCKET_EVENTS.NOTIFICATION.CREATED, handleNewNotification);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NOTIFICATION.CREATED, handleNewNotification);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLiveUnreadCount(0);
+    }
+  }, [isAuthenticated]);
+
+  const unreadCount = liveUnreadCount;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-[1010]">
@@ -254,4 +285,4 @@ export const Header: React.FC<HeaderProps> = () => {
       />
     </header>
   );
-};
+};;

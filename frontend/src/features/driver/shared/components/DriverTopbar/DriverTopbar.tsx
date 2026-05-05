@@ -23,6 +23,8 @@ import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
 import { useGetNotificationsQuery } from "@/features/notifications/services/notificationApi";
 import { useGetWalletDetailsQuery } from "@/features/driver/wallet/services/driverWalletApi";
 import { useNavigate } from "react-router-dom";
+import { getSocket } from "@/shared/socket/socket";
+import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
 
 export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   title = "Dashboard",
@@ -34,6 +36,8 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [liveUnreadCount, setLiveUnreadCount] = useState(0);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -89,7 +93,34 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
     { skip: !isAuthenticated, pollingInterval: 0 },
   );
 
-  const unreadCount = data?.data?.unreadCount || 0;
+  useEffect(() => {
+    if (data?.data?.unreadCount !== undefined) {
+      setLiveUnreadCount(data.data.unreadCount);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewNotification = () => {
+      setLiveUnreadCount((prev) => Math.min(prev + 1, 99));
+    };
+
+    socket.on(SOCKET_EVENTS.NOTIFICATION.CREATED, handleNewNotification);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NOTIFICATION.CREATED, handleNewNotification);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLiveUnreadCount(0);
+    }
+  }, [isAuthenticated]);
+
+  const unreadCount = liveUnreadCount || 0;
 
   const handleNotificationToggle = () => {
     const nextState = !isNotificationOpen;
