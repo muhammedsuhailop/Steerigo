@@ -16,6 +16,7 @@ import { driverAvailabilityRoutes } from "./DriverAvailabilityRoutes";
 import { driverRideRoutes } from "./DriverRideRoutes";
 import { driverPayoutRoutes } from "./driverPayoutRoutes";
 import { DriverWalletController } from "@interface/controllers/driver/DriverWalletController";
+import { driverStatsRoutes } from "./driverStatsRoutes";
 
 const router = Router();
 
@@ -77,5 +78,8 @@ router.use("/ride", driverRideRoutes);
 
 // /api/driver/payouts
 router.use("/payouts", driverPayoutRoutes);
+
+// /api/driver/stats
+router.use("/stats", driverStatsRoutes);
 
 export { router as driverRoutes };

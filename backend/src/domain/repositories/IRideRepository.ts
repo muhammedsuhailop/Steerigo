@@ -22,6 +22,13 @@ export interface IAdminRidePaginationOptions extends IRidePaginationOptions {
   driverId?: string;
 }
 
+export interface IDriverRideStatsResult {
+  total: number;
+  completed: number;
+  cancelled: number;
+  totalEarnings: number;
+}
+
 export interface IRideRepository
   extends IReadOnlyRepository<Ride, string>,
     IWriteOnlyRepository<Ride, string> {
@@ -45,4 +52,8 @@ export interface IRideRepository
   findPaginatedAll(
     options: IAdminRidePaginationOptions,
   ): Promise<PaginatedResult<Ride>>;
+  countByDriverStats(
+    driverId: string,
+    filters: IRideFilters,
+  ): Promise<IDriverRideStatsResult>;
 }

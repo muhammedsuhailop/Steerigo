@@ -69,6 +69,16 @@ import { DriverWalletController } from "@interface/controllers/driver/DriverWall
 import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
 import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
 import { DriverCancelRideUseCase } from "@application/use-cases/driver/DriverCancelRideUseCase";
+import { DriverStatsController } from "@interface/controllers/driver/DriverStatsController";
+import { GetDriverStatsRequestDto } from "@application/dto/driver/GetDriverStatsRequestDto";
+import { GetDriverStatsResponseDto } from "@application/dto/driver/GetDriverStatsResponseDto";
+import { GetDriverStatsUseCase } from "@application/use-cases/driver/GetDriverStatsUseCase";
+import { GetDriverPayoutsDto } from "@application/dto/driver/GetDriverPayoutsDto";
+import { GetPayoutsResponseDto } from "@application/dto/driver/GetPayoutsResponseDto";
+import { RequestPayoutDto } from "@application/dto/driver/RequestPayoutDto";
+import { RequestPayoutResponseDto } from "@application/dto/driver/RequestPayoutResponseDto";
+import { GetDriverWalletDto } from "@application/dto/driver/GetDriverWalletDto";
+import { GetDriverWalletResponseDto } from "@application/dto/driver/GetDriverWalletResponseDto";
 
 export class DriverFactory {
   static register(container: Container): void {
@@ -210,9 +220,26 @@ export class DriverFactory {
         >
       >(TYPES.MarkRideAsCompletedUseCase)
       .to(MarkRideAsCompletedUseCase);
-    container.bind(TYPES.RequestPayoutUseCase).to(RequestPayoutUseCase);
-    container.bind(TYPES.GetDriverPayoutsUseCase).to(GetDriverPayoutsUseCase);
-    container.bind(TYPES.GetDriverWalletUseCase).to(GetDriverWalletUseCase);
+    container
+      .bind<
+        IUseCase<RequestPayoutDto, Promise<Result<RequestPayoutResponseDto>>>
+      >(TYPES.RequestPayoutUseCase)
+      .to(RequestPayoutUseCase);
+
+    container
+      .bind<
+        IUseCase<GetDriverPayoutsDto, Promise<Result<GetPayoutsResponseDto>>>
+      >(TYPES.GetDriverPayoutsUseCase)
+      .to(GetDriverPayoutsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetDriverWalletDto,
+          Promise<Result<GetDriverWalletResponseDto>>
+        >
+      >(TYPES.GetDriverWalletUseCase)
+      .to(GetDriverWalletUseCase);
     container
       .bind<
         IUseCase<
@@ -221,9 +248,18 @@ export class DriverFactory {
         >
       >(TYPES.DriverCancelRideUseCase)
       .to(DriverCancelRideUseCase);
+    container
+      .bind<
+        IUseCase<
+          GetDriverStatsRequestDto,
+          Promise<Result<GetDriverStatsResponseDto>>
+        >
+      >(TYPES.GetDriverStatsUseCase)
+      .to(GetDriverStatsUseCase);
 
     // Controller bindings
     container.bind(TYPES.DriverController).to(DriverController);
     container.bind(TYPES.DriverWalletController).to(DriverWalletController);
+    container.bind(TYPES.DriverStatsController).to(DriverStatsController);
   }
 }

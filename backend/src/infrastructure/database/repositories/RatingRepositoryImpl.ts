@@ -1,11 +1,13 @@
 import { injectable } from "inversify";
 import {
+  IRatingAggregateResult,
   IRatingRepository,
   PaginatedRatings,
+  RatingFilters,
   RatingQueryOptions,
 } from "@domain/repositories/IRatingRepository";
 import { Rating } from "@domain/entities/Rating";
-import { RatingModel } from "../models/RatingModel";
+import { IRatingDocument, RatingModel } from "../models/RatingModel";
 import { RatingMapper } from "../mappers/RatingMapper";
 import { Logger } from "@shared/utils/Logger";
 import { FilterQuery, SortOrder, Types } from "mongoose";
@@ -200,5 +202,110 @@ export class RatingRepositoryImpl implements IRatingRepository {
       });
       throw error;
     }
+  }
+
+  async getAverageRatingForReviewee(
+    revieweeId: string,
+    filters: RatingFilters,
+  ): Promise<IRatingAggregateResult> {
+    const query: FilterQuery<IRatingDocument> = { revieweeId };
+
+    if (filters.reviewType) query.reviewType = filters.reviewType;
+    if (filters.fromDate ?? filters.toDate) {
+      query.createdAt = {};
+      if (filters.fromDate) query.createdAt.$gte = filters.fromDate;
+      if (filters.toDate) query.createdAt.$lte = filters.toDate;
+    }
+
+    const agg = await RatingModel.aggregate<{
+      averageRating: number;
+      totalRatings: number;
+      zeroToOne: number;
+      oneToTwo: number;
+      twoToThree: number;
+      threeToFour: number;
+      fourToFive: number;
+    }>([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$overallRating" },
+          totalRatings: { $sum: 1 },
+
+          zeroToOne: {
+            $sum: { $cond: [{ $lt: ["$overallRating", 1] }, 1, 0] },
+          },
+          oneToTwo: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$overallRating", 1] },
+                    { $lt: ["$overallRating", 2] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          twoToThree: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$overallRating", 2] },
+                    { $lt: ["$overallRating", 3] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          threeToFour: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$overallRating", 3] },
+                    { $lt: ["$overallRating", 4] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          fourToFive: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$overallRating", 4] },
+                    { $lte: ["$overallRating", 5] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      averageRating: agg[0] ? parseFloat(agg[0].averageRating.toFixed(2)) : 0,
+      totalRatings: agg[0]?.totalRatings ?? 0,
+      distribution: {
+        zeroToOne: agg[0]?.zeroToOne ?? 0,
+        oneToTwo: agg[0]?.oneToTwo ?? 0,
+        twoToThree: agg[0]?.twoToThree ?? 0,
+        threeToFour: agg[0]?.threeToFour ?? 0,
+        fourToFive: agg[0]?.fourToFive ?? 0,
+      },
+    };
   }
 }

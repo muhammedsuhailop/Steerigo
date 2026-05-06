@@ -32,6 +32,18 @@ export interface PaginatedRatings {
   totalPages: number;
 }
 
+export interface IRatingAggregateResult {
+  averageRating: number;
+  totalRatings: number;
+  distribution: {
+    zeroToOne: number;
+    oneToTwo: number;
+    twoToThree: number;
+    threeToFour: number;
+    fourToFive: number;
+  };
+}
+
 export interface IRatingRepository
   extends IReadOnlyRepository<Rating, string>,
     IWriteOnlyRepository<Rating, string> {
@@ -42,4 +54,9 @@ export interface IRatingRepository
   existsByRideAndReviewer(rideId: string, reviewerId: string): Promise<boolean>;
 
   findAll(options: RatingQueryOptions): Promise<PaginatedRatings>;
+
+  getAverageRatingForReviewee(
+    revieweeId: string,
+    filters: RatingFilters,
+  ): Promise<IRatingAggregateResult>;
 }

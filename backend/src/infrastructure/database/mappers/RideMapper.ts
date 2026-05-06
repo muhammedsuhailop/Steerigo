@@ -3,10 +3,7 @@ import { Location } from "@domain/value-objects/Location";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideType } from "@domain/value-objects/RideType";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
-import {
-  FareBreakdown,
-  TaxBreakdown,
-} from "@domain/value-objects/FareBreakdown";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { Money } from "@domain/value-objects/Money";
 import { IRideDocument } from "../models/RideModel";
 import { toObjectId } from "@shared/utils/idHelper";
@@ -28,9 +25,11 @@ export class RideMapper {
     const combinedTax = doc.fareBreakdown.tax;
 
     const totalFare = Money.create(
-      doc.fareBreakdown.baseFare +
-        (doc.fareBreakdown.platformFee ?? 0) +
-        combinedTax,
+      doc.fareBreakdown.totalFare ??
+        doc.fareBreakdown.baseFare +
+          (doc.fareBreakdown.timeFare ?? 0) +
+          (doc.fareBreakdown.platformFee ?? 0) +
+          combinedTax,
       currency,
     );
 
@@ -119,6 +118,7 @@ export class RideMapper {
         platformFee: fareBreakdown.getPlatformFee().getAmount(),
         tax: combinedTax,
         surgeMultiplier: 1,
+        totalFare: fareBreakdown.getTotalFare().getAmount(),
       },
 
       coupon:

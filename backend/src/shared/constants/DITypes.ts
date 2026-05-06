@@ -152,6 +152,7 @@ export const TYPES = {
   GetDriverPayoutsUseCase: Symbol.for("GetDriverPayoutsUseCase"),
   GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
   DriverCancelRideUseCase: Symbol.for("DriverCancelRideUseCase"),
+  GetDriverStatsUseCase: Symbol.for("GetDriverStatsUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -237,4 +238,5 @@ export const TYPES = {
   ChatRoomController: Symbol.for("ChatRoomController"),
   ChatMessageController: Symbol.for("ChatMessageController"),
   AdminStatsController: Symbol.for("AdminStatsController"),
+  DriverStatsController: Symbol.for("DriverStatsController"),
 };

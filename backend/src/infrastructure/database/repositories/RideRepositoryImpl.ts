@@ -1,6 +1,8 @@
 import { injectable } from "inversify";
 import {
   IAdminRidePaginationOptions,
+  IDriverRideStatsResult,
+  IRideFilters,
   IRidePaginationOptions,
   IRideRepository,
 } from "@domain/repositories/IRideRepository";
@@ -411,5 +413,40 @@ export class RideRepositoryImpl implements IRideRepository {
       });
       throw error;
     }
+  }
+
+  async countByDriverStats(
+    driverId: string,
+    filters: IRideFilters,
+  ): Promise<IDriverRideStatsResult> {
+    const query: FilterQuery<IRideDocument> = { driverId };
+
+    if (filters.fromDate ?? filters.toDate) {
+      query.createdAt = {};
+      if (filters.fromDate) query.createdAt.$gte = filters.fromDate;
+      if (filters.toDate) query.createdAt.$lte = filters.toDate;
+    }
+
+    const [total, completed, cancelled, earningsAgg] = await Promise.all([
+      RideModel.countDocuments(query),
+      RideModel.countDocuments({ ...query, status: RideStatus.COMPLETED }),
+      RideModel.countDocuments({ ...query, status: RideStatus.CANCELLED }),
+      RideModel.aggregate<{ totalEarnings: number }>([
+        { $match: { ...query, status: RideStatus.COMPLETED } },
+        {
+          $group: {
+            _id: null,
+            totalEarnings: { $sum: "$fareBreakdown.totalFare" },
+          },
+        },
+      ]),
+    ]);
+
+    return {
+      total,
+      completed,
+      cancelled,
+      totalEarnings: earningsAgg[0]?.totalEarnings ?? 0,
+    };
   }
 }
