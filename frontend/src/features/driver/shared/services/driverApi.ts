@@ -5,6 +5,8 @@ import type {
   DriverStats,
   DashboardApiResponse,
   FullDashboardResponse,
+  DriverStatsResponse,
+  DriverStatsData,
 } from "../types/driver.types";
 import type { DriverStatusResponse } from "../../scheduling/types/scheduling.types";
 import {
@@ -116,6 +118,14 @@ export const driverApi = createApi({
       },
       providesTags: ["Driver", "DriverStats"],
     }),
+    getActualDriverStats: builder.query<DriverStatsData, void>({
+      query: () => ({
+        url: API_ENDPOINTS.DRIVER.STATS,
+        method: "GET",
+      }),
+      transformResponse: (response: DriverStatsResponse) => response.data,
+      providesTags: ["DriverStats"],
+    }),
   }),
 });
 
@@ -123,4 +133,5 @@ export const {
   useGetDriverProfileQuery,
   useGetDriverStatusQuery,
   useGetDriverStatsQuery,
+  useGetActualDriverStatsQuery,
 } = driverApi;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  useGetActualDriverStatsQuery,
   useGetDriverProfileQuery,
   useGetDriverStatsQuery,
 } from "../../shared/services/driverApi";
@@ -24,6 +25,9 @@ const DriverDashboard: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const { data: statsData, isLoading: isStatsLoading } =
+    useGetActualDriverStatsQuery();
 
   const {
     data: dashboardData,
@@ -173,7 +177,9 @@ const DriverDashboard: React.FC = () => {
                 profileData?.profileImageUrl ?? driver.profileImageUrl,
             }}
           />
-          <DriverStats stats={stats} />
+          {statsData && (
+            <DriverStats stats={statsData} loading={isStatsLoading} />
+          )}
         </main>
         <Footer />
       </div>
