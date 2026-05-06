@@ -116,6 +116,8 @@ export const TYPES = {
 
   //Use Cases - Admin status
   GetAdminUserStatsUseCase: Symbol.for("GetAdminUserStatsUseCase"),
+  GetAdminRideStatsUseCase: Symbol.for("GetAdminRideStatsUseCase"),
+  GetAdminDriverStatsUseCase:Symbol.for("GetAdminDriverStatsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -170,7 +172,7 @@ export const TYPES = {
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
   GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
-  GetUserStatsUseCase:Symbol.for("GetUserStatsUseCase"),
+  GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
 
   //Use Cases - Chat
   CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),

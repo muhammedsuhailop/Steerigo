@@ -24,6 +24,8 @@ export const ADMIN_MESSAGES = {
 
   STATS: {
     USER_FETCHED: "User stats fetched successfully",
+    RIDE_FETCHED: "Ride stats fetched successfully",
+    DRIVER_FETCHED: "Drivers stats fetched successfully",
   },
 } as const;
 

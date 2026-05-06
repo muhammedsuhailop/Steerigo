@@ -252,7 +252,7 @@ export class UserProfileController {
 
       res.status(HttpStatusCodes.OK).json({
         success: true,
-        message: "User stats fetched successfully.",
+        message: USER_MESSAGES.PROFILE.STATS_FETCHED,
         data: result.getValue(),
       });
     } catch (error) {

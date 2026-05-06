@@ -8,6 +8,11 @@ import { DriverStatus } from "@domain/value-objects/DriverStatus";
 import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 
+export interface IDriverDateRangeFilter {
+  fromDate: Date;
+  toDate: Date;
+}
+
 export interface IDriverRepository
   extends IReadOnlyRepository<Driver, string>,
     IWriteOnlyRepository<Driver, string>,
@@ -19,13 +24,14 @@ export interface IDriverRepository
   findByStatus(status: DriverStatus, options?: QueryOptions): Promise<Driver[]>;
   findByKycStatus(
     kycStatus: KYCStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<Driver[]>;
   findByLicenseCategory(
     category: LicenseCategory,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<Driver[]>;
   findActiveDrivers(options?: QueryOptions): Promise<Driver[]>;
   countByStatus(status: DriverStatus): Promise<number>;
   countByKycStatus(kycStatus: KYCStatus): Promise<number>;
+  countNewDrivers(filter: IDriverDateRangeFilter): Promise<number>;
 }

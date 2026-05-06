@@ -53,6 +53,12 @@ import { GetAdminUserStatsUseCase } from "@application/use-cases/admin/GetAdminU
 import { AdminStatsController } from "@interface/controllers/admin/AdminStatsController";
 import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsRequestDto";
 import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
+import { GetAdminRideStatsUseCase } from "@application/use-cases/admin/GetAdminRideStatsUseCase";
+import { GetAdminRideStatsRequestDto } from "@application/dto/admin/GetAdminRideStatsRequestDto";
+import { GetAdminRideStatsResponseDto } from "@application/dto/admin/GetAdminRideStatsResponseDto";
+import { GetAdminDriverStatsUseCase } from "@application/use-cases/admin/GetAdminDriverStatsUseCase";
+import { GetAdminDriverStatsRequestDto } from "@application/dto/admin/GetAdminDriverStatsRequestDto";
+import { GetAdminDriverStatsResponseDto } from "@application/dto/admin/GetAdminDriverStatsResponseDto";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -150,6 +156,24 @@ export class AdminFactory {
         >
       >(TYPES.GetAdminUserStatsUseCase)
       .to(GetAdminUserStatsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminRideStatsRequestDto,
+          Promise<Result<GetAdminRideStatsResponseDto>>
+        >
+      >(TYPES.GetAdminRideStatsUseCase)
+      .to(GetAdminRideStatsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminDriverStatsRequestDto,
+          Promise<Result<GetAdminDriverStatsResponseDto>>
+        >
+      >(TYPES.GetAdminDriverStatsUseCase)
+      .to(GetAdminDriverStatsUseCase);
 
     // Controller bindings
     container
