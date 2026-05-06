@@ -11,7 +11,7 @@ import { useUploadProfilePictureMutation } from "../../services/userProfileApi";
 import type { ProfileHeaderProps } from "./ProfileHeader.types";
 
 interface ExtendedProfileHeaderProps extends ProfileHeaderProps {
-  onRegistrationSuccess?: () => Promise<void>;
+  onRegistrationSuccess?: () => void;
 }
 
 export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
@@ -28,7 +28,7 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string>(
-    profile?.profilePicture || ""
+    profile?.profilePicture || "",
   );
 
   const userId = useMemo(() => {
@@ -59,7 +59,7 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
         month: "long",
       });
     },
-    []
+    [],
   );
 
   const getInitials = useMemo(
@@ -72,7 +72,7 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
         .toUpperCase()
         .slice(0, 2);
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
         } else {
           console.error("No picture URL in response:", response);
           throw new Error(
-            response?.message || "Failed to get image URL from server"
+            response?.message || "Failed to get image URL from server",
           );
         }
       } catch (err: any) {
@@ -174,7 +174,7 @@ export const ProfileHeader: React.FC<ExtendedProfileHeaderProps> = ({
         throw new Error(errorMessage);
       }
     },
-    [userId, uploadProfilePicture]
+    [userId, uploadProfilePicture],
   );
 
   const handleUploadSuccess = useCallback(() => {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdRefresh, MdError } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/features/auth";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useLogoutMutation } from "@/features/auth/services/authApi";
 import { Button } from "@/shared/components/ui/Button";
@@ -14,14 +13,14 @@ import type {
   UserProfileFormData,
   UserStats,
 } from "../types/userProfile.types";
+import { useAppDispatch } from "@/app/store/hooks";
 
 const UserProfilePage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [logoutMutation] = useLogoutMutation();
   const {
     profile,
-    // stats,
     isLoading,
     isUpdating,
     error,
@@ -46,7 +45,6 @@ const UserProfilePage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Clear success message after timeout
   useEffect(() => {
     if (showSuccess) {
       const timer = setTimeout(() => setShowSuccess(false), 5000);
@@ -77,14 +75,13 @@ const UserProfilePage: React.FC = () => {
     await refreshData();
   };
 
-  // Handle logout after successful driver registration
   const handleRegistrationSuccess = async () => {
     try {
       await logoutMutation().unwrap();
+      console.log("Logout successful after registration");
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("Logout error during registration flow:", err);
     } finally {
-      // Redirect to login page
       navigate("/login", { replace: true });
     }
   };
@@ -120,8 +117,8 @@ const UserProfilePage: React.FC = () => {
                 {typeof error === "string"
                   ? error
                   : "message" in (error as any)
-                  ? (error as any).message
-                  : "An unexpected error occurred"}
+                    ? (error as any).message
+                    : "An unexpected error occurred"}
               </p>
               <Button
                 variant="primary"

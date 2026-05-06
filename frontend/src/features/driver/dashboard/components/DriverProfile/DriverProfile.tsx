@@ -1,15 +1,11 @@
 import React from "react";
-import { Badge } from "@/shared/components/ui";
 import type { DriverProfileProps } from "./DriverProfile.types";
 
 export const DriverProfile: React.FC<DriverProfileProps> = ({
   driver,
-  isOnline,
-  onToggleStatus,
-  loading = false,
   className = "",
 }) => {
-  const status = driver.currentStatus ?? "Offline";
+  console.log("Driver Profile Image URL:", driver.profileImageUrl);
 
   const getStatusBadgeVariant = (statusStr?: string) => {
     switch (statusStr) {
@@ -48,7 +44,6 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900">Driver Profile</h2>
-        <Badge variant={getStatusBadgeVariant(status)}>{status}</Badge>
       </div>
 
       <div className="flex items-start space-x-4">
@@ -84,21 +79,6 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({
           ) : (
             <p className="text-sm text-gray-500">Mobile not available</p>
           )}
-        </div>
-
-        {/* Status Toggle */}
-        <div className="flex-shrink-0">
-          <button
-            onClick={() => onToggleStatus(!isOnline)}
-            disabled={loading}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-              isOnline
-                ? "bg-red-100 hover:bg-red-200 text-red-700"
-                : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
-            } disabled:opacity-50`}
-          >
-            {loading ? "Loading..." : isOnline ? "Go Offline" : "Go Online"}
-          </button>
         </div>
       </div>
     </div>

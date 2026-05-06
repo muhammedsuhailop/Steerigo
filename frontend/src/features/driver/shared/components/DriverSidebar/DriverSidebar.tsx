@@ -15,6 +15,7 @@ export const DriverSidebar: React.FC<DriverSidebarProps> = ({
   onToggle,
   isMobile,
   className = "",
+  disableNavigation = false,
 }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { isOnline } = useSelector((state: RootState) => state.driver);
@@ -100,6 +101,7 @@ export const DriverSidebar: React.FC<DriverSidebarProps> = ({
               isCollapsed={isCollapsed || false}
               isMobile={isMobile || false}
               isActive={window.location.pathname === item.path}
+              disableNavigation={disableNavigation}
             />
           ))}
         </nav>

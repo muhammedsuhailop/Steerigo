@@ -33,6 +33,7 @@ export const DriverRegistrationPage: React.FC = () => {
         isCollapsed={sidebarCollapsed}
         onToggle={toggleSidebar}
         isMobile={isMobile}
+        disableNavigation={true}
       />
 
       {/* Main Content */}
