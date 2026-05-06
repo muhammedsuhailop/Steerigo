@@ -9,11 +9,9 @@ import { Alert } from "@/shared/components/ui/Alert";
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UpdateProfileForm } from "../components/UpdateProfileForm";
 import { ProfileStats } from "../components/ProfileStats";
-import type {
-  UserProfileFormData,
-  UserStats,
-} from "../types/userProfile.types";
+import type { UserProfileFormData } from "../types/userProfile.types";
 import { useAppDispatch } from "@/app/store/hooks";
+import { useGetUserStatsQuery } from "../services/userProfileApi";
 
 const UserProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -33,14 +31,8 @@ const UserProfilePage: React.FC = () => {
     clearErrors,
   } = useUserProfile();
 
-  const dummyStats: UserStats = {
-    totalRides: 42,
-    completedRides: 37,
-    cancelledRides: 2,
-    totalSpent: 1234.56,
-    memberSince: "2023-01-01",
-    favoriteDrivers: ["Sharuck", "Doe", "Sam"],
-  };
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetUserStatsQuery();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -135,7 +127,7 @@ const UserProfilePage: React.FC = () => {
     );
   }
 
-  if (!profile || !dummyStats) {
+  if (!profile) {
     return null;
   }
 
@@ -199,7 +191,7 @@ const UserProfilePage: React.FC = () => {
           ) : (
             <ProfileHeader
               profile={profile}
-              stats={dummyStats}
+              stats={statsResponse?.data}
               onEditClick={handleEditClick}
               onDriverRegisterClick={navigateToDriverRegistration}
               onRegisterAsDriver={registerAsDriver}
@@ -210,15 +202,13 @@ const UserProfilePage: React.FC = () => {
           )}
 
           {/* Profile Statistics */}
-          {!isEditMode && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Your Statistics
-                </h2>
-              </div>
-
-              <ProfileStats stats={dummyStats} isLoading={isLoading} />
+          {!isEditMode && statsResponse?.data && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-6">Your Statistics</h2>
+              <ProfileStats
+                stats={statsResponse.data}
+                isLoading={statsLoading}
+              />
             </div>
           )}
         </div>

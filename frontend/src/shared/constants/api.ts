@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
     CANCEL_RIDE_REQUEST: "/user/ride/request-cancel",
     RIDE: "/user/ride",
     RIDES: "/user/ride/rides",
+    STATS: "/user/stats",
   },
   DRIVER: {
     REGISTER: "/driver/register",
