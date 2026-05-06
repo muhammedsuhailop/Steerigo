@@ -15,6 +15,9 @@ import { USER_MESSAGES } from "@shared/constants/UserMessages";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
 import { UserRole } from "@shared/constants/AuthConstants";
+import { GetUserStatsRequestDto } from "@application/dto/user/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "@application/dto/user/GetUserStatsResponseDto";
+import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -42,7 +45,13 @@ export class UserProfileController {
     private registerUserAsDriverUseCase: IUseCase<
       RegisterAsDriverRequestDto,
       Promise<Result<RegisterAsDriverResponseDto>>
-    >
+    >,
+
+    @inject(TYPES.GetUserStatsUseCase)
+    private readonly getUserStatsUseCase: IUseCase<
+      GetUserStatsRequestDto,
+      Promise<Result<GetUserStatsResponseDto>>
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -218,6 +227,43 @@ export class UserProfileController {
         success: false,
         message: USER_MESSAGES.PROFILE.INTERNAL_SERVER_ERROR,
       });
+    }
+  }
+
+  async getMyStats(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.userId;
+
+      const dto = GetUserStatsRequestDto.fromRequest(
+        userId,
+        req.query as Record<string, unknown>,
+      );
+
+      const result = await this.getUserStatsUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+          "user_get_stats",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: "User stats fetched successfully.",
+        data: result.getValue(),
+      });
+    } catch (error) {
+      Logger.error("UserProfileController.getMyStats error", { error });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "user_get_stats",
+      );
+
+      res.status(statusCode).json(response);
     }
   }
 }

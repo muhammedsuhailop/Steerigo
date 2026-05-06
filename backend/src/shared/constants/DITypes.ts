@@ -115,7 +115,7 @@ export const TYPES = {
   GetAdminWalletUseCase: Symbol.for("GetAdminWalletUseCase"),
 
   //Use Cases - Admin status
-  GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
+  GetAdminUserStatsUseCase: Symbol.for("GetAdminUserStatsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
@@ -170,6 +170,7 @@ export const TYPES = {
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
   GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
+  GetUserStatsUseCase:Symbol.for("GetUserStatsUseCase"),
 
   //Use Cases - Chat
   CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),

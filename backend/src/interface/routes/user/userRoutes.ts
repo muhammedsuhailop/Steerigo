@@ -57,6 +57,11 @@ router.get("/coupons", (req: Request, res: Response) =>
   couponController.getUserCoupons(req, res),
 );
 
+// GET /api/user/stats
+router.get("/stats", (req: Request, res: Response) =>
+  userProfileController.getMyStats(req, res),
+);
+
 // POST /api/drivers/search/nearby
 router.post(
   "/search/nearby",
@@ -65,5 +70,6 @@ router.post(
   (req: Request, res: Response) =>
     driverSearchController.findNearbyDrivers(req, res),
 );
+
 
 export { router as userRoutes };

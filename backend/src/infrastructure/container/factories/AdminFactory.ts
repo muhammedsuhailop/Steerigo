@@ -49,7 +49,7 @@ import { GetAdminWalletUseCase } from "@application/use-cases/admin/GetAdminWall
 import { GetAdminWalletDto } from "@application/dto/admin/GetAdminWalletDto";
 import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWalletResponseDto";
 import { AdminWalletController } from "@interface/controllers/admin/AdminWalletController";
-import { GetUserStatsUseCase } from "@application/use-cases/admin/GetUserStatsUseCase";
+import { GetAdminUserStatsUseCase } from "@application/use-cases/admin/GetAdminUserStatsUseCase";
 import { AdminStatsController } from "@interface/controllers/admin/AdminStatsController";
 import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsRequestDto";
 import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
@@ -148,8 +148,8 @@ export class AdminFactory {
           GetUserStatsRequestDto,
           Promise<Result<GetUserStatsResponseDto>>
         >
-      >(TYPES.GetUserStatsUseCase)
-      .to(GetUserStatsUseCase);
+      >(TYPES.GetAdminUserStatsUseCase)
+      .to(GetAdminUserStatsUseCase);
 
     // Controller bindings
     container

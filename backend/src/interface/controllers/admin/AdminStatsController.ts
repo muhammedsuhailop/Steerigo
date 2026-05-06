@@ -14,8 +14,8 @@ import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 @injectable()
 export class AdminStatsController {
   constructor(
-    @inject(TYPES.GetUserStatsUseCase)
-    private readonly getUserStatsUseCase: IUseCase<
+    @inject(TYPES.GetAdminUserStatsUseCase)
+    private readonly getAdminUserStatsUseCase: IUseCase<
       GetUserStatsRequestDto,
       Promise<Result<GetUserStatsResponseDto>>
     >,
@@ -29,7 +29,7 @@ export class AdminStatsController {
 
       const dto = GetUserStatsRequestDto.fromRequest(req.query);
 
-      const result = await this.getUserStatsUseCase.execute(dto);
+      const result = await this.getAdminUserStatsUseCase.execute(dto);
 
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(

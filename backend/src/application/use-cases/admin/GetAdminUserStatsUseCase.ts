@@ -7,7 +7,7 @@ import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsReque
 import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
 
 @injectable()
-export class GetUserStatsUseCase
+export class GetAdminUserStatsUseCase
   implements
     IUseCase<GetUserStatsRequestDto, Promise<Result<GetUserStatsResponseDto>>>
 {

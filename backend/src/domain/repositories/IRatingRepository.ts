@@ -32,9 +32,9 @@ export interface PaginatedRatings {
   totalPages: number;
 }
 
-export interface IRatingAggregateResult {
-  averageRating: number;
+export interface IRatingStatsResult {
   totalRatings: number;
+  averageRating: number;
   distribution: {
     zeroToOne: number;
     oneToTwo: number;
@@ -55,8 +55,9 @@ export interface IRatingRepository
 
   findAll(options: RatingQueryOptions): Promise<PaginatedRatings>;
 
-  getAverageRatingForReviewee(
-    revieweeId: string,
-    filters: RatingFilters,
-  ): Promise<IRatingAggregateResult>;
+  getRatingStats(params: {
+    reviewerId?: string;
+    revieweeId?: string;
+    filters: RatingFilters;
+  }): Promise<IRatingStatsResult>;
 }

@@ -4,20 +4,15 @@ import { Result } from "@shared/utils/Result";
 import { TYPES } from "@shared/constants/DITypes";
 import { IRideRepository } from "@domain/repositories/IRideRepository";
 import { IRatingRepository } from "@domain/repositories/IRatingRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { GetDriverStatsRequestDto } from "@application/dto/driver/GetDriverStatsRequestDto";
-import { GetDriverStatsResponseDto } from "@application/dto/driver/GetDriverStatsResponseDto";
+import { GetUserStatsRequestDto } from "@application/dto/user/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "@application/dto/user/GetUserStatsResponseDto";
 import { ReviewType } from "@domain/value-objects/ReviewType";
-import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Logger } from "@shared/utils/Logger";
 
 @injectable()
-export class GetDriverStatsUseCase
+export class GetUserStatsUseCase
   implements
-    IUseCase<
-      GetDriverStatsRequestDto,
-      Promise<Result<GetDriverStatsResponseDto>>
-    >
+    IUseCase<GetUserStatsRequestDto, Promise<Result<GetUserStatsResponseDto>>>
 {
   constructor(
     @inject(TYPES.RideRepository)
@@ -25,25 +20,19 @@ export class GetDriverStatsUseCase
 
     @inject(TYPES.RatingRepository)
     private readonly ratingRepository: IRatingRepository,
-
-    @inject(TYPES.DriverRepository)
-    private readonly driverRepository: IDriverRepository,
   ) {}
 
   async execute(
-    dto: GetDriverStatsRequestDto,
-  ): Promise<Result<GetDriverStatsResponseDto>> {
+    dto: GetUserStatsRequestDto,
+  ): Promise<Result<GetUserStatsResponseDto>> {
     try {
-      Logger.debug("GetDriverStats started", dto.getUserId());
-      const driver = await this.driverRepository.findByUserId(dto.getUserId());
-      if (!driver) {
-        Logger.warn("Driver not found for user", dto.getUserId());
-        return Result.failure(new DriverNotFoundError(dto.getUserId()));
-      }
-
-      const driverId = driver.getId();
+      const userId = dto.getUserId();
+      Logger.debug("GetUserStats started", { userId });
 
       const now = new Date();
+
+      const riderId = dto.getUserId();
+
       let fromDate = dto.getFromDate();
       let toDate = dto.getToDate();
 
@@ -55,16 +44,16 @@ export class GetDriverStatsUseCase
 
       const dateFilters = { fromDate, toDate };
 
-      Logger.debug("Fetching stats", {
-        driverId,
+      Logger.debug("Fetching user stats", {
+        userId,
         fromDate,
         toDate,
       });
 
       const [rideStats, ratingStats] = await Promise.all([
-        this.rideRepository.countByDriverStats(driverId, dateFilters),
+        this.rideRepository.countByRiderStats(riderId, dateFilters),
         this.ratingRepository.getRatingStats({
-          revieweeId: driverId,
+          reviewerId: riderId,
           filters: {
             ...dateFilters,
             reviewType: ReviewType.USER_REVIEW,
@@ -73,14 +62,14 @@ export class GetDriverStatsUseCase
       ]);
 
       return Result.success({
-        driverId,
+        userId: riderId,
         fromDate: fromDate.toISOString(),
         toDate: toDate.toISOString(),
         rideStats: {
           totalRides: rideStats.total,
           completedRides: rideStats.completed,
           cancelledRides: rideStats.cancelled,
-          totalEarnings: rideStats.totalEarnings,
+          totalSpend: rideStats.totalSpend,
           currency: "INR",
         },
         ratingStats: {
@@ -90,10 +79,9 @@ export class GetDriverStatsUseCase
         },
       });
     } catch (error) {
-      Logger.error("GetDriverStats failed", {
+      Logger.error("GetUserStats failed", {
         error: (error as Error).message,
       });
-
       return Result.failure(error as Error);
     }
   }
