@@ -7,6 +7,7 @@ import { closeChat, toggleMinimize } from "../store/chatSlice";
 import { MessageBubble } from "./MessageBubble";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
+import { getDateLabel } from "../utils/formatDateLabel";
 
 export const FloatingChatWindow: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -97,13 +98,33 @@ export const FloatingChatWindow: React.FC = () => {
             ref={scrollRef}
             className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-1"
           >
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg.id}
-                message={msg}
-                isOwnMessage={msg.senderId === currentUserId}
-              />
-            ))}
+            {messages.map((msg, index) => {
+              const currentLabel = getDateLabel(msg.timeline.sentAt);
+
+              const prevMessage = messages[index - 1];
+              const prevLabel = prevMessage
+                ? getDateLabel(prevMessage.timeline.sentAt)
+                : null;
+
+              const showDateHeader = currentLabel !== prevLabel;
+
+              return (
+                <React.Fragment key={msg.id}>
+                  {showDateHeader && (
+                    <div className="flex justify-center my-3">
+                      <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
+                        {currentLabel}
+                      </span>
+                    </div>
+                  )}
+
+                  <MessageBubble
+                    message={msg}
+                    isOwnMessage={msg.senderId === currentUserId}
+                  />
+                </React.Fragment>
+              );
+            })}
           </div>
 
           <form
