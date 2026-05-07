@@ -12,6 +12,12 @@ export interface ApiErrorResponse<T = unknown> {
   timestamp: string;
 }
 
+export interface RTKQueryError {
+  status?: boolean;
+  data?: ApiErrorResponse;
+  message?: string;
+}
+
 export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;

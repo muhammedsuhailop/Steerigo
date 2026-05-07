@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RideStatus } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
 import {
   useApplyCouponMutation,
   useRemoveCouponMutation,
+  useGetUserCouponsQuery,
 } from "../services/viewRideApi";
 import { RiTicket2Line, RiCloseCircleFill } from "react-icons/ri";
-import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
-import { CouponDetails } from "../types/viewRide.types";
+import { FaCheckCircle, FaExclamationCircle, FaTag } from "react-icons/fa";
+import { CouponDetails, AvailableCoupon } from "../types/viewRide.types";
 import { useDispatch } from "react-redux";
 import { updateCouponData } from "../store/viewRideSlice";
 import { IoChevronBack } from "react-icons/io5";
-import { ApiErrorResponse } from "@/shared/api/types/errors";
 import { BaseError } from "@/shared/components/ui/ErrorHandling/ErrorHandling.types";
+import { RTKQueryError } from "@/shared/api/types/errors";
 
 interface CouponSectionProps {
   rideId: string;
@@ -31,7 +32,10 @@ const CouponSection: React.FC<CouponSectionProps> = ({
   const [couponCode, setCouponCode] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const { data: couponsData } = useGetUserCouponsQuery();
   const [applyCoupon, { isLoading: isApplying }] = useApplyCouponMutation();
   const [removeCoupon, { isLoading: isRemoving }] = useRemoveCouponMutation();
 
@@ -40,6 +44,19 @@ const CouponSection: React.FC<CouponSectionProps> = ({
   useEffect(() => {
     if (localError) setLocalError(null);
   }, [couponCode]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const isEligibleStatus = [
     RideStatus.ACCEPTED,
@@ -54,11 +71,16 @@ const CouponSection: React.FC<CouponSectionProps> = ({
 
   if (!isEligibleStatus || !isPaymentPending) return null;
 
-  const handleApply = async () => {
-    if (!couponCode.trim()) return;
+  const handleApply = async (code?: string) => {
+    const codeToApply = code || couponCode;
+    if (!codeToApply.trim()) return;
     try {
       setLocalError(null);
-      const result = await applyCoupon({ rideId, couponCode }).unwrap();
+      setIsDropdownOpen(false);
+      const result = await applyCoupon({
+        rideId,
+        couponCode: codeToApply,
+      }).unwrap();
       dispatch(
         updateCouponData({
           couponDetails: {
@@ -70,16 +92,14 @@ const CouponSection: React.FC<CouponSectionProps> = ({
         }),
       );
       setCouponCode("");
+      setIsDropdownOpen(false);
     } catch (err) {
-      const error = err as BaseError & {
-        data?: ApiErrorResponse & { message?: string };
-      };
+      const rtkError = err as RTKQueryError;
 
       const errorMessage =
-        error.userMessage ||
-        error.message ||
-        error.data?.message ||
-        error.data?.error?.userMessage ||
+        rtkError.data?.error?.userMessage ||
+        rtkError.data?.error?.message ||
+        rtkError.message ||
         "Failed to apply coupon.";
 
       setLocalError(errorMessage);
@@ -106,8 +126,15 @@ const CouponSection: React.FC<CouponSectionProps> = ({
     }
   };
 
+  const availableCoupons =
+    couponsData?.data?.coupons?.filter((c: AvailableCoupon) => c.isActive) ||
+    [];
+
   return (
-    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mt-4 transition-all">
+    <div
+      className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mt-4 transition-all"
+      ref={dropdownRef}
+    >
       <div className="flex items-center gap-2 mb-4">
         <RiTicket2Line className="text-gray-600 text-lg" />
         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide">
@@ -166,11 +193,12 @@ const CouponSection: React.FC<CouponSectionProps> = ({
           </div>
         )
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 relative">
           <div className="relative">
             <input
               type="text"
               value={couponCode}
+              onFocus={() => setIsDropdownOpen(true)}
               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
               placeholder="ENTER COUPON CODE"
               className={`w-full bg-gray-50 border-2 rounded-2xl px-5 py-4 text-xs font-bold uppercase tracking-wide outline-none transition-all placeholder:text-gray-300 ${
@@ -180,7 +208,7 @@ const CouponSection: React.FC<CouponSectionProps> = ({
               }`}
             />
             <button
-              onClick={handleApply}
+              onClick={() => handleApply()}
               disabled={isApplying || !couponCode}
               className="absolute right-2 top-2 bottom-2 px-6 bg-black text-white rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-gray-800 disabled:opacity-30 transition-all min-w-[80px]"
             >
@@ -191,6 +219,38 @@ const CouponSection: React.FC<CouponSectionProps> = ({
               )}
             </button>
           </div>
+
+          {/* Coupon Listing Dropdown */}
+          {isDropdownOpen && availableCoupons.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl max-h-48 overflow-y-auto">
+              {availableCoupons.map((coupon: AvailableCoupon) => (
+                <div
+                  key={coupon.id}
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <FaTag className="text-blue-500 text-xs" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">
+                        {coupon.code}
+                      </p>
+                      <p className="text-[10px] text-gray-500 font-medium">
+                        {coupon.discountType === "PERCENTAGE"
+                          ? `${coupon.discountValue}% OFF`
+                          : `₹${coupon.discountValue} OFF`}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleApply(coupon.code)}
+                    className="text-[10px] font-black text-blue-600 uppercase hover:underline"
+                  >
+                    Apply
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {localError && (
             <div className="flex items-center gap-2 px-1">

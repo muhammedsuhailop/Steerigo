@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
     RIDE: "/user/ride",
     RIDES: "/user/ride/rides",
     STATS: "/user/stats",
+    COUPONS: "/user/coupons",
   },
   DRIVER: {
     REGISTER: "/driver/register",
