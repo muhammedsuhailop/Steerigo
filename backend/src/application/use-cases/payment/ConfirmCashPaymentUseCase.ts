@@ -36,7 +36,7 @@ export class ConfirmCashPaymentUseCase
     private readonly driverRepository: IDriverRepository,
     @inject(TYPES.EarningsDistributionService)
     private readonly earningsDistributionService: IEarningsDistributionService,
-    @inject(TYPES.IDGenerator)
+    @inject(TYPES.NanoIdGenerator)
     private readonly idGenerator: IIdGenerator,
     @inject(TYPES.EventBus)
     private readonly eventBus: IEventBus,
@@ -101,7 +101,7 @@ export class ConfirmCashPaymentUseCase
 
       const amount = Money.create(payableAmount, ride.getCurrency());
 
-      const paymentId = this.idGenerator.generate();
+      const paymentId = this.idGenerator.generate("PAY");
       const paidAt = new Date();
 
       if (!ride.getTimeline().getPaymentInitiatedAt()) {

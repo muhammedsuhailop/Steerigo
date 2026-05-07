@@ -36,10 +36,15 @@ export class RazorpayService implements IPaymentGatewayService {
     try {
       const amountInPaise = Math.round(params.amount * 100);
 
+      const sanitizedReceipt = `pay_${crypto
+        .randomUUID()
+        .replace(/-/g, "")
+        .slice(0, 30)}`;
+
       const order = await this.client.orders.create({
         amount: amountInPaise,
         currency: params.currency,
-        receipt: params.receipt,
+        receipt: sanitizedReceipt,
         notes: params.notes,
       });
 
@@ -57,7 +62,7 @@ export class RazorpayService implements IPaymentGatewayService {
       };
     } catch (error) {
       Logger.error("Failed to create Razorpay order", {
-        error: error instanceof Error ? error.message : String(error),
+        error: JSON.stringify(error, null, 2),
       });
       throw error;
     }

@@ -16,6 +16,7 @@ import { TransactionDirection } from "@domain/value-objects/TransactionDirection
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { Types } from "mongoose";
+import { IIdGenerator } from "@application/services/IIdGenerator";
 
 const PLATFORM_OWNER_ID = "platform";
 
@@ -28,6 +29,8 @@ export class EarningsDistributionService
     private readonly walletRepository: IWalletRepository,
     @inject(TYPES.TransactionRepository)
     private readonly transactionRepository: ITransactionRepository,
+    @inject(TYPES.NanoIdGenerator)
+    private readonly idGenerator: IIdGenerator,
   ) {}
 
   async distribute(
@@ -261,7 +264,7 @@ export class EarningsDistributionService
     await this.walletRepository.save(wallet);
 
     const transaction = Transaction.create({
-      id: new Types.ObjectId().toString(),
+      id: this.idGenerator.generate("TXN"),
       walletId: wallet.getId(),
       type: type,
       direction: TransactionDirection.DEBIT,
@@ -301,7 +304,7 @@ export class EarningsDistributionService
     await this.walletRepository.save(wallet);
 
     const transaction = Transaction.create({
-      id: new Types.ObjectId().toString(),
+      id: this.idGenerator.generate("TXN"),
       walletId: wallet.getId(),
       type: type,
       direction: TransactionDirection.CREDIT,
@@ -346,7 +349,7 @@ export class EarningsDistributionService
     await this.walletRepository.save(wallet);
 
     const transaction = Transaction.create({
-      id: new Types.ObjectId().toString(),
+      id: this.idGenerator.generate("TXN"),
       walletId: wallet.getId(),
       type: type,
       direction: TransactionDirection.CREDIT,
@@ -378,7 +381,7 @@ export class EarningsDistributionService
     if (!wallet) return;
 
     const transaction = Transaction.create({
-      id: new Types.ObjectId().toString(),
+      id: this.idGenerator.generate("TXN"),
       walletId: wallet.getId(),
       type: type,
       direction: TransactionDirection.CREDIT,

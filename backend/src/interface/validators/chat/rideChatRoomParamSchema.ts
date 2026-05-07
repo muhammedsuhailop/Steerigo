@@ -1,12 +1,31 @@
 import { z } from "zod";
 
-const rideIdRegex = /^RIDE-[0-9a-fA-F]{24}$/;
+const objectIdRideRegex = /^RIDE-[0-9a-fA-F]{24}$/;
 
 export const rideChatRoomParamSchema = z.object({
   params: z.object({
     rideId: z
       .string()
       .min(1, "Ride ID is required")
-      .regex(rideIdRegex, "Invalid Ride ID"),
+      .refine(
+        (value) => {
+          // Mongo ObjectId format
+          if (objectIdRideRegex.test(value)) {
+            return true;
+          }
+
+          // UUID format
+          if (value.startsWith("RIDE-")) {
+            const uuidPart = value.replace("RIDE-", "");
+
+            return z.uuid().safeParse(uuidPart).success;
+          }
+
+          return false;
+        },
+        {
+          message: "Invalid Ride ID",
+        },
+      ),
   }),
 });

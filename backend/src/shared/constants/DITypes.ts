@@ -44,6 +44,8 @@ export const TYPES = {
   PaymentGatewayService: Symbol.for("PaymentGatewayService"),
   EarningsDistributionService: Symbol.for("EarningsDistributionService"),
   IDGenerator: Symbol.for("IDGenerator"),
+  UuidGenerator: Symbol.for("UuidGenerator"),
+  NanoIdGenerator: Symbol.for("NanoIdGenerator"),
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
   PaymentStrategies: Symbol.for("PaymentStrategies"),
@@ -117,7 +119,7 @@ export const TYPES = {
   //Use Cases - Admin status
   GetAdminUserStatsUseCase: Symbol.for("GetAdminUserStatsUseCase"),
   GetAdminRideStatsUseCase: Symbol.for("GetAdminRideStatsUseCase"),
-  GetAdminDriverStatsUseCase:Symbol.for("GetAdminDriverStatsUseCase"),
+  GetAdminDriverStatsUseCase: Symbol.for("GetAdminDriverStatsUseCase"),
 
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),

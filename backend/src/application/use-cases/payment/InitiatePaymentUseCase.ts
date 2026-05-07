@@ -43,7 +43,7 @@ export class InitiatePaymentUseCase
     @inject(TYPES.EventBus)
     private readonly eventBus: IEventBus,
 
-    @inject(TYPES.IDGenerator)
+    @inject(TYPES.NanoIdGenerator)
     private idGenerator: IIdGenerator,
 
     @multiInject(TYPES.PaymentStrategies)
@@ -88,7 +88,7 @@ export class InitiatePaymentUseCase
 
       const amount = Money.create(ride.getPayableAmount(), ride.getCurrency());
 
-      const paymentId = this.idGenerator.generate();
+      const paymentId = this.idGenerator.generate("PAY");
 
       const payment = Payment.create(
         paymentId,
