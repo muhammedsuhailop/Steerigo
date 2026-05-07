@@ -61,6 +61,11 @@ export const API_ENDPOINTS = {
     TRANSACTIONS: "/admin/transactions",
     RIDES: "/admin/rides",
     COUPONS: "/admin/coupons",
+    STATS: {
+      USER: "/admin/stats/users",
+      DRIVER: "/admin/stats/drivers",
+      RIDE: "/admin/stats/rides",
+    },
   },
   FILE: {
     UPLOAD: "/file/upload",

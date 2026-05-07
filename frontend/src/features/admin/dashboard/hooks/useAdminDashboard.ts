@@ -1,43 +1,102 @@
-import { useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
+import {
+  useGetAdminUserStatsQuery,
+  useGetAdminRideStatsQuery,
+  useGetAdminDriverStatsQuery,
+} from "../services/adminDashboardApi";
 import {
   useGetAllUsersQuery,
   useGetAllDriversQuery,
-  useGetDriverStatsQuery,
   useGetKYCRequestsQuery,
 } from "@/features/admin/shared/services/adminApi";
 
+export type DateFilterOption =
+  | "today"
+  | "7days"
+  | "1month"
+  | "3months"
+  | "6months"
+  | "1year"
+  | "all";
+
 export const useAdminDashboard = () => {
-  // Fetch users data with minimal params for dashboard
+  const [filter, setFilter] = useState<DateFilterOption>("7days");
+
+  const dateParams = useMemo(() => {
+    if (filter === "all") return undefined;
+
+    const toDate = new Date().toISOString();
+    const from = new Date();
+
+    switch (filter) {
+      case "today":
+        from.setHours(0, 0, 0, 0);
+        break;
+      case "7days":
+        from.setDate(from.getDate() - 7);
+        break;
+      case "1month":
+        from.setMonth(from.getMonth() - 1);
+        break;
+      case "3months":
+        from.setMonth(from.getMonth() - 3);
+        break;
+      case "6months":
+        from.setMonth(from.getMonth() - 6);
+        break;
+      case "1year":
+        from.setFullYear(from.getFullYear() - 1);
+        break;
+      default:
+        return undefined;
+    }
+
+    return {
+      fromDate: from.toISOString(),
+      toDate,
+    };
+  }, [filter]);
+
+  const {
+    data: userStats,
+    isLoading: userStatsLoading,
+    refetch: refetchUserStats,
+  } = useGetAdminUserStatsQuery(dateParams);
+
+  const {
+    data: rideStats,
+    isLoading: rideStatsLoading,
+    refetch: refetchRideStats,
+  } = useGetAdminRideStatsQuery(dateParams);
+
+  const {
+    data: driverStats,
+    isLoading: driverStatsLoading,
+    refetch: refetchDriverStats,
+  } = useGetAdminDriverStatsQuery(dateParams);
+
   const {
     data: usersData,
     isLoading: usersLoading,
-    isFetching: usersFetching,
     refetch: refetchUsers,
   } = useGetAllUsersQuery({
     page: 1,
-    limit: 100,
+    limit: 5,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
 
-  // Fetch drivers data for dashboard
   const {
     data: driversData,
     isLoading: driversLoading,
-    isFetching: driversFetching,
     refetch: refetchDrivers,
   } = useGetAllDriversQuery({
     page: 1,
-    limit: 100,
+    limit: 5,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
 
-  // Fetch driver statistics
-  const { isLoading: driverStatsLoading, refetch: refetchDriverStats } =
-    useGetDriverStatsQuery();
-
-  // Fetch pending KYC requests
   const {
     data: kycData,
     isLoading: kycLoading,
@@ -45,167 +104,92 @@ export const useAdminDashboard = () => {
   } = useGetKYCRequestsQuery({
     status: "pending",
     page: 1,
-    limit: 10,
+    limit: 5,
   });
 
-  // Extract data safely
-  const users = useMemo(() => usersData?.data.users ?? [], [usersData]);
-
-  const drivers = useMemo(() => driversData?.data.drivers ?? [], [driversData]);
-
-  const kycRequests = useMemo(
-    () => kycData?.data.kycDocuments ?? [],
-    [kycData]
+  const recentUsers = useMemo(() => usersData?.data.users ?? [], [usersData]);
+  const recentDrivers = useMemo(
+    () => driversData?.data.drivers ?? [],
+    [driversData],
   );
-
-  const userPagination = usersData?.data.pagination;
-  const driverPagination = driversData?.data.pagination;
-
-  // Calculate user statistics from fetched data
-
-  const getUserStats = useMemo(() => {
-    const totalUsers = userPagination?.totalItems || 0;
-    const activeUsers = users.filter((u) => u.status === "Active").length;
-    const pendingUsers = users.filter(
-      (u) => u.status === "Pending Verification"
-    ).length;
-    const inactiveUsers = users.filter((u) => u.status === "Inactive").length;
-    const suspendedUsers = users.filter((u) => u.status === "Suspended").length;
-    const blockedUsers = users.filter((u) => u.status === "Blocked").length;
-
-    return {
-      totalUsers,
-      activeUsers,
-      pendingUsers,
-      inactiveUsers,
-      suspendedUsers,
-      blockedUsers,
-    };
-  }, [users, userPagination]);
-
-  // Calculate driver statistics
-
-  const getDriverStats = useMemo(() => {
-    const totalDrivers = driverPagination?.totalItems ?? drivers.length;
-
-    const activeDrivers = drivers.filter(
-      (d) => d.statusInfo.status === "Active"
-    ).length;
-
-    const suspendedDrivers = drivers.filter(
-      (d) => d.statusInfo.status === "Suspended"
-    ).length;
-
-    const blockedDrivers = drivers.filter(
-      (d) => d.statusInfo.status === "Blocked"
-    ).length;
-
-    const pendingKYCDrivers = drivers.filter(
-      (d) => d.statusInfo.kycStatus === "InReview"
-    ).length;
-
-    const approvedKYCDrivers = drivers.filter(
-      (d) => d.statusInfo.kycStatus === "Approved"
-    ).length;
-
-    const rejectedKYCDrivers = drivers.filter(
-      (d) => d.statusInfo.kycStatus === "Rejected"
-    ).length;
-
-    return {
-      totalDrivers,
-      activeDrivers,
-      suspendedDrivers,
-      blockedDrivers,
-      pendingKYCDrivers,
-      approvedKYCDrivers,
-      rejectedKYCDrivers,
-    };
-  }, [drivers, driverPagination]);
-
-  // Get recent users (last 5)
-
-  const getRecentUsers = useMemo(() => {
-    return users.slice(0, 5);
-  }, [users]);
-
-  // Get recent drivers (last 5)
-
-  const getRecentDrivers = useMemo(() => {
-    return drivers.slice(0, 5);
-  }, [drivers]);
-
-  // Get KYC statistics
-
-  const getKYCStats = useMemo(() => {
-    return {
-      pendingKYC: kycRequests.length,
-      totalKYCRequests: kycData?.data.pagination.totalPages || 0,
-    };
-  }, [kycRequests, kycData]);
-
-  // Get complete dashboard statistics
+  const recentKYCRequests = useMemo(
+    () => kycData?.data.kycDocuments ?? [],
+    [kycData],
+  );
 
   const getDashboardStats = useCallback(() => {
     return {
-      // User stats
-      ...getUserStats,
+      // User Stats
+      totalUsers: userStats?.totalUsers ?? 0,
+      newUsers: userStats?.newUsers ?? 0,
 
-      // Driver stats
-      ...getDriverStats,
+      // Driver Stats
+      totalDrivers: driverStats?.driverStats.totalDrivers ?? 0,
+      activeDrivers: driverStats?.driverStats.statusBreakdown.active ?? 0,
+      suspendedDrivers: driverStats?.driverStats.statusBreakdown.suspended ?? 0,
+      blockedDrivers: driverStats?.driverStats.statusBreakdown.blocked ?? 0,
+      pendingKYCDrivers: driverStats?.driverStats.kycBreakdown.inReview ?? 0,
+      approvedKYCDrivers: driverStats?.driverStats.kycBreakdown.approved ?? 0,
 
-      // KYC stats
-      ...getKYCStats,
+      // Ride & Revenue Stats
+      totalRides: rideStats?.rideStats.totalRides ?? 0,
+      completedRides: rideStats?.rideStats.completedRides ?? 0,
+      cancelledRides: rideStats?.rideStats.cancelledRides ?? 0,
+      totalRevenue: rideStats?.rideStats.totalAmount ?? 0,
+      currency: rideStats?.rideStats.currency ?? "INR",
+      averageRating: rideStats?.ratingStats.averageRating ?? 0,
 
-      // Recent data
-      recentUsers: getRecentUsers,
-      recentDrivers: getRecentDrivers,
-      recentKYCRequests: kycRequests.slice(0, 5),
+      // Lists
+      recentUsers,
+      recentDrivers,
+      recentKYCRequests,
     };
   }, [
-    getUserStats,
-    getDriverStats,
-    getKYCStats,
-    getRecentUsers,
-    getRecentDrivers,
-    kycRequests,
+    userStats,
+    driverStats,
+    rideStats,
+    recentUsers,
+    recentDrivers,
+    recentKYCRequests,
   ]);
 
-  // Refresh all dashboard data
-
   const refreshDashboardData = useCallback(() => {
+    refetchUserStats();
+    refetchRideStats();
+    refetchDriverStats();
     refetchUsers();
     refetchDrivers();
-    refetchDriverStats();
     refetchKYC();
-  }, [refetchUsers, refetchDrivers, refetchDriverStats, refetchKYC]);
+  }, [
+    refetchUserStats,
+    refetchRideStats,
+    refetchDriverStats,
+    refetchUsers,
+    refetchDrivers,
+    refetchKYC,
+  ]);
 
-  // Check if any data is loading
   const isLoading =
-    usersLoading || driversLoading || driverStatsLoading || kycLoading;
-  const isFetching = usersFetching || driversFetching;
+    userStatsLoading ||
+    rideStatsLoading ||
+    driverStatsLoading ||
+    usersLoading ||
+    driversLoading ||
+    kycLoading;
 
   return {
-    // Main function
     getDashboardStats,
     refreshDashboardData,
-
-    // Loading states
     loading: isLoading,
-    isFetching,
-
-    // Raw data (if needed)
-    users,
-    drivers,
-    kycRequests,
-    userPagination,
-    driverPagination,
-
-    // Individual stats getters
-    getUserStats,
-    getDriverStats,
-    getKYCStats,
-    getRecentUsers,
-    getRecentDrivers,
+    filter,
+    setFilter,
+    rawStats: {
+      user: userStats,
+      ride: rideStats,
+      driver: driverStats,
+    },
+    recentUsers,
+    recentDrivers,
+    recentKYCRequests,
   };
 };
