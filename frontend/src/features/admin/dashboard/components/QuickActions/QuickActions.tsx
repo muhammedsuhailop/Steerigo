@@ -28,12 +28,12 @@ const quickActions: QuickAction[] = [
     path: "/admin/kyc-requests",
   },
   {
-    id: "view-reports",
-    title: "View Reports",
-    description: "Access detailed analytics and reports",
-    icon: "view-reports",
+    id: "view-transactions",
+    title: "View Transactions",
+    description: "Access detailed transactions",
+    icon: "view-transactions",
     color: "purple",
-    path: "/admin/reports",
+    path: "/admin/transactions",
   },
   {
     id: "manage-coupons",
@@ -44,12 +44,12 @@ const quickActions: QuickAction[] = [
     path: "/admin/coupons",
   },
   {
-    id: "system-settings",
-    title: "System Settings",
-    description: "Configure platform settings",
-    icon: "system-settings",
+    id: "view-payouts",
+    title: "View Payouts",
+    description: "View detailed payout requestes",
+    icon: "view-payouts",
     color: "blue",
-    path: "/admin/settings",
+    path: "/admin/drivers/payouts",
   },
 ];
 

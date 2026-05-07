@@ -97,13 +97,6 @@ const AdminDashboard: React.FC = () => {
             onRefresh={handleRefresh}
           />
 
-          <RecentUsers
-            users={stats.recentUsers}
-            loading={loading}
-            onViewAll={handleViewAllUsers}
-            maxUsers={5}
-          />
-
           <RecentActivity />
         </main>
 

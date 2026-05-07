@@ -8,6 +8,8 @@ import {
   RiSettingsLine,
   RiFileTextLine,
   RiTicket2Line,
+  RiWallet3Line,
+  RiExchangeDollarLine,
 } from "react-icons/ri";
 
 const getActionIcon = (iconName: string) => {
@@ -18,6 +20,8 @@ const getActionIcon = (iconName: string) => {
     "system-settings": RiSettingsLine,
     "manage-kyc": RiFileTextLine,
     "manage-coupons": RiTicket2Line,
+    "view-payouts": RiWallet3Line,
+    "view-transactions": RiExchangeDollarLine,
   };
   return icons[iconName as keyof typeof icons];
 };
