@@ -334,7 +334,7 @@ export class DriverAvailability {
       return false;
     }
 
-    let currentDate = new Date(startTime);
+    const currentDate = new Date(startTime);
     currentDate.setUTCHours(0, 0, 0, 0);
 
     const endDate = new Date(endTime);

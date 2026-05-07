@@ -10,8 +10,6 @@ import { SOCKET_EVENTS } from "@infrastructure/realtime/constants/SocketEvents";
 import { getRideSocketServer } from "@infrastructure/realtime/socket";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { INotificationRepository } from "@domain/repositories/INotificationRepository";
-import { IIdGenerator } from "@application/services/IIdGenerator";
 import { NotificationType } from "@domain/value-objects/NotificationType";
 import { INotificationPersistenceService } from "@application/services/NotificationPersistenceService";
 

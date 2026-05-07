@@ -7,7 +7,6 @@ import { TYPES } from "@shared/constants/DITypes";
 import {
   DriverAvailabilityNotFoundError,
   InvalidStatusTransitionError,
-  ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
 import { IUseCase } from "../interfaces/IUseCase";
 import { UpdateAvailabilityStatusResponseDto } from "@application/dto/driver/UpdateAvailabilityStatusResponseDto";

@@ -2,7 +2,6 @@ import { injectable, inject } from "inversify";
 import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { TYPES } from "@shared/constants/DITypes";
-import { Logger } from "@shared/utils/Logger";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";
 
 @injectable()

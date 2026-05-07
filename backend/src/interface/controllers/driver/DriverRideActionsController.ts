@@ -4,7 +4,6 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
-import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
 import { MarkRideAsArrivedDto } from "@application/dto/driver/MarkRideAsArrivedDto";

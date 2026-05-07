@@ -1,13 +1,13 @@
-// Domain entity with metadata getters 
+// Domain entity with metadata getters
 export interface BaseEntity {
   getId(): string;
   getCreatedAt(): Date;
   getUpdatedAt(): Date;
 }
 
-// Pagination and filtering options 
+// Pagination and filtering options
 export interface QueryOptions<T = unknown> {
-  page?:number;
+  page?: number;
   limit?: number;
   offset?: number;
   sortBy?: keyof T;
@@ -15,7 +15,7 @@ export interface QueryOptions<T = unknown> {
   filters?: Partial<T>;
 }
 
-// Generic CRUD operations 
+// Generic CRUD operations
 export interface Repository<T extends BaseEntity, ID = string> {
   findById(id: ID): Promise<T | null>;
   save(entity: T): Promise<void>;
@@ -23,7 +23,7 @@ export interface Repository<T extends BaseEntity, ID = string> {
   exists(id: ID): Promise<boolean>;
 }
 
-// Result of a paginated query 
+// Result of a paginated query
 export interface PaginatedResult<T> {
   data: T[];
   total: number;
@@ -32,13 +32,13 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-// Bulk update options 
+// Bulk update options
 export interface UpdateOptions<T> {
   data: Partial<T>;
   validate?: boolean;
 }
 
-// Flexible filter definitions 
+// Flexible filter definitions
 
 type ComparisonOperators<T> = {
   $eq?: T;
@@ -53,10 +53,11 @@ type RangeOperators<T> = T extends Date | number
       $lt?: T;
       $lte?: T;
     }
-  : {};
+  : Record<string, never>;
 
-  type StringOperators<T> = T extends string ? { $regex?: string } : {};
-
+type StringOperators<T> = T extends string
+  ? { $regex?: string }
+  : Record<string, never>;
 
 export type FilterOptions<T> = {
   [K in keyof T]?:

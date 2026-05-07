@@ -7,7 +7,6 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import {
   DriverAvailabilityNotFoundError,
-  ExpiredAvailabilityError,
 } from "@domain/errors/DriverAvailabilityErrors";
 import { IUseCase } from "../interfaces/IUseCase";
 import { UpdateDriverLocationResponseDto } from "@application/dto/driver/UpdateDriverLocationResponseDto";

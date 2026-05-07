@@ -159,7 +159,7 @@ export class RideRepositoryImpl implements IRideRepository {
 
   async findByDriverId(driverId: string, status?: RideStatus): Promise<Ride[]> {
     try {
-      const query: any = {
+      const query: FilterQuery<IRideDocument> = {
         driverId: new Types.ObjectId(driverId),
       };
 
@@ -188,7 +188,7 @@ export class RideRepositoryImpl implements IRideRepository {
 
   async findByRiderId(riderId: string, status?: RideStatus): Promise<Ride[]> {
     try {
-      const query: any = {
+      const query: FilterQuery<IRideDocument> = {
         riderId: new Types.ObjectId(riderId),
       };
 

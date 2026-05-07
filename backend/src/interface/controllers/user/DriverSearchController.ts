@@ -45,7 +45,6 @@ export class DriverSearchController {
         radiusKm,
         gearType,
         bodyType,
-        limit,
       } = req.body;
 
       Logger.info("Find nearby drivers request received", {

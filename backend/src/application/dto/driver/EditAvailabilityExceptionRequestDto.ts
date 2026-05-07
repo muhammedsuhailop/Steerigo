@@ -66,7 +66,6 @@ export class EditAvailabilityExceptionRequestDto {
   validate(): string[] {
     const errors: string[] = [];
 
-    const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
