@@ -15,8 +15,6 @@ interface PaymentStatusCardProps {
 
 export const PaymentStatusCard: React.FC<PaymentStatusCardProps> = ({
   status,
-  amount,
-  currency,
 }) => {
   const isSuccess = status === "SUCCESS";
   const isFailed = status === "FAILED";

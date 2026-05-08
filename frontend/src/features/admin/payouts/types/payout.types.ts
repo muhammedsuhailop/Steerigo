@@ -1,7 +1,7 @@
 import { PayoutDestination } from "@/features/driver/payout/types/payout.types";
 import { PayoutMethod, PayoutStatus } from "@/shared/types/payment.types";
 
-export interface AdminPayoutItem extends Omit<any, "payoutId"> {
+export interface AdminPayoutItem {
   payoutId: string;
   driverId: string;
   amount: number;

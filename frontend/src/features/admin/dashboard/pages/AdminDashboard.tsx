@@ -6,7 +6,6 @@ import { AdminSidebar, AdminTopbar } from "../../shared/components";
 import {
   DashboardOverview,
   QuickActions,
-  RecentActivity,
   RecentUsers,
   SystemStatus,
 } from "../components";
@@ -96,7 +95,7 @@ const AdminDashboard: React.FC = () => {
             loading={loading}
             onRefresh={handleRefresh}
           />
-          
+
           <RecentUsers
             users={stats.recentUsers}
             loading={loading}

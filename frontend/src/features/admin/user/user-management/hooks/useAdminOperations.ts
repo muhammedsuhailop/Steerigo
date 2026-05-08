@@ -45,16 +45,24 @@ export const useAdminOperations = () => {
         const result = await updateUserStatus({ userId, action }).unwrap();
         console.log("User action successful:", result.message);
         return { success: true, message: result.message };
-      } catch (error: any) {
-        const errorMessage =
-          error?.data?.message ||
-          error?.message ||
-          "Failed to update user status";
+      } catch (error: unknown) {
+        let errorMessage = "Failed to update user status";
+
+        if (error && typeof error === "object") {
+          const err = error as {
+            data?: { message?: string };
+            message?: string;
+          };
+
+          errorMessage = err.data?.message || err.message || errorMessage;
+        }
+
         console.error("User action failed:", errorMessage);
+
         throw new Error(errorMessage);
       }
     },
-    [updateUserStatus]
+    [updateUserStatus],
   );
 
   const handleResetFilters = useCallback(() => {

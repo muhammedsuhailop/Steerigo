@@ -101,7 +101,9 @@ export const RideFilters: React.FC<RideFiltersProps> = ({
               options={sortOptions}
               value={filters.sortBy}
               onChange={(e) =>
-                onFiltersChange({ sortBy: e.target.value as any })
+                onFiltersChange({
+                  sortBy: e.target.value as AdminRideFilters["sortBy"],
+                })
               }
               size="md"
               disabled={loading}

@@ -10,7 +10,6 @@ import {
   selectPage,
   selectLimit,
 } from "@/features/admin/shared/store/adminUsersSlice";
-import type { RootState } from "@/app/store/store";
 import type { UserFilters as UserFiltersType } from "./UserManagement.types";
 
 //  Debounce hook for search input
@@ -79,7 +78,7 @@ export const UserManagement: React.FC = () => {
       if (newFilters.search !== undefined) {
         setLocalSearch(newFilters.search);
         // Apply other filters immediately
-        const { search, ...otherFilters } = newFilters;
+        const { search:_search, ...otherFilters } = newFilters;
         if (Object.keys(otherFilters).length > 0) {
           handleFiltersChange(otherFilters);
         }
@@ -113,7 +112,7 @@ export const UserManagement: React.FC = () => {
 
   // Check if specific user action is loading
   const isActionLoading = useCallback(
-    (userId: string) => isUpdating,
+    (_userId: string) => isUpdating,
     [isUpdating]
   );
 
