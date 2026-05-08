@@ -6,9 +6,9 @@ import type {
   ProfilePictureData,
   UserProfile,
   UserProfileFormData,
-  UserStats,
 } from "../types/userProfile.types";
 import { updateUser } from "@/features/auth/store/authSlice";
+import { UserStats } from "../types/userStats.types";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -77,14 +77,12 @@ export const userProfileApi = createApi({
     }),
 
     // Get user statistics
-    getUserStats: builder.query<ApiResponse<UserStats>, string>({
-      query: (userId) => ({
-        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}/stats`,
+    getUserStats: builder.query<ApiResponse<UserStats>, void>({
+      query: () => ({
+        url: `${API_ENDPOINTS.USER.STATS}`,
         method: "GET",
       }),
-      providesTags: (result, error, userId) => [
-        { type: "UserStats", id: userId },
-      ],
+      providesTags: ["UserStats"],
     }),
 
     // Upload profile picture

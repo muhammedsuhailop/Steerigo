@@ -4,7 +4,6 @@ import type {
   UserFilters,
   UserAction,
 } from "../../user/user-management/components/UserManagement/UserManagement.types";
-// import { DashboardStats } from "../services/AdminStatsService";
 
 export interface AdminDataService {
   fetchUsers(params: {
@@ -34,7 +33,7 @@ export interface AdminDataService {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: any;
+    data?: unknown;
   }>;
 }
 

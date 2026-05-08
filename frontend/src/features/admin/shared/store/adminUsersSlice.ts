@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type {
-  User,
-  UserFilters,
-} from "../../user-management/components/UserManagement/UserManagement.types";
+import { UserFilters } from "../../user/user-management/components/UserManagement";
 
 // Local state management for admin users feature
 // API calls are handled by adminApi (RTK Query)

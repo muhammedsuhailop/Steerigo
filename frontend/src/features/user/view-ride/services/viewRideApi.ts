@@ -3,6 +3,7 @@ import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import {
   CouponResponse,
+  GetUserCouponsResponse,
   InitiatePaymentRequest,
   InitiatePaymentResponse,
   RateDriverResponse,
@@ -56,6 +57,13 @@ export const viewRideApi = createApi({
         url: API_ENDPOINTS.PAYMENT.MARK_FAILED,
         method: "POST",
         data,
+      }),
+    }),
+
+    getUserCoupons: builder.query<GetUserCouponsResponse, void>({
+      query: () => ({
+        url: API_ENDPOINTS.USER.COUPONS,
+        method: "GET",
       }),
     }),
 
@@ -115,6 +123,7 @@ export const {
   useInitiatePaymentMutation,
   useVerifyPaymentMutation,
   useMarkPaymentFailedMutation,
+  useGetUserCouponsQuery,
   useApplyCouponMutation,
   useRemoveCouponMutation,
   useSubmitRideRatingMutation,

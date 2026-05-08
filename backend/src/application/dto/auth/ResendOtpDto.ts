@@ -1,5 +1,4 @@
 import { Email } from "@domain/value-objects/Email";
-import { da } from "zod/v4/locales";
 
 export class ResendOtpDto {
   private email: Email;

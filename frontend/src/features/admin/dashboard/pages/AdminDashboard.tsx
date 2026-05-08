@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import { Footer } from "@/features/public/components";
-import { MdOutlineRefresh } from "react-icons/md";
 import { AdminSidebar, AdminTopbar } from "../../shared/components";
 import {
   DashboardOverview,
   QuickActions,
-  RecentActivity,
   RecentUsers,
   SystemStatus,
 } from "../components";
@@ -17,10 +15,15 @@ const AdminDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const { getDashboardStats, loading, refreshDashboardData } =
-    useAdminDashboard();
+  const {
+    getDashboardStats,
+    loading,
+    refreshDashboardData,
+    rawStats,
+    filter,
+    setFilter,
+  } = useAdminDashboard();
 
-  // Get stats using the hook
   const stats = getDashboardStats();
 
   useEffect(() => {
@@ -42,15 +45,13 @@ const AdminDashboard: React.FC = () => {
 
   const handleRefresh = () => {
     refreshDashboardData();
-    // Show notification  //TODO
     console.log("Dashboard data refreshed");
   };
 
   const handleViewAllUsers = () => {
-    // Navigate to users page
     window.location.href = "/admin/users";
   };
-  
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -70,34 +71,31 @@ const AdminDashboard: React.FC = () => {
 
         {/* Page Content */}
         <main className="flex-1 px-6 py-8 space-y-8">
-          <div className="flex items-center flex justify-end">
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Refreshing..." : <MdOutlineRefresh />}
-            </button>
-          </div>
+          <DashboardOverview
+            userName={user?.name ?? ""}
+            userStats={rawStats.user}
+            rideStats={rawStats.ride}
+            driverStats={rawStats.driver}
+            isLoading={loading}
+            filter={filter}
+            onFilterChange={setFilter}
+          />
 
-          <DashboardOverview userName={user?.name ?? ""} />
           <QuickActions />
 
-          {/* System Status Component */}
           <SystemStatus
             stats={{
               totalUsers: stats.totalUsers,
-              activeUsers: stats.activeUsers,
-              pendingUsers: stats.pendingUsers,
-              suspendedUsers: stats.suspendedUsers,
-              blockedUsers: stats.blockedUsers,
-              inactiveUsers: stats.inactiveUsers,
+              activeUsers: stats.activeDrivers,
+              pendingUsers: stats.pendingKYCDrivers,
+              suspendedUsers: stats.suspendedDrivers,
+              blockedUsers: stats.blockedDrivers,
+              inactiveUsers: stats.cancelledRides,
             }}
             loading={loading}
             onRefresh={handleRefresh}
           />
 
-          {/* Recent Users Component */}
           <RecentUsers
             users={stats.recentUsers}
             loading={loading}
@@ -105,7 +103,6 @@ const AdminDashboard: React.FC = () => {
             maxUsers={5}
           />
 
-          <RecentActivity />
         </main>
 
         {/* Footer */}

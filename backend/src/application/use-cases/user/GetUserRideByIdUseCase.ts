@@ -21,7 +21,6 @@ import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities/User";
 import { Driver } from "@domain/entities/Driver";
 import { RideErrors } from "@domain/errors/RideErrors";
-import { TaxBreakdown } from "@domain/value-objects/FareBreakdown";
 import { IRatingRepository } from "@domain/repositories/IRatingRepository";
 import { Rating } from "@domain/entities/Rating";
 import { ReviewType } from "@domain/value-objects/ReviewType";

@@ -22,26 +22,42 @@ export class CouponUsageService implements ICouponUsageService {
     try {
       const ride = await this.rideRepository.findByRideId(rideId);
 
-      if (!ride || !ride.hasCouponApplied()) {
+      if (!ride) {
+        Logger.warn("Coupon usage skipped: ride not found", { rideId });
+        return;
+      }
+
+      if (!ride.hasCouponApplied()) {
+        Logger.warn("Coupon usage skipped: coupon not applied", { rideId });
         return;
       }
 
       const couponDetails = ride.getCouponDetails();
 
+      if (!couponDetails) {
+        Logger.warn("Coupon usage skipped: coupon details missing", { rideId });
+        return;
+      }
+
       const usage = CouponUsage.create({
         id: this.idGenerator.generate(),
         userId: ride.getRiderId(),
-        couponId: couponDetails!.couponId,
+        couponId: couponDetails.couponId,
         rideId: ride.getRideId(),
-        discountAmount: couponDetails!.discountAmount,
+        discountAmount: couponDetails.discountAmount,
         usedAt: new Date(),
+      });
+
+      Logger.info("Creating coupon usage entry", {
+        rideId,
+        couponId: couponDetails.couponId,
       });
 
       await this.couponUsageRepository.create(usage);
 
       Logger.info("Coupon usage recorded successfully", {
         rideId,
-        couponId: couponDetails!.couponId,
+        couponId: couponDetails.couponId,
       });
     } catch (error) {
       Logger.error("Failed to record coupon usage", {

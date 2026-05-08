@@ -4,7 +4,7 @@ export interface ICouponUsageDocument extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
   couponId: Types.ObjectId;
-  rideId: Types.ObjectId;
+  rideId: string;
   discountAmount: number;
   usedAt: Date;
   createdAt: Date;
@@ -24,7 +24,7 @@ const couponUsageSchema = new Schema<ICouponUsageDocument>(
       index: true,
     },
     rideId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       required: true,
       index: true,
     },

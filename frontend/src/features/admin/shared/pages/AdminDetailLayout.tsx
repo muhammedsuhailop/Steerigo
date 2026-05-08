@@ -1,5 +1,4 @@
-import React, { useState, useEffect, ReactNode } from "react";
-import { useAuth } from "@/features/auth";
+import React, { useState, useEffect } from "react";
 import { AdminSidebar, AdminTopbar } from "../components";
 import { AdminDetailLayoutProps } from "../types";
 
@@ -7,7 +6,6 @@ const AdminDetailLayout: React.FC<AdminDetailLayoutProps> = ({
   children,
   title = "Admin - Details",
 }) => {
-  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 

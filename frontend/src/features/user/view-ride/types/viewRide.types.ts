@@ -168,3 +168,27 @@ export interface LocationUpdatePayload {
   lng: number;
   bearing?: number;
 }
+
+export interface AvailableCoupon {
+  id: string;
+  code: string;
+  discountType: string;
+  discountValue: number;
+  maxDiscount?: number;
+  minRideAmount?: number;
+  validFrom?: string;
+  validTo?: string;
+  isActive: boolean;
+}
+
+export interface GetUserCouponsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    coupons: AvailableCoupon[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}

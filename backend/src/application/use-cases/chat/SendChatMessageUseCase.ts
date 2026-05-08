@@ -20,6 +20,7 @@ import { UserChat } from "@domain/entities/UserChat";
 import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 import { IChatEventBus } from "@application/services/IChatEventBus";
 import { ChatMessageSentEvent } from "@application/events/ChatEvents";
+import { UserRole } from "@shared/constants/AuthConstants";
 
 @injectable()
 export class SendChatMessageUseCase
@@ -100,6 +101,40 @@ export class SendChatMessageUseCase
 
       const participants = chatRoom.getParticipants();
 
+      const driverIdsToResolve = participants
+        .filter(
+          (p) =>
+            p.role === UserRole.DRIVER &&
+            String(p.userId) !== String(senderIdToStore),
+        )
+        .map((p) => String(p.userId));
+
+      const driverProfiles =
+        driverIdsToResolve.length > 0
+          ? await this.driverRepository.findByIds(driverIdsToResolve)
+          : [];
+
+      const driverIdMap = new Map<string, string>();
+      driverProfiles.forEach((d) =>
+        driverIdMap.set(String(d.getId()), String(d.getUserId())),
+      );
+
+      const resolvedParticipants = participants.map((p) => {
+        let authUserId = String(p.userId);
+
+        if (p.role === UserRole.DRIVER) {
+          authUserId =
+            String(p.userId) === String(senderIdToStore)
+              ? String(userId)
+              : driverIdMap.get(String(p.userId)) || String(p.userId);
+        }
+
+        return {
+          userId: authUserId,
+          role: p.role,
+        };
+      });
+
       for (const participant of participants) {
         let userChat = await this.userChatRepository.findByUserIdAndChatRoomId(
           participant.userId,
@@ -147,6 +182,7 @@ export class SendChatMessageUseCase
         payload: {
           chatRoomId: savedMessage.getChatRoomId(),
           rideId: chatRoom.getRideId(),
+          senderParticipantId: userId,
           message: {
             id: savedMessage.getId(),
             senderId: savedMessage.getSenderId(),
@@ -156,10 +192,7 @@ export class SendChatMessageUseCase
             createdAt: savedMessage.getCreatedAt().toISOString(),
             updatedAt: savedMessage.getUpdatedAt().toISOString(),
           },
-          participants: chatRoom.getParticipants().map((participant) => ({
-            userId: participant.userId,
-            role: participant.role,
-          })),
+          participants: resolvedParticipants,
         },
       };
 

@@ -26,6 +26,7 @@ import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupSt
 import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
 import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
 import { CreateRideChatRoomDto } from "@application/dto/chat/CreateRideChatRoomDto";
+import { IIdGenerator } from "@application/services/IIdGenerator";
 
 @injectable()
 export class AcceptRideRequestUseCase
@@ -61,6 +62,8 @@ export class AcceptRideRequestUseCase
       CreateRideChatRoomDto,
       Promise<Result<CreateRideChatRoomResponseDto>>
     >,
+    @inject(TYPES.UuidGenerator)
+    private readonly idGenerator: IIdGenerator,
   ) {}
 
   async execute(
@@ -180,7 +183,7 @@ export class AcceptRideRequestUseCase
         cancelledCount,
       });
 
-      const rideId = `RIDE-${new Types.ObjectId().toString()}`;
+      const rideId = `RIDE-${this.idGenerator.generate()}`;
       const timeline = new RideTimeline(new Date());
       timeline.setAcceptedAt(new Date());
 

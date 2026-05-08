@@ -4,7 +4,6 @@ import {
   AvailabilityInfo,
   CurrentRideInfo,
   PendingRequest,
-  DashboardMeta,
 } from "@application/dto/driver/DriverDashboardResponseDto";
 import { Driver } from "@domain/entities/Driver";
 import { DriverAvailability } from "@domain/entities/DriverAvailability";

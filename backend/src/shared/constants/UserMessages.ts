@@ -9,6 +9,7 @@ export const USER_MESSAGES = {
     ACCESS_DENIED_REGISTER_DRIVER:
       "Access denied. You can only register yourself as a driver.",
     INTERNAL_SERVER_ERROR: "Internal server error",
+    STATS_FETCHED: "User stats fetched successfully.",
   },
   DRIVER_SEARCH: {
     UNAUTHORIZED: "Unauthorized: User not authenticated",
@@ -23,5 +24,8 @@ export const USER_MESSAGES = {
   RIDE: {
     UNAUTHORIZED: "You are not authorized to access this ride",
     RIDE_ID_REQUIRED: "Ride ID is required",
+  },
+  COUPON: {
+    FETCHED: "Coupons fetched successfully",
   },
 } as const;

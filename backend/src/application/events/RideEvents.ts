@@ -55,8 +55,10 @@ export type RideRequestCreatedEvent = BaseRideEvent<
   RideRequestCreatedPayload
 >;
 
-export interface RideMatchedEvent
-  extends BaseRideEvent<"RideMatched", RideMatchedEventPayload> {}
+export type RideMatchedEvent = BaseRideEvent<
+  "RideMatched",
+  RideMatchedEventPayload
+>;
 
 export interface RideRequestGroupExhaustedPayload {
   requestGroupId: string;

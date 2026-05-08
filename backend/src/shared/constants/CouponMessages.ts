@@ -1,6 +1,6 @@
 export const COUPON_ERROR_MESSAGES = {
-  COUPON_NOT_FOUND: "Coupon with ID '{{couponId}}' not found",
-  COUPON_CODE_EXISTS: "Coupon with code '{{code}}' already exists",
+  COUPON_NOT_FOUND: "Coupon '{{couponId}}' is invalid or expired",
+  COUPON_CODE_EXISTS: "Coupon'{{code}}' already exists",
   INVALID_DISCOUNT_VALUE: "Invalid discount value: {{reason}}",
   INVALID_DISCOUNT_TYPE: "Invalid discount type: '{{discountType}}'",
   INVALID_VALIDITY_PERIOD: "validFrom must be before validTo",

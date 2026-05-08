@@ -13,8 +13,6 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import { ApiResponse } from "@shared/types/Common";
-import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class AdminPayoutController {

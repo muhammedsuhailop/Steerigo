@@ -1,3 +1,5 @@
+import { UserStats } from "./userStats.types";
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -41,18 +43,9 @@ export interface UpdateProfileRequest {
   data: Partial<UserProfileFormData>;
 }
 
-export interface UserStats {
-  totalRides: number;
-  completedRides: number;
-  cancelledRides: number;
-  totalSpent: number;
-  memberSince: string;
-  favoriteDrivers: string[];
-}
-
 export interface ProfileHeaderProps {
   profile: UserProfile;
-  stats: UserStats;
+  stats: UserStats | undefined;
   onEditClick: () => void;
   onDriverRegisterClick: () => void;
   isLoading?: boolean;

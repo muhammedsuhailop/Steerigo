@@ -3,7 +3,7 @@ import { Document, Schema, model, Model, Types } from "mongoose";
 
 export interface IRatingDocument extends Document {
   _id: Types.ObjectId;
-  rideId: String;
+  rideId: string;
   reviewerId: Types.ObjectId;
   reviewerName: string;
   revieweeId: Types.ObjectId;

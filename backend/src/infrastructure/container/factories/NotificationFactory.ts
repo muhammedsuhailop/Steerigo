@@ -1,9 +1,18 @@
+import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
+import { GetNotificationsDto } from "@application/dto/notification/GetNotificationsDto";
+import { GetNotificationsResponseDto } from "@application/dto/notification/GetNotificationsResponseDto";
+import { MarkNotificationsReadDto } from "@application/dto/notification/MarkNotificationsReadDto";
+import { MarkNotificationsReadResponseDto } from "@application/dto/notification/MarkNotificationsReadResponseDto";
 import { INotificationRealtimePublisher } from "@application/services/INotificationRealtimePublisher";
 import {
   INotificationPersistenceService,
   NotificationPersistenceService,
 } from "@application/services/NotificationPersistenceService";
-import { CreateNotificationUseCase } from "@application/use-cases/notification/CreateNotificationUseCase";
+import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
+import {
+  CreateNotificationResponseDto,
+  CreateNotificationUseCase,
+} from "@application/use-cases/notification/CreateNotificationUseCase";
 import { GetNotificationsUseCase } from "@application/use-cases/notification/GetNotificationsUseCase";
 import { MarkNotificationsReadUseCase } from "@application/use-cases/notification/MarkNotificationsReadUseCase";
 import { INotificationRepository } from "@domain/repositories/INotificationRepository";
@@ -11,6 +20,7 @@ import { NotificationRepositoryImpl } from "@infrastructure/database/repositorie
 import { NotificationRealtimePublisher } from "@infrastructure/realtime/publisher/NotificationRealtimePublisher";
 import { NotificationController } from "@interface/controllers/notification/NotificationController";
 import { TYPES } from "@shared/constants/DITypes";
+import { Result } from "@shared/utils/Result";
 import { Container } from "inversify";
 
 export class NotificationFactory {
@@ -23,15 +33,30 @@ export class NotificationFactory {
 
     // Use Cases
     container
-      .bind<CreateNotificationUseCase>(TYPES.CreateNotificationUseCase)
+      .bind<
+        IUseCase<
+          CreateNotificationDto,
+          Promise<Result<CreateNotificationResponseDto>>
+        >
+      >(TYPES.CreateNotificationUseCase)
       .to(CreateNotificationUseCase);
 
     container
-      .bind<GetNotificationsUseCase>(TYPES.GetNotificationsUseCase)
+      .bind<
+        IUseCase<
+          GetNotificationsDto,
+          Promise<Result<GetNotificationsResponseDto>>
+        >
+      >(TYPES.GetNotificationsUseCase)
       .to(GetNotificationsUseCase);
 
     container
-      .bind<MarkNotificationsReadUseCase>(TYPES.MarkNotificationsReadUseCase)
+      .bind<
+        IUseCase<
+          MarkNotificationsReadDto,
+          Promise<Result<MarkNotificationsReadResponseDto>>
+        >
+      >(TYPES.MarkNotificationsReadUseCase)
       .to(MarkNotificationsReadUseCase);
 
     container

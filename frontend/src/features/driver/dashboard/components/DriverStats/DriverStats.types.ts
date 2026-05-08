@@ -1,7 +1,7 @@
-import type { DriverStats } from "../../../shared/types/driver.types";
+import type { DriverStatsData } from "../../../shared/types/driver.types";
 
 export interface DriverStatsProps {
-  stats: DriverStats;
+  stats: DriverStatsData;
   loading?: boolean;
   className?: string;
 }

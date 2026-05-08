@@ -1,8 +1,9 @@
-import type { UserProfile, UserStats } from "../../types/userProfile.types";
+import type { UserProfile } from "../../types/userProfile.types";
+import { UserStats } from "../../types/userStats.types";
 
 export interface ProfileHeaderProps {
   profile: UserProfile;
-  stats: UserStats;
+  stats: UserStats | undefined;
   onEditClick: () => void;
   onDriverRegisterClick: () => void;
   onRegisterAsDriver?: () => Promise<{ success: boolean; error?: string }>;

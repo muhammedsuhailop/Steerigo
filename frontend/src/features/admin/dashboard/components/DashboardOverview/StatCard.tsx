@@ -39,14 +39,16 @@ export const StatCard: React.FC<StatCardProps> = ({ stat }) => {
   };
 
   return (
-    <div className={`p-6 rounded-lg border ${colorClasses[stat.color]}`}>
+    <div
+      className={`p-6 rounded-lg border transition-all duration-200 ${colorClasses[stat.color]}`}
+    >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium opacity-75">{stat.title}</p>
           <p className="text-2xl font-bold">{stat.value}</p>
           {stat.change && (
             <div
-              className={`flex items-center mt-2 text-xs ${
+              className={`flex items-center mt-2 text-xs font-semibold ${
                 stat.change.type === "increase"
                   ? "text-green-600"
                   : "text-red-600"
@@ -57,7 +59,12 @@ export const StatCard: React.FC<StatCardProps> = ({ stat }) => {
               ) : (
                 <RiArrowDownLine className="w-4 h-4 mr-1" />
               )}
-              {Math.abs(stat.change.value)}% from last month
+
+              <span>
+                {stat.change.value}
+
+                {stat.change.label && ` ${stat.change.label}`}
+              </span>
             </div>
           )}
         </div>

@@ -8,6 +8,7 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { NOTIFICATION_MESSAGES } from "@shared/constants/NotificationMessages";
+import { INotificationRealtimePublisher } from "@application/services/INotificationRealtimePublisher";
 
 export interface CreateNotificationResponseDto {
   success: boolean;
@@ -26,6 +27,8 @@ export class CreateNotificationUseCase
   constructor(
     @inject(TYPES.NotificationRepository)
     private notificationRepository: INotificationRepository,
+    @inject(TYPES.NotificationRealtimePublisher)
+    private realtimePublisher: INotificationRealtimePublisher,
   ) {}
 
   async execute(
@@ -55,6 +58,15 @@ export class CreateNotificationUseCase
         recipientId: saved.getRecipientId(),
         type: saved.getType(),
       });
+
+      this.realtimePublisher.emitToUser(
+        saved.getRecipientId(),
+        saved.getId(),
+        saved.getType(),
+        saved.getTitle(),
+        saved.getBody(),
+        saved.getMetadata() || {},
+      );
 
       return Result.success({
         success: true,

@@ -5,8 +5,6 @@ import {
   validateGetUsersRequest,
   validateUpdateUserStatusRequest,
 } from "@interface/validators/admin/AdminUserValidator";
-import { authMiddleware } from "@interface/middleware/auth/AuthMiddleware";
-import { requireRole } from "@interface/middleware/auth/AuthMiddleware";
 import { TYPES } from "@shared/constants/DITypes";
 import { validateGetUserProfileRequest } from "@interface/validators/admin/adminUserProfileValidator";
 
@@ -16,10 +14,6 @@ const router = Router();
 const adminUserController = container.get<AdminUserController>(
   TYPES.AdminUserController
 );
-
-// Apply authentication and admin role authorization to all routes
-router.use(authMiddleware);
-router.use(requireRole(["Admin"]));
 
 // GET /admin/users - Get all users with filters and pagination
 router.get("/", validateGetUsersRequest, (req, res) =>

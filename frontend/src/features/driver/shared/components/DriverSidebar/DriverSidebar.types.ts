@@ -3,6 +3,7 @@ export interface DriverSidebarProps {
   onToggle?: () => void;
   className?: string;
   isMobile?: boolean;
+  disableNavigation?: boolean;
 }
 
 export interface SidebarItem {
@@ -19,4 +20,5 @@ export interface SidebarItemProps {
   isCollapsed: boolean;
   isMobile: boolean;
   isActive: boolean;
+  disableNavigation?: boolean;
 }

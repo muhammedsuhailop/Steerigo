@@ -66,7 +66,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     setPage(1);
   }, [isReadFilter]);
 
-  const { data, isLoading, isFetching } = useGetNotificationsQuery(
+  const { data, isLoading, isFetching, refetch } = useGetNotificationsQuery(
     {
       page,
       limit,
@@ -76,6 +76,12 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   );
 
   const [markAsRead] = useMarkAsReadMutation();
+
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, page, isReadFilter]);
 
   if (!isOpen) return null;
 

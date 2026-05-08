@@ -546,6 +546,13 @@ export class DriverAvailabilityRepositoryImpl
 
       const onTheClockDriverIds = await this.getOnTheClockDriverIds();
 
+      if (onTheClockDriverIds.length > 0) {
+        Logger.debug("Excluding on-the-clock drivers", {
+          count: onTheClockDriverIds.length,
+          ids: onTheClockDriverIds,
+        });
+      }
+
       const pipeline: PipelineStage[] = [
         {
           $geoNear: {
@@ -614,6 +621,15 @@ export class DriverAvailabilityRepositoryImpl
           pipeline,
         ).exec();
 
+      Logger.debug("Database aggregation results", {
+        count: aggregatedDocs.length,
+        drivers: aggregatedDocs.map((d) => ({
+          id: d.driverId,
+          distance: d.distanceMeters,
+          status: d.status,
+        })),
+      });
+
       const rankedDrivers = aggregatedDocs
         .map((doc) => {
           const domainDriver = DriverAvailabilityMapper.toDomain(
@@ -629,14 +645,30 @@ export class DriverAvailabilityRepositoryImpl
             etaMinutes,
           };
         })
-        .filter((item) =>
-          this.isAvailableForRequestedDuration(item.driver, rideStart, rideEnd),
-        );
+        .filter((item) => {
+          const isAvailable = this.isAvailableForRequestedDuration(
+            item.driver,
+            rideStart,
+            rideEnd,
+          );
+
+          if (!isAvailable) {
+            Logger.info("Driver filtered out by availability logic", {
+              driverId: item.driver.getDriverId(),
+              requestedStart: rideStart.toISOString(),
+              requestedEnd: rideEnd.toISOString(),
+              driverStatus: item.driver.getStatus(),
+            });
+          }
+
+          return isAvailable;
+        });
 
       Logger.info("Filtered nearby available drivers", {
-        totalFound: aggregatedDocs.length,
-        nearbyCount: rankedDrivers.length,
+        totalFromDb: aggregatedDocs.length,
+        finalNearbyCount: rankedDrivers.length,
         excludedOnTheClockCount: onTheClockDriverIds.length,
+        filteredOutBySchedule: aggregatedDocs.length - rankedDrivers.length,
       });
 
       return rankedDrivers;

@@ -8,6 +8,7 @@ import {
   RawChatMessage,
 } from "../types/chat.types";
 import { MessageDeliveryStatus } from "../types/enums";
+import { getLocalMidnight } from "../utils/formatDateLabel";
 
 const transformToTimeline = (msg: RawChatMessage): MessageTimeline => ({
   sentAt: msg.createdAt,
@@ -70,11 +71,24 @@ const chatSlice = createSlice({
         unreadCount: number;
       }>,
     ) => {
-      state.messages = action.payload.messages.map((msg) => ({
+      const mapped = action.payload.messages.map((msg) => ({
         ...msg,
         status: msg.messageStatus?.status ?? MessageDeliveryStatus.SENT,
         timeline: transformToTimeline(msg),
       }));
+
+      state.messages = mapped.sort((a, b) => {
+        const dayDiff =
+          getLocalMidnight(a.timeline.sentAt) -
+          getLocalMidnight(b.timeline.sentAt);
+
+        if (dayDiff !== 0) return dayDiff;
+
+        return (
+          new Date(a.timeline.sentAt).getTime() -
+          new Date(b.timeline.sentAt).getTime()
+        );
+      });
 
       if (state.activeChatRoomId) {
         state.unreadCounts[state.activeChatRoomId] = action.payload.unreadCount;
@@ -87,23 +101,39 @@ const chatSlice = createSlice({
     ) => {
       const { message, currentUserId } = action.payload;
 
-      if (!state.messages.find((m) => m.id === message.id)) {
-        state.messages.push({
-          ...message,
-          status: message.messageStatus?.status ?? MessageDeliveryStatus.SENT,
-          timeline: transformToTimeline(message),
-        });
+      const exists = state.messages.some((m) => m.id === message.id);
+      if (exists) return;
 
-        const isNotFromMe = message.senderId !== currentUserId;
-        const isNotViewing =
-          !state.isOpen ||
-          state.isMinimized ||
-          state.activeChatRoomId !== message.chatRoomId;
+      const newMsg = {
+        ...message,
+        status: message.messageStatus?.status ?? MessageDeliveryStatus.SENT,
+        timeline: transformToTimeline(message),
+      };
 
-        if (isNotFromMe && isNotViewing) {
-          state.unreadCounts[message.chatRoomId] =
-            (state.unreadCounts[message.chatRoomId] || 0) + 1;
-        }
+      state.messages.push(newMsg);
+
+      state.messages.sort((a, b) => {
+        const dayDiff =
+          getLocalMidnight(a.timeline.sentAt) -
+          getLocalMidnight(b.timeline.sentAt);
+
+        if (dayDiff !== 0) return dayDiff;
+
+        return (
+          new Date(a.timeline.sentAt).getTime() -
+          new Date(b.timeline.sentAt).getTime()
+        );
+      });
+
+      const isNotFromMe = message.senderId !== currentUserId;
+      const isNotViewing =
+        !state.isOpen ||
+        state.isMinimized ||
+        state.activeChatRoomId !== message.chatRoomId;
+
+      if (isNotFromMe && isNotViewing) {
+        state.unreadCounts[message.chatRoomId] =
+          (state.unreadCounts[message.chatRoomId] || 0) + 1;
       }
     },
 

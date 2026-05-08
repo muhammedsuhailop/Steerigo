@@ -7,7 +7,10 @@ import { ReviewType } from "@domain/value-objects/ReviewType";
 
 export class RatingMapper {
   static toDomain(doc: IRatingDocument): Rating {
-    const criteriaObj: any = {};
+    const criteriaObj: Record<RatingCriteriaType, number> = {} as Record<
+      RatingCriteriaType,
+      number
+    >;
 
     for (const key of Object.values(RatingCriteriaType)) {
       criteriaObj[key] = doc.criteria.get(key) ?? 0;

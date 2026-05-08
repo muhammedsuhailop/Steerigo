@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdRefresh, MdError } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/features/auth";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useLogoutMutation } from "@/features/auth/services/authApi";
 import { Button } from "@/shared/components/ui/Button";
@@ -10,18 +9,16 @@ import { Alert } from "@/shared/components/ui/Alert";
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UpdateProfileForm } from "../components/UpdateProfileForm";
 import { ProfileStats } from "../components/ProfileStats";
-import type {
-  UserProfileFormData,
-  UserStats,
-} from "../types/userProfile.types";
+import type { UserProfileFormData } from "../types/userProfile.types";
+import { useAppDispatch } from "@/app/store/hooks";
+import { useGetUserStatsQuery } from "../services/userProfileApi";
 
 const UserProfilePage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [logoutMutation] = useLogoutMutation();
   const {
     profile,
-    // stats,
     isLoading,
     isUpdating,
     error,
@@ -34,19 +31,12 @@ const UserProfilePage: React.FC = () => {
     clearErrors,
   } = useUserProfile();
 
-  const dummyStats: UserStats = {
-    totalRides: 42,
-    completedRides: 37,
-    cancelledRides: 2,
-    totalSpent: 1234.56,
-    memberSince: "2023-01-01",
-    favoriteDrivers: ["Sharuck", "Doe", "Sam"],
-  };
+  const { data: statsResponse, isLoading: statsLoading } =
+    useGetUserStatsQuery();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Clear success message after timeout
   useEffect(() => {
     if (showSuccess) {
       const timer = setTimeout(() => setShowSuccess(false), 5000);
@@ -77,14 +67,13 @@ const UserProfilePage: React.FC = () => {
     await refreshData();
   };
 
-  // Handle logout after successful driver registration
   const handleRegistrationSuccess = async () => {
     try {
       await logoutMutation().unwrap();
+      console.log("Logout successful after registration");
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("Logout error during registration flow:", err);
     } finally {
-      // Redirect to login page
       navigate("/login", { replace: true });
     }
   };
@@ -120,8 +109,8 @@ const UserProfilePage: React.FC = () => {
                 {typeof error === "string"
                   ? error
                   : "message" in (error as any)
-                  ? (error as any).message
-                  : "An unexpected error occurred"}
+                    ? (error as any).message
+                    : "An unexpected error occurred"}
               </p>
               <Button
                 variant="primary"
@@ -138,7 +127,7 @@ const UserProfilePage: React.FC = () => {
     );
   }
 
-  if (!profile || !dummyStats) {
+  if (!profile) {
     return null;
   }
 
@@ -202,7 +191,7 @@ const UserProfilePage: React.FC = () => {
           ) : (
             <ProfileHeader
               profile={profile}
-              stats={dummyStats}
+              stats={statsResponse?.data}
               onEditClick={handleEditClick}
               onDriverRegisterClick={navigateToDriverRegistration}
               onRegisterAsDriver={registerAsDriver}
@@ -213,15 +202,13 @@ const UserProfilePage: React.FC = () => {
           )}
 
           {/* Profile Statistics */}
-          {!isEditMode && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Your Statistics
-                </h2>
-              </div>
-
-              <ProfileStats stats={dummyStats} isLoading={isLoading} />
+          {!isEditMode && statsResponse?.data && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-6">Your Statistics</h2>
+              <ProfileStats
+                stats={statsResponse.data}
+                isLoading={statsLoading}
+              />
             </div>
           )}
         </div>

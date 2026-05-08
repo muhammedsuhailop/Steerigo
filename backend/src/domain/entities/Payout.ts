@@ -27,7 +27,7 @@ export class Payout {
     private status: PayoutStatus,
     private readonly method: PayoutMethod,
     private readonly destination?: PayoutDestination,
-    private readonly externalPayoutId?: string,
+    private externalPayoutId?: string,
     private readonly fee?: Money,
     private failureReason?: string,
     private readonly createdAt: Date = new Date(),
@@ -102,7 +102,9 @@ export class Payout {
       throw new Error("Only requested payouts can be moved to processing");
     }
     this.status = PayoutStatus.PROCESSING;
-    if (externalPayoutId) (this as any).externalPayoutId = externalPayoutId;
+    if (externalPayoutId) {
+      this.externalPayoutId = externalPayoutId;
+    }
     this.updatedAt = new Date();
   }
 

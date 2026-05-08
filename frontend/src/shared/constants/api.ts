@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
     CANCEL_RIDE_REQUEST: "/user/ride/request-cancel",
     RIDE: "/user/ride",
     RIDES: "/user/ride/rides",
+    STATS: "/user/stats",
+    COUPONS: "/user/coupons",
   },
   DRIVER: {
     REGISTER: "/driver/register",
@@ -50,6 +52,7 @@ export const API_ENDPOINTS = {
     },
     WALLET: "/driver/wallet",
     PAYOUTS: "/driver/payouts",
+    STATS: "/driver/stats",
   },
   ADMIN: {
     USERS: "/admin/users",
@@ -59,6 +62,11 @@ export const API_ENDPOINTS = {
     TRANSACTIONS: "/admin/transactions",
     RIDES: "/admin/rides",
     COUPONS: "/admin/coupons",
+    STATS: {
+      USER: "/admin/stats/users",
+      DRIVER: "/admin/stats/drivers",
+      RIDE: "/admin/stats/rides",
+    },
   },
   FILE: {
     UPLOAD: "/file/upload",

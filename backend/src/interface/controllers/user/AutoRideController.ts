@@ -54,11 +54,6 @@ export class AutoRideController {
         gearType,
         bodyType,
         maxRideRequests,
-        dropLatitude,
-        dropLongitude,
-        dropAddress,
-        pickupAddress,
-        rideType,
       } = req.body;
 
       Logger.info("Auto search and send ride request received", {

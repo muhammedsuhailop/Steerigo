@@ -14,6 +14,7 @@ import { RideRequestFactory } from "./factories/RideRequestFactory";
 import { NotificationFactory } from "./factories/NotificationFactory";
 import { PaymentFactory } from "./factories/PaymentFactory";
 import { ChatFactory } from "./factories/ChatFactory";
+import { EventHandlersFactory } from "./factories/EventHandlersFactory";
 
 const container = new Container();
 
@@ -31,7 +32,10 @@ DriverAvailabilityFactory.register(container);
 FareCalculationFactory.register(container);
 RideRequestFactory.register(container);
 NotificationFactory.register(container);
+NotificationFactory.registerRealtimePublisher(container);
 PaymentFactory.register(container);
 ChatFactory.register(container);
+EventHandlersFactory.register(container);
+EventHandlersFactory.init(container);
 
 export { container };

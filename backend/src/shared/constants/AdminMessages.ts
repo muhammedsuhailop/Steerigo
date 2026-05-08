@@ -21,6 +21,12 @@ export const ADMIN_MESSAGES = {
   WALLET: {
     FETCHED: "Admin wallet fetched successfully",
   },
+
+  STATS: {
+    USER_FETCHED: "User stats fetched successfully",
+    RIDE_FETCHED: "Ride stats fetched successfully",
+    DRIVER_FETCHED: "Drivers stats fetched successfully",
+  },
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {

@@ -17,10 +17,7 @@ import {
 } from "../types/adminDriverProfile.types";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import { UserAction } from "../../user/user-management/components/UserManagement";
-import {
-  AdminUserProfileInfo,
-  AdminUserProfileResponse,
-} from "../types/admin.user.interfaces";
+import { AdminUserProfileResponse } from "../types/admin.user.interfaces";
 
 type BaseListQueryParams = {
   page?: number;
@@ -43,8 +40,6 @@ const actionToStatusMap: Record<UserAction, AdminUser["status"]> = {
   suspend: "Suspended",
   verify: "Active",
 };
-
-type QueryParams = BaseListQueryParams | undefined;
 
 const buildParams = (params?: BaseListQueryParams) => {
   if (!params) return undefined;
@@ -149,7 +144,9 @@ export const adminApi = createApi({
           { type: "AdminUsers", id: "LIST" },
         ]);
 
-        const patches: any[] = [];
+        const patches: Array<{
+          undo: () => void;
+        }> = [];
 
         for (const { originalArgs } of queries) {
           const patch = dispatch(
@@ -173,7 +170,7 @@ export const adminApi = createApi({
 
         try {
           await queryFulfilled;
-        } catch (error) {
+        } catch (_error) {
           patches.forEach((patch) => patch.undo());
         }
       },

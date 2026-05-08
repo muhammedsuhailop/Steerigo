@@ -32,6 +32,7 @@ export interface IRideDocument extends Document {
     platformFee: number;
     tax: number;
     surgeMultiplier: number;
+    totalFare: number;
   };
 
   currency: string;
@@ -114,6 +115,7 @@ const rideSchema = new Schema<IRideDocument>(
       platformFee: { type: Number, default: 0 },
       tax: { type: Number, default: 0 },
       surgeMultiplier: { type: Number, default: 1 },
+      totalFare: { type: Number, default: 0 },
     },
 
     currency: { type: String, default: "INR" },

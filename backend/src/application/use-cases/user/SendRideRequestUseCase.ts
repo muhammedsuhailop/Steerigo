@@ -152,8 +152,6 @@ export class SendRideRequestUseCase
         address: dto.dropAddress,
       });
 
-      const rideType = dto.rideType;
-
       const rideRequest = RideRequest.create(
         dto.driverId,
         dto.riderId,

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Alert } from "@/shared/components/ui";
+import { Modal, Button, Input } from "@/shared/components/ui";
 import {
   CreateCouponRequest,
   CouponFormErrors,

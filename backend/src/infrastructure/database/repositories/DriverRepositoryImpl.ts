@@ -1,5 +1,8 @@
 import { injectable } from "inversify";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import {
+  IDriverDateRangeFilter,
+  IDriverRepository,
+} from "@domain/repositories/IDriverRepository";
 import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 import { DriverModel, IDriverModel } from "../models/DriverModel";
@@ -112,7 +115,7 @@ export class DriverRepositoryImpl
   async count(filters?: UnifiedDriverFilterOptions): Promise<number> {
     try {
       const mongoFilter = this.buildFilterQuery(
-        filters ?? ({} as UnifiedDriverFilterOptions)
+        filters ?? ({} as UnifiedDriverFilterOptions),
       );
       return await DriverModel.countDocuments(mongoFilter);
     } catch (error) {
@@ -132,7 +135,7 @@ export class DriverRepositoryImpl
   }
 
   async findPaginated(
-    options: QueryOptions<Driver> & { filters?: UnifiedDriverFilterOptions }
+    options: QueryOptions<Driver> & { filters?: UnifiedDriverFilterOptions },
   ): Promise<PaginatedResult<Driver>> {
     const {
       page = 1,
@@ -165,7 +168,7 @@ export class DriverRepositoryImpl
 
   async updateMany(
     filters: FilterOptions<Driver>,
-    updates: Partial<Driver>
+    updates: Partial<Driver>,
   ): Promise<number> {
     function hasGetEligibleGearTypes(u: unknown): u is {
       getEligibleGearTypes: () => IDriverModel["eligibleGearTypes"];
@@ -273,7 +276,7 @@ export class DriverRepositoryImpl
         filters as FilterQuery<IDriverModel>,
         {
           $set: updateData,
-        }
+        },
       );
 
       Logger.info("Multiple drivers updated", {
@@ -295,7 +298,7 @@ export class DriverRepositoryImpl
   async deleteMany(filters: FilterOptions<Driver>): Promise<number> {
     try {
       const result = await DriverModel.deleteMany(
-        filters as FilterQuery<IDriverModel>
+        filters as FilterQuery<IDriverModel>,
       );
       Logger.info("Multiple drivers deleted", { count: result.deletedCount });
       return result.deletedCount ?? 0;
@@ -332,7 +335,7 @@ export class DriverRepositoryImpl
 
   async findByStatus(
     status: DriverStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<Driver[]> {
     try {
       const query = DriverModel.find({ status });
@@ -353,7 +356,7 @@ export class DriverRepositoryImpl
 
   async findByKycStatus(
     kycStatus: KYCStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<Driver[]> {
     try {
       const query = DriverModel.find({ kycStatus });
@@ -374,7 +377,7 @@ export class DriverRepositoryImpl
 
   async findByLicenseCategory(
     category: LicenseCategory,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<Driver[]> {
     try {
       const query = DriverModel.find({ licenceCategory: category });
@@ -427,7 +430,7 @@ export class DriverRepositoryImpl
     filters: IAdminDriverQuery,
     pagination: { page: number; pageSize: number },
     sortBy?: string,
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Promise<{
     data: IAdminDriverSummary[];
     pagination: {
@@ -438,7 +441,7 @@ export class DriverRepositoryImpl
     };
   }> {
     const mongoFilter = this.buildFilterQuery(
-      filters as UnifiedDriverFilterOptions
+      filters as UnifiedDriverFilterOptions,
     );
     const totalItems = await DriverModel.countDocuments(mongoFilter);
     const totalPages = Math.ceil(totalItems / pagination.pageSize);
@@ -545,7 +548,7 @@ export class DriverRepositoryImpl
   async updateDriverStatus(
     driverId: string,
     status: string,
-    reason?: string
+    reason?: string,
   ): Promise<boolean> {
     const update: UpdateQuery<IDriverModel> & Record<string, unknown> = {
       status,
@@ -660,10 +663,19 @@ export class DriverRepositoryImpl
     };
   }
 
+  async countNewDrivers(filter: IDriverDateRangeFilter): Promise<number> {
+    return DriverModel.countDocuments({
+      createdAt: {
+        $gte: filter.fromDate,
+        $lte: filter.toDate,
+      },
+    });
+  }
+
   //  Private Helper Methods
 
   private buildFilterQuery(
-    filters: UnifiedDriverFilterOptions
+    filters: UnifiedDriverFilterOptions,
   ): FilterQuery<IDriverModel> {
     const q: FilterQuery<IDriverModel> = {};
 
@@ -706,7 +718,7 @@ export class DriverRepositoryImpl
 
   private buildSortQuery(
     sortBy?: string,
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Record<string, 1 | -1> {
     const order: 1 | -1 = sortOrder === "asc" ? 1 : -1;
     const field = sortBy ?? "createdAt";

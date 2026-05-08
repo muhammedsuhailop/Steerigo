@@ -1,8 +1,12 @@
 import { injectable } from "inversify";
 import {
   IAdminRidePaginationOptions,
+  IDriverRideStatsResult,
+  IRideFilters,
   IRidePaginationOptions,
   IRideRepository,
+  IRiderRideStatsResult,
+  IRideStatsResult,
 } from "@domain/repositories/IRideRepository";
 import { Ride } from "@domain/entities/Ride";
 import { RideStatus } from "@domain/value-objects/RideStatus";
@@ -12,6 +16,7 @@ import { Logger } from "@shared/utils/Logger";
 import { FilterQuery, SortOrder, Types } from "mongoose";
 import { PaginatedResult } from "@shared/types/Repository";
 import { RideErrors } from "@domain/errors/RideErrors";
+import { toObjectId } from "@shared/utils/idHelper";
 
 @injectable()
 export class RideRepositoryImpl implements IRideRepository {
@@ -154,7 +159,7 @@ export class RideRepositoryImpl implements IRideRepository {
 
   async findByDriverId(driverId: string, status?: RideStatus): Promise<Ride[]> {
     try {
-      const query: any = {
+      const query: FilterQuery<IRideDocument> = {
         driverId: new Types.ObjectId(driverId),
       };
 
@@ -183,7 +188,7 @@ export class RideRepositoryImpl implements IRideRepository {
 
   async findByRiderId(riderId: string, status?: RideStatus): Promise<Ride[]> {
     try {
-      const query: any = {
+      const query: FilterQuery<IRideDocument> = {
         riderId: new Types.ObjectId(riderId),
       };
 
@@ -411,5 +416,103 @@ export class RideRepositoryImpl implements IRideRepository {
       });
       throw error;
     }
+  }
+
+  async countRideStats(params: {
+    driverId?: string;
+    riderId?: string;
+    filters: IRideFilters;
+  }): Promise<IRideStatsResult> {
+    const { driverId, riderId, filters } = params;
+
+    const query: FilterQuery<IRideDocument> = {};
+
+    if (driverId) {
+      query.driverId = toObjectId(driverId);
+    }
+
+    if (riderId) {
+      query.riderId = toObjectId(riderId);
+    }
+
+    if (filters.fromDate ?? filters.toDate) {
+      query.createdAt = {};
+      if (filters.fromDate) query.createdAt.$gte = filters.fromDate;
+      if (filters.toDate) query.createdAt.$lte = filters.toDate;
+    }
+
+    const result = await RideModel.aggregate<IRideStatsResult>([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+
+          total: { $sum: 1 },
+
+          completed: {
+            $sum: {
+              $cond: [{ $eq: ["$status", RideStatus.COMPLETED] }, 1, 0],
+            },
+          },
+
+          cancelled: {
+            $sum: {
+              $cond: [{ $eq: ["$status", RideStatus.CANCELLED] }, 1, 0],
+            },
+          },
+
+          totalAmount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", RideStatus.COMPLETED] },
+                "$fareBreakdown.totalFare",
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      total: result[0]?.total ?? 0,
+      completed: result[0]?.completed ?? 0,
+      cancelled: result[0]?.cancelled ?? 0,
+      totalAmount: result[0]?.totalAmount ?? 0,
+    };
+  }
+
+  async countByDriverStats(
+    driverId: string,
+    filters: IRideFilters,
+  ): Promise<IDriverRideStatsResult> {
+    const stats = await this.countRideStats({
+      driverId,
+      filters,
+    });
+
+    return {
+      total: stats.total,
+      completed: stats.completed,
+      cancelled: stats.cancelled,
+      totalEarnings: stats.totalAmount,
+    };
+  }
+
+  async countByRiderStats(
+    riderId: string,
+    filters: IRideFilters,
+  ): Promise<IRiderRideStatsResult> {
+    const stats = await this.countRideStats({
+      riderId,
+      filters,
+    });
+
+    return {
+      total: stats.total,
+      completed: stats.completed,
+      cancelled: stats.cancelled,
+      totalSpend: stats.totalAmount,
+    };
   }
 }

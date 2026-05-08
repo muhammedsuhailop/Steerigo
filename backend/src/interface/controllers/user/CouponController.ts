@@ -11,10 +11,19 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { ApiResponse } from "@shared/types/Common";
+import { GetUserCouponsDto } from "@application/dto/user/GetUserCouponsDto";
+import { GetUserCouponsResponseDto } from "@application/dto/user/GetUserCouponsResponseDto";
+import { USER_MESSAGES } from "@shared/constants/UserMessages";
 
 @injectable()
 export class CouponController {
   constructor(
+    @inject(TYPES.GetUserCouponsUseCase)
+    private readonly getUserCouponsUseCase: IUseCase<
+      GetUserCouponsDto,
+      Promise<Result<GetUserCouponsResponseDto>>
+    >,
+
     @inject(TYPES.ApplyCouponUseCase)
     private readonly applyCouponUseCase: IUseCase<
       ApplyCouponDto,
@@ -31,6 +40,53 @@ export class CouponController {
   private getUserId(req: Request): string | null {
     const user = req.user;
     return user?.userId ?? null;
+  }
+
+  async getUserCoupons(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req) as string;
+
+      Logger.info("Get user coupons request received", {
+        userId,
+        query: req.query,
+      });
+
+      const dto = GetUserCouponsDto.fromRequest(userId, req.query);
+
+      const result = await this.getUserCouponsUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "get_user_coupons",
+        );
+
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: USER_MESSAGES.COUPON.FETCHED,
+        data,
+      } as ApiResponse);
+    } catch (error) {
+      Logger.error("Get user coupons controller error", {
+        userId: this.getUserId(req),
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "get_user_coupons",
+      );
+
+      res.status(statusCode).json(response);
+    }
   }
 
   async applyCoupon(req: Request, res: Response): Promise<void> {

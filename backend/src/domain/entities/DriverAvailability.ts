@@ -6,6 +6,7 @@ import {
   AvailabilityException,
   AvailabilityExceptionValidator,
 } from "./AvailabilityException";
+import { Logger } from "@shared/utils/Logger";
 
 export interface DailyRecurrenceData {
   daysOfWeek: DayOfWeek[];
@@ -34,7 +35,7 @@ export class DriverAvailability {
     private exceptions: AvailabilityException[] = [],
     private isActive: boolean = true,
     private readonly createdAt: Date = new Date(),
-    private updatedAt: Date = new Date()
+    private updatedAt: Date = new Date(),
   ) {}
 
   static createRecurring(
@@ -43,7 +44,7 @@ export class DriverAvailability {
     dailyRecurrence: DailyRecurrenceData,
     validity: ScheduleValidityData,
     currentLocation: Location,
-    notes?: string
+    notes?: string,
   ): DriverAvailability {
     this.validateRecurringSchedule(dailyRecurrence, validity);
     return new DriverAvailability(
@@ -57,14 +58,14 @@ export class DriverAvailability {
         notes,
       },
       [],
-      true
+      true,
     );
   }
 
   static createImmediate(
     id: string,
     driverId: string,
-    currentLocation: Location
+    currentLocation: Location,
   ): DriverAvailability {
     return new DriverAvailability(
       id,
@@ -73,7 +74,7 @@ export class DriverAvailability {
       currentLocation,
       undefined,
       [],
-      true
+      true,
     );
   }
 
@@ -97,13 +98,13 @@ export class DriverAvailability {
       data.exceptions || [],
       data.isActive,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 
   private static validateRecurringSchedule(
     dailyRecurrence: DailyRecurrenceData,
-    validity: ScheduleValidityData
+    validity: ScheduleValidityData,
   ): void {
     if (
       !dailyRecurrence.daysOfWeek ||
@@ -192,7 +193,7 @@ export class DriverAvailability {
   updateRecurringSchedule(
     dailyRecurrence: DailyRecurrenceData,
     validity: ScheduleValidityData,
-    notes?: string
+    notes?: string,
   ): void {
     DriverAvailability.validateRecurringSchedule(dailyRecurrence, validity);
     this.recurringSchedule = {
@@ -228,7 +229,7 @@ export class DriverAvailability {
 
   updateException(
     exceptionId: string,
-    updates: Partial<AvailabilityException>
+    updates: Partial<AvailabilityException>,
   ): boolean {
     const exception = this.exceptions.find((e) => e.id === exceptionId);
     if (!exception) {
@@ -281,11 +282,18 @@ export class DriverAvailability {
     }
 
     if (!this.isActive) {
+      Logger.debug("Availability Trace: Driver is not active", {
+        driverId: this.driverId,
+      });
       return false;
     }
 
     for (const exception of this.exceptions) {
       if (exception.startTime < endTime && exception.endTime > startTime) {
+        Logger.debug("Availability Trace: Overlap with manual exception", {
+          driverId: this.driverId,
+          exception,
+        });
         return false;
       }
     }
@@ -294,23 +302,39 @@ export class DriverAvailability {
       return this.isRangeWithinRecurringSchedule(startTime, endTime);
     }
 
-    return this.status === AvailabilityStatus.AVAILABLE;
+    const isAvailable = this.status === AvailabilityStatus.AVAILABLE;
+    if (!isAvailable) {
+      Logger.debug(
+        "Availability Trace: Missing recurring schedule and status not AVAILABLE",
+        { driverId: this.driverId, status: this.status },
+      );
+    }
+
+    return isAvailable;
   }
 
   private isRangeWithinRecurringSchedule(
     startTime: Date,
-    endTime: Date
+    endTime: Date,
   ): boolean {
     const { dailyRecurrence, validity } = this.recurringSchedule!;
 
     if (startTime < validity.startDate) {
+      Logger.debug(
+        "Availability Trace: Request is before schedule validity start date",
+        { driverId: this.driverId, validityStart: validity.startDate },
+      );
       return false;
     }
     if (validity.endDate && endTime > validity.endDate) {
+      Logger.debug(
+        "Availability Trace: Request is after schedule validity end date",
+        { driverId: this.driverId, validityEnd: validity.endDate },
+      );
       return false;
     }
 
-    let currentDate = new Date(startTime);
+    const currentDate = new Date(startTime);
     currentDate.setUTCHours(0, 0, 0, 0);
 
     const endDate = new Date(endTime);
@@ -335,9 +359,13 @@ export class DriverAvailability {
           !this.isDayRangeCoveredBySlots(
             dayRangeStart,
             dayRangeEnd,
-            dailyRecurrence
+            dailyRecurrence,
           )
         ) {
+          Logger.debug(
+            "Availability Trace: Time slot coverage failed for day",
+            { driverId: this.driverId, dayOfWeek, dayRangeStart, dayRangeEnd },
+          );
           return false;
         }
       } else {
@@ -346,6 +374,14 @@ export class DriverAvailability {
         dayEnd.setUTCHours(23, 59, 59, 999);
 
         if (startTime < dayEnd && endTime > dayStart) {
+          Logger.debug(
+            "Availability Trace: Day of week not in driver's recurrence",
+            {
+              driverId: this.driverId,
+              dayOfWeek,
+              allowedDays: dailyRecurrence.daysOfWeek,
+            },
+          );
           return false;
         }
       }
@@ -360,7 +396,7 @@ export class DriverAvailability {
   private isDayRangeCoveredBySlots(
     dayRangeStart: Date,
     dayRangeEnd: Date,
-    dailyRecurrence: DailyRecurrenceData
+    dailyRecurrence: DailyRecurrenceData,
   ): boolean {
     const startMinutes =
       dayRangeStart.getUTCHours() * 60 + dayRangeStart.getUTCMinutes();
@@ -375,7 +411,7 @@ export class DriverAvailability {
       for (const slot of dailyRecurrence.timeSlots) {
         const slotRanges = this.normalizeRange(
           slot.getStartTime(),
-          slot.getEndTime()
+          slot.getEndTime(),
         );
 
         if (
@@ -387,6 +423,17 @@ export class DriverAvailability {
       }
 
       if (!covered) {
+        Logger.debug(
+          "Availability Trace: Minutes range not covered by any time slot",
+          {
+            driverId: this.driverId,
+            requestedMinutes: { qStart, qEnd },
+            availableSlots: dailyRecurrence.timeSlots.map((s) => ({
+              start: s.getStartTime(),
+              end: s.getEndTime(),
+            })),
+          },
+        );
         return false;
       }
     }
@@ -395,13 +442,17 @@ export class DriverAvailability {
       for (const ex of dailyRecurrence.excludedTimeSlots) {
         const exRanges = this.normalizeRange(
           ex.getStartTime(),
-          ex.getEndTime()
+          ex.getEndTime(),
         );
 
         for (const [qStart, qEnd] of queryRanges) {
           if (
             exRanges.some(([eStart, eEnd]) => qStart < eEnd && eStart < qEnd)
           ) {
+            Logger.debug("Availability Trace: Hit an excluded time slot", {
+              driverId: this.driverId,
+              excludedSlot: ex,
+            });
             return false;
           }
         }
@@ -436,14 +487,14 @@ export class DriverAvailability {
 
   private isWithinTimeSlots(
     checkDate: Date,
-    dailyRecurrence: DailyRecurrenceData
+    dailyRecurrence: DailyRecurrenceData,
   ): boolean {
     const hours = checkDate.getUTCHours();
     const minutes = checkDate.getUTCMinutes();
     const timeInMinutes = hours * 60 + minutes;
 
     const inTimeSlot = dailyRecurrence.timeSlots.some((slot) =>
-      slot.containsTime(timeInMinutes)
+      slot.containsTime(timeInMinutes),
     );
 
     if (!inTimeSlot) {
@@ -452,7 +503,7 @@ export class DriverAvailability {
 
     if (dailyRecurrence.excludedTimeSlots) {
       const inExcludedSlot = dailyRecurrence.excludedTimeSlots.some((slot) =>
-        slot.containsTime(timeInMinutes)
+        slot.containsTime(timeInMinutes),
       );
 
       if (inExcludedSlot) {

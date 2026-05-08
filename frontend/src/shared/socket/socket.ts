@@ -2,19 +2,62 @@ import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
+const DEBUG = import.meta.env.VITE_SOCKET_DEBUG === "true";
+
+const log = (...args: unknown[]) => {
+  if (DEBUG) console.log(...args);
+};
+
+const errorLog = (...args: unknown[]) => {
+  if (DEBUG) console.error(...args);
+};
+
+declare global {
+  interface Window {
+    socket?: Socket;
+  }
+}
+
 export const createSocket = (accessToken: string) => {
   if (!accessToken) {
-    console.warn("Socket not created: no access token");
+    log("Socket not created: no access token");
     return;
   }
 
-  if (socket) socket.disconnect();
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+  }
 
   socket = io(import.meta.env.VITE_SOCKET_URL, {
     auth: { accessToken },
     transports: ["websocket"],
     reconnection: true,
     autoConnect: true,
+  });
+
+  if (DEBUG) {
+    window.socket = socket;
+  }
+
+  socket.on("connect", () => {
+    log("Socket connected:", socket?.id);
+  });
+
+  socket.on("disconnect", (reason) => {
+    log("Socket disconnected:", reason);
+  });
+
+  socket.on("connect_error", (err) => {
+    errorLog("Socket connection error:", err.message);
+  });
+
+  socket.io.on("reconnect_attempt", (attempt) => {
+    log("Reconnect attempt:", attempt);
+  });
+
+  socket.io.on("reconnect", (attempt) => {
+    log("Reconnected after:", attempt);
   });
 
   return socket;
@@ -28,13 +71,15 @@ export const updateSocketAuth = (accessToken: string) => {
     accessToken,
   };
 
-  socket.disconnect();
   socket.connect();
 };
 
 export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
-  socket?.disconnect();
-  socket = null;
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
 };

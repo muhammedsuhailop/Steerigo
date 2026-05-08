@@ -4,11 +4,6 @@ import { TYPES } from "@shared/constants/DITypes";
 import { AdminCouponController } from "@interface/controllers/admin/AdminCouponController";
 import { validateSchema } from "@interface/middleware/ValidationMiddleware";
 import {
-  authMiddleware,
-  requireRole,
-} from "@interface/middleware/auth/AuthMiddleware";
-import { UserRole } from "@shared/constants/AuthConstants";
-import {
   createCouponSchema,
   editCouponSchema,
   getAdminCouponsSchema,
@@ -18,9 +13,6 @@ const router = Router();
 const controller = container.get<AdminCouponController>(
   TYPES.AdminCouponController,
 );
-
-router.use(authMiddleware);
-router.use(requireRole([UserRole.ADMIN]));
 
 // GET /api/admin/coupons
 router.get("/", validateSchema(getAdminCouponsSchema), (req, res) =>

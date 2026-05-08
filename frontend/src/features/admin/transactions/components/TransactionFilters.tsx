@@ -1,5 +1,5 @@
 import React from "react";
-import { Select, Button, DateInput } from "@/shared/components/ui";
+import { Select, Button, DateInput, Input } from "@/shared/components/ui";
 import { MdRefresh } from "react-icons/md";
 import {
   AdminTransactionFilters,
@@ -60,27 +60,55 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
     filters.direction ||
     filters.fromDate ||
     filters.toDate ||
+    filters.search ||
     filters.sortBy !== "createdAt" ||
     filters.sortOrder !== "desc";
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex flex-col sm:flex-row gap-4 flex-1">
-          <div className="min-w-[150px]">
+      <div className="space-y-4">
+        {/* First Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+          {/* Search */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Search
+            </label>
+
+            <Input
+              type="text"
+              placeholder="Transaction ID, note..."
+              value={filters.search || ""}
+              onChange={(e) => onFiltersChange({ search: e.target.value })}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Transaction Type
+            </label>
+
             <Select
               options={typeOptions}
               value={filters.type || ""}
               onChange={(e) =>
-                onFiltersChange({ type: e.target.value as TransactionType })
+                onFiltersChange({
+                  type: e.target.value as TransactionType,
+                })
               }
               disabled={loading}
               size="md"
-              placeholder="Transaction Type"
             />
           </div>
 
-          <div className="min-w-[150px]">
+          {/* Direction */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Direction
+            </label>
+
             <Select
               options={directionOptions}
               value={filters.direction || ""}
@@ -91,13 +119,15 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
               }
               disabled={loading}
               size="md"
-              placeholder="Direction"
             />
           </div>
-        </div>
 
-        <div className="flex gap-2 min-w-[280px]">
-          <div className="flex-1">
+          {/* From Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              From Date
+            </label>
+
             <DateInput
               emptyPlaceholder="From date"
               value={filters.fromDate || ""}
@@ -106,7 +136,13 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
               size="md"
             />
           </div>
-          <div className="flex-1">
+
+          {/* To Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              To Date
+            </label>
+
             <DateInput
               emptyPlaceholder="To date"
               value={filters.toDate || ""}
@@ -117,36 +153,54 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <Select
-            options={sortOptions}
-            value={filters.sortBy}
-            onChange={(e) => onFiltersChange({ sortBy: e.target.value })}
-            disabled={loading}
-            size="md"
-            className="min-w-[160px]"
-          />
+        {/* Second Row */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+            {/* Sort By */}
+            <div className="min-w-[220px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sort By
+              </label>
 
-          <Select
-            options={sortOrderOptions}
-            value={filters.sortOrder}
-            onChange={(e) =>
-              onFiltersChange({ sortOrder: e.target.value as "asc" | "desc" })
-            }
-            disabled={loading}
-            size="md"
-            className="min-w-[130px]"
-          />
+              <Select
+                options={sortOptions}
+                value={filters.sortBy}
+                onChange={(e) => onFiltersChange({ sortBy: e.target.value })}
+                disabled={loading}
+                size="md"
+              />
+            </div>
 
+            {/* Sort Order */}
+            <div className="min-w-[220px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sort Order
+              </label>
+
+              <Select
+                options={sortOrderOptions}
+                value={filters.sortOrder}
+                onChange={(e) =>
+                  onFiltersChange({
+                    sortOrder: e.target.value as "asc" | "desc",
+                  })
+                }
+                disabled={loading}
+                size="md"
+              />
+            </div>
+          </div>
+
+          {/* Reset Button */}
           {hasActiveFilters && (
             <Button
               variant="outline"
               size="md"
               onClick={onResetFilters}
               leftIcon={<MdRefresh />}
-              className="text-gray-600 border-gray-300 hover:bg-gray-50"
+              className="text-gray-600 border-gray-300 hover:bg-gray-50 md:self-end"
             >
-              Reset
+              Reset Filters
             </Button>
           )}
         </div>

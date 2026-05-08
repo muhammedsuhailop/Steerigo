@@ -43,6 +43,9 @@ import { RideSearchDispatchService } from "@application/services/ride-search/Rid
 import { RideRequestTimeoutWorker } from "@infrastructure/workers/RideRequestTimeoutWorker";
 import { IRideSearchQueue } from "@application/services/IRideSearchQueue";
 import { BullMqRideSearchQueue } from "@infrastructure/queues/BullMqRideSearchQueue";
+import { WorkerSocketBridge } from "@infrastructure/realtime/WorkerSocketBridge";
+import { UuidGenerator } from "@infrastructure/services/UuidGenerator";
+import { NanoIdGenerator } from "@infrastructure/services/NanoIdGenerator";
 
 export class ServiceFactory {
   static register(container: Container): void {
@@ -89,6 +92,8 @@ export class ServiceFactory {
       .to(RedisService)
       .inSingletonScope();
     container.bind<IIdGenerator>(TYPES.IDGenerator).to(MongoIdGenerator);
+    container.bind<IIdGenerator>(TYPES.UuidGenerator).to(UuidGenerator);
+    container.bind<IIdGenerator>(TYPES.NanoIdGenerator).to(NanoIdGenerator);
     container
       .bind<ICouponValidationService>(TYPES.CouponValidationService)
       .to(CouponValidationService);
@@ -111,5 +116,9 @@ export class ServiceFactory {
     container
       .bind<IRideSearchQueue>(TYPES.RideSearchQueue)
       .to(BullMqRideSearchQueue);
+
+    container
+      .bind<WorkerSocketBridge>(TYPES.WorkerSocketBridge)
+      .to(WorkerSocketBridge);
   }
 }

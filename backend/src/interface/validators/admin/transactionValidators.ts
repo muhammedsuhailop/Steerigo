@@ -11,6 +11,7 @@ export const getAdminTransactionsSchema = z.object({
     relatedEntityType: z.string().optional(),
     fromDate: z.string().optional(),
     toDate: z.string().optional(),
+    search: z.string().optional(),
     sortBy: z.enum(["createdAt", "amount"]).optional(),
     sortOrder: z.enum(["asc", "desc"]).optional(),
     page: z.string().optional(),

@@ -6,7 +6,6 @@ import {
   RideDomainEvent,
   RideRequestCreatedEvent,
   RideMatchedEvent,
-  RideRequestGroupExhaustedEvent,
   RideArrivedEvent,
   RideStartedEvent,
   RideCompletedEvent,
@@ -25,42 +24,54 @@ import {
 import { IPaymentNotificationService } from "@application/services/IPaymentNotificationService";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { ICouponUsageService } from "@application/services/ICouponUsageService";
 import { NotificationType } from "@domain/value-objects/NotificationType";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { DomainEvent } from "@application/events/DomainEvent";
+import { IEventHandler } from "@application/events/IEventHandler";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
+  // Store handlers in a map by event type
+  private readonly handlers: Map<string, Set<IEventHandler<DomainEvent>>> =
+    new Map();
+
   constructor(
     @inject(TYPES.RideNotificationService)
     private readonly notificationService: IRideNotificationService,
-
     @inject(TYPES.NotificationPersistenceService)
     private readonly persistence: INotificationPersistenceService,
-
     @inject(TYPES.PaymentNotificationService)
     private readonly paymentNotificationService: IPaymentNotificationService,
-
-    @inject(TYPES.CouponUsageService)
-    private readonly couponUsageService: ICouponUsageService,
-
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
-
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
+
   ) {}
 
+  // Generic-safe subscription
+  subscribe<TEvent extends DomainEvent>(
+    eventType: TEvent["type"],
+    handler: IEventHandler<TEvent>,
+  ): void {
+    const existingHandlers =
+      this.handlers.get(eventType) ?? new Set<IEventHandler<DomainEvent>>();
+
+    existingHandlers.add(handler as IEventHandler<DomainEvent>);
+
+    this.handlers.set(eventType, existingHandlers);
+  }
+
   async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
+    await this.dispatchRegisteredHandlers(event as DomainEvent);
+
     switch (event.type) {
       case "RideRequestCreated":
         return this.handleRideRequestCreated(event);
       case "RideMatched":
         return this.handleRideMatched(event);
-      case "RideRequestGroupExhausted":
-        return this.handleRideRequestGroupExhausted(event);
       case "RideArrived":
         return this.handleRideArrived(event);
       case "RideStarted":
@@ -90,6 +101,30 @@ export class InMemoryEventBus implements IEventBus {
     }
   }
 
+  private async dispatchRegisteredHandlers(event: DomainEvent): Promise<void> {
+    const handlers = this.handlers.get(event.type);
+
+    if (!handlers || handlers.size === 0) {
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      [...handlers].map((handler) => handler.handle(event)),
+    );
+
+    results.forEach((result) => {
+      if (result.status === "rejected") {
+        Logger.error("Event handler failed", {
+          eventType: event.type,
+          error:
+            result.reason instanceof Error
+              ? result.reason.message
+              : String(result.reason),
+        });
+      }
+    });
+  }
+
   private async handleRideRequestCreated(event: RideRequestCreatedEvent) {
     const { driverId, ...payload } = event.payload;
     await this.notificationService.notifyDriverNewRequest(driverId, payload);
@@ -109,22 +144,6 @@ export class InMemoryEventBus implements IEventBus {
       title: "Your ride has been accepted!",
       body: "Your driver is on the way.",
       metadata: payload,
-    });
-  }
-
-  private async handleRideRequestGroupExhausted(
-    event: RideRequestGroupExhaustedEvent,
-  ) {
-    const { riderId, requestGroupId, reason } = event.payload;
-    await this.notificationService.notifyRiderNoDriverFound(riderId, {
-      requestGroupId,
-      reason,
-    });
-    await this.persistence.persistNotification(riderId, {
-      type: NotificationType.RIDE_REQUESTED,
-      title: "No drivers found",
-      body: "No drivers available at the moment.",
-      metadata: { requestGroupId, reason },
     });
   }
 
@@ -178,20 +197,22 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentSucceeded(event: PaymentSucceededEvent) {
-    const { riderId, driverId, driverUserId, rideId } = event.payload;
-    await this.couponUsageService.recordUsage(rideId);
+    const { riderId, driverId, driverUserId } = event.payload;
+
     await this.paymentNotificationService.notifyPaymentSucceeded(
       riderId,
       driverId,
       driverUserId,
       event.payload,
     );
+
     await this.persistence.persistNotification(riderId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Payment successful",
       body: "Payment completed successfully.",
       metadata: { ...event.payload },
     });
+
     await this.persistence.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Payment received",
@@ -202,17 +223,20 @@ export class InMemoryEventBus implements IEventBus {
 
   private async handlePaymentFailed(event: PaymentFailedEvent) {
     const { riderId, driverUserId } = event.payload;
+
     await this.paymentNotificationService.notifyPaymentFailed(
       riderId,
       driverUserId,
       event.payload,
     );
+
     await this.persistence.persistNotification(riderId, {
       type: NotificationType.PAYMENT_FAILED,
       title: "Payment failed",
       body: "Payment failed. Please try again.",
       metadata: { ...event.payload },
     });
+
     await this.persistence.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_FAILED,
       title: "Payment failed",
@@ -222,18 +246,20 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handlePaymentCashConfirmed(event: PaymentCashConfirmedEvent) {
-    const { riderId, driverId, driverUserId, rideId } = event.payload;
-    await this.couponUsageService.recordUsage(rideId);
+    const { riderId, driverId, driverUserId } = event.payload;
+
     await this.paymentNotificationService.notifyPaymentCashConfirmed(
       driverId,
       event.payload,
     );
+
     await this.persistence.persistNotification(driverUserId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Cash received",
       body: "You confirmed cash payment.",
       metadata: { ...event.payload },
     });
+
     await this.persistence.persistNotification(riderId, {
       type: NotificationType.PAYMENT_COMPLETED,
       title: "Payment completed",
@@ -243,53 +269,21 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handleRideCancelled(event: RideCancelledEvent) {
-    const {
-      riderId,
-      driverId,
-      driverUserId,
-      rideId,
-      reason,
-      cancellationFeeAmount,
-      cancellationFeeCurrency,
-      cancelledAt,
-      pickup,
-      drop,
-    } = event.payload;
+    const { riderId, driverId, driverUserId } = event.payload;
 
-    await this.notificationService.notifyRiderRideCancelled(riderId, {
-      rideId,
-      driverId,
-      reason,
-      cancellationFeeAmount,
-      cancellationFeeCurrency,
-      cancelledAt,
-      pickup,
-      drop,
-    });
     await this.persistence.persistNotification(riderId, {
       type: NotificationType.RIDE_CANCELLED,
       title: "Ride cancelled",
-      body:
-        cancellationFeeAmount > 0
-          ? `Your ride was cancelled. A fee of ${cancellationFeeCurrency} ${cancellationFeeAmount} may apply.`
-          : "Your ride has been cancelled with no charge.",
-      metadata: { rideId, reason, cancellationFeeAmount, cancelledAt },
+      body: "Your ride has been cancelled.",
+      metadata: { ...event.payload },
     });
 
     if (driverId && driverUserId) {
-      await this.notificationService.notifyDriverRideCancelled(driverId, {
-        rideId,
-        riderId,
-        reason,
-        cancelledAt,
-        pickup,
-        drop,
-      });
       await this.persistence.persistNotification(driverUserId, {
         type: NotificationType.RIDE_CANCELLED,
         title: "Rider cancelled the ride",
         body: "The rider has cancelled the ride.",
-        metadata: { rideId, riderId, reason, cancelledAt },
+        metadata: { ...event.payload },
       });
     }
 
@@ -297,73 +291,13 @@ export class InMemoryEventBus implements IEventBus {
   }
 
   private async handleRideCancelledByDriver(event: RideCancelledByDriverEvent) {
-    const {
-      rideId,
-      riderId,
-      driverId,
-      driverUserId,
-      reason,
-      riderChargeAmount,
-      riderChargeCurrency,
-      driverPenaltyAmount,
-      driverPenaltyCurrency,
-      penaltyDeducted,
-      cancelledAt,
-      pickup,
-      drop,
-    } = event.payload;
+    const { riderId, driverId } = event.payload;
 
-    await this.notificationService.notifyRiderRideCancelledByDriver(riderId, {
-      rideId,
-      driverId,
-      reason,
-      riderChargeAmount,
-      riderChargeCurrency,
-      cancelledAt,
-      pickup,
-      drop,
-    });
     await this.persistence.persistNotification(riderId, {
       type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
-      title: "Your driver cancelled the ride",
-      body:
-        riderChargeAmount > 0
-          ? `Your ride was cancelled by the driver. A charge of ${riderChargeCurrency} ${riderChargeAmount} may apply.`
-          : "Your ride was cancelled by the driver. No charge applied.",
-      metadata: { rideId, driverId, reason, riderChargeAmount, cancelledAt },
-    });
-
-    await this.notificationService.notifyDriverRideCancelledConfirmation(
-      driverUserId,
-      {
-        rideId,
-        riderId,
-        reason,
-        driverPenaltyAmount,
-        driverPenaltyCurrency,
-        penaltyDeducted,
-        cancelledAt,
-        pickup,
-        drop,
-      },
-    );
-    await this.persistence.persistNotification(driverUserId, {
-      type: NotificationType.RIDE_CANCELLED_BY_DRIVER,
-      title: "Ride cancelled",
-      body:
-        driverPenaltyAmount > 0
-          ? penaltyDeducted
-            ? `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} was deducted from your wallet.`
-            : `Ride cancelled. A penalty of ${driverPenaltyCurrency} ${driverPenaltyAmount} will be applied later.`
-          : "Ride cancelled with no penalty.",
-      metadata: {
-        rideId,
-        riderId,
-        reason,
-        driverPenaltyAmount,
-        penaltyDeducted,
-        cancelledAt,
-      },
+      title: "Driver cancelled the ride",
+      body: "Your driver cancelled the ride.",
+      metadata: { ...event.payload },
     });
 
     await this.updateDriverAvailability(driverId);
@@ -386,41 +320,36 @@ export class InMemoryEventBus implements IEventBus {
 
   private async updateDriverAvailability(driverId?: string | null) {
     if (!driverId) return;
+
     try {
       const availability =
         await this.driverAvailabilityRepository.findActiveByDriverId(driverId);
+
       if (!availability) return;
+
       if (availability.getStatus() === AvailabilityStatus.SCHEDULED) return;
+
       availability.updateStatus(AvailabilityStatus.SCHEDULED);
+
       await this.driverAvailabilityRepository.save(availability);
     } catch (error) {
-      Logger.error("Failed to update driver availability after cancellation", {
+      Logger.error("Failed to update driver availability", {
         driverId,
         error: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
-  private async incrementDriverRideCount(driverId: string): Promise<void> {
+  private async incrementDriverRideCount(driverId: string) {
     try {
       const driver = await this.driverRepository.findById(driverId);
 
-      if (!driver) {
-        Logger.warn("Could not find driver to increment ride count", {
-          driverId,
-        });
-        return;
-      }
+      if (!driver) return;
 
       driver.incrementTotalRides();
       await this.driverRepository.save(driver);
-
-      Logger.info("Driver ride count incremented", {
-        driverId,
-        newTotal: driver.getTotalRides(),
-      });
     } catch (error) {
-      Logger.error("Failed to increment driver ride count", {
+      Logger.error("Failed to increment ride count", {
         driverId,
         error: error instanceof Error ? error.message : String(error),
       });

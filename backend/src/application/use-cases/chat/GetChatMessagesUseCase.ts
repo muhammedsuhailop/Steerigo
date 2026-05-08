@@ -13,6 +13,9 @@ import { GetChatMessagesResponseDto } from "@application/dto/chat/response/GetCh
 import { ChatErrors } from "@domain/errors/ChatErrors";
 import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
+import { ChatRoom, ChatParticipant } from "@domain/entities/ChatRoom";
+import { Message } from "@domain/entities/Message";
+import { MessageStatus } from "@domain/entities/MessageStatus";
 
 @injectable()
 export class GetChatMessagesUseCase
@@ -22,16 +25,12 @@ export class GetChatMessagesUseCase
   constructor(
     @inject(TYPES.ChatRoomRepository)
     private readonly chatRoomRepository: IChatRoomRepository,
-
     @inject(TYPES.MessageRepository)
     private readonly messageRepository: IMessageRepository,
-
     @inject(TYPES.MessageStatusRepository)
     private readonly messageStatusRepository: IMessageStatusRepository,
-
     @inject(TYPES.UserChatRepository)
     private readonly userChatRepository: IUserChatRepository,
-
     @inject(TYPES.DriverRepository)
     private readonly driverRepository: IDriverRepository,
   ) {}
@@ -40,44 +39,27 @@ export class GetChatMessagesUseCase
     dto: GetChatMessagesDto,
   ): Promise<Result<GetChatMessagesResponseDto>> {
     try {
-      const userId = dto.getUserId();
-      const chatRoomId = dto.getChatRoomId();
+      const userId: string = dto.getUserId();
+      const chatRoomId: string = dto.getChatRoomId();
 
-      Logger.info("Fetching chat messages", {
-        userId,
-        chatRoomId,
-        page: dto.getPage(),
-        limit: dto.getLimit(),
-      });
-
-      const chatRoom = await this.chatRoomRepository.findById(chatRoomId);
+      const chatRoom: ChatRoom | null =
+        await this.chatRoomRepository.findById(chatRoomId);
       if (!chatRoom) {
         return Result.failure(ChatErrors.chatRoomNotFound(chatRoomId));
       }
 
-      let isAuthorized = chatRoom.isParticipant(userId);
+      let activeParticipantId: string = userId;
+      let isAuthorized: boolean = chatRoom.isParticipant(userId);
 
       if (!isAuthorized) {
         const driverProfile = await this.driverRepository.findByUserId(userId);
-
         if (driverProfile) {
-          const driverId = driverProfile.getId();
-          isAuthorized = chatRoom.isParticipant(driverId);
-
-          Logger.debug("Chat access resolved via Driver Profile", {
-            userId,
-            resolvedDriverId: driverId,
-            isAuthorized,
-          });
+          activeParticipantId = driverProfile.getId();
+          isAuthorized = chatRoom.isParticipant(activeParticipantId);
         }
       }
 
       if (!isAuthorized) {
-        Logger.warn("Unauthorized chat access attempt", {
-          userId,
-          chatRoomId,
-        });
-
         return Result.failure(
           ChatErrors.unauthorizedChatAccess(chatRoomId, userId),
         );
@@ -90,59 +72,86 @@ export class GetChatMessagesUseCase
           sortOrder: dto.getSortOrder(),
         });
 
+      const participants: ChatParticipant[] = chatRoom.getParticipants();
+      const otherParticipant: ChatParticipant | undefined = participants.find(
+        (p) => p.userId !== activeParticipantId,
+      );
+      const otherParticipantId: string | undefined = otherParticipant?.userId;
+
+      const messageIds: string[] = paginatedMessages.data.map((m: Message) =>
+        m.getId(),
+      );
+
+      const [myStatuses, theirStatuses]: [MessageStatus[], MessageStatus[]] =
+        await Promise.all([
+          this.messageStatusRepository.findByMessageIdsAndUserId(
+            messageIds,
+            activeParticipantId,
+          ),
+          otherParticipantId
+            ? this.messageStatusRepository.findByMessageIdsAndUserId(
+                messageIds,
+                otherParticipantId,
+              )
+            : Promise.resolve([]),
+        ]);
+
+      const statusMap = new Map<string, MessageDeliveryStatus>();
+
+      myStatuses.forEach((s: MessageStatus) =>
+        statusMap.set(
+          `${s.getMessageId()}_${activeParticipantId}`,
+          s.getStatus(),
+        ),
+      );
+
+      if (otherParticipantId) {
+        theirStatuses.forEach((s: MessageStatus) =>
+          statusMap.set(
+            `${s.getMessageId()}_${otherParticipantId}`,
+            s.getStatus(),
+          ),
+        );
+      }
+
       const userChat = await this.userChatRepository.findByUserIdAndChatRoomId(
         userId,
         chatRoomId,
       );
-
-      const unreadCount = userChat ? userChat.getUnreadCount() : 0;
-
-      const totalUnreadCount =
+      const totalUnreadCount: number =
         await this.userChatRepository.getTotalUnreadCountByUserId(userId);
-
-      const messageIds = paginatedMessages.data.map((m) => m.getId());
-
-      const statuses =
-        messageIds.length > 0
-          ? await this.messageStatusRepository.findByMessageIdsAndUserId(
-              messageIds,
-              userId,
-            )
-          : [];
-
-      const statusMap = new Map<
-        string,
-        { status: MessageDeliveryStatus; readAt?: string }
-      >();
-
-      for (const status of statuses) {
-        statusMap.set(status.getMessageId(), {
-          status: status.getStatus(),
-        });
-      }
 
       const response: GetChatMessagesResponseDto = {
         success: true,
         message: CHAT_MESSAGES.MESSAGES.FETCHED,
         data: {
-          messages: paginatedMessages.data.map((message) => ({
-            id: message.getId(),
-            chatRoomId: message.getChatRoomId(),
-            senderId: message.getSenderId(),
-            content: message.getContent(),
-            type: message.getType(),
-            createdAt: message.getCreatedAt().toISOString(),
-            updatedAt: message.getUpdatedAt().toISOString(),
-            editedAt: message.getEditedAt()?.toISOString(),
-            deletedAt: message.getDeletedAt()?.toISOString(),
-            isDeleted: message.isDeleted(),
+          messages: paginatedMessages.data.map((message: Message) => {
+            const senderId: string = message.getSenderId();
+            const messageId: string = message.getId();
 
-            messageStatus: statusMap.get(message.getId()) ?? null,
-          })),
+            const relevantUserId: string | undefined =
+              senderId === activeParticipantId
+                ? otherParticipantId
+                : activeParticipantId;
 
-          unreadCount,
+            const status: MessageDeliveryStatus | undefined = relevantUserId
+              ? statusMap.get(`${messageId}_${relevantUserId}`)
+              : undefined;
+
+            return {
+              id: messageId,
+              chatRoomId: message.getChatRoomId(),
+              senderId: senderId,
+              content: message.getContent(),
+              type: message.getType(),
+              createdAt: message.getCreatedAt().toISOString(),
+              updatedAt: message.getUpdatedAt().toISOString(),
+              isDeleted: message.isDeleted(),
+              messageStatus: status ? { status } : null,
+            };
+          }),
+          unreadCount: userChat ? userChat.getUnreadCount() : 0,
           totalUnreadCount,
-
           pagination: {
             total: paginatedMessages.total,
             page: paginatedMessages.page,
@@ -154,12 +163,7 @@ export class GetChatMessagesUseCase
 
       return Result.success(response);
     } catch (error) {
-      Logger.error("GetChatMessagesUseCase failed", {
-        userId: dto.getUserId(),
-        chatRoomId: dto.getChatRoomId(),
-        error: error instanceof Error ? error.message : String(error),
-      });
-
+      Logger.error("GetChatMessagesUseCase failed", { error });
       return Result.failure(error as Error);
     }
   }

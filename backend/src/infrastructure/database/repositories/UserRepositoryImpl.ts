@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { IUserRepository, UserStatsFilter } from "@domain/repositories/IUserRepository";
 import { User } from "@domain/entities/User";
 import { UserModel } from "../models/UserModel";
 import { AuthProvider } from "@shared/constants/AuthConstants";
@@ -28,11 +28,11 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async findByEmailAndProvider(
     email: string,
-    provider: AuthProvider
+    provider: AuthProvider,
   ): Promise<User | null> {
     const userDoc = await this.queryService.findByEmailAndProvider(
       email,
-      provider
+      provider,
     );
     return userDoc ? UserDomainMapper.toDomain(userDoc) : null;
   }
@@ -79,7 +79,7 @@ export class UserRepositoryImpl implements IUserRepository {
         savedDoc = await UserModel.findOneAndUpdate(
           { email: user.getEmailValue() },
           userData,
-          { new: true }
+          { new: true },
         );
       } else {
         savedDoc = await UserModel.create(userData);
@@ -162,7 +162,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async updateMany(
     filters: FilterOptions<User>,
-    updates: Partial<User>
+    updates: Partial<User>,
   ): Promise<number> {
     try {
       const result = await UserModel.updateMany(filters, updates);
@@ -197,5 +197,25 @@ export class UserRepositoryImpl implements IUserRepository {
       Logger.error("Error finding users by IDs", { ids, error });
       throw error;
     }
+  }
+
+  async countByUserStats(filter: UserStatsFilter): Promise<number> {
+    const query: Record<string, unknown> = {};
+
+    if (filter.createdAt) {
+      query.createdAt = {};
+
+      if (filter.createdAt.from) {
+        (query.createdAt as Record<string, unknown>)["$gte"] =
+          filter.createdAt.from;
+      }
+
+      if (filter.createdAt.to) {
+        (query.createdAt as Record<string, unknown>)["$lte"] =
+          filter.createdAt.to;
+      }
+    }
+
+    return UserModel.countDocuments(query);
   }
 }

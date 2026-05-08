@@ -2,21 +2,13 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/shared/utils/axiosBaseQuery";
 import type {
   Driver,
-  RideRequest,
-  CurrentRide,
   DriverStats,
   DashboardApiResponse,
   FullDashboardResponse,
+  DriverStatsResponse,
+  DriverStatsData,
 } from "../types/driver.types";
-import type {
-  AvailabilityData,
-  DriverStatusResponse,
-} from "../../scheduling/types/scheduling.types";
-import {
-  mockStateManager,
-  MOCK_DRIVER,
-  MOCK_PENDING_REQUESTS,
-} from "../mocks/driver.mock";
+import type { DriverStatusResponse } from "../../scheduling/types/scheduling.types";
 import {
   DriverProfile,
   DriverProfileResponse,
@@ -29,24 +21,16 @@ interface ApiResponse<T> {
   data: T;
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const mockSuccess = <T>(data: T) => ({ data: { data } });
-
 export const driverApi = createApi({
   reducerPath: "driverApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: [
-    "Driver",
-    "DriverStats",
-    "RideRequests",
-    "CurrentRide",
-    "DriverStatus",
-  ],
+  tagTypes: ["Driver", "DriverStats", "RideRequests", "DriverStatus"],
   endpoints: (builder) => ({
     getDriverProfile: builder.query<DriverProfileResponse, void>({
       query: () => ({
         url: API_ENDPOINTS.DRIVER.PROFILE,
         method: "GET",
+        skipErrorHandling: true,
       }),
       transformResponse: (response: ApiResponse<DriverProfile>) => {
         return response.data;
@@ -69,6 +53,7 @@ export const driverApi = createApi({
       query: () => ({
         url: API_ENDPOINTS.DRIVER.DASHBOARD,
         method: "GET",
+        skipErrorHandling: true,
       }),
       transformResponse: (response: DashboardApiResponse) => {
         const {
@@ -133,187 +118,13 @@ export const driverApi = createApi({
       },
       providesTags: ["Driver", "DriverStats"],
     }),
-
-    getPendingRequests: builder.query<{ data: RideRequest[] }, void>({
-      queryFn: async () => {
-        await delay(400);
-        return mockSuccess(mockStateManager.getRequests());
-      },
-      // query: () => ({
-      //   url: "/driver/ride-requests/pending",
-      //   method: "GET",
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.data.map(({ requestId }) => ({
-                type: "RideRequests" as const,
-                requestId,
-              })),
-              { type: "RideRequests" as const, id: "LIST" },
-            ]
-          : [{ type: "RideRequests" as const, id: "LIST" }],
-    }),
-
-    getCurrentRide: builder.query<{ data: CurrentRide }, void>({
-      queryFn: async () => {
-        await delay(400);
-        const currentRide = mockStateManager.getCurrentRide();
-        if (!currentRide) {
-          return {
-            error: {
-              status: 404,
-              data: { message: "No active ride" },
-            },
-          };
-        }
-        return mockSuccess(currentRide);
-      },
-      // query: () => ({
-      //   url: "/driver/ride/current",
-      //   method: "GET",
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      providesTags: ["CurrentRide"],
-    }),
-
-    updateDriverProfile: builder.mutation<{ data: Driver }, Partial<Driver>>({
-      queryFn: async (updates) => {
-        await delay(400);
-        const updated = mockStateManager.updateDriver(updates);
-        return mockSuccess(updated);
-      },
-      // query: (updates) => ({
-      //   url: "/driver/profile",
-      //   method: "PUT",
-      //   data: updates,
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      invalidatesTags: ["Driver"],
-    }),
-
-    setDriverOnlineStatus: builder.mutation<{ data: Driver }, boolean>({
-      queryFn: async (isOnline) => {
-        await delay(400);
-        const updated = mockStateManager.setOnlineStatus(isOnline);
-        return mockSuccess(updated);
-      },
-      // query: (isOnline) => ({
-      //   url: "/driver/online-status",
-      //   method: "PUT",
-      //   data: { isOnline },
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      invalidatesTags: ["Driver", "DriverStatus"],
-    }),
-
-    acceptRideRequest: builder.mutation<{ data: CurrentRide }, string>({
-      queryFn: async (requestId) => {
-        await delay(400);
-        const ride = mockStateManager.acceptRideRequest(requestId);
-        if (!ride) {
-          return {
-            error: {
-              status: 404,
-              data: { message: "Request not found" },
-            },
-          };
-        }
-        return mockSuccess(ride);
-      },
-      // query: (requestId) => ({
-      //   url: `/driver/ride-requests/${requestId}/accept`,
-      //   method: "POST",
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      invalidatesTags: ["RideRequests", "CurrentRide"],
-    }),
-
-    rejectRideRequest: builder.mutation<
-      { data: any },
-      { requestId: string; reason?: string }
-    >({
-      queryFn: async ({ requestId, reason }) => {
-        await delay(400);
-        const rejected = mockStateManager.rejectRideRequest(requestId);
-        if (!rejected) {
-          return {
-            error: {
-              status: 404,
-              data: { message: "Request not found" },
-            },
-          };
-        }
-        return mockSuccess({ rejected: true });
-      },
-      // query: ({ requestId, reason }) => ({
-      //   url: `/driver/ride-requests/${requestId}/reject`,
-      //   method: "POST",
-      //   data: { reason },
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      invalidatesTags: ["RideRequests"],
-    }),
-
-    updateRideStatus: builder.mutation<
-      { data: CurrentRide },
-      {
-        rideId: string;
-        status:
-          | "accepted"
-          | "pickup"
-          | "ongoing"
-          | "completed"
-          | "cancelled"
-          | "rejected";
-      }
-    >({
-      queryFn: async ({ rideId, status }) => {
-        await delay(400);
-        const updated = mockStateManager.updateRideStatus(rideId, status);
-        if (!updated) {
-          return {
-            error: {
-              status: 404,
-              data: { message: "Ride not found" },
-            },
-          };
-        }
-        return mockSuccess(updated);
-      },
-      // query: ({ rideId, status }) => ({
-      //   url: `/driver/ride/${rideId}/status`,
-      //   method: "PUT",
-      //   data: { status },
-      // }),
-      // transformResponse: (response: any) => {
-      //   return { data: response.data };
-      // },
-      invalidatesTags: ["CurrentRide"],
-    }),
-
-    endRide: builder.mutation<{ data: CurrentRide }, string>({
-      query: (rideId) => ({
-        url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/complete`,
-        method: "POST",
+    getActualDriverStats: builder.query<DriverStatsData, void>({
+      query: () => ({
+        url: API_ENDPOINTS.DRIVER.STATS,
+        method: "GET",
       }),
-      transformResponse: (response: any) => {
-        return { data: response.data };
-      },
-      invalidatesTags: ["CurrentRide"],
+      transformResponse: (response: DriverStatsResponse) => response.data,
+      providesTags: ["DriverStats"],
     }),
   }),
 });
@@ -322,12 +133,5 @@ export const {
   useGetDriverProfileQuery,
   useGetDriverStatusQuery,
   useGetDriverStatsQuery,
-  useGetPendingRequestsQuery,
-  useGetCurrentRideQuery,
-  useUpdateDriverProfileMutation,
-  useSetDriverOnlineStatusMutation,
-  useAcceptRideRequestMutation,
-  useRejectRideRequestMutation,
-  useUpdateRideStatusMutation,
-  useEndRideMutation,
+  useGetActualDriverStatsQuery,
 } = driverApi;

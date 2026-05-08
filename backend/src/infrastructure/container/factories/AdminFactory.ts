@@ -49,6 +49,16 @@ import { GetAdminWalletUseCase } from "@application/use-cases/admin/GetAdminWall
 import { GetAdminWalletDto } from "@application/dto/admin/GetAdminWalletDto";
 import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWalletResponseDto";
 import { AdminWalletController } from "@interface/controllers/admin/AdminWalletController";
+import { GetAdminUserStatsUseCase } from "@application/use-cases/admin/GetAdminUserStatsUseCase";
+import { AdminStatsController } from "@interface/controllers/admin/AdminStatsController";
+import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
+import { GetAdminRideStatsUseCase } from "@application/use-cases/admin/GetAdminRideStatsUseCase";
+import { GetAdminRideStatsRequestDto } from "@application/dto/admin/GetAdminRideStatsRequestDto";
+import { GetAdminRideStatsResponseDto } from "@application/dto/admin/GetAdminRideStatsResponseDto";
+import { GetAdminDriverStatsUseCase } from "@application/use-cases/admin/GetAdminDriverStatsUseCase";
+import { GetAdminDriverStatsRequestDto } from "@application/dto/admin/GetAdminDriverStatsRequestDto";
+import { GetAdminDriverStatsResponseDto } from "@application/dto/admin/GetAdminDriverStatsResponseDto";
 
 export class AdminFactory {
   static register(container: Container): void {
@@ -138,6 +148,32 @@ export class AdminFactory {
         IUseCase<GetAdminWalletDto, Promise<Result<GetAdminWalletResponseDto>>>
       >(TYPES.GetAdminWalletUseCase)
       .to(GetAdminWalletUseCase);
+    container
+      .bind<
+        IUseCase<
+          GetUserStatsRequestDto,
+          Promise<Result<GetUserStatsResponseDto>>
+        >
+      >(TYPES.GetAdminUserStatsUseCase)
+      .to(GetAdminUserStatsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminRideStatsRequestDto,
+          Promise<Result<GetAdminRideStatsResponseDto>>
+        >
+      >(TYPES.GetAdminRideStatsUseCase)
+      .to(GetAdminRideStatsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          GetAdminDriverStatsRequestDto,
+          Promise<Result<GetAdminDriverStatsResponseDto>>
+        >
+      >(TYPES.GetAdminDriverStatsUseCase)
+      .to(GetAdminDriverStatsUseCase);
 
     // Controller bindings
     container
@@ -156,5 +192,6 @@ export class AdminFactory {
     container
       .bind<AdminWalletController>(TYPES.AdminWalletController)
       .to(AdminWalletController);
+    container.bind(TYPES.AdminStatsController).to(AdminStatsController);
   }
 }

@@ -23,6 +23,7 @@ export interface AdminTransactionQueryFilters {
   relatedEntityType?: string;
   fromDate?: Date;
   toDate?: Date;
+  search?: string;
   page: number;
   limit: number;
   sortBy: "createdAt" | "amount";

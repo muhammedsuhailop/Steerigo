@@ -44,6 +44,8 @@ export const TYPES = {
   PaymentGatewayService: Symbol.for("PaymentGatewayService"),
   EarningsDistributionService: Symbol.for("EarningsDistributionService"),
   IDGenerator: Symbol.for("IDGenerator"),
+  UuidGenerator: Symbol.for("UuidGenerator"),
+  NanoIdGenerator: Symbol.for("NanoIdGenerator"),
   PaymentNotificationService: Symbol.for("PaymentNotificationService"),
   CancellationChargeService: Symbol.for("CancellationChargeService"),
   PaymentStrategies: Symbol.for("PaymentStrategies"),
@@ -56,10 +58,17 @@ export const TYPES = {
   NotificationPersistenceService: Symbol.for("NotificationPersistenceService"),
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
   ChatRealtimeService: Symbol.for("ChatRealtimeService"),
+  WorkerSocketBridge: Symbol.for("WorkerSocketBridge"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
   ChatEventBus: Symbol.for("ChatEventBus"),
+  CouponUsageOnPaymentSucceededHandler: Symbol.for(
+    "CouponUsageOnPaymentSucceededHandler",
+  ),
+  CouponUsageOnPaymentCashConfirmedHandler: Symbol.for(
+    "CouponUsageOnPaymentCashConfirmedHandler",
+  ),
 
   // Adapters
   CryptoAdapter: Symbol.for("CryptoAdapter"),
@@ -107,6 +116,11 @@ export const TYPES = {
   GetAdminRideByIdUseCase: Symbol.for("GetAdminRideByIdUseCase"),
   GetAdminWalletUseCase: Symbol.for("GetAdminWalletUseCase"),
 
+  //Use Cases - Admin status
+  GetAdminUserStatsUseCase: Symbol.for("GetAdminUserStatsUseCase"),
+  GetAdminRideStatsUseCase: Symbol.for("GetAdminRideStatsUseCase"),
+  GetAdminDriverStatsUseCase: Symbol.for("GetAdminDriverStatsUseCase"),
+
   // Use Cases - Driver
   RegisterDriverUseCase: Symbol.for("RegisterDriverUseCase"),
   UpdateDriverProfileUseCase: Symbol.for("UpdateDriverProfileUseCase"),
@@ -142,6 +156,7 @@ export const TYPES = {
   GetDriverPayoutsUseCase: Symbol.for("GetDriverPayoutsUseCase"),
   GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
   DriverCancelRideUseCase: Symbol.for("DriverCancelRideUseCase"),
+  GetDriverStatsUseCase: Symbol.for("GetDriverStatsUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -157,7 +172,9 @@ export const TYPES = {
   CancelRideUseCase: Symbol.for("CancelRideUseCase"),
   RateDriverUseCase: Symbol.for("RateDriverUseCase"),
   ApplyCouponUseCase: Symbol.for("ApplyCouponUseCase"),
+  GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
+  GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
 
   //Use Cases - Chat
   CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),
@@ -225,4 +242,6 @@ export const TYPES = {
   AdminWalletController: Symbol.for("AdminWalletController"),
   ChatRoomController: Symbol.for("ChatRoomController"),
   ChatMessageController: Symbol.for("ChatMessageController"),
+  AdminStatsController: Symbol.for("AdminStatsController"),
+  DriverStatsController: Symbol.for("DriverStatsController"),
 };

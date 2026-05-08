@@ -35,6 +35,7 @@ import { adminRideApi } from "@/features/admin/rides/services/adminRideApi";
 import { adminCouponApi } from "@/features/admin/coupons/services/adminCouponApi";
 import { chatApi } from "@/features/chat/services/chatApi";
 import chatReducer from "@/features/chat/store/chatSlice";
+import { adminDashboardApi } from "@/features/admin/dashboard/services/adminDashboardApi";
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -48,6 +49,7 @@ const appReducer = combineReducers({
   [adminTransactionApi.reducerPath]: adminTransactionApi.reducer,
   [adminRideApi.reducerPath]: adminRideApi.reducer,
   [adminCouponApi.reducerPath]: adminCouponApi.reducer,
+  [adminDashboardApi.reducerPath]: adminDashboardApi.reducer,
 
   driver: driverReducer,
   driverRegistration: driverRegistrationReducer,
@@ -109,4 +111,5 @@ export const apiMiddlewares = [
   adminRideApi.middleware,
   adminCouponApi.middleware,
   chatApi.middleware,
+  adminDashboardApi.middleware,
 ];

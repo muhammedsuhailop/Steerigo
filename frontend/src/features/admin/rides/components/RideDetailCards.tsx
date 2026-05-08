@@ -3,7 +3,7 @@ import React from "react";
 export const StatusBadge: React.FC<{
   status: string;
   type?: "ride" | "payment";
-}> = ({ status, type = "ride" }) => {
+}> = ({ status }) => {
   const getColors = () => {
     const s = status.toUpperCase();
     if (["COMPLETED", "SUCCESS", "PAID"].includes(s))
