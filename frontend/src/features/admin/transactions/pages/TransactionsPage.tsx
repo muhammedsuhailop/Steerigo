@@ -5,6 +5,7 @@ import { TablePagination } from "@/shared/components/ui/Table";
 import { AdminTransactionFilters } from "../types/transaction.types";
 import { TransactionFilters } from "../components/TransactionFilters";
 import { AdminLayout } from "../../shared/components/AdminLayout/AdminLayout";
+import { useDebounce } from "../../../../shared/hooks/useDebounce";
 
 export const TransactionsPage: React.FC = () => {
   // Data Fetching and Filtering Logic
@@ -15,7 +16,12 @@ export const TransactionsPage: React.FC = () => {
     sortOrder: "desc",
   });
 
-  const { data, isLoading, isFetching } = useGetAdminTransactionsQuery(filters);
+  const debouncedSearch = useDebounce(filters.search, 500);
+
+  const { data, isLoading, isFetching } = useGetAdminTransactionsQuery({
+    ...filters,
+    search: debouncedSearch,
+  });
 
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
@@ -42,6 +48,7 @@ export const TransactionsPage: React.FC = () => {
       direction: undefined,
       fromDate: undefined,
       toDate: undefined,
+      search: "",
     });
   };
 

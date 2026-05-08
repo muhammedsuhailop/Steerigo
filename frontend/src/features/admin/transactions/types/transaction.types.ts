@@ -37,6 +37,7 @@ export interface AdminTransactionFilters {
   relatedEntityId?: string;
   fromDate?: string;
   toDate?: string;
+  search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
