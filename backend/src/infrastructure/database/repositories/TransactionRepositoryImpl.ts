@@ -211,6 +211,36 @@ export class TransactionRepositoryImpl implements ITransactionRepository {
         }
       }
 
+      const finalQuery: FilterQuery<typeof TransactionModel> = filters.search
+        ? {
+            $and: [
+              query,
+              {
+                $or: [
+                  {
+                    transactionId: {
+                      $regex: filters.search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    relatedEntityId: {
+                      $regex: filters.search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    note: {
+                      $regex: filters.search,
+                      $options: "i",
+                    },
+                  },
+                ],
+              },
+            ],
+          }
+        : query;
+
       const mongoSortOrder: SortOrder = filters.sortOrder === "asc" ? 1 : -1;
 
       const sortField =
@@ -219,12 +249,12 @@ export class TransactionRepositoryImpl implements ITransactionRepository {
       const skip = (filters.page - 1) * filters.limit;
 
       const [docs, total] = await Promise.all([
-        TransactionModel.find(query)
+        TransactionModel.find(finalQuery)
           .sort({ [sortField]: mongoSortOrder })
           .skip(skip)
           .limit(filters.limit)
           .lean(),
-        TransactionModel.countDocuments(query),
+        TransactionModel.countDocuments(finalQuery),
       ]);
 
       return {

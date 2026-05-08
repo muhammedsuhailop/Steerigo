@@ -7,6 +7,7 @@ import { TransactionErrors } from "@domain/errors/TransactionErrors";
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
+const MAX_SEARCH_LENGTH = 60;
 
 interface RawQuery {
   walletId?: string;
@@ -18,6 +19,7 @@ interface RawQuery {
   relatedEntityType?: string;
   fromDate?: string;
   toDate?: string;
+  search?: string;
   sortBy?: string;
   sortOrder?: string;
   page?: string;
@@ -72,6 +74,12 @@ export class GetAdminTransactionsDto {
       throw TransactionErrors.invalidDateRange();
     }
 
+    const rawSearch = q.search?.trim();
+    const search =
+      rawSearch && rawSearch.length > 0
+        ? rawSearch.slice(0, MAX_SEARCH_LENGTH)
+        : undefined;
+
     const sortBy: "createdAt" | "amount" =
       q.sortBy === "amount" ? "amount" : "createdAt";
 
@@ -103,6 +111,7 @@ export class GetAdminTransactionsDto {
       fromDate,
       toDate,
       sortBy,
+      search,
       sortOrder,
       page,
       limit,
