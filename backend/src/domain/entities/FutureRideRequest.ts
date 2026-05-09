@@ -26,17 +26,12 @@ export class FutureRideRequest {
     pickup: Location;
     drop: Location;
     pickupTime: Date;
-    searchStartTime: Date;
     rideType: RideType;
     fareBreakdown: FareBreakdown;
     pickupETA: string;
   }): FutureRideRequest {
     if (params.pickupTime <= new Date()) {
       throw new Error("Pickup time must be future date");
-    }
-
-    if (params.searchStartTime >= params.pickupTime) {
-      throw new Error("Search start time must be before pickup time");
     }
 
     if (params.fareBreakdown.getTotalFare().getAmount() <= 0) {

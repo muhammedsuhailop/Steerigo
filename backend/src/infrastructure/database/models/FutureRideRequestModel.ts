@@ -138,7 +138,6 @@ const futureRideRequestSchema = new Schema(
       index: true,
     },
 
-
     rideType: {
       type: String,
       enum: ["One Way", "Round Trip"],
@@ -217,11 +216,6 @@ const futureRideRequestSchema = new Schema(
 );
 
 // Indexes
-
-futureRideRequestSchema.index({
-  status: 1,
-  searchStartTime: 1,
-});
 
 futureRideRequestSchema.index({
   pickupTime: 1,
