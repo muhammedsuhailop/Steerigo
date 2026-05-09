@@ -15,6 +15,7 @@ import { NotificationFactory } from "./factories/NotificationFactory";
 import { PaymentFactory } from "./factories/PaymentFactory";
 import { ChatFactory } from "./factories/ChatFactory";
 import { EventHandlersFactory } from "./factories/EventHandlersFactory";
+import { FutureRideRequestFactory } from "./factories/FutureRideRequestFactory";
 
 const container = new Container();
 
@@ -37,5 +38,6 @@ PaymentFactory.register(container);
 ChatFactory.register(container);
 EventHandlersFactory.register(container);
 EventHandlersFactory.init(container);
+FutureRideRequestFactory.register(container);
 
 export { container };

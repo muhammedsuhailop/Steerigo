@@ -27,6 +27,7 @@ export const TYPES = {
   MessageRepository: Symbol.for("MessageRepository"),
   MessageStatusRepository: Symbol.for("MessageStatusRepository"),
   UserChatRepository: Symbol.for("UserChatRepository"),
+  FutureRideRequestRepository:Symbol.for("FutureRideRequestRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
