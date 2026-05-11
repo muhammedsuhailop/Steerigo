@@ -72,6 +72,7 @@ export class RideMapper {
         (doc.paymentStatus as PaymentStatus) || PaymentStatus.PENDING,
       pickup,
       drop,
+      timeRequired:doc.timeRequired,
       rideType: doc.rideType as RideType,
       fareBreakdown,
       currency,
@@ -110,6 +111,7 @@ export class RideMapper {
         address: entity.getDrop().getAddress(),
       },
 
+      timeRequired:entity.getTimeRequired(),
       rideType: entity.getRideType(),
 
       fareBreakdown: {

@@ -17,6 +17,7 @@ export class Ride {
     private paymentStatus: PaymentStatus,
     private readonly pickup: Location,
     private readonly drop: Location,
+    private readonly timeRequired: number,
     private readonly rideType: RideType,
     private fareBreakdown: FareBreakdown,
     private readonly currency: string = "INR",
@@ -33,6 +34,7 @@ export class Ride {
     riderId: string,
     pickup: Location,
     drop: Location,
+    timeRequired: number,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
     timeline: RideTimeline,
@@ -52,6 +54,7 @@ export class Ride {
       PaymentStatus.PENDING,
       pickup,
       drop,
+      timeRequired,
       rideType,
       fareBreakdown,
       "INR",
@@ -69,6 +72,7 @@ export class Ride {
     paymentStatus: PaymentStatus;
     pickup: Location;
     drop: Location;
+    timeRequired: number;
     rideType: RideType;
     fareBreakdown: FareBreakdown;
     currency: string;
@@ -86,6 +90,7 @@ export class Ride {
       data.paymentStatus,
       data.pickup,
       data.drop,
+      data.timeRequired,
       data.rideType,
       data.fareBreakdown,
       data.currency,
@@ -116,6 +121,9 @@ export class Ride {
   }
   getDrop(): Location {
     return this.drop;
+  }
+  getTimeRequired():number {
+    return this.timeRequired;
   }
   getRideType(): RideType {
     return this.rideType;

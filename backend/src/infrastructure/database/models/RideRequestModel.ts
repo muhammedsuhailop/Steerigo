@@ -16,6 +16,7 @@ export interface IRideRequestDocument extends Document {
     address?: string;
   };
   pickupTime: Date;
+  timeRequired: number;
   rideType: string;
   fareBreakdown: {
     baseFare: {
@@ -116,6 +117,11 @@ const rideRequestSchema = new Schema(
     pickupTime: {
       type: Date,
       required: true,
+    },
+    timeRequired: {
+      type: Number,
+      min: 1,
+      max: 12,
     },
     rideType: {
       type: String,

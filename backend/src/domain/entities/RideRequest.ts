@@ -12,6 +12,7 @@ export class RideRequest {
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly pickupTime: Date,
+    private readonly timeRequired: number,
     private readonly rideType: RideType,
     private readonly fareBreakdown: FareBreakdown,
     private status: RideRequestStatus,
@@ -27,6 +28,7 @@ export class RideRequest {
     pickup: Location,
     drop: Location,
     pickupTime: Date,
+    timeRequired: number,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
     pickupETA: string,
@@ -43,6 +45,7 @@ export class RideRequest {
       pickup,
       drop,
       pickupTime,
+      timeRequired,
       rideType,
       fareBreakdown,
       RideRequestStatus.PENDING,
@@ -58,6 +61,7 @@ export class RideRequest {
     pickup: Location;
     drop: Location;
     pickupTime: Date;
+    timeRequired: number;
     rideType: RideType;
     fareBreakdown: FareBreakdown;
     status: RideRequestStatus;
@@ -73,6 +77,7 @@ export class RideRequest {
       data.pickup,
       data.drop,
       data.pickupTime,
+      data.timeRequired,
       data.rideType,
       data.fareBreakdown,
       data.status,
@@ -105,6 +110,10 @@ export class RideRequest {
 
   getPickupTime(): Date {
     return this.pickupTime;
+  }
+
+  getTimeRequired(): number {
+    return this.timeRequired;
   }
 
   getRideType(): RideType {

@@ -194,6 +194,7 @@ export class AcceptRideRequestUseCase
         acceptedRequest.getRiderId(),
         acceptedRequest.getPickup(),
         acceptedRequest.getDrop(),
+        acceptedRequest.getTimeRequired(),
         acceptedRequest.getRideType(),
         acceptedRequest.getFareBreakdown(),
         timeline,

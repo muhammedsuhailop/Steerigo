@@ -210,6 +210,7 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
           pickup,
           drop,
           new Date(),
+          group.getTimeRequired(),
           group.getRideType() as RideType,
           fallbackFareBreakdown,
           "5 mins",

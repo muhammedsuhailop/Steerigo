@@ -19,6 +19,7 @@ interface SendRideRequestBody {
     address?: string;
   };
   pickupTime: string;
+  timeRequired: number;
   rideType: string;
   fareBreakdown: {
     baseFare: {
@@ -67,6 +68,7 @@ export class SendRideRequestDto {
   public readonly dropLongitude: number;
   public readonly dropAddress: string | undefined;
   public readonly pickupTime: Date;
+  public readonly timeRequired: number;
   public readonly rideType: string;
   public readonly fareBreakdown: FareBreakdown;
   public readonly pickupETA: string;
@@ -82,6 +84,7 @@ export class SendRideRequestDto {
     dropLongitude: number,
     dropAddress: string | undefined,
     pickupTime: Date,
+    timeRequired: number,
     rideType: string,
     fareBreakdown: FareBreakdown,
     pickupETA: string,
@@ -96,6 +99,7 @@ export class SendRideRequestDto {
     this.dropLongitude = dropLongitude;
     this.dropAddress = dropAddress;
     this.pickupTime = pickupTime;
+    this.timeRequired = timeRequired;
     this.rideType = rideType;
     this.fareBreakdown = fareBreakdown;
     this.pickupETA = pickupETA;
@@ -112,6 +116,7 @@ export class SendRideRequestDto {
       pickup,
       drop,
       pickupTime,
+      timeRequired,
       rideType,
       fareBreakdown: fareBreakdownData,
       pickupETA,
@@ -123,6 +128,10 @@ export class SendRideRequestDto {
 
     if (!pickupTime) {
       throw new Error("Pickup time is required");
+    }
+
+    if (!timeRequired) {
+      throw new Error("Required Time is required");
     }
 
     if (!rideType?.trim()) {
@@ -190,6 +199,7 @@ export class SendRideRequestDto {
       drop.longitude,
       drop.address,
       new Date(pickupTime),
+      timeRequired,
       rideType,
       fareBreakdown,
       pickupETA,
@@ -241,6 +251,12 @@ export class SendRideRequestDto {
 
     if (this.pickupTime < new Date()) {
       throw new Error("Pickup time must be in the future");
+    }
+
+    if (this.timeRequired < 1 || this.timeRequired > 12) {
+      throw new Error(
+        "You can only book for rides duration of minimum 1 hours to maximum 12 hours.",
+      );
     }
 
     if (!this.pickupETA || this.pickupETA.trim().length === 0) {

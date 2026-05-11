@@ -24,6 +24,7 @@ export interface IRideDocument extends Document {
     address?: string;
   };
 
+  timeRequired: number;
   rideType: string;
 
   fareBreakdown: {
@@ -105,6 +106,12 @@ const rideSchema = new Schema<IRideDocument>(
       latitude: { type: Number, required: true },
       longitude: { type: Number, required: true },
       address: { type: String },
+    },
+
+    timeRequired: {
+      type: Number,
+      min: 1,
+      max: 12,
     },
 
     rideType: { type: String, enum: RideType, required: true },

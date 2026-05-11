@@ -53,7 +53,7 @@ export class AutoSearchAndSendRideRequestUseCase
       }
 
       const fareBreakdown = await this.fareCalculationService.calculateFare({
-        durationMinutes: dto.timeRequired,
+        durationMinutes: dto.timeRequired * 60 ,
         searchDate: dto.searchDate,
       });
 
@@ -108,6 +108,7 @@ export class AutoSearchAndSendRideRequestUseCase
         userId,
         pickup,
         drop,
+        dto.timeRequired,
         dto.rideType as RideType,
         fareBreakdown.getTotalFare().getAmount(),
         fareBreakdown.getTotalFare().getCurrency(),
@@ -123,7 +124,7 @@ export class AutoSearchAndSendRideRequestUseCase
         candidateCount: savedGroup.getCandidateDriverIds().length,
         candidateDriverIds: savedGroup.getCandidateDriverIds(),
       });
-      
+
       await this.rideSearchDispatchService.scheduleGroupGuards(
         savedGroup.getId(),
       );

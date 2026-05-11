@@ -159,6 +159,7 @@ export class SendRideRequestUseCase
         pickup,
         drop,
         dto.pickupTime,
+        dto.timeRequired,
         dto.rideType as RideType,
         dto.fareBreakdown,
         dto.pickupETA,

@@ -25,6 +25,7 @@ export class RideRequestGroupMapper {
       riderId: doc.riderId.toString(),
       pickup,
       drop,
+      timeRequired: doc.timeRequired,
       rideType: doc.rideType as RideType,
       estimatedFareAmount: doc.estimatedFare.amount,
       estimatedFareCurrency: doc.estimatedFare.currency,
@@ -59,6 +60,7 @@ export class RideRequestGroupMapper {
         longitude: drop.getLongitude(),
         address: drop.getAddress() as string,
       },
+      timeRequired: entity.getTimeRequired(),
       rideType: entity.getRideType(),
       estimatedFare: {
         amount: entity.getEstimatedFareAmount(),

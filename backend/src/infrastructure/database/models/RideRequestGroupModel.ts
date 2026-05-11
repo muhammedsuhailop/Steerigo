@@ -12,6 +12,7 @@ export interface IRideRequestGroupDocument extends Document {
   riderId: Types.ObjectId;
   pickup: IRideLocation;
   drop: IRideLocation;
+  timeRequired: number;
   rideType: string;
   estimatedFare: {
     amount: number;
@@ -38,6 +39,7 @@ const RideRequestGroupSchema = new Schema<IRideRequestGroupDocument>(
     riderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     pickup: { type: RideLocationSchema, required: true },
     drop: { type: RideLocationSchema, required: true },
+    timeRequired: { type: Number, min: 1, max: 12 },
     rideType: { type: String, required: true },
     estimatedFare: {
       amount: { type: Number, required: true },
