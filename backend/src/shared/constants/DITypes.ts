@@ -27,7 +27,7 @@ export const TYPES = {
   MessageRepository: Symbol.for("MessageRepository"),
   MessageStatusRepository: Symbol.for("MessageStatusRepository"),
   UserChatRepository: Symbol.for("UserChatRepository"),
-  FutureRideRequestRepository:Symbol.for("FutureRideRequestRepository"),
+  FutureRideRequestRepository: Symbol.for("FutureRideRequestRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -60,6 +60,9 @@ export const TYPES = {
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
   ChatRealtimeService: Symbol.for("ChatRealtimeService"),
   WorkerSocketBridge: Symbol.for("WorkerSocketBridge"),
+  FutureRideExpiryService: Symbol.for("FutureRideExpiryService"),
+  FutureRideExpiryQueue: Symbol.for("FutureRideExpiryQueue"),
+  FutureRideExpiryWorker: Symbol.for("FutureRideExpiryWorker"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -176,6 +179,10 @@ export const TYPES = {
   GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
   GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
+  ScheduleFutureRideRequestUseCase: Symbol.for(
+    "ScheduleFutureRideRequestUseCase",
+  ),
+  CancelFutureRideRequestUseCase: Symbol.for("CancelFutureRideRequestUseCase"),
 
   //Use Cases - Chat
   CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),

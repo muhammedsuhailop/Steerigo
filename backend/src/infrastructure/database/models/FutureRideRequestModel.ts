@@ -1,30 +1,24 @@
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 import { Document, Model, Schema, Types, model } from "mongoose";
 
 export interface IFutureRideRequestDocument extends Document {
   _id: Types.ObjectId;
-
   riderId: Types.ObjectId;
-
   driverId?: Types.ObjectId | null;
-
   requestGroupId: string;
-
   pickup: {
     latitude: number;
     longitude: number;
     address?: string;
   };
-
   drop: {
     latitude: number;
     longitude: number;
     address?: string;
   };
-
   pickupTime: Date;
-
+  requiredDuration: number;
   rideType: string;
-
   fareBreakdown: {
     baseFare: {
       amount: number;
@@ -35,7 +29,6 @@ export interface IFutureRideRequestDocument extends Document {
       amount: number;
       currency: string;
     };
-
     taxes: {
       fare: {
         name: string;
@@ -45,7 +38,6 @@ export interface IFutureRideRequestDocument extends Document {
           currency: string;
         };
       };
-
       platformFee: {
         name: string;
         rate: number;
@@ -55,23 +47,16 @@ export interface IFutureRideRequestDocument extends Document {
         };
       };
     };
-
     totalFare: {
       amount: number;
       currency: string;
     };
-
     durationHours: number;
-
     calculatedAt: Date;
   };
-
   status: string;
-
   pickupETA: string;
-
   createdAt: Date;
-
   updatedAt: Date;
 }
 
@@ -94,7 +79,6 @@ const futureRideRequestSchema = new Schema(
     requestGroupId: {
       type: String,
       required: true,
-      unique: true,
       index: true,
     },
 
@@ -135,7 +119,11 @@ const futureRideRequestSchema = new Schema(
     pickupTime: {
       type: Date,
       required: true,
-      index: true,
+    },
+
+    requiredDuration: {
+      type: Number,
+      min: 60,
     },
 
     rideType: {
@@ -189,19 +177,8 @@ const futureRideRequestSchema = new Schema(
 
     status: {
       type: String,
-
-      enum: [
-        "Pending",
-        "Matched",
-        "Accepted",
-        "Rejected",
-        "Expired",
-        "Cancelled",
-        "Completed",
-      ],
-
-      default: "Pending",
-
+      enum: FutureRideRequestStatus,
+      default: FutureRideRequestStatus.PENDING,
       index: true,
     },
 

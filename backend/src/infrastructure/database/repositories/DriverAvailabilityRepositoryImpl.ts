@@ -66,6 +66,33 @@ type NearbyAvailableDriverAggregationResult = {
   driverDoc: DriverLookupDocument;
 };
 
+type BaseLocationAggregationResult = {
+  _id: Types.ObjectId;
+  driverId: Types.ObjectId;
+  status: string;
+  currentLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    updatedAt?: Date;
+  };
+  baseLocationPoint: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  locationPoint: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  recurringSchedule?: IDriverAvailabilityModel["recurringSchedule"];
+  exceptions?: IDriverAvailabilityModel["exceptions"];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  distanceMeters: number;
+  driverDoc: DriverLookupDocument;
+};
+
 @injectable()
 export class DriverAvailabilityRepositoryImpl
   implements IDriverAvailabilityRepository
@@ -563,6 +590,7 @@ export class DriverAvailabilityRepositoryImpl
             distanceField: "distanceMeters",
             maxDistance: radiusKm * 1000,
             spherical: true,
+            key: "locationPoint",
             query: {
               isActive: true,
               status: {
@@ -784,6 +812,109 @@ export class DriverAvailabilityRepositoryImpl
     }
   }
 
+  async findNearbyAvailableDriversByBaseLocation(
+    latitude: number,
+    longitude: number,
+    availableFrom: Date,
+    radiusKm: number,
+    limit: number,
+  ): Promise<Array<{ driver: DriverAvailability; distanceKm: number }>> {
+    try {
+      Logger.debug("findNearbyAvailableDriversByBaseLocation called", {
+        latitude,
+        longitude,
+        radiusKm,
+        limit,
+        availableFrom: availableFrom.toISOString(),
+      });
+
+      const pipeline: PipelineStage[] = [
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [longitude, latitude],
+            },
+            distanceField: "distanceMeters",
+            maxDistance: radiusKm * 1000,
+            spherical: true,
+            key: "baseLocationPoint",
+            query: {
+              isActive: true,
+              status: {
+                $ne: AvailabilityStatus.OFFLINE,
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            "recurringSchedule.validity.startDate": { $lte: availableFrom },
+            "recurringSchedule.validity.endDate": { $gte: availableFrom },
+          },
+        },
+        {
+          $lookup: {
+            from: "drivers",
+            localField: "driverId",
+            foreignField: "_id",
+            as: "driverDoc",
+          },
+        },
+        {
+          $unwind: "$driverDoc",
+        },
+        {
+          $match: {
+            "driverDoc.status": DriverStatus.ACTIVE,
+            "driverDoc.kycStatus": KYCStatus.APPROVED,
+          },
+        },
+        {
+          $sort: {
+            distanceMeters: 1,
+          },
+        },
+        {
+          $limit: limit,
+        },
+      ];
+
+      const aggregatedDocs =
+        await DriverAvailabilityModel.aggregate<BaseLocationAggregationResult>(
+          pipeline,
+        ).exec();
+
+      Logger.debug("findNearbyAvailableDriversByBaseLocation results", {
+        count: aggregatedDocs.length,
+        drivers: aggregatedDocs.map((d) => ({
+          id: d.driverId,
+          distanceMeters: d.distanceMeters,
+          status: d.status,
+        })),
+      });
+
+      return aggregatedDocs.map((doc) => {
+        const domainDriver = DriverAvailabilityMapper.toDomain(
+          this.toDriverAvailabilityDocument(doc),
+        );
+
+        const distanceKm = this.roundToTwoDecimals(doc.distanceMeters / 1000);
+
+        return { driver: domainDriver, distanceKm };
+      });
+    } catch (error) {
+      Logger.error("Error finding nearby available drivers by base location", {
+        latitude,
+        longitude,
+        radiusKm,
+        availableFrom,
+        error,
+      });
+      throw error;
+    }
+  }
+
   private async getOnTheClockDriverIds(): Promise<Types.ObjectId[]> {
     const groups = await RideRequestGroupModel.find({
       status: RideRequestGroupStatus.SEARCHING,
@@ -806,7 +937,7 @@ export class DriverAvailabilityRepositoryImpl
   }
 
   private toDriverAvailabilityDocument(
-    doc: NearbyAvailableDriverAggregationResult,
+    doc: NearbyAvailableDriverAggregationResult | BaseLocationAggregationResult,
   ): HydratedDocument<IDriverAvailabilityModel> {
     return new DriverAvailabilityModel({
       _id: doc._id,

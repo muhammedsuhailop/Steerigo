@@ -56,7 +56,9 @@ export class DriverRideActionsController {
         rideId,
       });
 
-      const dto = MarkRideAsArrivedDto.fromRequest(userId, { rideId });
+      const dto = MarkRideAsArrivedDto.fromRequest(userId, {
+        rideId: rideId as string,
+      });
 
       const result = await this.markRideAsArrivedUseCase.execute(dto);
 
@@ -107,7 +109,9 @@ export class DriverRideActionsController {
 
       Logger.info("Mark ride as started request received", { userId, rideId });
 
-      const dto = MarkRideAsStartedDto.fromRequest(userId, { rideId });
+      const dto = MarkRideAsStartedDto.fromRequest(userId, {
+        rideId: rideId as string,
+      });
       const result = await this.markRideAsStartedUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -156,7 +160,9 @@ export class DriverRideActionsController {
 
       Logger.info("Mark ride as completed received", { userId, rideId });
 
-      const dto = MarkRideAsCompletedDto.fromRequest(userId, { rideId });
+      const dto = MarkRideAsCompletedDto.fromRequest(userId, {
+        rideId: rideId as string,
+      });
       const result = await this.markRideAsCompletedUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -210,7 +216,11 @@ export class DriverRideActionsController {
         body: req.body,
       });
 
-      const dto = DriverCancelRideDto.fromRequest(userId, { rideId }, req.body);
+      const dto = DriverCancelRideDto.fromRequest(
+        userId,
+        { rideId: rideId as string },
+        req.body,
+      );
       const result = await this.driverCancelRideUseCase.execute(dto);
 
       if (result.isFailure()) {

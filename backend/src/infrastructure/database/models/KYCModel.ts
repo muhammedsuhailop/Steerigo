@@ -3,7 +3,7 @@ import { KYCStatus } from "@domain/value-objects/KYCStatus";
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IKYCModel extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   driverId: Types.ObjectId;
   docType: string;
   docNumber: string;

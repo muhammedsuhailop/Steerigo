@@ -5,7 +5,7 @@ import { BodyType, GearType } from "@domain/value-objects/VehicleType";
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IDriverModel extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   userId: Types.ObjectId;
   eligibleGearTypes: string[];
   eligibleBodyTypes: string[];

@@ -81,7 +81,7 @@ export class UserProfileController {
         return;
       }
 
-      const dto = GetUserProfileDto.fromRequest(userId);
+      const dto = GetUserProfileDto.fromRequest(userId as string);
       const result = await this.getUserProfileUseCase.execute(dto);
 
       if (result.isSuccessful()) {
@@ -129,7 +129,7 @@ export class UserProfileController {
 
       const body = req.body as UserProfileRequestBody;
 
-      const dto = UpdateUserProfileDto.fromRequest(userId, body);
+      const dto = UpdateUserProfileDto.fromRequest(userId as string, body);
 
       const result = await this.updateUserProfileUseCase.execute(dto);
 

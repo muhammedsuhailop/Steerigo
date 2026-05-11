@@ -14,12 +14,24 @@ import { TimeSlot } from "@domain/value-objects/TimeSlot";
 import { Types } from "mongoose";
 
 export class DriverAvailabilityMapper {
-  static toDomain(raw: IDriverAvailabilityModel): DriverAvailability {
-    const location = Location.create({
-      latitude: raw.currentLocation.latitude,
-      longitude: raw.currentLocation.longitude,
-      address: raw.currentLocation.address,
+  private static mapLocation(raw: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  }): Location {
+    return Location.create({
+      latitude: raw.latitude,
+      longitude: raw.longitude,
+      address: raw.address,
     });
+  }
+
+  static toDomain(raw: IDriverAvailabilityModel): DriverAvailability {
+    const currentLocation = this.mapLocation(raw.currentLocation);
+
+    const baseLocation = raw.baseLocation
+      ? this.mapLocation(raw.baseLocation)
+      : undefined;
 
     const timeSlots =
       raw.recurringSchedule?.dailyRecurrence.timeSlots.map((slot) =>
@@ -61,7 +73,8 @@ export class DriverAvailabilityMapper {
       id: raw._id.toString(),
       driverId: raw.driverId.toString(),
       status: raw.status as AvailabilityStatus,
-      currentLocation: location,
+      currentLocation,
+      baseLocation,
       recurringSchedule,
       exceptions,
       isActive: raw.isActive,
@@ -73,24 +86,52 @@ export class DriverAvailabilityMapper {
   static toPersistence(
     availability: DriverAvailability,
   ): Partial<IDriverAvailabilityModel> {
-    const location = availability.getCurrentLocation();
-    const coordinates = location.getCoordinates();
+    const currentLocation = availability.getCurrentLocation();
+    const currentCoordinates = currentLocation.getCoordinates();
+
+    const baseLocation = availability.getBaseLocation();
+    const baseCoordinates = baseLocation?.getCoordinates();
+
     const recurringSchedule = availability.getRecurringSchedule();
 
     const persistenceData: Partial<IDriverAvailabilityModel> = {
       _id: new Types.ObjectId(availability.getId()),
+
       driverId: new Types.ObjectId(availability.getDriverId()),
+
       status: availability.getStatus(),
+
       currentLocation: {
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        address: coordinates.address,
+        latitude: currentCoordinates.latitude,
+        longitude: currentCoordinates.longitude,
+        address: currentCoordinates.address,
         updatedAt: new Date(),
       },
+
       locationPoint: {
         type: "Point",
-        coordinates: [coordinates.longitude, coordinates.latitude],
+        coordinates: [
+          currentCoordinates.longitude,
+          currentCoordinates.latitude,
+        ],
       },
+
+      baseLocation: baseCoordinates
+        ? {
+            latitude: baseCoordinates.latitude,
+            longitude: baseCoordinates.longitude,
+            address: baseCoordinates.address,
+            updatedAt: new Date(),
+          }
+        : undefined,
+
+      baseLocationPoint: baseCoordinates
+        ? {
+            type: "Point",
+            coordinates: [baseCoordinates.longitude, baseCoordinates.latitude],
+          }
+        : undefined,
+
       exceptions: availability.getExceptions().map((exception) => ({
         id: exception.id,
         type: exception.type,
@@ -99,7 +140,9 @@ export class DriverAvailabilityMapper {
         endTime: exception.endTime,
         createdAt: exception.createdAt,
       })),
+
       isActive: availability.getIsActive(),
+
       updatedAt: availability.getUpdatedAt(),
     };
 
@@ -107,12 +150,14 @@ export class DriverAvailabilityMapper {
       persistenceData.recurringSchedule = {
         dailyRecurrence: {
           daysOfWeek: recurringSchedule.dailyRecurrence.daysOfWeek,
+
           timeSlots: recurringSchedule.dailyRecurrence.timeSlots.map(
             (slot) => ({
               startTime: slot.getStartTime(),
               endTime: slot.getEndTime(),
             }),
           ),
+
           excludedTimeSlots:
             recurringSchedule.dailyRecurrence.excludedTimeSlots?.map(
               (slot) => ({
@@ -121,7 +166,9 @@ export class DriverAvailabilityMapper {
               }),
             ),
         },
+
         validity: recurringSchedule.validity,
+
         notes: recurringSchedule.notes,
       };
     } else {

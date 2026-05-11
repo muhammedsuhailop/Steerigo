@@ -36,7 +36,7 @@ export class FileController {
     private _updateProfileUc: IUseCase<
       UpdateProfilePictureDto,
       Promise<Result<UpdateProfilePictureResponseDto>>
-    >
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -145,7 +145,7 @@ export class FileController {
         return;
       }
 
-      const publicId = decodeURIComponent(req.params.publicId);
+      const publicId = decodeURIComponent(req.params.publicId as string);
       if (!publicId) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
@@ -207,7 +207,10 @@ export class FileController {
         return;
       }
 
-      const dto = UpdateProfilePictureDto.fromRequest(userId, req.file);
+      const dto = UpdateProfilePictureDto.fromRequest(
+        userId as string,
+        req.file,
+      );
 
       const result = await this._updateProfileUc.execute(dto);
 

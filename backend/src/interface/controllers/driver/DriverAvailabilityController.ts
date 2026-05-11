@@ -278,7 +278,7 @@ export class DriverAvailabilityController {
       const exceptionId = req.params.exceptionId;
       const dto = EditAvailabilityExceptionRequestDto.fromRequest(
         userId,
-        exceptionId,
+        exceptionId as string,
         req.body,
       );
       const result = await this.editExceptionUseCase.execute(dto);
@@ -335,7 +335,7 @@ export class DriverAvailabilityController {
       const exceptionId = req.params.exceptionId;
       const dto = RemoveAvailabilityExceptionRequestDto.fromRequest(
         userId,
-        exceptionId,
+        exceptionId as string,
       );
       const result = await this.removeExceptionUseCase.execute(dto);
 

@@ -105,7 +105,10 @@ export class AdminCouponController {
         body: req.body,
       });
 
-      const dto = EditCouponDto.fromRequest({ couponId }, req.body);
+      const dto = EditCouponDto.fromRequest(
+        { couponId: couponId as string },
+        req.body,
+      );
 
       const result = await this.editCouponUseCase.execute(dto);
 

@@ -105,7 +105,7 @@ export class AdminRideController {
 
       Logger.info("Admin get ride by ID received", { rideId });
 
-      const dto = GetAdminRideByIdDto.fromRequest({ rideId });
+      const dto = GetAdminRideByIdDto.fromRequest({ rideId: rideId as string });
       const result = await this.getAdminRideByIdUseCase.execute(dto);
 
       if (result.isFailure()) {

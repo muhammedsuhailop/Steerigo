@@ -12,6 +12,10 @@ import { Result } from "@shared/utils/Result";
 import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto";
 import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
+import { ScheduleFutureRideDto } from "@application/dto/user/ScheduleFutureRideDto";
+import { ScheduleFutureRideResponseDto } from "@application/dto/user/ScheduleFutureRideResponseDto";
+import { CancelFutureRideDto } from "@application/dto/user/CancelFutureRideDto";
+import { CancelFutureRideResponseDto } from "@application/dto/user/CancelFutureRideResponseDto";
 
 @injectable()
 export class AutoRideController {
@@ -26,6 +30,16 @@ export class AutoRideController {
       CancelRideRequestDto,
       Promise<Result<CancelRideRequestResponseDto>>
     >,
+    @inject(TYPES.ScheduleFutureRideRequestUseCase)
+    private readonly scheduleUseCase: IUseCase<
+      ScheduleFutureRideDto,
+      Promise<Result<ScheduleFutureRideResponseDto>>
+    >,
+    @inject(TYPES.CancelFutureRideRequestUseCase)
+    private readonly cancelUseCase: IUseCase<
+      CancelFutureRideDto,
+      Promise<Result<CancelFutureRideResponseDto>>
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -36,14 +50,6 @@ export class AutoRideController {
   async autoSearchAndSendRequests(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
-
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.DRIVER_SEARCH.UNAUTHORIZED,
-        } as ApiResponse);
-        return;
-      }
 
       const {
         latitude,
@@ -68,7 +74,10 @@ export class AutoRideController {
         maxRideRequests,
       });
 
-      const dto = AutoSearchAndRequestDto.fromRequest(userId, req.body);
+      const dto = AutoSearchAndRequestDto.fromRequest(
+        userId as string,
+        req.body,
+      );
 
       const result = await this.autoSearchAndSendUseCase.execute(dto);
 
@@ -129,14 +138,6 @@ export class AutoRideController {
     try {
       const userId = this.getUserId(req);
 
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.DRIVER_SEARCH.UNAUTHORIZED,
-        } as ApiResponse);
-        return;
-      }
-
       const { requestGroupId } = req.body;
 
       Logger.info("Cancel ride requests received", {
@@ -144,7 +145,7 @@ export class AutoRideController {
         requestGroupId,
       });
 
-      const dto = CancelRideRequestDto.fromRequest(userId, req.body);
+      const dto = CancelRideRequestDto.fromRequest(userId as string, req.body);
 
       const result = await this.cancelRideRequestsUseCase.execute(dto);
 
@@ -188,6 +189,118 @@ export class AutoRideController {
         "CancelRideRequests",
       );
 
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async scheduleFutureRide(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      const dto = ScheduleFutureRideDto.fromRequest(userId as string, req.body);
+      const result = await this.scheduleUseCase.execute(dto);
+
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: responseData.message,
+          data: {
+            requestGroupId: responseData.result.requestGroupId,
+            totalDriversNotified: responseData.result.totalDriversNotified,
+            pickupTime: responseData.result.pickupTime,
+            expiresAt: responseData.result.expiresAt,
+            scheduledAt: responseData.result.scheduledAt,
+            scheduledRequests: responseData.result.scheduledRequests,
+          },
+        } as ApiResponse);
+
+        Logger.info("Schedule future ride successful", {
+          userId,
+          requestGroupId: responseData.result.requestGroupId,
+          driverCount: responseData.result.totalDriversNotified,
+        });
+      } else {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "ScheduleFutureRide",
+        );
+        res.status(statusCode).json(response);
+
+        Logger.warn("Schedule future ride failed", {
+          userId,
+          error: error?.message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Schedule future ride controller error", {
+        error,
+        userId: this.getUserId(req),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "ScheduleFutureRide",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async cancelFutureRide(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      Logger.info("Cancel future ride request received", {
+        userId,
+        requestGroupId: req.body.requestGroupId,
+      });
+
+      const dto = CancelFutureRideDto.fromRequest(userId as string, req.body);
+      const result = await this.cancelUseCase.execute(dto);
+
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: USER_MESSAGES.DRIVER_SEARCH.SCHEDULE_CANCELLED,
+          data: {
+            requestGroupId: responseData.requestGroupId,
+            cancelledCount: responseData.cancelledCount,
+            cancelledAt: responseData.cancelledAt,
+          },
+        } as ApiResponse);
+
+        Logger.info("Cancel future ride successful", {
+          userId,
+          requestGroupId: responseData.requestGroupId,
+          cancelledCount: responseData.cancelledCount,
+        });
+      } else {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "CancelFutureRide",
+        );
+        res.status(statusCode).json(response);
+
+        Logger.warn("Cancel future ride failed", {
+          userId,
+          error: error?.message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Cancel future ride controller error", {
+        error,
+        userId: this.getUserId(req),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "CancelFutureRide",
+      );
       res.status(statusCode).json(response);
     }
   }

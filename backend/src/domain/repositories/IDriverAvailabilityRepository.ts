@@ -28,18 +28,18 @@ export interface IDriverAvailabilityRepository
 
   addException(
     driverId: string,
-    exception: AvailabilityException
+    exception: AvailabilityException,
   ): Promise<DriverAvailability | null>;
   removeException(
     driverId: string,
-    exceptionId: string
+    exceptionId: string,
   ): Promise<DriverAvailability | null>;
   getExceptions(driverId: string): Promise<AvailabilityException[]>;
 
   // Status-based queries
   findByStatus(
     status: AvailabilityStatus,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<DriverAvailability[]>;
   findAvailableDrivers(options?: QueryOptions): Promise<DriverAvailability[]>;
 
@@ -48,7 +48,7 @@ export interface IDriverAvailabilityRepository
     latitude: number,
     longitude: number,
     radiusKm: number,
-    options?: QueryOptions
+    options?: QueryOptions,
   ): Promise<DriverAvailability[]>;
 
   findNearbyAvailableDrivers(
@@ -57,7 +57,7 @@ export interface IDriverAvailabilityRepository
     searchDate: Date,
     radiusKm?: number,
     timeRequiredMinutes?: number,
-    limit?: number
+    limit?: number,
   ): Promise<
     Array<{
       driver: DriverAvailability;
@@ -75,6 +75,14 @@ export interface IDriverAvailabilityRepository
   findConflictingSchedule(
     driverId: string,
     availableFrom: Date,
-    availableTill: Date
+    availableTill: Date,
   ): Promise<DriverAvailability | null>;
+
+  findNearbyAvailableDriversByBaseLocation(
+    latitude: number,
+    longitude: number,
+    availableFrom: Date,
+    radiusKm: number,
+    limit: number,
+  ): Promise<Array<{ driver: DriverAvailability; distanceKm: number }>>;
 }

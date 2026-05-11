@@ -44,6 +44,13 @@ export interface IDriverAvailabilityModel extends Document {
     updatedAt?: Date;
   };
   locationPoint: IGeoPoint;
+  baseLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    updatedAt?: Date;
+  };
+  baseLocationPoint?: IGeoPoint;
   recurringSchedule?: {
     dailyRecurrence: DailyRecurrence;
     validity: ScheduleValidity;
@@ -218,6 +225,15 @@ const driverAvailabilitySchema = new Schema(
       type: geoPointSchema,
       required: true,
     },
+    baseLocation: {
+      type: locationSchema,
+      required: false,
+    },
+
+    baseLocationPoint: {
+      type: geoPointSchema,
+      required: false,
+    },
     recurringSchedule: {
       type: recurringScheduleSchema,
       default: null,
@@ -258,6 +274,9 @@ driverAvailabilitySchema.index({
 driverAvailabilitySchema.index({
   locationPoint: "2dsphere",
 });
+driverAvailabilitySchema.index({
+  baseLocationPoint: "2dsphere",
+});
 driverAvailabilitySchema.index(
   { driverId: 1, isActive: 1 },
   {
@@ -279,6 +298,13 @@ driverAvailabilitySchema.pre("validate", function (next) {
         this.currentLocation.longitude,
         this.currentLocation.latitude,
       ],
+    };
+  }
+
+  if (this.baseLocation) {
+    this.baseLocationPoint = {
+      type: "Point",
+      coordinates: [this.baseLocation.longitude, this.baseLocation.latitude],
     };
   }
 
@@ -334,6 +360,18 @@ driverAvailabilitySchema.pre("validate", function (next) {
 
     if (longitude < -180 || longitude > 180) {
       return next(new Error("Invalid longitude value"));
+    }
+  }
+
+  if (this.baseLocation) {
+    const { latitude, longitude } = this.baseLocation;
+
+    if (latitude < -90 || latitude > 90) {
+      return next(new Error("Invalid base location latitude value"));
+    }
+
+    if (longitude < -180 || longitude > 180) {
+      return next(new Error("Invalid base location longitude value"));
     }
   }
 

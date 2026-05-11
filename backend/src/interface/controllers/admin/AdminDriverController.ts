@@ -72,7 +72,7 @@ export class AdminDriverController {
     private updateDriverKycStatusUseCase: IUseCase<
       UpdateDriverKycStatusRequestDto,
       Promise<Result<UpdateDriverKycStatusResponseDto>>
-    >
+    >,
   ) {}
 
   async getDrivers(req: Request, res: Response): Promise<void> {
@@ -82,7 +82,7 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_drivers"
+          "get_drivers",
         );
         res.status(statusCode).json(response);
         return;
@@ -95,7 +95,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "get_drivers"
+        "get_drivers",
       );
       res.status(statusCode).json(response);
     }
@@ -104,15 +104,15 @@ export class AdminDriverController {
   async driverAction(req: Request, res: Response): Promise<void> {
     try {
       const dto = DriverActionRequestDto.fromRequest(
-        req.params.driverId,
-        req.body
+        req.params.driverId as string,
+        req.body,
       );
 
       const result = await this.driverActionUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "driver_action"
+          "driver_action",
         );
         res.status(statusCode).json(response);
         return;
@@ -129,7 +129,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "driver_action"
+        "driver_action",
       );
       res.status(statusCode).json(response);
     }
@@ -144,7 +144,7 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_driver_profile"
+          "get_driver_profile",
         );
         res.status(statusCode).json(response);
         return;
@@ -157,7 +157,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "get_driver_profile"
+        "get_driver_profile",
       );
       res.status(statusCode).json(response);
     }
@@ -170,7 +170,7 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_kyc_requests"
+          "get_kyc_requests",
         );
         res.status(statusCode).json(response);
         return;
@@ -183,7 +183,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "get_kyc_requests"
+        "get_kyc_requests",
       );
       res.status(statusCode).json(response);
     }
@@ -192,14 +192,14 @@ export class AdminDriverController {
   async updateKycStatus(req: Request, res: Response): Promise<void> {
     try {
       const dto = UpdateKycStatusRequestDto.fromRequest(
-        req.params.kycId,
-        req.body
+        req.params.kycId as string,
+        req.body,
       );
       const result = await this.updateKycStatusUseCase.execute(dto);
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "update_kyc_status"
+          "update_kyc_status",
         );
         res.status(statusCode).json(response);
         return;
@@ -216,7 +216,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "update_kyc_status"
+        "update_kyc_status",
       );
       res.status(statusCode).json(response);
     }
@@ -231,7 +231,7 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_kyc_request_by_id"
+          "get_kyc_request_by_id",
         );
         res.status(statusCode).json(response);
         return;
@@ -244,7 +244,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "get_kyc_request_by_id"
+        "get_kyc_request_by_id",
       );
       res.status(statusCode).json(response);
     }
@@ -253,8 +253,8 @@ export class AdminDriverController {
   async updateDriverKycStatus(req: Request, res: Response): Promise<void> {
     try {
       const dto = UpdateDriverKycStatusRequestDto.fromRequest(
-        req.params.driverId,
-        req.body
+        req.params.driverId as string,
+        req.body,
       );
 
       const result = await this.updateDriverKycStatusUseCase.execute(dto);
@@ -262,7 +262,7 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "update_driver_kyc_status"
+          "update_driver_kyc_status",
         );
         res.status(statusCode).json(response);
         return;
@@ -281,7 +281,7 @@ export class AdminDriverController {
     } catch (error) {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
-        "update_driver_kyc_status"
+        "update_driver_kyc_status",
       );
       res.status(statusCode).json(response);
     }

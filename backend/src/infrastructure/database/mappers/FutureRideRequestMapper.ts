@@ -77,6 +77,7 @@ export class FutureRideRequestMapper {
       pickup,
       drop,
       pickupTime: doc.pickupTime,
+      requiredDuration: doc.requiredDuration,
       rideType: doc.rideType as RideType,
       fareBreakdown,
       status: doc.status as FutureRideRequestStatus,
@@ -107,6 +108,7 @@ export class FutureRideRequestMapper {
         address: entity.getDrop().getAddress(),
       },
       pickupTime: entity.getPickupTime(),
+      requiredDuration: entity.getrequiredDuration(),
       rideType: entity.getRideType(),
       fareBreakdown: {
         baseFare: {

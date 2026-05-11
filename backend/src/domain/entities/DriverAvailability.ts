@@ -31,6 +31,7 @@ export class DriverAvailability {
     private readonly driverId: string,
     private status: AvailabilityStatus,
     private currentLocation: Location,
+    private baseLocation?: Location,
     private recurringSchedule?: RecurringScheduleData,
     private exceptions: AvailabilityException[] = [],
     private isActive: boolean = true,
@@ -44,6 +45,7 @@ export class DriverAvailability {
     dailyRecurrence: DailyRecurrenceData,
     validity: ScheduleValidityData,
     currentLocation: Location,
+    baseLocation?: Location,
     notes?: string,
   ): DriverAvailability {
     this.validateRecurringSchedule(dailyRecurrence, validity);
@@ -52,6 +54,7 @@ export class DriverAvailability {
       driverId,
       AvailabilityStatus.SCHEDULED,
       currentLocation,
+      baseLocation,
       {
         dailyRecurrence,
         validity,
@@ -66,12 +69,14 @@ export class DriverAvailability {
     id: string,
     driverId: string,
     currentLocation: Location,
+    baseLocation?: Location,
   ): DriverAvailability {
     return new DriverAvailability(
       id,
       driverId,
       AvailabilityStatus.AVAILABLE,
       currentLocation,
+      baseLocation,
       undefined,
       [],
       true,
@@ -83,6 +88,7 @@ export class DriverAvailability {
     driverId: string;
     status: AvailabilityStatus;
     currentLocation: Location;
+    baseLocation?: Location;
     recurringSchedule?: RecurringScheduleData;
     exceptions?: AvailabilityException[];
     isActive: boolean;
@@ -94,6 +100,7 @@ export class DriverAvailability {
       data.driverId,
       data.status,
       data.currentLocation,
+      data.baseLocation,
       data.recurringSchedule,
       data.exceptions || [],
       data.isActive,
@@ -136,6 +143,10 @@ export class DriverAvailability {
 
   getCurrentLocation(): Location {
     return this.currentLocation;
+  }
+
+  getBaseLocation(): Location | undefined {
+    return this.baseLocation;
   }
 
   getRecurringSchedule(): RecurringScheduleData | undefined {
@@ -187,6 +198,11 @@ export class DriverAvailability {
 
   updateLocation(newLocation: Location): void {
     this.currentLocation = newLocation;
+    this.updatedAt = new Date();
+  }
+
+  updateBaseLocation(newLocation: Location): void {
+    this.baseLocation = newLocation;
     this.updatedAt = new Date();
   }
 
