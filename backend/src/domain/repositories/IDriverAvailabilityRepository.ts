@@ -5,8 +5,7 @@ import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
 import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
-export interface IDriverAvailabilityFilters
-  extends FilterOptions<DriverAvailability> {
+export interface IDriverAvailabilityFilters extends FilterOptions<DriverAvailability> {
   status?: AvailabilityStatus;
   driverId?: string;
   availableFrom?: Date;
@@ -19,7 +18,8 @@ export interface IDriverAvailabilityFilters
 }
 
 export interface IDriverAvailabilityRepository
-  extends IWriteOnlyRepository<DriverAvailability, string>,
+  extends
+    IWriteOnlyRepository<DriverAvailability, string>,
     IQueryableRepository<DriverAvailability, string> {
   // Driver-specific queries
   findByDriverId(driverId: string): Promise<DriverAvailability | null>;
@@ -84,5 +84,11 @@ export interface IDriverAvailabilityRepository
     availableFrom: Date,
     radiusKm: number,
     limit: number,
-  ): Promise<Array<{ driver: DriverAvailability; distanceKm: number }>>;
+  ): Promise<
+    Array<{
+      driver: DriverAvailability;
+      driverUserId: string;
+      distanceKm: number;
+    }>
+  >;
 }

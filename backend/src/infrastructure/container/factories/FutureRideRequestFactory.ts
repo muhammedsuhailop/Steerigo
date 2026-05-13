@@ -17,6 +17,13 @@ import { FutureRideExpiryWorker } from "@infrastructure/workers/FutureRideExpiry
 import { Queue } from "bullmq";
 import { AppConstants } from "@shared/constants/AppConstants";
 import { getBullMQConnection } from "@infrastructure/queues/BullMQConnection";
+import { AcceptFutureRideRequestDto } from "@application/dto/driver/AcceptFutureRideRequestDto";
+import { AcceptFutureRideRequestResponseDto } from "@application/dto/driver/AcceptFutureRideRequestResponseDto";
+import { AcceptFutureRideRequestUseCase } from "@application/use-cases/driver/AcceptFutureRideRequestUseCase";
+import { DriverScheduleRideController } from "@interface/controllers/driver/DriverScheduleRideController";
+import { GetFutureRideRequestsDto } from "@application/dto/driver/GetFutureRideRequestsDto";
+import { GetFutureRideRequestsResponseDto } from "@application/dto/driver/GetFutureRideRequestsResponseDto";
+import { GetFutureRideRequestsUseCase } from "@application/use-cases/driver/GetFutureRideRequestsUseCase";
 
 export class FutureRideRequestFactory {
   static register(container: Container): void {
@@ -53,6 +60,24 @@ export class FutureRideRequestFactory {
       .to(CancelFutureRideRequestUseCase);
 
     container
+      .bind<
+        IUseCase<
+          GetFutureRideRequestsDto,
+          Promise<Result<GetFutureRideRequestsResponseDto>>
+        >
+      >(TYPES.GetFutureRideRequestsUseCase)
+      .to(GetFutureRideRequestsUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          AcceptFutureRideRequestDto,
+          Promise<Result<AcceptFutureRideRequestResponseDto>>
+        >
+      >(TYPES.AcceptFutureRideRequestUseCase)
+      .to(AcceptFutureRideRequestUseCase);
+
+    container
       .bind<IFutureRideExpiryService>(TYPES.FutureRideExpiryService)
       .to(FutureRideExpiryService)
       .inSingletonScope();
@@ -60,6 +85,11 @@ export class FutureRideRequestFactory {
     container
       .bind<FutureRideExpiryWorker>(TYPES.FutureRideExpiryWorker)
       .to(FutureRideExpiryWorker)
+      .inSingletonScope();
+
+    container
+      .bind<DriverScheduleRideController>(TYPES.DriverScheduleRideController)
+      .to(DriverScheduleRideController)
       .inSingletonScope();
   }
 }

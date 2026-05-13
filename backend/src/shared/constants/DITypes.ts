@@ -161,6 +161,8 @@ export const TYPES = {
   GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
   DriverCancelRideUseCase: Symbol.for("DriverCancelRideUseCase"),
   GetDriverStatsUseCase: Symbol.for("GetDriverStatsUseCase"),
+  AcceptFutureRideRequestUseCase: Symbol.for("AcceptFutureRideRequestUseCase"),
+  GetFutureRideRequestsUseCase: Symbol.for("GetFutureRideRequestsUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -252,4 +254,5 @@ export const TYPES = {
   ChatMessageController: Symbol.for("ChatMessageController"),
   AdminStatsController: Symbol.for("AdminStatsController"),
   DriverStatsController: Symbol.for("DriverStatsController"),
+  DriverScheduleRideController: Symbol.for("DriverScheduleRideController"),
 };

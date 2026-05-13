@@ -94,9 +94,7 @@ type BaseLocationAggregationResult = {
 };
 
 @injectable()
-export class DriverAvailabilityRepositoryImpl
-  implements IDriverAvailabilityRepository
-{
+export class DriverAvailabilityRepositoryImpl implements IDriverAvailabilityRepository {
   private readonly HAVERSINE_RADIUS_KM = 6371;
   private readonly AVERAGE_SPEED_KM_PER_HOUR = 30;
 
@@ -818,7 +816,13 @@ export class DriverAvailabilityRepositoryImpl
     availableFrom: Date,
     radiusKm: number,
     limit: number,
-  ): Promise<Array<{ driver: DriverAvailability; distanceKm: number }>> {
+  ): Promise<
+    Array<{
+      driver: DriverAvailability;
+      driverUserId: string;
+      distanceKm: number;
+    }>
+  > {
     try {
       Logger.debug("findNearbyAvailableDriversByBaseLocation called", {
         latitude,
@@ -901,7 +905,11 @@ export class DriverAvailabilityRepositoryImpl
 
         const distanceKm = this.roundToTwoDecimals(doc.distanceMeters / 1000);
 
-        return { driver: domainDriver, distanceKm };
+        return {
+          driver: domainDriver,
+          driverUserId: doc.driverDoc.userId.toString(),
+          distanceKm,
+        };
       });
     } catch (error) {
       Logger.error("Error finding nearby available drivers by base location", {

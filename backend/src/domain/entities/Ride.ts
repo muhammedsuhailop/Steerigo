@@ -6,6 +6,7 @@ import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { RideType } from "@domain/value-objects/RideType";
+import { BookingType } from "@domain/value-objects/BookingType";
 
 export class Ride {
   private constructor(
@@ -19,6 +20,7 @@ export class Ride {
     private readonly drop: Location,
     private readonly timeRequired: number,
     private readonly rideType: RideType,
+    private readonly bookingType: BookingType,
     private fareBreakdown: FareBreakdown,
     private readonly currency: string = "INR",
     private readonly timeline: RideTimeline,
@@ -36,15 +38,18 @@ export class Ride {
     drop: Location,
     timeRequired: number,
     rideType: RideType,
+    bookingType: BookingType,
     fareBreakdown: FareBreakdown,
     timeline: RideTimeline,
   ): Ride {
     if (!id || !rideId || !driverId || !riderId) {
       throw new Error("All ID fields are required");
     }
+
     if (!rideType || rideType.trim() === "") {
       throw new Error("Ride type is required");
     }
+
     return new Ride(
       id,
       rideId,
@@ -56,6 +61,7 @@ export class Ride {
       drop,
       timeRequired,
       rideType,
+      bookingType,
       fareBreakdown,
       "INR",
       timeline,
@@ -74,6 +80,7 @@ export class Ride {
     drop: Location;
     timeRequired: number;
     rideType: RideType;
+    bookingType: BookingType;
     fareBreakdown: FareBreakdown;
     currency: string;
     timeline: RideTimeline;
@@ -92,6 +99,7 @@ export class Ride {
       data.drop,
       data.timeRequired,
       data.rideType,
+      data.bookingType,
       data.fareBreakdown,
       data.currency,
       data.timeline,
@@ -104,48 +112,75 @@ export class Ride {
   getId(): string {
     return this.id;
   }
+
   getRideId(): string {
     return this.rideId;
   }
+
   getDriverId(): string {
     return this.driverId;
   }
+
   getRiderId(): string {
     return this.riderId;
   }
+
   getStatus(): RideStatus {
     return this.status;
   }
+
   getPickup(): Location {
     return this.pickup;
   }
+
   getDrop(): Location {
     return this.drop;
   }
-  getTimeRequired():number {
+
+  getTimeRequired(): number {
     return this.timeRequired;
   }
+
   getRideType(): RideType {
     return this.rideType;
   }
+
+  getBookingType(): BookingType {
+    return this.bookingType;
+  }
+
+  isInstantBooking(): boolean {
+    return this.bookingType === BookingType.INSTANT;
+  }
+
+  isScheduledBooking(): boolean {
+    return this.bookingType === BookingType.SCHEDULED;
+  }
+
   getFareBreakdown(): FareBreakdown {
     return this.fareBreakdown;
   }
+
   getCurrency(): string {
     return this.currency;
   }
+
   getTimeline(): RideTimeline {
     return this.timeline;
   }
+
   getCreatedAt(): Date {
     return this.createdAt;
   }
+
   getUpdatedAt(): Date {
     return this.updatedAt;
   }
+
   getFare(): number {
     return this.fareBreakdown.getTotalFare().getAmount();
   }
+
   getPaymentStatus(): PaymentStatus {
     return this.paymentStatus;
   }
@@ -162,18 +197,23 @@ export class Ride {
   isRequested(): boolean {
     return this.status === RideStatus.REQUESTED;
   }
+
   isAccepted(): boolean {
     return this.status === RideStatus.ACCEPTED;
   }
+
   isArrived(): boolean {
     return this.status === RideStatus.ARRIVED;
   }
+
   isStarted(): boolean {
     return this.status === RideStatus.STARTED;
   }
+
   isCompleted(): boolean {
     return this.status === RideStatus.COMPLETED;
   }
+
   isCancelled(): boolean {
     return this.status === RideStatus.CANCELLED;
   }
@@ -182,12 +222,15 @@ export class Ride {
   getArrivedAt(): Date | undefined {
     return this.timeline.getArrivedAt();
   }
+
   getStartedAt(): Date | undefined {
     return this.timeline.getStartedAt();
   }
+
   getCompletedAt(): Date | undefined {
     return this.timeline.getCompletedAt();
   }
+
   getCancelledAt(): Date | undefined {
     return this.timeline.getCancelledAt();
   }
@@ -195,26 +238,35 @@ export class Ride {
   getRideDurationMs(): number | undefined {
     const startedAt = this.getStartedAt();
     const completedAt = this.getCompletedAt();
+
     if (!startedAt || !completedAt) return undefined;
+
     return completedAt.getTime() - startedAt.getTime();
   }
 
   getFormattedRideDuration(): string {
     const durationMs = this.getRideDurationMs();
+
     if (!durationMs) return "00:00:00";
+
     const hours = Math.floor(durationMs / (1000 * 60 * 60));
     const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
   getElapsedTimeFromStart(): string {
     const startedAt = this.getStartedAt();
+
     if (!startedAt) return "00:00:00";
+
     const diff = new Date().getTime() - startedAt.getTime();
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
@@ -223,6 +275,7 @@ export class Ride {
     if (this.status !== RideStatus.REQUESTED) {
       throw new Error("Only requested rides can be accepted");
     }
+
     this.status = RideStatus.ACCEPTED;
   }
 
@@ -230,6 +283,7 @@ export class Ride {
     if (!this.isAccepted()) {
       throw new Error("Only accepted rides can be marked as arrived");
     }
+
     this.status = RideStatus.ARRIVED;
     this.timeline.setArrivedAt(new Date());
   }
@@ -238,9 +292,11 @@ export class Ride {
     if (!this.isAccepted() && !this.isArrived()) {
       throw new Error("Only accepted or arrived rides can be started");
     }
+
     if (this.isAccepted() && !this.timeline.getArrivedAt()) {
       this.timeline.setArrivedAt(new Date());
     }
+
     this.status = RideStatus.STARTED;
     this.timeline.setStartedAt(new Date());
   }
@@ -249,6 +305,7 @@ export class Ride {
     if (!this.isStarted()) {
       throw new Error("Only started rides can be completed");
     }
+
     this.fareBreakdown = finalFareBreakdown;
     this.status = RideStatus.COMPLETED;
     this.timeline.setCompletedAt(new Date());
@@ -258,6 +315,7 @@ export class Ride {
     if (!this.isStarted()) {
       throw new Error("Only started rides can be completed");
     }
+
     this.status = RideStatus.COMPLETED;
     this.timeline.setCompletedAt(new Date());
   }
@@ -266,6 +324,7 @@ export class Ride {
     if (this.isCancelled()) {
       throw new Error("Ride is already cancelled");
     }
+
     this.status = RideStatus.CANCELLED;
     this.timeline.setCancelledAt(new Date());
   }
@@ -274,9 +333,11 @@ export class Ride {
     if (this.isCancelled()) {
       throw new Error("Ride is already cancelled");
     }
+
     if (this.isCompleted()) {
       throw new Error("Completed rides cannot be cancelled");
     }
+
     if (this.isStarted()) {
       throw new Error("Started rides cannot be cancelled by rider");
     }
@@ -290,6 +351,7 @@ export class Ride {
     if (this.isCancelled()) {
       throw new Error("Ride is already cancelled");
     }
+
     if (this.isCompleted()) {
       throw new Error("Completed rides cannot be cancelled");
     }
@@ -329,7 +391,7 @@ export class Ride {
       discountType,
     };
   }
-  
+
   removeCoupon(): void {
     if (this.paymentStatus !== PaymentStatus.PENDING) {
       throw new Error(

@@ -1,5 +1,7 @@
+import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 export interface DriverRequestNotificationPayload {
@@ -183,6 +185,37 @@ export interface RideSearchProgressPayload {
   status: "SEARCHING" | "COMPLETED" | "EXPIRED";
 }
 
+export interface FutureRideAcceptedPayload {
+  futureRequestId: string;
+  requestGroupId: string;
+
+  rideId: string;
+  driverId: string;
+
+  status: FutureRideRequestStatus;
+
+  pickup: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+
+  drop: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+
+  pickupTime: string;
+
+  rideType: string;
+
+  fare: {
+    readonly amount: number;
+    readonly currency: string;
+  };
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -247,5 +280,25 @@ export interface IRideNotificationService {
   notifyRiderSearchProgress(
     riderId: string,
     payload: RideSearchProgressPayload,
+  ): Promise<void>;
+
+  notifyDriverNewFutureRequest(
+    driverId: string,
+    payload: Omit<
+      FutureRideRequestSentToDriverEvent["payload"],
+      "driverId" | "driverUserId"
+    >,
+  ): Promise<void>;
+
+  notifyFutureRideAccepted(
+    riderId: string,
+    payload: FutureRideAcceptedPayload,
+  ): Promise<void>;
+
+  notifyFutureRideExpired(
+    riderId: string,
+    payload: {
+      requestGroupId: string;
+    },
   ): Promise<void>;
 }

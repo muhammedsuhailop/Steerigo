@@ -16,7 +16,6 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { Types } from "mongoose";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
@@ -27,15 +26,13 @@ import { IRideSearchDispatchService } from "@application/services/IRideSearchDis
 import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
 import { CreateRideChatRoomDto } from "@application/dto/chat/CreateRideChatRoomDto";
 import { IIdGenerator } from "@application/services/IIdGenerator";
+import { BookingType } from "@domain/value-objects/BookingType";
 
 @injectable()
-export class AcceptRideRequestUseCase
-  implements
-    IUseCase<
-      AcceptRideRequestDto,
-      Promise<Result<AcceptRideRequestResponseDto>>
-    >
-{
+export class AcceptRideRequestUseCase implements IUseCase<
+  AcceptRideRequestDto,
+  Promise<Result<AcceptRideRequestResponseDto>>
+> {
   private readonly LOCK_TTL_SECONDS =
     Number(process.env.RIDE_ACCEPT_LOCK_TTL_SECONDS) || 10;
   private readonly LOCK_KEY_PREFIX = REDIS_LOCK_KEYS.RIDE_ACCEPT;
@@ -63,6 +60,8 @@ export class AcceptRideRequestUseCase
       Promise<Result<CreateRideChatRoomResponseDto>>
     >,
     @inject(TYPES.UuidGenerator)
+    private readonly uuIdGenerator: IIdGenerator,
+    @inject(TYPES.IDGenerator)
     private readonly idGenerator: IIdGenerator,
   ) {}
 
@@ -183,12 +182,12 @@ export class AcceptRideRequestUseCase
         cancelledCount,
       });
 
-      const rideId = `RIDE-${this.idGenerator.generate()}`;
+      const rideId = `RIDE-${this.uuIdGenerator.generate()}`;
       const timeline = new RideTimeline(new Date());
       timeline.setAcceptedAt(new Date());
 
       const ride = Ride.create(
-        new Types.ObjectId().toString(),
+        this.idGenerator.generate(),
         rideId,
         driverId,
         acceptedRequest.getRiderId(),
@@ -196,6 +195,7 @@ export class AcceptRideRequestUseCase
         acceptedRequest.getDrop(),
         acceptedRequest.getTimeRequired(),
         acceptedRequest.getRideType(),
+        BookingType.INSTANT,
         acceptedRequest.getFareBreakdown(),
         timeline,
       );

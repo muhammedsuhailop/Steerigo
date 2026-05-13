@@ -334,6 +334,7 @@ export class DriverDashboardRepositoryImpl
       drop,
       timeRequired:doc.timeRequired,
       rideType: rideTypeValue,
+      bookingType:doc.bookingType,
       fareBreakdown,
       currency: doc.currency,
       timeline,

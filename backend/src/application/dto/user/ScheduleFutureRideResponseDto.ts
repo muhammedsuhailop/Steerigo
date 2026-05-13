@@ -1,6 +1,7 @@
 export interface ScheduledRequestInfo {
   readonly requestId: string;
   readonly driverId: string;
+  readonly driverUserId: string;
   readonly pickupETA: string;
   readonly totalFare: number;
   readonly currency: string;

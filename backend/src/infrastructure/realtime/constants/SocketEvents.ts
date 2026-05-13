@@ -1,5 +1,8 @@
 export const SOCKET_EVENTS = {
   DRIVER_REQUEST_CREATED: "ride:request:created",
+  FUTURE_RIDE_REQUEST_CREATED: "ride:request:future:created",
+  FUTURE_RIDE_ACCEPTED: "future-ride:accepted",
+  FUTURE_RIDE_EXPIRED: "future-ride:expired",
   DRIVER_REQUEST_CANCELLED: "ride:request:cancelled",
   DRIVER_LOCATION_UPDATE: "driver:location:update",
   DRIVER_LOCATION: "driver:location",

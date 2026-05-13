@@ -12,21 +12,19 @@ import {
 import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { IFareCalculationService } from "@application/services/IFareCalculationService";
+import { IFutureRideExpiryService } from "@application/services/ride-search/IFutureRideExpiryService";
+import { IEventBus } from "@application/services/IEventBus";
 import { FutureRideRequest } from "@domain/entities/FutureRideRequest";
 import { Location } from "@domain/value-objects/Location";
 import { RideType } from "@domain/value-objects/RideType";
 import { FutureRideErrors } from "@domain/errors/FutureRideErrors";
 import { AppConstants } from "@shared/constants/AppConstants";
-import { IFutureRideExpiryService } from "@application/services/ride-search/IFutureRideExpiryService";
 
 @injectable()
-export class ScheduleFutureRideRequestUseCase
-  implements
-    IUseCase<
-      ScheduleFutureRideDto,
-      Promise<Result<ScheduleFutureRideResponseDto>>
-    >
-{
+export class ScheduleFutureRideRequestUseCase implements IUseCase<
+  ScheduleFutureRideDto,
+  Promise<Result<ScheduleFutureRideResponseDto>>
+> {
   constructor(
     @inject(TYPES.FutureRideRequestRepository)
     private readonly futureRideRequestRepository: IFutureRideRequestRepository,
@@ -36,6 +34,8 @@ export class ScheduleFutureRideRequestUseCase
     private readonly fareCalculationService: IFareCalculationService,
     @inject(TYPES.FutureRideExpiryService)
     private readonly futureRideExpiryService: IFutureRideExpiryService,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -79,6 +79,7 @@ export class ScheduleFutureRideRequestUseCase
       const saveResults = await Promise.allSettled(
         nearbyAvailabilities.map(async (availability) => {
           const driverId = availability.driver.getDriverId();
+          const driverUserId = availability.driverUserId;
 
           const request = FutureRideRequest.create({
             riderId: dto.getRiderId(),
@@ -99,6 +100,7 @@ export class ScheduleFutureRideRequestUseCase
           return {
             requestId: saved.getId(),
             driverId,
+            driverUserId,
             pickupETA: AppConstants.FUTURE_RIDE_DEFAULT_ETA_LABEL,
             totalFare: fareBreakdown.getTotalFare().getAmount(),
             currency: fareBreakdown.getTotalFare().getCurrency(),
@@ -146,6 +148,55 @@ export class ScheduleFutureRideRequestUseCase
           FutureRideErrors.scheduleFailed("All driver request saves failed"),
         );
       }
+
+      const expiresAt = new Date(
+        Date.now() + AppConstants.FUTURE_RIDE_EXPIRY_WINDOW_MS,
+      ).toISOString();
+
+      const notifyResults = await Promise.allSettled(
+        successfulRequests.map((req) =>
+          this.eventBus.publish({
+            type: "FutureRideRequestSentToDriver",
+            occurredAt: new Date(),
+            payload: {
+              futureRequestId: req.requestId,
+              requestGroupId: dto.requestGroupId,
+              driverId: req.driverId,
+              driverUserId: req.driverUserId,
+              riderId: dto.getRiderId(),
+              pickup: {
+                latitude: dto.latitude,
+                longitude: dto.longitude,
+                address: dto.pickupAddress,
+              },
+              drop: {
+                latitude: dto.dropLatitude,
+                longitude: dto.dropLongitude,
+                address: dto.dropAddress,
+              },
+              pickupTime: dto.pickupTime.toISOString(),
+              rideType: dto.rideType,
+              fare: fareBreakdown.getTotalFare().getAmount(),
+              currency: fareBreakdown.getTotalFare().getCurrency(),
+              expiresAt,
+            },
+          }),
+        ),
+      );
+
+      notifyResults.forEach((result, index) => {
+        if (result.status === "rejected") {
+          Logger.warn("Failed to notify driver of future ride request", {
+            index,
+            requestGroupId: dto.requestGroupId,
+            driverId: successfulRequests[index]?.driverId,
+            error:
+              result.reason instanceof Error
+                ? result.reason.message
+                : result.reason,
+          });
+        }
+      });
 
       await this.futureRideExpiryService.scheduleGroupExpiry(
         dto.requestGroupId,

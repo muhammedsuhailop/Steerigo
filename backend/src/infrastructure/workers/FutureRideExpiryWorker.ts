@@ -6,6 +6,7 @@ import { AppConstants } from "@shared/constants/AppConstants";
 import { Logger } from "@shared/utils/Logger";
 import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
 import { FutureRideExpiryJobData } from "@infrastructure/queues/FutureRideExpiryQueue";
+import { IEventBus } from "@application/services/IEventBus";
 
 @injectable()
 export class FutureRideExpiryWorker {
@@ -14,6 +15,8 @@ export class FutureRideExpiryWorker {
   constructor(
     @inject(TYPES.FutureRideRequestRepository)
     private readonly futureRideRequestRepository: IFutureRideRequestRepository,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   start(): void {
@@ -84,6 +87,13 @@ export class FutureRideExpiryWorker {
       return;
     }
 
+    const requests =
+      await this.futureRideRequestRepository.findByRequestGroupId(
+        requestGroupId,
+      );
+
+    const riderId = requests[0]?.getRiderId() ?? "";
+
     const cancelledCount =
       await this.futureRideRequestRepository.markExpiredAllPendingInGroup(
         requestGroupId,
@@ -93,5 +103,11 @@ export class FutureRideExpiryWorker {
       "Future ride group expired — no driver accepted within expiry window",
       { requestGroupId, cancelledCount },
     );
+
+    await this.eventBus.publish({
+      type: "FutureRideExpired",
+      occurredAt: new Date(),
+      payload: { requestGroupId, riderId, cancelledCount },
+    });
   }
 }

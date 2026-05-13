@@ -124,6 +124,10 @@ export class FutureRideRequest {
     return this.requiredDuration;
   }
 
+  getrequiredHours(): number {
+    return Number((this.requiredDuration / 60).toFixed(2));
+  }
+
   getRideType(): RideType {
     return this.rideType;
   }

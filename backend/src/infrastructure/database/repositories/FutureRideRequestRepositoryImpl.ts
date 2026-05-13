@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { injectable } from "inversify";
 import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
 import { FutureRideRequest } from "@domain/entities/FutureRideRequest";
@@ -10,9 +10,7 @@ import {
 import { FutureRideRequestMapper } from "../mappers/FutureRideRequestMapper";
 
 @injectable()
-export class FutureRideRequestRepositoryImpl
-  implements IFutureRideRequestRepository
-{
+export class FutureRideRequestRepositoryImpl implements IFutureRideRequestRepository {
   async findById(id: string): Promise<FutureRideRequest | null> {
     const document = await FutureRideRequestModel.findById(id);
     if (!document) return null;
@@ -133,5 +131,36 @@ export class FutureRideRequestRepositoryImpl
       status: FutureRideRequestStatus.ACCEPTED,
     });
     return Boolean(result);
+  }
+
+  async findByDriverIdWithFilters(
+    driverId: string,
+    filters: {
+      status?: FutureRideRequestStatus;
+      offset: number;
+      limit: number;
+    },
+  ): Promise<{ requests: FutureRideRequest[]; total: number }> {
+    const query: FilterQuery<IFutureRideRequestDocument> = {
+      driverId: new Types.ObjectId(driverId),
+    };
+
+    if (filters.status !== undefined) {
+      query["status"] = filters.status;
+    }
+
+    const [documents, total] = await Promise.all([
+      FutureRideRequestModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(filters.offset)
+        .limit(filters.limit),
+      FutureRideRequestModel.countDocuments(query),
+    ]);
+
+    const requests = documents.map((doc) =>
+      FutureRideRequestMapper.toDomain(doc as IFutureRideRequestDocument),
+    );
+
+    return { requests, total };
   }
 }

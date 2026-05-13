@@ -1,3 +1,4 @@
+import { BookingType } from "@domain/value-objects/BookingType";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { RideStatus } from "@domain/value-objects/RideStatus";
@@ -26,6 +27,7 @@ export interface IRideDocument extends Document {
 
   timeRequired: number;
   rideType: string;
+  bookingType: BookingType;
 
   fareBreakdown: {
     baseFare: number;
@@ -115,6 +117,11 @@ const rideSchema = new Schema<IRideDocument>(
     },
 
     rideType: { type: String, enum: RideType, required: true },
+    bookingType: {
+      type: String,
+      enum: BookingType,
+      default: BookingType.INSTANT,
+    },
 
     fareBreakdown: {
       baseFare: { type: Number, default: 0 },
