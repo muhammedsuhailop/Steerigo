@@ -44,6 +44,8 @@ export const API_ENDPOINTS = {
     RIDE_REQUESTS: "/driver/ride-requests",
     CURRENT_RIDE: "/driver/ride/current",
     RIDE: "/driver/ride",
+    FUTURE_REQUESTS: "/driver/ride/future-requests",
+    ACCEPT_FUTURE_REQUEST: "/driver/ride/future-accept",
     PROFILE_PIC_UPLOAD: "/file/profile-picture",
     AVAILABILITY: {
       UPDATE_LOCATION: "/driver/availability/update-location",

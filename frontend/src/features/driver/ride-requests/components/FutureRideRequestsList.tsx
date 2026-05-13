@@ -1,14 +1,12 @@
 import React from "react";
-import { RideRequestCard } from "./RideRequestCard";
-import type { RideRequestsListProps } from "../types/rideRequests.types";
+import { FutureRideRequestCard } from "./FutureRideRequestCard";
+import type { FutureRideRequestsListProps } from "../types/rideRequests.types";
 
-export const RideRequestsList: React.FC<RideRequestsListProps> = ({
+export const FutureRideRequestsList: React.FC<FutureRideRequestsListProps> = ({
   requests,
   isLoading,
   onAccept,
-  onReject,
   acceptingRequestId,
-  rejectingRequestId,
 }) => {
   if (isLoading) {
     return (
@@ -31,19 +29,14 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
               <div className="h-8 w-24 bg-slate-200 rounded" />
             </div>
 
-            <div className="h-12 bg-slate-200 rounded-2xl mb-5" />
-
-            <div className="h-44 bg-slate-200 rounded-2xl mb-5" />
-
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="h-20 bg-slate-200 rounded-2xl" />
-              <div className="h-20 bg-slate-200 rounded-2xl" />
+              <div className="h-24 bg-slate-200 rounded-2xl" />
+              <div className="h-24 bg-slate-200 rounded-2xl" />
             </div>
 
-            <div className="flex gap-3">
-              <div className="h-12 flex-1 bg-slate-200 rounded-2xl" />
-              <div className="h-12 flex-1 bg-slate-200 rounded-2xl" />
-            </div>
+            <div className="h-40 bg-slate-200 rounded-2xl mb-5" />
+
+            <div className="h-12 w-full bg-slate-200 rounded-2xl" />
           </div>
         ))}
       </div>
@@ -55,11 +48,11 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
       <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl min-h-[500px] flex items-center justify-center p-10">
         <div className="text-center">
           <p className="text-lg font-black text-slate-700">
-            No Pending Requests
+            No Scheduled Requests
           </p>
 
           <p className="text-sm text-slate-400 mt-2">
-            Incoming ride requests will appear here
+            Upcoming scheduled requests rides will appear here
           </p>
         </div>
       </div>
@@ -69,13 +62,11 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
   return (
     <div className="flex flex-col gap-6">
       {requests.map((request) => (
-        <RideRequestCard
+        <FutureRideRequestCard
           key={request.requestId}
           request={request}
           onAccept={onAccept}
-          onReject={onReject}
           isAccepting={acceptingRequestId === request.requestId}
-          isRejecting={rejectingRequestId === request.requestId}
         />
       ))}
     </div>

@@ -5,8 +5,13 @@ import { Alert } from "@/shared/components/ui/Alert";
 import { useRideRequests } from "../hooks/useRideRequests";
 import { useDriverRealtime } from "../hooks/useDriverRealtime";
 import { RideRequestsHeader } from "../components/RideRequestsHeader";
-import { RideRequestsEmptyState } from "../components/RideRequestsEmptyState";
 import { RideRequestsList } from "../components/RideRequestsList";
+import {
+  useAcceptFutureRideRequestMutation,
+  useGetFutureRideRequestsQuery,
+} from "../services/rideRequestsApi";
+import { FutureRideRequestsList } from "../components/FutureRideRequestsList";
+import { FutureRideRequestsHeader } from "../components/FutureRideRequestsHeader";
 
 export const RideRequestsPage: React.FC = () => {
   useDriverRealtime();
@@ -49,6 +54,35 @@ export const RideRequestsPage: React.FC = () => {
     }
   }, [success, clearSuccess]);
 
+  const {
+    data: futureData,
+    isLoading: isFutureLoading,
+    isFetching: isFutureFetching,
+    refetch: refetchFutureData,
+  } = useGetFutureRideRequestsQuery({
+    status: "Matched",
+  });
+
+  const [acceptFuture] = useAcceptFutureRideRequestMutation();
+  const [acceptingFutureId, setAcceptingFutureId] = useState<string | null>(
+    null,
+  );
+
+  const handleAcceptFuture = async (requestId: string) => {
+    setAcceptingFutureId(requestId);
+    try {
+      await acceptFuture(requestId).unwrap();
+    } catch (err) {
+      console.log(error);
+    } finally {
+      setAcceptingFutureId(null);
+    }
+  };
+
+  const refreshFuture = () => {
+    refetchFutureData();
+  };
+
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
@@ -87,20 +121,16 @@ export const RideRequestsPage: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-12 py-8 w-full space-y-6">
-          <RideRequestsHeader
-            total={total}
-            onRefresh={refresh}
-            isRefreshing={isFetching}
-          />
+        <main className="flex-1 max-w-[1600px] mx-auto px-6 lg:px-12 py-8 w-full grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
+          {/* Instant Ride Requests  */}
+          <section className="flex flex-col">
+            <RideRequestsHeader
+              total={total}
+              onRefresh={refresh}
+              isRefreshing={isFetching}
+            />
 
-          <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200/60 shadow-sm w-full">
-            {requests.length === 0 && !isLoading ? (
-              <RideRequestsEmptyState
-                onRefresh={refresh}
-                isRefreshing={isFetching}
-              />
-            ) : (
+            <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
               <RideRequestsList
                 requests={requests}
                 isLoading={isLoading}
@@ -109,8 +139,26 @@ export const RideRequestsPage: React.FC = () => {
                 acceptingRequestId={acceptingRequestId}
                 rejectingRequestId={rejectingRequestId}
               />
-            )}
-          </div>
+            </div>
+          </section>
+
+          {/* Scheduled Requests */}
+          <section className="flex flex-col">
+            <FutureRideRequestsHeader
+              total={futureData?.data.pagination.total || 0}
+              onRefresh={refreshFuture}
+              isRefreshing={isFutureFetching}
+            />
+
+            <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
+              <FutureRideRequestsList
+                requests={futureData?.data.requests || []}
+                isLoading={isFutureLoading}
+                onAccept={handleAcceptFuture}
+                acceptingRequestId={acceptingFutureId}
+              />
+            </div>
+          </section>
         </main>
 
         <Footer />
