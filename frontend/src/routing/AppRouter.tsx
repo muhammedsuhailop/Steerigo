@@ -38,6 +38,7 @@ import RideManagement from "@/features/admin/rides/pages/RideManagement";
 import { RideView } from "@/features/admin/rides/pages/RideView";
 import CouponManagement from "@/features/admin/coupons/pages/CouponManagement";
 import { FloatingChatWindow } from "@/features/chat/components/FloatingChatWindow";
+import FutureSchedulePage from "@/features/user/driver-search/pages/FutureSchedulePage";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -207,7 +208,6 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/search"
           element={
@@ -217,6 +217,15 @@ export const AppRouter: React.FC = () => {
           }
         />
         <Route
+          path="/search/schedule"
+          element={
+            <ProtectedRoute allowedRoles={["Rider"]}>
+              <FutureSchedulePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/profile"
           element={
             <ProtectedRoute allowedRoles={["Rider"]}>
@@ -224,7 +233,6 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/rides"
           element={
@@ -233,7 +241,6 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/ride/:id"
           element={
@@ -322,7 +329,6 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         {/* Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

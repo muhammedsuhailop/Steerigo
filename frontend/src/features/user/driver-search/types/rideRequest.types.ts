@@ -102,3 +102,65 @@ export const RIDE_REQUEST_ERROR_CODES = {
 
 export type RideRequestErrorCode =
   (typeof RIDE_REQUEST_ERROR_CODES)[keyof typeof RIDE_REQUEST_ERROR_CODES];
+
+export interface FutureSchedulePayload {
+  bodyType: string;
+  gearType: string;
+  rideType: "One Way" | "Round Trip";
+  pickupAddress: string;
+  latitude: number;
+  longitude: number;
+  dropAddress: string;
+  dropLatitude: number;
+  dropLongitude: number;
+  radiusKm: number;
+  requestGroupId: string;
+  pickupTime: string; // ISO format
+  requiredDuration: number; // in minutes
+}
+
+export interface ScheduledRequestItem {
+  requestId: string;
+  driverId: string;
+  driverUserId: string;
+  pickupETA: string;
+  totalFare: number;
+  currency: string;
+}
+
+export interface FutureScheduleResponse {
+  success: boolean;
+  message: string;
+  data: {
+    requestGroupId: string;
+    totalDriversNotified: number;
+    pickupTime: string;
+    expiresAt: string;
+    scheduledAt: string;
+    scheduledRequests: ScheduledRequestItem[];
+  };
+}
+
+export interface FutureRideAcceptedPayload {
+  futureRequestId: string;
+  requestGroupId: string;
+  rideId: string;
+  driverId: string;
+  status: string;
+  pickup: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+  drop: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+  pickupTime: string;
+  rideType: string;
+  fare: {
+    readonly amount: number;
+    readonly currency: string;
+  };
+}

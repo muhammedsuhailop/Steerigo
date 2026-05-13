@@ -2,6 +2,8 @@ export const SOCKET_EVENTS = {
   RIDER: {
     MATCHED: "ride:matched",
     NO_DRIVER: "ride:no-driver-found",
+    FUTURE_RIDE_ACCEPTED: "future-ride:accepted",
+    FUTURE_RIDE_EXPIRED: "future-ride:expired",
   },
   DRIVER: {
     NEW_REQUEST: "ride:request:created",

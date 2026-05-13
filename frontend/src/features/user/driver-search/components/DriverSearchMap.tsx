@@ -2,14 +2,14 @@ import React, { useEffect } from "react";
 import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FaMapMarkerAlt, FaStar, FaPhone } from "react-icons/fa";
-import type { Driver, Location } from "../types/driverSearch.types";
-
+import { FaStar } from "react-icons/fa";
+import type { Driver } from "../types/driverSearch.types";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { Location } from "@/shared/types/ride.types";
 
-// Fix default marker icons
+// default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,

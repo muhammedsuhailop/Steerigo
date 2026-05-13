@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     RIDES: "/user/ride/rides",
     STATS: "/user/stats",
     COUPONS: "/user/coupons",
+    SEND_FUTURE_REQUEST: "/user/ride/future-schedule",
   },
   DRIVER: {
     REGISTER: "/driver/register",
