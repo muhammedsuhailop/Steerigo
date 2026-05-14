@@ -14,6 +14,8 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
   request,
   onAccept,
   isAccepting,
+  isUnavailable = false,
+  isAccepted = false,
 }) => {
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -35,9 +37,10 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
 
   const pickupInfo = formatDateTime(request.pickupTime);
 
+  const isDisabled = isAccepting || isUnavailable || isAccepted;
+
   return (
     <Card className="w-full relative overflow-hidden border border-slate-200 bg-white rounded-3xl shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/50">
-      {/* Top Accent */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-500" />
 
       <div className="p-5 space-y-5 flex flex-col">
@@ -70,6 +73,13 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
             </p>
           </div>
         </div>
+
+        {isAccepted && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-100 text-emerald-700 text-sm font-black self-start">
+            <FaCheck />
+            Accepted Ride
+          </div>
+        )}
 
         {/* Time & Date */}
         <div className="grid grid-cols-2 gap-3">
@@ -140,25 +150,38 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
 
         {/* Action */}
         <Button
-          onClick={() => onAccept(request.requestId)}
-          disabled={isAccepting}
-          className="w-full h-12 rounded-2xl bg-gray-600 hover:bg-gray-700 text-white font-bold shadow-md shadow-gray-200 transition-all active:scale-[0.98] disabled:opacity-50"
+          onClick={() => {
+            if (isDisabled) return;
+            onAccept(request.requestId);
+          }}
+          disabled={isDisabled}
+          className={`
+              w-full h-12 rounded-2xl text-white font-bold shadow-md transition-all active:scale-[0.98]
+            ${
+              isAccepted
+                ? "bg-emerald-500 shadow-emerald-200"
+                : isUnavailable
+                  ? "bg-slate-400 shadow-slate-200"
+                  : "bg-gray-600 hover:bg-gray-700 shadow-gray-200"
+            }
+
+            disabled:opacity-70
+          `}
         >
           {isAccepting ? (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
           ) : (
             <div className="flex items-center justify-center gap-2">
               <FaCheck />
-              Accept Scheduled Ride
+              {isAccepted
+                ? "Accepted"
+                : isUnavailable
+                  ? "No Longer Available"
+                  : "Accept Scheduled Request"}
             </div>
           )}
         </Button>
 
-        {/* Footer */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-          <span>REQ: {request.requestId.slice(0, 12)}</span>
-          <span>{pickupInfo.time}</span>
-        </div>
       </div>
     </Card>
   );

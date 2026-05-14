@@ -151,6 +151,8 @@ export interface FutureRideRequestCardProps {
   request: FutureRideRequestData;
   onAccept: (requestId: string) => void;
   isAccepting: boolean;
+  isUnavailable?: boolean;
+  isAccepted?: boolean;
 }
 
 export interface FutureRideRequestsListProps {
@@ -158,6 +160,7 @@ export interface FutureRideRequestsListProps {
   isLoading: boolean;
   onAccept: (requestId: string) => void;
   acceptingRequestId: string | null;
+  unavailableRequestIds: Set<string>;
 }
 
 export type GetFutureRideRequestsQuery = {
@@ -165,3 +168,18 @@ export type GetFutureRideRequestsQuery = {
   page?: number;
   limit?: number;
 };
+
+export interface FutureRideRequestCancelledSocketPayload {
+  futureRequestId: string;
+  requestGroupId: string;
+  driverId: string;
+  acceptedByDriverId: string;
+}
+
+export interface FutureRideRequestExpiredSocketPayload {
+  futureRequestId: string;
+  requestGroupId: string;
+  driverId: string;
+  riderId: string;
+  pickupTime: string;
+}

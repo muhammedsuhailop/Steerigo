@@ -193,11 +193,6 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
           </Button>
         </div>
 
-        {/* Footer Meta */}
-        <div className="pt-4 border-t border-slate-100 flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-          <span>REQ: {request.requestId.slice(0, 12)}</span>
-          <span>Created {formatTime(request.createdAt)}</span>
-        </div>
       </div>
     </Card>
   );

@@ -13,12 +13,13 @@ import {
 import { FutureRideRequestsList } from "../components/FutureRideRequestsList";
 import { FutureRideRequestsHeader } from "../components/FutureRideRequestsHeader";
 
+import type {
+  PendingRideRequestData,
+  FutureRideRequestData,
+} from "../types/rideRequests.types";
+import { FutureRideRequestStatus } from "@/shared/types/ride.types";
+
 export const RideRequestsPage: React.FC = () => {
-  useDriverRealtime();
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
   const {
     requests,
     total,
@@ -35,25 +36,6 @@ export const RideRequestsPage: React.FC = () => {
     clearSuccess,
   } = useRideRequests();
 
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (mobile) setSidebarCollapsed(true);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(clearSuccess, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, clearSuccess]);
-
   const {
     data: futureData,
     isLoading: isFutureLoading,
@@ -63,28 +45,91 @@ export const RideRequestsPage: React.FC = () => {
     status: "Matched",
   });
 
+  const [liveRideRequests, setLiveRideRequests] = useState<
+    PendingRideRequestData[]
+  >([]);
+
+  const [liveFutureRideRequests, setLiveFutureRideRequests] = useState<
+    FutureRideRequestData[]
+  >([]);
+
+  useEffect(() => {
+    setLiveRideRequests(requests);
+  }, [requests]);
+
+  useEffect(() => {
+    if (!futureData) return;
+
+    setLiveFutureRideRequests(futureData.data.requests);
+  }, []);
+
+  const { unavailableRequestIds } = useDriverRealtime({
+    onNewRideRequest: (request) => {
+      setLiveRideRequests((prev) => {
+        const exists = prev.some(
+          (item) => item.requestId === request.requestId,
+        );
+
+        if (exists) {
+          return prev;
+        }
+
+        return [request, ...prev];
+      });
+    },
+
+    onNewFutureRideRequest: (request) => {
+      setLiveFutureRideRequests((prev) => {
+        const exists = prev.some(
+          (item) => item.requestId === request.requestId,
+        );
+
+        if (exists) {
+          return prev;
+        }
+
+        return [request, ...prev];
+      });
+    },
+  });
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+
   const [acceptFuture] = useAcceptFutureRideRequestMutation();
+
   const [acceptingFutureId, setAcceptingFutureId] = useState<string | null>(
     null,
   );
 
-  const handleAcceptFuture = async (requestId: string) => {
-    setAcceptingFutureId(requestId);
-    try {
-      await acceptFuture(requestId).unwrap();
-    } catch (err) {
-      console.log(error);
-    } finally {
-      setAcceptingFutureId(null);
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+
+      setIsMobile(mobile);
+
+      if (mobile) {
+        setSidebarCollapsed(true);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(clearSuccess, 5000);
+
+      return () => clearTimeout(timer);
     }
-  };
-
-  const refreshFuture = () => {
-    refetchFutureData();
-  };
-
-  const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
-  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
+  }, [success, clearSuccess]);
 
   const handleAccept = async (requestId: string) => {
     await acceptRequest(requestId);
@@ -93,6 +138,47 @@ export const RideRequestsPage: React.FC = () => {
   const handleReject = async (requestId: string) => {
     await rejectRequest(requestId);
   };
+
+  const handleAcceptFuture = async (requestId: string) => {
+    setAcceptingFutureId(requestId);
+
+    try {
+      await acceptFuture(requestId).unwrap();
+
+      setLiveFutureRideRequests((prev) =>
+        prev.map((request) => {
+          if (request.requestId !== requestId) {
+            return request;
+          }
+
+          return {
+            ...request,
+            status: FutureRideRequestStatus.ACCEPTED,
+          };
+        }),
+      );
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setAcceptingFutureId(null);
+    }
+  };
+
+  const refreshFuture = async () => {
+    try {
+      const response = await refetchFutureData();
+
+      if ("data" in response) {
+        setLiveFutureRideRequests(response.data?.data.requests ?? []);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
+
+  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -105,16 +191,19 @@ export const RideRequestsPage: React.FC = () => {
 
       <div
         className="flex-1 flex flex-col min-h-screen transition-all duration-300"
-        style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
+        style={{
+          marginLeft: isMobile ? 0 : sidebarWidth,
+        }}
       >
         {/* Topbar */}
         <DriverTopbar onToggleSidebar={toggleSidebar} title="Ride Requests" />
 
-        {/* Alert Banner */}
+        {/* Alerts */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
           {error && (
             <Alert type="danger" message={error} onClose={clearError} />
           )}
+
           {success && (
             <Alert type="success" message={success} onClose={clearSuccess} />
           )}
@@ -122,7 +211,6 @@ export const RideRequestsPage: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 max-w-[1600px] mx-auto px-6 lg:px-12 py-8 w-full grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
-          {/* Instant Ride Requests  */}
           <section className="flex flex-col">
             <RideRequestsHeader
               total={total}
@@ -132,7 +220,7 @@ export const RideRequestsPage: React.FC = () => {
 
             <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
               <RideRequestsList
-                requests={requests}
+                requests={liveRideRequests}
                 isLoading={isLoading}
                 onAccept={handleAccept}
                 onReject={handleReject}
@@ -142,20 +230,21 @@ export const RideRequestsPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Scheduled Requests */}
+          {/* FUTURE RIDE REQUESTS */}
           <section className="flex flex-col">
             <FutureRideRequestsHeader
-              total={futureData?.data.pagination.total || 0}
+              total={liveFutureRideRequests.length}
               onRefresh={refreshFuture}
               isRefreshing={isFutureFetching}
             />
 
             <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
               <FutureRideRequestsList
-                requests={futureData?.data.requests || []}
+                requests={liveFutureRideRequests}
                 isLoading={isFutureLoading}
                 onAccept={handleAcceptFuture}
                 acceptingRequestId={acceptingFutureId}
+                unavailableRequestIds={unavailableRequestIds}
               />
             </div>
           </section>
@@ -164,6 +253,7 @@ export const RideRequestsPage: React.FC = () => {
         <Footer />
       </div>
 
+      {/* Mobile Overlay */}
       {isMobile && !sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"

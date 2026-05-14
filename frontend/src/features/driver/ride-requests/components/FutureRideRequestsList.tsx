@@ -1,12 +1,14 @@
 import React from "react";
 import { FutureRideRequestCard } from "./FutureRideRequestCard";
 import type { FutureRideRequestsListProps } from "../types/rideRequests.types";
+import { FutureRideRequestStatus } from "@/shared/types/ride.types";
 
 export const FutureRideRequestsList: React.FC<FutureRideRequestsListProps> = ({
   requests,
   isLoading,
   onAccept,
   acceptingRequestId,
+  unavailableRequestIds,
 }) => {
   if (isLoading) {
     return (
@@ -67,6 +69,8 @@ export const FutureRideRequestsList: React.FC<FutureRideRequestsListProps> = ({
           request={request}
           onAccept={onAccept}
           isAccepting={acceptingRequestId === request.requestId}
+          isUnavailable={unavailableRequestIds.has(request.requestId)}
+          isAccepted={request.status === FutureRideRequestStatus.ACCEPTED}
         />
       ))}
     </div>

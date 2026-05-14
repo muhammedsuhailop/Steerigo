@@ -1,57 +1,100 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
-import { rideRequestsApi } from "../services/rideRequestsApi";
+import type {
+  FutureRideRequestCancelledSocketPayload,
+  FutureRideRequestExpiredSocketPayload,
+  PendingRideRequestData,
+  FutureRideRequestData,
+} from "../types/rideRequests.types";
 
-export const useDriverRealtime = () => {
-  const dispatch = useDispatch();
+interface Props {
+  onNewRideRequest?: (request: PendingRideRequestData) => void;
 
-  useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+  onNewFutureRideRequest?: (request: FutureRideRequestData) => void;
+}
 
-    const onNewRideRequest = () => {
-      dispatch(
-        rideRequestsApi.util.invalidateTags([
-          { type: "RideRequests", id: "LIST" },
-        ]),
-      );
-    };
-
-    socket.on(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
-
-    return () => {
-      socket.off(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
-    };
-  }, [dispatch]);
+export const useDriverRealtime = ({
+  onNewRideRequest,
+  onNewFutureRideRequest,
+}: Props = {}) => {
+  const [unavailableRequestIds, setUnavailableRequestIds] = useState<
+    Set<string>
+  >(new Set());
 
   useEffect(() => {
     const socket = getSocket();
+
     if (!socket) return;
 
-    const onNewRideRequest = () => {
-      dispatch(
-        rideRequestsApi.util.invalidateTags([
-          { type: "RideRequests", id: "LIST" },
-        ]),
-      );
+    const markUnavailable = (futureRequestId: string) => {
+      setUnavailableRequestIds((prev) => {
+        const next = new Set(prev);
+
+        next.add(futureRequestId);
+
+        return next;
+      });
     };
 
-    const onNewFutureRideRequest = () => {
-      dispatch(
-        rideRequestsApi.util.invalidateTags([
-          { type: "FutureRideRequests", id: "LIST" },
-        ]),
-      );
+    const onRideRequestCreated = (payload: PendingRideRequestData) => {
+      onNewRideRequest?.(payload);
     };
 
-    socket.on(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
-    socket.on("ride:request:future:created", onNewFutureRideRequest);
+    const onFutureRideRequestCreated = (payload: FutureRideRequestData) => {
+      onNewFutureRideRequest?.(payload);
+    };
+
+    const onFutureRideCancelled = (
+      payload: FutureRideRequestCancelledSocketPayload,
+    ) => {
+      markUnavailable(payload.futureRequestId);
+    };
+
+    const onFutureRideExpired = (
+      payload: FutureRideRequestExpiredSocketPayload,
+    ) => {
+      markUnavailable(payload.futureRequestId);
+    };
+
+    socket.on(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onRideRequestCreated);
+
+    socket.on(
+      SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CREATED,
+      onFutureRideRequestCreated,
+    );
+
+    socket.on(
+      SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CANCELLED,
+      onFutureRideCancelled,
+    );
+
+    socket.on(
+      SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_EXPIRED,
+      onFutureRideExpired,
+    );
 
     return () => {
-      socket.off(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onNewRideRequest);
-      socket.off("ride:request:future:created", onNewFutureRideRequest);
+      socket.off(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onRideRequestCreated);
+
+      socket.off(
+        SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CREATED,
+        onFutureRideRequestCreated,
+      );
+
+      socket.off(
+        SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CANCELLED,
+        onFutureRideCancelled,
+      );
+
+      socket.off(
+        SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_EXPIRED,
+        onFutureRideExpired,
+      );
     };
-  }, [dispatch]);
+  }, [onNewRideRequest, onNewFutureRideRequest]);
+
+  return {
+    unavailableRequestIds,
+  };
 };
