@@ -8,6 +8,7 @@ export class FutureRideRequest {
     private id: string,
     private readonly riderId: string,
     private driverId: string | null,
+    private driverUserId: string | null,
     private readonly requestGroupId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
@@ -44,6 +45,7 @@ export class FutureRideRequest {
       "",
       params.riderId,
       null,
+      null,
       params.requestGroupId,
       params.pickup,
       params.drop,
@@ -60,6 +62,7 @@ export class FutureRideRequest {
     id: string;
     riderId: string;
     driverId: string | null;
+    driverUserId: string | null;
     requestGroupId: string;
     pickup: Location;
     drop: Location;
@@ -76,6 +79,7 @@ export class FutureRideRequest {
       data.id,
       data.riderId,
       data.driverId,
+      data.driverUserId,
       data.requestGroupId,
       data.pickup,
       data.drop,
@@ -102,6 +106,10 @@ export class FutureRideRequest {
 
   getDriverId(): string | null {
     return this.driverId;
+  }
+
+  getDriverUserId(): string | null {
+    return this.driverUserId;
   }
 
   getRequestGroupId(): string {
@@ -152,14 +160,13 @@ export class FutureRideRequest {
     return this.updatedAt;
   }
 
-  // Behaviors
-
-  assignDriver(driverId: string): void {
+  assignDriver(driverId: string, driverUserId: string): void {
     if (this.status !== FutureRideRequestStatus.PENDING) {
       throw new Error("Only pending request can assign driver");
     }
 
     this.driverId = driverId;
+    this.driverUserId = driverUserId;
     this.status = FutureRideRequestStatus.MATCHED;
     this.updatedAt = new Date();
   }

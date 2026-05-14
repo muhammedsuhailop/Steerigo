@@ -5,6 +5,7 @@ export interface IFutureRideRequestDocument extends Document {
   _id: Types.ObjectId;
   riderId: Types.ObjectId;
   driverId?: Types.ObjectId | null;
+  driverUserId?: Types.ObjectId | null;
   requestGroupId: string;
   pickup: {
     latitude: number;
@@ -72,6 +73,13 @@ const futureRideRequestSchema = new Schema(
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",
+      default: null,
+      index: true,
+    },
+
+    driverUserId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       default: null,
       index: true,
     },

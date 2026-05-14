@@ -301,4 +301,25 @@ export interface IRideNotificationService {
       requestGroupId: string;
     },
   ): Promise<void>;
+
+  notifyDriverFutureRideExpired(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      riderId: string;
+      pickupTime: string;
+    },
+  ): Promise<void>;
+
+  notifyDriverFutureRideRequestCancelled(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      acceptedByDriverId: string;
+    },
+  ): Promise<void>;
 }

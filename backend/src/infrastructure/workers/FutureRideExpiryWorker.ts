@@ -7,6 +7,7 @@ import { Logger } from "@shared/utils/Logger";
 import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
 import { FutureRideExpiryJobData } from "@infrastructure/queues/FutureRideExpiryQueue";
 import { IEventBus } from "@application/services/IEventBus";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 
 @injectable()
 export class FutureRideExpiryWorker {
@@ -109,5 +110,28 @@ export class FutureRideExpiryWorker {
       occurredAt: new Date(),
       payload: { requestGroupId, riderId, cancelledCount },
     });
+
+    const pendingRequests = requests.filter(
+      (request) =>
+        request.getStatus() === FutureRideRequestStatus.PENDING ||
+        request.getStatus() === FutureRideRequestStatus.MATCHED,
+    );
+
+    await Promise.all(
+      pendingRequests.map((request) =>
+        this.eventBus.publish({
+          type: "FutureRideRequestExpiredForDriver",
+          occurredAt: new Date(),
+          payload: {
+            futureRequestId: request.getId(),
+            requestGroupId,
+            driverId: request.getDriverId() as string,
+            driverUserId: request.getDriverUserId() as string,
+            riderId: request.getRiderId(),
+            pickupTime: request.getPickupTime().toISOString(),
+          },
+        }),
+      ),
+    );
   }
 }

@@ -141,6 +141,18 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
         );
       }
 
+      const groupRequests =
+        await this.futureRideRequestRepository.findByRequestGroupId(
+          requestGroupId,
+        );
+
+      const otherDriverRequests = groupRequests.filter(
+        (request) =>
+          request.getId() !== futureRequest.getId() &&
+          (request.getStatus() === FutureRideRequestStatus.PENDING ||
+            request.getStatus() === FutureRideRequestStatus.MATCHED),
+      );
+
       futureRequest.markAccepted();
       await this.futureRideRequestRepository.save(futureRequest);
 
@@ -157,6 +169,24 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
       });
 
       await this.futureRideExpiryService.cancelGroupExpiry(requestGroupId);
+
+      await Promise.all(
+        otherDriverRequests.map((request) =>
+          this.eventBus.publish({
+            type: "FutureRideRequestCancelledForDriver",
+            occurredAt: new Date(),
+            payload: {
+              futureRequestId: request.getId(),
+              requestGroupId,
+
+              driverId: request.getDriverId() as string,
+              driverUserId: request.getDriverUserId() as string,
+
+              acceptedByDriverId: driverId,
+            },
+          }),
+        ),
+      );
 
       const rideId = `RIDE-${this.uuIdGenerator.generate()}`;
       const timeline = new RideTimeline(futureRequest.getCreatedAt());

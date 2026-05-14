@@ -443,7 +443,7 @@ export class RideNotificationService implements IRideNotificationService {
 
         Logger.info("Notified driver of future ride request via socket", {
           driverUserId,
-          futureRequestId: payload.futureRequestId,
+          futureRequestId: payload.requestId,
           requestGroupId: payload.requestGroupId,
         });
       } else {
@@ -453,7 +453,7 @@ export class RideNotificationService implements IRideNotificationService {
 
         Logger.info("Published future ride request to Redis for bridge", {
           driverUserId,
-          futureRequestId: payload.futureRequestId,
+          futureRequestId: payload.requestId,
           requestGroupId: payload.requestGroupId,
         });
       }
@@ -514,6 +514,69 @@ export class RideNotificationService implements IRideNotificationService {
     } catch (error) {
       Logger.error("Error notifying future ride expiry", {
         riderId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyDriverFutureRideExpired(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      riderId: string;
+      pickupTime: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_REQUEST_EXPIRED,
+          payload,
+        );
+
+        Logger.info("Notified driver of future ride request expiry", {
+          driverUserId,
+          futureRequestId: payload.futureRequestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of future ride expiry", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyDriverFutureRideRequestCancelled(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      acceptedByDriverId: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_REQUEST_CANCELLED,
+          payload,
+        );
+
+        Logger.info("Notified driver of request cancelled", {
+          driverUserId,
+          futureRequestId: payload.futureRequestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of request cancelled", {
+        driverUserId,
         error: error instanceof Error ? error.message : String(error),
       });
     }

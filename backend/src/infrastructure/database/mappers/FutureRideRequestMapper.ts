@@ -73,6 +73,7 @@ export class FutureRideRequestMapper {
       id: doc._id.toString(),
       riderId: doc.riderId.toString(),
       driverId: doc.driverId ? doc.driverId.toString() : null,
+      driverUserId: doc.driverUserId ? doc.driverUserId.toString() : null,
       requestGroupId: doc.requestGroupId,
       pickup,
       drop,
@@ -96,6 +97,9 @@ export class FutureRideRequestMapper {
       _id: entity.getId() ? new Types.ObjectId(entity.getId()) : undefined,
       riderId: toObjectId(entity.getRiderId()),
       driverId: entity.getDriverId() ? toObjectId(entity.getDriverId()!) : null,
+      driverUserId: entity.getDriverUserId()
+        ? toObjectId(entity.getDriverUserId()!)
+        : null,
       requestGroupId: entity.getRequestGroupId(),
       pickup: {
         latitude: entity.getPickup().getLatitude(),

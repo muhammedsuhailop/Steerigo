@@ -35,6 +35,8 @@ import {
   FutureRideCancelledByRiderEvent,
   FutureRideDomainEvent,
   FutureRideExpiredEvent,
+  FutureRideRequestCancelledForDriverEvent,
+  FutureRideRequestExpiredForDriverEvent,
   FutureRideRequestSentToDriverEvent,
 } from "@application/events/FutureRideEvents";
 
@@ -110,6 +112,10 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleFutureRideExpired(event);
       case "FutureRideCancelledByRider":
         return this.handleFutureRideCancelledByRider(event);
+      case "FutureRideRequestExpiredForDriver":
+        return this.handleFutureRideRequestExpiredForDriver(event);
+      case "FutureRideRequestCancelledForDriver":
+        return this.handleFutureRideRequestCancelledForDriver(event);
       default:
         Logger.warn("Unhandled domain event type", {
           eventType: (event as { type: string }).type,
@@ -430,5 +436,27 @@ export class InMemoryEventBus implements IEventBus {
       body: "Your ride request has been cancelled.",
       metadata: payload,
     });
+  }
+
+  private async handleFutureRideRequestExpiredForDriver(
+    event: FutureRideRequestExpiredForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverFutureRideExpired(
+      driverUserId,
+      payload,
+    );
+  }
+
+  private async handleFutureRideRequestCancelledForDriver(
+    event: FutureRideRequestCancelledForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverFutureRideRequestCancelled(
+      driverUserId,
+      payload,
+    );
   }
 }

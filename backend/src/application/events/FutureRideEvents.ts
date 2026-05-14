@@ -56,7 +56,7 @@ export interface FutureRideCancelledByRiderEvent extends DomainEvent {
 export interface FutureRideRequestSentToDriverEvent extends DomainEvent {
   readonly type: "FutureRideRequestSentToDriver";
   readonly payload: {
-    readonly futureRequestId: string;
+    readonly requestId: string;
     readonly requestGroupId: string;
     readonly driverId: string;
     readonly driverUserId: string;
@@ -72,10 +72,37 @@ export interface FutureRideRequestSentToDriverEvent extends DomainEvent {
       readonly address: string | undefined;
     };
     readonly pickupTime: string;
+    readonly pickupETA: string;
     readonly rideType: string;
     readonly fare: number;
     readonly currency: string;
+    readonly status: FutureRideRequestStatus;
+    readonly requiredDuration: number;
+    readonly createdAt: string;
     readonly expiresAt: string;
+  };
+}
+
+export interface FutureRideRequestExpiredForDriverEvent extends DomainEvent {
+  readonly type: "FutureRideRequestExpiredForDriver";
+  readonly payload: {
+    readonly futureRequestId: string;
+    readonly requestGroupId: string;
+    readonly driverId: string;
+    readonly driverUserId: string;
+    readonly riderId: string;
+    readonly pickupTime: string;
+  };
+}
+
+export interface FutureRideRequestCancelledForDriverEvent extends DomainEvent {
+  readonly type: "FutureRideRequestCancelledForDriver";
+  readonly payload: {
+    readonly futureRequestId: string;
+    readonly requestGroupId: string;
+    readonly driverId: string;
+    readonly driverUserId: string;
+    readonly acceptedByDriverId: string;
   };
 }
 
@@ -83,4 +110,6 @@ export type FutureRideDomainEvent =
   | FutureRideAcceptedEvent
   | FutureRideExpiredEvent
   | FutureRideCancelledByRiderEvent
-  | FutureRideRequestSentToDriverEvent;
+  | FutureRideRequestSentToDriverEvent
+  | FutureRideRequestExpiredForDriverEvent
+  | FutureRideRequestCancelledForDriverEvent;

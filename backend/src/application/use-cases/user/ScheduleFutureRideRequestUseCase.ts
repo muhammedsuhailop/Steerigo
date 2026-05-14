@@ -19,6 +19,7 @@ import { Location } from "@domain/value-objects/Location";
 import { RideType } from "@domain/value-objects/RideType";
 import { FutureRideErrors } from "@domain/errors/FutureRideErrors";
 import { AppConstants } from "@shared/constants/AppConstants";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 
 @injectable()
 export class ScheduleFutureRideRequestUseCase implements IUseCase<
@@ -93,7 +94,7 @@ export class ScheduleFutureRideRequestUseCase implements IUseCase<
             pickupETA: AppConstants.FUTURE_RIDE_DEFAULT_ETA_LABEL,
           });
 
-          request.assignDriver(driverId);
+          request.assignDriver(driverId, driverUserId);
 
           const saved = await this.futureRideRequestRepository.save(request);
 
@@ -159,7 +160,7 @@ export class ScheduleFutureRideRequestUseCase implements IUseCase<
             type: "FutureRideRequestSentToDriver",
             occurredAt: new Date(),
             payload: {
-              futureRequestId: req.requestId,
+              requestId: req.requestId,
               requestGroupId: dto.requestGroupId,
               driverId: req.driverId,
               driverUserId: req.driverUserId,
@@ -175,9 +176,13 @@ export class ScheduleFutureRideRequestUseCase implements IUseCase<
                 address: dto.dropAddress,
               },
               pickupTime: dto.pickupTime.toISOString(),
+              pickupETA: dto.pickupTime.toISOString(),
               rideType: dto.rideType,
               fare: fareBreakdown.getTotalFare().getAmount(),
               currency: fareBreakdown.getTotalFare().getCurrency(),
+              status: FutureRideRequestStatus.MATCHED,
+              requiredDuration: dto.requiredDuration,
+              createdAt: new Date().toISOString(),
               expiresAt,
             },
           }),
