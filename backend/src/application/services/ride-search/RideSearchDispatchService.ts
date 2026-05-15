@@ -205,6 +205,7 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
         } as unknown as FareBreakdown; //TEMP----
         request = RideRequest.create(
           driverId,
+          driver.getUserId(),
           group.getRiderId(),
           group.getId(),
           pickup,

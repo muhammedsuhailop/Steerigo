@@ -88,10 +88,10 @@ export const useRideRequests = () => {
     [rejectRequest],
   );
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     setError(null);
     setSuccess(null);
-    refetch();
+    return await refetch();
   }, [refetch]);
 
   const clearError = useCallback(() => {

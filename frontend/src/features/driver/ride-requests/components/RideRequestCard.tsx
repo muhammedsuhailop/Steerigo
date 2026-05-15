@@ -1,7 +1,6 @@
 import React from "react";
 import { Card } from "@/shared/components/ui/Card";
 import { Button } from "@/shared/components/ui/Button";
-import { Badge } from "@/shared/components/ui/Badge";
 import {
   FaMapMarkerAlt,
   FaMapPin,
@@ -19,6 +18,7 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
   onReject,
   isAccepting,
   isRejecting,
+  isExpiredBySocket = false,
 }) => {
   const formatTime = (dateString: string): string => {
     const date = new Date(dateString);
@@ -38,9 +38,9 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
     });
   };
 
-  const isExpired = request.expiresAt
-    ? new Date(request.expiresAt) < new Date()
-    : false;
+  const isExpired =
+    isExpiredBySocket ||
+    (request.expiresAt ? new Date(request.expiresAt) < new Date() : false);
 
   const getTimeRemaining = (): string | null => {
     if (!request.expiresAt) return null;
@@ -81,25 +81,10 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
           <div className="text-right">
             <div className="flex items-center justify-end gap-0.5 text-2xl font-black text-emerald-600">
               <FaRupeeSign className="text-sm" />
-              {request.fare}
+              {request.fare.amount}
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {request.currency}
-            </p>
           </div>
         </div>
-
-        {/* Expiry Badge */}
-        {timeRemaining && (
-          <div
-            className={`flex items-center gap-2 p-2 px-3 rounded-xl border ${isExpired ? "bg-slate-50 border-slate-200 text-slate-500" : "bg-amber-50 border-amber-100 text-amber-700 animate-pulse"}`}
-          >
-            <FaClock size={12} />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              {isExpired ? "Expired" : `Offer expires in ${timeRemaining}`}
-            </span>
-          </div>
-        )}
 
         {/* Route Section */}
         <div className="relative space-y-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -166,33 +151,45 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
           <Button
             onClick={() => onAccept(request.requestId)}
             disabled={isAccepting || isRejecting || isExpired}
-            className="flex-1 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50"
+            className={`flex-1 h-12 rounded-2xl font-bold transition-all active:scale-95 
+      ${
+        isExpired
+          ? "bg-slate-100 text-slate-400 shadow-none cursor-not-allowed"
+          : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
+      } 
+      disabled:opacity-100`}
           >
             {isAccepting ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
             ) : (
               <div className="flex items-center justify-center gap-2">
-                <FaCheck /> Accept
+                {isExpired ? (
+                  <FaClock className="text-slate-300" />
+                ) : (
+                  <FaCheck />
+                )}
+                {isExpired ? "Request Expired" : "Accept"}
               </div>
             )}
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={() => onReject(request.requestId)}
-            disabled={isAccepting || isRejecting || isExpired}
-            className="flex-1 h-12 rounded-2xl border-2 border-slate-200 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 font-bold text-slate-600 transition-all active:scale-95 disabled:opacity-50"
-          >
-            {isRejecting ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-rose-600/30 border-t-rose-600" />
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <FaTimes /> Reject
-              </div>
-            )}
-          </Button>
+          {!isExpired && (
+            <Button
+              variant="outline"
+              onClick={() => onReject(request.requestId)}
+              disabled={isAccepting || isRejecting}
+              className="flex-1 h-12 rounded-2xl border-2 border-slate-200 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 font-bold text-slate-600 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {isRejecting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-rose-600/30 border-t-rose-600" />
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <FaTimes /> Reject
+                </div>
+              )}
+            </Button>
+          )}
         </div>
-
       </div>
     </Card>
   );

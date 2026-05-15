@@ -13,6 +13,7 @@ import {
   RideCancelledByDriverEvent,
   RideFareUpdatedEvent,
   RideSearchProgressUpdatedEvent,
+  RideRequestExpiredForDriverEvent,
 } from "@application/events/RideEvents";
 import {
   PaymentCashConfirmedEvent,
@@ -116,6 +117,8 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleFutureRideRequestExpiredForDriver(event);
       case "FutureRideRequestCancelledForDriver":
         return this.handleFutureRideRequestCancelledForDriver(event);
+      case "RideRequestExpiredForDriver":
+        return this.handleRideRequestExpiredForDriver(event);
       default:
         Logger.warn("Unhandled domain event type", {
           eventType: (event as { type: string }).type,
@@ -455,6 +458,17 @@ export class InMemoryEventBus implements IEventBus {
     const { driverUserId, ...payload } = event.payload;
 
     await this.notificationService.notifyDriverFutureRideRequestCancelled(
+      driverUserId,
+      payload,
+    );
+  }
+
+  private async handleRideRequestExpiredForDriver(
+    event: RideRequestExpiredForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverRideRequestExpired(
       driverUserId,
       payload,
     );

@@ -15,10 +15,10 @@ import { Result } from "@shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 
 @injectable()
-export class SendRideRequestUseCase
-  implements
-    IUseCase<SendRideRequestDto, Promise<Result<SendRideRequestResponseDto>>>
-{
+export class SendRideRequestUseCase implements IUseCase<
+  SendRideRequestDto,
+  Promise<Result<SendRideRequestResponseDto>>
+> {
   constructor(
     @inject(TYPES.RideRequestRepository)
     private readonly rideRequestRepository: IRideRequestRepository,
@@ -154,6 +154,7 @@ export class SendRideRequestUseCase
 
       const rideRequest = RideRequest.create(
         dto.driverId,
+        driver.getUserId(),
         dto.riderId,
         dto.requestGroupId,
         pickup,

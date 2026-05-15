@@ -7,6 +7,7 @@ export class RideRequest {
   private constructor(
     private id: string,
     private readonly driverId: string,
+    private readonly driverUserId: string,
     private readonly riderId: string,
     private readonly requestGroupId: string,
     private readonly pickup: Location,
@@ -23,6 +24,7 @@ export class RideRequest {
 
   static create(
     driverId: string,
+    driverUserId: string,
     riderId: string,
     requestGroupId: string,
     pickup: Location,
@@ -40,6 +42,7 @@ export class RideRequest {
     return new RideRequest(
       "",
       driverId,
+      driverUserId,
       riderId,
       requestGroupId,
       pickup,
@@ -56,6 +59,7 @@ export class RideRequest {
   static fromData(data: {
     id: string;
     driverId: string;
+    driverUserId: string;
     riderId: string;
     requestGroupId: string;
     pickup: Location;
@@ -72,6 +76,7 @@ export class RideRequest {
     return new RideRequest(
       data.id,
       data.driverId,
+      data.driverUserId,
       data.riderId,
       data.requestGroupId,
       data.pickup,
@@ -94,6 +99,10 @@ export class RideRequest {
 
   getDriverId(): string {
     return this.driverId;
+  }
+
+  getDriverUserId(): string {
+    return this.driverUserId;
   }
 
   getRiderId(): string {

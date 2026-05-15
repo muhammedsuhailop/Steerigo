@@ -6,6 +6,7 @@ import type {
   FutureRideRequestExpiredSocketPayload,
   PendingRideRequestData,
   FutureRideRequestData,
+  RideRequestExpiredSocketPayload,
 } from "../types/rideRequests.types";
 
 interface Props {
@@ -18,6 +19,10 @@ export const useDriverRealtime = ({
   onNewRideRequest,
   onNewFutureRideRequest,
 }: Props = {}) => {
+  const [expiredRequestIds, setExpiredRequestIds] = useState<Set<string>>(
+    new Set(),
+  );
+
   const [unavailableRequestIds, setUnavailableRequestIds] = useState<
     Set<string>
   >(new Set());
@@ -51,6 +56,10 @@ export const useDriverRealtime = ({
       markUnavailable(payload.futureRequestId);
     };
 
+    const onRideRequestExpired = (payload: RideRequestExpiredSocketPayload) => {
+      setExpiredRequestIds((prev) => new Set(prev).add(payload.requestId));
+    };
+
     const onFutureRideExpired = (
       payload: FutureRideRequestExpiredSocketPayload,
     ) => {
@@ -58,6 +67,8 @@ export const useDriverRealtime = ({
     };
 
     socket.on(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onRideRequestCreated);
+
+    socket.on(SOCKET_EVENTS.DRIVER.REQUEST_EXPIRED, onRideRequestExpired);
 
     socket.on(
       SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CREATED,
@@ -76,6 +87,8 @@ export const useDriverRealtime = ({
 
     return () => {
       socket.off(SOCKET_EVENTS.DRIVER.NEW_REQUEST, onRideRequestCreated);
+
+      socket.off(SOCKET_EVENTS.DRIVER.REQUEST_EXPIRED, onRideRequestExpired);
 
       socket.off(
         SOCKET_EVENTS.DRIVER.FUTURE_RIDE_REQUEST_CREATED,
@@ -96,5 +109,6 @@ export const useDriverRealtime = ({
 
   return {
     unavailableRequestIds,
+    expiredRequestIds,
   };
 };

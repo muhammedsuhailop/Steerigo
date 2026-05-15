@@ -12,7 +12,10 @@ export interface PendingRideRequestData {
     address?: string;
   };
   rideType: string;
-  fare: number;
+  fare: {
+    amount: number;
+    currency: string;
+  };
   currency: string;
   pickupTime: string;
   pickupETA: string;
@@ -67,6 +70,7 @@ export interface RideRequestCardProps {
   onReject: (requestId: string) => void;
   isAccepting: boolean;
   isRejecting: boolean;
+  isExpiredBySocket: boolean;
 }
 
 export interface RideRequestsListProps {
@@ -76,6 +80,7 @@ export interface RideRequestsListProps {
   onReject: (requestId: string) => void;
   acceptingRequestId: string | null;
   rejectingRequestId: string | null;
+  expiredRequestIds: Set<string>;
 }
 
 export interface RideRequestsEmptyStateProps {
@@ -182,4 +187,13 @@ export interface FutureRideRequestExpiredSocketPayload {
   driverId: string;
   riderId: string;
   pickupTime: string;
+}
+
+export interface RideRequestExpiredSocketPayload {
+  requestId: string;
+  requestGroupId: string;
+  driverId: string;
+  driverUserId: string;
+  riderId: string;
+  expiredAt: string;
 }

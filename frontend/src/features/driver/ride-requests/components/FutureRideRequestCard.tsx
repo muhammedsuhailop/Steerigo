@@ -67,10 +67,6 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
               <FaRupeeSign className="text-sm mr-0.5" />
               {request.fare}
             </div>
-
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-              {request.currency}
-            </p>
           </div>
         </div>
 
@@ -181,7 +177,6 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
             </div>
           )}
         </Button>
-
       </div>
     </Card>
   );

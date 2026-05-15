@@ -9,6 +9,7 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
   onReject,
   acceptingRequestId,
   rejectingRequestId,
+  expiredRequestIds,
 }) => {
   if (isLoading) {
     return (
@@ -76,6 +77,7 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
           onReject={onReject}
           isAccepting={acceptingRequestId === request.requestId}
           isRejecting={rejectingRequestId === request.requestId}
+          isExpiredBySocket={expiredRequestIds.has(request.requestId)}
         />
       ))}
     </div>

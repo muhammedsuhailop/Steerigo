@@ -70,6 +70,7 @@ export class RideRequestMapper {
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
+      driverUserId: doc.driverUserId.toString(),
       requestGroupId: doc.requestGroupId,
       riderId: doc.riderId.toString(),
       pickup,
@@ -91,6 +92,7 @@ export class RideRequestMapper {
     return {
       _id: entity.getId() ? new Types.ObjectId(entity.getId()) : undefined,
       driverId: toObjectId(entity.getDriverId()),
+      driverUserId: toObjectId(entity.getDriverUserId()),
       requestGroupId: entity.getRequestGroupId(),
       riderId: toObjectId(entity.getRiderId()),
       pickup: {

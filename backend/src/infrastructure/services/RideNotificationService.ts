@@ -581,4 +581,46 @@ export class RideNotificationService implements IRideNotificationService {
       });
     }
   }
+
+  async notifyDriverRideRequestExpired(
+    driverUserId: string,
+    payload: {
+      requestId: string;
+      driverId: string;
+      requestGroupId: string;
+      riderId: string;
+      expiredAt: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.RIDE_REQUEST_EXPIRED,
+          payload,
+        );
+
+        Logger.info("Notified driver of ride request expiry", {
+          driverUserId,
+          requestId: payload.requestId,
+        });
+      } else {
+        await this.publishToRedis(PUBSUB_CHANNELS.RIDE_REQUEST_EXPIRED, {
+          driverUserId,
+          ...payload,
+        });
+
+        Logger.info("Published ride request expiry to Redis for bridge", {
+          driverUserId,
+          requestId: payload.requestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of ride request expiry", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 }

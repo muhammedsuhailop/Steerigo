@@ -45,8 +45,7 @@ export interface RideSearchProgressUpdatedPayload {
   status: "SEARCHING" | "COMPLETED" | "EXPIRED";
 }
 
-export interface RideRequestCreatedPayload
-  extends DriverRequestNotificationPayload {
+export interface RideRequestCreatedPayload extends DriverRequestNotificationPayload {
   driverId: string;
 }
 
@@ -172,6 +171,20 @@ export interface RideFareUpdatedEventPayload {
   couponType?: CouponDiscountType;
 }
 
+export interface RideRequestExpiredForDriverEventPayload {
+  requestId: string;
+  requestGroupId: string;
+  driverId: string;
+  driverUserId: string;
+  riderId: string;
+  expiredAt: string;
+}
+
+export type RideRequestExpiredForDriverEvent = BaseRideEvent<
+  "RideRequestExpiredForDriver",
+  RideRequestExpiredForDriverEventPayload
+>;
+
 export type RideCancelledByDriverEvent = BaseRideEvent<
   "RideCancelledByDriver",
   RideCancelledByDriverEventPayload
@@ -210,4 +223,5 @@ export type RideDomainEvent =
   | RideCompletedEvent
   | RideCancelledEvent
   | RideCancelledByDriverEvent
-  | RideFareUpdatedEvent;
+  | RideFareUpdatedEvent
+  | RideRequestExpiredForDriverEvent;

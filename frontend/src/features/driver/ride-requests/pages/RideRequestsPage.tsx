@@ -54,7 +54,9 @@ export const RideRequestsPage: React.FC = () => {
   >([]);
 
   useEffect(() => {
-    setLiveRideRequests(requests);
+    if (requests && requests.length > 0) {
+      setLiveRideRequests(requests);
+    }
   }, [requests]);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export const RideRequestsPage: React.FC = () => {
     setLiveFutureRideRequests(futureData.data.requests);
   }, []);
 
-  const { unavailableRequestIds } = useDriverRealtime({
+  const { unavailableRequestIds, expiredRequestIds } = useDriverRealtime({
     onNewRideRequest: (request) => {
       setLiveRideRequests((prev) => {
         const exists = prev.some(
@@ -130,6 +132,18 @@ export const RideRequestsPage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [success, clearSuccess]);
+
+  const handleManualRefresh = async () => {
+    try {
+      const response = await refresh();
+
+      if ("data" in response && response.data) {
+        setLiveRideRequests(response.data.data.requests ?? []);
+      }
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    }
+  };
 
   const handleAccept = async (requestId: string) => {
     await acceptRequest(requestId);
@@ -214,7 +228,7 @@ export const RideRequestsPage: React.FC = () => {
           <section className="flex flex-col">
             <RideRequestsHeader
               total={total}
-              onRefresh={refresh}
+              onRefresh={handleManualRefresh}
               isRefreshing={isFetching}
             />
 
@@ -226,11 +240,12 @@ export const RideRequestsPage: React.FC = () => {
                 onReject={handleReject}
                 acceptingRequestId={acceptingRequestId}
                 rejectingRequestId={rejectingRequestId}
+                expiredRequestIds={expiredRequestIds}
               />
             </div>
           </section>
 
-          {/* FUTURE RIDE REQUESTS */}
+          {/* Future Ride Requests */}
           <section className="flex flex-col">
             <FutureRideRequestsHeader
               total={liveFutureRideRequests.length}

@@ -322,4 +322,14 @@ export interface IRideNotificationService {
       acceptedByDriverId: string;
     },
   ): Promise<void>;
+
+  notifyDriverRideRequestExpired(
+    driverId: string,
+    payload: {
+      requestId: string;
+      requestGroupId: string;
+      riderId: string;
+      expiredAt: string;
+    },
+  ): Promise<void>;
 }
