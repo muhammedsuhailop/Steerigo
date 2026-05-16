@@ -110,8 +110,7 @@ export class AutoSearchAndSendRideRequestUseCase
         drop,
         dto.timeRequired,
         dto.rideType as RideType,
-        fareBreakdown.getTotalFare().getAmount(),
-        fareBreakdown.getTotalFare().getCurrency(),
+        fareBreakdown,
         candidateDriverIds,
       );
 

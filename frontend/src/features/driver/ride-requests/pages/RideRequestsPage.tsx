@@ -42,12 +42,16 @@ export const RideRequestsPage: React.FC = () => {
     isFetching: isFutureFetching,
     refetch: refetchFutureData,
   } = useGetFutureRideRequestsQuery({
-    status: "Matched",
+    status: FutureRideRequestStatus.MATCHED,
   });
 
   const [liveRideRequests, setLiveRideRequests] = useState<
     PendingRideRequestData[]
   >([]);
+
+  const [rejectedRequestIds, setRejectedRequestIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [liveFutureRideRequests, setLiveFutureRideRequests] = useState<
     FutureRideRequestData[]
@@ -150,8 +154,20 @@ export const RideRequestsPage: React.FC = () => {
   };
 
   const handleReject = async (requestId: string) => {
-    await rejectRequest(requestId);
+    const result = await rejectRequest(requestId);
+
+    if (result?.success) {
+      setRejectedRequestIds((prev) => {
+        const next = new Set(prev);
+        next.add(requestId);
+        return next;
+      });
+    }
   };
+
+  const visibleRideRequests = liveRideRequests.filter(
+    (request) => !rejectedRequestIds.has(request.requestId),
+  );
 
   const handleAcceptFuture = async (requestId: string) => {
     setAcceptingFutureId(requestId);
@@ -227,14 +243,14 @@ export const RideRequestsPage: React.FC = () => {
         <main className="flex-1 max-w-[1600px] mx-auto px-6 lg:px-12 py-8 w-full grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
           <section className="flex flex-col">
             <RideRequestsHeader
-              total={total}
+              total={visibleRideRequests.length}
               onRefresh={handleManualRefresh}
               isRefreshing={isFetching}
             />
 
             <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
               <RideRequestsList
-                requests={liveRideRequests}
+                requests={visibleRideRequests}
                 isLoading={isLoading}
                 onAccept={handleAccept}
                 onReject={handleReject}

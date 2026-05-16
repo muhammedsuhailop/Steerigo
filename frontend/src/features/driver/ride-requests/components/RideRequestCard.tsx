@@ -81,7 +81,7 @@ export const RideRequestCard: React.FC<RideRequestCardProps> = ({
           <div className="text-right">
             <div className="flex items-center justify-end gap-0.5 text-2xl font-black text-emerald-600">
               <FaRupeeSign className="text-sm" />
-              {request.fare.amount}
+              {request.fareBreakdown.totalFare.amount}
             </div>
           </div>
         </div>

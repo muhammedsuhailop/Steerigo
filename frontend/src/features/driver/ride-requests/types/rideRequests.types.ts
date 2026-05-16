@@ -1,5 +1,8 @@
+import { RideFareBreakdown } from "@/shared/types/ride.types";
+
 export interface PendingRideRequestData {
   requestId: string;
+  requestGroupId: string;
   riderId: string;
   pickup: {
     latitude: number;
@@ -12,10 +15,7 @@ export interface PendingRideRequestData {
     address?: string;
   };
   rideType: string;
-  fare: {
-    amount: number;
-    currency: string;
-  };
+  fareBreakdown: RideFareBreakdown;
   currency: string;
   pickupTime: string;
   pickupETA: string;

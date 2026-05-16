@@ -1,6 +1,7 @@
 import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
@@ -21,10 +22,7 @@ export interface DriverRequestNotificationPayload {
   pickupTime: string;
   rideType: string;
   pickupETA: string;
-  fare: {
-    amount: number;
-    currency: string;
-  };
+  fareBreakdown: FareBreakdown;
   searchedAt: string;
   expiresAt: string;
 }

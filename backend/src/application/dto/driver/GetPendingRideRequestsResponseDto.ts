@@ -1,3 +1,5 @@
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+
 export interface PendingRideRequestData {
   requestId: string;
   riderId: string;
@@ -12,8 +14,7 @@ export interface PendingRideRequestData {
     address?: string;
   };
   rideType: string;
-  fare: number;
-  currency: string;
+  fareBreakdown: FareBreakdown;
   pickupTime: string;
   pickupETA: string;
   status: string;
