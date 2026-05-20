@@ -325,7 +325,8 @@ export interface IRideNotificationService {
       futureRequestId: string;
       requestGroupId: string;
       driverId: string;
-      acceptedByDriverId: string;
+      acceptedByDriverId: string | null;
+      cancelledByRider: boolean;
     },
   ): Promise<void>;
 

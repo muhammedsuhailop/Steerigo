@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "@/shared/socket/socket";
 import { SOCKET_EVENTS } from "@/shared/socket/socketEvents";
-import { useScheduleFutureRideMutation } from "../services/driverSearchApi";
+import {
+  useCancelFutureRideRequestMutation,
+  useScheduleFutureRideMutation,
+} from "../services/driverSearchApi";
 import { TripFormData } from "../types/driverSearch.types";
 import {
   FutureRideAcceptedPayload,
@@ -17,7 +20,9 @@ interface UseScheduleRideReturn {
     formData: TripFormData,
     requestGroupId: string,
   ) => Promise<boolean>;
+  cancelSchedule: (requestGroupId: string) => Promise<boolean>;
   isLoading: boolean;
+  isCancelling: boolean;
   lastResponse: FutureScheduleResponse | null;
   acceptedRide: FutureRideAcceptedPayload | null;
   isExpired: boolean;
@@ -28,6 +33,8 @@ interface UseScheduleRideReturn {
 export const useScheduleRide = (): UseScheduleRideReturn => {
   const navigate = useNavigate();
   const [scheduleRide, { isLoading }] = useScheduleFutureRideMutation();
+  const [cancelFutureRide, { isLoading: isCancelling }] =
+    useCancelFutureRideRequestMutation();
   const [lastResponse, setLastResponse] =
     useState<FutureScheduleResponse | null>(null);
   const [acceptedRide, setAcceptedRide] =
@@ -86,6 +93,18 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
     },
     [navigate, lastResponse?.data.requestGroupId],
   );
+
+  const cancelSchedule = async (requestGroupId: string): Promise<boolean> => {
+    try {
+      await cancelFutureRide({ requestGroupId }).unwrap();
+      reset();
+      return true;
+    } catch (err: unknown) {
+      const parsedError = errorHandler.parseApiError(err, "FutureRideCancel");
+      errorHandler.logError(parsedError);
+      return false;
+    }
+  };
 
   const handleFutureRideExpired = useCallback(
     (data: { requestGroupId: string }) => {
@@ -155,7 +174,9 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
 
   return {
     performSchedule,
+    cancelSchedule,
     isLoading,
+    isCancelling,
     lastResponse,
     acceptedRide,
     isExpired,

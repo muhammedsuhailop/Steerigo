@@ -178,11 +178,10 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
             payload: {
               futureRequestId: request.getId(),
               requestGroupId,
-
               driverId: request.getDriverId() as string,
               driverUserId: request.getDriverUserId() as string,
-
               acceptedByDriverId: driverId,
+              cancelledByRider: false,
             },
           }),
         ),

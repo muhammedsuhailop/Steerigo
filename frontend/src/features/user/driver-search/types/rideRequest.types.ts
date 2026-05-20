@@ -170,3 +170,17 @@ export interface FutureRideRejectedPayload {
   riderId: string;
   pickupTime: string;
 }
+
+export interface CancelFutureRideRequest {
+  requestGroupId: string;
+}
+
+export interface CancelFutureRideRequestResponse {
+  success: boolean;
+  message: string;
+  data: {
+    requestGroupId: string;
+    cancelledCount: number;
+    cancelledAt: string;
+  };
+}

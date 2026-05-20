@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     STATS: "/user/stats",
     COUPONS: "/user/coupons",
     SEND_FUTURE_REQUEST: "/user/ride/future-schedule",
+    CANCEL_FUTURE_REQUEST: "/user/ride/future-cancel",
   },
   DRIVER: {
     REGISTER: "/driver/register",

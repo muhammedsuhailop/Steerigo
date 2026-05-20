@@ -102,7 +102,8 @@ export interface FutureRideRequestCancelledForDriverEvent extends DomainEvent {
     readonly requestGroupId: string;
     readonly driverId: string;
     readonly driverUserId: string;
-    readonly acceptedByDriverId: string;
+    readonly acceptedByDriverId: string | null;
+    readonly cancelledByRider: boolean;
   };
 }
 

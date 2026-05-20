@@ -9,6 +9,8 @@ import type {
 import {
   AutoRideRequestPayload,
   AutoRideRequestResponse,
+  CancelFutureRideRequest,
+  CancelFutureRideRequestResponse,
   CancelRideRequestPayload,
   CancelRideRequestResponse,
   FutureSchedulePayload,
@@ -87,6 +89,18 @@ export const driverSearchApi = createApi({
       }),
       invalidatesTags: ["RideRequest"],
     }),
+
+    cancelFutureRideRequest: builder.mutation<
+      CancelFutureRideRequestResponse,
+      CancelFutureRideRequest
+    >({
+      query: (payload) => ({
+        url: API_ENDPOINTS.USER.CANCEL_FUTURE_REQUEST,
+        method: "POST",
+        data: payload,
+      }),
+      invalidatesTags: ["RideRequest"],
+    }),
   }),
 });
 
@@ -96,4 +110,5 @@ export const {
   useSendAutoRideRequestMutation,
   useCancelRideRequestMutation,
   useScheduleFutureRideMutation,
+  useCancelFutureRideRequestMutation,
 } = driverSearchApi;

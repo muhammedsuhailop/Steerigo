@@ -10,17 +10,21 @@ import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRe
 import { FutureRideErrors } from "@domain/errors/FutureRideErrors";
 import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 import { IFutureRideExpiryService } from "@application/services/ride-search/IFutureRideExpiryService";
+import { IEventBus } from "@application/services/IEventBus";
+import { FutureRideCancelledByRiderEvent } from "@application/events/FutureRideEvents";
 
 @injectable()
-export class CancelFutureRideRequestUseCase
-  implements
-    IUseCase<CancelFutureRideDto, Promise<Result<CancelFutureRideResponseDto>>>
-{
+export class CancelFutureRideRequestUseCase implements IUseCase<
+  CancelFutureRideDto,
+  Promise<Result<CancelFutureRideResponseDto>>
+> {
   constructor(
     @inject(TYPES.FutureRideRequestRepository)
     private readonly futureRideRequestRepository: IFutureRideRequestRepository,
     @inject(TYPES.FutureRideExpiryService)
     private readonly futureRideExpiryService: IFutureRideExpiryService,
+    @inject(TYPES.EventBus)
+    private readonly eventBus: IEventBus,
   ) {}
 
   async execute(
@@ -55,11 +59,11 @@ export class CancelFutureRideRequestUseCase
         FutureRideRequestStatus.MATCHED,
       ];
 
-      const anyCancellable = requests.some((r) =>
+      const activeRequests = requests.filter((r) =>
         cancellableStatuses.includes(r.getStatus()),
       );
 
-      if (!anyCancellable) {
+      if (activeRequests.length === 0) {
         const firstStatus = requests[0]?.getStatus() ?? "unknown";
         return Result.failure(
           FutureRideErrors.cannotCancelRequest(dto.requestGroupId, firstStatus),
@@ -78,6 +82,35 @@ export class CancelFutureRideRequestUseCase
         riderId: dto.getRiderId(),
         cancelledCount,
       });
+
+      const groupEvent: FutureRideCancelledByRiderEvent = {
+        type: "FutureRideCancelledByRider",
+        occurredAt: new Date(),
+        payload: {
+          requestGroupId: dto.requestGroupId,
+          riderId: dto.getRiderId(),
+          cancelledCount,
+        },
+      };
+
+      await this.eventBus.publish(groupEvent);
+
+      await Promise.all(
+        activeRequests.map((request) =>
+          this.eventBus.publish({
+            type: "FutureRideRequestCancelledForDriver",
+            occurredAt: new Date(),
+            payload: {
+              futureRequestId: request.getId(),
+              requestGroupId: dto.requestGroupId,
+              driverId: request.getDriverId() as string,
+              driverUserId: request.getDriverUserId() as string,
+              acceptedByDriverId: null,
+              cancelledByRider: true,
+            },
+          }),
+        ),
+      );
 
       return Result.success(
         CancelFutureRideResponseDto.create(dto.requestGroupId, cancelledCount),

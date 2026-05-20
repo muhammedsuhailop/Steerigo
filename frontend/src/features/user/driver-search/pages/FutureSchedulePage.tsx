@@ -27,7 +27,9 @@ const generateMongoObjectId = (): string => {
 const FutureRideSearchPage: React.FC = () => {
   const {
     performSchedule,
+    cancelSchedule,
     isLoading,
+    isCancelling: isCancellingSchedule,
     lastResponse,
     acceptedRide,
     isExpired,
@@ -89,19 +91,10 @@ const FutureRideSearchPage: React.FC = () => {
   };
 
   const handleCancelRequest = async () => {
-    try {
-      setIsCancelling(true);
+    const activeGroupId = lastResponse?.data?.requestGroupId;
+    if (!activeGroupId) return;
 
-      console.log(
-        "Cancel future ride request:",
-        lastResponse?.data?.requestGroupId,
-      );
-
-      // TODO:
-      // call cancel request API here
-    } finally {
-      setIsCancelling(false);
-    }
+    await cancelSchedule(activeGroupId);
   };
 
   const shouldLockForm =
@@ -151,7 +144,7 @@ const FutureRideSearchPage: React.FC = () => {
                 response={lastResponse}
                 formData={currentFormData}
                 onCancelRequest={handleCancelRequest}
-                isCancelling={isCancelling}
+                isCancelling={isCancellingSchedule}
                 isExpired={isExpired}
                 isAllRejected={isAllRejected}
               />
