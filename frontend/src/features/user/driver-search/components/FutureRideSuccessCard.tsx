@@ -28,7 +28,8 @@ const FutureRideSuccessCard: React.FC<FutureRideSuccessCardProps> = ({
 }) => {
   const estimatedFare = response.data?.scheduledRequests?.[0]?.totalFare;
 
-  const isFailed = isExpired || isAllRejected;
+  const hasNoDrivers = response.data?.totalDriversNotified === 0;
+  const isFailed = isExpired || isAllRejected || hasNoDrivers;
 
   const getHeaderContent = () => {
     if (isExpired) {
@@ -46,6 +47,15 @@ const FutureRideSuccessCard: React.FC<FutureRideSuccessCardProps> = ({
         title: "We couldn't match your ride",
         description:
           "No nearby drivers were available for your scheduled ride request.",
+      };
+    }
+
+    if (hasNoDrivers) {
+      return {
+        badge: "No Drivers Found",
+        title: "No drivers found in your location",
+        description:
+          "No drivers are currently available near your pickup location for the selected time. Please try again later.",
       };
     }
 
@@ -97,7 +107,7 @@ const FutureRideSuccessCard: React.FC<FutureRideSuccessCardProps> = ({
           )}
         </div>
 
-        {/* SUMMARY */}
+        {/* SUMMARY  */}
         {!isFailed && (
           <div className="mt-7 rounded-3xl border border-white/60 bg-white/90 p-5 shadow-sm backdrop-blur">
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -206,7 +216,7 @@ const FutureRideSuccessCard: React.FC<FutureRideSuccessCardProps> = ({
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER  */}
       {!isFailed && (
         <div className="border-t border-gray-100 bg-gray-50/70 px-6 py-4">
           <div className="flex items-center justify-end">

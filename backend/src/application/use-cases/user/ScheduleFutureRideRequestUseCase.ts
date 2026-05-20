@@ -57,7 +57,20 @@ export class ScheduleFutureRideRequestUseCase implements IUseCase<
         );
 
       if (nearbyAvailabilities.length === 0) {
-        return Result.failure(FutureRideErrors.noDriversFound());
+        Logger.info("No nearby drivers found for future ride request", {
+          requestGroupId: dto.requestGroupId,
+          riderId: dto.getRiderId(),
+          pickupTime: dto.pickupTime,
+        });
+
+        return Result.success(
+          ScheduleFutureRideResponseDto.create(
+            dto.requestGroupId,
+            [],
+            dto.pickupTime,
+            dto.requiredDuration,
+          ),
+        );
       }
 
       const fareBreakdown = await this.fareCalculationService.calculateFare({

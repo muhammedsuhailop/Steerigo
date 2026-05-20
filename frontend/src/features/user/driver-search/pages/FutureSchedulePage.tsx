@@ -37,6 +37,9 @@ const FutureRideSearchPage: React.FC = () => {
     reset,
   } = useScheduleRide();
 
+  const hasNoDriversInResponse =
+    lastResponse?.success && lastResponse?.data?.totalDriversNotified === 0;
+
   const [currentFormData, setCurrentFormData] = useState<TripFormData | null>(
     null,
   );
@@ -53,13 +56,13 @@ const FutureRideSearchPage: React.FC = () => {
 
   const handleFormChange = useCallback(
     (formData: TripFormData) => {
-      if (isExpired || isAllRejected) {
+      if (isExpired || isAllRejected || hasNoDriversInResponse) {
         reset();
       }
 
       setCurrentFormData(formData);
     },
-    [isExpired, isAllRejected, reset],
+    [isExpired, isAllRejected, hasNoDriversInResponse, reset],
   );
 
   const handleLocationSelect = (location: Location | null): void => {
@@ -98,7 +101,11 @@ const FutureRideSearchPage: React.FC = () => {
   };
 
   const shouldLockForm =
-    !!lastResponse?.success && !acceptedRide && !isExpired && !isAllRejected;
+    !!lastResponse?.success &&
+    !acceptedRide &&
+    !isExpired &&
+    !isAllRejected &&
+    !hasNoDriversInResponse;
 
   return (
     <div className="min-h-screen bg-gray-50">
