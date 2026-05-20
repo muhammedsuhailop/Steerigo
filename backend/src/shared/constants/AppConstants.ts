@@ -29,5 +29,6 @@ export const AppConstants = {
 
   CHAT_ROOM_EXPIRY_QUEUE_NAME: "chat-room-expiry",
   CHAT_ROOM_EXPIRY_JOB_NAME: "end-chat-room",
-  CHAT_ROOM_EXPIRY_DELAY_MS:  24 * 60 * 60 * 1000,
+  CHAT_ROOM_EXPIRY_DELAY_MS: 24 * 60 * 60 * 1000,
+  CHAT_ROOM_CANCELLATION_EXPIRY_DELAY_MS: 60 * 60 * 1000,
 };

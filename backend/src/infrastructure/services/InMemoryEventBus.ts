@@ -324,6 +324,7 @@ export class InMemoryEventBus implements IEventBus {
     }
 
     await this.updateDriverAvailability(driverId);
+    await this.scheduleChatRoomEndAfterCancellation(event.payload.rideId);
   }
 
   private async handleRideCancelledByDriver(event: RideCancelledByDriverEvent) {
@@ -337,6 +338,7 @@ export class InMemoryEventBus implements IEventBus {
     });
 
     await this.updateDriverAvailability(driverId);
+    await this.scheduleChatRoomEndAfterCancellation(event.payload.rideId);
   }
 
   private async handleRideFareUpdated(event: RideFareUpdatedEvent) {
@@ -528,6 +530,39 @@ export class InMemoryEventBus implements IEventBus {
       });
     } catch (error) {
       Logger.error("Failed to schedule chat room end after ride completion", {
+        rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async scheduleChatRoomEndAfterCancellation(
+    rideId: string,
+  ): Promise<void> {
+    try {
+      const chatRoom = await this.chatRoomRepository.findByRideId(rideId);
+
+      if (!chatRoom) {
+        Logger.info(
+          "No chat room found for cancelled ride — skipping expiry schedule",
+          {
+            rideId,
+          },
+        );
+        return;
+      }
+
+      await this.chatRoomExpiryService.scheduleChatRoomEndAfterCancellation(
+        rideId,
+        chatRoom.getId(),
+      );
+
+      Logger.info("Chat room end scheduled after ride cancellation", {
+        rideId,
+        chatRoomId: chatRoom.getId(),
+      });
+    } catch (error) {
+      Logger.error("Failed to schedule chat room end after ride cancellation", {
         rideId,
         error: error instanceof Error ? error.message : String(error),
       });

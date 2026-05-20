@@ -32,6 +32,28 @@ export class ChatRoomExpiryService implements IChatRoomExpiryService {
     });
   }
 
+  async scheduleChatRoomEndAfterCancellation(
+    rideId: string,
+    chatRoomId: string,
+  ): Promise<void> {
+    await this.expiryQueue.add(
+      AppConstants.CHAT_ROOM_EXPIRY_JOB_NAME,
+      { rideId, chatRoomId } satisfies ChatRoomExpiryJobData,
+      {
+        jobId: this.buildJobId(chatRoomId),
+        delay: AppConstants.CHAT_ROOM_CANCELLATION_EXPIRY_DELAY_MS, 
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
+
+    Logger.info("Chat room end scheduled after cancellation", {
+      chatRoomId,
+      rideId,
+      endsInMs: AppConstants.CHAT_ROOM_CANCELLATION_EXPIRY_DELAY_MS,
+    });
+  }
+
   async cancelChatRoomEnd(chatRoomId: string): Promise<void> {
     const job = await this.expiryQueue.getJob(this.buildJobId(chatRoomId));
 
