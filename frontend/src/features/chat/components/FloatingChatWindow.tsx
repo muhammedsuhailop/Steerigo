@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from "react";
-import { FaMinus, FaTimes, FaPaperPlane, FaCommentDots } from "react-icons/fa";
+import {
+  FaMinus,
+  FaTimes,
+  FaPaperPlane,
+  FaCommentDots,
+  FaChevronUp,
+} from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { useChatRoom } from "../hooks/useChatRoom";
 import { useSendChatMessageMutation } from "../services/chatApi";
@@ -8,6 +14,7 @@ import { MessageBubble } from "./MessageBubble";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { getDateLabel } from "../utils/formatDateLabel";
+import { ChatRoomStatus } from "../types/enums";
 
 export const FloatingChatWindow: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -17,6 +24,7 @@ export const FloatingChatWindow: React.FC = () => {
     isMinimized,
     activeChatRoomId,
     activeChatName,
+    activeChatStatus,
     messages,
     unreadCounts,
   } = useAppSelector((state) => state.chat);
@@ -38,6 +46,7 @@ export const FloatingChatWindow: React.FC = () => {
   }, [messages, isMinimized]);
 
   if (!isOpen || !activeChatRoomId || !currentUserId) return null;
+  const isChatEnded = activeChatStatus === ChatRoomStatus.ENDED;
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,15 +81,18 @@ export const FloatingChatWindow: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               dispatch(toggleMinimize());
             }}
             className="hover:text-blue-400 transition-colors"
           >
-            <FaMinus size={14} />
+            {isMinimized ? <FaChevronUp size={14} /> : <FaMinus size={14} />}
           </button>
+
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               dispatch(closeChat());
@@ -134,18 +146,19 @@ export const FloatingChatWindow: React.FC = () => {
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Type message..."
-              className="text-sm h-10"
-              disabled={isSending}
+              placeholder={isChatEnded ? "Chat has ended" : "Type message..."}
+              className={`text-sm h-10 ${isChatEnded ? "bg-gray-100 cursor-not-allowed" : ""}`}
+              disabled={isSending || isChatEnded}
             />
-            <Button
-              type="submit"
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 h-10 w-10 p-0 rounded-xl"
-              disabled={isSending || !text.trim()}
-            >
-              <FaPaperPlane size={14} />
-            </Button>
+            {!(isSending || !text.trim() || isChatEnded) && (
+              <Button
+                type="submit"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 h-10 w-10 p-0 rounded-xl transition-colors"
+              >
+                <FaPaperPlane size={14} />
+              </Button>
+            )}
           </form>
         </>
       )}

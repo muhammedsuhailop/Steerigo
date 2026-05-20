@@ -4,6 +4,7 @@ import { RiderInfo } from "../types/viewDriverRide.types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { useGetChatRoomByRideIdQuery } from "@/features/chat/services/chatApi";
 import { openChat } from "@/features/chat/store/chatSlice";
+import { ChatRoomStatus } from "@/features/chat/types/enums";
 
 interface RideRiderCardProps {
   rider: RiderInfo;
@@ -26,6 +27,9 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
   const { data: chatRoomData, isLoading: isRoomLoading } =
     useGetChatRoomByRideIdQuery(rideId);
   const chatRoomId = chatRoomData?.data.chatRoomId;
+  const chatRoomStatus = chatRoomData?.data.status || ChatRoomStatus.ENDED;
+
+  const isChatEnded = chatRoomStatus === ChatRoomStatus.ENDED;
 
   const handleOpenChat = () => {
     if (chatRoomId) {
@@ -33,6 +37,7 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
         openChat({
           roomId: chatRoomId,
           name: rider.name,
+          status: chatRoomStatus,
         }),
       );
     }
@@ -89,7 +94,11 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
             size={14}
             className={isRoomLoading ? "animate-pulse" : ""}
           />
-          {isRoomLoading ? "Loading..." : minimal ? "View Chat" : "Message"}
+          {isRoomLoading
+            ? "Loading..."
+            : minimal || isChatEnded
+              ? "View Chat"
+              : "Message"}
         </button>
       </div>
     </div>

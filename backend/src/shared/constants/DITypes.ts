@@ -63,6 +63,9 @@ export const TYPES = {
   FutureRideExpiryService: Symbol.for("FutureRideExpiryService"),
   FutureRideExpiryQueue: Symbol.for("FutureRideExpiryQueue"),
   FutureRideExpiryWorker: Symbol.for("FutureRideExpiryWorker"),
+  ChatRoomExpiryQueue: Symbol.for("ChatRoomExpiryQueue"),
+  ChatRoomExpiryWorker: Symbol.for("ChatRoomExpiryWorker"),
+  ChatRoomExpiryService: Symbol.for("ChatRoomExpiryService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),

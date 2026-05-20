@@ -41,6 +41,8 @@ import {
   FutureRideRequestExpiredForDriverEvent,
   FutureRideRequestSentToDriverEvent,
 } from "@application/events/FutureRideEvents";
+import { IChatRoomExpiryService } from "@application/services/chat/IChatRoomExpiryService";
+import { IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -59,6 +61,10 @@ export class InMemoryEventBus implements IEventBus {
     private readonly driverRepository: IDriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
+    @inject(TYPES.ChatRoomExpiryService)
+    private readonly chatRoomExpiryService: IChatRoomExpiryService,
+    @inject(TYPES.ChatRoomRepository)
+    private readonly chatRoomRepository: IChatRoomRepository,
   ) {}
 
   // Generic-safe subscription
@@ -209,6 +215,7 @@ export class InMemoryEventBus implements IEventBus {
     });
     await this.incrementDriverRideCount(payload.driverId);
     await this.updateDriverAvailability(payload.driverId);
+    await this.scheduleChatRoomEndForRide(payload.rideId);
   }
 
   private async handlePaymentInitiated(event: PaymentInitiatedEvent) {
@@ -494,5 +501,36 @@ export class InMemoryEventBus implements IEventBus {
       body: "No drivers accepted your scheduled ride request. Please try again.",
       metadata: { ...payload, riderId },
     });
+  }
+
+  private async scheduleChatRoomEndForRide(rideId: string): Promise<void> {
+    try {
+      const chatRoom = await this.chatRoomRepository.findByRideId(rideId);
+
+      if (!chatRoom) {
+        Logger.warn(
+          "No chat room found for completed ride — skipping expiry schedule",
+          {
+            rideId,
+          },
+        );
+        return;
+      }
+
+      await this.chatRoomExpiryService.scheduleChatRoomEnd(
+        rideId,
+        chatRoom.getId(),
+      );
+
+      Logger.info("Chat room end scheduled after ride completion", {
+        rideId,
+        chatRoomId: chatRoom.getId(),
+      });
+    } catch (error) {
+      Logger.error("Failed to schedule chat room end after ride completion", {
+        rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }

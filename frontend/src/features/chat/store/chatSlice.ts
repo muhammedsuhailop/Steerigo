@@ -7,7 +7,7 @@ import {
   MessageTimeline,
   RawChatMessage,
 } from "../types/chat.types";
-import { MessageDeliveryStatus } from "../types/enums";
+import { ChatRoomStatus, MessageDeliveryStatus } from "../types/enums";
 import { getLocalMidnight } from "../utils/formatDateLabel";
 
 const transformToTimeline = (msg: RawChatMessage): MessageTimeline => ({
@@ -24,6 +24,7 @@ interface ChatState {
   isMinimized: boolean;
   activeChatRoomId: string | null;
   activeChatName: string | null;
+  activeChatStatus: ChatRoomStatus | null;
   unreadCounts: Record<string, number>;
 }
 
@@ -33,6 +34,7 @@ const initialState: ChatState = {
   isMinimized: false,
   activeChatRoomId: null,
   activeChatName: null,
+  activeChatStatus: null,
   unreadCounts: {},
 };
 
@@ -42,10 +44,15 @@ const chatSlice = createSlice({
   reducers: {
     openChat: (
       state,
-      action: PayloadAction<{ roomId: string; name: string }>,
+      action: PayloadAction<{
+        roomId: string;
+        name: string;
+        status: ChatRoomStatus;
+      }>,
     ) => {
       state.activeChatRoomId = action.payload.roomId;
       state.activeChatName = action.payload.name;
+      state.activeChatStatus = action.payload.status;
       state.isOpen = true;
       state.isMinimized = false;
       state.unreadCounts[action.payload.roomId] = 0;
@@ -55,6 +62,7 @@ const chatSlice = createSlice({
       state.isOpen = false;
       state.activeChatRoomId = null;
       state.activeChatName = null;
+      state.activeChatStatus = null;
     },
 
     toggleMinimize: (state) => {

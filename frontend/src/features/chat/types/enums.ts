@@ -10,3 +10,8 @@ export enum MessageDeliveryStatus {
   DELIVERED = "DELIVERED",
   READ = "READ",
 }
+
+export enum ChatRoomStatus {
+  ACTIVE = "ACTIVE",
+  ENDED = "ENDED",
+}

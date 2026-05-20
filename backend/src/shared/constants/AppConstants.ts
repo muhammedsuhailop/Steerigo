@@ -26,4 +26,8 @@ export const AppConstants = {
   FUTURE_RIDE_EXPIRY_QUEUE_NAME: "future-ride-expiry",
   FUTURE_RIDE_EXPIRY_JOB_NAME: "expire-future-ride-group",
   FUTURE_RIDE_EXPIRY_WINDOW_MS: 10 * 60 * 1000,
+
+  CHAT_ROOM_EXPIRY_QUEUE_NAME: "chat-room-expiry",
+  CHAT_ROOM_EXPIRY_JOB_NAME: "end-chat-room",
+  CHAT_ROOM_EXPIRY_DELAY_MS:  24 * 60 * 60 * 1000,
 };

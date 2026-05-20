@@ -6,17 +6,19 @@ import { BsSend } from "react-icons/bs";
 interface MessageInputProps {
   onSend: (content: string) => void;
   isLoading: boolean;
+  isChatEnded?: boolean;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   onSend,
   isLoading,
+  isChatEnded = false,
 }) => {
   const [content, setContent] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim() && !isLoading) {
+    if (content.trim() && !isLoading && !isChatEnded) {
       onSend(content.trim());
       setContent("");
     }
@@ -27,14 +29,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       <Input
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Type your message..."
-        disabled={isLoading}
-        className="flex-1 bg-gray-50 border-none focus:ring-2 focus:ring-blue-500"
+        placeholder={isChatEnded ? "Chat has ended" : "Type your message..."}
+        disabled={isLoading || isChatEnded}
+        className={`flex-1 border-none focus:ring-2 focus:ring-blue-500 ${
+          isChatEnded ? "bg-gray-100 cursor-not-allowed" : "bg-gray-50"
+        }`}
       />
       <Button
         type="submit"
-        disabled={isLoading || !content.trim()}
-        className="bg-blue-600 hover:bg-blue-700 rounded-xl px-4"
+        disabled={isLoading || !content.trim() || isChatEnded}
+        className={`rounded-xl px-4 transition-all ${
+          isChatEnded
+            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
       >
         <BsSend className="w-4 h-4" />
       </Button>

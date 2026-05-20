@@ -22,6 +22,7 @@ import { container } from "@infrastructure/container/DIContainer";
 import { WorkerSocketBridge } from "@infrastructure/realtime/WorkerSocketBridge";
 import { TYPES } from "@shared/constants/DITypes";
 import { FutureRideExpiryWorker } from "@infrastructure/workers/FutureRideExpiryWorker";
+import { ChatRoomExpiryWorker } from "@infrastructure/workers/ChatRoomExpiryWorker";
 
 class App {
   private app: Application;
@@ -29,6 +30,7 @@ class App {
   private database: DatabaseConnection;
   private workerSocketBridge: WorkerSocketBridge;
   private futureRideExpiryWorker: FutureRideExpiryWorker;
+  private chatRoomExpiryWorker: ChatRoomExpiryWorker;
 
   constructor() {
     this.app = express();
@@ -39,6 +41,9 @@ class App {
     );
     this.futureRideExpiryWorker = container.get<FutureRideExpiryWorker>(
       TYPES.FutureRideExpiryWorker,
+    );
+    this.chatRoomExpiryWorker = container.get<ChatRoomExpiryWorker>(
+      TYPES.ChatRoomExpiryWorker,
     );
     this.initializeMiddleware();
     this.initializeRoutes();
@@ -109,6 +114,9 @@ class App {
     this.futureRideExpiryWorker.start();
     Logger.info("Future ride expiry worker started successfully");
 
+    this.chatRoomExpiryWorker.start();
+    Logger.info("Chat room expiry worker started successfully");
+
     // Start Redis bridge — subscribes to worker events and forwards to Socket.IO
     await this.workerSocketBridge.start();
 
@@ -169,6 +177,7 @@ class App {
 
       await this.workerSocketBridge.stop();
       await this.futureRideExpiryWorker.close();
+      await this.chatRoomExpiryWorker.close();
       await this.database.disconnect();
 
       Logger.info("Shutdown complete");

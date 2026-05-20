@@ -4,6 +4,7 @@ import { DriverInfo } from "../types/viewRide.types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { useGetChatRoomByRideIdQuery } from "@/features/chat/services/chatApi";
 import { openChat } from "@/features/chat/store/chatSlice";
+import { ChatRoomStatus } from "@/features/chat/types/enums";
 
 interface RideDriverCardProps {
   driver: DriverInfo;
@@ -26,6 +27,9 @@ const RideDriverCard: React.FC<RideDriverCardProps> = ({ driver, rideId }) => {
   const { data: chatRoomData, isLoading: isRoomLoading } =
     useGetChatRoomByRideIdQuery(rideId);
   const chatRoomId = chatRoomData?.data.chatRoomId;
+  const chatRoomStatus = chatRoomData?.data.status || ChatRoomStatus.ENDED;
+
+  const isChatEnded = chatRoomStatus === ChatRoomStatus.ENDED;
 
   const handleOpenChat = () => {
     if (chatRoomId) {
@@ -33,6 +37,7 @@ const RideDriverCard: React.FC<RideDriverCardProps> = ({ driver, rideId }) => {
         openChat({
           roomId: chatRoomId,
           name: driver.name,
+          status: chatRoomStatus,
         }),
       );
     }
@@ -52,7 +57,7 @@ const RideDriverCard: React.FC<RideDriverCardProps> = ({ driver, rideId }) => {
           <div className="flex items-center gap-1 text-amber-500 text-sm font-medium">
             <FaStar /> {driver.rating}
             <span className="text-gray-400 font-normal">
-              {driver.totalRides} Rides Complted
+              {driver.totalRides} Rides Completed
             </span>
           </div>
         </div>
@@ -90,7 +95,9 @@ const RideDriverCard: React.FC<RideDriverCardProps> = ({ driver, rideId }) => {
           {isRoomLoading
             ? "Loading..."
             : chatRoomId
-              ? "Message Driver"
+              ? isChatEnded
+                ? "View Chat"
+                : "Message Driver"
               : "Initializing Chat..."}
         </button>
       </div>

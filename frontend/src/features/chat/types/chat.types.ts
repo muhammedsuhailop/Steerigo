@@ -1,6 +1,6 @@
 import {
+  ChatRoomStatus,
   MessageDeliveryStatus,
-  MessageType,
 } from "@/features/chat/types/enums";
 
 export interface ChatParticipant {
@@ -22,7 +22,7 @@ export interface ChatRoom {
   chatRoomId: string;
   rideId: string;
   type: string;
-  status: string;
+  status: ChatRoomStatus;
   participants: ChatParticipant[];
   createdAt: string;
   updatedAt: string;
@@ -63,7 +63,7 @@ export interface GetRideChatRoomResponse {
     chatRoomId: string;
     rideId: string;
     type: string;
-    status: string;
+    status: ChatRoomStatus;
     participants: ChatParticipant[];
     lastMessageId?: string;
     lastMessageAt?: string;
