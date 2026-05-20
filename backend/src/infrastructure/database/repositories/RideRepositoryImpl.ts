@@ -17,6 +17,7 @@ import { FilterQuery, SortOrder, Types } from "mongoose";
 import { PaginatedResult } from "@shared/types/Repository";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { toObjectId } from "@shared/utils/idHelper";
+import { BookingType } from "@domain/value-objects/BookingType";
 
 @injectable()
 export class RideRepositoryImpl implements IRideRepository {
@@ -514,5 +515,90 @@ export class RideRepositoryImpl implements IRideRepository {
       cancelled: stats.cancelled,
       totalSpend: stats.totalAmount,
     };
+  }
+
+  async hasTimeSlotConflict(
+    driverId: string,
+    pickupTime: Date,
+    timeRequiredHours: number,
+  ): Promise<boolean> {
+    try {
+      const BUFFER_HOURS = 1;
+
+      const newRideStart = pickupTime;
+
+      const newRideEnd = new Date(
+        pickupTime.getTime() +
+          (timeRequiredHours + BUFFER_HOURS) * 60 * 60 * 1000,
+      );
+
+      const conflictingStatuses = [
+        RideStatus.ARRIVED,
+        RideStatus.ACCEPTED,
+        RideStatus.STARTED,
+      ];
+
+      const result = await RideModel.aggregate([
+        {
+          $match: {
+            driverId: new Types.ObjectId(driverId),
+            status: { $in: conflictingStatuses },
+          },
+        },
+        {
+          $addFields: {
+            existingEndMs: {
+              $add: [
+                { $toLong: "$requestedPickupTime" },
+                {
+                  $multiply: [
+                    { $add: ["$timeRequired", BUFFER_HOURS] },
+                    60 * 60 * 1000,
+                  ],
+                },
+              ],
+            },
+            newRideStartMs: newRideStart.getTime(),
+            newRideEndMs: newRideEnd.getTime(),
+          },
+        },
+        {
+          $match: {
+            $expr: {
+              $and: [
+                {
+                  $lt: [{ $toLong: "$requestedPickupTime" }, "$newRideEndMs"],
+                },
+                {
+                  $gt: ["$existingEndMs", "$newRideStartMs"],
+                },
+              ],
+            },
+          },
+        },
+        { $limit: 1 },
+        { $count: "conflicts" },
+      ]);
+
+      const hasConflict = (result[0]?.conflicts ?? 0) > 0;
+
+      Logger.debug("Time slot conflict check", {
+        driverId,
+        pickupTime,
+        timeRequiredHours,
+        newRideEnd,
+        hasConflict,
+      });
+
+      return hasConflict;
+    } catch (error) {
+      Logger.error("Error checking time slot conflict", {
+        driverId,
+        pickupTime,
+        error,
+      });
+
+      throw error;
+    }
   }
 }

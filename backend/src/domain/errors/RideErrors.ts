@@ -279,4 +279,18 @@ export class RideErrors {
       },
     );
   }
+
+  static timeSlotConflict(): DomainError {
+    return new DomainError(
+      "You already have another ride during this time slot.",
+      "RIDE_TIME_SLOT_CONFLICT",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
 }

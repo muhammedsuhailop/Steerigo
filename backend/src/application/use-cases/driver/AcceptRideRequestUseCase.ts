@@ -143,6 +143,24 @@ export class AcceptRideRequestUseCase implements IUseCase<
         );
       }
 
+      const hasScheduledConflict =
+        await this.rideRepository.hasTimeSlotConflict(
+          driverId,
+          rideRequest.getPickupTime(),
+          rideRequest.getTimeRequired(),
+        );
+
+      if (hasScheduledConflict) {
+        Logger.warn("Driver has scheduled ride conflict", {
+          driverId,
+          requestId,
+          pickupTime: rideRequest.getPickupTime(),
+          timeRequiredHours: rideRequest.getTimeRequired(),
+        });
+
+        return Result.failure(RideErrors.timeSlotConflict());
+      }
+
       const acceptedRequest =
         await this.rideRequestRepository.atomicAcceptRideRequest(requestId);
 
@@ -193,6 +211,7 @@ export class AcceptRideRequestUseCase implements IUseCase<
         acceptedRequest.getRiderId(),
         acceptedRequest.getPickup(),
         acceptedRequest.getDrop(),
+        acceptedRequest.getPickupTime(),
         acceptedRequest.getTimeRequired(),
         acceptedRequest.getRideType(),
         BookingType.INSTANT,

@@ -98,4 +98,18 @@ export class FutureRideErrors {
       },
     );
   }
+
+  static timeSlotConflict(): DomainError {
+    return new DomainError(
+      FUTURE_RIDE_ERROR_MESSAGES.TIME_SLOT_CONFLICT,
+      "FUTURE_RIDE_TIME_SLOT_CONFLICT",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
 }

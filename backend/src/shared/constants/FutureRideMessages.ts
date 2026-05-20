@@ -10,6 +10,8 @@ export const FUTURE_RIDE_ERROR_MESSAGES = {
   PICKUP_TIME_TOO_SOON: "Pickup time must be at least 6 hours from now.",
   INVALID_PICKUP_TIME: "Invalid pickup time provided.",
   SCHEDULE_FAILED: "Failed to schedule future ride request.",
+  TIME_SLOT_CONFLICT:
+    "You already have another scheduled ride during this time slot.",
 } as const;
 
 export const FUTURE_RIDE_SUCCESS_MESSAGES = {

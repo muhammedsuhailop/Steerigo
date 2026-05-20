@@ -25,6 +25,8 @@ export interface IRideDocument extends Document {
     address?: string;
   };
 
+  requestedPickupTime: Date;
+
   timeRequired: number;
   rideType: string;
   bookingType: BookingType;
@@ -108,6 +110,10 @@ const rideSchema = new Schema<IRideDocument>(
       latitude: { type: Number, required: true },
       longitude: { type: Number, required: true },
       address: { type: String },
+    },
+
+    requestedPickupTime: {
+      type: Date,
     },
 
     timeRequired: {

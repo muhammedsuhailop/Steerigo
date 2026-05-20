@@ -330,6 +330,7 @@ export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository
       paymentStatus: doc.paymentStatus as PaymentStatus,
       pickup,
       drop,
+      requestedPickupTime: doc.requestedPickupTime,
       timeRequired: doc.timeRequired,
       rideType: rideTypeValue,
       bookingType: doc.bookingType,

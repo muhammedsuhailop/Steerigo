@@ -18,6 +18,7 @@ export class Ride {
     private paymentStatus: PaymentStatus,
     private readonly pickup: Location,
     private readonly drop: Location,
+    private readonly requestedPickupTime: Date,
     private readonly timeRequired: number,
     private readonly rideType: RideType,
     private readonly bookingType: BookingType,
@@ -36,6 +37,7 @@ export class Ride {
     riderId: string,
     pickup: Location,
     drop: Location,
+    requestedPickupTime: Date,
     timeRequired: number,
     rideType: RideType,
     bookingType: BookingType,
@@ -59,6 +61,7 @@ export class Ride {
       PaymentStatus.PENDING,
       pickup,
       drop,
+      requestedPickupTime,
       timeRequired,
       rideType,
       bookingType,
@@ -78,6 +81,7 @@ export class Ride {
     paymentStatus: PaymentStatus;
     pickup: Location;
     drop: Location;
+    requestedPickupTime: Date;
     timeRequired: number;
     rideType: RideType;
     bookingType: BookingType;
@@ -97,6 +101,7 @@ export class Ride {
       data.paymentStatus,
       data.pickup,
       data.drop,
+      data.requestedPickupTime,
       data.timeRequired,
       data.rideType,
       data.bookingType,
@@ -131,6 +136,10 @@ export class Ride {
 
   getPickup(): Location {
     return this.pickup;
+  }
+
+  getrequestedPickupTime(): Date {
+    return this.requestedPickupTime;
   }
 
   getDrop(): Location {

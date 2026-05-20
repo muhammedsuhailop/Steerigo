@@ -4,7 +4,6 @@ import { AcceptFutureRideRequestDto } from "@application/dto/driver/AcceptFuture
 import { AcceptFutureRideRequestResponseDto } from "@application/dto/driver/AcceptFutureRideRequestResponseDto";
 import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { IFutureRideExpiryService } from "@application/services/ride-search/IFutureRideExpiryService";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { IEventBus } from "@application/services/IEventBus";
@@ -40,8 +39,6 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
     private readonly driverRepository: IDriverRepository,
     @inject(TYPES.FutureRideRequestRepository)
     private readonly futureRideRequestRepository: IFutureRideRequestRepository,
-    @inject(TYPES.DriverAvailabilityRepository)
-    private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.FutureRideExpiryService)
     private readonly futureRideExpiryService: IFutureRideExpiryService,
     @inject(TYPES.DistributedLockService)
@@ -153,6 +150,25 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
             request.getStatus() === FutureRideRequestStatus.MATCHED),
       );
 
+      const pickupTime = futureRequest.getPickupTime();
+      const requiredDurationHours = futureRequest.getrequiredHours();
+
+      const hasConflict = await this.rideRepository.hasTimeSlotConflict(
+        driverId,
+        pickupTime,
+        requiredDurationHours,
+      );
+
+      if (hasConflict) {
+        Logger.warn("Driver has a time slot conflict for scheduled ride", {
+          driverId,
+          requestId,
+          pickupTime,
+          requiredDurationHours,
+        });
+        return Result.failure(FutureRideErrors.timeSlotConflict());
+      }
+
       futureRequest.markAccepted();
       await this.futureRideRequestRepository.save(futureRequest);
 
@@ -198,6 +214,7 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
         futureRequest.getRiderId(),
         futureRequest.getPickup(),
         futureRequest.getDrop(),
+        futureRequest.getPickupTime(),
         futureRequest.getrequiredHours(),
         futureRequest.getRideType(),
         BookingType.SCHEDULED,
