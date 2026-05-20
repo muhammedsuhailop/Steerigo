@@ -61,7 +61,7 @@ export class ScheduleFutureRideRequestUseCase implements IUseCase<
       }
 
       const fareBreakdown = await this.fareCalculationService.calculateFare({
-        durationMinutes: AppConstants.FUTURE_RIDE_DEFAULT_DURATION_MINUTES,
+        durationMinutes: dto.requiredDuration,
         searchDate: dto.pickupTime,
       });
 
