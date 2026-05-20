@@ -14,6 +14,7 @@ import {
   RideCancelledByDriverDriverPayload,
   DriverFareUpdatedPayload,
   FutureRideAcceptedPayload,
+  FutureRideAllDriversRejectedPayload,
 } from "../../application/services/IRideNotificationService";
 import { getRideSocketServer } from "../realtime/socket";
 import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
@@ -621,6 +622,54 @@ export class RideNotificationService implements IRideNotificationService {
         driverUserId,
         error: error instanceof Error ? error.message : String(error),
       });
+    }
+  }
+
+  async notifyRiderFutureRideAllDriversRejected(
+    riderId: string,
+    payload: FutureRideAllDriversRejectedPayload,
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`rider:${riderId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_ALL_DRIVERS_REJECTED,
+          payload,
+        );
+
+        Logger.info(
+          "Notified rider that all drivers rejected scheduled ride via socket",
+          {
+            riderId,
+            requestGroupId: payload.requestGroupId,
+          },
+        );
+      } else {
+        await this.publishToRedis(
+          PUBSUB_CHANNELS.FUTURE_RIDE_ALL_DRIVERS_REJECTED,
+          {
+            riderId,
+            ...payload,
+          },
+        );
+
+        Logger.info(
+          "Published all-drivers-rejected event to Redis for bridge",
+          {
+            riderId,
+            requestGroupId: payload.requestGroupId,
+          },
+        );
+      }
+    } catch (error) {
+      Logger.error(
+        "Error notifying rider that all drivers rejected scheduled ride",
+        {
+          riderId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 }

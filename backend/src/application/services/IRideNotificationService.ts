@@ -1,4 +1,7 @@
-import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
+import {
+  FutureRideLastRequestRejectedEvent,
+  FutureRideRequestSentToDriverEvent,
+} from "@application/events/FutureRideEvents";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
 import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
@@ -214,6 +217,11 @@ export interface FutureRideAcceptedPayload {
   };
 }
 
+export interface FutureRideAllDriversRejectedPayload {
+  readonly requestGroupId: string;
+  readonly pickupTime: string;
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -329,5 +337,10 @@ export interface IRideNotificationService {
       riderId: string;
       expiredAt: string;
     },
+  ): Promise<void>;
+
+  notifyRiderFutureRideAllDriversRejected(
+    riderId: string,
+    payload: FutureRideAllDriversRejectedPayload,
   ): Promise<void>;
 }

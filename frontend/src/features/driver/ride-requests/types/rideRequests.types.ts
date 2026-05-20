@@ -155,7 +155,9 @@ export interface AcceptFutureRideRequestResponse {
 export interface FutureRideRequestCardProps {
   request: FutureRideRequestData;
   onAccept: (requestId: string) => void;
+  onReject: (requestId: string) => void;
   isAccepting: boolean;
+  isRejecting: boolean;
   isUnavailable?: boolean;
   isAccepted?: boolean;
 }
@@ -164,7 +166,9 @@ export interface FutureRideRequestsListProps {
   requests: FutureRideRequestData[];
   isLoading: boolean;
   onAccept: (requestId: string) => void;
+  onReject: (requestId: string) => void;
   acceptingRequestId: string | null;
+  rejectingRequestId: string | null;
   unavailableRequestIds: Set<string>;
 }
 
@@ -196,4 +200,14 @@ export interface RideRequestExpiredSocketPayload {
   driverUserId: string;
   riderId: string;
   expiredAt: string;
+}
+
+export interface RejectFutureRideRequestResponse {
+  readonly success: boolean;
+  readonly message: string;
+  readonly data: {
+    readonly futureRequestId: string;
+    readonly requestGroupId: string;
+    readonly driverId: string;
+  };
 }

@@ -15,5 +15,6 @@ export const FUTURE_RIDE_ERROR_MESSAGES = {
 export const FUTURE_RIDE_SUCCESS_MESSAGES = {
   SCHEDULED: "Your ride has been scheduled. Drivers have been notified.",
   CANCELLED: "Your scheduled ride has been successfully cancelled.",
+  REJECTED: "Future ride request has been rejected successfully.",
   REQUESTS_FETCHED: "Your Future Requests fetched successfully",
 } as const;

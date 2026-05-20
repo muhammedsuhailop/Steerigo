@@ -106,10 +106,20 @@ export interface FutureRideRequestCancelledForDriverEvent extends DomainEvent {
   };
 }
 
+export interface FutureRideLastRequestRejectedEvent extends DomainEvent {
+  readonly type: "FutureRideLastRequestRejected";
+  readonly payload: {
+    readonly requestGroupId: string;
+    readonly riderId: string;
+    readonly pickupTime: string;
+  };
+}
+
 export type FutureRideDomainEvent =
   | FutureRideAcceptedEvent
   | FutureRideExpiredEvent
   | FutureRideCancelledByRiderEvent
   | FutureRideRequestSentToDriverEvent
   | FutureRideRequestExpiredForDriverEvent
-  | FutureRideRequestCancelledForDriverEvent;
+  | FutureRideRequestCancelledForDriverEvent
+  | FutureRideLastRequestRejectedEvent;

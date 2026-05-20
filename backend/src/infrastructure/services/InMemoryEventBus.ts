@@ -36,6 +36,7 @@ import {
   FutureRideCancelledByRiderEvent,
   FutureRideDomainEvent,
   FutureRideExpiredEvent,
+  FutureRideLastRequestRejectedEvent,
   FutureRideRequestCancelledForDriverEvent,
   FutureRideRequestExpiredForDriverEvent,
   FutureRideRequestSentToDriverEvent,
@@ -119,6 +120,9 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleFutureRideRequestCancelledForDriver(event);
       case "RideRequestExpiredForDriver":
         return this.handleRideRequestExpiredForDriver(event);
+      case "FutureRideLastRequestRejected":
+        return this.handleFutureRideLastRequestRejected(event);
+
       default:
         Logger.warn("Unhandled domain event type", {
           eventType: (event as { type: string }).type,
@@ -472,5 +476,23 @@ export class InMemoryEventBus implements IEventBus {
       driverUserId,
       payload,
     );
+  }
+
+  private async handleFutureRideLastRequestRejected(
+    event: FutureRideLastRequestRejectedEvent,
+  ): Promise<void> {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRiderFutureRideAllDriversRejected(
+      riderId,
+      payload,
+    );
+
+    await this.persistence.persistNotification(riderId, {
+      type: NotificationType.RIDE_REQUEST_EXPIRED,
+      title: "No drivers found",
+      body: "No drivers accepted your scheduled ride request. Please try again.",
+      metadata: { ...payload, riderId },
+    });
   }
 }

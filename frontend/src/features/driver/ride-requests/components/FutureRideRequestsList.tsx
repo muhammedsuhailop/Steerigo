@@ -7,7 +7,9 @@ export const FutureRideRequestsList: React.FC<FutureRideRequestsListProps> = ({
   requests,
   isLoading,
   onAccept,
+  onReject,
   acceptingRequestId,
+  rejectingRequestId,
   unavailableRequestIds,
 }) => {
   if (isLoading) {
@@ -68,7 +70,9 @@ export const FutureRideRequestsList: React.FC<FutureRideRequestsListProps> = ({
           key={request.requestId}
           request={request}
           onAccept={onAccept}
+          onReject={onReject}
           isAccepting={acceptingRequestId === request.requestId}
+          isRejecting={rejectingRequestId === request.requestId}
           isUnavailable={unavailableRequestIds.has(request.requestId)}
           isAccepted={request.status === FutureRideRequestStatus.ACCEPTED}
         />

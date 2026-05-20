@@ -164,3 +164,9 @@ export interface FutureRideAcceptedPayload {
     readonly currency: string;
   };
 }
+
+export interface FutureRideRejectedPayload {
+  requestGroupId: string;
+  riderId: string;
+  pickupTime: string;
+}

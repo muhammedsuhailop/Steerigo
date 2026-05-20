@@ -163,4 +163,15 @@ export class FutureRideRequestRepositoryImpl implements IFutureRideRequestReposi
 
     return { requests, total };
   }
+
+  async hasAnyActiveRequestInGroup(requestGroupId: string): Promise<boolean> {
+    const count = await FutureRideRequestModel.countDocuments({
+      requestGroupId: new Types.ObjectId(requestGroupId),
+      status: {
+        $in: [FutureRideRequestStatus.PENDING, FutureRideRequestStatus.MATCHED],
+      },
+    });
+
+    return count > 0;
+  }
 }

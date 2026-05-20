@@ -11,6 +11,8 @@ import { AcceptFutureRideRequestDto } from "@application/dto/driver/AcceptFuture
 import { AcceptFutureRideRequestResponseDto } from "@application/dto/driver/AcceptFutureRideRequestResponseDto";
 import { GetFutureRideRequestsDto } from "@application/dto/driver/GetFutureRideRequestsDto";
 import { GetFutureRideRequestsResponseDto } from "@application/dto/driver/GetFutureRideRequestsResponseDto";
+import { RejectFutureRideRequestDto } from "@application/dto/driver/RejectFutureRideRequestDto";
+import { RejectFutureRideRequestResponseDto } from "@application/dto/driver/RejectFutureRideRequestResponseDto";
 
 @injectable()
 export class DriverScheduleRideController {
@@ -24,6 +26,11 @@ export class DriverScheduleRideController {
     private readonly getFutureRideRequestsUseCase: IUseCase<
       GetFutureRideRequestsDto,
       Promise<Result<GetFutureRideRequestsResponseDto>>
+    >,
+    @inject(TYPES.RejectFutureRideRequestUseCase)
+    private readonly rejectUseCase: IUseCase<
+      RejectFutureRideRequestDto,
+      Promise<Result<RejectFutureRideRequestResponseDto>>
     >,
   ) {}
 
@@ -40,7 +47,10 @@ export class DriverScheduleRideController {
         query: req.query,
       });
 
-      const dto = GetFutureRideRequestsDto.fromRequest(userId as string, req.query);
+      const dto = GetFutureRideRequestsDto.fromRequest(
+        userId as string,
+        req.query,
+      );
 
       const result = await this.getFutureRideRequestsUseCase.execute(dto);
 
@@ -135,6 +145,62 @@ export class DriverScheduleRideController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "AcceptFutureRideRequest",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async rejectFutureRideRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = this.getUserId(req);
+
+      Logger.info("Reject future ride request received", {
+        userId,
+        requestId: req.body.requestId,
+      });
+
+      const dto = RejectFutureRideRequestDto.fromRequest(
+        userId as string,
+        req.body,
+      );
+      const result = await this.rejectUseCase.execute(dto);
+
+      if (result.isSuccessful()) {
+        const responseData = result.getValue();
+
+        res.status(HttpStatusCodes.OK).json({
+          success: true,
+          message: responseData.message,
+          data: responseData.data,
+        } as ApiResponse);
+
+        Logger.info("Reject future ride request successful", {
+          userId,
+          requestId: req.body.requestId,
+          requestGroupId: responseData.data.requestGroupId,
+        });
+      } else {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "RejectFutureRideRequest",
+        );
+        res.status(statusCode).json(response);
+
+        Logger.warn("Reject future ride request failed", {
+          userId,
+          error: error?.message,
+        });
+      }
+    } catch (error) {
+      Logger.error("Reject future ride request controller error", {
+        error,
+        userId: this.getUserId(req),
+      });
+
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "RejectFutureRideRequest",
       );
       res.status(statusCode).json(response);
     }

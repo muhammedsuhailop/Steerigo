@@ -8,6 +8,7 @@ import type {
   AcceptFutureRideRequestResponse,
   GetFutureRideRequestsResponse,
   GetFutureRideRequestsQuery,
+  RejectFutureRideRequestResponse,
 } from "../types/rideRequests.types";
 
 export const rideRequestsApi = createApi({
@@ -111,6 +112,21 @@ export const rideRequestsApi = createApi({
         { type: "FutureRideRequests", id: "LIST" },
       ],
     }),
+
+    rejectFutureRideRequest: builder.mutation<
+      RejectFutureRideRequestResponse,
+      string
+    >({
+      query: (requestId) => ({
+        url: API_ENDPOINTS.DRIVER.REJECT_FUTURE_REQUEST,
+        method: "POST",
+        data: { requestId },
+      }),
+      invalidatesTags: (result, error, requestId) => [
+        { type: "FutureRideRequests", id: requestId },
+        { type: "FutureRideRequests", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -120,4 +136,5 @@ export const {
   useRejectRideRequestMutation,
   useGetFutureRideRequestsQuery,
   useAcceptFutureRideRequestMutation,
+  useRejectFutureRideRequestMutation,
 } = rideRequestsApi;

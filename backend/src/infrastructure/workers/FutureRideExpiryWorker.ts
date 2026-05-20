@@ -95,6 +95,12 @@ export class FutureRideExpiryWorker {
 
     const riderId = requests[0]?.getRiderId() ?? "";
 
+    const activeRequestsBeforeExpiry = requests.filter(
+      (request) =>
+        request.getStatus() === FutureRideRequestStatus.PENDING ||
+        request.getStatus() === FutureRideRequestStatus.MATCHED,
+    );
+
     const cancelledCount =
       await this.futureRideRequestRepository.markExpiredAllPendingInGroup(
         requestGroupId,
@@ -111,14 +117,8 @@ export class FutureRideExpiryWorker {
       payload: { requestGroupId, riderId, cancelledCount },
     });
 
-    const pendingRequests = requests.filter(
-      (request) =>
-        request.getStatus() === FutureRideRequestStatus.PENDING ||
-        request.getStatus() === FutureRideRequestStatus.MATCHED,
-    );
-
     await Promise.all(
-      pendingRequests.map((request) =>
+      activeRequestsBeforeExpiry.map((request) =>
         this.eventBus.publish({
           type: "FutureRideRequestExpiredForDriver",
           occurredAt: new Date(),

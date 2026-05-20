@@ -9,10 +9,8 @@ import {
   FaSquareFull,
 } from "react-icons/fa";
 import { GiSteeringWheel } from "react-icons/gi";
-
 import { TripFormData } from "../types/driverSearch.types";
 import { Location } from "@/shared/types/ride.types";
-
 import LocationPreview from "./LocationPreview";
 
 interface FutureRideSearchFormProps {
@@ -52,9 +50,7 @@ const FutureRideSearchForm: React.FC<FutureRideSearchFormProps> = ({
   const lastEmitted = useRef<string>("");
 
   const formatDate = (d: Date): string => d.toISOString().slice(0, 10);
-
   const formatTime = (d: Date): string => d.toTimeString().slice(0, 5);
-
   const getFullData = (): TripFormData => ({
     ...formData,
     pickupLocation: externalPickup,
@@ -64,7 +60,7 @@ const FutureRideSearchForm: React.FC<FutureRideSearchFormProps> = ({
   useEffect(() => {
     const now = new Date();
 
-    now.setHours(now.getHours() + 6);
+    now.setMinutes(now.getMinutes() + (6 * 60 + 5));
 
     setFormData((prev) => ({
       ...prev,
@@ -79,13 +75,9 @@ const FutureRideSearchForm: React.FC<FutureRideSearchFormProps> = ({
     }
 
     const startISO = `${formData.rideStartDate}T${formData.rideStartTime}:00`;
-
     const startDate = new Date(startISO);
-
     if (Number.isNaN(startDate.getTime())) return;
-
     const durationMs = formData.timeRequired * 60 * 60 * 1000;
-
     const endDate = new Date(startDate.getTime() + durationMs);
 
     setFormData((prev) => ({

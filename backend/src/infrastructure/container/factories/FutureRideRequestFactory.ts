@@ -24,6 +24,9 @@ import { DriverScheduleRideController } from "@interface/controllers/driver/Driv
 import { GetFutureRideRequestsDto } from "@application/dto/driver/GetFutureRideRequestsDto";
 import { GetFutureRideRequestsResponseDto } from "@application/dto/driver/GetFutureRideRequestsResponseDto";
 import { GetFutureRideRequestsUseCase } from "@application/use-cases/driver/GetFutureRideRequestsUseCase";
+import { RejectFutureRideRequestDto } from "@application/dto/driver/RejectFutureRideRequestDto";
+import { RejectFutureRideRequestResponseDto } from "@application/dto/driver/RejectFutureRideRequestResponseDto";
+import { RejectFutureRideRequestUseCase } from "@application/use-cases/driver/RejectFutureRideRequestUseCase";
 
 export class FutureRideRequestFactory {
   static register(container: Container): void {
@@ -76,6 +79,15 @@ export class FutureRideRequestFactory {
         >
       >(TYPES.AcceptFutureRideRequestUseCase)
       .to(AcceptFutureRideRequestUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          RejectFutureRideRequestDto,
+          Promise<Result<RejectFutureRideRequestResponseDto>>
+        >
+      >(TYPES.RejectFutureRideRequestUseCase)
+      .to(RejectFutureRideRequestUseCase);
 
     container
       .bind<IFutureRideExpiryService>(TYPES.FutureRideExpiryService)

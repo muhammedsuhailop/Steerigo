@@ -4,6 +4,7 @@ export const SOCKET_EVENTS = {
     NO_DRIVER: "ride:no-driver-found",
     FUTURE_RIDE_ACCEPTED: "future-ride:accepted",
     FUTURE_RIDE_EXPIRED: "future-ride:expired",
+    FUTURE_RIDE_ALL_REJECTED: "future_ride:all_drivers_rejected",
   },
   DRIVER: {
     NEW_REQUEST: "ride:request:created",

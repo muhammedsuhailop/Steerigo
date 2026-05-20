@@ -6,6 +6,7 @@ import { useScheduleFutureRideMutation } from "../services/driverSearchApi";
 import { TripFormData } from "../types/driverSearch.types";
 import {
   FutureRideAcceptedPayload,
+  FutureRideRejectedPayload,
   FutureSchedulePayload,
   FutureScheduleResponse,
 } from "../types/rideRequest.types";
@@ -20,22 +21,19 @@ interface UseScheduleRideReturn {
   lastResponse: FutureScheduleResponse | null;
   acceptedRide: FutureRideAcceptedPayload | null;
   isExpired: boolean;
+  isAllRejected: boolean;
   reset: () => void;
 }
 
 export const useScheduleRide = (): UseScheduleRideReturn => {
   const navigate = useNavigate();
-
   const [scheduleRide, { isLoading }] = useScheduleFutureRideMutation();
-
   const [lastResponse, setLastResponse] =
     useState<FutureScheduleResponse | null>(null);
-
   const [acceptedRide, setAcceptedRide] =
     useState<FutureRideAcceptedPayload | null>(null);
-
   const [isExpired, setIsExpired] = useState<boolean>(false);
-
+  const [isAllRejected, setIsAllRejected] = useState<boolean>(false);
   const performSchedule = async (
     formData: TripFormData,
     requestGroupId: string,
@@ -43,9 +41,7 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
     if (!formData.pickupLocation) {
       return false;
     }
-
     const dropLocation = formData.dropLocation ?? formData.pickupLocation;
-
     const pickupDateTime = new Date(
       `${formData.rideStartDate}T${formData.rideStartTime}`,
     );
@@ -68,17 +64,14 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
 
     try {
       const result = await scheduleRide(payload).unwrap();
-
       setLastResponse(result);
-
       setIsExpired(false);
+      setIsAllRejected(false);
 
       return true;
     } catch (err: unknown) {
       const parsedError = errorHandler.parseApiError(err, "FutureRideSchedule");
-
       errorHandler.logError(parsedError);
-
       return false;
     }
   };
@@ -88,9 +81,7 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
       if (data.requestGroupId !== lastResponse?.data.requestGroupId) {
         return;
       }
-
       setAcceptedRide(data);
-
       navigate(`/ride/${data.rideId}`);
     },
     [navigate, lastResponse?.data.requestGroupId],
@@ -101,15 +92,21 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
       if (data.requestGroupId !== lastResponse?.data.requestGroupId) {
         return;
       }
-
       setIsExpired(true);
+    },
+    [lastResponse?.data.requestGroupId],
+  );
+
+  const handleFutureRideRejected = useCallback(
+    (data: FutureRideRejectedPayload) => {
+      if (data.requestGroupId !== lastResponse?.data.requestGroupId) return;
+      setIsAllRejected(true);
     },
     [lastResponse?.data.requestGroupId],
   );
 
   useEffect(() => {
     const socket = getSocket();
-
     if (!socket || !lastResponse?.data.requestGroupId) {
       return;
     }
@@ -121,6 +118,11 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
 
     socket.on(SOCKET_EVENTS.RIDER.FUTURE_RIDE_EXPIRED, handleFutureRideExpired);
 
+    socket.on(
+      SOCKET_EVENTS.RIDER.FUTURE_RIDE_ALL_REJECTED,
+      handleFutureRideRejected,
+    );
+
     return () => {
       socket.off(
         SOCKET_EVENTS.RIDER.FUTURE_RIDE_ACCEPTED,
@@ -131,19 +133,24 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
         SOCKET_EVENTS.RIDER.FUTURE_RIDE_EXPIRED,
         handleFutureRideExpired,
       );
+
+      socket.off(
+        SOCKET_EVENTS.RIDER.FUTURE_RIDE_ALL_REJECTED,
+        handleFutureRideRejected,
+      );
     };
   }, [
     lastResponse?.data.requestGroupId,
     handleFutureRideAccepted,
     handleFutureRideExpired,
+    handleFutureRideRejected,
   ]);
 
   const reset = (): void => {
     setLastResponse(null);
-
     setAcceptedRide(null);
-
     setIsExpired(false);
+    setIsAllRejected(false);
   };
 
   return {
@@ -152,6 +159,7 @@ export const useScheduleRide = (): UseScheduleRideReturn => {
     lastResponse,
     acceptedRide,
     isExpired,
+    isAllRejected,
     reset,
   };
 };

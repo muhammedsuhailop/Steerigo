@@ -16,6 +16,7 @@ export const SOCKET_EVENTS = {
   RIDE_LEAVE: "ride:leave",
   RIDE_NO_DRIVER_FOUND: "ride:no-driver-found",
   RIDE_SEARCH_PROGRESS_UPDATED: "ride:search:progress-updated",
+  FUTURE_RIDE_ALL_DRIVERS_REJECTED: "future_ride:all_drivers_rejected",
 
   RIDE_CANCELLED_RIDER: "ride:cancelled:rider",
   RIDE_CANCELLED_DRIVER: "ride:cancelled:driver",

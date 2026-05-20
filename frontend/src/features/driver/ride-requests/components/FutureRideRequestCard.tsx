@@ -7,13 +7,16 @@ import {
   FaRupeeSign,
   FaCalendarAlt,
   FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 import type { FutureRideRequestCardProps } from "../types/rideRequests.types";
 
 export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
   request,
   onAccept,
+  onReject,
   isAccepting,
+  isRejecting,
   isUnavailable = false,
   isAccepted = false,
 }) => {
@@ -37,7 +40,7 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
 
   const pickupInfo = formatDateTime(request.pickupTime);
 
-  const isDisabled = isAccepting || isUnavailable || isAccepted;
+  const isDisabled = isAccepting || isRejecting || isUnavailable || isAccepted;
 
   return (
     <Card className="w-full relative overflow-hidden border border-slate-200 bg-white rounded-3xl shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/50">
@@ -145,38 +148,62 @@ export const FutureRideRequestCard: React.FC<FutureRideRequestCardProps> = ({
         </div>
 
         {/* Action */}
-        <Button
-          onClick={() => {
-            if (isDisabled) return;
-            onAccept(request.requestId);
-          }}
-          disabled={isDisabled}
-          className={`
-              w-full h-12 rounded-2xl text-white font-bold shadow-md transition-all active:scale-[0.98]
-            ${
-              isAccepted
-                ? "bg-emerald-500 shadow-emerald-200"
-                : isUnavailable
-                  ? "bg-slate-400 shadow-slate-200"
-                  : "bg-gray-600 hover:bg-gray-700 shadow-gray-200"
-            }
-
-            disabled:opacity-70
-          `}
-        >
-          {isAccepting ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
-          ) : (
-            <div className="flex items-center justify-center gap-2">
-              <FaCheck />
-              {isAccepted
-                ? "Accepted"
-                : isUnavailable
-                  ? "No Longer Available"
-                  : "Accept Scheduled Request"}
-            </div>
+        <div className="flex gap-3 mt-2">
+          {/* Reject Button */}
+          {!isAccepted && !isUnavailable && (
+            <Button
+              onClick={() => {
+                if (isDisabled) return;
+                onReject(request.requestId);
+              }}
+              disabled={isDisabled}
+              variant="outline"
+              className="flex-1 h-12 rounded-2xl font-bold border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 transition-all active:scale-[0.98] disabled:opacity-70"
+            >
+              {isRejecting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600/30 border-t-red-600" />
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <FaTimes />
+                  Reject
+                </div>
+              )}
+            </Button>
           )}
-        </Button>
+
+          {/* Accept Button */}
+          <Button
+            onClick={() => {
+              if (isDisabled) return;
+              onAccept(request.requestId);
+            }}
+            disabled={isDisabled}
+            className={`
+                flex-[2] h-12 rounded-2xl text-white font-bold shadow-md transition-all active:scale-[0.98]
+              ${
+                isAccepted
+                  ? "bg-emerald-500 shadow-emerald-200"
+                  : isUnavailable
+                    ? "bg-slate-400 shadow-slate-200"
+                    : "bg-gray-600 hover:bg-gray-700 shadow-gray-200"
+              }
+              disabled:opacity-70
+            `}
+          >
+            {isAccepting ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <FaCheck />
+                {isAccepted
+                  ? "Accepted"
+                  : isUnavailable
+                    ? "No Longer Available"
+                    : "Accept"}
+              </div>
+            )}
+          </Button>
+        </div>
       </div>
     </Card>
   );

@@ -9,6 +9,7 @@ import { RideRequestsList } from "../components/RideRequestsList";
 import {
   useAcceptFutureRideRequestMutation,
   useGetFutureRideRequestsQuery,
+  useRejectFutureRideRequestMutation,
 } from "../services/rideRequestsApi";
 import { FutureRideRequestsList } from "../components/FutureRideRequestsList";
 import { FutureRideRequestsHeader } from "../components/FutureRideRequestsHeader";
@@ -48,14 +49,20 @@ export const RideRequestsPage: React.FC = () => {
   const [liveRideRequests, setLiveRideRequests] = useState<
     PendingRideRequestData[]
   >([]);
-
   const [rejectedRequestIds, setRejectedRequestIds] = useState<Set<string>>(
     new Set(),
   );
-
   const [liveFutureRideRequests, setLiveFutureRideRequests] = useState<
     FutureRideRequestData[]
   >([]);
+  const [rejectFuture] = useRejectFutureRideRequestMutation();
+  const [rejectingFutureId, setRejectingFutureId] = useState<string | null>(
+    null,
+  );
+
+  const [rejectedFutureRequestIds, setRejectedFutureRequestIds] = useState<
+    Set<string>
+  >(new Set());
 
   useEffect(() => {
     if (requests && requests.length > 0) {
@@ -100,11 +107,8 @@ export const RideRequestsPage: React.FC = () => {
   });
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   const [isMobile, setIsMobile] = useState(false);
-
   const [acceptFuture] = useAcceptFutureRideRequestMutation();
-
   const [acceptingFutureId, setAcceptingFutureId] = useState<string | null>(
     null,
   );
@@ -194,6 +198,22 @@ export const RideRequestsPage: React.FC = () => {
     }
   };
 
+  const handleRejectFuture = async (requestId: string) => {
+    setRejectingFutureId(requestId);
+    try {
+      await rejectFuture(requestId).unwrap();
+      setRejectedFutureRequestIds((prev) => {
+        const next = new Set(prev);
+        next.add(requestId);
+        return next;
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRejectingFutureId(null);
+    }
+  };
+
   const refreshFuture = async () => {
     try {
       const response = await refetchFutureData();
@@ -209,6 +229,10 @@ export const RideRequestsPage: React.FC = () => {
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
+
+  const visibleFutureRideRequests = liveFutureRideRequests.filter(
+    (request) => !rejectedFutureRequestIds.has(request.requestId),
+  );
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -264,17 +288,19 @@ export const RideRequestsPage: React.FC = () => {
           {/* Future Ride Requests */}
           <section className="flex flex-col">
             <FutureRideRequestsHeader
-              total={liveFutureRideRequests.length}
+              total={visibleFutureRideRequests.length}
               onRefresh={refreshFuture}
               isRefreshing={isFutureFetching}
             />
 
             <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm p-4 min-h-[400px]">
               <FutureRideRequestsList
-                requests={liveFutureRideRequests}
+                requests={visibleFutureRideRequests}
                 isLoading={isFutureLoading}
                 onAccept={handleAcceptFuture}
+                onReject={handleRejectFuture}
                 acceptingRequestId={acceptingFutureId}
+                rejectingRequestId={rejectingFutureId}
                 unavailableRequestIds={unavailableRequestIds}
               />
             </div>

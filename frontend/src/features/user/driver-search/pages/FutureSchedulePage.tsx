@@ -1,20 +1,13 @@
 import React, { useCallback, useState } from "react";
-
 import { FaMap, FaMapMarkerAlt, FaCalendarAlt, FaClock } from "react-icons/fa";
-
 import { Header } from "@/features/public/components/Header";
 import { Footer } from "@/features/public/components/Footer";
-
 import TripLocationMap from "@/shared/components/maps/TripLocationMap";
 import LocationSearchInput from "@/shared/components/maps/LocationSearchInput";
-
 import FutureRideSearchForm from "../components/FutureRideSearchForm";
 import FutureRideSuccessCard from "../components/FutureRideSuccessCard";
-
 import { useScheduleRide } from "../hooks/useScheduleRide";
-
 import { Location } from "@/shared/types/ride.types";
-
 import { TripFormData } from "../types/driverSearch.types";
 
 const generateMongoObjectId = (): string => {
@@ -38,6 +31,7 @@ const FutureRideSearchPage: React.FC = () => {
     lastResponse,
     acceptedRide,
     isExpired,
+    isAllRejected,
     reset,
   } = useScheduleRide();
 
@@ -57,13 +51,13 @@ const FutureRideSearchPage: React.FC = () => {
 
   const handleFormChange = useCallback(
     (formData: TripFormData) => {
-      if (isExpired) {
+      if (isExpired || isAllRejected) {
         reset();
       }
 
       setCurrentFormData(formData);
     },
-    [isExpired, reset],
+    [isExpired, isAllRejected, reset],
   );
 
   const handleLocationSelect = (location: Location | null): void => {
@@ -110,7 +104,8 @@ const FutureRideSearchPage: React.FC = () => {
     }
   };
 
-  const shouldLockForm = !!lastResponse?.success && !acceptedRide && !isExpired;
+  const shouldLockForm =
+    !!lastResponse?.success && !acceptedRide && !isExpired && !isAllRejected;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,6 +153,7 @@ const FutureRideSearchPage: React.FC = () => {
                 onCancelRequest={handleCancelRequest}
                 isCancelling={isCancelling}
                 isExpired={isExpired}
+                isAllRejected={isAllRejected}
               />
             )}
           </div>

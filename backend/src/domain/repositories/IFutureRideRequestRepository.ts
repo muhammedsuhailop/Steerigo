@@ -21,4 +21,5 @@ export interface IFutureRideRequestRepository extends ICrudRepository<FutureRide
       limit: number;
     },
   ): Promise<{ requests: FutureRideRequest[]; total: number }>;
+  hasAnyActiveRequestInGroup(requestGroupId: string): Promise<boolean>;
 }
