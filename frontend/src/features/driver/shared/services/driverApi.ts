@@ -14,6 +14,7 @@ import {
   DriverProfileResponse,
 } from "../../profile/types/driverProfile.types";
 import { API_ENDPOINTS } from "@/shared/constants/api";
+import { DateFilterOption } from "../../dashboard/pages/DriverDashboard";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -118,11 +119,22 @@ export const driverApi = createApi({
       },
       providesTags: ["Driver", "DriverStats"],
     }),
-    getActualDriverStats: builder.query<DriverStatsData, void>({
-      query: () => ({
-        url: API_ENDPOINTS.DRIVER.STATS,
-        method: "GET",
-      }),
+    getActualDriverStats: builder.query<
+      DriverStatsData,
+      { fromDate?: string; toDate?: string } 
+    >({
+      query: ({ fromDate, toDate }) => {
+        let url = API_ENDPOINTS.DRIVER.STATS;
+
+        if (fromDate && toDate) {
+          url += `?fromDate=${fromDate}&toDate=${toDate}`;
+        }
+
+        return {
+          url,
+          method: "GET",
+        };
+      },
       transformResponse: (response: DriverStatsResponse) => response.data,
       providesTags: ["DriverStats"],
     }),

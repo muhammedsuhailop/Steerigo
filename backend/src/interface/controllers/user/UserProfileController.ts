@@ -61,25 +61,7 @@ export class UserProfileController {
 
   async getProfile(req: Request, res: Response): Promise<void> {
     try {
-      const currentUserId = this.getUserId(req);
-      if (!currentUserId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
-        });
-        return;
-      }
-
-      const { userId } = req.params;
-
-      const currentUser = req.user;
-      if (userId !== currentUserId && currentUser?.role !== "Admin") {
-        res.status(HttpStatusCodes.FORBIDDEN).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_VIEW,
-        });
-        return;
-      }
+      const userId = this.getUserId(req);
 
       const dto = GetUserProfileDto.fromRequest(userId as string);
       const result = await this.getUserProfileUseCase.execute(dto);
@@ -107,25 +89,7 @@ export class UserProfileController {
 
   async updateProfile(req: Request, res: Response): Promise<void> {
     try {
-      const currentUserId = this.getUserId(req);
-      if (!currentUserId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
-        });
-        return;
-      }
-
-      const { userId } = req.params;
-      const currentUser = req.user;
-
-      if (userId !== currentUserId && currentUser?.role !== UserRole.ADMIN) {
-        res.status(HttpStatusCodes.FORBIDDEN).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_UPDATE,
-        });
-        return;
-      }
+      const userId = this.getUserId(req);
 
       const body = req.body as UserProfileRequestBody;
 
@@ -160,33 +124,10 @@ export class UserProfileController {
 
   async registerAsDriver(req: Request, res: Response): Promise<void> {
     try {
-      const currentUserId = this.getUserId(req);
-      if (!currentUserId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.UNAUTHORIZED,
-        });
-        return;
-      }
 
-      const { userId } = req.params;
+      const userId = this.getUserId(req);
 
-      if (userId !== currentUserId) {
-        Logger.warn("User ID mismatch in register as driver", {
-          currentUserId,
-          urlUserId: userId,
-          currentUserIdLength: currentUserId?.length,
-          urlUserIdLength: userId?.length,
-          tokenUser: req.user,
-        });
-        res.status(HttpStatusCodes.FORBIDDEN).json({
-          success: false,
-          message: USER_MESSAGES.PROFILE.ACCESS_DENIED_REGISTER_DRIVER,
-        });
-        return;
-      }
-
-      const dto = RegisterAsDriverRequestDto.fromRequest(userId);
+      const dto = RegisterAsDriverRequestDto.fromRequest(userId as string);
       const result = await this.registerUserAsDriverUseCase.execute(dto);
 
       if (result.isSuccessful()) {
@@ -214,7 +155,6 @@ export class UserProfileController {
 
       Logger.info("Register as driver request processed", {
         userId,
-        currentUserId,
         success: result.isSuccessful(),
       });
     } catch (error) {

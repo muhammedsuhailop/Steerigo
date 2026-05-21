@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useGetActualDriverStatsQuery,
   useGetDriverProfileQuery,
@@ -21,6 +21,55 @@ import { useNavigate } from "react-router-dom";
 import LiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/LiveLocationUpdater";
 import AutoLiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/AutoLiveLocationUpdater";
 
+export type DateFilterOption =
+  | "today"
+  | "7days"
+  | "1month"
+  | "3months"
+  | "6months"
+  | "1year"
+  | "all";
+
+const getDateRangeForFilter = (
+  filter: DateFilterOption,
+): { fromDate?: string; toDate?: string } => {
+  if (filter === "all") {
+    return { fromDate: undefined, toDate: undefined };
+  }
+
+  const toDate = new Date();
+  const fromDate = new Date();
+
+  // Set times to cover the full day
+  toDate.setHours(23, 59, 59, 999);
+  fromDate.setHours(0, 0, 0, 0);
+
+  switch (filter) {
+    case "today":
+      break;
+    case "7days":
+      fromDate.setDate(fromDate.getDate() - 7);
+      break;
+    case "1month":
+      fromDate.setMonth(fromDate.getMonth() - 1);
+      break;
+    case "3months":
+      fromDate.setMonth(fromDate.getMonth() - 3);
+      break;
+    case "6months":
+      fromDate.setMonth(fromDate.getMonth() - 6);
+      break;
+    case "1year":
+      fromDate.setFullYear(fromDate.getFullYear() - 1);
+      break;
+  }
+
+  return {
+    fromDate: fromDate.toISOString(),
+    toDate: toDate.toISOString(),
+  };
+};
+
 const DriverDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,8 +77,15 @@ const DriverDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  const [filter, setFilter] = useState<DateFilterOption>("7days");
+
+  const dateRangeParams = useMemo(
+    () => getDateRangeForFilter(filter),
+    [filter],
+  );
+
   const { data: statsData, isLoading: isStatsLoading } =
-    useGetActualDriverStatsQuery();
+    useGetActualDriverStatsQuery(dateRangeParams);
 
   const {
     data: dashboardData,
@@ -201,9 +257,38 @@ const DriverDashboard: React.FC = () => {
             </div>
           )}
 
-          {statsData && (
-            <DriverStats stats={statsData} loading={isStatsLoading} />
-          )}
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                Performance Overview
+              </h2>
+
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
+                  View for:
+                </span>
+                <select
+                  value={filter}
+                  onChange={(e) =>
+                    setFilter(e.target.value as DateFilterOption)
+                  }
+                  className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[140px]"
+                >
+                  <option value="today">Today</option>
+                  <option value="7days">Last 7 Days</option>
+                  <option value="1month">Last 1 Month</option>
+                  <option value="3months">Last 3 Months</option>
+                  <option value="6months">Last 6 Months</option>
+                  <option value="1year">Last 1 Year</option>
+                  <option value="all">All Time</option>
+                </select>
+              </div>
+            </div>
+
+            {statsData && (
+              <DriverStats stats={statsData} loading={isStatsLoading} />
+            )}
+          </div>
         </main>
         <Footer />
       </div>

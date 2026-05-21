@@ -24,7 +24,7 @@ export const userProfileApi = createApi({
     // Get user profile
     getUserProfile: builder.query<ApiResponse<UserProfile>, string>({
       query: (userId) => ({
-        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}`,
+        url: `${API_ENDPOINTS.USER.PROFILE}`,
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
@@ -38,7 +38,7 @@ export const userProfileApi = createApi({
       { userId: string; data: Partial<UserProfileFormData> }
     >({
       query: ({ userId, data }) => ({
-        url: `${API_ENDPOINTS.USER.PROFILE}/${userId}`,
+        url: `${API_ENDPOINTS.USER.PROFILE}`,
         method: "PUT",
         data,
       }),
@@ -129,7 +129,7 @@ export const userProfileApi = createApi({
       string
     >({
       query: (userId) => ({
-        url: `/user/${userId}/register-as-driver`,
+        url: `/user/register-as-driver`,
         method: "POST",
       }),
       invalidatesTags: (result, error, userId) => [
