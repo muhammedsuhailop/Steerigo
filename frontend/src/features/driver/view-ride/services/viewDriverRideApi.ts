@@ -5,6 +5,8 @@ import {
   ConfirmCashPaymentResponse,
   ConfirmCashRequest,
   RideStatusResponse,
+  UpdateCurrentLocationRequest,
+  UpdateCurrentLocationResponse,
   ViewDriverRideResponse,
 } from "../types/viewDriverRide.types";
 
@@ -72,6 +74,17 @@ export const viewDriverRideApi = createApi({
         { type: "DriverRide", id: rideId },
       ],
     }),
+
+    updateDriverLocationFromRide: builder.mutation<
+      UpdateCurrentLocationResponse,
+      UpdateCurrentLocationRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.UPDATE_LOCATION,
+        method: "PUT",
+        data,
+      }),
+    }),
   }),
 });
 
@@ -82,4 +95,5 @@ export const {
   useCompleteRideMutation,
   useCancelRideMutation,
   useConfirmCashPaymentMutation,
+  useUpdateDriverLocationFromRideMutation,
 } = viewDriverRideApi;

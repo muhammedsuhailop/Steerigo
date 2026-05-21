@@ -569,7 +569,7 @@ export class DriverAvailabilityRepositoryImpl implements IDriverAvailabilityRepo
         timeRequiredMinutes,
       });
 
-      const onTheClockDriverIds = await this.getOnTheClockDriverIds();
+      const onTheClockDriverIds = await this.getDriversHandlingRideRequests();
 
       if (onTheClockDriverIds.length > 0) {
         Logger.debug("Excluding on-the-clock drivers", {
@@ -923,7 +923,7 @@ export class DriverAvailabilityRepositoryImpl implements IDriverAvailabilityRepo
     }
   }
 
-  private async getOnTheClockDriverIds(): Promise<Types.ObjectId[]> {
+  private async getDriversHandlingRideRequests(): Promise<Types.ObjectId[]> {
     const groups = await RideRequestGroupModel.find({
       status: RideRequestGroupStatus.SEARCHING,
     })
