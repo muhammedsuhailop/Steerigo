@@ -39,6 +39,7 @@ import { RideView } from "@/features/admin/rides/pages/RideView";
 import CouponManagement from "@/features/admin/coupons/pages/CouponManagement";
 import { FloatingChatWindow } from "@/features/chat/components/FloatingChatWindow";
 import FutureSchedulePage from "@/features/user/driver-search/pages/FutureSchedulePage";
+import GlobalLocationSync from "@/shared/components/ui/LiveLocationUpdater/GlobalLocationSync";
 
 export const AppRouter: React.FC = () => {
   const { user } = useAuth();
@@ -332,7 +333,10 @@ export const AppRouter: React.FC = () => {
         {/* Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      
       {user && <FloatingChatWindow />}
+
+      {user?.role === "Driver" && <GlobalLocationSync />}
     </>
   );
 };

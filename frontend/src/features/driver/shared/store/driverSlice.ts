@@ -18,6 +18,7 @@ const initialState: DriverState = {
   isOnline: false,
   driverId: null,
   availabilityStatus: null,
+  isAutoSyncEnabled: false,
 };
 
 const driverSlice = createSlice({
@@ -58,7 +59,7 @@ const driverSlice = createSlice({
     },
     setAvailability: (
       state,
-      action: PayloadAction<AvailabilityData | null>
+      action: PayloadAction<AvailabilityData | null>,
     ) => {
       state.availabilityStatus = action.payload;
     },
@@ -67,12 +68,12 @@ const driverSlice = createSlice({
     },
     removePendingRequest: (state, action: PayloadAction<string>) => {
       state.pendingRequests = state.pendingRequests.filter(
-        (req) => req.requestId !== action.payload
+        (req) => req.requestId !== action.payload,
       );
     },
     updateRideStatus: (
       state,
-      action: PayloadAction<{ rideId: string; status: CurrentRide["status"] }>
+      action: PayloadAction<{ rideId: string; status: CurrentRide["status"] }>,
     ) => {
       if (state.currentRide && state.currentRide.id === action.payload.rideId) {
         state.currentRide.status = action.payload.status;
@@ -93,6 +94,12 @@ const driverSlice = createSlice({
     clearDriverData: () => {
       return initialState;
     },
+    toggleAutoSync: (state) => {
+      state.isAutoSyncEnabled = !state.isAutoSyncEnabled;
+    },
+    setAutoSync: (state, action: PayloadAction<boolean>) => {
+      state.isAutoSyncEnabled = action.payload;
+    },
   },
 });
 
@@ -111,6 +118,8 @@ export const {
   updateRideStatus,
   clearError,
   clearDriverData,
+  toggleAutoSync,
+  setAutoSync,
 } = driverSlice.actions;
 
 export default driverSlice.reducer;
@@ -145,3 +154,6 @@ export const selectAvailability = (state: { driver: DriverState }) =>
 
 export const selectHasAvailability = (state: { driver: DriverState }) =>
   state.driver.availabilityStatus !== null;
+
+export const selectIsAutoSyncEnabled = (state: { driver: DriverState }) =>
+  state.driver.isAutoSyncEnabled;

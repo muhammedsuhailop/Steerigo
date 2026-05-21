@@ -18,6 +18,8 @@ import type {
   DriverStats as DriverStatsType,
 } from "../../shared/types/driver.types";
 import { useNavigate } from "react-router-dom";
+import LiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/LiveLocationUpdater";
+import AutoLiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/AutoLiveLocationUpdater";
 
 const DriverDashboard: React.FC = () => {
   const dispatch = useDispatch();
@@ -46,17 +48,31 @@ const DriverDashboard: React.FC = () => {
   const driver: Driver | undefined = dashboard?.driver;
   const stats: DriverStatsType | undefined = dashboard?.stats;
 
-  const isOnline = driver?.currentStatus === "Available";
+  const getErrorDetails = (error: unknown) => {
+    if (!error || typeof error !== "object") {
+      return {
+        status: undefined,
+        code: undefined,
+        message: undefined,
+      };
+    }
 
-  const getErrorDetails = (error: any) => {
-    if (!error)
-      return { status: undefined, code: undefined, message: undefined };
+    const err = error as {
+      status?: number;
+      code?: string;
+      message?: string;
+      data?: {
+        status?: number;
+        code?: string;
+        message?: string;
+      };
+    };
 
-    const status = error.status || error.data?.status;
-    const code = error.code || error.data?.code;
-    const message = error.message || error.data?.message;
-
-    return { status, code, message };
+    return {
+      status: err.status ?? err.data?.status,
+      code: err.code ?? err.data?.code,
+      message: err.message ?? err.data?.message,
+    };
   };
 
   const dashboardErr = getErrorDetails(dashboardError);
@@ -177,6 +193,14 @@ const DriverDashboard: React.FC = () => {
                 profileData?.profileImageUrl ?? driver.profileImageUrl,
             }}
           />
+
+          {driver.driverId && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <LiveLocationUpdater driverId={driver.driverId} />
+              <AutoLiveLocationUpdater />
+            </div>
+          )}
+
           {statsData && (
             <DriverStats stats={statsData} loading={isStatsLoading} />
           )}
