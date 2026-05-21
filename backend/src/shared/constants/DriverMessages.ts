@@ -26,7 +26,8 @@ export const DRIVER_MESSAGES = {
   PAYOUT_REQUEST_SUBMITTED:
     "Payout request submitted successfully. Awaiting admin approval.",
   WALLET_FETCHED: "Wallet details fetched successfully.",
-  STATS_FETCHED:"Driver stats fetched successfully."
+  STATS_FETCHED: "Driver stats fetched successfully.",
+  DRIVER_BASE_LOCATION_UPDATED: "Driver base location updated successfully",
 };
 
 export const DRIVER_ERROR_MESSAGES = {

@@ -19,6 +19,7 @@ import {
   AvailabilityData,
   DriverStatusResponse,
   DriverAvailabilityStatus,
+  BaseLocation,
 } from "../types/scheduling.types";
 import {
   DriverSidebar,
@@ -31,6 +32,8 @@ import {
   setAvailability,
 } from "../../shared/store/driverSlice";
 import LeafletMarker from "../components/LeafletMarker";
+import BaseLocationManager from "../components/BaseLocationManager";
+import CurrentLocationManager from "../components/CurrentLocationManager";
 
 interface AlertState {
   show: boolean;
@@ -237,6 +240,15 @@ const DriverScheduling: React.FC = () => {
 
   const handleLocationSelect = (location: Location) =>
     setSelectedLocation(location);
+
+  const handleBaseLocationUpdated = (newBaseLocation: BaseLocation) => {
+    if (availabilityDataFull) {
+      setAvailabilityDataFull({
+        ...availabilityDataFull,
+        baseLocation: newBaseLocation,
+      });
+    }
+  };
 
   const handleSaveLocation = async () => {
     if (!selectedLocation) {
@@ -540,31 +552,22 @@ const DriverScheduling: React.FC = () => {
             </div>
 
             {/* Right Column - Location Picker */}
-            <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-              <LeafletMarker
-                onLocationSelect={handleLocationSelect}
-                initialLocation={
-                  availabilityData.currentLocation ||
-                  selectedLocation ||
-                  undefined
-                }
-              />
+            <div className="space-y-4">
+              {driverId && (
+                <BaseLocationManager
+                  driverId={driverId}
+                  initialBaseLocation={availabilityDataFull?.baseLocation}
+                  onLocationUpdated={handleBaseLocationUpdated}
+                />
+              )}
 
-              {/* Save Location Button */}
-              <div className="mt-5">
-                <button
-                  onClick={handleSaveLocation}
-                  disabled={!selectedLocation || isLocationSaving}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-base font-semibold transition-all duration-200 active:scale-[0.98] ${
-                    !selectedLocation || isLocationSaving
-                      ? "bg-slate-800 text-white hover:bg-slate-900 border border-slate-700"
-                      : "bg-slate-700 text-white hover:bg-slate-800 border border-slate-600"
-                  }`}
-                >
-                  <FaLocationArrow size={20} />
-                  {isLocationSaving ? "Saving..." : "Update Location"}
-                </button>
-              </div>
+              <CurrentLocationManager
+                currentLocation={availabilityData.currentLocation}
+                selectedLocation={selectedLocation}
+                isLocationSaving={isLocationSaving}
+                onLocationSelect={handleLocationSelect}
+                onSaveLocation={handleSaveLocation}
+              />
             </div>
           </div>
         </main>

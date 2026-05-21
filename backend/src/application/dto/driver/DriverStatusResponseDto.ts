@@ -59,6 +59,7 @@ export interface DriverStatusResponseDto {
   readonly driverId: string;
   readonly availabilityStatus: AvailabilityStatus;
   readonly currentLocation: LocationResponse;
+  readonly baseLocation: LocationResponse;
   readonly lastLocationUpdateAt: Date;
   readonly recurringSchedule: RecurringScheduleResponse | null;
   readonly exceptions: AvailabilityExceptionResponse[];

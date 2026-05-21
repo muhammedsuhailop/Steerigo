@@ -11,6 +11,8 @@ import type {
   Exception,
   ExceptionUpdateFormData,
   ExceptionUpdateResponse,
+  UpdateDriverBaseLocationResponse,
+  UpdateBaseLocationRequest,
 } from "../types/scheduling.types";
 
 export const schedulingApi = createApi({
@@ -26,6 +28,18 @@ export const schedulingApi = createApi({
         data,
       }),
       invalidatesTags: ["Location"],
+    }),
+
+    updateBaseLocation: builder.mutation<
+      UpdateDriverBaseLocationResponse,
+      UpdateBaseLocationRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.UPDATE_BASE_LOCATION,
+        method: "PUT",
+        data,
+      }),
+      invalidatesTags: ["Location", "DriverStatus"],
     }),
 
     updateSchedule: builder.mutation<any, ScheduleFormData>({
@@ -45,14 +59,6 @@ export const schedulingApi = createApi({
       }),
       invalidatesTags: ["Status"],
     }),
-
-    // getExceptions: builder.query<Exception[], void>({
-    //   query: () => ({
-    //     url: `${API_ENDPOINTS.DRIVER.AVAILABILITY.EXCEPTION}`,
-    //     method: "GET",
-    //   }),
-    //   providesTags: ["Exceptions"],
-    // }),
 
     createException: builder.mutation<
       ExceptionCreateResponse,
@@ -90,9 +96,9 @@ export const schedulingApi = createApi({
 
 export const {
   useUpdateLocationMutation,
+  useUpdateBaseLocationMutation,
   useUpdateScheduleMutation,
   useUpdateStatusMutation,
-  // useGetExceptionsQuery,
   useCreateExceptionMutation,
   useUpdateExceptionMutation,
   useDeleteExceptionMutation,

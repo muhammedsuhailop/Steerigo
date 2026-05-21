@@ -51,6 +51,7 @@ export const API_ENDPOINTS = {
     PROFILE_PIC_UPLOAD: "/file/profile-picture",
     AVAILABILITY: {
       UPDATE_LOCATION: "/driver/availability/update-location",
+      UPDATE_BASE_LOCATION: "/driver/availability/update-base-location",
       SCHEDULE: "/driver/availability/schedule",
       STATUS: "/driver/availability/status",
       EXCEPTION: "/driver/availability/exception",

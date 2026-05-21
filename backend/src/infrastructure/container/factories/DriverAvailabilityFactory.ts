@@ -1,15 +1,9 @@
 import { Container } from "inversify";
 import { TYPES } from "@shared/constants/DITypes";
-
-// Repository
 import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 import { DriverAvailabilityRepositoryImpl } from "@infrastructure/database/repositories/DriverAvailabilityRepositoryImpl";
-
-// Use Cases
 import { UpdateAvailabilityStatusUseCase } from "@application/use-cases/driver/UpdateAvailabilityStatusUseCase";
 import { UpdateDriverLocationUseCase } from "@application/use-cases/driver/UpdateDriverLocationUseCase";
-
-// Controller
 import { DriverAvailabilityController } from "@interface/controllers/driver/DriverAvailabilityController";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import {
@@ -25,6 +19,9 @@ import { ScheduleRecurringAvailabilityUseCase } from "@application/use-cases/dri
 import { AddAvailabilityExceptionRequestDto } from "@application/dto/driver/AddAvailabilityExceptionRequestDto";
 import { AddAvailabilityExceptionUseCase } from "@application/use-cases/driver/AddAvailabilityExceptionUseCase";
 import { AddAvailabilityExceptionResponseDto } from "@application/dto/driver/AddAvailabilityExceptionResponseDto";
+import { UpdateBaseLocationRequestDto } from "@application/dto/driver/UpdateBaseLocationRequestDto";
+import { UpdateDriverBaseLocationResponseDto } from "@application/dto/driver/UpdateDriverBaseLocationResponseDto";
+import { UpdateDriverBaseLocationUseCase } from "@application/use-cases/driver/UpdateDriverBaseLocationUseCase";
 
 export class DriverAvailabilityFactory {
   static register(container: Container): void {
@@ -69,6 +66,15 @@ export class DriverAvailabilityFactory {
         >
       >(TYPES.AddAvailabilityExceptionUseCase)
       .to(AddAvailabilityExceptionUseCase);
+
+    container
+      .bind<
+        IUseCase<
+          UpdateBaseLocationRequestDto,
+          Promise<Result<UpdateDriverBaseLocationResponseDto>>
+        >
+      >(TYPES.UpdateDriverBaseLocationUseCase)
+      .to(UpdateDriverBaseLocationUseCase);
 
     // Controller
     container
