@@ -27,24 +27,13 @@ export const AuthenticatedHeroContent: React.FC<
         booking and trusted rides that get you there safely and comfortably.
       </p>
 
-      <div className="grid grid-cols-3 gap-6 mt-8 mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900">2.5k+</div>
-          <div className="text-sm text-gray-600">Available Drivers</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900">4.9★</div>
-          <div className="text-sm text-gray-600">Average Rating</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900">24/7</div>
-          <div className="text-sm text-gray-600">Support</div>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 mt-5">
         <Button size="lg" className="text-lg px-8 py-4">
-          <Link to="/search">Book My Driver</Link>
+          <Link to="/search">Book a Driver Now</Link>
+        </Button>
+
+        <Button size="lg" className="text-lg px-8 py-4">
+          <Link to="/search/schedule">Schedule a Driver</Link>
         </Button>
       </div>
     </div>

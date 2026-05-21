@@ -47,11 +47,35 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
       {/* Rider Profile Section */}
       <div className="flex items-center gap-4">
-        <img
-          src={rider.profilePicture}
-          alt={rider.name}
-          className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
-        />
+        <div className="relative w-16 h-16">
+          {rider.profilePicture ? (
+            <img
+              src={rider.profilePicture}
+              alt={rider.name}
+              className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+
+                const fallback = e.currentTarget
+                  .nextElementSibling as HTMLElement | null;
+
+                if (fallback) {
+                  fallback.style.display = "flex";
+                }
+              }}
+            />
+          ) : null}
+
+          {/* Fallback Avatar */}
+          <div
+            className={`w-16 h-16 rounded-full border-2 border-gray-100 bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xl items-center justify-center ${
+              rider.profilePicture ? "hidden" : "flex"
+            }`}
+          >
+            {rider.name?.charAt(0)?.toUpperCase() || "R"}
+          </div>
+        </div>
+        
         <div className="flex-1">
           <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
             Rider
