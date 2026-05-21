@@ -34,6 +34,7 @@ import {
 import LeafletMarker from "../components/LeafletMarker";
 import BaseLocationManager from "../components/BaseLocationManager";
 import CurrentLocationManager from "../components/CurrentLocationManager";
+import { errorHandler } from "@/shared/utils";
 
 interface AlertState {
   show: boolean;
@@ -169,14 +170,15 @@ const DriverScheduling: React.FC = () => {
       return;
     }
 
-    const err: any = driverStatusError;
+    const parsedError = driverStatusError
+      ? errorHandler.parseApiError(driverStatusError)
+      : null;
 
-    const serverMessage =
-      err?.data?.message || driverStatusResponse?.message || err?.message || "";
+    const serverMessage = parsedError
+      ? errorHandler.getUserMessage(parsedError)
+      : driverStatusResponse?.message || "";
 
-    const is404ByStatus = Boolean(
-      err && (err.status === 404 || err?.data?.status === 404),
-    );
+    const is404ByStatus = parsedError?.code === "NOT_FOUND";
 
     if (is404ByStatus) {
       setHasAvailability(false);
@@ -202,11 +204,10 @@ const DriverScheduling: React.FC = () => {
     }
 
     if (isDriverStatusError) {
-      const msg =
-        err?.data?.message ||
-        err?.message ||
-        "Unable to load availability. Please try again later.";
-      showAlert(msg, "danger");
+      showAlert(
+        serverMessage || "Unable to load availability. Please try again later.",
+        "danger",
+      );
     }
   }, [
     driverStatusResponse,
@@ -281,12 +282,11 @@ const DriverScheduling: React.FC = () => {
       }
 
       showAlert("Location saved successfully!", "success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save location:", error);
-      showAlert(
-        error?.data?.message || "Failed to save location. Please try again.",
-        "danger",
-      );
+      const parsedError = errorHandler.parseApiError(error);
+
+      showAlert(errorHandler.getUserMessage(parsedError), "danger");
     }
   };
 
@@ -396,14 +396,10 @@ const DriverScheduling: React.FC = () => {
       setShowScheduleForm(false);
 
       showAlert("Schedule updated successfully!", "success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update schedule:", error);
-      const serverError =
-        error?.data?.errors?.[0]?.message ||
-        error?.data?.message ||
-        "Failed to update schedule. Please try again.";
-
-      showAlert(serverError, "danger");
+      const parsedError = errorHandler.parseApiError(error);
+      showAlert(errorHandler.getUserMessage(parsedError), "danger");
     }
   };
 
@@ -412,12 +408,12 @@ const DriverScheduling: React.FC = () => {
       await updateStatus({ driverId: driverId || "", status }).unwrap();
       setCurrentStatus(status);
       showAlert("Status updated successfully!", "success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update status:", error);
-      showAlert(
-        error?.data?.message || "Failed to update status. Please try again.",
-        "danger",
-      );
+
+      const parsedError = errorHandler.parseApiError(error);
+
+      showAlert(errorHandler.getUserMessage(parsedError), "danger");
     }
   };
 
@@ -471,10 +467,68 @@ const DriverScheduling: React.FC = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Status and Form */}
-            <div className="space-y-6">
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 items-start">
+            {/* LEFT SECTION  */}
+            <div className="space-y-6 min-w-0">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                  <h2 className="text-lg font-semibold text-slate-800">
+                    Location Management
+                  </h2>
+
+                  <p className="text-sm text-slate-500 mt-1">
+                    Manage your base and current operating locations.
+                  </p>
+                </div>
+
+                {/* Content */}
+                <div className="grid grid-cols-1 2xl:grid-cols-2 gap-5 p-5">
+                  {/* Base Location */}
+                  <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                    {driverId && (
+                      <BaseLocationManager
+                        driverId={driverId}
+                        initialBaseLocation={availabilityDataFull?.baseLocation}
+                        onLocationUpdated={handleBaseLocationUpdated}
+                      />
+                    )}
+                  </div>
+
+                  {/* Current Location */}
+                  <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                    <CurrentLocationManager
+                      currentLocation={availabilityData.currentLocation}
+                      selectedLocation={selectedLocation}
+                      isLocationSaving={isLocationSaving}
+                      onLocationSelect={handleLocationSelect}
+                      onSaveLocation={handleSaveLocation}
+                    />
+                  </div>
+                </div>
+                {/* Schedule Form */}
+                {showScheduleForm && (
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <ScheduleForm
+                      onSubmit={handleScheduleSubmit}
+                      selectedLocation={selectedLocation}
+                      isLoading={isScheduleLoading}
+                      defaultAvailableFrom={
+                        defaultFormData.availableFrom || undefined
+                      }
+                      defaultAvailableTill={
+                        defaultFormData.availableTill || undefined
+                      }
+                      defaultLocation={defaultFormData.location || undefined}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT SECTION  */}
+            <div className="space-y-6 xl:sticky xl:top-24">
               {/* Status Card */}
               <StatusCard
                 availabilityStatus={currentStatus}
@@ -483,7 +537,7 @@ const DriverScheduling: React.FC = () => {
               />
 
               {/* Status Toggle */}
-              <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                 <StatusToggle
                   currentStatus={currentStatus}
                   onStatusChange={handleStatusChange}
@@ -493,81 +547,51 @@ const DriverScheduling: React.FC = () => {
                 />
               </div>
 
-              {/* Info Card */}
+              {/* Empty Availability Info */}
               {!hasAvailability && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
                   <div className="flex gap-3">
-                    <IoInformationCircleOutline className="text-yellow-600 text-xl flex-shrink-0 mt-0.5" />
+                    <IoInformationCircleOutline className="text-amber-600 text-xl flex-shrink-0 mt-0.5" />
+
                     <div>
-                      <p className="font-semibold text-yellow-900">
+                      <p className="font-semibold text-amber-900">
                         No Availability Found
                       </p>
-                      <p className="text-yellow-800 text-sm mt-1">
-                        Create your first availability schedule to get started.
+
+                      <p className="text-sm text-amber-700 mt-1">
+                        Create your availability schedule to start receiving
+                        ride requests.
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/*Button to toggle schedule form */}
+              {/* Toggle Button */}
               <button
                 onClick={() => setShowScheduleForm((prev) => !prev)}
                 className={`
-                  w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-base transition-all duration-200 ease-out
-                  ${
-                    showScheduleForm
-                      ? "bg-slate-800 text-white hover:bg-slate-900 border border-slate-700"
-                      : "bg-slate-700 text-white hover:bg-slate-800 border border-slate-600"
-                  } active:scale-[0.98] focus:outline-none `}
+          w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl
+          font-semibold text-sm transition-all duration-200
+          ${
+            showScheduleForm
+              ? "bg-slate-800 text-white hover:bg-slate-900"
+              : "bg-slate-700 text-white hover:bg-slate-800"
+          }
+        `}
               >
                 {showScheduleForm ? (
                   <>
-                    <FaCaretUp size={18} />
+                    <FaCaretUp size={16} />
                     <span>Hide Schedule</span>
                   </>
                 ) : (
                   <>
-                    <FaCaretDown size={18} />
+                    <FaCaretDown size={16} />
                     <span>Add / Edit Schedule</span>
                   </>
                 )}
               </button>
-
-              {/* Schedule Form */}
-              {showScheduleForm && (
-                <ScheduleForm
-                  onSubmit={handleScheduleSubmit}
-                  selectedLocation={selectedLocation}
-                  isLoading={isScheduleLoading}
-                  defaultAvailableFrom={
-                    defaultFormData.availableFrom || undefined
-                  }
-                  defaultAvailableTill={
-                    defaultFormData.availableTill || undefined
-                  }
-                  defaultLocation={defaultFormData.location || undefined}
-                />
-              )}
-            </div>
-
-            {/* Right Column - Location Picker */}
-            <div className="space-y-4">
-              {driverId && (
-                <BaseLocationManager
-                  driverId={driverId}
-                  initialBaseLocation={availabilityDataFull?.baseLocation}
-                  onLocationUpdated={handleBaseLocationUpdated}
-                />
-              )}
-
-              <CurrentLocationManager
-                currentLocation={availabilityData.currentLocation}
-                selectedLocation={selectedLocation}
-                isLocationSaving={isLocationSaving}
-                onLocationSelect={handleLocationSelect}
-                onSaveLocation={handleSaveLocation}
-              />
             </div>
           </div>
         </main>

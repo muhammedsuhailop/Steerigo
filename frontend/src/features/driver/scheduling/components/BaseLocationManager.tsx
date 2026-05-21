@@ -4,6 +4,7 @@ import LeafletMarker from "./LeafletMarker";
 import { Alert } from "@/shared/components/ui/Alert";
 import { useUpdateBaseLocationMutation } from "../services/schedulingApi";
 import type { Location, BaseLocation } from "../types/scheduling.types";
+import { errorHandler } from "@/shared/utils";
 
 interface BaseLocationManagerProps {
   driverId: string | null;
@@ -67,13 +68,12 @@ const BaseLocationManager: React.FC<BaseLocationManagerProps> = ({
       onLocationUpdated(newBaseLocation);
 
       showAlert("Base location updated successfully!", "success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save base location:", error);
-      showAlert(
-        error?.data?.message ||
-          "Failed to save base location. Please try again.",
-        "danger",
-      );
+
+      const parsedError = errorHandler.parseApiError(error);
+
+      showAlert(errorHandler.getUserMessage(parsedError), "danger");
     }
   };
 
@@ -87,7 +87,7 @@ const BaseLocationManager: React.FC<BaseLocationManagerProps> = ({
     : undefined;
 
   return (
-    <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm mt-6">
+    <div className="bg-white/90 backdrop-blur p-6 rounded-2xl border border-slate-200/60 shadow-sm">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
           <FaMapMarkerAlt className="text-indigo-500" />

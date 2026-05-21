@@ -1,11 +1,12 @@
 import { FaLocationArrow, FaMapMarkerAlt } from "react-icons/fa";
 import LeafletMarker from "./LeafletMarker";
+import { Location } from "../types/scheduling.types";
 
 interface CurrentLocationManagerProps {
-  currentLocation?: any;
-  selectedLocation?: any;
+  currentLocation?: Location | null;
+  selectedLocation?: Location | null;
   isLocationSaving: boolean;
-  onLocationSelect: (location: any) => void;
+  onLocationSelect: (location: Location) => void;
   onSaveLocation: () => void;
 }
 
