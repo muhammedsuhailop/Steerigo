@@ -17,7 +17,6 @@ import { FilterQuery, SortOrder, Types } from "mongoose";
 import { PaginatedResult } from "@shared/types/Repository";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { toObjectId } from "@shared/utils/idHelper";
-import { BookingType } from "@domain/value-objects/BookingType";
 
 @injectable()
 export class RideRepositoryImpl implements IRideRepository {
