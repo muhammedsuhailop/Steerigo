@@ -16,7 +16,6 @@ import {
   ProfileDropdown,
   MessagesDropdown,
   WalletDropdown,
-  OnlineStatus,
   Logo,
 } from "@/shared/components/ui";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
@@ -50,7 +49,7 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
     (state: RootState) => state.auth,
   );
 
-  const { isOnline, driver } = useSelector((state: RootState) => state.driver);
+  // const { isOnline, driver } = useSelector((state: RootState) => state.driver);
 
   const { data: walletResponse } = useGetWalletDetailsQuery(
     { limit: 5 },
@@ -137,12 +136,6 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       icon: HiOutlineUser,
       to: "/driver/profile",
     },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: HiOutlineCog,
-      to: "/driver/settings",
-    },
     { id: "logout", label: "Sign out", icon: HiOutlineLogout, danger: true },
   ];
 
@@ -172,20 +165,6 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
         <div className="flex items-center space-x-1 sm:space-x-4">
           {/* Desktop Only Icons */}
           <div className="hidden md:flex items-center space-x-2">
-            <div className="relative" ref={messagesRef}>
-              <button
-                onClick={() => setIsMessagesOpen(!isMessagesOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg relative"
-              >
-                <RiMessage3Line className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
-              </button>
-              <MessagesDropdown
-                isOpen={isMessagesOpen}
-                onClose={() => setIsMessagesOpen(false)}
-              />
-            </div>
-
             <div className="relative" ref={walletRef}>
               <button
                 onClick={() => setIsWalletOpen(!isWalletOpen)}
@@ -239,16 +218,6 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
                     Quick Access
                   </p>
                 </div>
-
-                <button className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mr-3">
-                    <RiMessage3Line className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <span className="flex-1 text-left font-medium">Messages</span>
-                  <span className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                    3
-                  </span>
-                </button>
 
                 <button
                   onClick={() => {

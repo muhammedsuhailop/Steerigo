@@ -72,10 +72,14 @@ export class RideMapper {
         (doc.paymentStatus as PaymentStatus) || PaymentStatus.PENDING,
       pickup,
       drop,
+      requestedPickupTime: doc.requestedPickupTime,
+      timeRequired: doc.timeRequired,
       rideType: doc.rideType as RideType,
+      bookingType: doc.bookingType,
       fareBreakdown,
       currency,
       timeline,
+      verificationCode: doc.verificationCode,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       couponDetails,
@@ -97,20 +101,20 @@ export class RideMapper {
       riderId: toObjectId(entity.getRiderId()),
       status: entity.getStatus(),
       paymentStatus: entity.getPaymentStatus(),
-
       pickup: {
         latitude: entity.getPickup().getLatitude(),
         longitude: entity.getPickup().getLongitude(),
         address: entity.getPickup().getAddress(),
       },
-
       drop: {
         latitude: entity.getDrop().getLatitude(),
         longitude: entity.getDrop().getLongitude(),
         address: entity.getDrop().getAddress(),
       },
-
+      requestedPickupTime: entity.getrequestedPickupTime(),
+      timeRequired: entity.getTimeRequired(),
       rideType: entity.getRideType(),
+      bookingType: entity.getBookingType(),
 
       fareBreakdown: {
         baseFare: fareBreakdown.getBaseFare().getAmount(),
@@ -146,6 +150,8 @@ export class RideMapper {
         paymentFailedAt: timeline.getPaymentFailedAt(),
         paymentRefundedAt: timeline.getPaymentRefundedAt(),
       },
+
+      verificationCode: entity.getVerificationCode(),
 
       updatedAt: entity.getUpdatedAt(),
     };

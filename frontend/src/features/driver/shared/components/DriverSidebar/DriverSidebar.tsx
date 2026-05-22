@@ -68,12 +68,6 @@ export const DriverSidebar: React.FC<DriverSidebarProps> = ({
       icon: "RiUser3Line",
       path: "/driver/profile",
     },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: "RiSettings4Line",
-      path: "/driver/settings",
-    },
   ];
 
   return (

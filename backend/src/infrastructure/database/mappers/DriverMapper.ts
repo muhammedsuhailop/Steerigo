@@ -9,7 +9,7 @@ import { Types } from "mongoose";
 export class DriverMapper {
   static toDomain(raw: IDriverModel): Driver {
     return Driver.fromData({
-      id: raw._id,
+      id: raw._id.toString(),
       userId: raw.userId.toString(),
       eligibleGearTypes: raw.eligibleGearTypes as GearType[],
       eligibleBodyTypes: raw.eligibleBodyTypes as BodyType[],
@@ -29,7 +29,7 @@ export class DriverMapper {
 
   static toPersistence(driver: Driver): Partial<IDriverModel> {
     return {
-      _id: driver.getId(),
+      _id: new Types.ObjectId(driver.getId()),
       userId: new Types.ObjectId(driver.getUserId()),
       eligibleGearTypes: driver.getEligibleGearTypes(),
       eligibleBodyTypes: driver.getEligibleBodyTypes(),

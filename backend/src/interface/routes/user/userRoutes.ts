@@ -34,19 +34,19 @@ router.use(requireRole([UserRole.RIDER]));
 
 router.use(rideRoutes);
 
-// GET /api/user/profile/:userId
-router.get("/profile/:userId", (req: Request, res: Response) =>
+// GET /api/user/profile
+router.get("/profile", (req: Request, res: Response) =>
   userProfileController.getProfile(req, res),
 );
 
-// PUT /api/user/profile/:userId
-router.put("/profile/:userId", (req: Request, res: Response) =>
+// PUT /api/user/profile
+router.put("/profile", (req: Request, res: Response) =>
   userProfileController.updateProfile(req, res),
 );
 
-// POST /api/user/profile/:userId/register-as-driver
+// POST /api/user/profile/register-as-driver
 router.post(
-  "/:userId/register-as-driver",
+  "/register-as-driver",
   getUserProfileValidation,
   (req: Request, res: Response) =>
     userProfileController.registerAsDriver(req, res),

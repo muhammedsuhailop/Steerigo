@@ -70,7 +70,7 @@ export class AdminUserController {
   async updateUserStatus(req: Request, res: Response): Promise<void> {
     try {
       const dto = UpdateUserStatusRequestDto.fromRequest(
-        req.params.userId,
+        req.params.userId as string,
         req.body
       );
 
@@ -110,7 +110,7 @@ export class AdminUserController {
     try {
       const userId = req.params.userId;
 
-      const dto = new GetUserProfileRequestDto(userId);
+      const dto = new GetUserProfileRequestDto(userId as string);
 
       const result = await this.getUserProfileUseCase.execute(dto);
 

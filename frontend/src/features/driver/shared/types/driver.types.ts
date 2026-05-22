@@ -208,6 +208,7 @@ export interface DriverState {
   error: string | null;
   isOnline: boolean;
   driverId: string | null;
+  isAutoSyncEnabled: boolean;
 }
 export interface RideStats {
   totalRides: number;

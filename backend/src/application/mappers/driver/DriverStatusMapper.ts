@@ -16,7 +16,7 @@ import { AvailabilityException } from "@domain/entities/AvailabilityException";
 
 export class DriverStatusMapper {
   static toDtoFromEntity(
-    availability: DriverAvailability
+    availability: DriverAvailability,
   ): DriverStatusResponseDto {
     const recurringSchedule =
       this.mapRecurringSchedule(availability.getRecurringSchedule()) ?? null;
@@ -26,6 +26,9 @@ export class DriverStatusMapper {
       driverId: availability.getDriverId(),
       availabilityStatus: availability.getStatus(),
       currentLocation: this.mapLocation(availability.getCurrentLocation()),
+      baseLocation: this.mapLocation(
+        availability.getBaseLocation() ?? availability.getCurrentLocation(),
+      ),
       lastLocationUpdateAt: new Date(),
       recurringSchedule,
       exceptions: availability
@@ -37,11 +40,11 @@ export class DriverStatusMapper {
       summary: this.buildSummary(
         availability.getStatus(),
         availability.getExceptions(),
-        availability.getRecurringSchedule()
+        availability.getRecurringSchedule(),
       ),
       todayTimeSlots: this.calculateTodayTimeSlots(
         availability.getExceptions(),
-        availability.getRecurringSchedule()
+        availability.getRecurringSchedule(),
       ),
       isActive: availability.getIsActive(),
       createdAt: availability.getCreatedAt(),
@@ -61,19 +64,22 @@ export class DriverStatusMapper {
   }
 
   private static mapRecurringSchedule(
-    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>
+    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>,
   ): RecurringScheduleResponse | undefined {
     if (!domainSchedule) return undefined;
 
     const { dailyRecurrence, validity } = domainSchedule;
 
     const timeSlots = dailyRecurrence.timeSlots.map((slot: TimeSlot) =>
-      TimeSlotHelper.minutesToTimeSlot(slot.getStartTime(), slot.getEndTime())
+      TimeSlotHelper.minutesToTimeSlot(slot.getStartTime(), slot.getEndTime()),
     );
 
     const excludedTimeSlots = (dailyRecurrence.excludedTimeSlots ?? []).map(
       (slot: TimeSlot) =>
-        TimeSlotHelper.minutesToTimeSlot(slot.getStartTime(), slot.getEndTime())
+        TimeSlotHelper.minutesToTimeSlot(
+          slot.getStartTime(),
+          slot.getEndTime(),
+        ),
     );
 
     const daysOfWeek = dailyRecurrence.daysOfWeek;
@@ -81,7 +87,7 @@ export class DriverStatusMapper {
 
     const isCurrentlyValid = ScheduleValidityHelper.isValidityActive(
       validity,
-      new Date()
+      new Date(),
     );
 
     return {
@@ -102,7 +108,7 @@ export class DriverStatusMapper {
   }
 
   private static mapException(
-    domainException: AvailabilityException
+    domainException: AvailabilityException,
   ): AvailabilityExceptionResponse {
     const startTime = domainException.startTime;
     const endTime = domainException.endTime;
@@ -129,7 +135,7 @@ export class DriverStatusMapper {
   private static buildSummary(
     availabilityStatus: AvailabilityStatus,
     exceptions: AvailabilityException[],
-    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>
+    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>,
   ): AvailabilitySummaryResponse {
     const now = new Date();
 
@@ -137,7 +143,7 @@ export class DriverStatusMapper {
     const mappedExceptions = exceptions.map((exc) => this.mapException(exc));
     const todayTimeSlots = this.calculateTodayTimeSlots(
       exceptions,
-      domainSchedule
+      domainSchedule,
     );
 
     return {
@@ -146,7 +152,7 @@ export class DriverStatusMapper {
       nextUnavailableTime: this.findNextUnavailableTime(mappedExceptions),
       totalHoursAvailableToday: todayTimeSlots.reduce(
         (sum, slot) => sum + slot.durationMinutes / 60,
-        0
+        0,
       ),
       activeExceptionsCount: mappedExceptions.filter((exc) => exc).length,
       scheduleStatus: this.determineScheduleStatus(recurringSchedule, now),
@@ -155,7 +161,7 @@ export class DriverStatusMapper {
 
   private static calculateTodayTimeSlots(
     exceptions: AvailabilityException[],
-    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>
+    domainSchedule?: ReturnType<DriverAvailability["getRecurringSchedule"]>,
   ): TimeSlotResponse[] {
     const recurringSchedule = this.mapRecurringSchedule(domainSchedule);
 
@@ -173,8 +179,8 @@ export class DriverStatusMapper {
         !recurringSchedule.dailyRecurrence.excludedTimeSlots.some(
           (excluded) =>
             excluded.startTime === slot.startTime &&
-            excluded.endTime === slot.endTime
-        )
+            excluded.endTime === slot.endTime,
+        ),
     );
 
     const mappedExceptions = exceptions.map((exc) => this.mapException(exc));
@@ -188,15 +194,15 @@ export class DriverStatusMapper {
               exc.startTime,
               exc.endTime,
               slot.startTime,
-              slot.endTime
-            )
-        )
+              slot.endTime,
+            ),
+        ),
     );
   }
 
   private static findNextAvailableTime(
     todayTimeSlots: TimeSlotResponse[],
-    now: Date
+    now: Date,
   ): Date | null {
     if (todayTimeSlots.length === 0) return null;
 
@@ -209,7 +215,7 @@ export class DriverStatusMapper {
   }
 
   private static findNextUnavailableTime(
-    exceptions: AvailabilityExceptionResponse[]
+    exceptions: AvailabilityExceptionResponse[],
   ): Date | null {
     const active = exceptions.find((exc) => exc);
     return active?.startTime ?? null;
@@ -217,7 +223,7 @@ export class DriverStatusMapper {
 
   private static determineScheduleStatus(
     recurringSchedule: RecurringScheduleResponse | undefined,
-    now: Date
+    now: Date,
   ): AvailabilityStatus {
     if (!recurringSchedule) return AvailabilityStatus.OFFLINE;
 
@@ -228,7 +234,7 @@ export class DriverStatusMapper {
     if (
       ScheduleValidityHelper.isSchedulePending(
         recurringSchedule.validity.startDate,
-        now
+        now,
       )
     ) {
       return AvailabilityStatus.SCHEDULED;

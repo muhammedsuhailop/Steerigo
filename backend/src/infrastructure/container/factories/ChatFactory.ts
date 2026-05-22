@@ -29,9 +29,17 @@ import { InMemoryChatEventBus } from "@infrastructure/events/InMemoryChatEventBu
 import { MarkChatMessagesReadUseCase } from "@application/use-cases/chat/MarkChatMessagesReadUseCase";
 import { MarkChatMessagesReadDto } from "@application/dto/chat/MarkChatMessagesReadDto";
 import { MarkChatMessagesReadResponseDto } from "@application/dto/chat/response/MarkChatMessagesReadResponseDto";
+import { createChatRoomExpiryQueue } from "@infrastructure/queues/ChatRoomExpiryQueue";
+import { IChatRoomExpiryService } from "@application/services/chat/IChatRoomExpiryService";
+import { ChatRoomExpiryService } from "@infrastructure/services/ChatRoomExpiryService";
+import { ChatRoomExpiryWorker } from "@infrastructure/workers/ChatRoomExpiryWorker";
 
 export class ChatFactory {
   static register(container: Container): void {
+    container
+      .bind(TYPES.ChatRoomExpiryQueue)
+      .toConstantValue(createChatRoomExpiryQueue());
+
     //Controllers
     container
       .bind<ChatRoomController>(TYPES.ChatRoomController)
@@ -114,5 +122,17 @@ export class ChatFactory {
         >
       >(TYPES.MarkChatMessagesReadUseCase)
       .to(MarkChatMessagesReadUseCase);
+
+    // Service
+    container
+      .bind<IChatRoomExpiryService>(TYPES.ChatRoomExpiryService)
+      .to(ChatRoomExpiryService)
+      .inSingletonScope();
+
+    // Worker
+    container
+      .bind(TYPES.ChatRoomExpiryWorker)
+      .to(ChatRoomExpiryWorker)
+      .inSingletonScope();
   }
 }

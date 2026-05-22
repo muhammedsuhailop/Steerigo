@@ -7,7 +7,7 @@ import { Types } from "mongoose";
 export class KYCMapper {
   static toDomain(raw: IKYCModel): KYC {
     return KYC.fromData({
-      id: raw._id,
+      id: raw._id.toString(),
       driverId: raw.driverId.toString(),
       docType: raw.docType as DocumentType,
       docNumber: raw.docNumber,
@@ -24,7 +24,7 @@ export class KYCMapper {
 
   static toPersistence(kyc: KYC): Partial<IKYCModel> {
     return {
-      _id: kyc.getId(),
+      _id: new Types.ObjectId(kyc.getId()),
       driverId: new Types.ObjectId(kyc.getDriverId()),
       docType: kyc.getDocType(),
       docNumber: kyc.getDocNumber(),

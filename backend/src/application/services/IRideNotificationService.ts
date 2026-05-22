@@ -1,5 +1,11 @@
+import {
+  FutureRideLastRequestRejectedEvent,
+  FutureRideRequestSentToDriverEvent,
+} from "@application/events/FutureRideEvents";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 
 export interface DriverRequestNotificationPayload {
@@ -19,10 +25,7 @@ export interface DriverRequestNotificationPayload {
   pickupTime: string;
   rideType: string;
   pickupETA: string;
-  fare: {
-    amount: number;
-    currency: string;
-  };
+  fareBreakdown: FareBreakdown;
   searchedAt: string;
   expiresAt: string;
 }
@@ -183,6 +186,42 @@ export interface RideSearchProgressPayload {
   status: "SEARCHING" | "COMPLETED" | "EXPIRED";
 }
 
+export interface FutureRideAcceptedPayload {
+  futureRequestId: string;
+  requestGroupId: string;
+
+  rideId: string;
+  driverId: string;
+
+  status: FutureRideRequestStatus;
+
+  pickup: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+
+  drop: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly address?: string;
+  };
+
+  pickupTime: string;
+
+  rideType: string;
+
+  fare: {
+    readonly amount: number;
+    readonly currency: string;
+  };
+}
+
+export interface FutureRideAllDriversRejectedPayload {
+  readonly requestGroupId: string;
+  readonly pickupTime: string;
+}
+
 export interface IRideNotificationService {
   notifyDriverNewRequest(
     driverId: string,
@@ -247,5 +286,62 @@ export interface IRideNotificationService {
   notifyRiderSearchProgress(
     riderId: string,
     payload: RideSearchProgressPayload,
+  ): Promise<void>;
+
+  notifyDriverNewFutureRequest(
+    driverId: string,
+    payload: Omit<
+      FutureRideRequestSentToDriverEvent["payload"],
+      "driverId" | "driverUserId"
+    >,
+  ): Promise<void>;
+
+  notifyFutureRideAccepted(
+    riderId: string,
+    payload: FutureRideAcceptedPayload,
+  ): Promise<void>;
+
+  notifyFutureRideExpired(
+    riderId: string,
+    payload: {
+      requestGroupId: string;
+    },
+  ): Promise<void>;
+
+  notifyDriverFutureRideExpired(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      riderId: string;
+      pickupTime: string;
+    },
+  ): Promise<void>;
+
+  notifyDriverFutureRideRequestCancelled(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      acceptedByDriverId: string | null;
+      cancelledByRider: boolean;
+    },
+  ): Promise<void>;
+
+  notifyDriverRideRequestExpired(
+    driverId: string,
+    payload: {
+      requestId: string;
+      requestGroupId: string;
+      riderId: string;
+      expiredAt: string;
+    },
+  ): Promise<void>;
+
+  notifyRiderFutureRideAllDriversRejected(
+    riderId: string,
+    payload: FutureRideAllDriversRejectedPayload,
   ): Promise<void>;
 }

@@ -5,6 +5,8 @@ import {
   ConfirmCashPaymentResponse,
   ConfirmCashRequest,
   RideStatusResponse,
+  UpdateCurrentLocationRequest,
+  UpdateCurrentLocationResponse,
   ViewDriverRideResponse,
 } from "../types/viewDriverRide.types";
 
@@ -29,12 +31,22 @@ export const viewDriverRideApi = createApi({
       invalidatesTags: (result, error, id) => [{ type: "DriverRide", id }],
     }),
 
-    startRide: builder.mutation<RideStatusResponse, string>({
-      query: (rideId) => ({
+    startRide: builder.mutation<
+      RideStatusResponse,
+      { rideId: string; verificationCode: string }
+    >({
+      query: ({ rideId, verificationCode }) => ({
         url: `${API_ENDPOINTS.DRIVER.RIDE}/${rideId}/started`,
         method: "PATCH",
+        data: { verificationCode },
+        skipErrorHandling: true,
       }),
-      invalidatesTags: (result, error, id) => [{ type: "DriverRide", id }],
+      invalidatesTags: (result, error, { rideId }) => {
+        if (error) {
+          return [];
+        }
+        return [{ type: "DriverRide", id: rideId }];
+      },
     }),
 
     completeRide: builder.mutation<RideStatusResponse, string>({
@@ -72,6 +84,17 @@ export const viewDriverRideApi = createApi({
         { type: "DriverRide", id: rideId },
       ],
     }),
+
+    updateDriverLocationFromRide: builder.mutation<
+      UpdateCurrentLocationResponse,
+      UpdateCurrentLocationRequest
+    >({
+      query: (data) => ({
+        url: API_ENDPOINTS.DRIVER.AVAILABILITY.UPDATE_LOCATION,
+        method: "PUT",
+        data,
+      }),
+    }),
   }),
 });
 
@@ -82,4 +105,5 @@ export const {
   useCompleteRideMutation,
   useCancelRideMutation,
   useConfirmCashPaymentMutation,
+  useUpdateDriverLocationFromRideMutation,
 } = viewDriverRideApi;

@@ -126,14 +126,6 @@ export const Header: React.FC<HeaderProps> = () => {
               <>
                 {/* Desktop-only items */}
                 <div className="hidden md:flex items-center space-x-4">
-                  <button
-                    type="button"
-                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
-                  >
-                    <Link to="/help" className="block w-full h-full">
-                      Help
-                    </Link>
-                  </button>
 
                   {/* Navigate Dropdown */}
                   <div className="relative" ref={navigateDropdownRef}>

@@ -41,7 +41,10 @@ export class AdminPayoutController {
       const adminId = req.user!.userId;
       const { payoutId } = req.params;
 
-      const dto = ApprovePayoutDto.create({ adminId, payoutId });
+      const dto = ApprovePayoutDto.create({
+        adminId,
+        payoutId: payoutId as string,
+      });
 
       const result = await this.approvePayoutUseCase.execute(dto);
 
@@ -74,7 +77,11 @@ export class AdminPayoutController {
       const { payoutId } = req.params;
       const { reason } = req.body;
 
-      const dto = RejectPayoutDto.create({ adminId, payoutId, reason });
+      const dto = RejectPayoutDto.create({
+        adminId,
+        payoutId: payoutId as string,
+        reason,
+      });
 
       const result = await this.rejectPayoutUseCase.execute(dto);
 

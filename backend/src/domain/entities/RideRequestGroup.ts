@@ -1,6 +1,7 @@
 import { Location } from "@domain/value-objects/Location";
 import { RideType } from "@domain/value-objects/RideType";
 import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 
 export class RideRequestGroup {
   private constructor(
@@ -8,9 +9,9 @@ export class RideRequestGroup {
     private readonly riderId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
+    private readonly timeRequired: number,
     private readonly rideType: RideType,
-    private readonly estimatedFareAmount: number,
-    private readonly estimatedFareCurrency: string,
+    private fareBreakdown: FareBreakdown,
     private candidateDriverIds: string[],
     private currentIndex: number,
     private status: RideRequestGroupStatus,
@@ -23,9 +24,9 @@ export class RideRequestGroup {
     riderId: string,
     pickup: Location,
     drop: Location,
+    timeRequired: number,
     rideType: RideType,
-    estimatedFareAmount: number,
-    estimatedFareCurrency: string,
+    fareBreakdown: FareBreakdown,
     candidateDriverIds: string[],
   ): RideRequestGroup {
     if (!id) {
@@ -43,9 +44,9 @@ export class RideRequestGroup {
       riderId,
       pickup,
       drop,
+      timeRequired,
       rideType,
-      estimatedFareAmount,
-      estimatedFareCurrency,
+      fareBreakdown,
       [...candidateDriverIds],
       0,
       RideRequestGroupStatus.SEARCHING,
@@ -57,9 +58,9 @@ export class RideRequestGroup {
     riderId: string;
     pickup: Location;
     drop: Location;
+    timeRequired: number;
     rideType: RideType;
-    estimatedFareAmount: number;
-    estimatedFareCurrency: string;
+    fareBreakdown: FareBreakdown;
     candidateDriverIds: string[];
     currentIndex: number;
     status: RideRequestGroupStatus;
@@ -71,9 +72,9 @@ export class RideRequestGroup {
       data.riderId,
       data.pickup,
       data.drop,
+      data.timeRequired,
       data.rideType,
-      data.estimatedFareAmount,
-      data.estimatedFareCurrency,
+      data.fareBreakdown,
       [...data.candidateDriverIds],
       data.currentIndex,
       data.status,
@@ -99,16 +100,16 @@ export class RideRequestGroup {
     return this.drop;
   }
 
+  getTimeRequired(): number {
+    return this.timeRequired;
+  }
+
   getRideType(): RideType {
     return this.rideType;
   }
 
-  getEstimatedFareAmount(): number {
-    return this.estimatedFareAmount;
-  }
-
-  getEstimatedFareCurrency(): string {
-    return this.estimatedFareCurrency;
+  getFareBreakdown(): FareBreakdown {
+    return this.fareBreakdown;
   }
 
   getCandidateDriverIds(): string[] {

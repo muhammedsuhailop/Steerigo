@@ -8,6 +8,16 @@ export enum RideStatus {
   ARRIVED = "Arrived",
 }
 
+export enum FutureRideRequestStatus {
+  PENDING = "Pending",
+  MATCHED = "Matched",
+  ACCEPTED = "Accepted",
+  REJECTED = "Rejected",
+  EXPIRED = "Expired",
+  CANCELLED = "Cancelled",
+  COMPLETED = "Completed",
+}
+
 export interface RideTimeline {
   requestedAt: string;
   acceptedAt?: string;
@@ -51,6 +61,12 @@ export interface RideTaxComponent {
   amount: Money;
 }
 
+export interface TaxDetail {
+  name: string;
+  rate: number;
+  amount: Money;
+}
+
 export interface RideTaxes {
   fare: RideTaxComponent;
   platformFee: RideTaxComponent;
@@ -59,10 +75,13 @@ export interface RideTaxes {
 export interface RideFareBreakdown {
   baseFare: Money;
   platformFee: Money;
-  taxes: RideTaxes;
+  taxes: {
+    fare: TaxDetail;
+    platformFee: TaxDetail;
+  };
   totalFare: Money;
   durationHours: number;
-  actualDurationMinutes: number;
+  calculatedAt: string;
 }
 
 export interface RideArrivedPayload {

@@ -24,8 +24,7 @@ const Toast: React.FC<ToastProps> = ({ error, index, onClose }) => {
 
   // Auto-close for LOW (8s) and MEDIUM (16s)
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-
+    let timer: ReturnType<typeof setTimeout>;
     if (error.severity === ErrorSeverity.LOW) {
       timer = setTimeout(() => {
         handleClose();
@@ -132,8 +131,8 @@ const Toast: React.FC<ToastProps> = ({ error, index, onClose }) => {
             </p>
           )}
 
-          {/* Context (if available) */}
-          {error.context && (
+          {/* Dev-only: Context (if available) */}
+          {import.meta.env.DEV && error.context && (
             <p className={`text-xs mt-1 ${getTextColorClass()} opacity-75`}>
               {error.context}
             </p>

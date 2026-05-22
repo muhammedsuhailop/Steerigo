@@ -24,6 +24,7 @@ export class FareBreakdown {
     platformFeeTax: TaxBreakdown;
     totalFare: Money;
     durationHours: number;
+    calculatedAt?: Date;
   }): FareBreakdown {
     return new FareBreakdown(
       params.baseFare,
@@ -32,6 +33,7 @@ export class FareBreakdown {
       params.platformFeeTax,
       params.totalFare,
       params.durationHours,
+      params.calculatedAt ?? new Date(),
     );
   }
 

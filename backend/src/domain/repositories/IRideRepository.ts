@@ -40,11 +40,12 @@ export interface IRideStatsResult {
   total: number;
   completed: number;
   cancelled: number;
-  totalAmount: number; 
+  totalAmount: number;
 }
 
 export interface IRideRepository
-  extends IReadOnlyRepository<Ride, string>,
+  extends
+    IReadOnlyRepository<Ride, string>,
     IWriteOnlyRepository<Ride, string> {
   findByRideId(rideId: string): Promise<Ride | null>;
 
@@ -85,4 +86,10 @@ export interface IRideRepository
     filters: IRideFilters,
   ): Promise<IRiderRideStatsResult>;
 
+  hasTimeSlotConflict(
+    driverId: string,
+    pickupTime: Date,
+    timeRequiredHours: number,
+    excludeStatuses?: RideStatus[],
+  ): Promise<boolean>;
 }

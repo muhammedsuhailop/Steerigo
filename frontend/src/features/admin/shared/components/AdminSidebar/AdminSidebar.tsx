@@ -48,7 +48,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       label: "KYC",
       icon: "RiShieldCheckLine",
       path: "/admin/kyc-requests",
-      badge: 5,
     },
     {
       id: "payouts",

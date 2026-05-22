@@ -7,11 +7,13 @@ export class RideRequest {
   private constructor(
     private id: string,
     private readonly driverId: string,
+    private readonly driverUserId: string,
     private readonly riderId: string,
     private readonly requestGroupId: string,
     private readonly pickup: Location,
     private readonly drop: Location,
     private readonly pickupTime: Date,
+    private readonly timeRequired: number,
     private readonly rideType: RideType,
     private readonly fareBreakdown: FareBreakdown,
     private status: RideRequestStatus,
@@ -22,11 +24,13 @@ export class RideRequest {
 
   static create(
     driverId: string,
+    driverUserId: string,
     riderId: string,
     requestGroupId: string,
     pickup: Location,
     drop: Location,
     pickupTime: Date,
+    timeRequired: number,
     rideType: RideType,
     fareBreakdown: FareBreakdown,
     pickupETA: string,
@@ -38,11 +42,13 @@ export class RideRequest {
     return new RideRequest(
       "",
       driverId,
+      driverUserId,
       riderId,
       requestGroupId,
       pickup,
       drop,
       pickupTime,
+      timeRequired,
       rideType,
       fareBreakdown,
       RideRequestStatus.PENDING,
@@ -53,11 +59,13 @@ export class RideRequest {
   static fromData(data: {
     id: string;
     driverId: string;
+    driverUserId: string;
     riderId: string;
     requestGroupId: string;
     pickup: Location;
     drop: Location;
     pickupTime: Date;
+    timeRequired: number;
     rideType: RideType;
     fareBreakdown: FareBreakdown;
     status: RideRequestStatus;
@@ -68,11 +76,13 @@ export class RideRequest {
     return new RideRequest(
       data.id,
       data.driverId,
+      data.driverUserId,
       data.riderId,
       data.requestGroupId,
       data.pickup,
       data.drop,
       data.pickupTime,
+      data.timeRequired,
       data.rideType,
       data.fareBreakdown,
       data.status,
@@ -91,6 +101,10 @@ export class RideRequest {
     return this.driverId;
   }
 
+  getDriverUserId(): string {
+    return this.driverUserId;
+  }
+
   getRiderId(): string {
     return this.riderId;
   }
@@ -105,6 +119,10 @@ export class RideRequest {
 
   getPickupTime(): Date {
     return this.pickupTime;
+  }
+
+  getTimeRequired(): number {
+    return this.timeRequired;
   }
 
   getRideType(): RideType {

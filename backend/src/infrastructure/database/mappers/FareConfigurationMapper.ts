@@ -1,5 +1,6 @@
 import { FareConfiguration } from "@domain/entities/FareConfiguration";
 import { IFareConfigurationDocument } from "../models/FareConfigurationModel";
+import { Types } from "mongoose";
 
 export class FareConfigurationMapper {
   static toDomain(doc: IFareConfigurationDocument): FareConfiguration {
@@ -14,17 +15,17 @@ export class FareConfigurationMapper {
       isActive: doc.isActive,
       effectiveFrom: doc.effectiveFrom,
       effectiveTill: doc.effectiveTill,
-      maxCancellationCharge:doc.maxCancellationCharge,
+      maxCancellationCharge: doc.maxCancellationCharge,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
   }
 
   static toPersistence(
-    config: FareConfiguration
+    config: FareConfiguration,
   ): Partial<IFareConfigurationDocument> {
     return {
-      _id: config.getId(),
+      _id: new Types.ObjectId(config.getId()),
       baseAmount: config.getBaseAmount(),
       baseHours: config.getBaseHours(),
       fareRules: config.getFareRules(),
@@ -34,7 +35,7 @@ export class FareConfigurationMapper {
       isActive: config.isActiveAt(new Date()),
       effectiveFrom: config.getEffectiveFrom(),
       effectiveTill: config.getEffectiveTill(),
-      maxCancellationCharge:config.getMaxCancellationCharge(),
+      maxCancellationCharge: config.getMaxCancellationCharge(),
       updatedAt: new Date(),
     };
   }

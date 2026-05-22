@@ -208,6 +208,7 @@ export class GetUserRideByIdUseCase
       distance: ride.getPickup().distanceTo(ride.getDrop()),
       fare: fareDetails,
       timeline: timelineDetails,
+      verificationCode:ride.getVerificationCode(),
       couponDetails: couponDetails,
       rating: ratingDetails,
       createdAt: ride.getCreatedAt().toISOString(),

@@ -100,7 +100,11 @@ export class CouponController {
         body: req.body,
       });
 
-      const dto = ApplyCouponDto.fromRequest(userId, { rideId }, req.body);
+      const dto = ApplyCouponDto.fromRequest(
+        userId,
+        { rideId: rideId as string },
+        req.body,
+      );
 
       const result = await this.applyCouponUseCase.execute(dto);
 
@@ -160,7 +164,9 @@ export class CouponController {
         rideId,
       });
 
-      const dto = RemoveCouponDto.fromRequest(userId, { rideId });
+      const dto = RemoveCouponDto.fromRequest(userId, {
+        rideId: rideId as string,
+      });
 
       const result = await this.removeCouponUseCase.execute(dto);
 

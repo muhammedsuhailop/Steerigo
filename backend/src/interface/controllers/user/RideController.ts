@@ -261,7 +261,11 @@ export class RideController {
         body: req.body,
       });
 
-      const dto = CancelRideDto.fromRequest(userId, { rideId }, req.body);
+      const dto = CancelRideDto.fromRequest(
+        userId,
+        { rideId: rideId as string },
+        req.body,
+      );
 
       const result = await this.cancelRideUseCase.execute(dto);
 
@@ -323,7 +327,11 @@ export class RideController {
         body: req.body,
       });
 
-      const dto = RateDriverDto.fromRequest(userId, { rideId }, req.body);
+      const dto = RateDriverDto.fromRequest(
+        userId,
+        { rideId: rideId as string },
+        req.body,
+      );
 
       const result = await this.rateDriverUseCase.execute(dto);
 

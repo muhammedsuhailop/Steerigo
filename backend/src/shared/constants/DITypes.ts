@@ -27,6 +27,7 @@ export const TYPES = {
   MessageRepository: Symbol.for("MessageRepository"),
   MessageStatusRepository: Symbol.for("MessageStatusRepository"),
   UserChatRepository: Symbol.for("UserChatRepository"),
+  FutureRideRequestRepository: Symbol.for("FutureRideRequestRepository"),
 
   // Application Services
   PasswordService: Symbol.for("PasswordService"),
@@ -59,6 +60,12 @@ export const TYPES = {
   NotificationRealtimePublisher: Symbol.for("NotificationRealtimePublisher"),
   ChatRealtimeService: Symbol.for("ChatRealtimeService"),
   WorkerSocketBridge: Symbol.for("WorkerSocketBridge"),
+  FutureRideExpiryService: Symbol.for("FutureRideExpiryService"),
+  FutureRideExpiryQueue: Symbol.for("FutureRideExpiryQueue"),
+  FutureRideExpiryWorker: Symbol.for("FutureRideExpiryWorker"),
+  ChatRoomExpiryQueue: Symbol.for("ChatRoomExpiryQueue"),
+  ChatRoomExpiryWorker: Symbol.for("ChatRoomExpiryWorker"),
+  ChatRoomExpiryService: Symbol.for("ChatRoomExpiryService"),
 
   //Event
   EventBus: Symbol.for("EventBus"),
@@ -157,6 +164,10 @@ export const TYPES = {
   GetDriverWalletUseCase: Symbol.for("GetDriverWalletUseCase"),
   DriverCancelRideUseCase: Symbol.for("DriverCancelRideUseCase"),
   GetDriverStatsUseCase: Symbol.for("GetDriverStatsUseCase"),
+  AcceptFutureRideRequestUseCase: Symbol.for("AcceptFutureRideRequestUseCase"),
+  GetFutureRideRequestsUseCase: Symbol.for("GetFutureRideRequestsUseCase"),
+  RejectFutureRideRequestUseCase: Symbol.for("RejectFutureRideRequestUseCase"),
+  UpdateDriverBaseLocationUseCase:Symbol.for("UpdateDriverBaseLocationUseCase"),
 
   // Use Cases - User
   GetUserProfileUseCase: Symbol.for("GetUserProfileUseCase"),
@@ -175,6 +186,10 @@ export const TYPES = {
   GetUserCouponsUseCase: Symbol.for("GetUserCouponsUseCase"),
   RemoveCouponUseCase: Symbol.for("RemoveCouponUseCase"),
   GetUserStatsUseCase: Symbol.for("GetUserStatsUseCase"),
+  ScheduleFutureRideRequestUseCase: Symbol.for(
+    "ScheduleFutureRideRequestUseCase",
+  ),
+  CancelFutureRideRequestUseCase: Symbol.for("CancelFutureRideRequestUseCase"),
 
   //Use Cases - Chat
   CreateRideChatRoomUseCase: Symbol.for("CreateRideChatRoomUseCase"),
@@ -244,4 +259,5 @@ export const TYPES = {
   ChatMessageController: Symbol.for("ChatMessageController"),
   AdminStatsController: Symbol.for("AdminStatsController"),
   DriverStatsController: Symbol.for("DriverStatsController"),
+  DriverScheduleRideController: Symbol.for("DriverScheduleRideController"),
 };

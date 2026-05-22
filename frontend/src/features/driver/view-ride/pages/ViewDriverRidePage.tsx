@@ -5,7 +5,10 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { DriverSidebar, DriverTopbar } from "../../shared/components";
 import { Footer } from "@/features/public/components";
 import { Alert } from "@/shared/components/ui/Alert";
-import { useGetDriverRideDetailsQuery } from "../services/viewDriverRideApi";
+import {
+  useGetDriverRideDetailsQuery,
+  useUpdateDriverLocationFromRideMutation,
+} from "../services/viewDriverRideApi";
 import {
   setDriverRideData,
   selectActiveDriverRide,
@@ -22,6 +25,7 @@ import { RideStatus } from "@/shared/types/ride.types";
 import { PaymentStatus } from "@/shared/types/payment.types";
 import RideStatsCard from "../components/RideStatsCard";
 import DriverRideRating from "../components/DriverRideRating";
+import { IoLocationOutline } from "react-icons/io5";
 
 const ViewDriverRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +39,10 @@ const ViewDriverRidePage: React.FC = () => {
     lng: number;
     bearing: number;
   } | null>(null);
+
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [updateLocation, { isLoading: isUpdatingLocation }] =
+    useUpdateDriverLocationFromRideMutation();
 
   const { data, isLoading, isFetching, error } = useGetDriverRideDetailsQuery(
     id as string,
@@ -93,6 +101,27 @@ const ViewDriverRidePage: React.FC = () => {
   }, [isInactive]);
 
   useDriverLocationUpdate(id, activeRide?.status, isInactive);
+
+  const handleUpdateLocation = async () => {
+    if (!driverLocation || !activeRide) {
+      setShowLocationPrompt(false);
+      return;
+    }
+    try {
+      await updateLocation({
+        driverId: activeRide.driverId,
+        currentLocation: {
+          latitude: driverLocation.lat,
+          longitude: driverLocation.lng,
+          address: activeRide.drop.address || "Current Location",
+        },
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to update location", err);
+    } finally {
+      setShowLocationPrompt(false);
+    }
+  };
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 256;
@@ -164,6 +193,37 @@ const ViewDriverRidePage: React.FC = () => {
             <div
               className={`${isInactive ? "w-full" : "lg:col-span-5"} space-y-6`}
             >
+              {showLocationPrompt && (
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 shadow-sm animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex items-center gap-2 text-blue-700 mb-3">
+                    <IoLocationOutline className="text-2xl" />
+                    <span className="font-bold text-sm">
+                      Update Availability Location?
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-600 font-medium leading-relaxed mb-4">
+                    Ride completed successfully! Do you want to set your
+                    location to this drop-off point to receive new rides nearby?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      className="flex-1 bg-blue-600 text-white py-3 rounded-xl text-xs font-bold tracking-widest transition-all hover:bg-blue-700 disabled:opacity-50"
+                      onClick={handleUpdateLocation}
+                      disabled={isUpdatingLocation}
+                    >
+                      {isUpdatingLocation ? "Updating..." : "Yes, Update"}
+                    </button>
+                    <button
+                      className="flex-1 bg-white text-blue-600 border border-blue-200 py-3 rounded-xl text-xs font-bold tracking-widest transition-all hover:bg-blue-50 disabled:opacity-50"
+                      onClick={() => setShowLocationPrompt(false)}
+                      disabled={isUpdatingLocation}
+                    >
+                      No, Thanks
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Rider Info */}
               {activeRider && (
                 <RideRiderCard
@@ -180,6 +240,7 @@ const ViewDriverRidePage: React.FC = () => {
                   rideId={activeRide.rideId}
                   status={activeRide.status}
                   amount={activeRide.fare.payableAmount}
+                  onTripCompleted={() => setShowLocationPrompt(true)}
                 />
               ) : (
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex items-center gap-4">

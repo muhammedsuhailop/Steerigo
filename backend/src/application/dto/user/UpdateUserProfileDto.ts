@@ -54,7 +54,7 @@ export class UpdateUserProfileDto {
 
   static fromRequest(
     userId: string,
-    requestBody: unknown
+    requestBody: unknown,
   ): UpdateUserProfileDto {
     const input = (requestBody ?? {}) as UpdateUserProfileRequestBody;
     return new UpdateUserProfileDto({
@@ -72,28 +72,50 @@ export class UpdateUserProfileDto {
 
     if (!this.name) {
       errors.push("Name is required");
-    } else if (this.name.length < 2) {
-      errors.push("Name must be at least 2 characters long");
+    } else {
+      const trimmedName = this.name.trim();
+
+      if (trimmedName.length < 2) {
+        errors.push("Name must be at least 2 characters long");
+      }
+
+      if (trimmedName.length > 50) {
+        errors.push("Name must not exceed 50 characters");
+      }
     }
 
     if (!this.mobile) {
       errors.push("Mobile number is required");
-    } else if (!/^\d{10,}$/.test(this.mobile)) {
-      errors.push("Mobile number must contain at least 10 digits");
+    } else {
+      const cleanedMobile = this.mobile.replace(/\D/g, "");
+
+      if (cleanedMobile.length < 10) {
+        errors.push("Mobile number must contain at least 10 digits");
+      }
+
+      if (cleanedMobile.length > 15) {
+        errors.push("Mobile number must not exceed 15 digits");
+      }
     }
 
     if (this.dob !== undefined) {
       const today = new Date();
-      let age = today.getFullYear() - this.dob.getFullYear();
 
-      const monthDiff = today.getMonth() - this.dob.getMonth();
-      const dayDiff = today.getDate() - this.dob.getDate();
-      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-        age--;
-      }
+      if (this.dob > today) {
+        errors.push("Date of birth cannot be in the future");
+      } else {
+        let age = today.getFullYear() - this.dob.getFullYear();
 
-      if (age < 10 || age > 120) {
-        errors.push("Age must be between 10 and 120 years");
+        const monthDiff = today.getMonth() - this.dob.getMonth();
+        const dayDiff = today.getDate() - this.dob.getDate();
+
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+          age--;
+        }
+
+        if (age < 10 || age > 120) {
+          errors.push("Age must be between 10 and 120 years");
+        }
       }
     }
 
@@ -104,8 +126,16 @@ export class UpdateUserProfileDto {
       errors.push("Gender must be Male, Female, or Other");
     }
 
-    if (this.address !== undefined && this.address.length > 500) {
-      errors.push("Address must be less than 500 characters");
+    if (this.address !== undefined) {
+      const trimmedAddress = this.address.trim();
+
+      if (trimmedAddress.length < 5) {
+        errors.push("Address must be at least 5 characters long");
+      }
+
+      if (trimmedAddress.length > 500) {
+        errors.push("Address must not exceed 500 characters");
+      }
     }
 
     return errors;

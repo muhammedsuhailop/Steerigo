@@ -33,9 +33,7 @@ interface RatingResult {
 }
 
 @injectable()
-export class DriverDashboardRepositoryImpl
-  implements IDriverDashboardRepository
-{
+export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository {
   private parseRideType(rideTypeValue: string): RideType {
     const normalizedValue = rideTypeValue?.trim().toLowerCase() ?? "";
     if (normalizedValue === "one way" || normalizedValue === "oneway") {
@@ -332,10 +330,14 @@ export class DriverDashboardRepositoryImpl
       paymentStatus: doc.paymentStatus as PaymentStatus,
       pickup,
       drop,
+      requestedPickupTime: doc.requestedPickupTime,
+      timeRequired: doc.timeRequired,
       rideType: rideTypeValue,
+      bookingType: doc.bookingType,
       fareBreakdown,
       currency: doc.currency,
       timeline,
+      verificationCode:doc.verificationCode,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -431,10 +433,12 @@ export class DriverDashboardRepositoryImpl
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
+      driverUserId: doc.driverUserId.toString(),
       requestGroupId: doc.requestGroupId.toString(),
       riderId: doc.riderId.toString(),
       pickup,
       drop,
+      timeRequired: doc.timeRequired,
       pickupTime: doc.pickupTime,
       rideType: rideTypeValue,
       fareBreakdown,

@@ -1,7 +1,6 @@
 import React from "react";
-import { Button } from "@/shared/components/ui/Button";
 import { Badge } from "@/shared/components/ui/Badge";
-import { FaSync, FaClock } from "react-icons/fa";
+import { FaSync } from "react-icons/fa";
 
 interface RideRequestsHeaderProps {
   total: number;
@@ -15,45 +14,31 @@ export const RideRequestsHeader: React.FC<RideRequestsHeaderProps> = ({
   isRefreshing,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Ride Requests
-          </h1>
-          <div className="flex items-center gap-3">
-            <Badge variant="info" className="text-sm font-semibold">
-              {total} {total === 1 ? "Request" : "Requests"}
-            </Badge>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className={`
-    inline-flex items-center justify-center
-    px-4 py-2 rounded-md border
-    font-semibold text-sm
-    transition-colors duration-200
-    border-slate-300 text-slate-700
-    hover:bg-slate-100
-    disabled:opacity-50 disabled:cursor-not-allowed
-  `}
+    <div className="flex items-center justify-between h-[52px] mb-4">
+      {/* Title Section with Vertical Bar */}
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-1.5 bg-emerald-500 rounded-full" />
+        <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+          Quick Requests
+        </h1>
+        <Badge
+          variant="outline"
+          className="bg-emerald-50 text-emerald-700 border-emerald-200 px-3 py-1 rounded-lg"
         >
-          {isRefreshing ? (
-            <>
-              <span className="mr-2 h-4 w-4 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
-              Refreshing...
-            </>
-          ) : (
-            <>
-              <FaSync className="mr-2" />
-              Refresh
-            </>
-          )}
-        </button>
+          {total} {total === 1 ? "Request" : "Requests"}
+        </Badge>
       </div>
+
+      {/* Action Section */}
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={isRefreshing}
+        className="inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl border-2 border-slate-200 font-bold text-sm text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 disabled:opacity-50"
+      >
+        <FaSync className={`${isRefreshing ? "animate-spin" : ""}`} />
+        <span>{isRefreshing ? "Refreshing" : "Refresh"}</span>
+      </button>
     </div>
   );
 };

@@ -20,6 +20,7 @@ export const USER_MESSAGES = {
       "An internal server error occurred while searching for drivers",
     SEARCH_FAILED: "Failed to find nearby drivers",
     CANCELLED_SUCCESS: "Ride requests cancelled successfully",
+    SCHEDULE_CANCELLED: "Your scheduled ride has been successfully cancelled.",
   },
   RIDE: {
     UNAUTHORIZED: "You are not authorized to access this ride",

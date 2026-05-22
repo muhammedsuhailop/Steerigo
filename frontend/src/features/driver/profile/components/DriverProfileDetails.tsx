@@ -161,6 +161,7 @@ export const DriverProfileDetails: React.FC<
                 <Input
                   type="text"
                   name="name"
+                  maxLength={50}
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter full name"

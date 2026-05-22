@@ -14,6 +14,7 @@ import {
   editAvailabilityExceptionSchema,
   removeAvailabilityExceptionSchema,
 } from "@interface/validators/driver/EditAvailabilityExceptionValidators";
+import { updateBaseLocationSchema } from "@interface/validators/driver/updateBaseLocationValidator";
 
 const router = Router();
 
@@ -61,6 +62,13 @@ router.put(
   "/update-location",
   validateSchema(updateLocationSchema),
   (req, res) => driverAvailabilityController.updateLocation(req, res),
+);
+
+// PUT /api/driver/availability/update-base-location - Update driver base location
+router.put(
+  "/update-base-location",
+  validateSchema(updateBaseLocationSchema),
+  (req, res) => driverAvailabilityController.updateBaseLocation(req, res),
 );
 
 export { router as driverAvailabilityRoutes };

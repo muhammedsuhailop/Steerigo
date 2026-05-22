@@ -13,18 +13,18 @@ import { Footer } from "@/features/public/components/Footer";
 import RideDriverCard from "../components/RideDriverCard";
 import FareBreakdown from "../components/FareBreakdown";
 import { RideTimelineStatus } from "../components/RideTimelineStatus";
-import LiveTrackingMap from "@/shared/components/maps/LiveTrackingMap";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { RideStatus } from "@/shared/types/ride.types";
 import CompletedRideSummary from "../components/CompletedRideSummary";
 import CancelRideButton from "../components/CancelRideButton";
 import CouponSection from "../components/CouponSection";
 import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
+import { FaShieldAlt } from "react-icons/fa";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: _isAuthLoading } = useAuth();
 
   const { data, isLoading, isFetching, error } = useGetRideDetailsQuery(
     id as string,
@@ -119,6 +119,27 @@ const ViewRidePage: React.FC = () => {
               </div>
 
               <div className="lg:col-span-4 space-y-6">
+                {(activeRide.status === RideStatus.ACCEPTED ||
+                  activeRide.status === RideStatus.ARRIVED) &&
+                  activeRide.verificationCode && (
+                    <div className="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 text-center shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <FaShieldAlt className="text-6xl text-indigo-900" />
+                      </div>
+                      <div className="relative z-10">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1">
+                          Your Ride PIN
+                        </p>
+                        <p className="text-4xl font-black text-indigo-900 tracking-[0.2em] my-2">
+                          {activeRide.verificationCode}
+                        </p>
+                        <p className="text-xs text-indigo-600 font-medium bg-white/60 inline-block px-3 py-1 rounded-full">
+                          Share this PIN to start the trip
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
                 {activeDriver ? (
                   <RideDriverCard
                     driver={activeDriver}

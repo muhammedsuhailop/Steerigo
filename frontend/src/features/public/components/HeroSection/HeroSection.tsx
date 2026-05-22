@@ -1,23 +1,12 @@
-import React from 'react';
-import { useAuth } from '@/features/auth';
-import { DriverSearchForm } from '@/features/user/dashbaord/components/DriverSearchForm';
-import { AuthenticatedHeroContent } from './AuthenticatedHeroContent';
-import { UnauthenticatedHeroContent } from './UnauthenticatedHeroContent';
-import type { HeroSectionProps } from './HeroSection.types';
-import type { SearchFormData } from '@/features/user/dashbaord/components/DriverSearchForm';
-import { URLS } from '@/shared/constants';
+import React from "react";
+import { useAuth } from "@/features/auth";
+import { AuthenticatedHeroContent } from "./AuthenticatedHeroContent";
+import { UnauthenticatedHeroContent } from "./UnauthenticatedHeroContent";
+import type { HeroSectionProps } from "./HeroSection.types";
+import { URLS } from "@/shared/constants";
 
 export const HeroSection: React.FC<HeroSectionProps> = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
-
-  const handleDriverSearch = async (searchData: SearchFormData) => {
-    try {
-      console.log('Searching for drivers with:', searchData);
-      // TODO: Implement driver search logic
-    } catch (error) {
-      console.error('Driver search failed:', error);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -36,8 +25,8 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
       className="relative flex items-center overflow-hidden rounded-3xl shadow-lg lg:py-10 mx-5 mt-5"
       style={{
         backgroundImage: `url('${URLS.PUBLIC.HERO_BG}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       {/* Light overlay */}
@@ -53,16 +42,6 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
               <UnauthenticatedHeroContent />
             )}
           </div>
-
-          {/* Sub Content - Driver Search Form for authenticated riders */}
-          {/* <div>
-            {isAuthenticated && user?.role === 'Rider' && (
-              <DriverSearchForm 
-                onSearch={handleDriverSearch}
-                isLoading={false}
-              />
-            )}
-          </div> */}
         </div>
       </div>
     </section>

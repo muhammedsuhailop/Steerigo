@@ -4,6 +4,7 @@ import { RiderInfo } from "../types/viewDriverRide.types";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { useGetChatRoomByRideIdQuery } from "@/features/chat/services/chatApi";
 import { openChat } from "@/features/chat/store/chatSlice";
+import { ChatRoomStatus } from "@/features/chat/types/enums";
 
 interface RideRiderCardProps {
   rider: RiderInfo;
@@ -26,6 +27,9 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
   const { data: chatRoomData, isLoading: isRoomLoading } =
     useGetChatRoomByRideIdQuery(rideId);
   const chatRoomId = chatRoomData?.data.chatRoomId;
+  const chatRoomStatus = chatRoomData?.data.status || ChatRoomStatus.ENDED;
+
+  const isChatEnded = chatRoomStatus === ChatRoomStatus.ENDED;
 
   const handleOpenChat = () => {
     if (chatRoomId) {
@@ -33,6 +37,7 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
         openChat({
           roomId: chatRoomId,
           name: rider.name,
+          status: chatRoomStatus,
         }),
       );
     }
@@ -42,11 +47,35 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
       {/* Rider Profile Section */}
       <div className="flex items-center gap-4">
-        <img
-          src={rider.profilePicture}
-          alt={rider.name}
-          className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
-        />
+        <div className="relative w-16 h-16">
+          {rider.profilePicture ? (
+            <img
+              src={rider.profilePicture}
+              alt={rider.name}
+              className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+
+                const fallback = e.currentTarget
+                  .nextElementSibling as HTMLElement | null;
+
+                if (fallback) {
+                  fallback.style.display = "flex";
+                }
+              }}
+            />
+          ) : null}
+
+          {/* Fallback Avatar */}
+          <div
+            className={`w-16 h-16 rounded-full border-2 border-gray-100 bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xl items-center justify-center ${
+              rider.profilePicture ? "hidden" : "flex"
+            }`}
+          >
+            {rider.name?.charAt(0)?.toUpperCase() || "R"}
+          </div>
+        </div>
+        
         <div className="flex-1">
           <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
             Rider
@@ -89,7 +118,11 @@ const RideRiderCard: React.FC<RideRiderCardProps> = ({
             size={14}
             className={isRoomLoading ? "animate-pulse" : ""}
           />
-          {isRoomLoading ? "Loading..." : minimal ? "View Chat" : "Message"}
+          {isRoomLoading
+            ? "Loading..."
+            : minimal || isChatEnded
+              ? "View Chat"
+              : "Message"}
         </button>
       </div>
     </div>

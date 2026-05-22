@@ -30,6 +30,8 @@ export const API_ENDPOINTS = {
     RIDES: "/user/ride/rides",
     STATS: "/user/stats",
     COUPONS: "/user/coupons",
+    SEND_FUTURE_REQUEST: "/user/ride/future-schedule",
+    CANCEL_FUTURE_REQUEST: "/user/ride/future-cancel",
   },
   DRIVER: {
     REGISTER: "/driver/register",
@@ -43,9 +45,13 @@ export const API_ENDPOINTS = {
     RIDE_REQUESTS: "/driver/ride-requests",
     CURRENT_RIDE: "/driver/ride/current",
     RIDE: "/driver/ride",
+    FUTURE_REQUESTS: "/driver/ride/future-requests",
+    ACCEPT_FUTURE_REQUEST: "/driver/ride/future-accept",
+    REJECT_FUTURE_REQUEST: "/driver/ride/future-reject",
     PROFILE_PIC_UPLOAD: "/file/profile-picture",
     AVAILABILITY: {
       UPDATE_LOCATION: "/driver/availability/update-location",
+      UPDATE_BASE_LOCATION: "/driver/availability/update-base-location",
       SCHEDULE: "/driver/availability/schedule",
       STATUS: "/driver/availability/status",
       EXCEPTION: "/driver/availability/exception",

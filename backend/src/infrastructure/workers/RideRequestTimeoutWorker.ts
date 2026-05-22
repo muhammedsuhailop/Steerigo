@@ -146,6 +146,19 @@ export class RideRequestTimeoutWorker {
         return;
       }
 
+      await this.eventBus.publish({
+        type: "RideRequestExpiredForDriver",
+        occurredAt: new Date(),
+        payload: {
+          requestId: expiredRequest.getId(),
+          requestGroupId,
+          driverId: expiredRequest.getDriverId(),
+          driverUserId: expiredRequest.getDriverUserId(),
+          riderId: group.getRiderId(),
+          expiredAt: new Date().toISOString(),
+        },
+      });
+
       const nextIndex = currentIndex + 1;
       const totalCandidates = group.getCandidateDriverIds().length;
 

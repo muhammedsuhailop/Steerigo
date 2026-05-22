@@ -26,11 +26,11 @@ export class ScheduleRecurringAvailabilityUseCase
     @inject(TYPES.DriverAvailabilityRepository)
     private availabilityRepository: IDriverAvailabilityRepository,
     @inject(TYPES.DriverRepository)
-    private driverRepository: IDriverRepository
+    private driverRepository: IDriverRepository,
   ) {}
 
   async execute(
-    dto: ScheduleRecurringAvailabilityRequestDto
+    dto: ScheduleRecurringAvailabilityRequestDto,
   ): Promise<Result<DriverAvailabilityResponseDto>> {
     try {
       Logger.info("Scheduling recurring driver availability", {
@@ -40,7 +40,7 @@ export class ScheduleRecurringAvailabilityUseCase
       const validationErrors = dto.validate();
       if (validationErrors.length > 0) {
         return Result.failure(
-          new InvalidAvailabilityScheduleError(validationErrors.join(", "))
+          new InvalidAvailabilityScheduleError(validationErrors.join(", ")),
         );
       }
 
@@ -58,7 +58,7 @@ export class ScheduleRecurringAvailabilityUseCase
         for (const exception of exceptions) {
           await this.availabilityRepository.removeException(
             driverId,
-            exception.id as string
+            exception.id as string,
           );
           Logger.debug("Exception removed", {
             driverId,
@@ -97,7 +97,7 @@ export class ScheduleRecurringAvailabilityUseCase
             startDate: dto.getValidityStartDate(),
             endDate: dto.getValidityEndDate(),
           },
-          dto.getNotes()
+          dto.getNotes(),
         );
 
         const location = Location.create(dto.getLocationData());
@@ -130,7 +130,8 @@ export class ScheduleRecurringAvailabilityUseCase
             endDate: dto.getValidityEndDate(),
           },
           location,
-          dto.getNotes()
+          location,
+          dto.getNotes(),
         );
 
         savedAvailability =
@@ -154,7 +155,7 @@ export class ScheduleRecurringAvailabilityUseCase
   }
 
   private buildResponseDto(
-    availability: DriverAvailability
+    availability: DriverAvailability,
   ): DriverAvailabilityResponseDto {
     const recurringSchedule = availability.getRecurringSchedule();
     const location = availability.getCurrentLocation().getCoordinates();
@@ -167,7 +168,7 @@ export class ScheduleRecurringAvailabilityUseCase
           endTime: slot.getEndTime(),
           displayStartTime: TimeSlot.minutesToTime(slot.getStartTime()),
           displayEndTime: TimeSlot.minutesToTime(slot.getEndTime()),
-        })
+        }),
       );
 
       const excludedTimeSlotDtos = recurringSchedule.dailyRecurrence
@@ -178,7 +179,7 @@ export class ScheduleRecurringAvailabilityUseCase
               endTime: slot.getEndTime(),
               displayStartTime: TimeSlot.minutesToTime(slot.getStartTime()),
               displayEndTime: TimeSlot.minutesToTime(slot.getEndTime()),
-            })
+            }),
           )
         : undefined;
 

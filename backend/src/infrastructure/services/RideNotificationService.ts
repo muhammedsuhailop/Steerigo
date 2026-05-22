@@ -13,6 +13,8 @@ import {
   RideCancelledByDriverRiderPayload,
   RideCancelledByDriverDriverPayload,
   DriverFareUpdatedPayload,
+  FutureRideAcceptedPayload,
+  FutureRideAllDriversRejectedPayload,
 } from "../../application/services/IRideNotificationService";
 import { getRideSocketServer } from "../realtime/socket";
 import { SOCKET_EVENTS } from "../realtime/constants/SocketEvents";
@@ -20,6 +22,7 @@ import { Logger } from "../../shared/utils/Logger";
 import { createRedisPubSubPublisher } from "../realtime/RedisPubSubClient";
 import { RedisClientType } from "redis";
 import { PUBSUB_CHANNELS } from "@infrastructure/realtime/constants/PubSubChannels";
+import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
 
 @injectable()
 export class RideNotificationService implements IRideNotificationService {
@@ -423,6 +426,251 @@ export class RideNotificationService implements IRideNotificationService {
         riderId,
         error: error instanceof Error ? error.message : String(error),
       });
+    }
+  }
+
+  async notifyDriverNewFutureRequest(
+    driverUserId: string,
+    payload: Omit<FutureRideRequestSentToDriverEvent["payload"], "driverId">,
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_REQUEST_CREATED,
+          payload,
+        );
+
+        Logger.info("Notified driver of future ride request via socket", {
+          driverUserId,
+          futureRequestId: payload.requestId,
+          requestGroupId: payload.requestGroupId,
+        });
+      } else {
+        await this.publishToRedis(PUBSUB_CHANNELS.RIDE_REQUEST_CREATED, {
+          ...payload,
+        });
+
+        Logger.info("Published future ride request to Redis for bridge", {
+          driverUserId,
+          futureRequestId: payload.requestId,
+          requestGroupId: payload.requestGroupId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of future ride request", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyFutureRideAccepted(
+    riderId: string,
+    payload: FutureRideAcceptedPayload,
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`rider:${riderId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_ACCEPTED,
+          payload,
+        );
+      }
+
+      Logger.info("Notified rider of future ride acceptance", {
+        riderId,
+        futureRequestId: payload.futureRequestId,
+      });
+    } catch (error) {
+      Logger.error("Error notifying future ride acceptance", {
+        riderId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyFutureRideExpired(
+    riderId: string,
+    payload: {
+      requestGroupId: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`rider:${riderId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_EXPIRED,
+          payload,
+        );
+      }
+
+      Logger.info("Notified rider of future ride expiry", {
+        riderId,
+        requestGroupId: payload.requestGroupId,
+      });
+    } catch (error) {
+      Logger.error("Error notifying future ride expiry", {
+        riderId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyDriverFutureRideExpired(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      riderId: string;
+      pickupTime: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_REQUEST_EXPIRED,
+          payload,
+        );
+
+        Logger.info("Notified driver of future ride request expiry", {
+          driverUserId,
+          futureRequestId: payload.futureRequestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of future ride expiry", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyDriverFutureRideRequestCancelled(
+    driverUserId: string,
+    payload: {
+      futureRequestId: string;
+      requestGroupId: string;
+      driverId: string;
+      acceptedByDriverId: string | null;
+      cancelledByRider: boolean;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_REQUEST_CANCELLED,
+          payload,
+        );
+
+        Logger.info("Notified driver of request cancelled", {
+          driverUserId,
+          futureRequestId: payload.futureRequestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of request cancelled", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyDriverRideRequestExpired(
+    driverUserId: string,
+    payload: {
+      requestId: string;
+      driverId: string;
+      requestGroupId: string;
+      riderId: string;
+      expiredAt: string;
+    },
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`driver:${driverUserId}`).emit(
+          SOCKET_EVENTS.RIDE_REQUEST_EXPIRED,
+          payload,
+        );
+
+        Logger.info("Notified driver of ride request expiry", {
+          driverUserId,
+          requestId: payload.requestId,
+        });
+      } else {
+        await this.publishToRedis(PUBSUB_CHANNELS.RIDE_REQUEST_EXPIRED, {
+          driverUserId,
+          ...payload,
+        });
+
+        Logger.info("Published ride request expiry to Redis for bridge", {
+          driverUserId,
+          requestId: payload.requestId,
+        });
+      }
+    } catch (error) {
+      Logger.error("Error notifying driver of ride request expiry", {
+        driverUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async notifyRiderFutureRideAllDriversRejected(
+    riderId: string,
+    payload: FutureRideAllDriversRejectedPayload,
+  ): Promise<void> {
+    try {
+      const io = this.tryGetSocketServer();
+
+      if (io) {
+        io.to(`rider:${riderId}`).emit(
+          SOCKET_EVENTS.FUTURE_RIDE_ALL_DRIVERS_REJECTED,
+          payload,
+        );
+
+        Logger.info(
+          "Notified rider that all drivers rejected scheduled ride via socket",
+          {
+            riderId,
+            requestGroupId: payload.requestGroupId,
+          },
+        );
+      } else {
+        await this.publishToRedis(
+          PUBSUB_CHANNELS.FUTURE_RIDE_ALL_DRIVERS_REJECTED,
+          {
+            riderId,
+            ...payload,
+          },
+        );
+
+        Logger.info(
+          "Published all-drivers-rejected event to Redis for bridge",
+          {
+            riderId,
+            requestGroupId: payload.requestGroupId,
+          },
+        );
+      }
+    } catch (error) {
+      Logger.error(
+        "Error notifying rider that all drivers rejected scheduled ride",
+        {
+          riderId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 }

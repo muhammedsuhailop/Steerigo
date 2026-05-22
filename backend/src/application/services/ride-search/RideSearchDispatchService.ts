@@ -175,43 +175,17 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
         const pickup = group.getPickup();
         const drop = group.getDrop();
 
-        const amount = group.getEstimatedFareAmount();
-        const currency = group.getEstimatedFareCurrency();
-        const fallbackFareBreakdown = {
-          getBaseFare: () => ({
-            getAmount: () => amount,
-            getCurrency: () => currency,
-          }),
-          getPlatformFee: () => ({
-            getAmount: () => 0,
-            getCurrency: () => currency,
-          }),
-          getFareTax: () => ({
-            name: "VAT",
-            rate: 0,
-            amount: { getAmount: () => 0, getCurrency: () => currency },
-          }),
-          getPlatformFeeTax: () => ({
-            name: "Tax",
-            rate: 0,
-            amount: { getAmount: () => 0, getCurrency: () => currency },
-          }),
-          getTotalFare: () => ({
-            getAmount: () => amount,
-            getCurrency: () => currency,
-          }),
-          getDurationHours: () => 0,
-          getCalculatedAt: () => new Date(),
-        } as unknown as FareBreakdown; //TEMP----
         request = RideRequest.create(
           driverId,
+          driver.getUserId(),
           group.getRiderId(),
           group.getId(),
           pickup,
           drop,
           new Date(),
+          group.getTimeRequired(),
           group.getRideType() as RideType,
-          fallbackFareBreakdown,
+          group.getFareBreakdown(),
           "5 mins",
         );
 
@@ -263,10 +237,7 @@ export class RideSearchDispatchService implements IRideSearchDispatchService {
           pickupTime: request.getPickupTime().toISOString(),
           rideType: request.getRideType(),
           pickupETA: request.getPickupETA(),
-          fare: {
-            amount: request.getFare(),
-            currency: group.getEstimatedFareCurrency(),
-          },
+          fareBreakdown: request.getFareBreakdown(),
           searchedAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 30_000).toISOString(),
         },

@@ -14,13 +14,10 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
-export class GetPendingRideRequestsUseCase
-  implements
-    IUseCase<
-      GetPendingRideRequestsDto,
-      Promise<Result<GetPendingRideRequestsResponseDto>>
-    >
-{
+export class GetPendingRideRequestsUseCase implements IUseCase<
+  GetPendingRideRequestsDto,
+  Promise<Result<GetPendingRideRequestsResponseDto>>
+> {
   constructor(
     @inject(TYPES.DriverRepository)
     private driverRepository: IDriverRepository,
@@ -57,7 +54,6 @@ export class GetPendingRideRequestsUseCase
         count: pendingRequests.length,
       });
 
-      // Apply pagination
       const offset = dto.getOffset();
       const limit = dto.getLimit();
       const paginatedRequests = pendingRequests.slice(offset, offset + limit);
@@ -77,8 +73,7 @@ export class GetPendingRideRequestsUseCase
             address: request.getDrop().getAddress(),
           },
           rideType: request.getRideType(),
-          fare: request.getFare(),
-          currency: "INR",
+          fareBreakdown: request.getFareBreakdown(),
           pickupTime: request.getPickupTime().toISOString(),
           pickupETA: request.getPickupETA(),
           status: request.getStatus(),

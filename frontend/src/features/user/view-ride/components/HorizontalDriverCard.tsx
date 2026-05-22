@@ -4,6 +4,7 @@ import { DriverInfo, RideDetails } from "../types/viewRide.types";
 import { useAppDispatch } from "@/app/store/hooks";
 import { useGetChatRoomByRideIdQuery } from "@/features/chat/services/chatApi";
 import { openChat } from "@/features/chat/store/chatSlice";
+import { ChatRoomStatus } from "@/features/chat/types/enums";
 
 interface HorizontalDriverCardProps {
   driver: DriverInfo;
@@ -27,10 +28,19 @@ const HorizontalDriverCard: React.FC<HorizontalDriverCardProps> = ({
   const { data: chatRoomData, isLoading: isRoomLoading } =
     useGetChatRoomByRideIdQuery(rideId);
   const chatRoomId = chatRoomData?.data.chatRoomId;
+  const chatRoomStatus = chatRoomData?.data.status || ChatRoomStatus.ENDED;
+
+  const isChatEnded = chatRoomStatus === ChatRoomStatus.ENDED;
 
   const handleOpenChat = () => {
     if (chatRoomId) {
-      dispatch(openChat({ roomId: chatRoomId, name: driver.name }));
+      dispatch(
+        openChat({
+          roomId: chatRoomId,
+          name: driver.name,
+          status: chatRoomStatus,
+        }),
+      );
     }
   };
 
@@ -58,7 +68,7 @@ const HorizontalDriverCard: React.FC<HorizontalDriverCardProps> = ({
               {driver.rating}
             </div>
             <span className="text-gray-400 text-[10px] font-semibold tracking-wider">
-              {driver.totalRides} Rides Complted
+              {driver.totalRides} Rides Completed
             </span>
           </div>
         </div>
@@ -99,13 +109,13 @@ const HorizontalDriverCard: React.FC<HorizontalDriverCardProps> = ({
           disabled={isRoomLoading || !chatRoomId}
           className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-200 
             ${
-              !chatRoomId
+              isRoomLoading || !chatRoomId
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : "bg-gray-900 text-white hover:bg-gray-800 active:scale-95 shadow-md hover:shadow-lg"
             }`}
         >
           <FaCommentDots className={isRoomLoading ? "animate-pulse" : ""} />
-          {isRoomLoading ? "Loading..." : "Message"}
+          {isRoomLoading ? "Loading..." : isChatEnded ? "View Chat" : "Message"}
         </button>
       </div>
     </div>

@@ -84,3 +84,27 @@ export interface RatingDetails {
   reviewerName?: string;
   createdAt: string;
 }
+
+export interface UpdateCurrentLocationRequest {
+  driverId: string;
+  currentLocation: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+}
+
+export interface UpdateCurrentLocationResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    availabilityId: string;
+    driverId: string;
+    currentLocation: {
+      latitude: number;
+      longitude: number;
+      address: string;
+    };
+    updatedAt: string;
+  };
+}

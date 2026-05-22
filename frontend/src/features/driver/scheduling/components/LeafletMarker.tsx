@@ -82,7 +82,7 @@ const LeafletMarker: React.FC<LeafletMarkerProps> = ({
   const mapRef = useRef<L.Map | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Position state
   const [selectedPosition, setSelectedPosition] = useState<{
@@ -91,11 +91,11 @@ const LeafletMarker: React.FC<LeafletMarkerProps> = ({
   } | null>(
     initialLocation
       ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
-      : null
+      : null,
   );
 
   const [address, setAddress] = useState<string>(
-    initialLocation?.address || ""
+    initialLocation?.address || "",
   );
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,7 +142,7 @@ const LeafletMarker: React.FC<LeafletMarkerProps> = ({
         setIsLoadingAddress(false);
       }
     },
-    [getAddressFromCoordinates, onLocationSelect]
+    [getAddressFromCoordinates, onLocationSelect],
   );
 
   // Use device geolocation
@@ -183,9 +183,9 @@ const LeafletMarker: React.FC<LeafletMarkerProps> = ({
       (err) => {
         console.error("Error getting current location:", err);
         alert(
-          "Unable to get your current location. Please select manually on the map."
+          "Unable to get your current location. Please select manually on the map.",
         );
-      }
+      },
     );
   }, [getAddressFromCoordinates, onLocationSelect]);
 
@@ -200,13 +200,13 @@ const LeafletMarker: React.FC<LeafletMarkerProps> = ({
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query
+          query,
         )}&addressdetails=1&limit=5`,
         {
           headers: {
             "User-Agent": "SteeriGo-App/1.0",
           },
-        }
+        },
       );
 
       if (!response.ok) {

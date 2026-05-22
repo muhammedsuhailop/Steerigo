@@ -70,11 +70,13 @@ export class RideRequestMapper {
     return RideRequest.fromData({
       id: doc._id.toString(),
       driverId: doc.driverId.toString(),
+      driverUserId: doc.driverUserId.toString(),
       requestGroupId: doc.requestGroupId,
       riderId: doc.riderId.toString(),
       pickup,
       drop,
       pickupTime: doc.pickupTime,
+      timeRequired: doc.timeRequired,
       rideType: doc.rideType as RideType,
       fareBreakdown,
       status: doc.status as RideRequestStatus,
@@ -90,6 +92,7 @@ export class RideRequestMapper {
     return {
       _id: entity.getId() ? new Types.ObjectId(entity.getId()) : undefined,
       driverId: toObjectId(entity.getDriverId()),
+      driverUserId: toObjectId(entity.getDriverUserId()),
       requestGroupId: entity.getRequestGroupId(),
       riderId: toObjectId(entity.getRiderId()),
       pickup: {
@@ -103,6 +106,7 @@ export class RideRequestMapper {
         address: entity.getDrop().getAddress(),
       },
       pickupTime: entity.getPickupTime(),
+      timeRequired: entity.getTimeRequired(),
       rideType: entity.getRideType(),
       fareBreakdown: {
         baseFare: {

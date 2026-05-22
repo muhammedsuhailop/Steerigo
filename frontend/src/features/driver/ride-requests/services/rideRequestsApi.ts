@@ -5,12 +5,16 @@ import type {
   GetPendingRideRequestsResponseDto,
   AcceptRideRequestResponseDto,
   RejectRideRequestResponseDto,
+  AcceptFutureRideRequestResponse,
+  GetFutureRideRequestsResponse,
+  GetFutureRideRequestsQuery,
+  RejectFutureRideRequestResponse,
 } from "../types/rideRequests.types";
 
 export const rideRequestsApi = createApi({
   reducerPath: "rideRequestsApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["RideRequests", "CurrentRide"],
+  tagTypes: ["RideRequests", "CurrentRide", "FutureRideRequests"],
   endpoints: (builder) => ({
     // Get pending ride requests
     getPendingRideRequests: builder.query<
@@ -72,6 +76,57 @@ export const rideRequestsApi = createApi({
         { type: "RideRequests", id: "LIST" },
       ],
     }),
+
+    getFutureRideRequests: builder.query<
+      GetFutureRideRequestsResponse,
+      GetFutureRideRequestsQuery | void
+    >({
+      query: (params) => ({
+        url: `${API_ENDPOINTS.DRIVER.FUTURE_REQUESTS}`,
+        method: "GET",
+        params,
+      }),
+      providesTags: (result) =>
+        result?.data.requests
+          ? [
+              ...result.data.requests.map(({ requestId }) => ({
+                type: "FutureRideRequests" as const,
+                id: requestId,
+              })),
+              { type: "FutureRideRequests" as const, id: "LIST" },
+            ]
+          : [{ type: "FutureRideRequests" as const, id: "LIST" }],
+    }),
+
+    acceptFutureRideRequest: builder.mutation<
+      AcceptFutureRideRequestResponse,
+      string
+    >({
+      query: (requestId) => ({
+        url: API_ENDPOINTS.DRIVER.ACCEPT_FUTURE_REQUEST,
+        method: "POST",
+        data: { requestId },
+      }),
+      invalidatesTags: (result, error, requestId) => [
+        { type: "FutureRideRequests", id: requestId },
+        { type: "FutureRideRequests", id: "LIST" },
+      ],
+    }),
+
+    rejectFutureRideRequest: builder.mutation<
+      RejectFutureRideRequestResponse,
+      string
+    >({
+      query: (requestId) => ({
+        url: API_ENDPOINTS.DRIVER.REJECT_FUTURE_REQUEST,
+        method: "POST",
+        data: { requestId },
+      }),
+      invalidatesTags: (result, error, requestId) => [
+        { type: "FutureRideRequests", id: requestId },
+        { type: "FutureRideRequests", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -79,4 +134,7 @@ export const {
   useGetPendingRideRequestsQuery,
   useAcceptRideRequestMutation,
   useRejectRideRequestMutation,
+  useGetFutureRideRequestsQuery,
+  useAcceptFutureRideRequestMutation,
+  useRejectFutureRideRequestMutation,
 } = rideRequestsApi;

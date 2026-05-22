@@ -5,7 +5,7 @@ import {
   PaginatedCoupons,
 } from "@domain/repositories/ICouponRepository";
 import { Coupon } from "@domain/entities/Coupon";
-import { CouponModel } from "../models/CouponModel";
+import { CouponModel, ICouponDocument } from "../models/CouponModel";
 import { CouponMapper } from "../mappers/CouponMapper";
 import { Logger } from "@shared/utils/Logger";
 import { FilterQuery, SortOrder } from "mongoose";
@@ -138,7 +138,9 @@ export class CouponRepositoryImpl implements ICouponRepository {
         CouponModel.countDocuments(query),
       ]);
 
-      const coupons = docs.map((doc) => CouponMapper.toDomain(doc));
+      const coupons = docs.map((doc) =>
+        CouponMapper.toDomain(doc as unknown as ICouponDocument),
+      );
 
       return {
         coupons,

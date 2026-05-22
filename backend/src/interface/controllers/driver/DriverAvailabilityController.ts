@@ -6,7 +6,6 @@ import {
   UpdateStatusRequestDto,
   UpdateLocationRequestDto,
 } from "@application/dto/driver";
-
 import { ApiResponse } from "@shared/types/Common";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
@@ -24,6 +23,8 @@ import { EditAvailabilityExceptionRequestDto } from "@application/dto/driver/Edi
 import { EditAvailabilityExceptionResponseDto } from "@application/dto/driver/EditAvailabilityExceptionResponseDto";
 import { RemoveAvailabilityExceptionRequestDto } from "@application/dto/driver/RemoveAvailabilityExceptionRequestDto";
 import { RemoveAvailabilityExceptionResponseDto } from "@application/dto/driver/RemoveAvailabilityExceptionResponseDto";
+import { UpdateBaseLocationRequestDto } from "@application/dto/driver/UpdateBaseLocationRequestDto";
+import { UpdateDriverBaseLocationResponseDto } from "@application/dto/driver/UpdateDriverBaseLocationResponseDto";
 
 @injectable()
 export class DriverAvailabilityController {
@@ -57,6 +58,11 @@ export class DriverAvailabilityController {
     private removeExceptionUseCase: IUseCase<
       RemoveAvailabilityExceptionRequestDto,
       Promise<Result<RemoveAvailabilityExceptionResponseDto>>
+    >,
+    @inject(TYPES.UpdateDriverBaseLocationUseCase)
+    private readonly updateBaseLocationUseCase: IUseCase<
+      UpdateBaseLocationRequestDto,
+      Promise<Result<UpdateDriverBaseLocationResponseDto>>
     >,
   ) {}
 
@@ -278,7 +284,7 @@ export class DriverAvailabilityController {
       const exceptionId = req.params.exceptionId;
       const dto = EditAvailabilityExceptionRequestDto.fromRequest(
         userId,
-        exceptionId,
+        exceptionId as string,
         req.body,
       );
       const result = await this.editExceptionUseCase.execute(dto);
@@ -335,7 +341,7 @@ export class DriverAvailabilityController {
       const exceptionId = req.params.exceptionId;
       const dto = RemoveAvailabilityExceptionRequestDto.fromRequest(
         userId,
-        exceptionId,
+        exceptionId as string,
       );
       const result = await this.removeExceptionUseCase.execute(dto);
 
@@ -364,6 +370,49 @@ export class DriverAvailabilityController {
       const { response, statusCode } = ErrorHandlerService.handleError(
         error,
         "remove-availability-exception",
+      );
+      res.status(statusCode).json(response);
+    }
+  }
+
+  async updateBaseLocation(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const { response, statusCode } =
+          ErrorHandlerService.handleValidationErrors(errors.array());
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const dto = UpdateBaseLocationRequestDto.fromRequest(req.body);
+      const driverId = dto.getDriverId();
+
+      const result = await this.updateBaseLocationUseCase.execute(dto);
+
+      if (result.isFailure()) {
+        const error = result.getError();
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          error,
+          "update_driver_base_location",
+        );
+        res.status(statusCode).json(response);
+        return;
+      }
+
+      const data = result.getValue();
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.DRIVER_BASE_LOCATION_UPDATED,
+        data,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
+      Logger.info("Driver base location updated successfully", { driverId });
+    } catch (error) {
+      const { response, statusCode } = ErrorHandlerService.handleError(
+        error,
+        "update_driver_base_location",
       );
       res.status(statusCode).json(response);
     }

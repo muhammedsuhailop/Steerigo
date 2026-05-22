@@ -16,6 +16,10 @@ import {
   removeCouponSchema,
 } from "@interface/validators/user/couponSchema";
 import { CouponController } from "@interface/controllers/user/CouponController";
+import {
+  cancelFutureRideSchema,
+  scheduleFutureRideSchema,
+} from "@interface/validators/user/scheduleFutureRideValidators";
 
 const router = Router();
 
@@ -54,6 +58,24 @@ router.post(
 // POST /api/user/ride/request-cancel
 router.post("/ride/request-cancel", (req: Request, res: Response) =>
   autoRideController.cancelRideRequests(req, res),
+);
+
+// POST /api/user/ride/future-schedule
+router.post(
+  "/ride/future-schedule",
+  validateSchema(scheduleFutureRideSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) =>
+    autoRideController.scheduleFutureRide(req, res),
+);
+
+// POST /api/user/ride/future-cancel
+router.post(
+  "/ride/future-cancel",
+  validateSchema(cancelFutureRideSchema),
+  handleValidationErrors,
+  (req: Request, res: Response) =>
+    autoRideController.cancelFutureRide(req, res),
 );
 
 // GET /api/user/ride/rides

@@ -87,8 +87,16 @@ export class MarkRideAsCompletedUseCase
       }
 
       const completedAt = new Date();
+
+      const bookedDurationMinutes = ride.getTimeRequired() * 60;
+
       const actualDurationMinutes = Math.ceil(
         (completedAt.getTime() - startedAt.getTime()) / (1000 * 60),
+      );
+
+      const finalDurationMinutes = Math.max(
+        bookedDurationMinutes,
+        actualDurationMinutes,
       );
 
       Logger.debug("Calculating final fare based on actual duration", {
@@ -100,7 +108,7 @@ export class MarkRideAsCompletedUseCase
 
       const finalFareBreakdown =
         await this.fareCalculationService.calculateFare({
-          durationMinutes: actualDurationMinutes,
+          durationMinutes: finalDurationMinutes,
           searchDate: completedAt,
         });
 

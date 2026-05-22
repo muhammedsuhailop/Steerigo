@@ -6,7 +6,10 @@ import {
   TransactionQueryFilters,
   TransactionQueryResult,
 } from "@domain/repositories/ITransactionRepository";
-import { TransactionModel } from "../models/TransactionModel";
+import {
+  ITransactionDocument,
+  TransactionModel,
+} from "../models/TransactionModel";
 import { TransactionMapper } from "../mappers/TransactionMapper";
 import { Logger } from "@shared/utils/Logger";
 import { FilterQuery, SortOrder } from "mongoose";
@@ -258,7 +261,9 @@ export class TransactionRepositoryImpl implements ITransactionRepository {
       ]);
 
       return {
-        transactions: docs.map((doc) => TransactionMapper.toDomain(doc)),
+        transactions: docs.map((doc) =>
+          TransactionMapper.toDomain(doc as unknown as ITransactionDocument),
+        ),
         total,
         page: filters.page,
         limit: filters.limit,

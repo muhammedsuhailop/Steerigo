@@ -279,4 +279,32 @@ export class RideErrors {
       },
     );
   }
+
+  static timeSlotConflict(): DomainError {
+    return new DomainError(
+      "You already have another ride during this time slot.",
+      "RIDE_TIME_SLOT_CONFLICT",
+      {
+        statusCode: HttpStatusCodes.CONFLICT,
+        errorType: ErrorType.CONFLICT_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "CONFLICT",
+      },
+    );
+  }
+
+  static invalidVerificationCode(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.INVALID_VERIFICATION_CODE, { rideId }),
+      "INVALID_VERIFICATION_CODE",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

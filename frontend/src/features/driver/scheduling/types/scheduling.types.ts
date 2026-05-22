@@ -13,6 +13,12 @@ export interface Location {
   address: string;
 }
 
+export interface BaseLocation {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
 export interface TimeSlot {
   startTime: string;
   endTime: string;
@@ -73,6 +79,7 @@ export interface AvailabilityData {
   driverId: string;
   availabilityStatus: DriverAvailabilityStatus;
   currentLocation: CurrentLocation;
+  baseLocation?: BaseLocation;
   lastLocationUpdateAt: string;
   recurringSchedule: RecurringSchedule;
   exceptions: Exception[];
@@ -180,4 +187,24 @@ export interface ExceptionUpdateResponse {
 export interface ExceptionDeleteResponse {
   success: boolean;
   message: string;
+}
+
+export interface UpdateBaseLocationRequest {
+  driverId: string;
+  baseLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
+export interface UpdateDriverBaseLocationResponse {
+  availabilityId: string;
+  driverId: string;
+  baseLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  updatedAt: string;
 }

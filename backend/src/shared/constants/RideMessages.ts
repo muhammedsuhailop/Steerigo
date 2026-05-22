@@ -35,6 +35,7 @@ export const RIDE_ERROR_MESSAGES = {
   INVALID_RATING_DATA: "Invalid rating data provided: {{reason}}",
   RIDE_NOT_ELIGIBLE_FOR_COUPON:
     "Ride '{rideId}' with status {{currentStatus}} is not eligible for a coupon",
+  INVALID_VERIFICATION_CODE: "Invalid verification code",
 } as const;
 
 export const RIDE_CANCELLATION_ERROR_MESSAGES = {

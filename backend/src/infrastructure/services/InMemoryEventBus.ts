@@ -13,6 +13,7 @@ import {
   RideCancelledByDriverEvent,
   RideFareUpdatedEvent,
   RideSearchProgressUpdatedEvent,
+  RideRequestExpiredForDriverEvent,
 } from "@application/events/RideEvents";
 import {
   PaymentCashConfirmedEvent,
@@ -30,6 +31,18 @@ import { TYPES } from "@shared/constants/DITypes";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { DomainEvent } from "@application/events/DomainEvent";
 import { IEventHandler } from "@application/events/IEventHandler";
+import {
+  FutureRideAcceptedEvent,
+  FutureRideCancelledByRiderEvent,
+  FutureRideDomainEvent,
+  FutureRideExpiredEvent,
+  FutureRideLastRequestRejectedEvent,
+  FutureRideRequestCancelledForDriverEvent,
+  FutureRideRequestExpiredForDriverEvent,
+  FutureRideRequestSentToDriverEvent,
+} from "@application/events/FutureRideEvents";
+import { IChatRoomExpiryService } from "@application/services/chat/IChatRoomExpiryService";
+import { IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
 
 @injectable()
 export class InMemoryEventBus implements IEventBus {
@@ -48,7 +61,10 @@ export class InMemoryEventBus implements IEventBus {
     private readonly driverRepository: IDriverRepository,
     @inject(TYPES.DriverAvailabilityRepository)
     private readonly driverAvailabilityRepository: IDriverAvailabilityRepository,
-
+    @inject(TYPES.ChatRoomExpiryService)
+    private readonly chatRoomExpiryService: IChatRoomExpiryService,
+    @inject(TYPES.ChatRoomRepository)
+    private readonly chatRoomRepository: IChatRoomRepository,
   ) {}
 
   // Generic-safe subscription
@@ -64,7 +80,9 @@ export class InMemoryEventBus implements IEventBus {
     this.handlers.set(eventType, existingHandlers);
   }
 
-  async publish(event: RideDomainEvent | PaymentDomainEvent): Promise<void> {
+  async publish(
+    event: RideDomainEvent | PaymentDomainEvent | FutureRideDomainEvent,
+  ): Promise<void> {
     await this.dispatchRegisteredHandlers(event as DomainEvent);
 
     switch (event.type) {
@@ -94,6 +112,23 @@ export class InMemoryEventBus implements IEventBus {
         return this.handleRideFareUpdated(event);
       case "RideSearchProgressUpdated":
         return this.handleRideSearchProgressUpdated(event);
+      case "FutureRideRequestSentToDriver":
+        return this.handleFutureRideRequestSentToDriver(event);
+      case "FutureRideAccepted":
+        return this.handleFutureRideAccepted(event);
+      case "FutureRideExpired":
+        return this.handleFutureRideExpired(event);
+      case "FutureRideCancelledByRider":
+        return this.handleFutureRideCancelledByRider(event);
+      case "FutureRideRequestExpiredForDriver":
+        return this.handleFutureRideRequestExpiredForDriver(event);
+      case "FutureRideRequestCancelledForDriver":
+        return this.handleFutureRideRequestCancelledForDriver(event);
+      case "RideRequestExpiredForDriver":
+        return this.handleRideRequestExpiredForDriver(event);
+      case "FutureRideLastRequestRejected":
+        return this.handleFutureRideLastRequestRejected(event);
+
       default:
         Logger.warn("Unhandled domain event type", {
           eventType: (event as { type: string }).type,
@@ -180,6 +215,7 @@ export class InMemoryEventBus implements IEventBus {
     });
     await this.incrementDriverRideCount(payload.driverId);
     await this.updateDriverAvailability(payload.driverId);
+    await this.scheduleChatRoomEndForRide(payload.rideId);
   }
 
   private async handlePaymentInitiated(event: PaymentInitiatedEvent) {
@@ -288,6 +324,7 @@ export class InMemoryEventBus implements IEventBus {
     }
 
     await this.updateDriverAvailability(driverId);
+    await this.scheduleChatRoomEndAfterCancellation(event.payload.rideId);
   }
 
   private async handleRideCancelledByDriver(event: RideCancelledByDriverEvent) {
@@ -301,6 +338,7 @@ export class InMemoryEventBus implements IEventBus {
     });
 
     await this.updateDriverAvailability(driverId);
+    await this.scheduleChatRoomEndAfterCancellation(event.payload.rideId);
   }
 
   private async handleRideFareUpdated(event: RideFareUpdatedEvent) {
@@ -351,6 +389,181 @@ export class InMemoryEventBus implements IEventBus {
     } catch (error) {
       Logger.error("Failed to increment ride count", {
         driverId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async handleFutureRideRequestSentToDriver(
+    event: FutureRideRequestSentToDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverNewFutureRequest(
+      driverUserId,
+      payload,
+    );
+
+    await this.persistence.persistNotification(driverUserId, {
+      type: NotificationType.RIDE_REQUESTED,
+      title: "New scheduled ride request!",
+      body: `New ride request for ${new Date(payload.pickupTime).toLocaleString()}`,
+      metadata: payload,
+    });
+  }
+
+  private async handleFutureRideAccepted(
+    event: FutureRideAcceptedEvent,
+  ): Promise<void> {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyFutureRideAccepted(riderId, payload);
+
+    await this.persistence.persistNotification(riderId, {
+      type: NotificationType.RIDE_ACCEPTED,
+      title: "Scheduled ride confirmed",
+      body: "A driver accepted your scheduled ride request.",
+      metadata: payload,
+    });
+  }
+
+  private async handleFutureRideExpired(
+    event: FutureRideExpiredEvent,
+  ): Promise<void> {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyFutureRideExpired(riderId, payload);
+
+    await this.persistence.persistNotification(riderId, {
+      type: NotificationType.NO_DRIVER_ACCEPTED,
+      title: "Ride request expired",
+      body: "Your future ride request expired because no driver accepted it in time.",
+      metadata: payload,
+    });
+  }
+
+  private async handleFutureRideCancelledByRider(
+    event: FutureRideCancelledByRiderEvent,
+  ): Promise<void> {
+    const { riderId, ...payload } = event.payload;
+    await this.persistence.persistNotification(riderId, {
+      type: NotificationType.RIDE_CANCELLED,
+      title: "Ride request cancelled",
+      body: "Your ride request has been cancelled.",
+      metadata: payload,
+    });
+  }
+
+  private async handleFutureRideRequestExpiredForDriver(
+    event: FutureRideRequestExpiredForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverFutureRideExpired(
+      driverUserId,
+      payload,
+    );
+  }
+
+  private async handleFutureRideRequestCancelledForDriver(
+    event: FutureRideRequestCancelledForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverFutureRideRequestCancelled(
+      driverUserId,
+      payload,
+    );
+  }
+
+  private async handleRideRequestExpiredForDriver(
+    event: RideRequestExpiredForDriverEvent,
+  ): Promise<void> {
+    const { driverUserId, ...payload } = event.payload;
+
+    await this.notificationService.notifyDriverRideRequestExpired(
+      driverUserId,
+      payload,
+    );
+  }
+
+  private async handleFutureRideLastRequestRejected(
+    event: FutureRideLastRequestRejectedEvent,
+  ): Promise<void> {
+    const { riderId, ...payload } = event.payload;
+
+    await this.notificationService.notifyRiderFutureRideAllDriversRejected(
+      riderId,
+      payload,
+    );
+
+    await this.persistence.persistNotification(riderId, {
+      type: NotificationType.RIDE_REQUEST_EXPIRED,
+      title: "No drivers found",
+      body: "No drivers accepted your scheduled ride request. Please try again.",
+      metadata: { ...payload, riderId },
+    });
+  }
+
+  private async scheduleChatRoomEndForRide(rideId: string): Promise<void> {
+    try {
+      const chatRoom = await this.chatRoomRepository.findByRideId(rideId);
+
+      if (!chatRoom) {
+        Logger.warn(
+          "No chat room found for completed ride — skipping expiry schedule",
+          {
+            rideId,
+          },
+        );
+        return;
+      }
+
+      await this.chatRoomExpiryService.scheduleChatRoomEnd(
+        rideId,
+        chatRoom.getId(),
+      );
+
+      Logger.info("Chat room end scheduled after ride completion", {
+        rideId,
+        chatRoomId: chatRoom.getId(),
+      });
+    } catch (error) {
+      Logger.error("Failed to schedule chat room end after ride completion", {
+        rideId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async scheduleChatRoomEndAfterCancellation(
+    rideId: string,
+  ): Promise<void> {
+    try {
+      const chatRoom = await this.chatRoomRepository.findByRideId(rideId);
+
+      if (!chatRoom) {
+        Logger.info(
+          "No chat room found for cancelled ride — skipping expiry schedule",
+          {
+            rideId,
+          },
+        );
+        return;
+      }
+
+      await this.chatRoomExpiryService.scheduleChatRoomEndAfterCancellation(
+        rideId,
+        chatRoom.getId(),
+      );
+
+      Logger.info("Chat room end scheduled after ride cancellation", {
+        rideId,
+        chatRoomId: chatRoom.getId(),
+      });
+    } catch (error) {
+      Logger.error("Failed to schedule chat room end after ride cancellation", {
+        rideId,
         error: error instanceof Error ? error.message : String(error),
       });
     }

@@ -158,6 +158,41 @@ export class WorkerSocketBridge {
     Logger.info("WorkerSocketBridge started — subscribed to Redis channels", {
       channels: Object.values(PUBSUB_CHANNELS),
     });
+
+    //Listen for Ride Request Expired - driver
+    await this.subscriber.subscribe(
+      PUBSUB_CHANNELS.RIDE_REQUEST_EXPIRED,
+      (message) => {
+        try {
+          const payload = JSON.parse(message) as {
+            driverUserId: string;
+            requestId: string;
+            requestGroupId: string;
+            riderId: string;
+            driverId: string;
+            expiredAt: string;
+          };
+
+          const { driverUserId, ...rest } = payload;
+
+          const io = getRideSocketServer();
+
+          io.to(`driver:${driverUserId}`).emit(
+            SOCKET_EVENTS.RIDE_REQUEST_EXPIRED,
+            rest,
+          );
+
+          Logger.debug("Forwarded ride request expiry to driver socket", {
+            driverUserId,
+            requestId: rest.requestId,
+          });
+        } catch (error) {
+          Logger.error("Failed to forward ride request expiry from Redis", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      },
+    );
   }
 
   async stop(): Promise<void> {

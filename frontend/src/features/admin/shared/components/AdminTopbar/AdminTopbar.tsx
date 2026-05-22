@@ -3,11 +3,7 @@ import { useSelector } from "react-redux";
 import type { AdminTopbarProps } from "./AdminTopbar.types";
 import type { RootState } from "@/app/store/store";
 import { FaRegBell } from "react-icons/fa";
-import {
-  RiMenuLine,
-  RiUserLine,
-  RiArrowDropDownLine,
-} from "react-icons/ri";
+import { RiMenuLine, RiUserLine, RiArrowDropDownLine } from "react-icons/ri";
 import { NotificationDropdown } from "@/shared/components/ui/Notification";
 import { ProfileDropdown } from "@/shared/components/ui/Profile";
 import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
@@ -51,18 +47,6 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({
   // Profile actions
   const profileActions = [
     {
-      id: "profile",
-      label: "Your Profile",
-      icon: HiOutlineUser,
-      to: "/admin/profile",
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: HiOutlineCog,
-      to: "/admin/settings",
-    },
-    {
       id: "logout",
       label: "Logout",
       icon: HiOutlineLogout,
@@ -95,24 +79,6 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({
 
         {/* Right */}
         <div className="flex items-center space-x-3">
-          {/* Notifications */}
-          <div className="relative" ref={notificationRef}>
-            <button
-              onClick={() => setIsNotificationOpen((o) => !o)}
-              className="relative p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-            >
-              <FaRegBell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                3
-              </span>
-            </button>
-
-            <NotificationDropdown
-              isOpen={isNotificationOpen}
-              onClose={() => setIsNotificationOpen(false)}
-            />
-          </div>
-
           {/* Profile */}
           <div className="relative" ref={profileRef}>
             <button

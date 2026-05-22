@@ -1,3 +1,4 @@
+import { BookingType } from "@domain/value-objects/BookingType";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
 import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
 import { RideStatus } from "@domain/value-objects/RideStatus";
@@ -24,7 +25,11 @@ export interface IRideDocument extends Document {
     address?: string;
   };
 
+  requestedPickupTime: Date;
+
+  timeRequired: number;
   rideType: string;
+  bookingType: BookingType;
 
   fareBreakdown: {
     baseFare: number;
@@ -50,6 +55,8 @@ export interface IRideDocument extends Document {
     paymentFailedAt?: Date;
     paymentRefundedAt?: Date;
   };
+
+  verificationCode: number;
 
   coupon?: {
     couponId: Types.ObjectId;
@@ -107,7 +114,22 @@ const rideSchema = new Schema<IRideDocument>(
       address: { type: String },
     },
 
+    requestedPickupTime: {
+      type: Date,
+    },
+
+    timeRequired: {
+      type: Number,
+      min: 1,
+      max: 12,
+    },
+
     rideType: { type: String, enum: RideType, required: true },
+    bookingType: {
+      type: String,
+      enum: BookingType,
+      default: BookingType.INSTANT,
+    },
 
     fareBreakdown: {
       baseFare: { type: Number, default: 0 },
@@ -132,6 +154,13 @@ const rideSchema = new Schema<IRideDocument>(
       paymentCompletedAt: Date,
       paymentFailedAt: Date,
       paymentRefundedAt: Date,
+    },
+
+    verificationCode: {
+      type: Number,
+      min: 1000,
+      max: 9999,
+      default: () => Math.floor(1000 + Math.random() * 9000),
     },
 
     coupon: {

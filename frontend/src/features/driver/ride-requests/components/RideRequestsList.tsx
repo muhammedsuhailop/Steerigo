@@ -9,33 +9,41 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
   onReject,
   acceptingRequestId,
   rejectingRequestId,
+  expiredRequestIds,
 }) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="flex flex-col gap-6">
+        {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-white rounded-lg shadow-md p-5 animate-pulse"
+            className="bg-white rounded-3xl border border-slate-200 p-5 animate-pulse"
           >
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-200 rounded-full" />
+                <div className="w-14 h-14 bg-slate-200 rounded-2xl" />
+
                 <div>
-                  <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 w-24 bg-gray-200 rounded" />
+                  <div className="h-5 w-40 bg-slate-200 rounded mb-2" />
+                  <div className="h-3 w-24 bg-slate-200 rounded" />
                 </div>
               </div>
-              <div className="h-8 w-20 bg-gray-200 rounded" />
+
+              <div className="h-8 w-24 bg-slate-200 rounded" />
             </div>
-            <div className="space-y-3 mb-4">
-              <div className="h-16 bg-gray-200 rounded" />
-              <div className="h-16 bg-gray-200 rounded" />
+
+            <div className="h-12 bg-slate-200 rounded-2xl mb-5" />
+
+            <div className="h-44 bg-slate-200 rounded-2xl mb-5" />
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="h-20 bg-slate-200 rounded-2xl" />
+              <div className="h-20 bg-slate-200 rounded-2xl" />
             </div>
-            <div className="h-20 bg-gray-200 rounded mb-4" />
+
             <div className="flex gap-3">
-              <div className="h-10 flex-1 bg-gray-200 rounded" />
-              <div className="h-10 flex-1 bg-gray-200 rounded" />
+              <div className="h-12 flex-1 bg-slate-200 rounded-2xl" />
+              <div className="h-12 flex-1 bg-slate-200 rounded-2xl" />
             </div>
           </div>
         ))}
@@ -43,8 +51,24 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
     );
   }
 
+  if (requests.length === 0) {
+    return (
+      <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl min-h-[500px] flex items-center justify-center p-10">
+        <div className="text-center">
+          <p className="text-lg font-black text-slate-700">
+            No Pending Requests
+          </p>
+
+          <p className="text-sm text-slate-400 mt-2">
+            Incoming ride requests will appear here
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="flex flex-col gap-6">
       {requests.map((request) => (
         <RideRequestCard
           key={request.requestId}
@@ -53,6 +77,7 @@ export const RideRequestsList: React.FC<RideRequestsListProps> = ({
           onReject={onReject}
           isAccepting={acceptingRequestId === request.requestId}
           isRejecting={rejectingRequestId === request.requestId}
+          isExpiredBySocket={expiredRequestIds.has(request.requestId)}
         />
       ))}
     </div>
