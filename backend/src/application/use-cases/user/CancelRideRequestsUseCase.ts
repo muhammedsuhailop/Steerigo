@@ -9,13 +9,10 @@ import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DomainError } from "@domain/errors/DomainError";
 
 @injectable()
-export class CancelRideRequestsUseCase
-  implements
-    IUseCase<
-      CancelRideRequestDto,
-      Promise<Result<CancelRideRequestResponseDto, DomainError>>
-    >
-{
+export class CancelRideRequestsUseCase implements IUseCase<
+  CancelRideRequestDto,
+  Promise<Result<CancelRideRequestResponseDto, DomainError>>
+> {
   constructor(
     @inject(TYPES.RideRequestRepository)
     private readonly rideRequestRepository: IRideRequestRepository,
@@ -40,10 +37,6 @@ export class CancelRideRequestsUseCase
         dto.requestGroupId,
         dto.getRiderId(),
       );
-
-    if (cancelledCount === 0) {
-      return Result.failure(RideRequestErrors.noPendingRequestsFound());
-    }
 
     return Result.success({
       requestGroupId: dto.requestGroupId,

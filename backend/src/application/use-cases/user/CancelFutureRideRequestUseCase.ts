@@ -64,9 +64,13 @@ export class CancelFutureRideRequestUseCase implements IUseCase<
       );
 
       if (activeRequests.length === 0) {
-        const firstStatus = requests[0]?.getStatus() ?? "unknown";
-        return Result.failure(
-          FutureRideErrors.cannotCancelRequest(dto.requestGroupId, firstStatus),
+        Logger.info("No active future ride requests to cancel", {
+          requestGroupId: dto.requestGroupId,
+          riderId: dto.getRiderId(),
+        });
+
+        return Result.success(
+          CancelFutureRideResponseDto.create(dto.requestGroupId, 0),
         );
       }
 
