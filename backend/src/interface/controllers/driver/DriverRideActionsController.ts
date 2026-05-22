@@ -107,10 +107,13 @@ export class DriverRideActionsController {
 
       const rideId = req.params.rideId;
 
+      const { verificationCode } = req.body;
+      
       Logger.info("Mark ride as started request received", { userId, rideId });
 
       const dto = MarkRideAsStartedDto.fromRequest(userId, {
         rideId: rideId as string,
+        verificationCode: verificationCode as string,
       });
       const result = await this.markRideAsStartedUseCase.execute(dto);
 

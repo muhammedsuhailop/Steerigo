@@ -337,6 +337,7 @@ export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository
       fareBreakdown,
       currency: doc.currency,
       timeline,
+      verificationCode:doc.verificationCode,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });

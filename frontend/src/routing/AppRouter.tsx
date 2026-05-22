@@ -102,7 +102,7 @@ export const AppRouter: React.FC = () => {
             )
           }
         />
-        <Route path="/help" element={<HelpPage />} />
+
         <Route path="/auth/callback" element={<AuthCallback />} />
         {/* Protected */}
         <Route
@@ -227,6 +227,15 @@ export const AppRouter: React.FC = () => {
         />
 
         <Route
+          path="/help"
+          element={
+            <ProtectedRoute allowedRoles={["Rider"]}>
+              <HelpPage /> 
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/profile"
           element={
             <ProtectedRoute allowedRoles={["Rider"]}>
@@ -333,7 +342,7 @@ export const AppRouter: React.FC = () => {
         {/* Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      
+
       {user && <FloatingChatWindow />}
 
       {user?.role === "Driver" && <GlobalLocationSync />}

@@ -32,6 +32,9 @@ const RideActionControls: React.FC<RideActionControlsProps> = ({
     DriverCancellationReason.RIDER_UNRESPONSIVE,
   );
 
+  const [verificationCode, setVerificationCode] = useState<string>("");
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const [markArrived, { isLoading: isArriving }] = useMarkArrivedMutation();
   const [startRide, { isLoading: isStarting }] = useStartRideMutation();
   const [completeRide, { isLoading: isCompleting }] = useCompleteRideMutation();
@@ -70,6 +73,16 @@ const RideActionControls: React.FC<RideActionControlsProps> = ({
     }
   };
 
+  const handleStartTrip = async () => {
+    setActionError(null);
+    try {
+      await startRide({ rideId, verificationCode }).unwrap();
+    } catch (err: unknown) {
+      console.log("Error Message", getErrorMessage(err));
+      setActionError(getErrorMessage(err));
+    }
+  };
+
   if ([RideStatus.CANCELLED, RideStatus.REJECTED].includes(status)) return null;
 
   return (
@@ -77,6 +90,13 @@ const RideActionControls: React.FC<RideActionControlsProps> = ({
       <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
         Update Ride Status
       </p>
+
+      {actionError && (
+        <div className="mt-3 bg-red-50 text-red-600 text-xs font-semibold p-3 rounded-xl border border-red-100 flex items-center gap-2">
+          <IoWarningOutline className="text-base flex-shrink-0" />
+          <span>{actionError}</span>
+        </div>
+      )}
 
       <div className="mt-5 space-y-3">
         {showCancelConfirm ? (
@@ -140,15 +160,30 @@ const RideActionControls: React.FC<RideActionControlsProps> = ({
             )}
 
             {status === RideStatus.ARRIVED && (
-              <button
-                className="w-full bg-blue-600 text-white py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all hover:bg-blue-700 disabled:opacity-60"
-                onClick={() => startRide(rideId)}
-                disabled={loading}
-              >
-                Start Trip
-              </button>
+              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
+                <label className="text-[10px] font-bold text-blue-800 uppercase tracking-widest block text-center">
+                  Ask Rider for 4-Digit PIN
+                </label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={verificationCode}
+                  onChange={(e) => {
+                    setActionError(null);
+                    setVerificationCode(e.target.value.replace(/\D/g, ""));
+                  }}
+                  placeholder="••••"
+                  className="w-full text-center text-2xl font-black tracking-[0.5em] py-3 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900"
+                />
+                <button
+                  className="w-full bg-blue-600 text-white py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all hover:bg-blue-700 disabled:opacity-60"
+                  onClick={handleStartTrip}
+                  disabled={loading || verificationCode.length !== 4}
+                >
+                  {isStarting ? "Verifying..." : "Verify & Start Trip"}
+                </button>
+              </div>
             )}
-
             {status === RideStatus.STARTED && (
               <button
                 className="w-full bg-green-600 text-white py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all hover:bg-green-700 disabled:opacity-60"

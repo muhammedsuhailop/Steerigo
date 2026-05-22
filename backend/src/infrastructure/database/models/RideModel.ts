@@ -56,6 +56,8 @@ export interface IRideDocument extends Document {
     paymentRefundedAt?: Date;
   };
 
+  verificationCode: number;
+
   coupon?: {
     couponId: Types.ObjectId;
     code: string;
@@ -152,6 +154,13 @@ const rideSchema = new Schema<IRideDocument>(
       paymentCompletedAt: Date,
       paymentFailedAt: Date,
       paymentRefundedAt: Date,
+    },
+
+    verificationCode: {
+      type: Number,
+      min: 1000,
+      max: 9999,
+      default: () => Math.floor(1000 + Math.random() * 9000),
     },
 
     coupon: {

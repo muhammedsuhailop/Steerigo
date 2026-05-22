@@ -70,6 +70,10 @@ export class MarkRideAsStartedUseCase
 
       const wasArrivedAutoSet = ride.isAccepted() && !ride.getArrivedAt();
 
+      if (ride.getVerificationCode() !== Number(dto.getVerificationCode())) {
+        return Result.failure(RideErrors.invalidVerificationCode(rideId));
+      }
+
       ride.setStatusToStarted();
 
       const updatedRide = await this.rideRepository.save(ride);

@@ -24,6 +24,7 @@ import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/Cr
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { BookingType } from "@domain/value-objects/BookingType";
 import { Ride } from "@domain/entities/Ride";
+import { IOtpService } from "@application/services/IOtpService";
 
 @injectable()
 export class AcceptFutureRideRequestUseCase implements IUseCase<
@@ -56,6 +57,8 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
     >,
     @inject(TYPES.IDGenerator)
     private readonly idGenerator: IIdGenerator,
+    @inject(TYPES.OtpService)
+    private readonly otpService : IOtpService
   ) {}
 
   async execute(
@@ -205,6 +208,7 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
 
       const rideId = `RIDE-${this.uuIdGenerator.generate()}`;
       const timeline = new RideTimeline(futureRequest.getCreatedAt());
+      const verificationCode = Number(this.otpService.generate());
       timeline.setAcceptedAt(new Date());
 
       const ride = Ride.create(
@@ -220,6 +224,7 @@ export class AcceptFutureRideRequestUseCase implements IUseCase<
         BookingType.SCHEDULED,
         futureRequest.getFareBreakdown(),
         timeline,
+        verificationCode,
       );
 
       ride.setStatusToAccepted();

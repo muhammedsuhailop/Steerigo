@@ -69,6 +69,7 @@ export interface RideDetails {
   duration?: number;
   fare: FareDetails;
   timeline: TimelineDetails;
+  verificationCode:number;
   couponDetails?: CouponDetails;
   rating?: RatingDetails;
   createdAt: string;

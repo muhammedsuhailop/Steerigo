@@ -293,4 +293,18 @@ export class RideErrors {
       },
     );
   }
+
+  static invalidVerificationCode(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(RIDE_ERROR_MESSAGES.INVALID_VERIFICATION_CODE, { rideId }),
+      "INVALID_VERIFICATION_CODE",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 }

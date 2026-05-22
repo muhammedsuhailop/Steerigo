@@ -10,17 +10,17 @@ export const Footer: React.FC<FooterProps> = () => {
     const currentYear = new Date().getFullYear();
 
     const usefulLinks = [
-        { name: 'About Us', href: '/about' },
-        { name: 'How it Works', href: '/how-it-works' },
-        { name: 'Contact Us', href: '/contact' },
-        { name: 'Help', href: '/help' }
+      { name: "About Us", href: "/help" },
+      { name: "How it Works", href: "/dashboard" },
+      { name: "Contact Us", href: "/help" },
+      { name: "Help", href: "/help" },
     ];
 
     const pages = [
-        { name: 'Privacy Policy', href: '/privacy' },
-        { name: 'Terms of Service', href: '/terms' },
-        { name: 'Find Us', href: '/find-us' },
-        { name: 'FAQ', href: '/faq' }
+      { name: "Privacy Policy", href: "#" },
+      { name: "Terms of Service", href: "#" },
+      { name: "Find Us", href: "#" },
+      { name: "FAQ", href: "/help" },
     ];
 
     return (

@@ -25,6 +25,7 @@ export class Ride {
     private fareBreakdown: FareBreakdown,
     private readonly currency: string = "INR",
     private readonly timeline: RideTimeline,
+    private readonly verificationCode: number,
     private readonly createdAt: Date = new Date(),
     private readonly updatedAt: Date = new Date(),
     private couponDetails?: CouponDetails,
@@ -43,6 +44,7 @@ export class Ride {
     bookingType: BookingType,
     fareBreakdown: FareBreakdown,
     timeline: RideTimeline,
+    verificationCode: number,
   ): Ride {
     if (!id || !rideId || !driverId || !riderId) {
       throw new Error("All ID fields are required");
@@ -68,6 +70,7 @@ export class Ride {
       fareBreakdown,
       "INR",
       timeline,
+      verificationCode,
       undefined,
     );
   }
@@ -88,6 +91,7 @@ export class Ride {
     fareBreakdown: FareBreakdown;
     currency: string;
     timeline: RideTimeline;
+    verificationCode: number;
     createdAt: Date;
     updatedAt: Date;
     couponDetails?: CouponDetails;
@@ -108,6 +112,7 @@ export class Ride {
       data.fareBreakdown,
       data.currency,
       data.timeline,
+      data.verificationCode,
       data.createdAt,
       data.updatedAt,
       data.couponDetails,
@@ -176,6 +181,10 @@ export class Ride {
 
   getTimeline(): RideTimeline {
     return this.timeline;
+  }
+
+  getVerificationCode(): number {
+    return this.verificationCode;
   }
 
   getCreatedAt(): Date {
