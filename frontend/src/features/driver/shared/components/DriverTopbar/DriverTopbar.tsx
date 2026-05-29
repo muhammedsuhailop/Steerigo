@@ -32,12 +32,10 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
 }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const [imageError, setImageError] = useState(false);
   const [liveUnreadCount, setLiveUnreadCount] = useState(0);
-
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -48,8 +46,6 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth,
   );
-
-  // const { isOnline, driver } = useSelector((state: RootState) => state.driver);
 
   const { data: walletResponse } = useGetWalletDetailsQuery(
     { limit: 5 },
@@ -72,7 +68,7 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       const setters = [
         setIsProfileOpen,
         setIsNotificationOpen,
-        setIsMessagesOpen,
+        // setIsMessagesOpen,
         setIsWalletOpen,
         setIsMobileMenuOpen,
       ];
@@ -118,6 +114,10 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       setLiveUnreadCount(0);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [user?.profilePicture]);
 
   const unreadCount = liveUnreadCount || 0;
 
@@ -266,11 +266,12 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
             >
               <div className="relative">
                 <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                  {user?.profilePicture ? (
+                  {user?.profilePicture && !imageError ? (
                     <img
                       src={user.profilePicture}
                       alt="profile"
                       className="w-full h-full object-cover"
+                      onError={() => setImageError(true)}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">

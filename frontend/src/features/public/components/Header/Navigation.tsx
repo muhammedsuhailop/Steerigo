@@ -6,12 +6,7 @@ export const Navigation: React.FC<NavigationProps> = ({ isAuthenticated }) => {
   const location = useLocation();
 
   // Navigation items for non-authenticated users
-  const guestNavigationItems: NavigationItem[] = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "How It Works", href: "/how-it-works" },
-    { name: "Contact", href: "/contact" },
-  ];
+  const guestNavigationItems: NavigationItem[] = [{ name: "Home", href: "/" }];
 
   // Navigation items for authenticated users
   const authNavigationItems: NavigationItem[] = [

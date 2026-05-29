@@ -22,9 +22,8 @@ export const Header: React.FC<HeaderProps> = () => {
   const [isNavigateDropdownOpen, setIsNavigateDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
   const [liveUnreadCount, setLiveUnreadCount] = useState(0);
-
+  const [profileImageError, setProfileImageError] = useState(false);
   const navigateDropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -102,6 +101,10 @@ export const Header: React.FC<HeaderProps> = () => {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    setProfileImageError(false);
+  }, [user?.profilePicture]);
+
   const unreadCount = liveUnreadCount;
 
   return (
@@ -126,7 +129,6 @@ export const Header: React.FC<HeaderProps> = () => {
               <>
                 {/* Desktop-only items */}
                 <div className="hidden md:flex items-center space-x-4">
-
                   {/* Navigate Dropdown */}
                   <div className="relative" ref={navigateDropdownRef}>
                     <button
@@ -198,11 +200,12 @@ export const Header: React.FC<HeaderProps> = () => {
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md whitespace-nowrap"
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                      {user?.profilePicture ? (
+                      {user?.profilePicture && !profileImageError ? (
                         <img
                           src={user.profilePicture}
                           alt="profile"
                           className="w-full h-full object-cover"
+                          onError={() => setProfileImageError(true)}
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-300 flex items-center justify-center">
