@@ -119,7 +119,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <option value="6months">Last 6 Months</option>
               <option value="1year">Last 1 Year</option>
               <option value="all">All Time</option>
-              <option value="custom">Custom Range 📅</option>
+              <option value="custom">Custom Range </option>
             </select>
           </div>
 
