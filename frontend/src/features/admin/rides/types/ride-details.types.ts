@@ -24,15 +24,10 @@ export interface LocationDetails {
 
 export interface RatingDetails {
   overallRating: number;
-
   reviewType: ReviewType;
-
   criteria: Record<string, number>;
-
   review?: string;
-
   reviewerName?: string;
-
   createdAt: string;
 }
 
@@ -59,6 +54,19 @@ export interface TimelineDetails {
   paymentCompletedAt?: string;
   paymentFailedAt?: string;
   paymentRefundedAt?: string;
+}
+
+export interface DriverDetails {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  profilePicture?: string;
+  status: string;
+  kycStatus: string;
+  averageRating: number;
+  totalRides: number;
 }
 
 export interface RideDetails {
@@ -89,5 +97,6 @@ export interface GetAdminRideByIdResponse {
   data: {
     ride: RideDetails;
     rider: RiderDetails;
+    driver: DriverDetails;
   };
 }

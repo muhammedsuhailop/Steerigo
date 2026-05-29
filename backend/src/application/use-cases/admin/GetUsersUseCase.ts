@@ -14,14 +14,18 @@ import {
   AdminUsersPaginationDto,
   AdminUsersAppliedFiltersDto,
 } from "@application/dto/admin/GetUsersResponseDto";
+import { IRideRepository } from "@domain/repositories/IRideRepository";
 
 @injectable()
-export class GetUsersUseCase
-  implements IUseCase<GetUsersRequestDto, Promise<Result<GetUsersResponseDto>>>
-{
+export class GetUsersUseCase implements IUseCase<
+  GetUsersRequestDto,
+  Promise<Result<GetUsersResponseDto>>
+> {
   constructor(
     @inject(TYPES.AdminUserRepository)
-    private adminUserRepository: IAdminUserRepository
+    private adminUserRepository: IAdminUserRepository,
+    @inject(TYPES.RideRepository)
+    private readonly rideRepository: IRideRepository,
   ) {}
 
   async execute(dto: GetUsersRequestDto): Promise<Result<GetUsersResponseDto>> {
@@ -32,8 +36,8 @@ export class GetUsersUseCase
       if (dateFrom && dateTo && dateFrom > dateTo) {
         return Result.failure(
           new Error(
-            "Date range is invalid: 'from' date cannot be after 'to' date"
-          )
+            "Date range is invalid: 'from' date cannot be after 'to' date",
+          ),
         );
       }
 
@@ -60,10 +64,45 @@ export class GetUsersUseCase
 
       const result = await this.adminUserRepository.findUsersWithSummary(
         filters,
-        pagination
+        pagination,
       );
 
-      const users: AdminUserSummaryDto[] = result.data.map(
+      const usersWithStats = await Promise.all(
+        result.data.map(async (user) => {
+          try {
+            const rideStats = await this.rideRepository.countByRiderStats(
+              user.userId,
+              {
+                fromDate: undefined,
+                toDate: undefined,
+              },
+            );
+
+            return {
+              ...user,
+              totalBookings: rideStats.total,
+              totalSpent: rideStats.totalSpend,
+            };
+          } catch (statsError) {
+            Logger.error(
+              `Failed loading dynamic stats for user: ${user.userId}`,
+              {
+                message:
+                  statsError instanceof Error
+                    ? statsError.message
+                    : String(statsError),
+              },
+            );
+            return {
+              ...user,
+              totalBookings: user.totalBookings || 0,
+              totalSpent: user.totalSpent || 0,
+            };
+          }
+        }),
+      );
+
+      const users: AdminUserSummaryDto[] = usersWithStats.map(
         (user) =>
           new AdminUserSummaryDto(
             user.userId,
@@ -75,15 +114,15 @@ export class GetUsersUseCase
             user.totalSpent,
             user.lastBooked?.toISOString() || null,
             user.createdAt.toISOString(),
-            user.isVerified
-          )
+            user.isVerified,
+          ),
       );
 
       const paginationDto = new AdminUsersPaginationDto(
         result.pagination.currentPage,
         result.pagination.pageSize,
         result.pagination.totalItems,
-        result.pagination.totalPages
+        result.pagination.totalPages,
       );
 
       const appliedFiltersDto = new AdminUsersAppliedFiltersDto(
@@ -92,13 +131,13 @@ export class GetUsersUseCase
         dto.getSearch() || null,
         dto.getStatus() || null,
         dateFrom?.toISOString() || null,
-        dateTo?.toISOString() || null
+        dateTo?.toISOString() || null,
       );
 
       const response = new GetUsersResponseDto(
         users,
         paginationDto,
-        appliedFiltersDto
+        appliedFiltersDto,
       );
 
       Logger.info("Users fetched successfully", {

@@ -1,15 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  MdArrowBack,
-  MdDirectionsCar,
-  MdPerson,
-  MdMap,
-  MdPayments,
-  MdLocalOffer,
-} from "react-icons/md";
+import { MdArrowBack, MdDirectionsCar, MdMap } from "react-icons/md";
 import { useGetAdminRideByIdQuery } from "../services/adminRideApi";
-import { Formatters } from "@/shared/components/ui/AdminTable/Formatters";
 import {
   StatusBadge,
   SectionHeader,
@@ -19,6 +11,8 @@ import { RideTimeline } from "../components/RideTimeline";
 import { PaymentStatusCard } from "../components/PaymentStatusCard";
 import { RideRatingCard } from "../components/RideRatingCard";
 import { AdminLayout } from "../../shared/components/AdminLayout/AdminLayout";
+import { ParticipantsCard } from "../components/ParticipantsCard";
+import { FareDetailsCard } from "../components/FareDetailsCard";
 
 export const RideView: React.FC = () => {
   const { rideId } = useParams<{ rideId: string }>();
@@ -30,7 +24,7 @@ export const RideView: React.FC = () => {
     return (
       <div className="flex h-screen items-center justify-center bg-[#f8f9fc]">
         <div className="animate-pulse font-black text-gray-400">
-          Loading Ride Intelligence...
+          Loading Ride Details...
         </div>
       </div>
     );
@@ -42,7 +36,7 @@ export const RideView: React.FC = () => {
       </div>
     );
 
-  const { ride, rider } = data.data;
+  const { ride, rider, driver } = data.data;
 
   return (
     <AdminLayout title="Ride Details">
@@ -63,18 +57,14 @@ export const RideView: React.FC = () => {
                 </h1>
                 <StatusBadge status={ride.status} />
               </div>
-              <p className="text-sm font-medium text-gray-400">
-                Logged on{" "}
-                {Formatters.formatDate(ride.createdAt, { includeTime: true })}
-              </p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          {/* LEFT SIDE: Operational Details */}
           <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[320px] flex flex-col">
+            {/* Ride Path */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
               <div className="p-6 flex-1">
                 <SectionHeader icon={<MdMap />} title="Ride Path" />
                 <div className="space-y-10 relative mt-4">
@@ -108,106 +98,29 @@ export const RideView: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 min-h-[280px] flex-1">
-              <SectionHeader icon={<MdPayments />} title="Financial Audit" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                <DataItem
-                  label="Base Fare"
-                  value={Formatters.formatCurrency(
-                    ride.fare.baseFare,
-                    ride.fare.currency,
-                  )}
-                />
-                <DataItem
-                  label="Platform Fee"
-                  value={Formatters.formatCurrency(
-                    ride.fare.platformFee,
-                    ride.fare.currency,
-                  )}
-                />
-                <DataItem
-                  label="Tax Component"
-                  value={Formatters.formatCurrency(
-                    ride.fare.tax.total.amount,
-                    ride.fare.tax.total.currency,
-                  )}
-                />
-                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 shadow-inner">
-                  <DataItem
-                    label="Final Payable"
-                    value={
-                      <span className="text-blue-700 text-xl font-black">
-                        {Formatters.formatCurrency(
-                          ride.fare.payableAmount,
-                          ride.fare.currency,
-                        )}
-                      </span>
-                    }
-                  />
-                </div>
-              </div>
-              {ride.couponDetails && (
-                <div className="flex items-center justify-between p-5 bg-orange-50 border border-orange-100 rounded-2xl">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-white rounded-lg shadow-sm">
-                      <MdLocalOffer className="text-orange-500 text-xl" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-orange-900 uppercase">
-                        Code: {ride.couponDetails.couponCode}
-                      </p>
-                      <p className="text-[10px] font-bold text-orange-700 uppercase">
-                        {ride.couponDetails.discountType} Reduction applied
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xl font-black text-orange-600">
-                    -{" "}
-                    {Formatters.formatCurrency(
-                      ride.couponDetails.discountAmount,
-                      ride.fare.currency,
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* Participants Component */}
+            <ParticipantsCard rider={rider} driver={driver} />
+
+            {/* Rating Component */}
             <RideRatingCard rating={ride.rating} />
           </div>
 
-          {/* RIGHT SIDE: Participants & Timeline */}
+          {/* RIGHT SIDE*/}
           <div className="lg:col-span-5 flex flex-col gap-6 h-full">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-full">
-              <SectionHeader icon={<MdPerson />} title="Participant" />
-              <div className="flex items-center gap-5">
-                <div className="relative">
-                  <img
-                    src={
-                      rider.profilePicture ||
-                      `https://ui-avatars.com/api/?name=${rider.name}&background=6366f1&color=fff&bold=true`
-                    }
-                    className="h-16 w-16 rounded-2xl object-cover border-4 border-white shadow-xl"
-                    alt="rider-avatar"
-                  />
-                  <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 border-2 border-white rounded-full"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-black text-gray-900 text-lg truncate">
-                    {rider.name}
-                  </h4>
-                  <p className="text-xs text-gray-400 font-medium truncate mb-2">
-                    {rider.email}
-                  </p>
-                  <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-full border border-blue-100">
-                    {rider.phoneNumber}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Fare Details Component  */}
+            <FareDetailsCard
+              fare={ride.fare}
+              couponDetails={ride.couponDetails}
+            />
+
+            {/* Payment Status */}
             <PaymentStatusCard
               status={ride.paymentStatus}
               amount={ride.fare.payableAmount}
               currency={ride.fare.currency}
             />
+
+            {/* Timeline */}
             <RideTimeline timeline={ride.timeline} />
           </div>
         </div>

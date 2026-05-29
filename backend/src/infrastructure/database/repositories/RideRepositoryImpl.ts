@@ -600,4 +600,28 @@ export class RideRepositoryImpl implements IRideRepository {
       throw error;
     }
   }
+
+  async findLatestByRiderId(riderId: string): Promise<Ride | null> {
+    try {
+      const doc = await RideModel.findOne({
+        riderId: new Types.ObjectId(riderId),
+      }).sort({ createdAt: -1 });
+
+      if (doc) {
+        Logger.debug("Latest ride entry found for rider context tracking", {
+          riderId,
+          rideId: doc.rideId,
+          createdAt: doc.createdAt,
+        });
+      }
+
+      return doc ? RideMapper.toDomain(doc) : null;
+    } catch (error) {
+      Logger.error("Error finding latest ride profile by rider ID", {
+        riderId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
 }
