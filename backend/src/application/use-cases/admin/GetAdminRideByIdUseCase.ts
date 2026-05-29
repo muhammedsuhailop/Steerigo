@@ -16,17 +16,20 @@ import {
   CouponDetails,
   RatingDetails,
   GetAdminRideByIdResponseDto,
+  DriverDetails,
 } from "@application/dto/admin/GetAdminRideByIdResponseDto";
 import { Rating } from "@domain/entities/Rating";
 import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities";
 import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { IDriverRepository } from "@domain/repositories/IDriverRepository";
+import { Driver } from "@domain/entities/Driver";
 
 @injectable()
-export class GetAdminRideByIdUseCase
-  implements
-    IUseCase<GetAdminRideByIdDto, Promise<Result<GetAdminRideByIdResponseDto>>>
-{
+export class GetAdminRideByIdUseCase implements IUseCase<
+  GetAdminRideByIdDto,
+  Promise<Result<GetAdminRideByIdResponseDto>>
+> {
   constructor(
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
@@ -34,6 +37,8 @@ export class GetAdminRideByIdUseCase
     private readonly ratingRepository: IRatingRepository,
     @inject(TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
+    @inject(TYPES.DriverRepository)
+    private readonly driverRepository: IDriverRepository,
   ) {}
 
   async execute(
@@ -54,6 +59,29 @@ export class GetAdminRideByIdUseCase
         return Result.failure(RideErrors.rideNotFound(rideId));
       }
 
+      const driverId = ride.getDriverId();
+      if (!driverId) {
+        return Result.failure(
+          new Error(`Ride ${rideId} does not have an assigned driver.`),
+        );
+      }
+
+      const driver = await this.driverRepository.findById(driverId);
+      if (!driver) {
+        return Result.failure(
+          new Error(`Driver record not found for ID: ${driverId}`),
+        );
+      }
+
+      const driverUserAccount = await this.userRepository.findById(
+        driver.getUserId(),
+      );
+      if (!driverUserAccount) {
+        return Result.failure(
+          new Error(`User account profile not found for driver: ${driverId}`),
+        );
+      }
+
       const ratings = await this.ratingRepository.findAllByRideId(rideId);
       const riderRating = ratings.find(
         (r: Rating) => r.getRevieweeId() === ride.getDriverId(),
@@ -61,6 +89,7 @@ export class GetAdminRideByIdUseCase
 
       const rideDetails = this.buildRideDetails(ride, riderRating);
       const riderDetails = this.buildRiderDetails(ride.getRiderId(), rider);
+      const driverDetails = this.buildDriverDetails(driver, driverUserAccount);
 
       Logger.info("Admin ride fetched successfully", { rideId });
 
@@ -70,6 +99,7 @@ export class GetAdminRideByIdUseCase
         data: {
           ride: rideDetails,
           rider: riderDetails,
+          driver: driverDetails,
         },
       });
     } catch (error) {
@@ -158,6 +188,24 @@ export class GetAdminRideByIdUseCase
       email: rider.getEmailValue(),
       phoneNumber: rider.getMobile(),
       profilePicture: rider.getProfilePicture?.(),
+    };
+  }
+
+  private buildDriverDetails(
+    driver: Driver,
+    driverUserAccount: User,
+  ): DriverDetails {
+    return {
+      id: driver.getId(),
+      userId: driver.getUserId(),
+      name: driverUserAccount.getName(),
+      email: driverUserAccount.getEmailValue(),
+      phoneNumber: driverUserAccount.getMobile(),
+      profilePicture: driverUserAccount.getProfilePicture?.(),
+      status: driver.getStatus(),
+      kycStatus: driver.getKycStatus(),
+      averageRating: driver.getAverageRating(),
+      totalRides: driver.getTotalRides(),
     };
   }
 }

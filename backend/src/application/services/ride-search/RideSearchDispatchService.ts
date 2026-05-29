@@ -19,7 +19,6 @@ import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
 import { IRideSearchQueue } from "@application/services/IRideSearchQueue";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { Logger } from "@shared/utils/Logger";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
 
 @injectable()
 export class RideSearchDispatchService implements IRideSearchDispatchService {

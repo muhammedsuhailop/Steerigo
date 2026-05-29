@@ -56,6 +56,9 @@ export interface IRideRepository
   findByDriverId(driverId: string, status?: RideStatus): Promise<Ride[]>;
 
   findByRiderId(riderId: string, status?: RideStatus): Promise<Ride[]>;
+  
+  findLatestByRiderId(riderId: string): Promise<Ride | null>;
+
   findPaginatedByDriverId(
     driverId: string,
     options: IRidePaginationOptions,

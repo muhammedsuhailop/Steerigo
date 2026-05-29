@@ -28,47 +28,8 @@ export type DateFilterOption =
   | "3months"
   | "6months"
   | "1year"
-  | "all";
-
-const getDateRangeForFilter = (
-  filter: DateFilterOption,
-): { fromDate?: string; toDate?: string } => {
-  if (filter === "all") {
-    return { fromDate: undefined, toDate: undefined };
-  }
-
-  const toDate = new Date();
-  const fromDate = new Date();
-
-  // Set times to cover the full day
-  toDate.setHours(23, 59, 59, 999);
-  fromDate.setHours(0, 0, 0, 0);
-
-  switch (filter) {
-    case "today":
-      break;
-    case "7days":
-      fromDate.setDate(fromDate.getDate() - 7);
-      break;
-    case "1month":
-      fromDate.setMonth(fromDate.getMonth() - 1);
-      break;
-    case "3months":
-      fromDate.setMonth(fromDate.getMonth() - 3);
-      break;
-    case "6months":
-      fromDate.setMonth(fromDate.getMonth() - 6);
-      break;
-    case "1year":
-      fromDate.setFullYear(fromDate.getFullYear() - 1);
-      break;
-  }
-
-  return {
-    fromDate: fromDate.toISOString(),
-    toDate: toDate.toISOString(),
-  };
-};
+  | "all"
+  | "custom";
 
 const DriverDashboard: React.FC = () => {
   const dispatch = useDispatch();
@@ -79,10 +40,65 @@ const DriverDashboard: React.FC = () => {
 
   const [filter, setFilter] = useState<DateFilterOption>("7days");
 
-  const dateRangeParams = useMemo(
-    () => getDateRangeForFilter(filter),
-    [filter],
-  );
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (filter === "custom") {
+      const current = new Date();
+      const past = new Date();
+      past.setDate(current.getDate() - 7);
+      setFromDate(past);
+      setToDate(current);
+    } else {
+      setFromDate(null);
+      setToDate(null);
+    }
+  }, [filter]);
+
+  const dateRangeParams = useMemo(() => {
+    if (filter === "all") {
+      return { fromDate: undefined, toDate: undefined };
+    }
+
+    if (filter === "custom") {
+      return {
+        fromDate: fromDate?.toISOString(),
+        toDate: toDate?.toISOString(),
+      };
+    }
+
+    const end = new Date();
+    const start = new Date();
+
+    end.setHours(23, 59, 59, 999);
+    start.setHours(0, 0, 0, 0);
+
+    switch (filter) {
+      case "today":
+        break;
+      case "7days":
+        start.setDate(start.getDate() - 7);
+        break;
+      case "1month":
+        start.setMonth(start.getMonth() - 1);
+        break;
+      case "3months":
+        start.setMonth(start.getMonth() - 3);
+        break;
+      case "6months":
+        start.setMonth(start.getMonth() - 6);
+        break;
+      case "1year":
+        start.setFullYear(start.getFullYear() - 1);
+        break;
+    }
+
+    return {
+      fromDate: start.toISOString(),
+      toDate: end.toISOString(),
+    };
+  }, [filter, fromDate, toDate]);
 
   const { data: statsData, isLoading: isStatsLoading } =
     useGetActualDriverStatsQuery(dateRangeParams);
@@ -106,24 +122,14 @@ const DriverDashboard: React.FC = () => {
 
   const getErrorDetails = (error: unknown) => {
     if (!error || typeof error !== "object") {
-      return {
-        status: undefined,
-        code: undefined,
-        message: undefined,
-      };
+      return { status: undefined, code: undefined, message: undefined };
     }
-
     const err = error as {
       status?: number;
       code?: string;
       message?: string;
-      data?: {
-        status?: number;
-        code?: string;
-        message?: string;
-      };
+      data?: { status?: number; code?: string; message?: string };
     };
-
     return {
       status: err.status ?? err.data?.status,
       code: err.code ?? err.data?.code,
@@ -173,9 +179,7 @@ const DriverDashboard: React.FC = () => {
     refetchDriver();
   };
 
-  if (isDriverNotFound) {
-    return null;
-  }
+  if (isDriverNotFound) return null;
 
   if (isDashboardLoading && !dashboard) {
     return (
@@ -199,11 +203,11 @@ const DriverDashboard: React.FC = () => {
             <p className="text-gray-600 mb-4">
               {dashboardErr.message ||
                 profileErr.message ||
-                "Failed to load dashboard data"}
+                "Failed to load data"}
             </p>
             <button
               onClick={refreshData}
-              className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg"
             >
               Try Again
             </button>
@@ -229,6 +233,11 @@ const DriverDashboard: React.FC = () => {
     );
   }
 
+  const formatToInputString = (d: Date | null): string => {
+    if (!d) return "";
+    return d.toISOString().split("T")[0];
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DriverSidebar
@@ -236,6 +245,7 @@ const DriverDashboard: React.FC = () => {
         onToggle={toggleSidebar}
         isMobile={isMobile}
       />
+
       <div
         className="flex-1 flex flex-col min-h-screen transition-all duration-300"
         style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
@@ -263,25 +273,63 @@ const DriverDashboard: React.FC = () => {
                 Performance Overview
               </h2>
 
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
-                  View for:
-                </span>
-                <select
-                  value={filter}
-                  onChange={(e) =>
-                    setFilter(e.target.value as DateFilterOption)
-                  }
-                  className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[140px]"
-                >
-                  <option value="today">Today</option>
-                  <option value="7days">Last 7 Days</option>
-                  <option value="1month">Last 1 Month</option>
-                  <option value="3months">Last 3 Months</option>
-                  <option value="6months">Last 6 Months</option>
-                  <option value="1year">Last 1 Year</option>
-                  <option value="all">All Time</option>
-                </select>
+              <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
+                    View for:
+                  </span>
+                  <select
+                    value={filter}
+                    onChange={(e) =>
+                      setFilter(e.target.value as DateFilterOption)
+                    }
+                    className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 min-w-[140px] font-semibold"
+                  >
+                    <option value="today">Today</option>
+                    <option value="7days">Last 7 Days</option>
+                    <option value="1month">Last 1 Month</option>
+                    <option value="3months">Last 3 Months</option>
+                    <option value="6months">Last 6 Months</option>
+                    <option value="1year">Last 1 Year</option>
+                    <option value="all">All Time</option>
+                    <option value="custom">Custom Range </option>
+                  </select>
+                </div>
+
+                {filter === "custom" && (
+                  <div className="flex items-center gap-2 border-t md:border-t-0 md:border-l pt-2 md:pt-0 md:pl-3 border-gray-200">
+                    <div className="flex items-center space-x-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase">
+                        From
+                      </label>
+                      <input
+                        type="date"
+                        value={formatToInputString(fromDate)}
+                        onChange={(e) =>
+                          setFromDate(
+                            e.target.value ? new Date(e.target.value) : null,
+                          )
+                        }
+                        className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-1.5 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase">
+                        To
+                      </label>
+                      <input
+                        type="date"
+                        value={formatToInputString(toDate)}
+                        onChange={(e) =>
+                          setToDate(
+                            e.target.value ? new Date(e.target.value) : null,
+                          )
+                        }
+                        className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-1.5 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -293,7 +341,6 @@ const DriverDashboard: React.FC = () => {
         <Footer />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {isMobile && !sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"

@@ -1,5 +1,4 @@
 import {
-  FutureRideLastRequestRejectedEvent,
   FutureRideRequestSentToDriverEvent,
 } from "@application/events/FutureRideEvents";
 import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";

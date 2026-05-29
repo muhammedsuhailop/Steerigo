@@ -9,7 +9,7 @@ export interface AdminUserProfileInfo {
   isVerified: boolean;
   authProvider: string;
   address?: string;
-  dob?: Date;
+  dob?: string | undefined;
   gender?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -18,7 +18,7 @@ export interface AdminUserProfileInfo {
 export interface UserAccountStats {
   totalBookings: number;
   totalSpent: number;
-  lastBookingDate: Date | null;
+  lastBookingDate: string | null;
   joinedDaysAgo: number;
 }
 
@@ -38,7 +38,6 @@ export interface GetUserProfileResponse {
   activityStatus: UserActivityStatus;
   metadata: UserProfileMetadata;
 }
-
 
 export interface AdminUserProfileResponse {
   success: boolean;

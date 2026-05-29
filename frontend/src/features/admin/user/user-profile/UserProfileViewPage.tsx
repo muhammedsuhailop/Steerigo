@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -10,11 +10,17 @@ import {
   useGetUserProfileByIdQuery,
   useUpdateUserStatusMutation,
 } from "../../shared/services/adminApi";
-import { UserProfileDetails } from "./components";
+import { UserProfileDetails, UserStatus } from "./components";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { UserAction } from "../user-management/components/UserManagement";
 import { AdminLayout } from "@/features/admin/shared/components/AdminLayout/AdminLayout";
+
+interface NetworkErrorPayload {
+  data?: {
+    message?: string;
+  };
+}
 
 const UserProfileViewPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -31,9 +37,9 @@ const UserProfileViewPage: React.FC = () => {
   const [updateUserAction, { isLoading: isUpdating }] =
     useUpdateUserStatusMutation();
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [confirmAction, setConfirmAction] = useState<UserAction | null>(null);
-  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -70,11 +76,13 @@ const UserProfileViewPage: React.FC = () => {
       setErrorMsg(null);
       setConfirmOpen(false);
       refetch();
-    } catch (err: any) {
+    } catch (err) {
       const label = confirmAction
         ? actionButtonConfig[confirmAction]?.label
         : "Action";
-      const msg = err?.data?.message || `${label} failed`;
+      const networkError = err as NetworkErrorPayload;
+      const msg = networkError?.data?.message || `${label} failed`;
+
       toast.error(msg);
       setErrorMsg(msg);
       setSuccessMsg(null);
@@ -95,7 +103,8 @@ const UserProfileViewPage: React.FC = () => {
       return actions;
     }
 
-    switch (status) {
+    // Cast status dynamically to isolate matching UI controls safely
+    switch (status as UserStatus) {
       case "Inactive":
         actions.push("activate");
         break;
@@ -110,7 +119,7 @@ const UserProfileViewPage: React.FC = () => {
   };
 
   const getStatusBadgeClasses = (status?: string) => {
-    switch (status) {
+    switch (status as UserStatus) {
       case "Active":
         return "bg-green-100 text-green-800";
       case "Suspended":
@@ -118,6 +127,8 @@ const UserProfileViewPage: React.FC = () => {
         return "bg-red-100 text-red-800";
       case "Inactive":
         return "bg-gray-100 text-gray-800";
+      case "Pending Verification":
+        return "bg-amber-100 text-amber-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -137,13 +148,14 @@ const UserProfileViewPage: React.FC = () => {
     );
 
   if (error || !profileData) {
+    const networkError = error as NetworkErrorPayload;
     return renderState(
       <div className="max-w-4xl mx-auto">
         <Alert type="danger">
           <p className="font-semibold">
             {error ? "Error Loading User Profile" : "No user profile found"}
           </p>
-          <p>{(error as any)?.data?.message || ""}</p>
+          <p>{networkError?.data?.message || ""}</p>
           <Button onClick={() => navigate("/admin/users")} className="mt-4">
             Back to Users
           </Button>
@@ -228,7 +240,7 @@ const UserProfileViewPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Profile Details */}
+          {/* Profile Details Layout */}
           <div className="grid grid-cols-1 gap-6 mt-6">
             <div className="w-full bg-white rounded-lg shadow-md p-6">
               <UserProfileDetails

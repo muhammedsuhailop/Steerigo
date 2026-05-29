@@ -14,7 +14,6 @@ import {
 import { USER_MESSAGES } from "@shared/constants/UserMessages";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
-import { UserRole } from "@shared/constants/AuthConstants";
 import { GetUserStatsRequestDto } from "@application/dto/user/GetUserStatsRequestDto";
 import { GetUserStatsResponseDto } from "@application/dto/user/GetUserStatsResponseDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";

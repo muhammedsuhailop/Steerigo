@@ -10,6 +10,19 @@ export interface RiderDetails {
   profilePicture?: string;
 }
 
+export interface DriverDetails {
+  id: string;         
+  userId: string;     
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  profilePicture?: string;
+  status: string;
+  kycStatus: string;
+  averageRating: number;
+  totalRides: number;
+}
+
 export interface LocationDetails {
   latitude: number;
   longitude: number;
@@ -80,5 +93,6 @@ export interface GetAdminRideByIdResponseDto {
   data: {
     ride: RideDetails;
     rider: RiderDetails;
+    driver: DriverDetails;
   };
 }

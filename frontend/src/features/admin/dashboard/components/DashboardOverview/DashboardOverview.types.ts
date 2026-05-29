@@ -30,4 +30,8 @@ export interface DashboardOverviewProps {
   isLoading?: boolean;
   filter: DateFilterOption;
   onFilterChange: (filter: DateFilterOption) => void;
+  fromDate?: Date | null | string;
+  onFromDateChange: (date: Date | null) => void;
+  toDate?: Date | null | string;
+  onToDateChange: (date: Date | null) => void;
 }

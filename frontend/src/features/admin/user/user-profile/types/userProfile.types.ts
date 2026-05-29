@@ -1,4 +1,9 @@
-export type UserStatus = "Active" | "Inactive" | "Suspended" | "Blocked";
+export type UserStatus =
+  | "Active"
+  | "Inactive"
+  | "Suspended"
+  | "Blocked"
+  | "Pending Verification";
 export type UserRole = "Rider" | "Driver" | "Admin";
 export type AuthProvider = "email" | "google";
 export type Gender = "Male" | "Female" | "Other";
@@ -21,7 +26,7 @@ export interface AdminUserProfileInfo {
   isVerified: boolean;
   authProvider: AuthProvider;
   address?: string;
-  dob?: Date;
+  dob?: string;
   gender?: Gender;
   createdAt: Date;
   updatedAt: Date;
@@ -30,7 +35,7 @@ export interface AdminUserProfileInfo {
 export interface UserAccountStats {
   totalBookings: number;
   totalSpent: number;
-  lastBookingDate: Date | null;
+  lastBookingDate: string | null;
   joinedDaysAgo: number;
 }
 

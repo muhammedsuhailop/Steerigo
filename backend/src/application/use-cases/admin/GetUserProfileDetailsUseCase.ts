@@ -14,38 +14,46 @@ import { TYPES } from "@shared/constants/DITypes";
 import { DomainError } from "@domain/errors/DomainError";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { User } from "@domain/entities/User";
+import { IRideRepository } from "@domain/repositories/IRideRepository";
 
 @injectable()
-export class GetUserProfileDetailsUseCase
-  implements
-    IUseCase<
-      GetUserProfileRequestDto,
-      Promise<Result<GetUserProfileResponseDto>>
-    >
-{
+export class GetUserProfileDetailsUseCase implements IUseCase<
+  GetUserProfileRequestDto,
+  Promise<Result<GetUserProfileResponseDto>>
+> {
   constructor(
     @inject(TYPES.UserRepository)
-    private readonly userRepository: IUserRepository
+    private readonly userRepository: IUserRepository,
+    @inject(TYPES.RideRepository)
+    private readonly rideRepository: IRideRepository,
   ) {}
 
   async execute(
-    dto: GetUserProfileRequestDto
+    dto: GetUserProfileRequestDto,
   ): Promise<Result<GetUserProfileResponseDto>> {
     try {
       Logger.info("Executing GetUserProfileUseCase", {
         userId: dto.getUserId(),
       });
 
-      const user = (await this.userRepository.findById(
-        dto.getUserId()
-      )) as User | null;
+      const userId = dto.getUserId();
+
+      const user = (await this.userRepository.findById(userId)) as User | null;
 
       if (!user) {
         Logger.warn("User profile not found", {
-          userId: dto.getUserId(),
+          userId: userId,
         });
         return Result.failure(new DomainError("User not found"));
       }
+
+      const [rideStats, lastRide] = await Promise.all([
+        this.rideRepository.countByRiderStats(userId, {
+          fromDate: undefined,
+          toDate: undefined,
+        }),
+        this.rideRepository.findLatestByRiderId(userId),
+      ]);
 
       const userInfo: AdminUserProfileInfo = {
         id: user.getId(),
@@ -65,9 +73,9 @@ export class GetUserProfileDetailsUseCase
       };
 
       const accountStats: UserAccountStats = {
-        totalBookings: 0,
-        totalSpent: 0,
-        lastBookingDate: null,
+        totalBookings: rideStats.total, 
+        totalSpent: rideStats.totalSpend, 
+        lastBookingDate: lastRide ? lastRide.getCreatedAt() : null,
         joinedDaysAgo: this.calculateJoinedDaysAgo(user.getCreatedAt()),
       };
 
@@ -106,7 +114,7 @@ export class GetUserProfileDetailsUseCase
       return Result.failure(
         error instanceof DomainError
           ? error
-          : new DomainError("Failed to fetch user profile")
+          : new DomainError("Failed to fetch user profile"),
       );
     }
   }

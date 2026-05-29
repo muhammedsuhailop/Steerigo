@@ -22,6 +22,10 @@ const AdminDashboard: React.FC = () => {
     rawStats,
     filter,
     setFilter,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
   } = useAdminDashboard();
 
   const stats = getDashboardStats();
@@ -79,6 +83,10 @@ const AdminDashboard: React.FC = () => {
             isLoading={loading}
             filter={filter}
             onFilterChange={setFilter}
+            fromDate={fromDate}
+            onFromDateChange={setFromDate}
+            toDate={toDate}
+            onToDateChange={setToDate}
           />
 
           <QuickActions />
@@ -102,7 +110,6 @@ const AdminDashboard: React.FC = () => {
             onViewAll={handleViewAllUsers}
             maxUsers={5}
           />
-
         </main>
 
         {/* Footer */}
