@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   useGetAdminUserStatsQuery,
   useGetAdminRideStatsQuery,
@@ -17,15 +17,41 @@ export type DateFilterOption =
   | "3months"
   | "6months"
   | "1year"
-  | "all";
+  | "all"
+  | "custom";
 
 export const useAdminDashboard = () => {
   const [filter, setFilter] = useState<DateFilterOption>("7days");
 
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (filter === "custom") {
+      const current = new Date();
+      const past = new Date();
+      past.setDate(current.getDate() - 7);
+
+      setFromDate(past);
+      setToDate(current);
+    } else {
+      setFromDate(null);
+      setToDate(null);
+    }
+  }, [filter]);
+
   const dateParams = useMemo(() => {
     if (filter === "all") return undefined;
 
-    const toDate = new Date().toISOString();
+    if (filter === "custom") {
+      if (!fromDate || !toDate) return undefined;
+      return {
+        fromDate: fromDate.toISOString(),
+        toDate: toDate.toISOString(),
+      };
+    }
+
+    const toDateStr = new Date().toISOString();
     const from = new Date();
 
     switch (filter) {
@@ -53,9 +79,9 @@ export const useAdminDashboard = () => {
 
     return {
       fromDate: from.toISOString(),
-      toDate,
+      toDate: toDateStr,
     };
-  }, [filter]);
+  }, [filter, fromDate, toDate]);
 
   const {
     data: userStats,
@@ -183,6 +209,10 @@ export const useAdminDashboard = () => {
     loading: isLoading,
     filter,
     setFilter,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
     rawStats: {
       user: userStats,
       ride: rideStats,
