@@ -1,0 +1,1 @@
+{"version":3,"file":"IAvailabilityCheckService.d.ts","sourceRoot":"","sources":["../../../src/application/services/IAvailabilityCheckService.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,yBAAyB;IACxC,iBAAiB,CACf,QAAQ,EAAE,MAAM,EAChB,SAAS,EAAE,IAAI,EACf,OAAO,EAAE,IAAI,GACZ,OAAO,CAAC,OAAO,CAAC,CAAC;CACrB"}

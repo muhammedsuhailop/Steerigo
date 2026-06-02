@@ -1,0 +1,1 @@
+{"version":3,"file":"DriverLocationHandler.d.ts","sourceRoot":"","sources":["../../../../src/infrastructure/realtime/handlers/DriverLocationHandler.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,EAAE,MAAM,EAAE,MAAM,WAAW,CAAC;AAO3C,OAAO,EAAE,yBAAyB,EAAE,MAAM,wDAAwD,CAAC;AAMnG,wBAAgB,6BAA6B,CAC3C,EAAE,EAAE,MAAM,EACV,MAAM,EAAE,MAAM,EACd,UAAU,EAAE,yBAAyB,QAyEtC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"AvailabilityStatus.d.ts","sourceRoot":"","sources":["../../../src/domain/value-objects/AvailabilityStatus.ts"],"names":[],"mappings":"AAAA,oBAAY,kBAAkB;IAC5B,SAAS,cAAc;IACvB,IAAI,SAAS;IACb,OAAO,YAAY;IACnB,SAAS,cAAc;CACxB;AAED,eAAO,MAAM,2BAA2B,sBAAoC,CAAC;AAE7E,eAAO,MAAM,+BAA+B,EAAE,MAAM,CAClD,kBAAkB,EAClB,kBAAkB,EAAE,CAmBrB,CAAC"}

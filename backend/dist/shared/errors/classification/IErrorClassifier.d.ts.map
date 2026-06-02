@@ -1,0 +1,1 @@
+{"version":3,"file":"IErrorClassifier.d.ts","sourceRoot":"","sources":["../../../../src/shared/errors/classification/IErrorClassifier.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAE,MAAM,iBAAiB,CAAC;AAE/C,MAAM,WAAW,gBAAgB;IAC/B,SAAS,CAAC,KAAK,EAAE,OAAO,GAAG,OAAO,CAAC;IAEnC,QAAQ,CAAC,KAAK,EAAE,OAAO,GAAG,YAAY,CAAC;IAEvC,QAAQ,CAAC,QAAQ,EAAE,MAAM,CAAC;CAC3B"}

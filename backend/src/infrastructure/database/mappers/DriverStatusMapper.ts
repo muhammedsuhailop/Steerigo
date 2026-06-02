@@ -26,6 +26,7 @@ export class DriverStatusMapper {
       driverId: availability.getDriverId(),
       availabilityStatus: availability.getStatus(),
       currentLocation: this.mapLocation(availability.getCurrentLocation()),
+      baseLocation: this.mapLocation(availability.getBaseLocation()!),
       lastLocationUpdateAt: new Date(),
       recurringSchedule,
       exceptions: availability
@@ -37,11 +38,11 @@ export class DriverStatusMapper {
       summary: this.buildSummary(
         availability.getStatus(),
         availability.getExceptions(),
-        availability.getRecurringSchedule()
+        availability.getRecurringSchedule(),
       ),
       todayTimeSlots: this.calculateTodayTimeSlots(
         availability.getExceptions(),
-        availability.getRecurringSchedule()
+        availability.getRecurringSchedule(),
       ),
       isActive: availability.getIsActive(),
       createdAt: availability.getCreatedAt(),

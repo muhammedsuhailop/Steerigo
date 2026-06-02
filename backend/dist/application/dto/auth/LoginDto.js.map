@@ -1,0 +1,1 @@
+{"version":3,"file":"LoginDto.js","sourceRoot":"","sources":["../../../../src/application/dto/auth/LoginDto.ts"],"names":[],"mappings":";;;AAAA,MAAa,QAAQ;IAIjB,YAAY,IAAyC;QACjD,IAAI,CAAC,KAAK,GAAG,IAAI,CAAC,KAAK,CAAC;QACxB,IAAI,CAAC,QAAQ,GAAG,IAAI,CAAC,QAAQ,CAAC;IAClC,CAAC;CACJ;AARD,4BAQC"}

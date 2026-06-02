@@ -1,0 +1,1 @@
+{"version":3,"file":"CancelRideRequestResponseDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/user/CancelRideRequestResponseDto.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,4BAA4B;IAC3C,cAAc,EAAE,MAAM,CAAC;IACvB,cAAc,EAAE,MAAM,CAAC;IACvB,OAAO,EAAE,MAAM,CAAC;CACjB"}

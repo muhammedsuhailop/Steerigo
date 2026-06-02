@@ -1,0 +1,28 @@
+export declare const AppConstants: {
+    OTP_LENGTH: number;
+    OTP_TTL_SECONDS: number;
+    MAX_OTP_ATTEMPTS: number;
+    BCRYPT_ROUNDS: number;
+    JWT_EXPIRES_IN: string;
+    RATE_LIMIT_WINDOW_MS: number;
+    RATE_LIMIT_MAX_REQUESTS: number;
+    REFRESH_TOKEN_EXPIRES_DAYS: number;
+    FETCH_MULTIPLIER: number;
+    RIDE_REQUEST_TIMEOUT_MS: number;
+    RIDE_SEARCH_NOTIFY_NO_DRIVER_MS: number;
+    RIDE_SEARCH_HARD_EXPIRE_MS: number;
+    FUTURE_RIDE_MIN_HOURS_AHEAD: number;
+    FUTURE_RIDE_AVAILABILITY_BUFFER_HOURS: number;
+    FUTURE_RIDE_DEFAULT_RADIUS_KM: number;
+    FUTURE_RIDE_MAX_CANDIDATES: number;
+    FUTURE_RIDE_DEFAULT_DURATION_MINUTES: number;
+    FUTURE_RIDE_DEFAULT_ETA_LABEL: string;
+    FUTURE_RIDE_EXPIRY_QUEUE_NAME: string;
+    FUTURE_RIDE_EXPIRY_JOB_NAME: string;
+    FUTURE_RIDE_EXPIRY_WINDOW_MS: number;
+    CHAT_ROOM_EXPIRY_QUEUE_NAME: string;
+    CHAT_ROOM_EXPIRY_JOB_NAME: string;
+    CHAT_ROOM_EXPIRY_DELAY_MS: number;
+    CHAT_ROOM_CANCELLATION_EXPIRY_DELAY_MS: number;
+};
+//# sourceMappingURL=AppConstants.d.ts.map

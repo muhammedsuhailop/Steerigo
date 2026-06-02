@@ -1,0 +1,52 @@
+import { Location } from "@domain/value-objects/Location";
+import { RideType } from "@domain/value-objects/RideType";
+import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+export declare class RideRequestGroup {
+    private readonly id;
+    private readonly riderId;
+    private readonly pickup;
+    private readonly drop;
+    private readonly timeRequired;
+    private readonly rideType;
+    private fareBreakdown;
+    private candidateDriverIds;
+    private currentIndex;
+    private status;
+    private readonly createdAt;
+    private updatedAt;
+    private constructor();
+    static create(id: string, riderId: string, pickup: Location, drop: Location, timeRequired: number, rideType: RideType, fareBreakdown: FareBreakdown, candidateDriverIds: string[]): RideRequestGroup;
+    static fromData(data: {
+        id: string;
+        riderId: string;
+        pickup: Location;
+        drop: Location;
+        timeRequired: number;
+        rideType: RideType;
+        fareBreakdown: FareBreakdown;
+        candidateDriverIds: string[];
+        currentIndex: number;
+        status: RideRequestGroupStatus;
+        createdAt: Date;
+        updatedAt: Date;
+    }): RideRequestGroup;
+    getId(): string;
+    getRiderId(): string;
+    getPickup(): Location;
+    getDrop(): Location;
+    getTimeRequired(): number;
+    getRideType(): RideType;
+    getFareBreakdown(): FareBreakdown;
+    getCandidateDriverIds(): string[];
+    getCurrentIndex(): number;
+    getStatus(): RideRequestGroupStatus;
+    getCreatedAt(): Date;
+    getUpdatedAt(): Date;
+    markCompleted(): void;
+    markExpired(): void;
+    markCancelled(): void;
+    incrementCurrentIndex(): void;
+    replaceCandidateDriverIds(candidateDriverIds: string[]): void;
+}
+//# sourceMappingURL=RideRequestGroup.d.ts.map

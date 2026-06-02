@@ -1,0 +1,64 @@
+export declare class RideTimeline {
+    private readonly requestedAt;
+    private acceptedAt?;
+    private arrivedAt?;
+    private startedAt?;
+    private completedAt?;
+    private cancelledAt?;
+    private rejectedAt?;
+    private paymentInitiatedAt?;
+    private paymentCompletedAt?;
+    private paymentFailedAt?;
+    private paymentRefundedAt?;
+    constructor(requestedAt: Date);
+    setAcceptedAt(date: Date): void;
+    setArrivedAt(date: Date): void;
+    setStartedAt(date: Date): void;
+    setCompletedAt(date: Date): void;
+    setCancelledAt(date: Date): void;
+    setRejectedAt(date: Date): void;
+    setPaymentInitiatedAt(date: Date): void;
+    setPaymentCompletedAt(date: Date): void;
+    setPaymentFailedAt(date: Date): void;
+    setPaymentRefundedAt(date: Date): void;
+    getRequestedAt(): Date;
+    getAcceptedAt(): Date | undefined;
+    getArrivedAt(): Date | undefined;
+    getStartedAt(): Date | undefined;
+    getCompletedAt(): Date | undefined;
+    getCancelledAt(): Date | undefined;
+    getRejectedAt(): Date | undefined;
+    getPaymentInitiatedAt(): Date | undefined;
+    getPaymentCompletedAt(): Date | undefined;
+    getPaymentFailedAt(): Date | undefined;
+    getPaymentRefundedAt(): Date | undefined;
+    getDuration(): number | null;
+    getPaymentDuration(): number | null;
+    static fromData(data: {
+        requestedAt?: Date;
+        acceptedAt?: Date;
+        arrivedAt?: Date;
+        startedAt?: Date;
+        completedAt?: Date;
+        cancelledAt?: Date;
+        rejectedAt?: Date;
+        paymentInitiatedAt?: Date;
+        paymentCompletedAt?: Date;
+        paymentFailedAt?: Date;
+        paymentRefundedAt?: Date;
+    }): RideTimeline;
+    toJSON(): {
+        requestedAt: Date;
+        acceptedAt: Date | undefined;
+        arrivedAt: Date | undefined;
+        startedAt: Date | undefined;
+        completedAt: Date | undefined;
+        cancelledAt: Date | undefined;
+        rejectedAt: Date | undefined;
+        paymentInitiatedAt: Date | undefined;
+        paymentCompletedAt: Date | undefined;
+        paymentFailedAt: Date | undefined;
+        paymentRefundedAt: Date | undefined;
+    };
+}
+//# sourceMappingURL=RideTimeline.d.ts.map

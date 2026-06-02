@@ -1,0 +1,1 @@
+{"version":3,"file":"rideIdParamSchema.js","sourceRoot":"","sources":["../../../../src/interface/validators/user/rideIdParamSchema.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AAEX,QAAA,iBAAiB,GAAG,OAAC,CAAC,MAAM,CAAC;IACxC,MAAM,EAAE,OAAC,CAAC,MAAM,CAAC;QACf,MAAM,EAAE,OAAC,CAAC,MAAM,EAAE,CAAC,GAAG,CAAC,CAAC,EAAE,qBAAqB,CAAC;KACjD,CAAC;CACH,CAAC,CAAC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"IChatEventBus.d.ts","sourceRoot":"","sources":["../../../src/application/services/IChatEventBus.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,gCAAgC,CAAC;AAEjE,MAAM,WAAW,aAAa;IAC5B,OAAO,CAAC,KAAK,EAAE,eAAe,GAAG,OAAO,CAAC,IAAI,CAAC,CAAC;CAChD"}

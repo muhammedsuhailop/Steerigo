@@ -1,0 +1,1 @@
+{"version":3,"file":"RideCancellationReason.js","sourceRoot":"","sources":["../../../src/domain/value-objects/RideCancellationReason.ts"],"names":[],"mappings":";;;AAAA,IAAY,sBAQX;AARD,WAAY,sBAAsB;IAChC,mEAAyC,CAAA;IACzC,2DAAiC,CAAA;IACjC,iEAAuC,CAAA;IACvC,yEAA+C,CAAA;IAC/C,iEAAuC,CAAA;IACvC,iDAAuB,CAAA;IACvB,yCAAe,CAAA;AACjB,CAAC,EARW,sBAAsB,sCAAtB,sBAAsB,QAQjC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"UserStatus.d.ts","sourceRoot":"","sources":["../../../src/shared/constants/UserStatus.ts"],"names":[],"mappings":"AAAA,oBAAY,UAAU;IACpB,oBAAoB,yBAAyB;IAC7C,MAAM,WAAW;IACjB,SAAS,cAAc;IACvB,OAAO,YAAY;IACnB,WAAW,gBAAgB;CAC5B;AAGD,eAAO,MAAM,cAAc,GAAI,QAAQ,MAAM,KAAG,OAE/C,CAAC;AAEF,eAAO,MAAM,YAAY,GAAI,QAAQ,MAAM,EAAE,YAAY,OAAO,KAAG,OAElE,CAAC"}

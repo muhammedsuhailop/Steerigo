@@ -1,0 +1,1 @@
+{"version":3,"file":"VehicleType.d.ts","sourceRoot":"","sources":["../../../src/domain/value-objects/VehicleType.ts"],"names":[],"mappings":"AAAA,oBAAY,QAAQ;IAClB,MAAM,WAAW;IACjB,SAAS,cAAc;CACxB;AAED,oBAAY,QAAQ;IAClB,KAAK,UAAU;IACf,GAAG,QAAQ;IACX,SAAS,cAAc;CACxB;AAED,eAAO,MAAM,gBAAgB,YAA0B,CAAC;AACxD,eAAO,MAAM,gBAAgB,YAA0B,CAAC"}

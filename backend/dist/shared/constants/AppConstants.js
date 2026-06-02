@@ -1,0 +1,32 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppConstants = void 0;
+exports.AppConstants = {
+    OTP_LENGTH: parseInt(process.env.OTP_LENGTH || "4"),
+    OTP_TTL_SECONDS: parseInt(process.env.OTP_TTL_SECONDS || "300"),
+    MAX_OTP_ATTEMPTS: parseInt(process.env.MAX_OTP_ATTEMPTS || "3"),
+    BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || "12"),
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
+    RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"),
+    RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "10"),
+    REFRESH_TOKEN_EXPIRES_DAYS: parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS || "7"),
+    FETCH_MULTIPLIER: 3,
+    RIDE_REQUEST_TIMEOUT_MS: 30000,
+    RIDE_SEARCH_NOTIFY_NO_DRIVER_MS: 60000,
+    RIDE_SEARCH_HARD_EXPIRE_MS: 90000,
+    FUTURE_RIDE_MIN_HOURS_AHEAD: 6,
+    FUTURE_RIDE_AVAILABILITY_BUFFER_HOURS: 2,
+    FUTURE_RIDE_DEFAULT_RADIUS_KM: 10,
+    FUTURE_RIDE_MAX_CANDIDATES: 5,
+    FUTURE_RIDE_DEFAULT_DURATION_MINUTES: 60,
+    FUTURE_RIDE_DEFAULT_ETA_LABEL: "On pickup time",
+    // BullMQ queue and job names
+    FUTURE_RIDE_EXPIRY_QUEUE_NAME: "future-ride-expiry",
+    FUTURE_RIDE_EXPIRY_JOB_NAME: "expire-future-ride-group",
+    FUTURE_RIDE_EXPIRY_WINDOW_MS: 10 * 60 * 1000,
+    CHAT_ROOM_EXPIRY_QUEUE_NAME: "chat-room-expiry",
+    CHAT_ROOM_EXPIRY_JOB_NAME: "end-chat-room",
+    CHAT_ROOM_EXPIRY_DELAY_MS: 24 * 60 * 60 * 1000,
+    CHAT_ROOM_CANCELLATION_EXPIRY_DELAY_MS: 60 * 60 * 1000,
+};
+//# sourceMappingURL=AppConstants.js.map

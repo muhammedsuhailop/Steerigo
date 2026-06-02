@@ -1,0 +1,1 @@
+{"version":3,"file":"MarkNotificationsReadResponseDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/notification/MarkNotificationsReadResponseDto.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,gCAAgC;IAC/C,OAAO,EAAE,OAAO,CAAC;IACjB,OAAO,EAAE,MAAM,CAAC;IAChB,IAAI,EAAE;QACJ,YAAY,EAAE,MAAM,CAAC;KACtB,CAAC;CACH"}

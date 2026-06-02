@@ -1,0 +1,1 @@
+{"version":3,"file":"DriverRideCancellationReason.js","sourceRoot":"","sources":["../../../src/domain/value-objects/DriverRideCancellationReason.ts"],"names":[],"mappings":";;;AAAA,IAAY,wBAOX;AAPD,WAAY,wBAAwB;IAClC,mEAAuC,CAAA;IACvC,mDAAuB,CAAA;IACvB,qEAAyC,CAAA;IACzC,2EAA+C,CAAA;IAC/C,6DAAiC,CAAA;IACjC,2CAAe,CAAA;AACjB,CAAC,EAPW,wBAAwB,wCAAxB,wBAAwB,QAOnC"}

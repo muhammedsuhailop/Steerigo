@@ -1,0 +1,1 @@
+{"version":3,"file":"IUnitOfWork.d.ts","sourceRoot":"","sources":["../../../src/domain/repositories/IUnitOfWork.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,WAAW;IAC1B,gBAAgB,CAAC,CAAC,EAAE,IAAI,EAAE,MAAM,OAAO,CAAC,CAAC,CAAC,GAAG,OAAO,CAAC,CAAC,CAAC,CAAC;CACzD"}

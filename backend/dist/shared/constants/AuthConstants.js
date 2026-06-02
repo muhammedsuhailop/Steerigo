@@ -1,0 +1,90 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TokenConfig = exports.AuthErrorMessages = exports.AuthValidationMessages = exports.AuthMessages = exports.UserStatus = exports.UserRole = exports.AuthProvider = void 0;
+var AuthProvider;
+(function (AuthProvider) {
+    AuthProvider["EMAIL"] = "email";
+    AuthProvider["GOOGLE"] = "google";
+})(AuthProvider || (exports.AuthProvider = AuthProvider = {}));
+var UserRole;
+(function (UserRole) {
+    UserRole["RIDER"] = "Rider";
+    UserRole["DRIVER"] = "Driver";
+    UserRole["ADMIN"] = "Admin";
+})(UserRole || (exports.UserRole = UserRole = {}));
+var UserStatus;
+(function (UserStatus) {
+    UserStatus["PENDING_VERIFICATION"] = "Pending Verification";
+    UserStatus["ACTIVE"] = "Active";
+    UserStatus["SUSPENDED"] = "Suspended";
+    UserStatus["BLOCKED"] = "Blocked";
+    UserStatus["DEACTIVATED"] = "Deactivated";
+})(UserStatus || (exports.UserStatus = UserStatus = {}));
+exports.AuthMessages = {
+    UNAUTHORIZED: "Unauthorized",
+    INTERNAL_SERVER_ERROR: "Internal server error",
+    LOGIN_SUCCESS: "Login successful",
+    LOGOUT_SUCCESS: "Logged out successfully",
+    TOKEN_REFRESH_SUCCESS: "Tokens refreshed successfully",
+    INVALID_CREDENTIALS: "Invalid email or password",
+    ACCOUNT_NOT_VERIFIED: "Account not verified. Please verify your email first",
+    ACCOUNT_SUSPENDED: "Account has been suspended. Contact support for assistance",
+    ACCOUNT_BLOCKED: "Account has been blocked. Contact support for assistance",
+    ACCOUNT_DEACTIVATED: "Account has been deactivated",
+    ACCOUNT_DEFAULT: "Your account is not active. Please contact support",
+    TOKEN_EXPIRED: "Session expired. Please log in again",
+    TOKEN_INVALID: "Invalid or expired token",
+    ACCESS_TOKEN_REQUIRED: "Access token required",
+    REFRESH_TOKEN_REQUIRED: "Refresh token required",
+    AUTHENTICATION_FAILED: "Authentication failed",
+    SIGNUP_SUCCESS: "Signup initiated. An OTP has been sent to your email for verification.",
+    SIGNUP_VERIFICATION_SUCCESS: "Email verified successfully. Welcome to Steerigo!",
+    OTP_SENT_SUCCESS: "Verification code sent to your email",
+    OTP_RESEND_SUCCESS: "New verification code sent to your email",
+    PASSWORD_RESET_REQUEST_SUCCESS: "Password reset code sent to your email",
+    PASSWORD_RESET_SUCCESS: "Password reset successfully",
+    PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
+    GOOGLE_AUTH_SUCCESS: "Google authentication successful",
+    USER_PROFILE_SUCCESS: "User profile fetched  successfully",
+    TOKENS_REFRESHED: "Tokens refreshed successfully",
+    USER_RETRIEVED: "User fetched successfully",
+    EMAIL_ALREADY_EXISIT: "User with this email already exists",
+};
+exports.AuthValidationMessages = {
+    EMAIL_REQUIRED: "Email is required",
+    EMAIL_INVALID: "Please provide a valid email address",
+    EMAIL_TOO_LONG: "Email must be less than 255 characters",
+    PASSWORD_REQUIRED: "Password is required",
+    PASSWORD_TOO_SHORT: "Password must be at least 8 characters long",
+    PASSWORD_TOO_LONG: "Password must be less than 128 characters",
+    PASSWORD_WEAK: "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character",
+    REFRESH_TOKEN_REQUIRED: "Refresh token is required",
+    REFRESH_TOKEN_INVALID: "Invalid refresh token format",
+    NAME_REQUIRED: "Name is required",
+    NAME_TOO_SHORT: "Name must be at least 2 characters long",
+    NAME_TOO_LONG: "Name must be less than 100 characters",
+    NAME_INVALID: "Name can only contain letters and spaces",
+};
+exports.AuthErrorMessages = {
+    SIGNUP_FAILED: "Failed to create account",
+    OTP_SEND_FAILED: "Failed to send verification code",
+    OTP_VERIFICATION_FAILED: "OTP verification failed",
+    GOOGLE_AUTH_FAILED: "Google authentication failed",
+    USER_NOT_FOUND: "User not found",
+    OTP_NOT_FOUND: "OTP not found or has expired. Please request a new OTP",
+    OTP_INVALID: "Invalid verification code",
+    OTP_EXPIRED: "OTP has expired. Please request a new one",
+    MAX_OTP_ATTEMPTS: "Maximum OTP attempts exceeded. Please wait...",
+    EMAIL_NOT_VERIFIED: "Email address is not verified. Please verify your email to continue",
+    REFRESH_TOKEN_EXPIRED: "Refresh token has expired. Please log in again",
+    REFRESH_TOKEN_REVOKED: "Refresh token has been revoked. Please log in again",
+    PASSWORD_RESET_FAILED: "Password reset failed. Please try again",
+    MOBILE_ALREADY_EXISTS: "This mobile number is already registered",
+};
+exports.TokenConfig = {
+    ACCESS_TOKEN_EXPIRES_IN: "10min",
+    REFRESH_TOKEN_EXPIRES_IN_DAYS: 7,
+    JWT_ISSUER: "Steerigo",
+    JWT_AUDIENCE: "Steerigo-Users",
+};
+//# sourceMappingURL=AuthConstants.js.map

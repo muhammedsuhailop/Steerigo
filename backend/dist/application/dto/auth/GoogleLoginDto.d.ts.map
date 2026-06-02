@@ -1,0 +1,1 @@
+{"version":3,"file":"GoogleLoginDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/auth/GoogleLoginDto.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,gBAAgB;IAC/B,IAAI,CAAC,EAAE,MAAM,CAAC;IACd,KAAK,CAAC,EAAE,MAAM,CAAC;CAChB;AAED,qBAAa,cAAc;IACzB,SAAgB,IAAI,EAAE,MAAM,CAAC;IAC7B,SAAgB,KAAK,CAAC,EAAE,MAAM,CAAC;gBAEnB,IAAI,EAAE,OAAO;CAU1B"}

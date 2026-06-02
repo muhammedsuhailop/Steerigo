@@ -1,0 +1,86 @@
+import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
+import { GearType, BodyType } from "@domain/value-objects/VehicleType";
+import { DocumentType } from "@domain/value-objects/DocumentType";
+import { Gender } from "@domain/value-objects/Gender";
+interface DriverRegistrationRequestBody {
+    name: string;
+    mobile: string;
+    dob: string;
+    gender: Gender;
+    state: string;
+    pin: string;
+    address: string;
+    licenseCategory: LicenseCategory;
+    licenseNumber: string;
+    licenseBodyTypes: BodyType[];
+    licenseGearTypes: GearType[];
+    licenseIssueDate: string;
+    licenseExpiryDate: string;
+    idType: DocumentType;
+    idNumber: string;
+    idIssueDate: string;
+    idExpiryDate?: string;
+    licenseFrontImage: string;
+    licenseBackImage: string;
+    idFrontImage: string;
+    idBackImage: string;
+}
+export declare class DriverRegistrationRequestDto {
+    private readonly userId;
+    private readonly name;
+    private readonly mobile;
+    private readonly dob;
+    private readonly gender;
+    private readonly state;
+    private readonly pin;
+    private readonly address;
+    private readonly licenseCategory;
+    private readonly licenseNumber;
+    private readonly licenseBodyTypes;
+    private readonly licenseGearTypes;
+    private readonly licenseIssueDate;
+    private readonly licenseExpiryDate;
+    private readonly idType;
+    private readonly idNumber;
+    private readonly idIssueDate;
+    private readonly idExpiryDate;
+    private readonly licenseFrontImage;
+    private readonly licenseBackImage;
+    private readonly idFrontImage;
+    private readonly idBackImage;
+    constructor(userId: string, name: string, mobile: string, dob: Date, gender: Gender, state: string, pin: string, address: string, licenseCategory: LicenseCategory, licenseNumber: string, licenseBodyTypes: BodyType[], licenseGearTypes: GearType[], licenseIssueDate: Date, licenseExpiryDate: Date, idType: DocumentType, idNumber: string, idIssueDate: Date, idExpiryDate: Date | null, licenseFrontImage: string, licenseBackImage: string, idFrontImage: string, idBackImage: string);
+    static fromRequest(userId: string, body: DriverRegistrationRequestBody): DriverRegistrationRequestDto;
+    getUserId(): string;
+    getName(): string;
+    getMobile(): string;
+    getDob(): Date;
+    getGender(): Gender;
+    getState(): string;
+    getPin(): string;
+    getAddress(): string;
+    getFullAddress(): string;
+    getLicenseCategory(): LicenseCategory;
+    getLicenseNumber(): string;
+    getEligibleBodyTypes(): BodyType[];
+    getEligibleGearTypes(): GearType[];
+    getLicenseIssueDate(): Date;
+    getLicenseExpiryDate(): Date;
+    getIdType(): DocumentType;
+    getIdNumber(): string;
+    getIdIssueDate(): Date;
+    getIdExpiryDate(): Date | null;
+    getLicenseFrontImage(): string;
+    getLicenseBackImage(): string;
+    getIdFrontImage(): string;
+    getIdBackImage(): string;
+    getLicenseImageUrls(): {
+        front: string[];
+        back: string[];
+    };
+    getIdImageUrls(): {
+        front: string[];
+        back: string[];
+    };
+}
+export {};
+//# sourceMappingURL=DriverRegistrationRequestDto.d.ts.map

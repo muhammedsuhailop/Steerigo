@@ -1,0 +1,1 @@
+{"version":3,"file":"IFutureRideExpiryService.d.ts","sourceRoot":"","sources":["../../../../src/application/services/ride-search/IFutureRideExpiryService.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,wBAAwB;IACvC,mBAAmB,CAAC,cAAc,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC,CAAC;IAC3D,iBAAiB,CAAC,cAAc,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC,CAAC;CAC1D"}

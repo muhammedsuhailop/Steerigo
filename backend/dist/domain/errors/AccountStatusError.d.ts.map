@@ -1,0 +1,1 @@
+{"version":3,"file":"AccountStatusError.d.ts","sourceRoot":"","sources":["../../../src/domain/errors/AccountStatusError.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,MAAM,eAAe,CAAC;AAI5C,qBAAa,kBAAmB,SAAQ,WAAW;aAG/B,MAAM,EAAE,MAAM;gBAD9B,OAAO,EAAE,MAAM,EACC,MAAM,EAAE,MAAM;CAWjC"}

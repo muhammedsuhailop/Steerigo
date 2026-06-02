@@ -1,0 +1,1 @@
+{"version":3,"file":"GetKycRequestByIdRequestDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/admin/GetKycRequestByIdRequestDto.ts"],"names":[],"mappings":"AAUA,qBAAa,2BAA2B;IACtC,OAAO,CAAC,QAAQ,CAAC,IAAI,CAA+B;gBAExC,WAAW,EAAE,OAAO;IAIhC,MAAM,CAAC,WAAW,CAAC,WAAW,EAAE,OAAO,GAAG,2BAA2B;IAIrE,QAAQ,IAAI,MAAM;CAGnB"}
