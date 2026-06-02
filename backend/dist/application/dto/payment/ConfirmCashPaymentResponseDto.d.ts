@@ -1,4 +1,4 @@
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+import { PaymentStatus } from "../../../domain/value-objects/PaymentStatus";
 export interface ConfirmCashPaymentResponseDto {
     success: boolean;
     message: string;

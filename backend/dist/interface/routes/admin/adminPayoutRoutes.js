@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminPayoutRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
-const ValidationMiddleware_1 = require("@interface/middleware/ValidationMiddleware");
-const payoutValidators_1 = require("@interface/validators/payment/payoutValidators");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const ValidationMiddleware_1 = require("../../middleware/ValidationMiddleware");
+const payoutValidators_1 = require("../../validators/payment/payoutValidators");
 const router = (0, express_1.Router)();
 exports.adminPayoutRoutes = router;
 const controller = DIContainer_1.container.get(DITypes_1.TYPES.AdminPayoutController);

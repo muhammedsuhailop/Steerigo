@@ -1,4 +1,4 @@
-import { ApiResponse } from "@shared/types/Common";
+import { ApiResponse } from "../types/Common";
 import { ErrorDetails } from "./ErrorDetails";
 export declare class ErrorResponseBuilder {
     build(errorDetails: ErrorDetails): ApiResponse;

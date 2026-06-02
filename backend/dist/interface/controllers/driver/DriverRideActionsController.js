@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverRideActionsController = void 0;
 const inversify_1 = require("inversify");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const MarkRideAsArrivedDto_1 = require("@application/dto/driver/MarkRideAsArrivedDto");
-const MarkRideAsStartedDto_1 = require("@application/dto/driver/MarkRideAsStartedDto");
-const MarkRideAsCompletedDto_1 = require("@application/dto/driver/MarkRideAsCompletedDto");
-const DriverCancelRideDto_1 = require("@application/dto/driver/DriverCancelRideDto");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const MarkRideAsArrivedDto_1 = require("../../../application/dto/driver/MarkRideAsArrivedDto");
+const MarkRideAsStartedDto_1 = require("../../../application/dto/driver/MarkRideAsStartedDto");
+const MarkRideAsCompletedDto_1 = require("../../../application/dto/driver/MarkRideAsCompletedDto");
+const DriverCancelRideDto_1 = require("../../../application/dto/driver/DriverCancelRideDto");
 let DriverRideActionsController = class DriverRideActionsController {
     constructor(markRideAsArrivedUseCase, markRideAsStartedUseCase, markRideAsCompletedUseCase, driverCancelRideUseCase) {
         this.markRideAsArrivedUseCase = markRideAsArrivedUseCase;

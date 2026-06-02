@@ -1,8 +1,8 @@
-import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
-import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
-import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
-import { IEventBus } from "@application/services/IEventBus";
-import { IDistributedLockService } from "@application/services/IDistributedLockService";
+import { IRideRequestRepository } from "../../domain/repositories/IRideRequestRepository";
+import { IRideRequestGroupRepository } from "../../domain/repositories/IRideRequestGroupRepository";
+import { IRideSearchDispatchService } from "../../application/services/IRideSearchDispatchService";
+import { IEventBus } from "../../application/services/IEventBus";
+import { IDistributedLockService } from "../../application/services/IDistributedLockService";
 export declare class RideRequestTimeoutWorker {
     private readonly rideRequestRepository;
     private readonly rideRequestGroupRepository;

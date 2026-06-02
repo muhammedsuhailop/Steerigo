@@ -1,4 +1,4 @@
-import { IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
+import { IChatRoomRepository } from "../../domain/repositories/IChatRoomRepository";
 export declare class ChatRoomExpiryWorker {
     private readonly chatRoomRepository;
     private worker?;

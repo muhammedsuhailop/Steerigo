@@ -1,5 +1,5 @@
-import { RatingCriteria } from "@domain/value-objects/RatingCriteria";
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { RatingCriteria } from "../../../domain/value-objects/RatingCriteria";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 export declare class RateDriverDto {
     private readonly riderId;
     readonly rideId: string;

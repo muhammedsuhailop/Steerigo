@@ -1,5 +1,5 @@
-import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
-import { RideStatus } from "@domain/value-objects/RideStatus";
+import { DriverCancellationReason } from "../../../domain/value-objects/DriverRideCancellationReason";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
 export interface DriverCancelRideResponseDto {
     rideId: string;
     status: RideStatus;

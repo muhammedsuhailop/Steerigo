@@ -1,4 +1,4 @@
-import { MessageType } from "@domain/value-objects/MessageType";
+import { MessageType } from "../value-objects/MessageType";
 export type MessageMetadata = {
     imageUrl?: string;
     latitude?: number;

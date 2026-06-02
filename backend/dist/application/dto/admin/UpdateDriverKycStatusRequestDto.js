@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateDriverKycStatusRequestDto = void 0;
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 const zod_1 = require("zod");
 const updateDriverKycStatusSchema = zod_1.z.object({
     driverId: zod_1.z

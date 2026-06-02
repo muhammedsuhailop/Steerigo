@@ -1,5 +1,5 @@
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { PaymentStatus } from "../../../domain/value-objects/PaymentStatus";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 export interface DriverDetails {
     driverId: string;
     userId: string;

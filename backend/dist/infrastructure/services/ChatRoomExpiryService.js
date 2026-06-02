@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRoomExpiryService = void 0;
 const inversify_1 = require("inversify");
 const bullmq_1 = require("bullmq");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const Logger_1 = require("@shared/utils/Logger");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const AppConstants_1 = require("../../shared/constants/AppConstants");
+const Logger_1 = require("../../shared/utils/Logger");
 let ChatRoomExpiryService = class ChatRoomExpiryService {
     constructor(expiryQueue) {
         this.expiryQueue = expiryQueue;

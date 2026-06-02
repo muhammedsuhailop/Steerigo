@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFutureRideRequestsDtoSchema = exports.GetFutureRideRequestsDto = void 0;
 const zod_1 = require("zod");
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const FutureRideRequestStatus_1 = require("../../../domain/value-objects/FutureRideRequestStatus");
 const getFutureRideRequestsDtoSchema = zod_1.z.object({
     status: zod_1.z.nativeEnum(FutureRideRequestStatus_1.FutureRideRequestStatus).optional(),
     page: zod_1.z.coerce.number().int().positive().optional().default(1),

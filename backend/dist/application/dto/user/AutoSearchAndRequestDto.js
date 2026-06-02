@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoSearchAndRequestDto = void 0;
-const ValidationErrors_1 = require("@domain/errors/ValidationErrors");
+const ValidationErrors_1 = require("../../../domain/errors/ValidationErrors");
 class AutoSearchAndRequestDto {
     constructor(requestGroupId, riderId, latitude, longitude, searchDate, timeRequired, radiusKm = 10, gearType = "", bodyType = "", maxRideRequests = 5, dropLatitude, dropLongitude, dropAddress, pickupAddress, rideType) {
         this.requestGroupId = requestGroupId;

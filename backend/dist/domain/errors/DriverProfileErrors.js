@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAccessDeniedError = exports.ResourceNotFoundError = exports.KycDocumentNotFoundError = exports.DriverProfileNotFoundError = exports.UserNotFoundError = void 0;
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
+const DriverMessages_1 = require("../../shared/constants/DriverMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class UserNotFoundError extends DomainError_1.DomainError {
     constructor(userId) {
         super(`${DriverMessages_1.DRIVER_ERROR_MESSAGES.USER_NOT_FOUND} with ID: ${userId}`, "USER_NOT_FOUND", {

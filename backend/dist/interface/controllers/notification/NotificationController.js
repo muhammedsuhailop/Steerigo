@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationController = void 0;
 const inversify_1 = require("inversify");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const NotificationMessages_1 = require("@shared/constants/NotificationMessages");
-const GetNotificationsDto_1 = require("@application/dto/notification/GetNotificationsDto");
-const MarkNotificationsReadDto_1 = require("@application/dto/notification/MarkNotificationsReadDto");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const NotificationMessages_1 = require("../../../shared/constants/NotificationMessages");
+const GetNotificationsDto_1 = require("../../../application/dto/notification/GetNotificationsDto");
+const MarkNotificationsReadDto_1 = require("../../../application/dto/notification/MarkNotificationsReadDto");
 let NotificationController = class NotificationController {
     constructor(getNotificationsUseCase, markNotificationsReadUseCase) {
         this.getNotificationsUseCase = getNotificationsUseCase;

@@ -1,5 +1,5 @@
-import { Notification } from "@domain/entities/Notification";
-import { INotificationDocument } from "@infrastructure/database/models/NotificationModel";
+import { Notification } from "../../../domain/entities/Notification";
+import { INotificationDocument } from "../../database/models/NotificationModel";
 import { Document } from "mongoose";
 export declare class NotificationMapper {
     static toDomain(doc: INotificationDocument): Notification;

@@ -1,9 +1,9 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IPasswordService } from "@application/services/IPasswordService";
-import { IEmailService } from "@application/services/IEmailService";
-import { IOtpService } from "@application/services/IOtpService";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IPasswordService } from "../../services/IPasswordService";
+import { IEmailService } from "../../services/IEmailService";
+import { IOtpService } from "../../services/IOtpService";
 import { ForgotPasswordRequestDto } from "../../dto/auth/ForgotPasswordRequestDto";
-import { Result } from "@shared/utils/Result";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class ForgotPasswordRequestUseCase implements IUseCase<ForgotPasswordRequestDto, Promise<Result<void>>> {
     private userRepository;

@@ -1,12 +1,12 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
-import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
-import { ICancellationChargeService } from "@application/services/ICancellationChargeService";
-import { IEarningsDistributionService } from "@application/services/IEarningsDistributionService";
-import { IEventBus } from "@application/services/IEventBus";
+import { Result } from "../../../shared/utils/Result";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { DriverCancelRideDto } from "../../dto/driver/DriverCancelRideDto";
+import { DriverCancelRideResponseDto } from "../../dto/driver/DriverCancelRideResponseDto";
+import { ICancellationChargeService } from "../../services/ICancellationChargeService";
+import { IEarningsDistributionService } from "../../services/IEarningsDistributionService";
+import { IEventBus } from "../../services/IEventBus";
 export declare class DriverCancelRideUseCase implements IUseCase<DriverCancelRideDto, Promise<Result<DriverCancelRideResponseDto>>> {
     private readonly driverRepository;
     private readonly rideRepository;

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PayoutErrors = void 0;
-const PayoutMesages_1 = require("@shared/constants/PayoutMesages");
+const PayoutMesages_1 = require("../../shared/constants/PayoutMesages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
 class PayoutErrors {
     static payoutNotFound(payoutId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(PayoutMesages_1.PAYOUT_ERROR_MESSAGES.PAYOUT_NOT_FOUND, { payoutId }), "PAYOUT_NOT_FOUND", {

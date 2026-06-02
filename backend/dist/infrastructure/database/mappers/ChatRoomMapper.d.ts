@@ -1,4 +1,4 @@
-import { ChatRoom } from "@domain/entities/ChatRoom";
+import { ChatRoom } from "../../../domain/entities/ChatRoom";
 import { IChatRoomDocument } from "../models/ChatRoomModel";
 export declare class ChatRoomMapper {
     static toDomain(doc: IChatRoomDocument): ChatRoom;

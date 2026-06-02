@@ -1,5 +1,5 @@
-import { BookingType } from "@domain/value-objects/BookingType";
-import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
+import { BookingType } from "../../../domain/value-objects/BookingType";
+import { CouponDiscountType } from "../../../domain/value-objects/CouponDiscountType";
 import { Document, Model, Types } from "mongoose";
 export interface IRideDocument extends Document {
     _id: Types.ObjectId;

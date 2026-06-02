@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = void 0;
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
+const TransactionDirection_1 = require("../value-objects/TransactionDirection");
 class Transaction {
     constructor(id, walletId, type, direction, amount, relatedEntityId, relatedEntityType, groupId, note, metadata = {}, createdAt = new Date()) {
         this.id = id;

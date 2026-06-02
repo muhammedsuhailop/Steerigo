@@ -1,4 +1,4 @@
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 import { Document, Model, Types } from "mongoose";
 export interface IRatingDocument extends Document {
     _id: Types.ObjectId;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserChatMapper = void 0;
 const mongoose_1 = require("mongoose");
-const UserChat_1 = require("@domain/entities/UserChat");
+const UserChat_1 = require("../../../domain/entities/UserChat");
 class UserChatMapper {
     static toDomain(doc) {
         return UserChat_1.UserChat.fromData({

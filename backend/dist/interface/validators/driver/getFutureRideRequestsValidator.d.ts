@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { FutureRideRequestStatus } from "../../../domain/value-objects/FutureRideRequestStatus";
 export declare const getFutureRideRequestsSchema: z.ZodObject<{
     query: z.ZodObject<{
         status: z.ZodOptional<z.ZodEnum<typeof FutureRideRequestStatus>>;

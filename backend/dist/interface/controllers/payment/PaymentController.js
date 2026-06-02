@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentController = void 0;
 const inversify_1 = require("inversify");
-const InitiatePaymentDto_1 = require("@application/dto/payment/InitiatePaymentDto");
-const VerifyPaymentDto_1 = require("@application/dto/payment/VerifyPaymentDto");
-const ConfirmCashPaymentDto_1 = require("@application/dto/payment/ConfirmCashPaymentDto");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const MarkPaymentFailedDto_1 = require("@application/dto/payment/MarkPaymentFailedDto");
+const InitiatePaymentDto_1 = require("../../../application/dto/payment/InitiatePaymentDto");
+const VerifyPaymentDto_1 = require("../../../application/dto/payment/VerifyPaymentDto");
+const ConfirmCashPaymentDto_1 = require("../../../application/dto/payment/ConfirmCashPaymentDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const MarkPaymentFailedDto_1 = require("../../../application/dto/payment/MarkPaymentFailedDto");
 let PaymentController = class PaymentController {
     constructor(initiatePaymentUseCase, verifyPaymentUseCase, confirmCashPaymentUseCase, markPaymentFailedUseCase) {
         this.initiatePaymentUseCase = initiatePaymentUseCase;

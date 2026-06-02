@@ -14,15 +14,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverRegistrationUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Driver_1 = require("@domain/entities/Driver");
-const KYC_1 = require("@domain/entities/KYC");
-const DomainError_1 = require("@domain/errors/DomainError");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const Result_1 = require("../../../shared/utils/Result");
+const Driver_1 = require("../../../domain/entities/Driver");
+const KYC_1 = require("../../../domain/entities/KYC");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 const mongoose_1 = require("mongoose");
-const DocumentType_1 = require("@domain/value-objects/DocumentType");
+const DocumentType_1 = require("../../../domain/value-objects/DocumentType");
 let DriverRegistrationUseCase = class DriverRegistrationUseCase {
     constructor(driverRepository, userRepository, kycRepository) {
         this.driverRepository = driverRepository;

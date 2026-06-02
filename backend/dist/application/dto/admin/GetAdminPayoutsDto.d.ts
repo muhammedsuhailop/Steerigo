@@ -1,4 +1,4 @@
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
+import { PayoutStatus } from "../../../domain/value-objects/PayoutStatus";
 export declare class GetAdminPayoutsDto {
     private readonly status;
     private readonly driverId;

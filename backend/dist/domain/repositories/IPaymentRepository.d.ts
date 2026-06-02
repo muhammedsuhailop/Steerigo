@@ -1,4 +1,4 @@
-import { Payment } from "@domain/entities/Payment";
+import { Payment } from "../entities/Payment";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 export interface IPaymentRepository extends IWriteOnlyRepository<Payment>, IReadOnlyRepository<Payment> {

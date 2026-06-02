@@ -1,7 +1,7 @@
-import { PaginatedResult } from "@shared/types/Repository";
-import { Notification } from "@domain/entities/Notification";
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
+import { PaginatedResult } from "../../shared/types/Repository";
+import { Notification } from "../entities/Notification";
+import { NotificationType } from "../value-objects/NotificationType";
+import { NotificationChannel } from "../value-objects/NotificationChannel";
 export interface INotificationFilters {
     isRead?: boolean;
     type?: NotificationType;

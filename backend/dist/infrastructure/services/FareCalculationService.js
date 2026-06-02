@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FareCalculationService = void 0;
 const inversify_1 = require("inversify");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
+const FareBreakdown_1 = require("../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../domain/value-objects/Money");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const Logger_1 = require("../../shared/utils/Logger");
 let FareCalculationService = class FareCalculationService {
     constructor(fareConfigRepository) {
         this.fareConfigRepository = fareConfigRepository;

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDriverWalletSchema = exports.GetDriverWalletDto = void 0;
 const zod_1 = require("zod");
-const TransactionType_1 = require("@domain/value-objects/TransactionType");
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
+const TransactionType_1 = require("../../../domain/value-objects/TransactionType");
+const TransactionDirection_1 = require("../../../domain/value-objects/TransactionDirection");
 const getDriverWalletSchema = zod_1.z.object({
     page: zod_1.z.coerce.number().int().positive().optional().default(1),
     limit: zod_1.z.coerce.number().int().positive().max(100).optional().default(10),

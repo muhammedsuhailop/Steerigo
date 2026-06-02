@@ -35,8 +35,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
-const NotificationChannel_1 = require("@domain/value-objects/NotificationChannel");
+const NotificationType_1 = require("../../../domain/value-objects/NotificationType");
+const NotificationChannel_1 = require("../../../domain/value-objects/NotificationChannel");
 const notificationMetadataSchema = new mongoose_1.Schema({
     rideId: { type: String, default: undefined },
     requestId: { type: String, default: undefined },

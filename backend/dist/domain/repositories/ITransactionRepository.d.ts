@@ -1,7 +1,7 @@
-import { Transaction } from "@domain/entities/Transaction";
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
-import { TransactionType } from "@domain/value-objects/TransactionType";
-import { WalletOwnerType } from "@domain/value-objects/WalletOwnerType";
+import { Transaction } from "../entities/Transaction";
+import { TransactionDirection } from "../value-objects/TransactionDirection";
+import { TransactionType } from "../value-objects/TransactionType";
+import { WalletOwnerType } from "../value-objects/WalletOwnerType";
 export interface TransactionQueryFilters {
     type?: TransactionType;
     direction?: TransactionDirection;

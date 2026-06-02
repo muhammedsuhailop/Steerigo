@@ -10,7 +10,7 @@ exports.FareConfigurationRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const FareConfigurationModel_1 = require("../models/FareConfigurationModel");
 const FareConfigurationMapper_1 = require("../mappers/FareConfigurationMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let FareConfigurationRepositoryImpl = class FareConfigurationRepositoryImpl {
     async findById(id) {
         try {

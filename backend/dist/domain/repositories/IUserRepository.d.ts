@@ -1,10 +1,10 @@
-import { QueryOptions } from "@shared/types/Repository";
+import { QueryOptions } from "../../shared/types/Repository";
 import { User } from "../entities/User";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
 import { IBatchRepository } from "./base/IBatchRepository";
-import { AuthProvider } from "@shared/constants/AuthConstants";
+import { AuthProvider } from "../../shared/constants/AuthConstants";
 export interface DateRange {
     from?: Date;
     to?: Date;

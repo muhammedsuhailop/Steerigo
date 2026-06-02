@@ -1,4 +1,4 @@
-import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
+import { MessageDeliveryStatus } from "../value-objects/MessageDeliveryStatus";
 export type MessageStatusCreateParams = {
     id: string;
     messageId: string;

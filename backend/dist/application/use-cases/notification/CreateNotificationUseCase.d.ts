@@ -1,8 +1,8 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
-import { INotificationRepository } from "@domain/repositories/INotificationRepository";
-import { Result } from "@shared/utils/Result";
-import { INotificationRealtimePublisher } from "@application/services/INotificationRealtimePublisher";
+import { CreateNotificationDto } from "../../dto/notification/CreateNotificationDto";
+import { INotificationRepository } from "../../../domain/repositories/INotificationRepository";
+import { Result } from "../../../shared/utils/Result";
+import { INotificationRealtimePublisher } from "../../services/INotificationRealtimePublisher";
 export interface CreateNotificationResponseDto {
     success: boolean;
     message: string;

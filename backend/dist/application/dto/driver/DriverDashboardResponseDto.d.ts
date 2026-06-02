@@ -1,6 +1,6 @@
-import { Email } from "@domain/value-objects/Email";
-import { Location } from "@domain/value-objects/Location";
-import { RideType } from "@domain/value-objects/RideType";
+import { Email } from "../../../domain/value-objects/Email";
+import { Location } from "../../../domain/value-objects/Location";
+import { RideType } from "../../../domain/value-objects/RideType";
 export interface DriverInfo {
     readonly driverId: string;
     readonly userId: string;

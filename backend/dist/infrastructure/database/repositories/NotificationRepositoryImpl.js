@@ -9,9 +9,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
-const NotificationModel_1 = require("@infrastructure/database/models/NotificationModel");
-const NotificationMapper_1 = require("@infrastructure/database/mappers/NotificationMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const NotificationModel_1 = require("../../database/models/NotificationModel");
+const NotificationMapper_1 = require("../../database/mappers/NotificationMapper");
+const Logger_1 = require("../../../shared/utils/Logger");
 let NotificationRepositoryImpl = class NotificationRepositoryImpl {
     async save(notification) {
         try {

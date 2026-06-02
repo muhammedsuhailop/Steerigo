@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideRequestModel = void 0;
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const FutureRideRequestStatus_1 = require("../../../domain/value-objects/FutureRideRequestStatus");
 const mongoose_1 = require("mongoose");
 const futureRideRequestSchema = new mongoose_1.Schema({
     riderId: {

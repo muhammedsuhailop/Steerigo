@@ -1,10 +1,10 @@
-import { IKYCRepository } from "@domain/repositories/IKYCRepository";
-import { IKYCRepository as IAdminKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
-import { KYC } from "@domain/entities/KYC";
-import { FilterOptions, PaginatedResult, QueryOptions } from "@shared/types/Repository";
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
-import { DocumentType } from "@domain/value-objects/DocumentType";
-import { IKYCQuery, IKYCWithDriverInfo } from "@domain/repositories/IAdminDriverKYCRepository";
+import { IKYCRepository } from "../../../domain/repositories/IKYCRepository";
+import { IKYCRepository as IAdminKYCRepository } from "../../../domain/repositories/IAdminDriverKYCRepository";
+import { KYC } from "../../../domain/entities/KYC";
+import { FilterOptions, PaginatedResult, QueryOptions } from "../../../shared/types/Repository";
+import { KYCStatus } from "../../../domain/value-objects/KYCStatus";
+import { DocumentType } from "../../../domain/value-objects/DocumentType";
+import { IKYCQuery, IKYCWithDriverInfo } from "../../../domain/repositories/IAdminDriverKYCRepository";
 type UnifiedKYCFilterOptions = FilterOptions<KYC> & IKYCQuery;
 export declare class KYCRepositoryImpl implements IKYCRepository, IAdminKYCRepository {
     findById(id: string): Promise<KYC | null>;

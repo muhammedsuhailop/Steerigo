@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Coupon = void 0;
-const CouponDiscountType_1 = require("@domain/value-objects/CouponDiscountType");
+const CouponDiscountType_1 = require("../value-objects/CouponDiscountType");
 class Coupon {
     constructor(id, code, discountType, discountValue, maxDiscount, minRideAmount, usageLimit, usagePerUser, validFrom, validTo, isActive, createdAt, updatedAt) {
         this.id = id;

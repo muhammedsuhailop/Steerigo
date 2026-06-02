@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { GoogleLoginRequestDto } from "@application/dto/auth/GoogleLoginRequestDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { SignupVerifyResponseDto } from "@application/dto/auth";
+import { GoogleLoginRequestDto } from "../../../application/dto/auth/GoogleLoginRequestDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { SignupVerifyResponseDto } from "../../../application/dto/auth";
 export declare class SocialAuthController {
     private getGoogleAuthUrlUseCase;
     private googleLoginUseCase;

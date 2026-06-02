@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteFileValidation = exports.fileListValidation = exports.uploadFileValidation = void 0;
 const express_validator_1 = require("express-validator");
-const FilePurpose_1 = require("@domain/value-objects/FilePurpose");
+const FilePurpose_1 = require("../../../domain/value-objects/FilePurpose");
 exports.uploadFileValidation = [
     (0, express_validator_1.body)("purpose")
         .notEmpty()

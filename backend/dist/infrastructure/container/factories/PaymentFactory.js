@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const RazorpayService_1 = require("@infrastructure/services/RazorpayService");
-const InitiatePaymentUseCase_1 = require("@application/use-cases/payment/InitiatePaymentUseCase");
-const VerifyPaymentUseCase_1 = require("@application/use-cases/payment/VerifyPaymentUseCase");
-const ConfirmCashPaymentUseCase_1 = require("@application/use-cases/payment/ConfirmCashPaymentUseCase");
-const PaymentController_1 = require("@interface/controllers/payment/PaymentController");
-const EarningsDistributionService_1 = require("@infrastructure/services/EarningsDistributionService");
-const MarkPaymentFailedUseCase_1 = require("@application/use-cases/payment/MarkPaymentFailedUseCase");
-const PaymentNotificationService_1 = require("@infrastructure/services/PaymentNotificationService");
-const OnlinePaymentStrategy_1 = require("@infrastructure/services/payment/OnlinePaymentStrategy");
-const WalletPaymentStrategy_1 = require("@infrastructure/services/payment/WalletPaymentStrategy");
-const CashPaymentStrategy_1 = require("@infrastructure/services/payment/CashPaymentStrategy");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const RazorpayService_1 = require("../../services/RazorpayService");
+const InitiatePaymentUseCase_1 = require("../../../application/use-cases/payment/InitiatePaymentUseCase");
+const VerifyPaymentUseCase_1 = require("../../../application/use-cases/payment/VerifyPaymentUseCase");
+const ConfirmCashPaymentUseCase_1 = require("../../../application/use-cases/payment/ConfirmCashPaymentUseCase");
+const PaymentController_1 = require("../../../interface/controllers/payment/PaymentController");
+const EarningsDistributionService_1 = require("../../services/EarningsDistributionService");
+const MarkPaymentFailedUseCase_1 = require("../../../application/use-cases/payment/MarkPaymentFailedUseCase");
+const PaymentNotificationService_1 = require("../../services/PaymentNotificationService");
+const OnlinePaymentStrategy_1 = require("../../services/payment/OnlinePaymentStrategy");
+const WalletPaymentStrategy_1 = require("../../services/payment/WalletPaymentStrategy");
+const CashPaymentStrategy_1 = require("../../services/payment/CashPaymentStrategy");
 class PaymentFactory {
     static register(container) {
         // Services

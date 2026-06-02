@@ -8,7 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ErrorResponseBuilder = void 0;
 const inversify_1 = require("inversify");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../utils/Logger");
 let ErrorResponseBuilder = class ErrorResponseBuilder {
     build(errorDetails) {
         Logger_1.Logger.debug("[ErrorResponseBuilder] Building error response", {

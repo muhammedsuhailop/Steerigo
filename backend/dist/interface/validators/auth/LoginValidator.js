@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createLoginValidationMiddleware = exports.validateRefreshTokenRequest = exports.validateLoginRequest = void 0;
 const zod_1 = require("zod");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
 // Login validation schema
 const loginSchema = zod_1.z.object({
     body: zod_1.z.object({

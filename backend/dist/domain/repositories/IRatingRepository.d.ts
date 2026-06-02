@@ -1,7 +1,7 @@
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { ReviewType } from "../value-objects/ReviewType";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
-import { Rating } from "@domain/entities/Rating";
+import { Rating } from "../entities/Rating";
 export interface RatingFilters {
     reviewType?: ReviewType;
     reviewerId?: string;

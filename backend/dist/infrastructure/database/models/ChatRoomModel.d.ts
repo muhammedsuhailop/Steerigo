@@ -1,6 +1,6 @@
 import { Document, Model, Types } from "mongoose";
-import { UserRole } from "@shared/constants/AuthConstants";
-import { ChatRoomType } from "@domain/value-objects/ChatRoomType";
+import { UserRole } from "../../../shared/constants/AuthConstants";
+import { ChatRoomType } from "../../../domain/value-objects/ChatRoomType";
 export interface IChatRoomDocument extends Document {
     _id: Types.ObjectId;
     type: ChatRoomType;

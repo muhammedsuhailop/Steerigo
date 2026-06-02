@@ -1,5 +1,5 @@
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
+import { PaymentMethod } from "../../../domain/value-objects/PaymentMethod";
+import { PaymentStatus } from "../../../domain/value-objects/PaymentStatus";
 export interface OnlinePaymentInitData {
     paymentId: string;
     gatewayOrderId: string;

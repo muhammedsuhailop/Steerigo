@@ -1,6 +1,6 @@
-import { Coupon } from "@domain/entities/Coupon";
+import { Coupon } from "../entities/Coupon";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
-import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
+import { CouponDiscountType } from "../value-objects/CouponDiscountType";
 export interface CouponFilters {
     code?: string;
     discountType?: CouponDiscountType;

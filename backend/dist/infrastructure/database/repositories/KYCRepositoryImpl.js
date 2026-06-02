@@ -10,8 +10,8 @@ exports.KYCRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const KYCModel_1 = require("../models/KYCModel");
 const KYCMapper_1 = require("../mappers/KYCMapper");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
-const Logger_1 = require("@shared/utils/Logger");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
 let KYCRepositoryImpl = class KYCRepositoryImpl {
     //   Basic Repository Operations

@@ -15,11 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideExpiryWorker = void 0;
 const bullmq_1 = require("bullmq");
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const BullMQConnection_1 = require("@infrastructure/queues/BullMQConnection");
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const Logger_1 = require("@shared/utils/Logger");
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const BullMQConnection_1 = require("../queues/BullMQConnection");
+const AppConstants_1 = require("../../shared/constants/AppConstants");
+const Logger_1 = require("../../shared/utils/Logger");
+const FutureRideRequestStatus_1 = require("../../domain/value-objects/FutureRideRequestStatus");
 let FutureRideExpiryWorker = class FutureRideExpiryWorker {
     constructor(futureRideRequestRepository, eventBus) {
         this.futureRideRequestRepository = futureRideRequestRepository;

@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverDashboardUseCase = void 0;
 const inversify_1 = require("inversify");
-const DriverDashboardMapper_1 = require("@infrastructure/database/mappers/DriverDashboardMapper");
-const Result_1 = require("@shared/utils/Result");
-const DomainError_1 = require("@domain/errors/DomainError");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverNotFoundError_1 = require("@domain/errors/DriverNotFoundError");
+const DriverDashboardMapper_1 = require("../../../infrastructure/database/mappers/DriverDashboardMapper");
+const Result_1 = require("../../../shared/utils/Result");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
 let GetDriverDashboardUseCase = class GetDriverDashboardUseCase {
     constructor(driverRepository, availabilityRepository, dashboardRepository, userRepository) {
         this.driverRepository = driverRepository;

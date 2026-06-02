@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AvailabilityExceptionNotFoundError = exports.DriverProfileNotFoundError = exports.ExpiredAvailabilityError = exports.InvalidStatusTransitionError = exports.DriverAlreadyAvailableError = exports.InvalidAvailabilityScheduleError = exports.DriverAvailabilityNotFoundError = void 0;
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
+const DriverMessages_1 = require("../../shared/constants/DriverMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
 class DriverAvailabilityNotFoundError extends DomainError_1.DomainError {
     constructor(driverId) {
         const driverPart = driverId ? ` for driver ID: ${driverId}` : "";

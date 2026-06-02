@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { IFutureRideExpiryService } from "@application/services/ride-search/IFutureRideExpiryService";
-import { FutureRideExpiryJobData } from "@infrastructure/queues/FutureRideExpiryQueue";
+import { IFutureRideExpiryService } from "../../application/services/ride-search/IFutureRideExpiryService";
+import { FutureRideExpiryJobData } from "../queues/FutureRideExpiryQueue";
 export declare class FutureRideExpiryService implements IFutureRideExpiryService {
     private readonly expiryQueue;
     constructor(expiryQueue: Queue<FutureRideExpiryJobData>);

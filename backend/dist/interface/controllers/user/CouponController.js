@@ -13,15 +13,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponController = void 0;
-const ApplyCouponDto_1 = require("@application/dto/user/ApplyCouponDto");
-const RemoveCouponDto_1 = require("@application/dto/user/RemoveCouponDto");
-const DITypes_1 = require("@shared/constants/DITypes");
+const ApplyCouponDto_1 = require("../../../application/dto/user/ApplyCouponDto");
+const RemoveCouponDto_1 = require("../../../application/dto/user/RemoveCouponDto");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const inversify_1 = require("inversify");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const GetUserCouponsDto_1 = require("@application/dto/user/GetUserCouponsDto");
-const UserMessages_1 = require("@shared/constants/UserMessages");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const GetUserCouponsDto_1 = require("../../../application/dto/user/GetUserCouponsDto");
+const UserMessages_1 = require("../../../shared/constants/UserMessages");
 let CouponController = class CouponController {
     constructor(getUserCouponsUseCase, applyCouponUseCase, removeCouponUseCase) {
         this.getUserCouponsUseCase = getUserCouponsUseCase;

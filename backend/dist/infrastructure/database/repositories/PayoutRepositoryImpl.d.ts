@@ -1,5 +1,5 @@
-import { Payout } from "@domain/entities/Payout";
-import { IPayoutRepository, PayoutQueryFilters, PayoutQueryResult } from "@domain/repositories/IPayoutRepository";
+import { Payout } from "../../../domain/entities/Payout";
+import { IPayoutRepository, PayoutQueryFilters, PayoutQueryResult } from "../../../domain/repositories/IPayoutRepository";
 export declare class PayoutRepositoryImpl implements IPayoutRepository {
     save(payout: Payout): Promise<Payout>;
     findById(id: string): Promise<Payout | null>;

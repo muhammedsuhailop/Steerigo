@@ -1,9 +1,9 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { AddAvailabilityExceptionRequestDto } from "@application/dto/driver/AddAvailabilityExceptionRequestDto";
-import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { Result } from "@shared/utils/Result";
-import { AddAvailabilityExceptionResponseDto } from "@application/dto/driver/AddAvailabilityExceptionResponseDto";
+import { AddAvailabilityExceptionRequestDto } from "../../dto/driver/AddAvailabilityExceptionRequestDto";
+import { IDriverAvailabilityRepository } from "../../../domain/repositories/IDriverAvailabilityRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { Result } from "../../../shared/utils/Result";
+import { AddAvailabilityExceptionResponseDto } from "../../dto/driver/AddAvailabilityExceptionResponseDto";
 export declare class AddAvailabilityExceptionUseCase implements IUseCase<AddAvailabilityExceptionRequestDto, Promise<Result<AddAvailabilityExceptionResponseDto>>> {
     private driverRepository;
     private availabilityRepository;

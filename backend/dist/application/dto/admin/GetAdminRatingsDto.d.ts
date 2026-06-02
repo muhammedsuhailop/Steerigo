@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 export declare const getAdminRatingsSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
     limit: z.ZodDefault<z.ZodCoercedNumber<unknown>>;

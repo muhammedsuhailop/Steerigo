@@ -1,4 +1,4 @@
-import { RefreshToken } from "@domain/entities/RefreshToken";
+import { RefreshToken } from "../../domain/entities/RefreshToken";
 export interface ITokenManagementService {
     generateAccessToken(payload: {
         userId: string;

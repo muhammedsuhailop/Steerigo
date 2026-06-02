@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { AcceptFutureRideRequestDto } from "@application/dto/driver/AcceptFutureRideRequestDto";
-import { AcceptFutureRideRequestResponseDto } from "@application/dto/driver/AcceptFutureRideRequestResponseDto";
-import { GetFutureRideRequestsDto } from "@application/dto/driver/GetFutureRideRequestsDto";
-import { GetFutureRideRequestsResponseDto } from "@application/dto/driver/GetFutureRideRequestsResponseDto";
-import { RejectFutureRideRequestDto } from "@application/dto/driver/RejectFutureRideRequestDto";
-import { RejectFutureRideRequestResponseDto } from "@application/dto/driver/RejectFutureRideRequestResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { AcceptFutureRideRequestDto } from "../../../application/dto/driver/AcceptFutureRideRequestDto";
+import { AcceptFutureRideRequestResponseDto } from "../../../application/dto/driver/AcceptFutureRideRequestResponseDto";
+import { GetFutureRideRequestsDto } from "../../../application/dto/driver/GetFutureRideRequestsDto";
+import { GetFutureRideRequestsResponseDto } from "../../../application/dto/driver/GetFutureRideRequestsResponseDto";
+import { RejectFutureRideRequestDto } from "../../../application/dto/driver/RejectFutureRideRequestDto";
+import { RejectFutureRideRequestResponseDto } from "../../../application/dto/driver/RejectFutureRideRequestResponseDto";
 export declare class DriverScheduleRideController {
     private readonly acceptUseCase;
     private readonly getFutureRideRequestsUseCase;

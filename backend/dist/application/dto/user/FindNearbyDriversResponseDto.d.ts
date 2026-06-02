@@ -1,5 +1,5 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
-import { BodyType, GearType } from "@domain/value-objects/VehicleType";
+import { FareBreakdown } from "../../../domain/value-objects/FareBreakdown";
+import { BodyType, GearType } from "../../../domain/value-objects/VehicleType";
 export interface DriverInfoResponse {
     id: string;
     userId: string;

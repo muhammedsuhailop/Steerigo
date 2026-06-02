@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverDetailedProfileUseCase = void 0;
 const inversify_1 = require("inversify");
-const GetDriverProfileResponseDto_1 = require("@application/dto/driver/GetDriverProfileResponseDto");
-const Result_1 = require("@shared/utils/Result");
-const DomainError_1 = require("@domain/errors/DomainError");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverProfileErrors_1 = require("@domain/errors/DriverProfileErrors");
+const GetDriverProfileResponseDto_1 = require("../../dto/driver/GetDriverProfileResponseDto");
+const Result_1 = require("../../../shared/utils/Result");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverProfileErrors_1 = require("../../../domain/errors/DriverProfileErrors");
 let GetDriverDetailedProfileUseCase = class GetDriverDetailedProfileUseCase {
     constructor(driverRepository, userRepository, kycRepository) {
         this.driverRepository = driverRepository;

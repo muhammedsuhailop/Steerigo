@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RateDriverDto = void 0;
-const RideErrors_1 = require("@domain/errors/RideErrors");
-const RatingCriteria_1 = require("@domain/value-objects/RatingCriteria");
-const ReviewType_1 = require("@domain/value-objects/ReviewType");
-const RatingCriteriaType_1 = require("@domain/value-objects/RatingCriteriaType");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
+const RatingCriteria_1 = require("../../../domain/value-objects/RatingCriteria");
+const ReviewType_1 = require("../../../domain/value-objects/ReviewType");
+const RatingCriteriaType_1 = require("../../../domain/value-objects/RatingCriteriaType");
 class RateDriverDto {
     constructor(riderId, rideId, reviewType, criteriaInput, review) {
         this.riderId = riderId;

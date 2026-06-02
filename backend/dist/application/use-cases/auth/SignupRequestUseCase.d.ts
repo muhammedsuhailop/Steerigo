@@ -1,9 +1,9 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { SignupRequestDto } from "../../dto/auth/SignupRequestDto";
-import { Result } from "@shared/utils/Result";
-import { IEmailService } from "@application/services/IEmailService";
-import { IPasswordService } from "@application/services/IPasswordService";
-import { IOtpService } from "@application/services/IOtpService";
+import { Result } from "../../../shared/utils/Result";
+import { IEmailService } from "../../services/IEmailService";
+import { IPasswordService } from "../../services/IPasswordService";
+import { IOtpService } from "../../services/IOtpService";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class SignupRequestUseCase implements IUseCase<SignupRequestDto, Promise<Result<void>>> {
     private userRepository;

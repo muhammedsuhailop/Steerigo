@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const UploadFileUseCase_1 = require("@application/use-cases/file/UploadFileUseCase");
-const GetUserFilesUseCase_1 = require("@application/use-cases/file/GetUserFilesUseCase");
-const DeleteFileUseCase_1 = require("@application/use-cases/file/DeleteFileUseCase");
-const FileController_1 = require("@interface/controllers/file/FileController");
-const UpdateProfilePictureUseCase_1 = require("@application/use-cases/file/UpdateProfilePictureUseCase");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const UploadFileUseCase_1 = require("../../../application/use-cases/file/UploadFileUseCase");
+const GetUserFilesUseCase_1 = require("../../../application/use-cases/file/GetUserFilesUseCase");
+const DeleteFileUseCase_1 = require("../../../application/use-cases/file/DeleteFileUseCase");
+const FileController_1 = require("../../../interface/controllers/file/FileController");
+const UpdateProfilePictureUseCase_1 = require("../../../application/use-cases/file/UpdateProfilePictureUseCase");
 class FileFactory {
     static register(container) {
         container

@@ -1,8 +1,8 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IOtpService } from "@application/services/IOtpService";
-import { IEmailService } from "@application/services/IEmailService";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IOtpService } from "../../services/IOtpService";
+import { IEmailService } from "../../services/IEmailService";
 import { ResendOtpDto } from "../../dto/auth/ResendOtpDto";
-import { Result } from "@shared/utils/Result";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class ResendOtpUseCase implements IUseCase<ResendOtpDto, Promise<Result<{
     expiresAt: Date;

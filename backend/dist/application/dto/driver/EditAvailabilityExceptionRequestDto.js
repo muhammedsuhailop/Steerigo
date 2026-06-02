@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.editAvailabilityExceptionSchema = exports.EditAvailabilityExceptionRequestDto = void 0;
-const AvailabilityExceptionType_1 = require("@domain/value-objects/AvailabilityExceptionType");
+const AvailabilityExceptionType_1 = require("../../../domain/value-objects/AvailabilityExceptionType");
 const zod_1 = require("zod");
 const editAvailabilityExceptionSchema = zod_1.z.object({
     type: zod_1.z.nativeEnum(AvailabilityExceptionType_1.AvailabilityExceptionType).optional(),

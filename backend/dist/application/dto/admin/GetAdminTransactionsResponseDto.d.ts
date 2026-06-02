@@ -1,5 +1,5 @@
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
-import { TransactionType } from "@domain/value-objects/TransactionType";
+import { TransactionDirection } from "../../../domain/value-objects/TransactionDirection";
+import { TransactionType } from "../../../domain/value-objects/TransactionType";
 export interface TransactionItem {
     transactionId: string;
     walletId: string;

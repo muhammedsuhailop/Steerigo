@@ -17,12 +17,12 @@ const inversify_1 = require("inversify");
 const RedisPubSubClient_1 = require("./RedisPubSubClient");
 const socket_1 = require("./socket");
 const SocketEvents_1 = require("./constants/SocketEvents");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 const PubSubChannels_1 = require("./constants/PubSubChannels");
-const DITypes_1 = require("@shared/constants/DITypes");
-const CreateNotificationDto_1 = require("@application/dto/notification/CreateNotificationDto");
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
-const NotificationChannel_1 = require("@domain/value-objects/NotificationChannel");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const CreateNotificationDto_1 = require("../../application/dto/notification/CreateNotificationDto");
+const NotificationType_1 = require("../../domain/value-objects/NotificationType");
+const NotificationChannel_1 = require("../../domain/value-objects/NotificationChannel");
 let WorkerSocketBridge = class WorkerSocketBridge {
     constructor(createNotificationUseCase) {
         this.createNotificationUseCase = createNotificationUseCase;

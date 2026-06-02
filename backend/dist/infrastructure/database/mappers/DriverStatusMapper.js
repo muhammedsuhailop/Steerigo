@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverStatusMapper = void 0;
-const AvailabilityStatus_1 = require("@domain/value-objects/AvailabilityStatus");
-const TimeSlotHelper_1 = require("@shared/utils/TimeSlotHelper");
-const ScheduleValidityHelper_1 = require("@shared/utils/ScheduleValidityHelper");
+const AvailabilityStatus_1 = require("../../../domain/value-objects/AvailabilityStatus");
+const TimeSlotHelper_1 = require("../../../shared/utils/TimeSlotHelper");
+const ScheduleValidityHelper_1 = require("../../../shared/utils/ScheduleValidityHelper");
 class DriverStatusMapper {
     static toDtoFromEntity(availability) {
         const recurringSchedule = this.mapRecurringSchedule(availability.getRecurringSchedule()) ?? null;

@@ -10,9 +10,9 @@ exports.RatingRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const RatingModel_1 = require("../models/RatingModel");
 const RatingMapper_1 = require("../mappers/RatingMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
-const idHelper_1 = require("@shared/utils/idHelper");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 let RatingRepositoryImpl = class RatingRepositoryImpl {
     async findById(id) {
         try {

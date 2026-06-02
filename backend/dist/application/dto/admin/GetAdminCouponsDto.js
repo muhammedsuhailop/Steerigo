@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminCouponsDto = void 0;
-const CouponDiscountType_1 = require("@domain/value-objects/CouponDiscountType");
-const CouponErrors_1 = require("@domain/errors/CouponErrors");
+const CouponDiscountType_1 = require("../../../domain/value-objects/CouponDiscountType");
+const CouponErrors_1 = require("../../../domain/errors/CouponErrors");
 const VALID_SORT_FIELDS = [
     "code",
     "discountValue",

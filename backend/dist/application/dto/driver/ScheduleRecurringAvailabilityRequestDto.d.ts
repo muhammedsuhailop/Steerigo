@@ -1,5 +1,5 @@
-import { DayOfWeek } from "@domain/value-objects/DayOfWeek";
-import { TimeSlot } from "@domain/value-objects/TimeSlot";
+import { DayOfWeek } from "../../../domain/value-objects/DayOfWeek";
+import { TimeSlot } from "../../../domain/value-objects/TimeSlot";
 export declare class ScheduleRecurringAvailabilityRequestDto {
     private readonly userId;
     private readonly data;

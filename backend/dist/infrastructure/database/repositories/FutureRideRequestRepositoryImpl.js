@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideRequestRepositoryImpl = void 0;
 const mongoose_1 = require("mongoose");
 const inversify_1 = require("inversify");
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const FutureRideRequestStatus_1 = require("../../../domain/value-objects/FutureRideRequestStatus");
 const FutureRideRequestModel_1 = require("../models/FutureRideRequestModel");
 const FutureRideRequestMapper_1 = require("../mappers/FutureRideRequestMapper");
 let FutureRideRequestRepositoryImpl = class FutureRideRequestRepositoryImpl {

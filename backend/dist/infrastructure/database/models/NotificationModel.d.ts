@@ -1,7 +1,7 @@
 import { Document, Model, Types } from "mongoose";
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
-import { NotificationMetadata } from "@domain/entities/Notification";
+import { NotificationType } from "../../../domain/value-objects/NotificationType";
+import { NotificationChannel } from "../../../domain/value-objects/NotificationChannel";
+import { NotificationMetadata } from "../../../domain/entities/Notification";
 export interface INotificationDocument extends Document {
     _id: Types.ObjectId;
     recipientId: Types.ObjectId;

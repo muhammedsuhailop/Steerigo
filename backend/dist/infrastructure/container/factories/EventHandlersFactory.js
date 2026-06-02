@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventHandlersFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const RecordCouponUsageOnPaymentSucceededHandler_1 = require("@infrastructure/events/payment/RecordCouponUsageOnPaymentSucceededHandler");
-const RecordCouponUsageOnPaymentCashConfirmedHandler_1 = require("@infrastructure/events/payment/RecordCouponUsageOnPaymentCashConfirmedHandler");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const RecordCouponUsageOnPaymentSucceededHandler_1 = require("../../events/payment/RecordCouponUsageOnPaymentSucceededHandler");
+const RecordCouponUsageOnPaymentCashConfirmedHandler_1 = require("../../events/payment/RecordCouponUsageOnPaymentCashConfirmedHandler");
 class EventHandlersFactory {
     static register(container) {
         container

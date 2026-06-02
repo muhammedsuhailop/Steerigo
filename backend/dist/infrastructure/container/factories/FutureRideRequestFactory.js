@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideRequestFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const FutureRideRequestRepositoryImpl_1 = require("@infrastructure/database/repositories/FutureRideRequestRepositoryImpl");
-const ScheduleFutureRideRequestUseCase_1 = require("@application/use-cases/user/ScheduleFutureRideRequestUseCase");
-const CancelFutureRideRequestUseCase_1 = require("@application/use-cases/user/CancelFutureRideRequestUseCase");
-const FutureRideExpiryService_1 = require("@infrastructure/services/FutureRideExpiryService");
-const FutureRideExpiryWorker_1 = require("@infrastructure/workers/FutureRideExpiryWorker");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const FutureRideRequestRepositoryImpl_1 = require("../../database/repositories/FutureRideRequestRepositoryImpl");
+const ScheduleFutureRideRequestUseCase_1 = require("../../../application/use-cases/user/ScheduleFutureRideRequestUseCase");
+const CancelFutureRideRequestUseCase_1 = require("../../../application/use-cases/user/CancelFutureRideRequestUseCase");
+const FutureRideExpiryService_1 = require("../../services/FutureRideExpiryService");
+const FutureRideExpiryWorker_1 = require("../../workers/FutureRideExpiryWorker");
 const bullmq_1 = require("bullmq");
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const BullMQConnection_1 = require("@infrastructure/queues/BullMQConnection");
-const AcceptFutureRideRequestUseCase_1 = require("@application/use-cases/driver/AcceptFutureRideRequestUseCase");
-const DriverScheduleRideController_1 = require("@interface/controllers/driver/DriverScheduleRideController");
-const GetFutureRideRequestsUseCase_1 = require("@application/use-cases/driver/GetFutureRideRequestsUseCase");
-const RejectFutureRideRequestUseCase_1 = require("@application/use-cases/driver/RejectFutureRideRequestUseCase");
+const AppConstants_1 = require("../../../shared/constants/AppConstants");
+const BullMQConnection_1 = require("../../queues/BullMQConnection");
+const AcceptFutureRideRequestUseCase_1 = require("../../../application/use-cases/driver/AcceptFutureRideRequestUseCase");
+const DriverScheduleRideController_1 = require("../../../interface/controllers/driver/DriverScheduleRideController");
+const GetFutureRideRequestsUseCase_1 = require("../../../application/use-cases/driver/GetFutureRideRequestsUseCase");
+const RejectFutureRideRequestUseCase_1 = require("../../../application/use-cases/driver/RejectFutureRideRequestUseCase");
 class FutureRideRequestFactory {
     static register(container) {
         container

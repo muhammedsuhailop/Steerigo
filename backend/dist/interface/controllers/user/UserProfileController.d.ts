@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { GetUserProfileDto } from "@application/dto/user/GetUserProfileDto";
-import { UpdateUserProfileDto } from "@application/dto/user/UpdateUserProfileDto";
-import { RegisterAsDriverRequestDto, RegisterAsDriverResponseDto, UserProfileUpdateResponseDto, UserResponseDto } from "@application/dto/user";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { GetUserStatsRequestDto } from "@application/dto/user/GetUserStatsRequestDto";
-import { GetUserStatsResponseDto } from "@application/dto/user/GetUserStatsResponseDto";
+import { GetUserProfileDto } from "../../../application/dto/user/GetUserProfileDto";
+import { UpdateUserProfileDto } from "../../../application/dto/user/UpdateUserProfileDto";
+import { RegisterAsDriverRequestDto, RegisterAsDriverResponseDto, UserProfileUpdateResponseDto, UserResponseDto } from "../../../application/dto/user";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { GetUserStatsRequestDto } from "../../../application/dto/user/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "../../../application/dto/user/GetUserStatsResponseDto";
 export declare class UserProfileController {
     private getUserProfileUseCase;
     private updateUserProfileUseCase;

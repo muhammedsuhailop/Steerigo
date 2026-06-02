@@ -1,4 +1,4 @@
-import { IUnitOfWork } from "@domain/repositories/IUnitOfWork";
+import { IUnitOfWork } from "../../../domain/repositories/IUnitOfWork";
 export declare class MongoUnitOfWork implements IUnitOfWork {
     runInTransaction<T>(work: () => Promise<T>): Promise<T>;
 }

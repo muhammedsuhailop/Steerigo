@@ -1,7 +1,7 @@
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
-import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IDriverAvailabilityRepository } from "../../../domain/repositories/IDriverAvailabilityRepository";
+import { DriverStatusResponseDto } from "../../dto/driver/DriverStatusResponseDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class GetDriverStatusUseCase implements IUseCase<string, Promise<Result<DriverStatusResponseDto>>> {
     private driverRepository;

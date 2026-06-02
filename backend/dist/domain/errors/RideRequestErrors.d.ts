@@ -1,4 +1,4 @@
-import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
+import { RideRequestStatus } from "../value-objects/RideRequestStatus";
 import { DomainError } from "./DomainError";
 export declare class RideRequestErrors {
     static driverNotFound(driverId: string): DomainError;

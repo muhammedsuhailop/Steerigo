@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminUserRoutes = void 0;
 const express_1 = require("express");
-const container_1 = require("@infrastructure/container");
-const AdminUserValidator_1 = require("@interface/validators/admin/AdminUserValidator");
-const DITypes_1 = require("@shared/constants/DITypes");
-const adminUserProfileValidator_1 = require("@interface/validators/admin/adminUserProfileValidator");
+const container_1 = require("../../../infrastructure/container");
+const AdminUserValidator_1 = require("../../validators/admin/AdminUserValidator");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const adminUserProfileValidator_1 = require("../../validators/admin/adminUserProfileValidator");
 const router = (0, express_1.Router)();
 exports.adminUserRoutes = router;
 // Get admin user controller instance from container

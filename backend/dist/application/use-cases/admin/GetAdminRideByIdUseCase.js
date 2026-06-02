@@ -14,11 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminRideByIdUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const RideErrors_1 = require("@domain/errors/RideErrors");
-const RideMessages_1 = require("@shared/constants/RideMessages");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
+const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let GetAdminRideByIdUseCase = class GetAdminRideByIdUseCase {
     constructor(rideRepository, ratingRepository, userRepository, driverRepository) {
         this.rideRepository = rideRepository;

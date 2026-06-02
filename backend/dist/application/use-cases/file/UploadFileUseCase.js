@@ -13,11 +13,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadFileUseCase = void 0;
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const inversify_1 = require("inversify");
-const FileUploadResponseDto_1 = require("@application/dto/file/FileUploadResponseDto");
+const FileUploadResponseDto_1 = require("../../dto/file/FileUploadResponseDto");
 let UploadFileUseCase = class UploadFileUseCase {
     constructor(_fileUploadService, _userRepository) {
         this._fileUploadService = _fileUploadService;

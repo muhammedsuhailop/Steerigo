@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.forgotPasswordVerifyRateLimiter = exports.forgotPasswordRequestRateLimiter = exports.logoutRateLimiter = exports.refreshTokenRateLimiter = exports.resendOtpRateLimiter = exports.otpRateLimiter = exports.loginRateLimiter = exports.signupRateLimiter = exports.createRateLimiter = void 0;
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-const AppConstants_1 = require("@shared/constants/AppConstants");
+const AppConstants_1 = require("../../../shared/constants/AppConstants");
 const createRateLimiter = (windowMs, max, message) => {
     return (0, express_rate_limit_1.default)({
         windowMs,

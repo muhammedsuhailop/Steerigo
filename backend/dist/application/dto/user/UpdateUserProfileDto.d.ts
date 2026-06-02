@@ -1,4 +1,4 @@
-import { Gender } from "@domain/value-objects/Gender";
+import { Gender } from "../../../domain/value-objects/Gender";
 export interface UpdateUserProfileInput {
     userId?: string;
     name?: string;

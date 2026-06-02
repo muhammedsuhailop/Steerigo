@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminDriverFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverRepositoryImpl_1 = require("@infrastructure/database/repositories/DriverRepositoryImpl");
-const KYCRepositoryImpl_1 = require("@infrastructure/database/repositories/KYCRepositoryImpl");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverRepositoryImpl_1 = require("../../database/repositories/DriverRepositoryImpl");
+const KYCRepositoryImpl_1 = require("../../database/repositories/KYCRepositoryImpl");
 // Admin Driver Use Cases
-const GetDriversUseCase_1 = require("@application/use-cases/admin/GetDriversUseCase");
-const DriverActionUseCase_1 = require("@application/use-cases/admin/DriverActionUseCase");
-const GetDriverProfileUseCase_1 = require("@application/use-cases/admin/GetDriverProfileUseCase");
-const GetKycRequestsUseCase_1 = require("@application/use-cases/admin/GetKycRequestsUseCase");
-const UpdateKycStatusUseCase_1 = require("@application/use-cases/admin/UpdateKycStatusUseCase");
-const GetKycRequestByIdUseCase_1 = require("@application/use-cases/admin/GetKycRequestByIdUseCase");
+const GetDriversUseCase_1 = require("../../../application/use-cases/admin/GetDriversUseCase");
+const DriverActionUseCase_1 = require("../../../application/use-cases/admin/DriverActionUseCase");
+const GetDriverProfileUseCase_1 = require("../../../application/use-cases/admin/GetDriverProfileUseCase");
+const GetKycRequestsUseCase_1 = require("../../../application/use-cases/admin/GetKycRequestsUseCase");
+const UpdateKycStatusUseCase_1 = require("../../../application/use-cases/admin/UpdateKycStatusUseCase");
+const GetKycRequestByIdUseCase_1 = require("../../../application/use-cases/admin/GetKycRequestByIdUseCase");
 // Admin Driver Controllers
-const AdminDriverController_1 = require("@interface/controllers/admin/AdminDriverController");
-const UpdateDriverKycStatusUseCase_1 = require("@application/use-cases/admin/UpdateDriverKycStatusUseCase");
+const AdminDriverController_1 = require("../../../interface/controllers/admin/AdminDriverController");
+const UpdateDriverKycStatusUseCase_1 = require("../../../application/use-cases/admin/UpdateDriverKycStatusUseCase");
 class AdminDriverFactory {
     static register(container) {
         container

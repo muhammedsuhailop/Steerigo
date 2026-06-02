@@ -14,11 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverPayoutsUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverNotFoundError_1 = require("@domain/errors/DriverNotFoundError");
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
+const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
 let GetDriverPayoutsUseCase = class GetDriverPayoutsUseCase {
     constructor(driverRepository, payoutRepository) {
         this.driverRepository = driverRepository;

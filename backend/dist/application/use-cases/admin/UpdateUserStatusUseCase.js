@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateUserStatusUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AdminErrors_1 = require("@domain/errors/AdminErrors");
-const AdminAction_1 = require("@domain/value-objects/AdminAction");
-const UpdateUserStatusResponseDto_1 = require("@application/dto/admin/UpdateUserStatusResponseDto");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AdminErrors_1 = require("../../../domain/errors/AdminErrors");
+const AdminAction_1 = require("../../../domain/value-objects/AdminAction");
+const UpdateUserStatusResponseDto_1 = require("../../dto/admin/UpdateUserStatusResponseDto");
 let UpdateUserStatusUseCase = class UpdateUserStatusUseCase {
     constructor(adminUserRepository) {
         this.adminUserRepository = adminUserRepository;

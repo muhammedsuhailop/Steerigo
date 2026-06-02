@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignupRequestUseCase = void 0;
 const inversify_1 = require("inversify");
-const User_1 = require("@domain/entities/User");
-const errors_1 = require("@domain/errors");
-const Result_1 = require("@shared/utils/Result");
+const User_1 = require("../../../domain/entities/User");
+const errors_1 = require("../../../domain/errors");
+const Result_1 = require("../../../shared/utils/Result");
 const uuid_1 = require("uuid");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const Password_1 = require("@domain/value-objects/Password");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const Password_1 = require("../../../domain/value-objects/Password");
 let SignupRequestUseCase = class SignupRequestUseCase {
     constructor(userRepository, passwordService, emailService, otpService) {
         this.userRepository = userRepository;

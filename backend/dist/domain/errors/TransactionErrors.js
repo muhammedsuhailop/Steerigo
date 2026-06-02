@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionErrors = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
-const TransactionMessages_1 = require("@shared/constants/TransactionMessages");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
+const TransactionMessages_1 = require("../../shared/constants/TransactionMessages");
 class TransactionErrors {
     static transactionNotFound(transactionId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(TransactionMessages_1.TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND, {

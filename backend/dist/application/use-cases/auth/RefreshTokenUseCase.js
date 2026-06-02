@@ -14,11 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RefreshTokenUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const errors_1 = require("@domain/errors");
-const RefreshToken_1 = require("@domain/entities/RefreshToken");
+const Result_1 = require("../../../shared/utils/Result");
+const errors_1 = require("../../../domain/errors");
+const RefreshToken_1 = require("../../../domain/entities/RefreshToken");
 const uuid_1 = require("uuid");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 let RefreshTokenUseCase = class RefreshTokenUseCase {
     constructor(refreshTokenRepository, userRepository, tokenService) {
         this.refreshTokenRepository = refreshTokenRepository;

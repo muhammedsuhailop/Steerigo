@@ -1,8 +1,8 @@
-import { ITokenManagementService } from "@application/services/ITokenManagementService";
-import { ITokenService } from "@application/services/ITokenService";
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
-import { RefreshToken } from "@domain/entities/RefreshToken";
-import { UserRole } from "@shared/constants/AuthConstants";
+import { ITokenManagementService } from "../../application/services/ITokenManagementService";
+import { ITokenService } from "../../application/services/ITokenService";
+import { IRefreshTokenRepository } from "../../domain/repositories/IRefreshTokenRepository";
+import { RefreshToken } from "../../domain/entities/RefreshToken";
+import { UserRole } from "../../shared/constants/AuthConstants";
 export declare class TokenManagementService implements ITokenManagementService {
     private tokenService;
     private refreshTokenRepository;

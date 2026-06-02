@@ -1,12 +1,12 @@
-import { CouponDetails } from "@domain/value-objects/CouponDetails";
-import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
-import { Location } from "@domain/value-objects/Location";
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
-import { RideStatus } from "@domain/value-objects/RideStatus";
-import { RideTimeline } from "@domain/value-objects/RideTimeline";
-import { RideType } from "@domain/value-objects/RideType";
-import { BookingType } from "@domain/value-objects/BookingType";
+import { CouponDetails } from "../value-objects/CouponDetails";
+import { CouponDiscountType } from "../value-objects/CouponDiscountType";
+import { FareBreakdown } from "../value-objects/FareBreakdown";
+import { Location } from "../value-objects/Location";
+import { PaymentStatus } from "../value-objects/PaymentStatus";
+import { RideStatus } from "../value-objects/RideStatus";
+import { RideTimeline } from "../value-objects/RideTimeline";
+import { RideType } from "../value-objects/RideType";
+import { BookingType } from "../value-objects/BookingType";
 export declare class Ride {
     private readonly id;
     private readonly rideId;

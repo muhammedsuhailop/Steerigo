@@ -1,6 +1,6 @@
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
-import { PayoutMethod } from "@domain/value-objects/PayoutMethod";
-import { PayoutDestination } from "@domain/entities/Payout";
+import { PayoutStatus } from "../../../domain/value-objects/PayoutStatus";
+import { PayoutMethod } from "../../../domain/value-objects/PayoutMethod";
+import { PayoutDestination } from "../../../domain/entities/Payout";
 export interface PayoutItemDto {
     payoutId: string;
     driverId: string;

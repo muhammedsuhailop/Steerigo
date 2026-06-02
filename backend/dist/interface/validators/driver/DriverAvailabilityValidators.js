@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateLocationSchema = exports.updateStatusSchema = exports.addAvailabilityExceptionSchema = exports.scheduleRecurringAvailabilitySchema = void 0;
-const AvailabilityExceptionType_1 = require("@domain/value-objects/AvailabilityExceptionType");
-const AvailabilityStatus_1 = require("@domain/value-objects/AvailabilityStatus");
-const RecurringPattern_1 = require("@domain/value-objects/RecurringPattern");
+const AvailabilityExceptionType_1 = require("../../../domain/value-objects/AvailabilityExceptionType");
+const AvailabilityStatus_1 = require("../../../domain/value-objects/AvailabilityStatus");
+const RecurringPattern_1 = require("../../../domain/value-objects/RecurringPattern");
 const zod_1 = require("zod");
 exports.scheduleRecurringAvailabilitySchema = zod_1.z.object({
     body: zod_1.z.object({

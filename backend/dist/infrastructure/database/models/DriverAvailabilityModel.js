@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAvailabilityModel = void 0;
-const AvailabilityExceptionType_1 = require("@domain/value-objects/AvailabilityExceptionType");
-const AvailabilityStatus_1 = require("@domain/value-objects/AvailabilityStatus");
+const AvailabilityExceptionType_1 = require("../../../domain/value-objects/AvailabilityExceptionType");
+const AvailabilityStatus_1 = require("../../../domain/value-objects/AvailabilityStatus");
 const mongoose_1 = require("mongoose");
 const locationSchema = new mongoose_1.Schema({
     latitude: {

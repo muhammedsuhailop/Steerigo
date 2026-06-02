@@ -1,8 +1,8 @@
-import { IDriverAvailabilityRepository, IDriverAvailabilityFilters } from "@domain/repositories/IDriverAvailabilityRepository";
-import { DriverAvailability } from "@domain/entities/DriverAvailability";
-import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
-import { AvailabilityException } from "@domain/entities/AvailabilityException";
+import { IDriverAvailabilityRepository, IDriverAvailabilityFilters } from "../../../domain/repositories/IDriverAvailabilityRepository";
+import { DriverAvailability } from "../../../domain/entities/DriverAvailability";
+import { AvailabilityStatus } from "../../../domain/value-objects/AvailabilityStatus";
+import { QueryOptions, PaginatedResult } from "../../../shared/types/Repository";
+import { AvailabilityException } from "../../../domain/entities/AvailabilityException";
 export declare class DriverAvailabilityRepositoryImpl implements IDriverAvailabilityRepository {
     private readonly HAVERSINE_RADIUS_KM;
     private readonly AVERAGE_SPEED_KM_PER_HOUR;

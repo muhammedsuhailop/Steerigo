@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { SignupRequestDto } from "@application/dto/auth/SignupRequestDto";
-import { SignupVerifyDto } from "@application/dto/auth/SignupVerifyDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { SignupVerifyResponseDto } from "@application/dto/auth";
+import { SignupRequestDto } from "../../../application/dto/auth/SignupRequestDto";
+import { SignupVerifyDto } from "../../../application/dto/auth/SignupVerifyDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { SignupVerifyResponseDto } from "../../../application/dto/auth";
 export declare class SignupController {
     private signupRequestUseCase;
     private signupVerifyUseCase;

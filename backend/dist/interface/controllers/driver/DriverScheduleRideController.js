@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverScheduleRideController = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const AcceptFutureRideRequestDto_1 = require("@application/dto/driver/AcceptFutureRideRequestDto");
-const GetFutureRideRequestsDto_1 = require("@application/dto/driver/GetFutureRideRequestsDto");
-const RejectFutureRideRequestDto_1 = require("@application/dto/driver/RejectFutureRideRequestDto");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const AcceptFutureRideRequestDto_1 = require("../../../application/dto/driver/AcceptFutureRideRequestDto");
+const GetFutureRideRequestsDto_1 = require("../../../application/dto/driver/GetFutureRideRequestsDto");
+const RejectFutureRideRequestDto_1 = require("../../../application/dto/driver/RejectFutureRideRequestDto");
 let DriverScheduleRideController = class DriverScheduleRideController {
     constructor(acceptUseCase, getFutureRideRequestsUseCase, rejectUseCase) {
         this.acceptUseCase = acceptUseCase;

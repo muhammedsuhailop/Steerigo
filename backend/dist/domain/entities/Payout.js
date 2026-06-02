@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Payout = void 0;
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
+const PayoutStatus_1 = require("../value-objects/PayoutStatus");
 class Payout {
     constructor(id, driverId, amount, currency, status, method, destination, externalPayoutId, fee, failureReason, createdAt = new Date(), processedAt, updatedAt = new Date()) {
         this.id = id;

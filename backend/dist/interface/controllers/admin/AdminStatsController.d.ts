@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { GetUserStatsRequestDto } from "@application/dto/admin/GetUserStatsRequestDto";
-import { GetUserStatsResponseDto } from "@application/dto/admin/GetUserStatsResponseDto";
-import { Result } from "@shared/utils/Result";
-import { GetAdminRideStatsRequestDto } from "@application/dto/admin/GetAdminRideStatsRequestDto";
-import { GetAdminRideStatsResponseDto } from "@application/dto/admin/GetAdminRideStatsResponseDto";
-import { GetAdminDriverStatsRequestDto } from "@application/dto/admin/GetAdminDriverStatsRequestDto";
-import { GetAdminDriverStatsResponseDto } from "@application/dto/admin/GetAdminDriverStatsResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { GetUserStatsRequestDto } from "../../../application/dto/admin/GetUserStatsRequestDto";
+import { GetUserStatsResponseDto } from "../../../application/dto/admin/GetUserStatsResponseDto";
+import { Result } from "../../../shared/utils/Result";
+import { GetAdminRideStatsRequestDto } from "../../../application/dto/admin/GetAdminRideStatsRequestDto";
+import { GetAdminRideStatsResponseDto } from "../../../application/dto/admin/GetAdminRideStatsResponseDto";
+import { GetAdminDriverStatsRequestDto } from "../../../application/dto/admin/GetAdminDriverStatsRequestDto";
+import { GetAdminDriverStatsResponseDto } from "../../../application/dto/admin/GetAdminDriverStatsResponseDto";
 export declare class AdminStatsController {
     private readonly getAdminUserStatsUseCase;
     private readonly getAdminRideStatsUseCase;

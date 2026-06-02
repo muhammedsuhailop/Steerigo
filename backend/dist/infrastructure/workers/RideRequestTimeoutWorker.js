@@ -15,14 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestTimeoutWorker = void 0;
 const bullmq_1 = require("bullmq");
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const BullMQConnection_1 = require("@infrastructure/queues/BullMQConnection");
-const RideSearchQueueConstants_1 = require("@shared/constants/RideSearchQueueConstants");
-const Logger_1 = require("@shared/utils/Logger");
-const RideRequestGroupStatus_1 = require("@domain/value-objects/RideRequestGroupStatus");
-const RedisLockKeys_1 = require("@shared/constants/RedisLockKeys");
-const RedisPubSubClient_1 = require("@infrastructure/realtime/RedisPubSubClient");
-const PubSubChannels_1 = require("@infrastructure/realtime/constants/PubSubChannels");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const BullMQConnection_1 = require("../queues/BullMQConnection");
+const RideSearchQueueConstants_1 = require("../../shared/constants/RideSearchQueueConstants");
+const Logger_1 = require("../../shared/utils/Logger");
+const RideRequestGroupStatus_1 = require("../../domain/value-objects/RideRequestGroupStatus");
+const RedisLockKeys_1 = require("../../shared/constants/RedisLockKeys");
+const RedisPubSubClient_1 = require("../realtime/RedisPubSubClient");
+const PubSubChannels_1 = require("../realtime/constants/PubSubChannels");
 let RideRequestTimeoutWorker = class RideRequestTimeoutWorker {
     constructor(rideRequestRepository, rideRequestGroupRepository, rideSearchDispatchService, eventBus, lockService) {
         this.rideRequestRepository = rideRequestRepository;

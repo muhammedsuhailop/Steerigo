@@ -8,7 +8,7 @@ export interface IRefreshTokenDocument extends Document {
     updatedAt: Date;
 }
 export declare const RefreshTokenModel: mongoose.Model<IRefreshTokenDocument, {}, {}, {}, mongoose.Document<unknown, {}, IRefreshTokenDocument, {}, {}> & IRefreshTokenDocument & Required<{
-    _id: mongoose.Types.ObjectId;
+    _id: unknown;
 }> & {
     __v: number;
 }, any>;

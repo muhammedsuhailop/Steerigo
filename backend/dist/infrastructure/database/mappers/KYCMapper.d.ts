@@ -1,4 +1,4 @@
-import { KYC } from "@domain/entities/KYC";
+import { KYC } from "../../../domain/entities/KYC";
 import { IKYCModel } from "../models/KYCModel";
 export declare class KYCMapper {
     static toDomain(raw: IKYCModel): KYC;

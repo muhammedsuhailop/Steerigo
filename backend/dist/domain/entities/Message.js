@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Message = void 0;
-const MessageType_1 = require("@domain/value-objects/MessageType");
+const MessageType_1 = require("../value-objects/MessageType");
 class Message {
     constructor(id, chatRoomId, senderId, content, type, metadata, createdAt = new Date(), updatedAt = new Date(), editedAt, deletedAt) {
         this.id = id;

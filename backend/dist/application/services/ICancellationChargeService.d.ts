@@ -1,5 +1,5 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
-import { Money } from "@domain/value-objects/Money";
+import { FareBreakdown } from "../../domain/value-objects/FareBreakdown";
+import { Money } from "../../domain/value-objects/Money";
 export interface RiderCancellationContext {
     isBeforeMatch: boolean;
     isWithinGracePeriod: boolean;

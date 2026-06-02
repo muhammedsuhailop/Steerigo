@@ -1,5 +1,5 @@
-import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
-import { FareConfiguration } from "@domain/entities/FareConfiguration";
+import { IFareConfigurationRepository } from "../../../domain/repositories/IFareConfigurationRepository";
+import { FareConfiguration } from "../../../domain/entities/FareConfiguration";
 export declare class FareConfigurationRepositoryImpl implements IFareConfigurationRepository {
     findById(id: string): Promise<FareConfiguration | null>;
     findActiveConfiguration(date?: Date): Promise<FareConfiguration | null>;

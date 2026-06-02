@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from "@shared/constants/AuthConstants";
+import { UserRole, UserStatus } from "../../../shared/constants/AuthConstants";
 export interface UserProfileDto {
     id: string;
     name: string;

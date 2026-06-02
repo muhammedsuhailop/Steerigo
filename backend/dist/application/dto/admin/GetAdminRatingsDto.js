@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminRatingsDto = exports.getAdminRatingsSchema = void 0;
 const zod_1 = require("zod");
-const ReviewType_1 = require("@domain/value-objects/ReviewType");
+const ReviewType_1 = require("../../../domain/value-objects/ReviewType");
 exports.getAdminRatingsSchema = zod_1.z.object({
     page: zod_1.z.coerce.number().positive().default(1),
     limit: zod_1.z.coerce.number().positive().max(100).default(10),

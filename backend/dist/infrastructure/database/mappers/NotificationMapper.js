@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationMapper = void 0;
-const Notification_1 = require("@domain/entities/Notification");
-const idHelper_1 = require("@shared/utils/idHelper");
+const Notification_1 = require("../../../domain/entities/Notification");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 class NotificationMapper {
     static toDomain(doc) {
         return Notification_1.Notification.fromData({

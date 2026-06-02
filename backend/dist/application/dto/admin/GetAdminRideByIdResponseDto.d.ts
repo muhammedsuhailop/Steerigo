@@ -1,6 +1,6 @@
-import { Money } from "@domain/value-objects/Money";
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { Money } from "../../../domain/value-objects/Money";
+import { PaymentStatus } from "../../../domain/value-objects/PaymentStatus";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 export interface RiderDetails {
     id: string;
     name: string;

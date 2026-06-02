@@ -1,7 +1,7 @@
-import { Location } from "@domain/value-objects/Location";
-import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
-import { RideType } from "@domain/value-objects/RideType";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { Location } from "../value-objects/Location";
+import { RideRequestStatus } from "../value-objects/RideRequestStatus";
+import { RideType } from "../value-objects/RideType";
+import { FareBreakdown } from "../value-objects/FareBreakdown";
 export declare class RideRequest {
     private id;
     private readonly driverId;

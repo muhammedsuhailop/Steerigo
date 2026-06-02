@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionMapper = void 0;
-const Transaction_1 = require("@domain/entities/Transaction");
-const Money_1 = require("@domain/value-objects/Money");
+const Transaction_1 = require("../../../domain/entities/Transaction");
+const Money_1 = require("../../../domain/value-objects/Money");
 class TransactionMapper {
     static toDomain(doc) {
         const amount = Money_1.Money.create(doc.amount, doc.currency);

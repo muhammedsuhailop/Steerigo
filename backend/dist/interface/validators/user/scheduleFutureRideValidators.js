@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cancelFutureRideSchema = exports.scheduleFutureRideSchema = void 0;
 const zod_1 = require("zod");
-const RideType_1 = require("@domain/value-objects/RideType");
-const VehicleType_1 = require("@domain/value-objects/VehicleType");
-const AppConstants_1 = require("@shared/constants/AppConstants");
+const RideType_1 = require("../../../domain/value-objects/RideType");
+const VehicleType_1 = require("../../../domain/value-objects/VehicleType");
+const AppConstants_1 = require("../../../shared/constants/AppConstants");
 exports.scheduleFutureRideSchema = zod_1.z.object({
     body: zod_1.z
         .object({

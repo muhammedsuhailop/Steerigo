@@ -1,4 +1,4 @@
-import { Driver } from "@domain/entities/Driver";
+import { Driver } from "../entities/Driver";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
 export interface IAdminDriverQuery {

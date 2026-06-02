@@ -1,4 +1,4 @@
-import { Gender } from "@domain/value-objects/Gender";
+import { Gender } from "../../../domain/value-objects/Gender";
 type UserProfileUpdates = Partial<{
     name: string;
     mobile: string;

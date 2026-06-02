@@ -1,25 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RepositoryFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const UserRepositoryImpl_1 = require("@infrastructure/database/repositories/UserRepositoryImpl");
-const RefreshTokenRepositoryImpl_1 = require("@infrastructure/database/repositories/RefreshTokenRepositoryImpl");
-const RideRequestRepositoryImpl_1 = require("@infrastructure/database/repositories/RideRequestRepositoryImpl");
-const RideRepositoryImpl_1 = require("@infrastructure/database/repositories/RideRepositoryImpl");
-const DriverLocationRepository_1 = require("@infrastructure/services/DriverLocationRepository");
-const PaymentRepositoryImpl_1 = require("@infrastructure/database/repositories/PaymentRepositoryImpl");
-const TransactionRepositoryImpl_1 = require("@infrastructure/database/repositories/TransactionRepositoryImpl");
-const PayoutRepositoryImpl_1 = require("@infrastructure/database/repositories/PayoutRepositoryImpl");
-const WalletRepositoryImpl_1 = require("@infrastructure/database/repositories/WalletRepositoryImpl");
-const RatingRepositoryImpl_1 = require("@infrastructure/database/repositories/RatingRepositoryImpl");
-const MongoUnitOfWork_1 = require("@infrastructure/database/repositories/MongoUnitOfWork");
-const CouponRepositoryImpl_1 = require("@infrastructure/database/repositories/CouponRepositoryImpl");
-const CouponUsageRepositoryImpl_1 = require("@infrastructure/database/repositories/CouponUsageRepositoryImpl");
-const RideRequestGroupRepositoryImpl_1 = require("@infrastructure/database/repositories/RideRequestGroupRepositoryImpl");
-const ChatRoomRepositoryImpl_1 = require("@infrastructure/database/repositories/ChatRoomRepositoryImpl");
-const MessageRepositoryImpl_1 = require("@infrastructure/database/repositories/MessageRepositoryImpl");
-const MessageStatusRepositoryImpl_1 = require("@infrastructure/database/repositories/MessageStatusRepositoryImpl");
-const UserChatRepositoryImpl_1 = require("@infrastructure/database/repositories/UserChatRepositoryImpl");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const UserRepositoryImpl_1 = require("../../database/repositories/UserRepositoryImpl");
+const RefreshTokenRepositoryImpl_1 = require("../../database/repositories/RefreshTokenRepositoryImpl");
+const RideRequestRepositoryImpl_1 = require("../../database/repositories/RideRequestRepositoryImpl");
+const RideRepositoryImpl_1 = require("../../database/repositories/RideRepositoryImpl");
+const DriverLocationRepository_1 = require("../../services/DriverLocationRepository");
+const PaymentRepositoryImpl_1 = require("../../database/repositories/PaymentRepositoryImpl");
+const TransactionRepositoryImpl_1 = require("../../database/repositories/TransactionRepositoryImpl");
+const PayoutRepositoryImpl_1 = require("../../database/repositories/PayoutRepositoryImpl");
+const WalletRepositoryImpl_1 = require("../../database/repositories/WalletRepositoryImpl");
+const RatingRepositoryImpl_1 = require("../../database/repositories/RatingRepositoryImpl");
+const MongoUnitOfWork_1 = require("../../database/repositories/MongoUnitOfWork");
+const CouponRepositoryImpl_1 = require("../../database/repositories/CouponRepositoryImpl");
+const CouponUsageRepositoryImpl_1 = require("../../database/repositories/CouponUsageRepositoryImpl");
+const RideRequestGroupRepositoryImpl_1 = require("../../database/repositories/RideRequestGroupRepositoryImpl");
+const ChatRoomRepositoryImpl_1 = require("../../database/repositories/ChatRoomRepositoryImpl");
+const MessageRepositoryImpl_1 = require("../../database/repositories/MessageRepositoryImpl");
+const MessageStatusRepositoryImpl_1 = require("../../database/repositories/MessageStatusRepositoryImpl");
+const UserChatRepositoryImpl_1 = require("../../database/repositories/UserChatRepositoryImpl");
 class RepositoryFactory {
     static register(container) {
         container

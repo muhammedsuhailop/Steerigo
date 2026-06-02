@@ -1,6 +1,6 @@
-import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
-import { DriverActionRequestDto } from "@application/dto/admin/DriverActionRequestDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminDriverRepository } from "../../../domain/repositories/IAdminDriverRepository";
+import { DriverActionRequestDto } from "../../dto/admin/DriverActionRequestDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class DriverActionUseCase implements IUseCase<DriverActionRequestDto, Promise<Result<{
     message: string;

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { PayoutMethod } from "@domain/value-objects/PayoutMethod";
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
+import { PayoutMethod } from "../../../domain/value-objects/PayoutMethod";
+import { PayoutStatus } from "../../../domain/value-objects/PayoutStatus";
 export declare const requestPayoutSchema: z.ZodObject<{
     body: z.ZodObject<{
         amount: z.ZodNumber;

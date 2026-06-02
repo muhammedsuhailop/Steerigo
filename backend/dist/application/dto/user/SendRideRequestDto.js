@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SendRideRequestDto = void 0;
-const errors_1 = require("@domain/errors");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
+const errors_1 = require("../../../domain/errors");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../../domain/value-objects/Money");
 class SendRideRequestDto {
     constructor(requestGroupId, riderId, driverId, pickupLatitude, pickupLongitude, pickupAddress, dropLatitude, dropLongitude, dropAddress, pickupTime, timeRequired, rideType, fareBreakdown, pickupETA) {
         this.requestGroupId = requestGroupId;

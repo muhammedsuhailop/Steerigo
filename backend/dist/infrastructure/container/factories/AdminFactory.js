@@ -1,33 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const AdminUserRepositoryImpl_1 = require("@infrastructure/database/repositories/AdminUserRepositoryImpl");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AdminUserRepositoryImpl_1 = require("../../database/repositories/AdminUserRepositoryImpl");
 // Admin Use Cases
-const GetUsersUseCase_1 = require("@application/use-cases/admin/GetUsersUseCase");
-const UpdateUserStatusUseCase_1 = require("@application/use-cases/admin/UpdateUserStatusUseCase");
+const GetUsersUseCase_1 = require("../../../application/use-cases/admin/GetUsersUseCase");
+const UpdateUserStatusUseCase_1 = require("../../../application/use-cases/admin/UpdateUserStatusUseCase");
 // Admin Controllers
-const AdminUserController_1 = require("@interface/controllers/admin/AdminUserController");
-const GetUserProfileDetailsUseCase_1 = require("@application/use-cases/admin/GetUserProfileDetailsUseCase");
-const GetAdminRidesUseCase_1 = require("@application/use-cases/admin/GetAdminRidesUseCase");
-const AdminRideController_1 = require("@interface/controllers/admin/AdminRideController");
-const ApprovePayoutUseCase_1 = require("@application/use-cases/admin/ApprovePayoutUseCase");
-const RejectPayoutUseCase_1 = require("@application/use-cases/admin/RejectPayoutUseCase");
-const GetAdminPayoutsUseCase_1 = require("@application/use-cases/admin/GetAdminPayoutsUseCase");
-const CreateCouponUseCase_1 = require("@application/use-cases/admin/CreateCouponUseCase");
-const EditCouponUseCase_1 = require("@application/use-cases/admin/EditCouponUseCase");
-const AdminCouponController_1 = require("@interface/controllers/admin/AdminCouponController");
-const GetAdminCouponsUseCase_1 = require("@application/use-cases/admin/GetAdminCouponsUseCase");
-const GetAdminRatingsUseCase_1 = require("@application/use-cases/admin/GetAdminRatingsUseCase");
-const GetAdminTransactionsUseCase_1 = require("@application/use-cases/admin/GetAdminTransactionsUseCase");
-const AdminTransactionController_1 = require("@interface/controllers/admin/AdminTransactionController");
-const GetAdminRideByIdUseCase_1 = require("@application/use-cases/admin/GetAdminRideByIdUseCase");
-const GetAdminWalletUseCase_1 = require("@application/use-cases/admin/GetAdminWalletUseCase");
-const AdminWalletController_1 = require("@interface/controllers/admin/AdminWalletController");
-const GetAdminUserStatsUseCase_1 = require("@application/use-cases/admin/GetAdminUserStatsUseCase");
-const AdminStatsController_1 = require("@interface/controllers/admin/AdminStatsController");
-const GetAdminRideStatsUseCase_1 = require("@application/use-cases/admin/GetAdminRideStatsUseCase");
-const GetAdminDriverStatsUseCase_1 = require("@application/use-cases/admin/GetAdminDriverStatsUseCase");
+const AdminUserController_1 = require("../../../interface/controllers/admin/AdminUserController");
+const GetUserProfileDetailsUseCase_1 = require("../../../application/use-cases/admin/GetUserProfileDetailsUseCase");
+const GetAdminRidesUseCase_1 = require("../../../application/use-cases/admin/GetAdminRidesUseCase");
+const AdminRideController_1 = require("../../../interface/controllers/admin/AdminRideController");
+const ApprovePayoutUseCase_1 = require("../../../application/use-cases/admin/ApprovePayoutUseCase");
+const RejectPayoutUseCase_1 = require("../../../application/use-cases/admin/RejectPayoutUseCase");
+const GetAdminPayoutsUseCase_1 = require("../../../application/use-cases/admin/GetAdminPayoutsUseCase");
+const CreateCouponUseCase_1 = require("../../../application/use-cases/admin/CreateCouponUseCase");
+const EditCouponUseCase_1 = require("../../../application/use-cases/admin/EditCouponUseCase");
+const AdminCouponController_1 = require("../../../interface/controllers/admin/AdminCouponController");
+const GetAdminCouponsUseCase_1 = require("../../../application/use-cases/admin/GetAdminCouponsUseCase");
+const GetAdminRatingsUseCase_1 = require("../../../application/use-cases/admin/GetAdminRatingsUseCase");
+const GetAdminTransactionsUseCase_1 = require("../../../application/use-cases/admin/GetAdminTransactionsUseCase");
+const AdminTransactionController_1 = require("../../../interface/controllers/admin/AdminTransactionController");
+const GetAdminRideByIdUseCase_1 = require("../../../application/use-cases/admin/GetAdminRideByIdUseCase");
+const GetAdminWalletUseCase_1 = require("../../../application/use-cases/admin/GetAdminWalletUseCase");
+const AdminWalletController_1 = require("../../../interface/controllers/admin/AdminWalletController");
+const GetAdminUserStatsUseCase_1 = require("../../../application/use-cases/admin/GetAdminUserStatsUseCase");
+const AdminStatsController_1 = require("../../../interface/controllers/admin/AdminStatsController");
+const GetAdminRideStatsUseCase_1 = require("../../../application/use-cases/admin/GetAdminRideStatsUseCase");
+const GetAdminDriverStatsUseCase_1 = require("../../../application/use-cases/admin/GetAdminDriverStatsUseCase");
 class AdminFactory {
     static register(container) {
         // Repository bindings

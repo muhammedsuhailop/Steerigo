@@ -1,9 +1,9 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { ICouponRepository } from "@domain/repositories/ICouponRepository";
-import { CreateCouponDto } from "@application/dto/admin/CreateCouponDto";
-import { CreateCouponResponseDto } from "@application/dto/admin/CreateCouponResponseDto";
-import { IIdGenerator } from "@application/services/IIdGenerator";
+import { Result } from "../../../shared/utils/Result";
+import { ICouponRepository } from "../../../domain/repositories/ICouponRepository";
+import { CreateCouponDto } from "../../dto/admin/CreateCouponDto";
+import { CreateCouponResponseDto } from "../../dto/admin/CreateCouponResponseDto";
+import { IIdGenerator } from "../../services/IIdGenerator";
 export declare class CreateCouponUseCase implements IUseCase<CreateCouponDto, Promise<Result<CreateCouponResponseDto>>> {
     private readonly couponRepository;
     private readonly idGenerator;

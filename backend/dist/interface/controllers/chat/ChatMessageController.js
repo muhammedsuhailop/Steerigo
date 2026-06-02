@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatMessageController = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const GetChatMessagesDto_1 = require("@application/dto/chat/GetChatMessagesDto");
-const SendChatMessageDto_1 = require("@application/dto/chat/SendChatMessageDto");
-const EditChatMessageDto_1 = require("@application/dto/chat/EditChatMessageDto");
-const DeleteChatMessageDto_1 = require("@application/dto/chat/DeleteChatMessageDto");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const GetChatMessagesDto_1 = require("../../../application/dto/chat/GetChatMessagesDto");
+const SendChatMessageDto_1 = require("../../../application/dto/chat/SendChatMessageDto");
+const EditChatMessageDto_1 = require("../../../application/dto/chat/EditChatMessageDto");
+const DeleteChatMessageDto_1 = require("../../../application/dto/chat/DeleteChatMessageDto");
 let ChatMessageController = class ChatMessageController {
     constructor(getChatMessagesUseCase, sendChatMessageUseCase, editChatMessageUseCase, deleteChatMessageUseCase) {
         this.getChatMessagesUseCase = getChatMessagesUseCase;

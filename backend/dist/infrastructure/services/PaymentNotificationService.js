@@ -9,8 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentNotificationService = void 0;
 const inversify_1 = require("inversify");
 const socket_1 = require("../realtime/socket");
-const Logger_1 = require("@shared/utils/Logger");
-const SocketEvents_1 = require("@infrastructure/realtime/constants/SocketEvents");
+const Logger_1 = require("../../shared/utils/Logger");
+const SocketEvents_1 = require("../realtime/constants/SocketEvents");
 let PaymentNotificationService = class PaymentNotificationService {
     async notifyPaymentInitiated(riderId, payload) {
         try {

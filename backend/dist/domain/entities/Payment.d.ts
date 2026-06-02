@@ -1,7 +1,7 @@
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
-import { Money } from "@domain/value-objects/Money";
-import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
+import { PaymentMethod } from "../value-objects/PaymentMethod";
+import { PaymentStatus } from "../value-objects/PaymentStatus";
+import { Money } from "../value-objects/Money";
+import { PaymentFailureReason } from "../value-objects/PaymentFailureReason";
 export declare class Payment {
     private readonly id;
     private readonly rideId;

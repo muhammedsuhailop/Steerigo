@@ -1,4 +1,4 @@
-import { NotificationSocketPayload } from "@application/dto/notification/NotificationSocketPayload";
+import { NotificationSocketPayload } from "../../application/dto/notification/NotificationSocketPayload";
 export declare class NotificationSocketAdapter {
     private static tryGetSocketServer;
     static emitToUser(userId: string, payload: NotificationSocketPayload): void;

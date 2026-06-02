@@ -10,8 +10,8 @@ exports.PayoutRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const PayoutModel_1 = require("../models/PayoutModel");
 const PayoutMapper_1 = require("../mappers/PayoutMapper");
-const Logger_1 = require("@shared/utils/Logger");
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
+const Logger_1 = require("../../../shared/utils/Logger");
+const PayoutStatus_1 = require("../../../domain/value-objects/PayoutStatus");
 let PayoutRepositoryImpl = class PayoutRepositoryImpl {
     async save(payout) {
         try {

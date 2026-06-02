@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RatingModel = void 0;
-const ReviewType_1 = require("@domain/value-objects/ReviewType");
+const ReviewType_1 = require("../../../domain/value-objects/ReviewType");
 const mongoose_1 = require("mongoose");
 const ratingSchema = new mongoose_1.Schema({
     rideId: {

@@ -1,4 +1,4 @@
-import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
+import { RideCancellationReason } from "../../../domain/value-objects/RideCancellationReason";
 export declare class CancelRideDto {
     private readonly riderId;
     readonly rideId: string;

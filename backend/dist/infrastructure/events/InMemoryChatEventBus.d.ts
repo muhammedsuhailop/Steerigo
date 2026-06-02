@@ -1,6 +1,6 @@
-import { IChatEventBus } from "@application/services/IChatEventBus";
-import { IChatRealtimeService } from "@application/services/IChatRealtimeService";
-import { ChatDomainEvent } from "@application/events/ChatEvents";
+import { IChatEventBus } from "../../application/services/IChatEventBus";
+import { IChatRealtimeService } from "../../application/services/IChatRealtimeService";
+import { ChatDomainEvent } from "../../application/events/ChatEvents";
 export declare class InMemoryChatEventBus implements IChatEventBus {
     private readonly chatRealtimeService;
     constructor(chatRealtimeService: IChatRealtimeService);

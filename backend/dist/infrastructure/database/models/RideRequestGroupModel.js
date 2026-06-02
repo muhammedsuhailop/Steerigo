@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestGroupModel = void 0;
 const mongoose_1 = require("mongoose");
-const RideRequestGroupStatus_1 = require("@domain/value-objects/RideRequestGroupStatus");
+const RideRequestGroupStatus_1 = require("../../../domain/value-objects/RideRequestGroupStatus");
 const RideLocationSchema = new mongoose_1.Schema({
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },

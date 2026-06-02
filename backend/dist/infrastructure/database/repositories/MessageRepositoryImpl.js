@@ -11,7 +11,7 @@ const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
 const MessageModel_1 = require("../models/MessageModel");
 const MessageMapper_1 = require("../mappers/MessageMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let MessageRepositoryImpl = class MessageRepositoryImpl {
     async findById(id) {
         try {

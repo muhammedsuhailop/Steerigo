@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateGetUserProfileRequest = void 0;
 const zod_1 = require("zod");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
 const getUserProfileSchema = zod_1.z.object({
     params: zod_1.z.object({
         userId: zod_1.z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid UserId format"),

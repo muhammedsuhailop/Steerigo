@@ -1,4 +1,4 @@
-import { AdminTransactionQueryFilters } from "@domain/repositories/ITransactionRepository";
+import { AdminTransactionQueryFilters } from "../../../domain/repositories/ITransactionRepository";
 export declare class GetAdminTransactionsDto {
     readonly filters: AdminTransactionQueryFilters;
     private constructor();

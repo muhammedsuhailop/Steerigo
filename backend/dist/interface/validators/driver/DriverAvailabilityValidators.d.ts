@@ -1,6 +1,6 @@
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
-import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
+import { AvailabilityExceptionType } from "../../../domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityStatus } from "../../../domain/value-objects/AvailabilityStatus";
+import { RecurringPattern } from "../../../domain/value-objects/RecurringPattern";
 import { z } from "zod";
 export declare const scheduleRecurringAvailabilitySchema: z.ZodObject<{
     body: z.ZodObject<{

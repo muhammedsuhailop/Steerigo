@@ -9,10 +9,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageStatusRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
-const MessageDeliveryStatus_1 = require("@domain/value-objects/MessageDeliveryStatus");
+const MessageDeliveryStatus_1 = require("../../../domain/value-objects/MessageDeliveryStatus");
 const MessageStatusModel_1 = require("../models/MessageStatusModel");
 const MessageStatusMapper_1 = require("../mappers/MessageStatusMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const MessageModel_1 = require("../models/MessageModel");
 let MessageStatusRepositoryImpl = class MessageStatusRepositoryImpl {
     async findById(id) {

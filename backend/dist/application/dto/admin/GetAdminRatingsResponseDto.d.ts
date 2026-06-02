@@ -1,5 +1,5 @@
-import { RatingCriteriaType } from "@domain/value-objects/RatingCriteriaType";
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { RatingCriteriaType } from "../../../domain/value-objects/RatingCriteriaType";
+import { ReviewType } from "../../../domain/value-objects/ReviewType";
 export interface AdminRatingItem {
     ratingId: string;
     rideId: string;

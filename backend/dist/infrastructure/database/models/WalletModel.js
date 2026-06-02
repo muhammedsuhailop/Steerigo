@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletModel = void 0;
 const mongoose_1 = require("mongoose");
-const WalletOwnerType_1 = require("@domain/value-objects/WalletOwnerType");
+const WalletOwnerType_1 = require("../../../domain/value-objects/WalletOwnerType");
 const walletSchema = new mongoose_1.Schema({
     walletId: {
         type: String,

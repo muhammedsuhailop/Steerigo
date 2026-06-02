@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { ForgotPasswordRequestDto } from "@application/dto/auth/ForgotPasswordRequestDto";
-import { ForgotPasswordVerifyDto } from "@application/dto/auth/ForgotPasswordVerifyDto";
-import { UpdatePasswordDto } from "@application/dto/auth/UpdatePasswordDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
+import { ForgotPasswordRequestDto } from "../../../application/dto/auth/ForgotPasswordRequestDto";
+import { ForgotPasswordVerifyDto } from "../../../application/dto/auth/ForgotPasswordVerifyDto";
+import { UpdatePasswordDto } from "../../../application/dto/auth/UpdatePasswordDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
 export declare class PasswordController {
     private forgotPasswordRequestUseCase;
     private forgotPasswordVerifyUseCase;

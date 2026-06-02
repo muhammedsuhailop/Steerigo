@@ -1,8 +1,8 @@
-import { Ride } from "@domain/entities/Ride";
-import { Payment } from "@domain/entities/Payment";
-import { Money } from "@domain/value-objects/Money";
-import { Result } from "@shared/utils/Result";
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { Ride } from "../../../domain/entities/Ride";
+import { Payment } from "../../../domain/entities/Payment";
+import { Money } from "../../../domain/value-objects/Money";
+import { Result } from "../../../shared/utils/Result";
+import { PaymentMethod } from "../../../domain/value-objects/PaymentMethod";
 export interface PaymentStrategyParams {
     payment: Payment;
     ride: Ride;

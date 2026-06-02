@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Ride = void 0;
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
-const BookingType_1 = require("@domain/value-objects/BookingType");
+const PaymentStatus_1 = require("../value-objects/PaymentStatus");
+const RideStatus_1 = require("../value-objects/RideStatus");
+const BookingType_1 = require("../value-objects/BookingType");
 class Ride {
     constructor(id, rideId, driverId, riderId, status, paymentStatus, pickup, drop, requestedPickupTime, timeRequired, rideType, bookingType, fareBreakdown, currency = "INR", timeline, verificationCode, createdAt = new Date(), updatedAt = new Date(), couponDetails) {
         this.id = id;

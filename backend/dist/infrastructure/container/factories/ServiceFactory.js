@@ -1,32 +1,32 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServiceFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 // Infrastructure Service Implementations
-const PasswordService_1 = require("@infrastructure/services/PasswordService");
-const TokenService_1 = require("@infrastructure/services/TokenService");
-const EmailService_1 = require("@infrastructure/services/EmailService");
-const OtpService_1 = require("@infrastructure/services/OtpService");
-const GoogleAuthService_1 = require("@infrastructure/services/GoogleAuthService");
-const TokenManagementService_1 = require("@infrastructure/services/TokenManagementService");
-const CryptoAdapter_1 = require("@infrastructure/adapters/CryptoAdapter");
-const CloudinaryService_1 = require("@infrastructure/services/CloudinaryService");
-const AvailabilityCheckService_1 = require("@infrastructure/services/AvailabilityCheckService");
-const DistributedLockService_1 = require("@infrastructure/services/DistributedLockService");
-const RideNotificationService_1 = require("@infrastructure/services/RideNotificationService");
-const InMemoryEventBus_1 = require("@infrastructure/services/InMemoryEventBus");
-const RedisService_1 = require("@infrastructure/services/RedisService");
-const MongoIdGenerator_1 = require("@infrastructure/services/MongoIdGenerator");
-const CancellationChargeService_1 = require("@infrastructure/services/CancellationChargeService");
-const CouponValidationService_1 = require("@infrastructure/services/CouponValidationService");
-const CouponUsageService_1 = require("@infrastructure/services/CouponUsageService");
-const RideSearchQueueProducer_1 = require("@infrastructure/queues/RideSearchQueueProducer");
-const RideSearchDispatchService_1 = require("@application/services/ride-search/RideSearchDispatchService");
-const RideRequestTimeoutWorker_1 = require("@infrastructure/workers/RideRequestTimeoutWorker");
-const BullMqRideSearchQueue_1 = require("@infrastructure/queues/BullMqRideSearchQueue");
-const WorkerSocketBridge_1 = require("@infrastructure/realtime/WorkerSocketBridge");
-const UuidGenerator_1 = require("@infrastructure/services/UuidGenerator");
-const NanoIdGenerator_1 = require("@infrastructure/services/NanoIdGenerator");
+const PasswordService_1 = require("../../services/PasswordService");
+const TokenService_1 = require("../../services/TokenService");
+const EmailService_1 = require("../../services/EmailService");
+const OtpService_1 = require("../../services/OtpService");
+const GoogleAuthService_1 = require("../../services/GoogleAuthService");
+const TokenManagementService_1 = require("../../services/TokenManagementService");
+const CryptoAdapter_1 = require("../../adapters/CryptoAdapter");
+const CloudinaryService_1 = require("../../services/CloudinaryService");
+const AvailabilityCheckService_1 = require("../../services/AvailabilityCheckService");
+const DistributedLockService_1 = require("../../services/DistributedLockService");
+const RideNotificationService_1 = require("../../services/RideNotificationService");
+const InMemoryEventBus_1 = require("../../services/InMemoryEventBus");
+const RedisService_1 = require("../../services/RedisService");
+const MongoIdGenerator_1 = require("../../services/MongoIdGenerator");
+const CancellationChargeService_1 = require("../../services/CancellationChargeService");
+const CouponValidationService_1 = require("../../services/CouponValidationService");
+const CouponUsageService_1 = require("../../services/CouponUsageService");
+const RideSearchQueueProducer_1 = require("../../queues/RideSearchQueueProducer");
+const RideSearchDispatchService_1 = require("../../../application/services/ride-search/RideSearchDispatchService");
+const RideRequestTimeoutWorker_1 = require("../../workers/RideRequestTimeoutWorker");
+const BullMqRideSearchQueue_1 = require("../../queues/BullMqRideSearchQueue");
+const WorkerSocketBridge_1 = require("../../realtime/WorkerSocketBridge");
+const UuidGenerator_1 = require("../../services/UuidGenerator");
+const NanoIdGenerator_1 = require("../../services/NanoIdGenerator");
 class ServiceFactory {
     static register(container) {
         // Bind Service Interfaces to Implementations

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestMapper = void 0;
-const RideRequest_1 = require("@domain/entities/RideRequest");
-const Location_1 = require("@domain/value-objects/Location");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
-const idHelper_1 = require("@shared/utils/idHelper");
+const RideRequest_1 = require("../../../domain/entities/RideRequest");
+const Location_1 = require("../../../domain/value-objects/Location");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../../domain/value-objects/Money");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 const mongoose_1 = require("mongoose");
 class RideRequestMapper {
     static toDomain(doc) {

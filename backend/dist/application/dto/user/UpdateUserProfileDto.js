@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateUserProfileDto = void 0;
-const Gender_1 = require("@domain/value-objects/Gender");
+const Gender_1 = require("../../../domain/value-objects/Gender");
 class UpdateUserProfileDto {
     constructor(data) {
         const input = (data ?? {});

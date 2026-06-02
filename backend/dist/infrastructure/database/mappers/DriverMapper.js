@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverMapper = void 0;
-const Driver_1 = require("@domain/entities/Driver");
+const Driver_1 = require("../../../domain/entities/Driver");
 const mongoose_1 = require("mongoose");
 class DriverMapper {
     static toDomain(raw) {

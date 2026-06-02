@@ -11,15 +11,15 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // Load environment variables
 dotenv_1.default.config();
-const connection_1 = require("@infrastructure/database/repositories/connection");
-const routes_1 = require("@interface/routes");
-const middleware_1 = require("@interface/middleware");
-const Logger_1 = require("@shared/utils/Logger");
-const socket_1 = require("@infrastructure/realtime/socket");
-const services_1 = require("@infrastructure/services");
-const NotificationFactory_1 = require("@infrastructure/container/factories/NotificationFactory");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
+const connection_1 = require("./infrastructure/database/repositories/connection");
+const routes_1 = require("./interface/routes");
+const middleware_1 = require("./interface/middleware");
+const Logger_1 = require("./shared/utils/Logger");
+const socket_1 = require("./infrastructure/realtime/socket");
+const services_1 = require("./infrastructure/services");
+const NotificationFactory_1 = require("./infrastructure/container/factories/NotificationFactory");
+const DIContainer_1 = require("./infrastructure/container/DIContainer");
+const DITypes_1 = require("./shared/constants/DITypes");
 class App {
     constructor() {
         this.app = (0, express_1.default)();

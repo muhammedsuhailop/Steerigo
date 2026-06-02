@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
+import { NotificationType } from "../../../domain/value-objects/NotificationType";
+import { NotificationChannel } from "../../../domain/value-objects/NotificationChannel";
 export declare const getNotificationsSchema: z.ZodObject<{
     query: z.ZodObject<{
         page: z.ZodOptional<z.ZodString>;

@@ -1,7 +1,7 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { GetCurrentUserDto } from "../../dto/auth/GetCurrentUserDto";
 import { GetCurrentUserResponseDto } from "../../dto/auth/GetCurrentUserResponseDto";
-import { Result } from "@shared/utils/Result";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class GetCurrentUserUseCase implements IUseCase<GetCurrentUserDto, Promise<Result<GetCurrentUserResponseDto>>> {
     private userRepository;

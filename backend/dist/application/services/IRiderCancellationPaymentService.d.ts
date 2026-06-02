@@ -1,4 +1,4 @@
-import { Money } from "@domain/value-objects/Money";
+import { Money } from "../../domain/value-objects/Money";
 export interface RiderCancellationPaymentResult {
     success: boolean;
     charged: boolean;

@@ -1,5 +1,5 @@
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
-import { DocumentType } from "@domain/value-objects/DocumentType";
+import { KYCStatus } from "../../../domain/value-objects/KYCStatus";
+import { DocumentType } from "../../../domain/value-objects/DocumentType";
 export declare class KycDocumentImages {
     readonly docImageUrlsFront: string[];
     readonly docImageUrlsBack: string[];

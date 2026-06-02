@@ -1,4 +1,4 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { FareBreakdown } from "../../domain/value-objects/FareBreakdown";
 export interface IFareCalculationParams {
     durationMinutes: number;
     searchDate?: Date;

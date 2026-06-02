@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DomainErrorClassifier = void 0;
-const DomainError_1 = require("@domain/errors/DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const Logger_1 = require("@shared/utils/Logger");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const ErrorType_1 = require("../../enums/ErrorType");
+const Logger_1 = require("../../utils/Logger");
+const HttpStatusCodes_1 = require("../../enums/HttpStatusCodes");
 class DomainErrorClassifier {
     constructor() {
         this.priority = 1;

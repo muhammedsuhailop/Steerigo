@@ -1,4 +1,4 @@
-import { RideRequest } from "@domain/entities/RideRequest";
+import { RideRequest } from "../../../domain/entities/RideRequest";
 import { IRideRequestDocument } from "../models/RideRequestModel";
 export declare class RideRequestMapper {
     static toDomain(doc: IRideRequestDocument): RideRequest;

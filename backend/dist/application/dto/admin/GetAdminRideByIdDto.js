@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminRideByIdDto = void 0;
-const RideErrors_1 = require("@domain/errors/RideErrors");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
 class GetAdminRideByIdDto {
     constructor(rideId) {
         this.rideId = rideId;

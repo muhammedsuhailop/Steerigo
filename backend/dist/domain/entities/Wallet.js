@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Wallet = void 0;
-const Money_1 = require("@domain/value-objects/Money");
+const Money_1 = require("../value-objects/Money");
 class Wallet {
     constructor(id, ownerId, ownerType, availableBalance, pendingBalance, currency, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

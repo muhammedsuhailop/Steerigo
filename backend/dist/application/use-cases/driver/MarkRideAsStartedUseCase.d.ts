@@ -1,10 +1,10 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { MarkRideAsStartedDto } from "@application/dto/driver/MarkRideAsStartedDto";
-import { MarkRideAsStartedResponseDto } from "@application/dto/driver/MarkRideAsStartedResponseDto";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IEventBus } from "@application/services/IEventBus";
-import { Result } from "@shared/utils/Result";
+import { MarkRideAsStartedDto } from "../../dto/driver/MarkRideAsStartedDto";
+import { MarkRideAsStartedResponseDto } from "../../dto/driver/MarkRideAsStartedResponseDto";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IEventBus } from "../../services/IEventBus";
+import { Result } from "../../../shared/utils/Result";
 export declare class MarkRideAsStartedUseCase implements IUseCase<MarkRideAsStartedDto, Promise<Result<MarkRideAsStartedResponseDto>>> {
     private driverRepository;
     private rideRepository;

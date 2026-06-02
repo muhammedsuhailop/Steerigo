@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OtpController = void 0;
 const inversify_1 = require("inversify");
-const ResendOtpDto_1 = require("@application/dto/auth/ResendOtpDto");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ResendOtpDto_1 = require("../../../application/dto/auth/ResendOtpDto");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 let OtpController = class OtpController {
     constructor(resendOtpUseCase) {
         this.resendOtpUseCase = resendOtpUseCase;

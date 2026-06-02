@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const ValidationMiddleware_1 = require("@interface/middleware/ValidationMiddleware");
-const AuthMiddleware_1 = require("@interface/middleware/auth/AuthMiddleware");
-const authValidationSchemas_1 = require("@interface/validators/auth/authValidationSchemas");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const ValidationMiddleware_1 = require("../../middleware/ValidationMiddleware");
+const AuthMiddleware_1 = require("../../middleware/auth/AuthMiddleware");
+const authValidationSchemas_1 = require("../../validators/auth/authValidationSchemas");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const router = (0, express_1.Router)();
 exports.authRoutes = router;
 // Get controller instances from DI container

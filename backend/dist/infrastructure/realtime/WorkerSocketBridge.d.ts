@@ -1,7 +1,7 @@
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
-import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IUseCase } from "../../application/use-cases/interfaces/IUseCase";
+import { CreateNotificationDto } from "../../application/dto/notification/CreateNotificationDto";
+import { CreateNotificationResponseDto } from "../../application/dto/notification/CreateNotificationResponseDto";
+import { Result } from "../../shared/utils/Result";
 export declare class WorkerSocketBridge {
     private readonly createNotificationUseCase;
     private subscriber;

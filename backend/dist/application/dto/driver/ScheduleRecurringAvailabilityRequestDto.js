@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScheduleRecurringAvailabilityRequestDto = void 0;
 const zod_1 = require("zod");
-const TimeSlot_1 = require("@domain/value-objects/TimeSlot");
+const TimeSlot_1 = require("../../../domain/value-objects/TimeSlot");
 const timeSlotSchema = zod_1.z.object({
     startTime: zod_1.z.number().int().min(0).max(1440),
     endTime: zod_1.z.number().int().min(0).max(1440),

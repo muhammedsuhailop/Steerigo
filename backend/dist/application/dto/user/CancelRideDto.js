@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancelRideDto = void 0;
-const RideCancellationErrors_1 = require("@domain/errors/RideCancellationErrors");
-const RideCancellationReason_1 = require("@domain/value-objects/RideCancellationReason");
+const RideCancellationErrors_1 = require("../../../domain/errors/RideCancellationErrors");
+const RideCancellationReason_1 = require("../../../domain/value-objects/RideCancellationReason");
 class CancelRideDto {
     constructor(riderId, rideId, reason) {
         this.riderId = riderId;

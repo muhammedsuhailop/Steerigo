@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateDriverKycStatusUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
-const DocumentType_1 = require("@domain/value-objects/DocumentType");
-const KYCValidationErrors_1 = require("@domain/errors/KYCValidationErrors");
-const DomainError_1 = require("@domain/errors/DomainError");
-const UpdateDriverKycStatusResponseDto_1 = require("@application/dto/admin/UpdateDriverKycStatusResponseDto");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
+const DocumentType_1 = require("../../../domain/value-objects/DocumentType");
+const KYCValidationErrors_1 = require("../../../domain/errors/KYCValidationErrors");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const UpdateDriverKycStatusResponseDto_1 = require("../../dto/admin/UpdateDriverKycStatusResponseDto");
 let UpdateDriverKycStatusUseCase = class UpdateDriverKycStatusUseCase {
     constructor(adminDriverRepository, kycRepository, userRepository) {
         this.adminDriverRepository = adminDriverRepository;

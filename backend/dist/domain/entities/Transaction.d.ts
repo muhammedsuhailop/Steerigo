@@ -1,6 +1,6 @@
-import { Money } from "@domain/value-objects/Money";
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
-import { TransactionType } from "@domain/value-objects/TransactionType";
+import { Money } from "../value-objects/Money";
+import { TransactionDirection } from "../value-objects/TransactionDirection";
+import { TransactionType } from "../value-objects/TransactionType";
 export declare class Transaction {
     private readonly id;
     private readonly walletId;

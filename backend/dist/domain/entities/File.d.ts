@@ -1,4 +1,4 @@
-import { FilePurpose } from "@domain/value-objects/FilePurpose";
+import { FilePurpose } from "../value-objects/FilePurpose";
 export declare class File {
     readonly id: string;
     readonly userId: string;

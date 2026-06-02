@@ -14,16 +14,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoSearchAndSendRideRequestUseCase = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AutoSearchAndRequestResponseDto_1 = require("@application/dto/user/AutoSearchAndRequestResponseDto");
-const Result_1 = require("@shared/utils/Result");
-const DomainError_1 = require("@domain/errors/DomainError");
-const Logger_1 = require("@shared/utils/Logger");
-const SearchCriteria_1 = require("@domain/value-objects/SearchCriteria");
-const RideRequestErrors_1 = require("@domain/errors/RideRequestErrors");
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const RideRequestGroup_1 = require("@domain/entities/RideRequestGroup");
-const Location_1 = require("@domain/value-objects/Location");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AutoSearchAndRequestResponseDto_1 = require("../../dto/user/AutoSearchAndRequestResponseDto");
+const Result_1 = require("../../../shared/utils/Result");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const Logger_1 = require("../../../shared/utils/Logger");
+const SearchCriteria_1 = require("../../../domain/value-objects/SearchCriteria");
+const RideRequestErrors_1 = require("../../../domain/errors/RideRequestErrors");
+const AppConstants_1 = require("../../../shared/constants/AppConstants");
+const RideRequestGroup_1 = require("../../../domain/entities/RideRequestGroup");
+const Location_1 = require("../../../domain/value-objects/Location");
 let AutoSearchAndSendRideRequestUseCase = class AutoSearchAndSendRideRequestUseCase {
     constructor(driverAvailabilityRepository, userRepository, fareCalculationService, rideRequestGroupRepository, rideSearchDispatchService) {
         this.driverAvailabilityRepository = driverAvailabilityRepository;

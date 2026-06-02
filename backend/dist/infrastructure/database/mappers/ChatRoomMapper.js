@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRoomMapper = void 0;
 const mongoose_1 = require("mongoose");
-const ChatRoom_1 = require("@domain/entities/ChatRoom");
+const ChatRoom_1 = require("../../../domain/entities/ChatRoom");
 class ChatRoomMapper {
     static toDomain(doc) {
         return ChatRoom_1.ChatRoom.fromData({

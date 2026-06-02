@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProfilePictureDto = void 0;
-const FilePurpose_1 = require("@domain/value-objects/FilePurpose");
+const FilePurpose_1 = require("../../../domain/value-objects/FilePurpose");
 class UpdateProfilePictureDto {
     constructor(data) {
         this.purpose = FilePurpose_1.FilePurpose.create("profile");

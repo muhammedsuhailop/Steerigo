@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionModel = void 0;
 const mongoose_1 = require("mongoose");
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
-const TransactionType_1 = require("@domain/value-objects/TransactionType");
+const TransactionDirection_1 = require("../../../domain/value-objects/TransactionDirection");
+const TransactionType_1 = require("../../../domain/value-objects/TransactionType");
 const transactionSchema = new mongoose_1.Schema({
     transactionId: {
         type: String,

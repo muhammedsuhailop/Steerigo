@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { AcceptRideRequestDto } from "@application/dto/driver/AcceptRideRequestDto";
-import { AcceptRideRequestResponseDto } from "@application/dto/driver/AcceptRideRequestResponseDto";
-import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestDto";
-import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
-import { GetPendingRideRequestsDto } from "@application/dto/driver/GetPendingRideRequestsDto";
-import { GetPendingRideRequestsResponseDto } from "@application/dto/driver/GetPendingRideRequestsResponseDto";
-import { GetDriverRidesDto } from "@application/dto/driver/GetDriverRidesDto";
-import { GetDriverRidesResponseDto } from "@application/dto/driver/GetDriverRidesResponseDto";
-import { GetDriverRideByIdDto } from "@application/dto/driver/GetDriverRideByIdDto";
-import { GetDriverRideByIdResponseDto } from "@application/dto/driver/GetDriverRideByIdResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { AcceptRideRequestDto } from "../../../application/dto/driver/AcceptRideRequestDto";
+import { AcceptRideRequestResponseDto } from "../../../application/dto/driver/AcceptRideRequestResponseDto";
+import { RejectRideRequestDto } from "../../../application/dto/driver/RejectRideRequestDto";
+import { RejectRideRequestResponseDto } from "../../../application/dto/driver/RejectRideRequestResponseDto";
+import { GetPendingRideRequestsDto } from "../../../application/dto/driver/GetPendingRideRequestsDto";
+import { GetPendingRideRequestsResponseDto } from "../../../application/dto/driver/GetPendingRideRequestsResponseDto";
+import { GetDriverRidesDto } from "../../../application/dto/driver/GetDriverRidesDto";
+import { GetDriverRidesResponseDto } from "../../../application/dto/driver/GetDriverRidesResponseDto";
+import { GetDriverRideByIdDto } from "../../../application/dto/driver/GetDriverRideByIdDto";
+import { GetDriverRideByIdResponseDto } from "../../../application/dto/driver/GetDriverRideByIdResponseDto";
 export declare class DriverRideController {
     private acceptRideRequestUseCase;
     private rejectRideRequestUseCase;

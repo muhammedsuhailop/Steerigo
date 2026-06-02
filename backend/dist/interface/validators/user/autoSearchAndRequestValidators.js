@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.autoSearchAndRequestSchema = void 0;
-const RideType_1 = require("@domain/value-objects/RideType");
-const VehicleType_1 = require("@domain/value-objects/VehicleType");
+const RideType_1 = require("../../../domain/value-objects/RideType");
+const VehicleType_1 = require("../../../domain/value-objects/VehicleType");
 const zod_1 = require("zod");
 exports.autoSearchAndRequestSchema = zod_1.z.object({
     body: zod_1.z

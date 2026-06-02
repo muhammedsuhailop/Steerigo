@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { FileUploadDto } from "@application/dto/file/FileUploadDto";
-import { UpdateProfilePictureDto } from "@application/dto/file/UpdateProfilePictureDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { FileUploadResponseDto } from "@application/dto/file/FileUploadResponseDto";
-import { GetUserFilesResponseDto } from "@application/dto/file/GetUserFilesResponseDto";
-import { UpdateProfilePictureResponseDto } from "@application/dto/file/UpdateProfilePictureResponseDto";
+import { FileUploadDto } from "../../../application/dto/file/FileUploadDto";
+import { UpdateProfilePictureDto } from "../../../application/dto/file/UpdateProfilePictureDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { FileUploadResponseDto } from "../../../application/dto/file/FileUploadResponseDto";
+import { GetUserFilesResponseDto } from "../../../application/dto/file/GetUserFilesResponseDto";
+import { UpdateProfilePictureResponseDto } from "../../../application/dto/file/UpdateProfilePictureResponseDto";
 type MulterRequest = Request & {
     file?: Express.Multer.File;
 };

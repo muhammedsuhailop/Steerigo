@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminStatsRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const router = (0, express_1.Router)();
 exports.adminStatsRoutes = router;
 const controller = DIContainer_1.container.get(DITypes_1.TYPES.AdminStatsController);

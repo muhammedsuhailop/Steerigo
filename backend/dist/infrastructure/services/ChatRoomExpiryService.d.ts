@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { IChatRoomExpiryService } from "@application/services/chat/IChatRoomExpiryService";
-import { ChatRoomExpiryJobData } from "@infrastructure/queues/ChatRoomExpiryQueue";
+import { IChatRoomExpiryService } from "../../application/services/chat/IChatRoomExpiryService";
+import { ChatRoomExpiryJobData } from "../queues/ChatRoomExpiryQueue";
 export declare class ChatRoomExpiryService implements IChatRoomExpiryService {
     private readonly expiryQueue;
     constructor(expiryQueue: Queue<ChatRoomExpiryJobData>);

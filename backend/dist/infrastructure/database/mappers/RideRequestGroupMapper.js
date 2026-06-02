@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestGroupMapper = void 0;
 const mongoose_1 = require("mongoose");
-const RideRequestGroup_1 = require("@domain/entities/RideRequestGroup");
-const Location_1 = require("@domain/value-objects/Location");
-const idHelper_1 = require("@shared/utils/idHelper");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
+const RideRequestGroup_1 = require("../../../domain/entities/RideRequestGroup");
+const Location_1 = require("../../../domain/value-objects/Location");
+const idHelper_1 = require("../../../shared/utils/idHelper");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../../domain/value-objects/Money");
 class RideRequestGroupMapper {
     static toDomain(doc) {
         const pickup = Location_1.Location.create({

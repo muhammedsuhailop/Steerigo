@@ -1,4 +1,4 @@
-import { CouponUsage } from "@domain/entities/CouponUsage";
+import { CouponUsage } from "../entities/CouponUsage";
 export interface ICouponUsageRepository {
     countByUserAndCoupon(userId: string, couponId: string): Promise<number>;
     create(usage: CouponUsage): Promise<void>;

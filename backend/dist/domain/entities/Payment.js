@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Payment = void 0;
-const PaymentMethod_1 = require("@domain/value-objects/PaymentMethod");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
-const Money_1 = require("@domain/value-objects/Money");
+const PaymentMethod_1 = require("../value-objects/PaymentMethod");
+const PaymentStatus_1 = require("../value-objects/PaymentStatus");
+const Money_1 = require("../value-objects/Money");
 class Payment {
     constructor(id, rideId, riderId, driverId, amount, refundedAmount, method, status, paymentIntentId, gateway, gatewayOrderId, gatewayPaymentId, gatewaySignature, failureReason, metadata = {}, paidAt, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

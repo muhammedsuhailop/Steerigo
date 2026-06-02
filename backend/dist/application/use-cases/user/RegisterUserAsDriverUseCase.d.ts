@@ -1,8 +1,8 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { RegisterAsDriverRequestDto } from "@application/dto/user/RegisterAsDriverRequestDto";
-import { RegisterAsDriverResponseDto } from "@application/dto/user/RegisterAsDriverResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { RegisterAsDriverRequestDto } from "../../dto/user/RegisterAsDriverRequestDto";
+import { RegisterAsDriverResponseDto } from "../../dto/user/RegisterAsDriverResponseDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class RegisterUserAsDriverUseCase implements IUseCase<RegisterAsDriverRequestDto, Promise<Result<RegisterAsDriverResponseDto>>> {
     private userRepository;

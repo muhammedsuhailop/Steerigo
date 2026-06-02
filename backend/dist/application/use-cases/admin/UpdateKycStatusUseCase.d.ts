@@ -1,10 +1,10 @@
-import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
-import { IKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { UpdateKycStatusRequestDto } from "@application/dto/admin/UpdateKycStatusRequestDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminDriverRepository } from "../../../domain/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "../../../domain/repositories/IAdminDriverKYCRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { UpdateKycStatusRequestDto } from "../../dto/admin/UpdateKycStatusRequestDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
-import { KycDocumentResponseDto } from "@application/dto/admin/KycDocumentResponseDto";
+import { KycDocumentResponseDto } from "../../dto/admin/KycDocumentResponseDto";
 export declare class UpdateKycStatusUseCase implements IUseCase<UpdateKycStatusRequestDto, Promise<Result<{
     message: string;
     kycDocument: KycDocumentResponseDto;

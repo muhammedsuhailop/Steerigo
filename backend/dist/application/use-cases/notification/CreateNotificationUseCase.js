@@ -15,11 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateNotificationUseCase = void 0;
 const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
-const Notification_1 = require("@domain/entities/Notification");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const NotificationMessages_1 = require("@shared/constants/NotificationMessages");
+const Notification_1 = require("../../../domain/entities/Notification");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const NotificationMessages_1 = require("../../../shared/constants/NotificationMessages");
 let CreateNotificationUseCase = class CreateNotificationUseCase {
     constructor(notificationRepository, realtimePublisher) {
         this.notificationRepository = notificationRepository;

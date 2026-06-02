@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.markPaymentFailedValidatorSchema = exports.confirmCashPaymentSchema = exports.verifyPaymentSchema = exports.initiatePaymentSchema = void 0;
 const zod_1 = require("zod");
-const PaymentMethod_1 = require("@domain/value-objects/PaymentMethod");
-const MarkPaymentFailedDto_1 = require("@application/dto/payment/MarkPaymentFailedDto");
+const PaymentMethod_1 = require("../../../domain/value-objects/PaymentMethod");
+const MarkPaymentFailedDto_1 = require("../../../application/dto/payment/MarkPaymentFailedDto");
 exports.initiatePaymentSchema = zod_1.z.object({
     body: zod_1.z.object({
         rideId: zod_1.z.string().min(1, "rideId is required"),

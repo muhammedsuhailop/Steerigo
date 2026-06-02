@@ -1,7 +1,7 @@
-import { IRideRequestRepository, IRideRequestFilters } from "@domain/repositories/IRideRequestRepository";
-import { RideRequest } from "@domain/entities/RideRequest";
-import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
-import { QueryOptions, PaginatedResult } from "@shared/types/Repository";
+import { IRideRequestRepository, IRideRequestFilters } from "../../../domain/repositories/IRideRequestRepository";
+import { RideRequest } from "../../../domain/entities/RideRequest";
+import { RideRequestStatus } from "../../../domain/value-objects/RideRequestStatus";
+import { QueryOptions, PaginatedResult } from "../../../shared/types/Repository";
 export declare class RideRequestRepositoryImpl implements IRideRequestRepository {
     findById(id: string): Promise<RideRequest | null>;
     exists(id: string): Promise<boolean>;

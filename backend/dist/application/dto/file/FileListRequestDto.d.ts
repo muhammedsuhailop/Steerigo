@@ -1,4 +1,4 @@
-import { FilePurpose } from "@domain/value-objects/FilePurpose";
+import { FilePurpose } from "../../../domain/value-objects/FilePurpose";
 export interface FileListQuery {
     userId?: string;
     purpose?: string;

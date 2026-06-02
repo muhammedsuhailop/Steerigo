@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageStatus = void 0;
-const MessageDeliveryStatus_1 = require("@domain/value-objects/MessageDeliveryStatus");
+const MessageDeliveryStatus_1 = require("../value-objects/MessageDeliveryStatus");
 class MessageStatus {
     constructor(id, messageId, userId, status, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

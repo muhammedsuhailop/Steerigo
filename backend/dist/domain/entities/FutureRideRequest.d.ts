@@ -1,7 +1,7 @@
-import { Location } from "@domain/value-objects/Location";
-import { RideType } from "@domain/value-objects/RideType";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
-import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { Location } from "../value-objects/Location";
+import { RideType } from "../value-objects/RideType";
+import { FareBreakdown } from "../value-objects/FareBreakdown";
+import { FutureRideRequestStatus } from "../value-objects/FutureRideRequestStatus";
 export declare class FutureRideRequest {
     private id;
     private readonly riderId;

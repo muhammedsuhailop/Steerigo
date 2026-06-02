@@ -1,4 +1,4 @@
-import { ChatMessageDeletedPayload, ChatMessageEditedPayload, ChatMessageSentPayload, ChatMessageViewedPayload } from "@application/events/ChatEvents";
+import { ChatMessageDeletedPayload, ChatMessageEditedPayload, ChatMessageSentPayload, ChatMessageViewedPayload } from "../events/ChatEvents";
 export interface IChatRealtimeService {
     notifyMessageSent(payload: ChatMessageSentPayload): Promise<void>;
     notifyMessageEdited(payload: ChatMessageEditedPayload): Promise<void>;

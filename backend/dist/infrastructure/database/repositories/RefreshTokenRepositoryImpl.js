@@ -8,9 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RefreshTokenRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
-const RefreshToken_1 = require("@domain/entities/RefreshToken");
+const RefreshToken_1 = require("../../../domain/entities/RefreshToken");
 const RefreshTokenModel_1 = require("../models/RefreshTokenModel");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let RefreshTokenRepositoryImpl = class RefreshTokenRepositoryImpl {
     async findByToken(token) {
         try {

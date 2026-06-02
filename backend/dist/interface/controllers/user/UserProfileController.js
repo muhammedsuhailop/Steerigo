@@ -14,15 +14,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserProfileController = void 0;
 const inversify_1 = require("inversify");
-const GetUserProfileDto_1 = require("@application/dto/user/GetUserProfileDto");
-const UpdateUserProfileDto_1 = require("@application/dto/user/UpdateUserProfileDto");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const user_1 = require("@application/dto/user");
-const UserMessages_1 = require("@shared/constants/UserMessages");
-const GetUserStatsRequestDto_1 = require("@application/dto/user/GetUserStatsRequestDto");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
+const GetUserProfileDto_1 = require("../../../application/dto/user/GetUserProfileDto");
+const UpdateUserProfileDto_1 = require("../../../application/dto/user/UpdateUserProfileDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const user_1 = require("../../../application/dto/user");
+const UserMessages_1 = require("../../../shared/constants/UserMessages");
+const GetUserStatsRequestDto_1 = require("../../../application/dto/user/GetUserStatsRequestDto");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
 let UserProfileController = class UserProfileController {
     constructor(getUserProfileUseCase, updateUserProfileUseCase, registerUserAsDriverUseCase, getUserStatsUseCase) {
         this.getUserProfileUseCase = getUserProfileUseCase;

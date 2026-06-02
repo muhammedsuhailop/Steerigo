@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateUpdateDriverKycStatusRequest = exports.validateGetKycRequestByIdRequest = exports.validateUpdateKycStatusRequest = exports.validateGetKycRequestsRequest = exports.validateGetDriverProfileRequest = exports.validateDriverActionRequest = exports.validateGetDriversRequest = void 0;
 const zod_1 = require("zod");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
 // Driver validation schemas
 const getDriversSchema = zod_1.z.object({
     query: zod_1.z.object({

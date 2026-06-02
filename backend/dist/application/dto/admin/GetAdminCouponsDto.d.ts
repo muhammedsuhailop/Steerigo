@@ -1,4 +1,4 @@
-import { CouponSortField, SortOrder, CouponFilters } from "@domain/repositories/ICouponRepository";
+import { CouponSortField, SortOrder, CouponFilters } from "../../../domain/repositories/ICouponRepository";
 export declare class GetAdminCouponsDto {
     readonly filters: CouponFilters;
     readonly sortBy: CouponSortField;

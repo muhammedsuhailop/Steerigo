@@ -1,8 +1,8 @@
-import { PaginatedResult } from "@shared/types/Repository";
+import { PaginatedResult } from "../../shared/types/Repository";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
-import { Ride } from "@domain/entities/Ride";
-import { RideStatus } from "@domain/value-objects/RideStatus";
+import { Ride } from "../entities/Ride";
+import { RideStatus } from "../value-objects/RideStatus";
 export interface IRideFilters {
     status?: RideStatus;
     fromDate?: Date;

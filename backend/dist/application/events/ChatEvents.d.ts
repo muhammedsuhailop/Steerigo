@@ -1,6 +1,6 @@
-import { MessageType } from "@domain/value-objects/MessageType";
-import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
-import { UserRole } from "@shared/constants/AuthConstants";
+import { MessageType } from "../../domain/value-objects/MessageType";
+import { MessageDeliveryStatus } from "../../domain/value-objects/MessageDeliveryStatus";
+import { UserRole } from "../../shared/constants/AuthConstants";
 export interface BaseChatEvent<TType extends string, TPayload> {
     type: TType;
     occurredAt: Date;

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PayoutModel = void 0;
 const mongoose_1 = require("mongoose");
-const PayoutMethod_1 = require("@domain/value-objects/PayoutMethod");
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
+const PayoutMethod_1 = require("../../../domain/value-objects/PayoutMethod");
+const PayoutStatus_1 = require("../../../domain/value-objects/PayoutStatus");
 const destinationSchema = new mongoose_1.Schema({
     type: { type: String, enum: ["BANK", "UPI"], required: true },
     accountNumber: String,

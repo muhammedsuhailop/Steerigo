@@ -1,4 +1,4 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { FareBreakdown } from "../../../domain/value-objects/FareBreakdown";
 export declare class SendRideRequestDto {
     readonly riderId: string;
     readonly driverId: string;

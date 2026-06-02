@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponErrors = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
-const CouponMessages_1 = require("@shared/constants/CouponMessages");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
+const CouponMessages_1 = require("../../shared/constants/CouponMessages");
 class CouponErrors {
     static couponNotFound(couponId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(CouponMessages_1.COUPON_ERROR_MESSAGES.COUPON_NOT_FOUND, { couponId }), "COUPON_NOT_FOUND", {

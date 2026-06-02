@@ -1,7 +1,7 @@
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { GearType, BodyType } from "@domain/value-objects/VehicleType";
-import { DocumentType } from "@domain/value-objects/DocumentType";
-import { Gender } from "@domain/value-objects/Gender";
+import { LicenseCategory } from "../../../domain/value-objects/LicenseCategory";
+import { GearType, BodyType } from "../../../domain/value-objects/VehicleType";
+import { DocumentType } from "../../../domain/value-objects/DocumentType";
+import { Gender } from "../../../domain/value-objects/Gender";
 interface DriverRegistrationRequestBody {
     name: string;
     mobile: string;

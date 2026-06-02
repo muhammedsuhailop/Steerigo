@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fileRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const fileValidators_1 = require("@interface/validators/file/fileValidators");
-const AuthMiddleware_1 = require("@interface/middleware/auth/AuthMiddleware");
-const MulterMiddleware_1 = require("@interface/middleware/multer/MulterMiddleware");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const fileValidators_1 = require("../../validators/file/fileValidators");
+const AuthMiddleware_1 = require("../../middleware/auth/AuthMiddleware");
+const MulterMiddleware_1 = require("../../middleware/multer/MulterMiddleware");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const router = (0, express_1.Router)();
 exports.fileRoutes = router;
 const fileController = DIContainer_1.container.get(DITypes_1.TYPES.FileController);

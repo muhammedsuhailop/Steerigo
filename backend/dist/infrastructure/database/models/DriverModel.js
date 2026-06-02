@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverModel = void 0;
-const DriverStatus_1 = require("@domain/value-objects/DriverStatus");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
-const LicenseCategory_1 = require("@domain/value-objects/LicenseCategory");
-const VehicleType_1 = require("@domain/value-objects/VehicleType");
+const DriverStatus_1 = require("../../../domain/value-objects/DriverStatus");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
+const LicenseCategory_1 = require("../../../domain/value-objects/LicenseCategory");
+const VehicleType_1 = require("../../../domain/value-objects/VehicleType");
 const mongoose_1 = require("mongoose");
 const driverSchema = new mongoose_1.Schema({
     userId: {

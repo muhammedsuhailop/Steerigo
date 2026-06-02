@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "@shared/types/Common";
+import { ApiResponse } from "../../shared/types/Common";
 export declare class ErrorHandlerMiddleware {
     static handle(err: Error, req: Request, res: Response, _next: NextFunction): void;
     static notFound(req: Request, res: Response): void;

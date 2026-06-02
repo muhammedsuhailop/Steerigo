@@ -1,5 +1,5 @@
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
-import { RecurringPattern } from "@domain/value-objects/RecurringPattern";
+import { AvailabilityExceptionType } from "../../../domain/value-objects/AvailabilityExceptionType";
+import { RecurringPattern } from "../../../domain/value-objects/RecurringPattern";
 export declare class TimeSlotDto {
     readonly startTime: number;
     readonly endTime: number;

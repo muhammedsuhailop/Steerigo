@@ -1,5 +1,5 @@
-import { Money } from "@domain/value-objects/Money";
-import { WalletOwnerType } from "@domain/value-objects/WalletOwnerType";
+import { Money } from "../value-objects/Money";
+import { WalletOwnerType } from "../value-objects/WalletOwnerType";
 export declare class Wallet {
     private readonly id;
     private readonly ownerId;

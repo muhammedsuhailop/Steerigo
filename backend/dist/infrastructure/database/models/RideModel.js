@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideModel = void 0;
-const BookingType_1 = require("@domain/value-objects/BookingType");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
-const RideType_1 = require("@domain/value-objects/RideType");
+const BookingType_1 = require("../../../domain/value-objects/BookingType");
+const PaymentStatus_1 = require("../../../domain/value-objects/PaymentStatus");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
+const RideType_1 = require("../../../domain/value-objects/RideType");
 const mongoose_1 = require("mongoose");
 const rideSchema = new mongoose_1.Schema({
     rideId: { type: String, required: true, unique: true, index: true },

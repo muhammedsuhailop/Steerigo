@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationSocketAdapter = void 0;
-const Logger_1 = require("@shared/utils/Logger");
-const socket_1 = require("@infrastructure/realtime/socket");
-const SocketEvents_1 = require("@infrastructure/realtime/constants/SocketEvents");
+const Logger_1 = require("../../shared/utils/Logger");
+const socket_1 = require("../realtime/socket");
+const SocketEvents_1 = require("../realtime/constants/SocketEvents");
 class NotificationSocketAdapter {
     static tryGetSocketServer() {
         try {

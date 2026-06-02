@@ -34,8 +34,8 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
-const Gender_1 = require("@domain/value-objects/Gender");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const Gender_1 = require("../../../domain/value-objects/Gender");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 const mongoose_1 = __importStar(require("mongoose"));
 const UserSchema = new mongoose_1.Schema({
     name: {

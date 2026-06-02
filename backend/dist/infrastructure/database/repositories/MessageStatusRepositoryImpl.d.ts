@@ -1,6 +1,6 @@
-import { IMessageStatusRepository } from "@domain/repositories/IMessageStatusRepository";
-import { MessageStatus } from "@domain/entities/MessageStatus";
-import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
+import { IMessageStatusRepository } from "../../../domain/repositories/IMessageStatusRepository";
+import { MessageStatus } from "../../../domain/entities/MessageStatus";
+import { MessageDeliveryStatus } from "../../../domain/value-objects/MessageDeliveryStatus";
 export declare class MessageStatusRepositoryImpl implements IMessageStatusRepository {
     findById(id: string): Promise<MessageStatus | null>;
     exists(id: string): Promise<boolean>;

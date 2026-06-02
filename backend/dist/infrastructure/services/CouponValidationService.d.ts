@@ -1,6 +1,6 @@
-import { ICouponRepository } from "@domain/repositories/ICouponRepository";
-import { CouponValidationResult, ICouponValidationService } from "@application/services/ICouponValidationService";
-import { ICouponUsageRepository } from "@domain/repositories/ICouponUsageRepository";
+import { ICouponRepository } from "../../domain/repositories/ICouponRepository";
+import { CouponValidationResult, ICouponValidationService } from "../../application/services/ICouponValidationService";
+import { ICouponUsageRepository } from "../../domain/repositories/ICouponUsageRepository";
 export declare class CouponValidationService implements ICouponValidationService {
     private readonly couponRepository;
     private readonly couponUsageRepository;

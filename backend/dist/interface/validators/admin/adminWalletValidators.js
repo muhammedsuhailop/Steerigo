@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAdminWalletSchema = void 0;
 const zod_1 = require("zod");
-const TransactionType_1 = require("@domain/value-objects/TransactionType");
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
+const TransactionType_1 = require("../../../domain/value-objects/TransactionType");
+const TransactionDirection_1 = require("../../../domain/value-objects/TransactionDirection");
 exports.getAdminWalletSchema = zod_1.z.object({
     query: zod_1.z.object({
         page: zod_1.z.string().optional(),

@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminCouponRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
-const ValidationMiddleware_1 = require("@interface/middleware/ValidationMiddleware");
-const couponValidators_1 = require("@interface/validators/admin/couponValidators");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const ValidationMiddleware_1 = require("../../middleware/ValidationMiddleware");
+const couponValidators_1 = require("../../validators/admin/couponValidators");
 const router = (0, express_1.Router)();
 exports.adminCouponRoutes = router;
 const controller = DIContainer_1.container.get(DITypes_1.TYPES.AdminCouponController);

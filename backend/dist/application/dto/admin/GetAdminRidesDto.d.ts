@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RideStatus } from "@domain/value-objects/RideStatus";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
 declare const getAdminRidesSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
     limit: z.ZodDefault<z.ZodCoercedNumber<unknown>>;

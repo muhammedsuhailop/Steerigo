@@ -1,4 +1,4 @@
-import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
+import { CouponDiscountType } from "../../../domain/value-objects/CouponDiscountType";
 export declare class EditCouponDto {
     readonly couponId: string;
     readonly discountType?: CouponDiscountType;

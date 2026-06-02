@@ -1,4 +1,4 @@
-import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { AvailabilityStatus } from "../../../domain/value-objects/AvailabilityStatus";
 export declare class UpdateStatusRequestDto {
     private readonly data;
     constructor(requestData: unknown);

@@ -14,16 +14,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScheduleRecurringAvailabilityUseCase = void 0;
 const inversify_1 = require("inversify");
-const DriverAvailabilityResponseDto_1 = require("@application/dto/driver/DriverAvailabilityResponseDto");
-const DriverAvailability_1 = require("@domain/entities/DriverAvailability");
-const Location_1 = require("@domain/value-objects/Location");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverAvailabilityErrors_1 = require("@domain/errors/DriverAvailabilityErrors");
-const DriverNotFoundError_1 = require("@domain/errors/DriverNotFoundError");
+const DriverAvailabilityResponseDto_1 = require("../../dto/driver/DriverAvailabilityResponseDto");
+const DriverAvailability_1 = require("../../../domain/entities/DriverAvailability");
+const Location_1 = require("../../../domain/value-objects/Location");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverAvailabilityErrors_1 = require("../../../domain/errors/DriverAvailabilityErrors");
+const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
 const mongoose_1 = require("mongoose");
-const TimeSlot_1 = require("@domain/value-objects/TimeSlot");
+const TimeSlot_1 = require("../../../domain/value-objects/TimeSlot");
 let ScheduleRecurringAvailabilityUseCase = class ScheduleRecurringAvailabilityUseCase {
     constructor(availabilityRepository, driverRepository) {
         this.availabilityRepository = availabilityRepository;

@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverLocationRepository = void 0;
 const inversify_1 = require("inversify");
-const Location_1 = require("@domain/value-objects/Location");
-const Logger_1 = require("@shared/utils/Logger");
-const RedisService_1 = require("@infrastructure/services/RedisService");
-const DITypes_1 = require("@shared/constants/DITypes");
+const Location_1 = require("../../domain/value-objects/Location");
+const Logger_1 = require("../../shared/utils/Logger");
+const RedisService_1 = require("../services/RedisService");
+const DITypes_1 = require("../../shared/constants/DITypes");
 let DriverLocationRepository = class DriverLocationRepository {
     constructor(redisService) {
         this.redisService = redisService;

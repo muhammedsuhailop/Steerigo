@@ -1,7 +1,7 @@
-import { IEarningsDistributionService, DistributeEarningsParams, EarningsDistributionResult, DistributeCancellationParams } from "@application/services/IEarningsDistributionService";
-import { IWalletRepository } from "@domain/repositories/IWalletRepository";
-import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
-import { IIdGenerator } from "@application/services/IIdGenerator";
+import { IEarningsDistributionService, DistributeEarningsParams, EarningsDistributionResult, DistributeCancellationParams } from "../../application/services/IEarningsDistributionService";
+import { IWalletRepository } from "../../domain/repositories/IWalletRepository";
+import { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
+import { IIdGenerator } from "../../application/services/IIdGenerator";
 export declare class EarningsDistributionService implements IEarningsDistributionService {
     private readonly walletRepository;
     private readonly transactionRepository;

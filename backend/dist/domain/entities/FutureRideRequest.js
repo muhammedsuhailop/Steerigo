@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideRequest = void 0;
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const FutureRideRequestStatus_1 = require("../value-objects/FutureRideRequestStatus");
 class FutureRideRequest {
     constructor(id, riderId, driverId, driverUserId, requestGroupId, pickup, drop, pickupTime, requiredDuration, rideType, fareBreakdown, status, pickupETA, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

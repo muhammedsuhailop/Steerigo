@@ -10,7 +10,7 @@ exports.WalletRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const WalletModel_1 = require("../models/WalletModel");
 const WalletMapper_1 = require("../mappers/WalletMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let WalletRepositoryImpl = class WalletRepositoryImpl {
     async save(wallet) {
         try {

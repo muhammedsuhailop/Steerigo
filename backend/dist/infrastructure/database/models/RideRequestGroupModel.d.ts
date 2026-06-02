@@ -1,5 +1,5 @@
 import { Document, Types } from "mongoose";
-import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+import { RideRequestGroupStatus } from "../../../domain/value-objects/RideRequestGroupStatus";
 export interface IRideLocation {
     latitude: number;
     longitude: number;

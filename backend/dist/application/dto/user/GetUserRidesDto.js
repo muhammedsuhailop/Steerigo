@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserRidesSchema = exports.GetUserRidesDto = void 0;
 const zod_1 = require("zod");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 const getUserRidesSchema = zod_1.z.object({
     page: zod_1.z.coerce.number().positive().optional().default(1),
     limit: zod_1.z.coerce.number().positive().max(100).optional().default(10),

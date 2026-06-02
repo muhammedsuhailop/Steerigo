@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationErrors = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
-const NotificationMessages_1 = require("@shared/constants/NotificationMessages");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
+const NotificationMessages_1 = require("../../shared/constants/NotificationMessages");
 class NotificationErrors {
     static notificationNotFound(notificationId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(NotificationMessages_1.NOTIFICATION_ERROR_MESSAGES.NOTIFICATION_NOT_FOUND, {

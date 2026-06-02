@@ -1,4 +1,4 @@
-import { RideRequest } from "@domain/entities/RideRequest";
+import { RideRequest } from "../../../domain/entities/RideRequest";
 export interface FareBreakdownDto {
     baseFare: {
         amount: number;

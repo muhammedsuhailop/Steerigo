@@ -1,4 +1,4 @@
-import { IPaymentGatewayService, RazorpayOrderResult, RazorpayVerifyParams } from "@application/services/IPaymentGatewayService";
+import { IPaymentGatewayService, RazorpayOrderResult, RazorpayVerifyParams } from "../../application/services/IPaymentGatewayService";
 export declare class RazorpayService implements IPaymentGatewayService {
     private readonly client;
     private readonly keySecret;

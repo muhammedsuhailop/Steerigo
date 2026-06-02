@@ -1,5 +1,5 @@
 import { IRideNotificationService, DriverRequestNotificationPayload, DriverRequestCancelledPayload, RiderRideMatchedPayload, RiderNoDriverFoundPayload, RideArrivedPayload, RideStartedPayload, RideCompletedPayload, RideCancelledDriverPayload, RideCancelledRiderPayload, RideCancelledByDriverRiderPayload, RideCancelledByDriverDriverPayload, DriverFareUpdatedPayload, FutureRideAcceptedPayload, FutureRideAllDriversRejectedPayload } from "../../application/services/IRideNotificationService";
-import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
+import { FutureRideRequestSentToDriverEvent } from "../../application/events/FutureRideEvents";
 export declare class RideNotificationService implements IRideNotificationService {
     private redisPublisher;
     private redisConnected;

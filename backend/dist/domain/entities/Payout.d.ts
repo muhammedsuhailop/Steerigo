@@ -1,6 +1,6 @@
-import { Money } from "@domain/value-objects/Money";
-import { PayoutMethod } from "@domain/value-objects/PayoutMethod";
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
+import { Money } from "../value-objects/Money";
+import { PayoutMethod } from "../value-objects/PayoutMethod";
+import { PayoutStatus } from "../value-objects/PayoutStatus";
 export type BankDestination = {
     type: "BANK";
     accountNumber: string;

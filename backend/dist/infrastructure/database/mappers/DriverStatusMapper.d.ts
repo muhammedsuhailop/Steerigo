@@ -1,5 +1,5 @@
-import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
-import { DriverAvailability } from "@domain/entities/DriverAvailability";
+import { DriverStatusResponseDto } from "../../../application/dto/driver/DriverStatusResponseDto";
+import { DriverAvailability } from "../../../domain/entities/DriverAvailability";
 export declare class DriverStatusMapper {
     static toDtoFromEntity(availability: DriverAvailability): DriverStatusResponseDto;
     private static mapLocation;

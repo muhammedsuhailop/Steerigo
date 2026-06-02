@@ -14,15 +14,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AutoRideController = void 0;
 const inversify_1 = require("inversify");
-const AutoSearchAndRequestDto_1 = require("@application/dto/user/AutoSearchAndRequestDto");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const CancelRideRequestDto_1 = require("@application/dto/user/CancelRideRequestDto");
-const UserMessages_1 = require("@shared/constants/UserMessages");
-const ScheduleFutureRideDto_1 = require("@application/dto/user/ScheduleFutureRideDto");
-const CancelFutureRideDto_1 = require("@application/dto/user/CancelFutureRideDto");
+const AutoSearchAndRequestDto_1 = require("../../../application/dto/user/AutoSearchAndRequestDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const CancelRideRequestDto_1 = require("../../../application/dto/user/CancelRideRequestDto");
+const UserMessages_1 = require("../../../shared/constants/UserMessages");
+const ScheduleFutureRideDto_1 = require("../../../application/dto/user/ScheduleFutureRideDto");
+const CancelFutureRideDto_1 = require("../../../application/dto/user/CancelFutureRideDto");
 let AutoRideController = class AutoRideController {
     constructor(autoSearchAndSendUseCase, cancelRideRequestsUseCase, scheduleUseCase, cancelUseCase) {
         this.autoSearchAndSendUseCase = autoSearchAndSendUseCase;

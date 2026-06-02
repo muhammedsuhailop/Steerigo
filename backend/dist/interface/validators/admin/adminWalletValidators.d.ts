@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { TransactionType } from "@domain/value-objects/TransactionType";
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
+import { TransactionType } from "../../../domain/value-objects/TransactionType";
+import { TransactionDirection } from "../../../domain/value-objects/TransactionDirection";
 export declare const getAdminWalletSchema: z.ZodObject<{
     query: z.ZodObject<{
         page: z.ZodOptional<z.ZodString>;

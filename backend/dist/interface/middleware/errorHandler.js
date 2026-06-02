@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleControllerError = exports.asyncHandler = exports.handleValidationErrors = exports.notFound = exports.handle = exports.ErrorHandlerMiddleware = void 0;
 const express_validator_1 = require("express-validator");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
+const Logger_1 = require("../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../shared/utils/ErrorHandlerService");
 class ErrorHandlerMiddleware {
     // Global error handler - catches all unhandled errors
     static handle(err, req, res, _next) {

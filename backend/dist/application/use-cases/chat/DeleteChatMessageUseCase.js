@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeleteChatMessageUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ChatErrors_1 = require("@domain/errors/ChatErrors");
+const Result_1 = require("../../../shared/utils/Result");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ChatErrors_1 = require("../../../domain/errors/ChatErrors");
 let DeleteChatMessageUseCase = class DeleteChatMessageUseCase {
     constructor(messageRepository, chatEventBus) {
         this.messageRepository = messageRepository;

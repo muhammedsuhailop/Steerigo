@@ -1,4 +1,4 @@
-import { ReviewType } from "@domain/value-objects/ReviewType";
+import { ReviewType } from "../value-objects/ReviewType";
 import { RatingCriteria } from "../value-objects/RatingCriteria";
 export declare class Rating {
     private readonly id;

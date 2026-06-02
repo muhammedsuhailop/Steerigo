@@ -1,5 +1,5 @@
-import { PayoutMethod } from "@domain/value-objects/PayoutMethod";
-import { PayoutDestination } from "@domain/entities/Payout";
+import { PayoutMethod } from "../../../domain/value-objects/PayoutMethod";
+import { PayoutDestination } from "../../../domain/entities/Payout";
 export declare class RequestPayoutDto {
     private readonly userId;
     private readonly amount;

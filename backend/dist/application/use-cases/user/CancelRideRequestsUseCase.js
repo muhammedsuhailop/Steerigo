@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancelRideRequestsUseCase = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Result_1 = require("@shared/utils/Result");
-const RideRequestErrors_1 = require("@domain/errors/RideRequestErrors");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Result_1 = require("../../../shared/utils/Result");
+const RideRequestErrors_1 = require("../../../domain/errors/RideRequestErrors");
 let CancelRideRequestsUseCase = class CancelRideRequestsUseCase {
     constructor(rideRequestRepository) {
         this.rideRequestRepository = rideRequestRepository;

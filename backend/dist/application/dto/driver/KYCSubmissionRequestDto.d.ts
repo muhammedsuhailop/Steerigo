@@ -1,6 +1,6 @@
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { GearType, BodyType } from "@domain/value-objects/VehicleType";
-import { DocumentType } from "@domain/value-objects/DocumentType";
+import { LicenseCategory } from "../../../domain/value-objects/LicenseCategory";
+import { GearType, BodyType } from "../../../domain/value-objects/VehicleType";
+import { DocumentType } from "../../../domain/value-objects/DocumentType";
 interface LicenseKYCRequestBody {
     licenseCategory: LicenseCategory;
     docNumber: string;

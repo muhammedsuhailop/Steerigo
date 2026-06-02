@@ -1,6 +1,6 @@
-import { Transaction } from "@domain/entities/Transaction";
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
-import { TransactionType } from "@domain/value-objects/TransactionType";
+import { Transaction } from "../../../domain/entities/Transaction";
+import { TransactionDirection } from "../../../domain/value-objects/TransactionDirection";
+import { TransactionType } from "../../../domain/value-objects/TransactionType";
 import { ITransactionDocument } from "../models/TransactionModel";
 export declare class TransactionMapper {
     static toDomain(doc: ITransactionDocument): Transaction;

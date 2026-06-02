@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { InitiatePaymentDto } from "@application/dto/payment/InitiatePaymentDto";
-import { InitiatePaymentResponseDto } from "@application/dto/payment/InitiatePaymentResponseDto";
-import { VerifyPaymentDto } from "@application/dto/payment/VerifyPaymentDto";
-import { VerifyPaymentResponseDto } from "@application/dto/payment/VerifyPaymentResponseDto";
-import { ConfirmCashPaymentDto } from "@application/dto/payment/ConfirmCashPaymentDto";
-import { ConfirmCashPaymentResponseDto } from "@application/dto/payment/ConfirmCashPaymentResponseDto";
-import { Result } from "@shared/utils/Result";
-import { MarkPaymentFailedDto } from "@application/dto/payment/MarkPaymentFailedDto";
-import { MarkPaymentFailedResponseDto } from "@application/dto/payment/MarkPaymentFailedResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { InitiatePaymentDto } from "../../../application/dto/payment/InitiatePaymentDto";
+import { InitiatePaymentResponseDto } from "../../../application/dto/payment/InitiatePaymentResponseDto";
+import { VerifyPaymentDto } from "../../../application/dto/payment/VerifyPaymentDto";
+import { VerifyPaymentResponseDto } from "../../../application/dto/payment/VerifyPaymentResponseDto";
+import { ConfirmCashPaymentDto } from "../../../application/dto/payment/ConfirmCashPaymentDto";
+import { ConfirmCashPaymentResponseDto } from "../../../application/dto/payment/ConfirmCashPaymentResponseDto";
+import { Result } from "../../../shared/utils/Result";
+import { MarkPaymentFailedDto } from "../../../application/dto/payment/MarkPaymentFailedDto";
+import { MarkPaymentFailedResponseDto } from "../../../application/dto/payment/MarkPaymentFailedResponseDto";
 export declare class PaymentController {
     private readonly initiatePaymentUseCase;
     private readonly verifyPaymentUseCase;

@@ -14,11 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminTransactionController = void 0;
 const inversify_1 = require("inversify");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const GetAdminTransactionsDto_1 = require("@application/dto/admin/GetAdminTransactionsDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const GetAdminTransactionsDto_1 = require("../../../application/dto/admin/GetAdminTransactionsDto");
 let AdminTransactionController = class AdminTransactionController {
     constructor(getAdminTransactionsUseCase) {
         this.getAdminTransactionsUseCase = getAdminTransactionsUseCase;

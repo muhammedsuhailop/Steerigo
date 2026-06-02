@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileListRequestDto = void 0;
-const FilePurpose_1 = require("@domain/value-objects/FilePurpose");
+const FilePurpose_1 = require("../../../domain/value-objects/FilePurpose");
 class FileListRequestDto {
     constructor(query) {
         const input = (query ?? {});

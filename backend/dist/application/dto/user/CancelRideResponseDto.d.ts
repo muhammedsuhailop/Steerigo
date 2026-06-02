@@ -1,5 +1,5 @@
-import { RideStatus } from "@domain/value-objects/RideStatus";
-import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
+import { RideCancellationReason } from "../../../domain/value-objects/RideCancellationReason";
 export interface CancelRideResponseDto {
     rideId: string;
     status: RideStatus;

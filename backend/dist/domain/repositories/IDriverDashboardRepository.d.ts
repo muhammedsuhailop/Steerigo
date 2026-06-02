@@ -1,7 +1,7 @@
-import { Ride } from "@domain/entities/Ride";
-import { RideRequest } from "@domain/entities/RideRequest";
-import { DriverDashboardStatistics } from "@domain/value-objects/DriverDashboardStatistics";
-import { DriverDashboardPerformance } from "@domain/value-objects/DriverDashboardPerformance";
+import { Ride } from "../entities/Ride";
+import { RideRequest } from "../entities/RideRequest";
+import { DriverDashboardStatistics } from "../value-objects/DriverDashboardStatistics";
+import { DriverDashboardPerformance } from "../value-objects/DriverDashboardPerformance";
 export interface IDriverDashboardRepository {
     getDashboardData(driverId: string): Promise<{
         currentRide: Ride | null;

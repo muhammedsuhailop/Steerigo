@@ -1,4 +1,4 @@
-import { UserStatus } from "@shared/constants/UserStatus";
+import { UserStatus } from "../../../shared/constants/UserStatus";
 export type AdminUsersQuery = {
     status?: string;
     search?: string;

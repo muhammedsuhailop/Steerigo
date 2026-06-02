@@ -1,6 +1,6 @@
-import { IUserChatRepository, IUserChatPaginationOptions } from "@domain/repositories/IUserChatRepository";
-import { UserChat } from "@domain/entities/UserChat";
-import { PaginatedResult } from "@shared/types/Repository";
+import { IUserChatRepository, IUserChatPaginationOptions } from "../../../domain/repositories/IUserChatRepository";
+import { UserChat } from "../../../domain/entities/UserChat";
+import { PaginatedResult } from "../../../shared/types/Repository";
 export declare class UserChatRepositoryImpl implements IUserChatRepository {
     findById(id: string): Promise<UserChat | null>;
     exists(id: string): Promise<boolean>;

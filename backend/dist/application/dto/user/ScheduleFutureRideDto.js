@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScheduleFutureRideDto = void 0;
-const ValidationErrors_1 = require("@domain/errors/ValidationErrors");
-const FutureRideErrors_1 = require("@domain/errors/FutureRideErrors");
-const AppConstants_1 = require("@shared/constants/AppConstants");
+const ValidationErrors_1 = require("../../../domain/errors/ValidationErrors");
+const FutureRideErrors_1 = require("../../../domain/errors/FutureRideErrors");
+const AppConstants_1 = require("../../../shared/constants/AppConstants");
 class ScheduleFutureRideDto {
     constructor(requestGroupId, riderId, latitude, longitude, pickupTime, radiusKm, gearType, bodyType, maxCandidates, dropLatitude, dropLongitude, dropAddress, pickupAddress, rideType, requiredDuration) {
         this.requestGroupId = requestGroupId;

@@ -1,8 +1,8 @@
-import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
-import { IKYCRepository } from "@domain/repositories/IAdminDriverKYCRepository";
-import { GetDriverProfileRequestDto } from "@application/dto/admin/GetDriverProfileRequestDto";
-import { AdminGetDriverProfileResponseDto } from "@application/dto/admin/GetDriverProfileResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminDriverRepository } from "../../../domain/repositories/IAdminDriverRepository";
+import { IKYCRepository } from "../../../domain/repositories/IAdminDriverKYCRepository";
+import { GetDriverProfileRequestDto } from "../../dto/admin/GetDriverProfileRequestDto";
+import { AdminGetDriverProfileResponseDto } from "../../dto/admin/GetDriverProfileResponseDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class GetDriverProfileUseCase implements IUseCase<GetDriverProfileRequestDto, Promise<Result<AdminGetDriverProfileResponseDto>>> {
     private adminDriverRepository;

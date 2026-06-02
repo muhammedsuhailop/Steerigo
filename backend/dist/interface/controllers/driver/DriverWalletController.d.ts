@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { GetDriverWalletDto } from "@application/dto/driver/GetDriverWalletDto";
-import { GetDriverWalletResponseDto } from "@application/dto/driver/GetDriverWalletResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { GetDriverWalletDto } from "../../../application/dto/driver/GetDriverWalletDto";
+import { GetDriverWalletResponseDto } from "../../../application/dto/driver/GetDriverWalletResponseDto";
+import { Result } from "../../../shared/utils/Result";
 export declare class DriverWalletController {
     private readonly getDriverWalletUseCase;
     constructor(getDriverWalletUseCase: IUseCase<GetDriverWalletDto, Promise<Result<GetDriverWalletResponseDto>>>);

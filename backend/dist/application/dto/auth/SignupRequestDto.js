@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignupRequestDto = void 0;
-const Email_1 = require("@domain/value-objects/Email");
+const Email_1 = require("../../../domain/value-objects/Email");
 class SignupRequestDto {
     constructor(data) {
         this.email = Email_1.Email.create(data.email);

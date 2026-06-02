@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancelRideRequestDto = void 0;
-const DomainError_1 = require("@domain/errors/DomainError");
+const DomainError_1 = require("../../../domain/errors/DomainError");
 class CancelRideRequestDto {
     constructor(riderId, requestGroupId) {
         this.riderId = riderId;

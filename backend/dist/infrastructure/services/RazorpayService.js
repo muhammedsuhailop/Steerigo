@@ -16,7 +16,7 @@ exports.RazorpayService = void 0;
 const inversify_1 = require("inversify");
 const razorpay_1 = __importDefault(require("razorpay"));
 const crypto_1 = __importDefault(require("crypto"));
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 let RazorpayService = class RazorpayService {
     constructor() {
         const keyId = process.env.RAZORPAY_KEY_ID;

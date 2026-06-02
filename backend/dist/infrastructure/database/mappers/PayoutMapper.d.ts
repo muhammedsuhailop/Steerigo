@@ -1,8 +1,8 @@
-import { Payout } from "@domain/entities/Payout";
+import { Payout } from "../../../domain/entities/Payout";
 import { IPayoutDocument } from "../models/PayoutModel";
-import { PayoutMethod } from "@domain/value-objects/PayoutMethod";
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
-import { PayoutDestination } from "@domain/entities/Payout";
+import { PayoutMethod } from "../../../domain/value-objects/PayoutMethod";
+import { PayoutStatus } from "../../../domain/value-objects/PayoutStatus";
+import { PayoutDestination } from "../../../domain/entities/Payout";
 export declare class PayoutMapper {
     static toDomain(doc: IPayoutDocument): Payout;
     static toPersistence(entity: Payout): {

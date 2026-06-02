@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RejectPayoutUseCase = void 0;
 const inversify_1 = require("inversify");
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const PayoutErrors_1 = require("@domain/errors/PayoutErrors");
-const AdminMessages_1 = require("@shared/constants/AdminMessages");
+const PayoutStatus_1 = require("../../../domain/value-objects/PayoutStatus");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const PayoutErrors_1 = require("../../../domain/errors/PayoutErrors");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let RejectPayoutUseCase = class RejectPayoutUseCase {
     constructor(payoutRepository) {
         this.payoutRepository = payoutRepository;

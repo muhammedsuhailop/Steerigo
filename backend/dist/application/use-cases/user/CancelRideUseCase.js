@@ -15,12 +15,12 @@ var CancelRideUseCase_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancelRideUseCase = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const RideCancellationErrors_1 = require("@domain/errors/RideCancellationErrors");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const PaymentStatus_1 = require("../../../domain/value-objects/PaymentStatus");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const RideCancellationErrors_1 = require("../../../domain/errors/RideCancellationErrors");
 let CancelRideUseCase = CancelRideUseCase_1 = class CancelRideUseCase {
     constructor(rideRepository, driverRepository, cancellationChargeService, eventBus) {
         this.rideRepository = rideRepository;

@@ -1,8 +1,8 @@
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { ITokenService } from "@application/services/ITokenService";
-import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
-import { Result } from "@shared/utils/Result";
+import { IRefreshTokenRepository } from "../../../domain/repositories/IRefreshTokenRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { ITokenService } from "../../services/ITokenService";
+import { RefreshTokenDto } from "../../dto/auth/RefreshTokenDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class RefreshTokenUseCase implements IUseCase<RefreshTokenDto, Promise<Result<{
     accessToken: string;

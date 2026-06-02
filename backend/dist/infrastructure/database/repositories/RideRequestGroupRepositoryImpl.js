@@ -11,8 +11,8 @@ const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
 const RideRequestGroupModel_1 = require("../models/RideRequestGroupModel");
 const RideRequestGroupMapper_1 = require("../mappers/RideRequestGroupMapper");
-const RideRequestGroupStatus_1 = require("@domain/value-objects/RideRequestGroupStatus");
-const Logger_1 = require("@shared/utils/Logger");
+const RideRequestGroupStatus_1 = require("../../../domain/value-objects/RideRequestGroupStatus");
+const Logger_1 = require("../../../shared/utils/Logger");
 let RideRequestGroupRepositoryImpl = class RideRequestGroupRepositoryImpl {
     async save(entity) {
         const persistence = RideRequestGroupMapper_1.RideRequestGroupMapper.toPersistence(entity);

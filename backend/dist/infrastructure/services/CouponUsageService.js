@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponUsageService = void 0;
 const inversify_1 = require("inversify");
-const CouponUsage_1 = require("@domain/entities/CouponUsage");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
+const CouponUsage_1 = require("../../domain/entities/CouponUsage");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const Logger_1 = require("../../shared/utils/Logger");
 let CouponUsageService = class CouponUsageService {
     constructor(rideRepository, couponUsageRepository, idGenerator) {
         this.rideRepository = rideRepository;

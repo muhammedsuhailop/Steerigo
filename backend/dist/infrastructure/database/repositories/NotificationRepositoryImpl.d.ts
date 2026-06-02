@@ -1,6 +1,6 @@
-import { INotificationRepository, INotificationPaginationOptions } from "@domain/repositories/INotificationRepository";
-import { Notification } from "@domain/entities/Notification";
-import { PaginatedResult } from "@shared/types/Repository";
+import { INotificationRepository, INotificationPaginationOptions } from "../../../domain/repositories/INotificationRepository";
+import { Notification } from "../../../domain/entities/Notification";
+import { PaginatedResult } from "../../../shared/types/Repository";
 export declare class NotificationRepositoryImpl implements INotificationRepository {
     save(notification: Notification): Promise<Notification>;
     findById(id: string): Promise<Notification | null>;

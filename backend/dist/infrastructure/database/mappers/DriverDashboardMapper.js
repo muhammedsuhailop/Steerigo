@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverDashboardMapper = void 0;
-const DriverDashboardResponseDto_1 = require("@application/dto/driver/DriverDashboardResponseDto");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
+const DriverDashboardResponseDto_1 = require("../../../application/dto/driver/DriverDashboardResponseDto");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 class DriverDashboardMapper {
     static toResponseDto(driver, driverUser, availability, currentRide, currentRideRiderUser, pendingRequests, pendingRequestUsers, statistics, performance, scheduledRidesCount) {
         return new DriverDashboardResponseDto_1.DriverDashboardResponseDto({

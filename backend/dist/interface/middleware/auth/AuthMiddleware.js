@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireRole = exports.authMiddleware = void 0;
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
 const authMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;

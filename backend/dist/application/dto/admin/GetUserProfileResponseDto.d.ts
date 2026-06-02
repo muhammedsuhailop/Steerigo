@@ -1,5 +1,5 @@
-import { Gender } from "@domain/value-objects/Gender";
-import { UserStatus, UserRole, AuthProvider } from "@shared/constants/AuthConstants";
+import { Gender } from "../../../domain/value-objects/Gender";
+import { UserStatus, UserRole, AuthProvider } from "../../../shared/constants/AuthConstants";
 export interface AdminUserProfileInfo {
     id: string;
     name: string;

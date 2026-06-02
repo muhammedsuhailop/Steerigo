@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationFactory = void 0;
-const NotificationPersistenceService_1 = require("@application/services/NotificationPersistenceService");
-const CreateNotificationUseCase_1 = require("@application/use-cases/notification/CreateNotificationUseCase");
-const GetNotificationsUseCase_1 = require("@application/use-cases/notification/GetNotificationsUseCase");
-const MarkNotificationsReadUseCase_1 = require("@application/use-cases/notification/MarkNotificationsReadUseCase");
-const NotificationRepositoryImpl_1 = require("@infrastructure/database/repositories/NotificationRepositoryImpl");
-const NotificationRealtimePublisher_1 = require("@infrastructure/realtime/publisher/NotificationRealtimePublisher");
-const NotificationController_1 = require("@interface/controllers/notification/NotificationController");
-const DITypes_1 = require("@shared/constants/DITypes");
+const NotificationPersistenceService_1 = require("../../../application/services/NotificationPersistenceService");
+const CreateNotificationUseCase_1 = require("../../../application/use-cases/notification/CreateNotificationUseCase");
+const GetNotificationsUseCase_1 = require("../../../application/use-cases/notification/GetNotificationsUseCase");
+const MarkNotificationsReadUseCase_1 = require("../../../application/use-cases/notification/MarkNotificationsReadUseCase");
+const NotificationRepositoryImpl_1 = require("../../database/repositories/NotificationRepositoryImpl");
+const NotificationRealtimePublisher_1 = require("../../realtime/publisher/NotificationRealtimePublisher");
+const NotificationController_1 = require("../../../interface/controllers/notification/NotificationController");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 class NotificationFactory {
     static register(container) {
         // Repository

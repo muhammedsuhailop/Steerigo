@@ -1,5 +1,5 @@
 import { IGoogleAuthService } from "../../services/IGoogleAuthService";
-import { Result } from "@shared/utils/Result";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class GetGoogleAuthUrlUseCase implements IUseCase<void, Promise<Result<{
     authUrl: string;

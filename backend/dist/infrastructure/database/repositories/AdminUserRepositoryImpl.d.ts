@@ -1,6 +1,6 @@
-import { IAdminUserRepository, IAdminUserSummary } from "@domain/repositories/IAdminUserRepository";
-import { User } from "@domain/entities/User";
-import { QueryOptions, PaginatedResult, FilterOptions } from "@shared/types/Repository";
+import { IAdminUserRepository, IAdminUserSummary } from "../../../domain/repositories/IAdminUserRepository";
+import { User } from "../../../domain/entities/User";
+import { QueryOptions, PaginatedResult, FilterOptions } from "../../../shared/types/Repository";
 type AdminFilterOptions = FilterOptions<User> & {
     status?: string;
     search?: string;

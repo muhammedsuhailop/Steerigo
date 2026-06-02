@@ -1,4 +1,4 @@
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { KYCStatus } from "../../../domain/value-objects/KYCStatus";
 export declare class UpdateKycStatusRequestDto {
     private readonly data;
     constructor(requestData: unknown);

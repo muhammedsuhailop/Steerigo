@@ -8,13 +8,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 const RideModel_1 = require("../models/RideModel");
 const RideMapper_1 = require("../mappers/RideMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
-const RideErrors_1 = require("@domain/errors/RideErrors");
-const idHelper_1 = require("@shared/utils/idHelper");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 let RideRepositoryImpl = class RideRepositoryImpl {
     async findById(id) {
         try {

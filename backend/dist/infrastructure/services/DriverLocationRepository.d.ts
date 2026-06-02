@@ -1,5 +1,5 @@
-import { IDriverLocationRepository, DriverLocationSnapshot } from "@domain/repositories/IDriverLocationRepository";
-import { RedisService } from "@infrastructure/services/RedisService";
+import { IDriverLocationRepository, DriverLocationSnapshot } from "../../domain/repositories/IDriverLocationRepository";
+import { RedisService } from "../services/RedisService";
 export declare class DriverLocationRepository implements IDriverLocationRepository {
     private readonly redisService;
     private readonly client;

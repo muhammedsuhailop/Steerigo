@@ -1,6 +1,6 @@
-import { Wallet } from "@domain/entities/Wallet";
+import { Wallet } from "../../../domain/entities/Wallet";
 import { IWalletDocument } from "../models/WalletModel";
-import { WalletOwnerType } from "@domain/value-objects/WalletOwnerType";
+import { WalletOwnerType } from "../../../domain/value-objects/WalletOwnerType";
 export declare class WalletMapper {
     static toDomain(doc: IWalletDocument): Wallet;
     static toPersistence(entity: Wallet): {

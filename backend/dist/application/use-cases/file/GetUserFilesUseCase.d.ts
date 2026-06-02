@@ -1,6 +1,6 @@
-import { IFileUploadService } from "@application/services/IFileUploadService";
-import { Result } from "@shared/utils/Result";
-import { GetUserFilesResponseDto } from "@application/dto/file/GetUserFilesResponseDto";
+import { IFileUploadService } from "../../services/IFileUploadService";
+import { Result } from "../../../shared/utils/Result";
+import { GetUserFilesResponseDto } from "../../dto/file/GetUserFilesResponseDto";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class GetUserFilesUseCase implements IUseCase<string, Promise<Result<GetUserFilesResponseDto, Error>>> {
     private fileUploadService;

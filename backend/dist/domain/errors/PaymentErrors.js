@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentErrors = void 0;
-const PaymentMessages_1 = require("@shared/constants/PaymentMessages");
+const PaymentMessages_1 = require("../../shared/constants/PaymentMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
 class PaymentErrors {
     static rideNotCompleted(rideId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(PaymentMessages_1.PAYMENT_ERROR_MESSAGES.RIDE_NOT_COMPLETED, { rideId }), "RIDE_NOT_COMPLETED", {

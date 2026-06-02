@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminRideStatsRequestDto = exports.getRideStatsSchema = void 0;
-const ValidationErrors_1 = require("@domain/errors/ValidationErrors");
+const ValidationErrors_1 = require("../../../domain/errors/ValidationErrors");
 const zod_1 = require("zod");
 exports.getRideStatsSchema = zod_1.z
     .object({

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAvailabilityMapper = void 0;
-const DriverAvailability_1 = require("@domain/entities/DriverAvailability");
-const Location_1 = require("@domain/value-objects/Location");
-const TimeSlot_1 = require("@domain/value-objects/TimeSlot");
+const DriverAvailability_1 = require("../../../domain/entities/DriverAvailability");
+const Location_1 = require("../../../domain/value-objects/Location");
+const TimeSlot_1 = require("../../../domain/value-objects/TimeSlot");
 const mongoose_1 = require("mongoose");
 class DriverAvailabilityMapper {
     static mapLocation(raw) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { PaymentMethod } from "../../../domain/value-objects/PaymentMethod";
 export declare const initiatePaymentSchema: z.ZodObject<{
     body: z.ZodObject<{
         rideId: z.ZodString;

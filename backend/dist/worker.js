@@ -6,10 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const Logger_1 = require("@shared/utils/Logger");
-const connection_1 = require("@infrastructure/database/repositories/connection");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
+const Logger_1 = require("./shared/utils/Logger");
+const connection_1 = require("./infrastructure/database/repositories/connection");
+const DITypes_1 = require("./shared/constants/DITypes");
+const DIContainer_1 = require("./infrastructure/container/DIContainer");
 async function bootstrap() {
     try {
         await connection_1.DatabaseConnection.getInstance().connect();

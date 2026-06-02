@@ -1,7 +1,7 @@
 import { IBaseRepository } from "./IBaseRepository";
-import { RideRequest } from "@domain/entities/RideRequest";
-import { RideRequestStatus } from "@domain/value-objects/RideRequestStatus";
-import { QueryOptions, FilterOptions } from "@shared/types/Repository";
+import { RideRequest } from "../entities/RideRequest";
+import { RideRequestStatus } from "../value-objects/RideRequestStatus";
+import { QueryOptions, FilterOptions } from "../../shared/types/Repository";
 export interface IRideRequestFilters extends FilterOptions<RideRequest> {
     status?: RideRequestStatus;
     driverId?: string;

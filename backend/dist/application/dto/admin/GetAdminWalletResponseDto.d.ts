@@ -1,5 +1,5 @@
-import { TransactionType } from "@domain/value-objects/TransactionType";
-import { TransactionDirection } from "@domain/value-objects/TransactionDirection";
+import { TransactionType } from "../../../domain/value-objects/TransactionType";
+import { TransactionDirection } from "../../../domain/value-objects/TransactionDirection";
 export interface AdminTransactionItemData {
     id: string;
     type: TransactionType;

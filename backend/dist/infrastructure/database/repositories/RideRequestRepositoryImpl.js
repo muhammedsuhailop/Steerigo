@@ -8,10 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
-const RideRequestStatus_1 = require("@domain/value-objects/RideRequestStatus");
+const RideRequestStatus_1 = require("../../../domain/value-objects/RideRequestStatus");
 const RideRequestModel_1 = require("../models/RideRequestModel");
 const RideRequestMapper_1 = require("../mappers/RideRequestMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
 let RideRequestRepositoryImpl = class RideRequestRepositoryImpl {
     // Basic Repository Operations

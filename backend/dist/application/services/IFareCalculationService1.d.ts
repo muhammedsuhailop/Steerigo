@@ -1,5 +1,5 @@
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
-import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
+import { FareBreakdown } from "../../domain/value-objects/FareBreakdown";
+import { IFareConfigurationRepository } from "../../domain/repositories/IFareConfigurationRepository";
 export interface IFareCalculationParams {
     durationMinutes: number;
     searchDate?: Date;

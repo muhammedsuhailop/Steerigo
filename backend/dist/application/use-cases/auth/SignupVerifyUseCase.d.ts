@@ -1,11 +1,11 @@
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
-import { IOtpService } from "@application/services/IOtpService";
-import { ITokenService } from "@application/services/ITokenService";
-import { IEmailService } from "@application/services/IEmailService";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IRefreshTokenRepository } from "../../../domain/repositories/IRefreshTokenRepository";
+import { IOtpService } from "../../services/IOtpService";
+import { ITokenService } from "../../services/ITokenService";
+import { IEmailService } from "../../services/IEmailService";
 import { SignupVerifyDto } from "../../dto/auth/SignupVerifyDto";
 import { SignupVerifyResponseDto } from "../../dto/auth/SignupVerifyResponseDto";
-import { Result } from "@shared/utils/Result";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class SignupVerifyUseCase implements IUseCase<SignupVerifyDto, Promise<Result<SignupVerifyResponseDto>>> {
     private userRepository;

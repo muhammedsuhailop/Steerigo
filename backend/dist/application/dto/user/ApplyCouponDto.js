@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApplyCouponDto = void 0;
-const RideErrors_1 = require("@domain/errors/RideErrors");
-const CouponErrors_1 = require("@domain/errors/CouponErrors");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
+const CouponErrors_1 = require("../../../domain/errors/CouponErrors");
 class ApplyCouponDto {
     constructor(riderId, rideId, couponCode) {
         this.riderId = riderId;

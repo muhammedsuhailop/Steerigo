@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponUsageMapper = void 0;
 const mongoose_1 = require("mongoose");
-const CouponUsage_1 = require("@domain/entities/CouponUsage");
+const CouponUsage_1 = require("../../../domain/entities/CouponUsage");
 class CouponUsageMapper {
     static toDomain(doc) {
         return CouponUsage_1.CouponUsage.fromData({

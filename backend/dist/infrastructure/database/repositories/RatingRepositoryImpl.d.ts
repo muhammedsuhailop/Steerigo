@@ -1,5 +1,5 @@
-import { IRatingRepository, IRatingStatsResult, PaginatedRatings, RatingFilters, RatingQueryOptions } from "@domain/repositories/IRatingRepository";
-import { Rating } from "@domain/entities/Rating";
+import { IRatingRepository, IRatingStatsResult, PaginatedRatings, RatingFilters, RatingQueryOptions } from "../../../domain/repositories/IRatingRepository";
+import { Rating } from "../../../domain/entities/Rating";
 export declare class RatingRepositoryImpl implements IRatingRepository {
     findById(id: string): Promise<Rating | null>;
     exists(id: string): Promise<boolean>;

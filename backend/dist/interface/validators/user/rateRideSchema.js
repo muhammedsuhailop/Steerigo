@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rateRideSchema = void 0;
 const zod_1 = require("zod");
-const RatingCriteriaType_1 = require("@domain/value-objects/RatingCriteriaType");
+const RatingCriteriaType_1 = require("../../../domain/value-objects/RatingCriteriaType");
 const dynamicCriteriaShape = Object.values(RatingCriteriaType_1.RatingCriteriaType).reduce((acc, key) => {
     acc[key] = zod_1.z.any();
     return acc;

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideErrors = void 0;
-const RideMessages_1 = require("@shared/constants/RideMessages");
+const RideMessages_1 = require("../../shared/constants/RideMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
 class RideErrors {
     static rideNotFound(rideId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(RideMessages_1.RIDE_ERROR_MESSAGES.RIDE_NOT_FOUND, { rideId }), "RIDE_NOT_FOUND", {

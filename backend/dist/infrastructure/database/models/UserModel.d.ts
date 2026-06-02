@@ -1,4 +1,4 @@
-import { Gender } from "@domain/value-objects/Gender";
+import { Gender } from "../../../domain/value-objects/Gender";
 import mongoose, { Document } from "mongoose";
 export interface IUserDocument extends Document {
     name: string;
@@ -21,7 +21,7 @@ export interface IUserDocument extends Document {
     updatedAt: Date;
 }
 export declare const UserModel: mongoose.Model<IUserDocument, {}, {}, {}, mongoose.Document<unknown, {}, IUserDocument, {}, {}> & IUserDocument & Required<{
-    _id: mongoose.Types.ObjectId;
+    _id: unknown;
 }> & {
     __v: number;
 }, any>;

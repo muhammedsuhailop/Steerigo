@@ -1,4 +1,4 @@
-import { Ride } from "@domain/entities/Ride";
+import { Ride } from "../../../domain/entities/Ride";
 import { IRideDocument } from "../models/RideModel";
 export declare class RideMapper {
     static toDomain(doc: IRideDocument): Ride;

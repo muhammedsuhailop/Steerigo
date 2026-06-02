@@ -1,4 +1,4 @@
-import { User } from "@domain/entities/User";
+import { User } from "../entities/User";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
 export interface IAdminUsersQuery {

@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminPayoutController = void 0;
 const inversify_1 = require("inversify");
-const ApprovePayoutDto_1 = require("@application/dto/admin/ApprovePayoutDto");
-const RejectPayoutDto_1 = require("@application/dto/admin/RejectPayoutDto");
-const GetAdminPayoutsDto_1 = require("@application/dto/admin/GetAdminPayoutsDto");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
+const ApprovePayoutDto_1 = require("../../../application/dto/admin/ApprovePayoutDto");
+const RejectPayoutDto_1 = require("../../../application/dto/admin/RejectPayoutDto");
+const GetAdminPayoutsDto_1 = require("../../../application/dto/admin/GetAdminPayoutsDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
 let AdminPayoutController = class AdminPayoutController {
     constructor(approvePayoutUseCase, rejectPayoutUseCase, getAdminPayoutsUseCase) {
         this.approvePayoutUseCase = approvePayoutUseCase;

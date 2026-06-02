@@ -1,5 +1,5 @@
-import { Transaction } from "@domain/entities/Transaction";
-import { AdminTransactionQueryFilters, ITransactionRepository, TransactionQueryFilters, TransactionQueryResult } from "@domain/repositories/ITransactionRepository";
+import { Transaction } from "../../../domain/entities/Transaction";
+import { AdminTransactionQueryFilters, ITransactionRepository, TransactionQueryFilters, TransactionQueryResult } from "../../../domain/repositories/ITransactionRepository";
 export declare class TransactionRepositoryImpl implements ITransactionRepository {
     save(transaction: Transaction): Promise<Transaction>;
     findById(id: string): Promise<Transaction | null>;

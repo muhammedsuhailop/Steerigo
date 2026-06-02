@@ -1,4 +1,4 @@
-import { LocationCoordinates } from "@domain/value-objects/Location";
+import { LocationCoordinates } from "../value-objects/Location";
 export interface DriverLocationSnapshot {
     driverUserId: string;
     coordinates: LocationCoordinates;

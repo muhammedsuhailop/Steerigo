@@ -10,7 +10,7 @@ exports.TransactionRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const TransactionModel_1 = require("../models/TransactionModel");
 const TransactionMapper_1 = require("../mappers/TransactionMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const WalletModel_1 = require("../models/WalletModel");
 let TransactionRepositoryImpl = class TransactionRepositoryImpl {
     async save(transaction) {

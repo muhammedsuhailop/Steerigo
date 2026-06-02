@@ -1,5 +1,5 @@
-import { Payment } from "@domain/entities/Payment";
-import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
+import { Payment } from "../../../domain/entities/Payment";
+import { IPaymentRepository } from "../../../domain/repositories/IPaymentRepository";
 export declare class PaymentRepositoryImpl implements IPaymentRepository {
     findById(id: string): Promise<Payment | null>;
     findByRideId(rideId: string): Promise<Payment | null>;

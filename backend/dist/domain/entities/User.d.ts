@@ -1,8 +1,8 @@
 import { Email } from "../value-objects/Email";
 import { Password } from "../value-objects/Password";
-import { AuthProvider, UserRole, UserStatus } from "@shared/constants/AuthConstants";
-import { BaseEntity } from "@shared/types/Repository";
-import { Gender } from "@domain/value-objects/Gender";
+import { AuthProvider, UserRole, UserStatus } from "../../shared/constants/AuthConstants";
+import { BaseEntity } from "../../shared/types/Repository";
+import { Gender } from "../value-objects/Gender";
 export interface UserCreationProps {
     id: string;
     name: string;

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileUploadDto = void 0;
-const FilePurpose_1 = require("@domain/value-objects/FilePurpose");
+const FilePurpose_1 = require("../../../domain/value-objects/FilePurpose");
 class FileUploadDto {
     constructor(data) {
         this.userId = data.userId;

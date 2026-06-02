@@ -1,4 +1,4 @@
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityExceptionType } from "../../../domain/value-objects/AvailabilityExceptionType";
 import { z } from "zod";
 declare const addAvailabilityExceptionSchema: z.ZodObject<{
     type: z.ZodEnum<typeof AvailabilityExceptionType>;

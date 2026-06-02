@@ -1,6 +1,6 @@
 import { ICrudRepository } from "./ICrudRepository";
-import { FutureRideRequest } from "@domain/entities/FutureRideRequest";
-import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { FutureRideRequest } from "../entities/FutureRideRequest";
+import { FutureRideRequestStatus } from "../value-objects/FutureRideRequestStatus";
 export interface IFutureRideRequestRepository extends ICrudRepository<FutureRideRequest> {
     findByRequestGroupId(requestGroupId: string): Promise<FutureRideRequest[]>;
     findByRiderId(riderId: string): Promise<FutureRideRequest[]>;

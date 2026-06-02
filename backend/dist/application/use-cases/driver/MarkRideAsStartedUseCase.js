@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MarkRideAsStartedUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const RideErrors_1 = require("@domain/errors/RideErrors");
-const DriverNotFoundError_1 = require("@domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("@shared/constants/RideMessages");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
+const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
+const RideMessages_1 = require("../../../shared/constants/RideMessages");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 let MarkRideAsStartedUseCase = class MarkRideAsStartedUseCase {
     constructor(driverRepository, rideRepository, eventBus) {
         this.driverRepository = driverRepository;

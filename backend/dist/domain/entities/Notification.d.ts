@@ -1,5 +1,5 @@
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
+import { NotificationType } from "../value-objects/NotificationType";
+import { NotificationChannel } from "../value-objects/NotificationChannel";
 export interface NotificationMetadata {
     rideId?: string;
     requestId?: string;

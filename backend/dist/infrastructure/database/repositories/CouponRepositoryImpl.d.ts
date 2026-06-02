@@ -1,5 +1,5 @@
-import { CouponQueryOptions, ICouponRepository, PaginatedCoupons } from "@domain/repositories/ICouponRepository";
-import { Coupon } from "@domain/entities/Coupon";
+import { CouponQueryOptions, ICouponRepository, PaginatedCoupons } from "../../../domain/repositories/ICouponRepository";
+import { Coupon } from "../../../domain/entities/Coupon";
 export declare class CouponRepositoryImpl implements ICouponRepository {
     findById(id: string): Promise<Coupon | null>;
     findByCode(code: string): Promise<Coupon | null>;

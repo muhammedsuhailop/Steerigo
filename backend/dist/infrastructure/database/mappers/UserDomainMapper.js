@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserDomainMapper = void 0;
-const User_1 = require("@domain/entities/User");
-const Password_1 = require("@domain/value-objects/Password");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const User_1 = require("../../../domain/entities/User");
+const Password_1 = require("../../../domain/value-objects/Password");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 class UserDomainMapper {
     static toDomain(userDoc) {
         const passwordHash = userDoc.password;

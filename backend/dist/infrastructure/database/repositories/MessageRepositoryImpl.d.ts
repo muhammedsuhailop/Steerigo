@@ -1,6 +1,6 @@
-import { IMessageRepository, IMessagePaginationOptions } from "@domain/repositories/IMessageRepository";
-import { Message } from "@domain/entities/Message";
-import { PaginatedResult } from "@shared/types/Repository";
+import { IMessageRepository, IMessagePaginationOptions } from "../../../domain/repositories/IMessageRepository";
+import { Message } from "../../../domain/entities/Message";
+import { PaginatedResult } from "../../../shared/types/Repository";
 export declare class MessageRepositoryImpl implements IMessageRepository {
     findById(id: string): Promise<Message | null>;
     exists(id: string): Promise<boolean>;

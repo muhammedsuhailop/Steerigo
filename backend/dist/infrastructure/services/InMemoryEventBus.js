@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryEventBus = void 0;
 const inversify_1 = require("inversify");
-const AvailabilityStatus_1 = require("@domain/value-objects/AvailabilityStatus");
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
+const AvailabilityStatus_1 = require("../../domain/value-objects/AvailabilityStatus");
+const NotificationType_1 = require("../../domain/value-objects/NotificationType");
+const Logger_1 = require("../../shared/utils/Logger");
+const DITypes_1 = require("../../shared/constants/DITypes");
 let InMemoryEventBus = class InMemoryEventBus {
     constructor(notificationService, persistence, paymentNotificationService, driverRepository, driverAvailabilityRepository, chatRoomExpiryService, chatRoomRepository) {
         this.notificationService = notificationService;

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { NotificationChannel } from "@domain/value-objects/NotificationChannel";
+import { NotificationType } from "../../../domain/value-objects/NotificationType";
+import { NotificationChannel } from "../../../domain/value-objects/NotificationChannel";
 declare const createNotificationSchema: z.ZodObject<{
     recipientId: z.ZodString;
     type: z.ZodEnum<typeof NotificationType>;

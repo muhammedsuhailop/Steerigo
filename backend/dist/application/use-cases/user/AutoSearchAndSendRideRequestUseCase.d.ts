@@ -1,12 +1,12 @@
-import { AutoSearchAndRequestDto } from "@application/dto/user/AutoSearchAndRequestDto";
-import { AutoSearchAndRequestResponseDto } from "@application/dto/user/AutoSearchAndRequestResponseDto";
+import { AutoSearchAndRequestDto } from "../../dto/user/AutoSearchAndRequestDto";
+import { AutoSearchAndRequestResponseDto } from "../../dto/user/AutoSearchAndRequestResponseDto";
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IFareCalculationService } from "@application/services/IFareCalculationService";
-import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
-import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
+import { Result } from "../../../shared/utils/Result";
+import { IDriverAvailabilityRepository } from "../../../domain/repositories/IDriverAvailabilityRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IFareCalculationService } from "../../services/IFareCalculationService";
+import { IRideRequestGroupRepository } from "../../../domain/repositories/IRideRequestGroupRepository";
+import { IRideSearchDispatchService } from "../../services/IRideSearchDispatchService";
 export declare class AutoSearchAndSendRideRequestUseCase implements IUseCase<AutoSearchAndRequestDto, Promise<Result<AutoSearchAndRequestResponseDto>>> {
     private readonly driverAvailabilityRepository;
     private readonly userRepository;

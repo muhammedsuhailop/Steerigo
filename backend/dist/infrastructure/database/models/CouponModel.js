@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponModel = void 0;
 const mongoose_1 = require("mongoose");
-const CouponDiscountType_1 = require("@domain/value-objects/CouponDiscountType");
+const CouponDiscountType_1 = require("../../../domain/value-objects/CouponDiscountType");
 const couponSchema = new mongoose_1.Schema({
     code: { type: String, required: true, unique: true, index: true },
     discountType: {

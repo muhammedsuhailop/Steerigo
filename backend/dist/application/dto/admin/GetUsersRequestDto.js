@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetUsersRequestDto = void 0;
-const UserStatus_1 = require("@shared/constants/UserStatus");
+const UserStatus_1 = require("../../../shared/constants/UserStatus");
 const zod_1 = require("zod");
 const getUsersRequestSchema = zod_1.z.object({
     page: zod_1.z.coerce.number().int().min(1).default(1),

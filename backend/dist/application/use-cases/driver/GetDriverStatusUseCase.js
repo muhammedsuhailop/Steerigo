@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverStatusUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const DomainError_1 = require("@domain/errors/DomainError");
-const DriverAvailabilityErrors_1 = require("@domain/errors/DriverAvailabilityErrors");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverStatusMapper_1 = require("@application/mappers/driver/DriverStatusMapper");
+const Result_1 = require("../../../shared/utils/Result");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const DriverAvailabilityErrors_1 = require("../../../domain/errors/DriverAvailabilityErrors");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverStatusMapper_1 = require("../../mappers/driver/DriverStatusMapper");
 let GetDriverStatusUseCase = class GetDriverStatusUseCase {
     constructor(driverRepository, availabilityRepository) {
         this.driverRepository = driverRepository;

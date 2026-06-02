@@ -10,9 +10,9 @@ exports.PaymentRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const PaymentModel_1 = require("../models/PaymentModel");
 const PaymentMapper_1 = require("../mappers/PaymentMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
+const PaymentStatus_1 = require("../../../domain/value-objects/PaymentStatus");
 let PaymentRepositoryImpl = class PaymentRepositoryImpl {
     async findById(id) {
         try {

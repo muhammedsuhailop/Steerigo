@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KYCModel = void 0;
-const DocumentType_1 = require("@domain/value-objects/DocumentType");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const DocumentType_1 = require("../../../domain/value-objects/DocumentType");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 const mongoose_1 = require("mongoose");
 const kycSchema = new mongoose_1.Schema({
     driverId: {

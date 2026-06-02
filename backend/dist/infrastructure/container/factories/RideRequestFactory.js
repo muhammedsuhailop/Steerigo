@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const SendRideRequestUseCase_1 = require("@application/use-cases/user/SendRideRequestUseCase");
-const RideController_1 = require("@interface/controllers/user/RideController");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const SendRideRequestUseCase_1 = require("../../../application/use-cases/user/SendRideRequestUseCase");
+const RideController_1 = require("../../../interface/controllers/user/RideController");
 class RideRequestFactory {
     static register(container) {
         // Use Cases

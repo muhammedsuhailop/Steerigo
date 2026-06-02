@@ -14,11 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRealtimeService = void 0;
 const inversify_1 = require("inversify");
-const SocketEvents_1 = require("@infrastructure/realtime/constants/SocketEvents");
-const socket_1 = require("@infrastructure/realtime/socket");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
+const SocketEvents_1 = require("../../realtime/constants/SocketEvents");
+const socket_1 = require("../../realtime/socket");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const NotificationType_1 = require("../../../domain/value-objects/NotificationType");
 let ChatRealtimeService = class ChatRealtimeService {
     constructor(persistence) {
         this.persistence = persistence;

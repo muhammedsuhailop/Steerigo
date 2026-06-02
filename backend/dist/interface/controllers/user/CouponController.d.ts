@@ -1,12 +1,12 @@
-import { ApplyCouponDto } from "@application/dto/user/ApplyCouponDto";
-import { ApplyCouponResponseDto } from "@application/dto/user/ApplyCouponResponseDto";
-import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
-import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
+import { ApplyCouponDto } from "../../../application/dto/user/ApplyCouponDto";
+import { ApplyCouponResponseDto } from "../../../application/dto/user/ApplyCouponResponseDto";
+import { RemoveCouponDto } from "../../../application/dto/user/RemoveCouponDto";
+import { RemoveCouponResponseDto } from "../../../application/dto/user/RemoveCouponResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
 import { Request, Response } from "express";
-import { GetUserCouponsDto } from "@application/dto/user/GetUserCouponsDto";
-import { GetUserCouponsResponseDto } from "@application/dto/user/GetUserCouponsResponseDto";
+import { GetUserCouponsDto } from "../../../application/dto/user/GetUserCouponsDto";
+import { GetUserCouponsResponseDto } from "../../../application/dto/user/GetUserCouponsResponseDto";
 export declare class CouponController {
     private readonly getUserCouponsUseCase;
     private readonly applyCouponUseCase;

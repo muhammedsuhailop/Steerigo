@@ -8,8 +8,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationRealtimePublisher = void 0;
 const inversify_1 = require("inversify");
-const NotificationSocketAdapter_1 = require("@infrastructure/adapters/NotificationSocketAdapter");
-const Logger_1 = require("@shared/utils/Logger");
+const NotificationSocketAdapter_1 = require("../../adapters/NotificationSocketAdapter");
+const Logger_1 = require("../../../shared/utils/Logger");
 let NotificationRealtimePublisher = class NotificationRealtimePublisher {
     emitToUser(userId, notificationId, type, title, body, metadata) {
         try {

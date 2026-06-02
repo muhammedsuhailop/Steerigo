@@ -8,15 +8,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAvailabilityRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
-const AvailabilityStatus_1 = require("@domain/value-objects/AvailabilityStatus");
+const AvailabilityStatus_1 = require("../../../domain/value-objects/AvailabilityStatus");
 const DriverAvailabilityModel_1 = require("../models/DriverAvailabilityModel");
 const DriverAvailabilityMapper_1 = require("../mappers/DriverAvailabilityMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
-const DriverStatus_1 = require("@domain/value-objects/DriverStatus");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const DriverStatus_1 = require("../../../domain/value-objects/DriverStatus");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 const RideRequestGroupModel_1 = require("../models/RideRequestGroupModel");
-const RideRequestGroupStatus_1 = require("@domain/value-objects/RideRequestGroupStatus");
+const RideRequestGroupStatus_1 = require("../../../domain/value-objects/RideRequestGroupStatus");
 let DriverAvailabilityRepositoryImpl = class DriverAvailabilityRepositoryImpl {
     constructor() {
         this.HAVERSINE_RADIUS_KM = 6371;

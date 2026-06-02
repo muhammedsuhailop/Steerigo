@@ -1,6 +1,6 @@
-import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
-import { RideRequestGroup } from "@domain/entities/RideRequestGroup";
-import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
+import { IRideRequestGroupRepository } from "../../../domain/repositories/IRideRequestGroupRepository";
+import { RideRequestGroup } from "../../../domain/entities/RideRequestGroup";
+import { RideRequestGroupStatus } from "../../../domain/value-objects/RideRequestGroupStatus";
 export declare class RideRequestGroupRepositoryImpl implements IRideRequestGroupRepository {
     save(entity: RideRequestGroup): Promise<RideRequestGroup>;
     exists(id: string): Promise<boolean>;

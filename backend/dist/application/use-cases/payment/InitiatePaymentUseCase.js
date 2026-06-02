@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InitiatePaymentUseCase = void 0;
 const inversify_1 = require("inversify");
-const Payment_1 = require("@domain/entities/Payment");
-const Money_1 = require("@domain/value-objects/Money");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const PaymentErrors_1 = require("@domain/errors/PaymentErrors");
-const RideErrors_1 = require("@domain/errors/RideErrors");
+const Payment_1 = require("../../../domain/entities/Payment");
+const Money_1 = require("../../../domain/value-objects/Money");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const PaymentErrors_1 = require("../../../domain/errors/PaymentErrors");
+const RideErrors_1 = require("../../../domain/errors/RideErrors");
 let InitiatePaymentUseCase = class InitiatePaymentUseCase {
     constructor(rideRepository, paymentRepository, eventBus, idGenerator, strategies) {
         this.rideRepository = rideRepository;

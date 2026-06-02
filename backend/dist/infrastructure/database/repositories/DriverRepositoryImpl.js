@@ -10,8 +10,8 @@ exports.DriverRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const DriverModel_1 = require("../models/DriverModel");
 const DriverMapper_1 = require("../mappers/DriverMapper");
-const DriverStatus_1 = require("@domain/value-objects/DriverStatus");
-const Logger_1 = require("@shared/utils/Logger");
+const DriverStatus_1 = require("../../../domain/value-objects/DriverStatus");
+const Logger_1 = require("../../../shared/utils/Logger");
 const mongoose_1 = require("mongoose");
 let DriverRepositoryImpl = class DriverRepositoryImpl {
     //  Basic Repository Operations

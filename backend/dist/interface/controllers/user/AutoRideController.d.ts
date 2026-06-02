@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { AutoSearchAndRequestDto } from "@application/dto/user/AutoSearchAndRequestDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { AutoSearchAndRequestResponseDto } from "@application/dto/user/AutoSearchAndRequestResponseDto";
-import { Result } from "@shared/utils/Result";
-import { CancelRideRequestDto } from "@application/dto/user/CancelRideRequestDto";
-import { CancelRideRequestResponseDto } from "@application/dto/user/CancelRideRequestResponseDto";
-import { ScheduleFutureRideDto } from "@application/dto/user/ScheduleFutureRideDto";
-import { ScheduleFutureRideResponseDto } from "@application/dto/user/ScheduleFutureRideResponseDto";
-import { CancelFutureRideDto } from "@application/dto/user/CancelFutureRideDto";
-import { CancelFutureRideResponseDto } from "@application/dto/user/CancelFutureRideResponseDto";
+import { AutoSearchAndRequestDto } from "../../../application/dto/user/AutoSearchAndRequestDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { AutoSearchAndRequestResponseDto } from "../../../application/dto/user/AutoSearchAndRequestResponseDto";
+import { Result } from "../../../shared/utils/Result";
+import { CancelRideRequestDto } from "../../../application/dto/user/CancelRideRequestDto";
+import { CancelRideRequestResponseDto } from "../../../application/dto/user/CancelRideRequestResponseDto";
+import { ScheduleFutureRideDto } from "../../../application/dto/user/ScheduleFutureRideDto";
+import { ScheduleFutureRideResponseDto } from "../../../application/dto/user/ScheduleFutureRideResponseDto";
+import { CancelFutureRideDto } from "../../../application/dto/user/CancelFutureRideDto";
+import { CancelFutureRideResponseDto } from "../../../application/dto/user/CancelFutureRideResponseDto";
 export declare class AutoRideController {
     private autoSearchAndSendUseCase;
     private readonly cancelRideRequestsUseCase;

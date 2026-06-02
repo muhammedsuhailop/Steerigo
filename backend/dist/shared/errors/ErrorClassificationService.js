@@ -16,8 +16,8 @@ const DatabaseErrorClassifier_1 = require("./classification/DatabaseErrorClassif
 const NetworkErrorClassifier_1 = require("./classification/NetworkErrorClassifier");
 const ValidationErrorClassifier_1 = require("./classification/ValidationErrorClassifier");
 const UnknownErrorClassifier_1 = require("./classification/UnknownErrorClassifier");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorType_1 = require("@shared/enums/ErrorType");
+const Logger_1 = require("../utils/Logger");
+const ErrorType_1 = require("../enums/ErrorType");
 let ErrorClassificationService = class ErrorClassificationService {
     constructor() {
         this.classifiers = [

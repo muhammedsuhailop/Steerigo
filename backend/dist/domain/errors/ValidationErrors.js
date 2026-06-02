@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvalidBodyTypeError = exports.InvalidGearTypeError = exports.InvalidLimitError = exports.InvalidRadiusError = exports.InvalidTimeRequiredError = exports.InvalidSearchDateRangeError = exports.InvalidSearchDateFormatError = exports.InvalidLongitudeError = exports.InvalidLatitudeError = exports.ValidationError = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class ValidationError extends DomainError_1.DomainError {
     constructor(message, field) {
         super(message, "VALIDATION_ERROR", {

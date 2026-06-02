@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageModel = void 0;
-const MessageType_1 = require("@domain/value-objects/MessageType");
+const MessageType_1 = require("../../../domain/value-objects/MessageType");
 const mongoose_1 = require("mongoose");
 const messageSchema = new mongoose_1.Schema({
     chatRoomId: {

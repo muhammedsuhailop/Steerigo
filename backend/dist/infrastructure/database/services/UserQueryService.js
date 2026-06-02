@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserQueryService = void 0;
 const UserModel_1 = require("../models/UserModel");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const Logger_1 = require("@shared/utils/Logger");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const Logger_1 = require("../../../shared/utils/Logger");
 class UserQueryService {
     async findById(id) {
         try {

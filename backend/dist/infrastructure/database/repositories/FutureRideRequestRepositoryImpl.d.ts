@@ -1,6 +1,6 @@
-import { IFutureRideRequestRepository } from "@domain/repositories/IFutureRideRequestRepository";
-import { FutureRideRequest } from "@domain/entities/FutureRideRequest";
-import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { IFutureRideRequestRepository } from "../../../domain/repositories/IFutureRideRequestRepository";
+import { FutureRideRequest } from "../../../domain/entities/FutureRideRequest";
+import { FutureRideRequestStatus } from "../../../domain/value-objects/FutureRideRequestStatus";
 export declare class FutureRideRequestRepositoryImpl implements IFutureRideRequestRepository {
     findById(id: string): Promise<FutureRideRequest | null>;
     exists(id: string): Promise<boolean>;

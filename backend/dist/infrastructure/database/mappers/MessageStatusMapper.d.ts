@@ -1,4 +1,4 @@
-import { MessageStatus } from "@domain/entities/MessageStatus";
+import { MessageStatus } from "../../../domain/entities/MessageStatus";
 import { IMessageStatusDocument } from "../models/MessageStatusModel";
 export declare class MessageStatusMapper {
     static toDomain(doc: IMessageStatusDocument): MessageStatus;

@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { GearType, BodyType } from "@domain/value-objects/VehicleType";
-import { DocumentType } from "@domain/value-objects/DocumentType";
-import { Gender } from "@domain/value-objects/Gender";
+import { LicenseCategory } from "../../../domain/value-objects/LicenseCategory";
+import { GearType, BodyType } from "../../../domain/value-objects/VehicleType";
+import { DocumentType } from "../../../domain/value-objects/DocumentType";
+import { Gender } from "../../../domain/value-objects/Gender";
 export declare const driverRegistrationSchema: z.ZodObject<{
     body: z.ZodObject<{
         name: z.ZodString;
         mobile: z.ZodString;
-        dob: z.ZodPreprocess<z.ZodDate>;
+        dob: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>;
         gender: z.ZodEnum<typeof Gender>;
         state: z.ZodString;
         pin: z.ZodString;
@@ -28,8 +28,8 @@ export declare const driverRegistrationSchema: z.ZodObject<{
             Manual: GearType.MANUAL;
             Automatic: GearType.AUTOMATIC;
         }>>;
-        licenseIssueDate: z.ZodPreprocess<z.ZodDate>;
-        licenseExpiryDate: z.ZodPreprocess<z.ZodDate>;
+        licenseIssueDate: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>;
+        licenseExpiryDate: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>;
         idType: z.ZodEnum<{
             Aadhaar: DocumentType.AADHAAR;
             PAN: DocumentType.PAN;
@@ -37,8 +37,8 @@ export declare const driverRegistrationSchema: z.ZodObject<{
             Passport: DocumentType.PASSPORT;
         }>;
         idNumber: z.ZodString;
-        idIssueDate: z.ZodPreprocess<z.ZodDate>;
-        idExpiryDate: z.ZodPreprocess<z.ZodOptional<z.ZodDate>>;
+        idIssueDate: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>;
+        idExpiryDate: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodOptional<z.ZodDate>>;
         licenseFrontImage: z.ZodString;
         licenseBackImage: z.ZodString;
         idFrontImage: z.ZodString;
@@ -49,7 +49,7 @@ export declare const driverUpdateSchema: z.ZodObject<{
     body: z.ZodObject<{
         name: z.ZodOptional<z.ZodString>;
         mobile: z.ZodString;
-        dob: z.ZodOptional<z.ZodPreprocess<z.ZodDate>>;
+        dob: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>;
         gender: z.ZodOptional<z.ZodEnum<typeof Gender>>;
         state: z.ZodOptional<z.ZodString>;
         pin: z.ZodOptional<z.ZodString>;
@@ -70,8 +70,8 @@ export declare const driverUpdateSchema: z.ZodObject<{
             MCWOG: LicenseCategory.MCWOG;
         }>>;
         licenseNumber: z.ZodOptional<z.ZodString>;
-        licenseIssueDate: z.ZodOptional<z.ZodPreprocess<z.ZodDate>>;
-        licenseExpiryDate: z.ZodOptional<z.ZodPreprocess<z.ZodDate>>;
+        licenseIssueDate: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>;
+        licenseExpiryDate: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>;
         idType: z.ZodOptional<z.ZodEnum<{
             Aadhaar: DocumentType.AADHAAR;
             PAN: DocumentType.PAN;
@@ -79,8 +79,8 @@ export declare const driverUpdateSchema: z.ZodObject<{
             Passport: DocumentType.PASSPORT;
         }>>;
         idNumber: z.ZodOptional<z.ZodString>;
-        idIssueDate: z.ZodOptional<z.ZodPreprocess<z.ZodDate>>;
-        idExpiryDate: z.ZodOptional<z.ZodPreprocess<z.ZodDate>>;
+        idIssueDate: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>;
+        idExpiryDate: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>;
         licenseFrontImage: z.ZodOptional<z.ZodString>;
         licenseBackImage: z.ZodOptional<z.ZodString>;
         idFrontImage: z.ZodOptional<z.ZodString>;
@@ -96,8 +96,8 @@ export declare const kycSubmissionSchema: z.ZodObject<{
             Passport: DocumentType.PASSPORT;
         }>;
         docNumber: z.ZodString;
-        issueDate: z.ZodPreprocess<z.ZodDate>;
-        expiryDate: z.ZodNullable<z.ZodOptional<z.ZodPreprocess<z.ZodDate>>>;
+        issueDate: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>;
+        expiryDate: z.ZodNullable<z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodDate>>>;
         frontImageUrls: z.ZodArray<z.ZodString>;
         backImageUrls: z.ZodArray<z.ZodString>;
     }, z.core.$strip>;

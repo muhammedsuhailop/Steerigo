@@ -1,4 +1,4 @@
-import { FutureRideRequest } from "@domain/entities/FutureRideRequest";
+import { FutureRideRequest } from "../../../domain/entities/FutureRideRequest";
 import { IFutureRideRequestDocument } from "../models/FutureRideRequestModel";
 export declare class FutureRideRequestMapper {
     static toDomain(doc: IFutureRideRequestDocument): FutureRideRequest;

@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignupController = void 0;
 const inversify_1 = require("inversify");
-const SignupRequestDto_1 = require("@application/dto/auth/SignupRequestDto");
-const SignupVerifyDto_1 = require("@application/dto/auth/SignupVerifyDto");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const CookieHelper_1 = require("@shared/utils/CookieHelper");
+const SignupRequestDto_1 = require("../../../application/dto/auth/SignupRequestDto");
+const SignupVerifyDto_1 = require("../../../application/dto/auth/SignupVerifyDto");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const CookieHelper_1 = require("../../../shared/utils/CookieHelper");
 let SignupController = class SignupController {
     constructor(signupRequestUseCase, signupVerifyUseCase) {
         this.signupRequestUseCase = signupRequestUseCase;

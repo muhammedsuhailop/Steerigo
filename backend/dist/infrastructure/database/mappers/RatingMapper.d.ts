@@ -1,4 +1,4 @@
-import { Rating } from "@domain/entities/Rating";
+import { Rating } from "../../../domain/entities/Rating";
 import { IRatingDocument } from "../models/RatingModel";
 export declare class RatingMapper {
     static toDomain(doc: IRatingDocument): Rating;

@@ -1,5 +1,5 @@
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
-import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { AvailabilityExceptionType } from "../../../domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityStatus } from "../../../domain/value-objects/AvailabilityStatus";
 export interface TimeSlotResponse {
     readonly startTime: string;
     readonly endTime: string;

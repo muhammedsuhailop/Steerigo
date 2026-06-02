@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminDriverStatsUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverStatus_1 = require("@domain/value-objects/DriverStatus");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const Result_1 = require("../../../shared/utils/Result");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverStatus_1 = require("../../../domain/value-objects/DriverStatus");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 let GetAdminDriverStatsUseCase = class GetAdminDriverStatsUseCase {
     constructor(driverRepository) {
         this.driverRepository = driverRepository;

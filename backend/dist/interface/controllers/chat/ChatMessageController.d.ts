@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { GetChatMessagesDto } from "@application/dto/chat/GetChatMessagesDto";
-import { SendChatMessageDto } from "@application/dto/chat/SendChatMessageDto";
-import { GetChatMessagesResponseDto } from "@application/dto/chat/response/GetChatMessagesResponseDto";
-import { SendChatMessageResponseDto } from "@application/dto/chat/response/SendChatMessageResponseDto";
-import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
-import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
-import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
-import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { GetChatMessagesDto } from "../../../application/dto/chat/GetChatMessagesDto";
+import { SendChatMessageDto } from "../../../application/dto/chat/SendChatMessageDto";
+import { GetChatMessagesResponseDto } from "../../../application/dto/chat/response/GetChatMessagesResponseDto";
+import { SendChatMessageResponseDto } from "../../../application/dto/chat/response/SendChatMessageResponseDto";
+import { EditChatMessageDto } from "../../../application/dto/chat/EditChatMessageDto";
+import { EditChatMessageResponseDto } from "../../../application/dto/chat/response/EditChatMessageResponseDto";
+import { DeleteChatMessageDto } from "../../../application/dto/chat/DeleteChatMessageDto";
+import { DeleteChatMessageResponseDto } from "../../../application/dto/chat/response/DeleteChatMessageResponseDto";
 export declare class ChatMessageController {
     private readonly getChatMessagesUseCase;
     private readonly sendChatMessageUseCase;

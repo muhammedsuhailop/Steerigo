@@ -1,8 +1,8 @@
-import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
-import { GetDriversRequestDto } from "@application/dto/admin/GetDriversRequestDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminDriverRepository } from "../../../domain/repositories/IAdminDriverRepository";
+import { GetDriversRequestDto } from "../../dto/admin/GetDriversRequestDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
-import { GetDriversResponseDto } from "@application/dto/admin/GetDriversResponseDto";
+import { GetDriversResponseDto } from "../../dto/admin/GetDriversResponseDto";
 export declare class GetDriversUseCase implements IUseCase<GetDriversRequestDto, Promise<Result<GetDriversResponseDto>>> {
     private adminDriverRepository;
     constructor(adminDriverRepository: IAdminDriverRepository);

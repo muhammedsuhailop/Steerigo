@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { SendRideRequestDto } from "@application/dto/user/SendRideRequestDto";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
-import { GetUserRideByIdDto } from "@application/dto/user/GetUserRideByIdDto";
-import { GetUserRideByIdResponseDto } from "@application/dto/user/GetUserRideByIdResponseDto";
-import { GetUserRidesDto } from "@application/dto/user/GetUserRidesDto";
-import { GetUserRidesResponseDto } from "@application/dto/user/GetUserRidesResponseDto";
-import { CancelRideDto } from "@application/dto/user/CancelRideDto";
-import { CancelRideResponseDto } from "@application/dto/user/CancelRideResponseDto";
-import { RateDriverDto } from "@application/dto/user/RateDriverDto";
-import { RateDriverResponseDto } from "@application/dto/user/RateDriverResponseDto";
+import { SendRideRequestDto } from "../../../application/dto/user/SendRideRequestDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { SendRideRequestResponseDto } from "../../../application/dto/user/SendRideRequestResponseDto";
+import { GetUserRideByIdDto } from "../../../application/dto/user/GetUserRideByIdDto";
+import { GetUserRideByIdResponseDto } from "../../../application/dto/user/GetUserRideByIdResponseDto";
+import { GetUserRidesDto } from "../../../application/dto/user/GetUserRidesDto";
+import { GetUserRidesResponseDto } from "../../../application/dto/user/GetUserRidesResponseDto";
+import { CancelRideDto } from "../../../application/dto/user/CancelRideDto";
+import { CancelRideResponseDto } from "../../../application/dto/user/CancelRideResponseDto";
+import { RateDriverDto } from "../../../application/dto/user/RateDriverDto";
+import { RateDriverResponseDto } from "../../../application/dto/user/RateDriverResponseDto";
 export declare class RideController {
     private sendRideRequestUseCase;
     private getUserRideByIdUseCase;

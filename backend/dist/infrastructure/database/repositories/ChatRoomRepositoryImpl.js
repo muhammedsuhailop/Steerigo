@@ -11,7 +11,7 @@ const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
 const ChatRoomModel_1 = require("../models/ChatRoomModel");
 const ChatRoomMapper_1 = require("../mappers/ChatRoomMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let ChatRoomRepositoryImpl = class ChatRoomRepositoryImpl {
     async findById(id) {
         try {

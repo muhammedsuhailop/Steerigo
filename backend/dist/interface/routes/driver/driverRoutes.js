@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.driverRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const ValidationMiddleware_1 = require("@interface/middleware/ValidationMiddleware");
-const AuthMiddleware_1 = require("@interface/middleware/auth/AuthMiddleware");
-const driverValidationSchemas_1 = require("@interface/validators/driver/driverValidationSchemas");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const ValidationMiddleware_1 = require("../../middleware/ValidationMiddleware");
+const AuthMiddleware_1 = require("../../middleware/auth/AuthMiddleware");
+const driverValidationSchemas_1 = require("../../validators/driver/driverValidationSchemas");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverAvailabilityRoutes_1 = require("./DriverAvailabilityRoutes");
 const DriverRideRoutes_1 = require("./DriverRideRoutes");
 const driverPayoutRoutes_1 = require("./driverPayoutRoutes");

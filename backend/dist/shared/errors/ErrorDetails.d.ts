@@ -1,4 +1,4 @@
-import { ErrorType } from "@shared/enums/ErrorType";
+import { ErrorType } from "../enums/ErrorType";
 export interface ErrorDetails {
     statusCode: number;
     message: string;

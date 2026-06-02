@@ -1,8 +1,8 @@
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IKYCRepository } from "@domain/repositories/IKYCRepository";
-import { KYCSubmissionRequestDto } from "@application/dto/driver/KYCSubmissionRequestDto";
-import { Result } from "@shared/utils/Result";
-import { SubmitKYCResponseDto } from "@application/dto/driver/SubmitKYCResponseDto";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IKYCRepository } from "../../../domain/repositories/IKYCRepository";
+import { KYCSubmissionRequestDto } from "../../dto/driver/KYCSubmissionRequestDto";
+import { Result } from "../../../shared/utils/Result";
+import { SubmitKYCResponseDto } from "../../dto/driver/SubmitKYCResponseDto";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class SubmitKYCUseCase implements IUseCase<KYCSubmissionRequestDto, Promise<Result<SubmitKYCResponseDto>>> {
     private driverRepository;

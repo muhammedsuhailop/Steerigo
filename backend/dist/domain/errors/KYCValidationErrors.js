@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvalidKYCStatusTransitionError = exports.NonLicenseKYCNotApprovedError = exports.LicenseNotApprovedError = exports.ProfilePictureNotUploadedError = exports.KYCNotFoundError = void 0;
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
+const DriverMessages_1 = require("../../shared/constants/DriverMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class KYCNotFoundError extends DomainError_1.DomainError {
     constructor(message = DriverMessages_1.KYC_ERROR_MESSAGES.KYC_NOT_FOUND) {
         super(message, "KYC_NOT_FOUND", {

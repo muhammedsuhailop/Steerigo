@@ -10,7 +10,7 @@ exports.CouponRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const CouponModel_1 = require("../models/CouponModel");
 const CouponMapper_1 = require("../mappers/CouponMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 let CouponRepositoryImpl = class CouponRepositoryImpl {
     async findById(id) {
         try {

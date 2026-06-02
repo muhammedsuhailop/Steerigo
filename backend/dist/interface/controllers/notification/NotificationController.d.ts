@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { GetNotificationsDto } from "@application/dto/notification/GetNotificationsDto";
-import { GetNotificationsResponseDto } from "@application/dto/notification/GetNotificationsResponseDto";
-import { MarkNotificationsReadDto } from "@application/dto/notification/MarkNotificationsReadDto";
-import { MarkNotificationsReadResponseDto } from "@application/dto/notification/MarkNotificationsReadResponseDto";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
+import { GetNotificationsDto } from "../../../application/dto/notification/GetNotificationsDto";
+import { GetNotificationsResponseDto } from "../../../application/dto/notification/GetNotificationsResponseDto";
+import { MarkNotificationsReadDto } from "../../../application/dto/notification/MarkNotificationsReadDto";
+import { MarkNotificationsReadResponseDto } from "../../../application/dto/notification/MarkNotificationsReadResponseDto";
 export declare class NotificationController {
     private getNotificationsUseCase;
     private markNotificationsReadUseCase;

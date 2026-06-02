@@ -1,4 +1,4 @@
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
+import { PaymentMethod } from "../../../domain/value-objects/PaymentMethod";
 export declare class InitiatePaymentDto {
     private readonly userId;
     private readonly rideId;

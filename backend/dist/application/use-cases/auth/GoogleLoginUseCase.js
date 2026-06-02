@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleLoginUseCase = void 0;
 const inversify_1 = require("inversify");
-const User_1 = require("@domain/entities/User");
-const RefreshToken_1 = require("@domain/entities/RefreshToken");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const errors_1 = require("@domain/errors");
+const User_1 = require("../../../domain/entities/User");
+const RefreshToken_1 = require("../../../domain/entities/RefreshToken");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const errors_1 = require("../../../domain/errors");
 const uuid_1 = require("uuid");
 let GoogleLoginUseCase = class GoogleLoginUseCase {
     constructor(googleAuthService, userRepository, tokenService, refreshTokenRepository, emailService) {

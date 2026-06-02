@@ -10,7 +10,7 @@ exports.UserChatRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const mongoose_1 = require("mongoose");
 const UserChatMapper_1 = require("../mappers/UserChatMapper");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const UserChatMode_1 = require("../models/UserChatMode");
 let UserChatRepositoryImpl = class UserChatRepositoryImpl {
     async findById(id) {

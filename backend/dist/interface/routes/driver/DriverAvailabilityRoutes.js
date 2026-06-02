@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.driverAvailabilityRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const ValidationMiddleware_1 = require("@interface/middleware/ValidationMiddleware");
-const DriverAvailabilityValidators_1 = require("@interface/validators/driver/DriverAvailabilityValidators");
-const DITypes_1 = require("@shared/constants/DITypes");
-const EditAvailabilityExceptionValidators_1 = require("@interface/validators/driver/EditAvailabilityExceptionValidators");
-const updateBaseLocationValidator_1 = require("@interface/validators/driver/updateBaseLocationValidator");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const ValidationMiddleware_1 = require("../../middleware/ValidationMiddleware");
+const DriverAvailabilityValidators_1 = require("../../validators/driver/DriverAvailabilityValidators");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const EditAvailabilityExceptionValidators_1 = require("../../validators/driver/EditAvailabilityExceptionValidators");
+const updateBaseLocationValidator_1 = require("../../validators/driver/updateBaseLocationValidator");
 const router = (0, express_1.Router)();
 exports.driverAvailabilityRoutes = router;
 // Get controller instance from DI container

@@ -1,4 +1,4 @@
-import { DayOfWeek } from "@domain/value-objects/DayOfWeek";
+import { DayOfWeek } from "../../../domain/value-objects/DayOfWeek";
 import { Document, Types } from "mongoose";
 interface TimeSlot {
     startTime: number;

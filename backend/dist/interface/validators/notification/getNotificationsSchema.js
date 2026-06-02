@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNotificationsSchema = void 0;
 const zod_1 = require("zod");
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
-const NotificationChannel_1 = require("@domain/value-objects/NotificationChannel");
+const NotificationType_1 = require("../../../domain/value-objects/NotificationType");
+const NotificationChannel_1 = require("../../../domain/value-objects/NotificationChannel");
 exports.getNotificationsSchema = zod_1.z.object({
     query: zod_1.z.object({
         page: zod_1.z.string().regex(/^\d+$/).optional(),

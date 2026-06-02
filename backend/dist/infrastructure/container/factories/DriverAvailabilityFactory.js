@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAvailabilityFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverAvailabilityRepositoryImpl_1 = require("@infrastructure/database/repositories/DriverAvailabilityRepositoryImpl");
-const UpdateAvailabilityStatusUseCase_1 = require("@application/use-cases/driver/UpdateAvailabilityStatusUseCase");
-const UpdateDriverLocationUseCase_1 = require("@application/use-cases/driver/UpdateDriverLocationUseCase");
-const DriverAvailabilityController_1 = require("@interface/controllers/driver/DriverAvailabilityController");
-const ScheduleRecurringAvailabilityUseCase_1 = require("@application/use-cases/driver/ScheduleRecurringAvailabilityUseCase");
-const AddAvailabilityExceptionUseCase_1 = require("@application/use-cases/driver/AddAvailabilityExceptionUseCase");
-const UpdateDriverBaseLocationUseCase_1 = require("@application/use-cases/driver/UpdateDriverBaseLocationUseCase");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverAvailabilityRepositoryImpl_1 = require("../../database/repositories/DriverAvailabilityRepositoryImpl");
+const UpdateAvailabilityStatusUseCase_1 = require("../../../application/use-cases/driver/UpdateAvailabilityStatusUseCase");
+const UpdateDriverLocationUseCase_1 = require("../../../application/use-cases/driver/UpdateDriverLocationUseCase");
+const DriverAvailabilityController_1 = require("../../../interface/controllers/driver/DriverAvailabilityController");
+const ScheduleRecurringAvailabilityUseCase_1 = require("../../../application/use-cases/driver/ScheduleRecurringAvailabilityUseCase");
+const AddAvailabilityExceptionUseCase_1 = require("../../../application/use-cases/driver/AddAvailabilityExceptionUseCase");
+const UpdateDriverBaseLocationUseCase_1 = require("../../../application/use-cases/driver/UpdateDriverBaseLocationUseCase");
 class DriverAvailabilityFactory {
     static register(container) {
         // Repository

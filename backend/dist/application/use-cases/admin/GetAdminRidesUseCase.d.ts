@@ -1,10 +1,10 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { GetAdminRidesDto } from "@application/dto/admin/GetAdminRidesDto";
-import { GetAdminRidesResponseDto } from "@application/dto/admin/GetAdminRidesResponseDto";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { Result } from "@shared/utils/Result";
+import { GetAdminRidesDto } from "../../dto/admin/GetAdminRidesDto";
+import { GetAdminRidesResponseDto } from "../../dto/admin/GetAdminRidesResponseDto";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { Result } from "../../../shared/utils/Result";
 export declare class GetAdminRidesUseCase implements IUseCase<GetAdminRidesDto, Promise<Result<GetAdminRidesResponseDto>>> {
     private readonly rideRepository;
     private readonly driverRepository;

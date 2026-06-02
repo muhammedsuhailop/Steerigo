@@ -1,6 +1,6 @@
-import { IChatRoomPaginationOptions, IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
-import { ChatRoom } from "@domain/entities/ChatRoom";
-import { PaginatedResult } from "@shared/types/Repository";
+import { IChatRoomPaginationOptions, IChatRoomRepository } from "../../../domain/repositories/IChatRoomRepository";
+import { ChatRoom } from "../../../domain/entities/ChatRoom";
+import { PaginatedResult } from "../../../shared/types/Repository";
 export declare class ChatRoomRepositoryImpl implements IChatRoomRepository {
     findById(id: string): Promise<ChatRoom | null>;
     exists(id: string): Promise<boolean>;

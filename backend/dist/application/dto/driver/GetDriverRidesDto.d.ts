@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RideStatus } from "@domain/value-objects/RideStatus";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
 declare const getDriverRidesSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;

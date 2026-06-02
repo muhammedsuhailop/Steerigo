@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { RefreshTokenDto } from "@application/dto/auth";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
+import { RefreshTokenDto } from "../../../application/dto/auth";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
 export declare class TokenController {
     private logoutUseCase;
     private refreshTokenUseCase;

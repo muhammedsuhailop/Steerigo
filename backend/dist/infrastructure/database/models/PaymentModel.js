@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentModel = void 0;
 const mongoose_1 = require("mongoose");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
-const PaymentMethod_1 = require("@domain/value-objects/PaymentMethod");
-const PaymentFailureReason_1 = require("@domain/value-objects/PaymentFailureReason");
+const PaymentStatus_1 = require("../../../domain/value-objects/PaymentStatus");
+const PaymentMethod_1 = require("../../../domain/value-objects/PaymentMethod");
+const PaymentFailureReason_1 = require("../../../domain/value-objects/PaymentFailureReason");
 const paymentSchema = new mongoose_1.Schema({
     paymentId: { type: String, required: true, unique: true, index: true },
     rideId: { type: String, required: true },

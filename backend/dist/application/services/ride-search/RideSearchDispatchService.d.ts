@@ -1,11 +1,11 @@
-import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
-import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
-import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IEventBus } from "@application/services/IEventBus";
-import { IDistributedLockService } from "@application/services/IDistributedLockService";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IRideSearchQueue } from "@application/services/IRideSearchQueue";
+import { IRideSearchDispatchService } from "../../services/IRideSearchDispatchService";
+import { IRideRequestGroupRepository } from "../../../domain/repositories/IRideRequestGroupRepository";
+import { IRideRequestRepository } from "../../../domain/repositories/IRideRequestRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IEventBus } from "../../services/IEventBus";
+import { IDistributedLockService } from "../../services/IDistributedLockService";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IRideSearchQueue } from "../../services/IRideSearchQueue";
 export declare class RideSearchDispatchService implements IRideSearchDispatchService {
     private readonly rideRequestGroupRepository;
     private readonly rideRequestRepository;

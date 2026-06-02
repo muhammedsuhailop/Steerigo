@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageStatusMapper = void 0;
 const mongoose_1 = require("mongoose");
-const MessageStatus_1 = require("@domain/entities/MessageStatus");
+const MessageStatus_1 = require("../../../domain/entities/MessageStatus");
 class MessageStatusMapper {
     static toDomain(doc) {
         return MessageStatus_1.MessageStatus.fromData({

@@ -1,8 +1,8 @@
-import { IAdminUserRepository } from "@domain/repositories/IAdminUserRepository";
-import { UpdateUserStatusRequestDto } from "@application/dto/admin/UpdateUserStatusRequestDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminUserRepository } from "../../../domain/repositories/IAdminUserRepository";
+import { UpdateUserStatusRequestDto } from "../../dto/admin/UpdateUserStatusRequestDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
-import { UpdateUserStatusResponseDto } from "@application/dto/admin/UpdateUserStatusResponseDto";
+import { UpdateUserStatusResponseDto } from "../../dto/admin/UpdateUserStatusResponseDto";
 export declare class UpdateUserStatusUseCase implements IUseCase<UpdateUserStatusRequestDto, Promise<Result<UpdateUserStatusResponseDto>>> {
     private adminUserRepository;
     constructor(adminUserRepository: IAdminUserRepository);

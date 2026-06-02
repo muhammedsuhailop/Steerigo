@@ -1,7 +1,7 @@
-import { IUserRepository, UserStatsFilter } from "@domain/repositories/IUserRepository";
-import { User } from "@domain/entities/User";
-import { AuthProvider } from "@shared/constants/AuthConstants";
-import { QueryOptions, PaginatedResult, FilterOptions } from "@shared/types/Repository";
+import { IUserRepository, UserStatsFilter } from "../../../domain/repositories/IUserRepository";
+import { User } from "../../../domain/entities/User";
+import { AuthProvider } from "../../../shared/constants/AuthConstants";
+import { QueryOptions, PaginatedResult, FilterOptions } from "../../../shared/types/Repository";
 export declare class UserRepositoryImpl implements IUserRepository {
     private queryService;
     findById(id: string): Promise<User | null>;

@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverPayoutController = void 0;
 const inversify_1 = require("inversify");
-const RequestPayoutDto_1 = require("@application/dto/driver/RequestPayoutDto");
-const GetDriverPayoutsDto_1 = require("@application/dto/driver/GetDriverPayoutsDto");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
+const RequestPayoutDto_1 = require("../../../application/dto/driver/RequestPayoutDto");
+const GetDriverPayoutsDto_1 = require("../../../application/dto/driver/GetDriverPayoutsDto");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
 let DriverPayoutController = class DriverPayoutController {
     constructor(requestPayoutUseCase, getDriverPayoutsUseCase) {
         this.requestPayoutUseCase = requestPayoutUseCase;

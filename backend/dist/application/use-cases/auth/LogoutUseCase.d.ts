@@ -1,6 +1,6 @@
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
-import { RefreshTokenDto } from "@application/dto/auth/RefreshTokenDto";
-import { Result } from "@shared/utils/Result";
+import { IRefreshTokenRepository } from "../../../domain/repositories/IRefreshTokenRepository";
+import { RefreshTokenDto } from "../../dto/auth/RefreshTokenDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 /**
  * Logout Use Case

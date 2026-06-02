@@ -1,6 +1,6 @@
-import { IRefreshTokenRepository } from "@domain/repositories/IRefreshTokenRepository";
-import { RefreshToken } from "@domain/entities/RefreshToken";
-import { FilterOptions, QueryOptions, PaginatedResult } from "@shared/types/Repository";
+import { IRefreshTokenRepository } from "../../../domain/repositories/IRefreshTokenRepository";
+import { RefreshToken } from "../../../domain/entities/RefreshToken";
+import { FilterOptions, QueryOptions, PaginatedResult } from "../../../shared/types/Repository";
 export declare class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
     findByToken(token: string): Promise<RefreshToken | null>;
     findByUserId(userId: string): Promise<RefreshToken[]>;

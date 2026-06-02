@@ -9,8 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BullMqRideSearchQueue = void 0;
 const inversify_1 = require("inversify");
 const RideSearchQueue_1 = require("./RideSearchQueue");
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const RideSearchQueueConstants_1 = require("@shared/constants/RideSearchQueueConstants");
+const AppConstants_1 = require("../../shared/constants/AppConstants");
+const RideSearchQueueConstants_1 = require("../../shared/constants/RideSearchQueueConstants");
 let BullMqRideSearchQueue = class BullMqRideSearchQueue {
     async scheduleRequestTimeout(data) {
         await RideSearchQueue_1.rideSearchQueue.add(RideSearchQueueConstants_1.RIDE_SEARCH_QUEUE.JOBS.REQUEST_TIMEOUT, data, {

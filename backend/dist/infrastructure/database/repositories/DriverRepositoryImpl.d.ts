@@ -1,11 +1,11 @@
-import { IDriverDateRangeFilter, IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IAdminDriverRepository } from "@domain/repositories/IAdminDriverRepository";
-import { Driver } from "@domain/entities/Driver";
-import { FilterOptions, PaginatedResult, QueryOptions } from "@shared/types/Repository";
-import { DriverStatus } from "@domain/value-objects/DriverStatus";
-import { KYCStatus } from "@domain/value-objects/KYCStatus";
-import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
-import { IAdminDriverQuery, IAdminDriverSummary } from "@domain/repositories/IAdminDriverRepository";
+import { IDriverDateRangeFilter, IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IAdminDriverRepository } from "../../../domain/repositories/IAdminDriverRepository";
+import { Driver } from "../../../domain/entities/Driver";
+import { FilterOptions, PaginatedResult, QueryOptions } from "../../../shared/types/Repository";
+import { DriverStatus } from "../../../domain/value-objects/DriverStatus";
+import { KYCStatus } from "../../../domain/value-objects/KYCStatus";
+import { LicenseCategory } from "../../../domain/value-objects/LicenseCategory";
+import { IAdminDriverQuery, IAdminDriverSummary } from "../../../domain/repositories/IAdminDriverRepository";
 type UnifiedDriverFilterOptions = FilterOptions<Driver> & IAdminDriverQuery;
 export declare class DriverRepositoryImpl implements IDriverRepository, IAdminDriverRepository {
     findById(id: string): Promise<Driver | null>;

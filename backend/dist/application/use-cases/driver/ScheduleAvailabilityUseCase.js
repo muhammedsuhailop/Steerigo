@@ -1,18 +1,18 @@
 "use strict";
 // import { injectable, inject } from "inversify";
-// import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
-// import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-// import { ScheduleAvailabilityRequestDto } from "@application/dto/driver/ScheduleAvailabilityRequestDto";
-// import { DriverAvailability } from "@domain/entities/DriverAvailability";
-// import { Location } from "@domain/value-objects/Location";
-// import { Result } from "@shared/utils/Result";
-// import { Logger } from "@shared/utils/Logger";
-// import { TYPES } from "@shared/constants/DITypes";
-// import { InvalidAvailabilityScheduleError } from "@domain/errors/DriverAvailabilityErrors";
-// import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
+// import { IDriverAvailabilityRepository } from "../../../domain/repositories/IDriverAvailabilityRepository";
+// import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+// import { ScheduleAvailabilityRequestDto } from "../../dto/driver/ScheduleAvailabilityRequestDto";
+// import { DriverAvailability } from "../../../domain/entities/DriverAvailability";
+// import { Location } from "../../../domain/value-objects/Location";
+// import { Result } from "../../../shared/utils/Result";
+// import { Logger } from "../../../shared/utils/Logger";
+// import { TYPES } from "../../../shared/constants/DITypes";
+// import { InvalidAvailabilityScheduleError } from "../../../domain/errors/DriverAvailabilityErrors";
+// import { DriverNotFoundError } from "../../../domain/errors/DriverNotFoundError";
 // import { Types } from "mongoose";
 // import { IUseCase } from "../interfaces/IUseCase";
-// import { DriverAvailabilityResponseDto } from "@application/dto/driver/DriverAvailabilityResponseDto";
+// import { DriverAvailabilityResponseDto } from "../../dto/driver/DriverAvailabilityResponseDto";
 // @injectable()
 // export class ScheduleAvailabilityUseCase
 //   implements

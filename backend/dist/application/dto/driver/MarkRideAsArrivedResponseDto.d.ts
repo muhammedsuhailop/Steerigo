@@ -1,4 +1,4 @@
-import { RideStatus } from "@domain/value-objects/RideStatus";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
 export interface MarkRideAsArrivedResponseDto {
     success: boolean;
     message: string;

@@ -1,4 +1,4 @@
-import { FilePurpose } from "@domain/value-objects/FilePurpose";
+import { FilePurpose } from "../../../domain/value-objects/FilePurpose";
 export declare class UpdateProfilePictureDto {
     readonly userId: string;
     readonly purpose: FilePurpose;

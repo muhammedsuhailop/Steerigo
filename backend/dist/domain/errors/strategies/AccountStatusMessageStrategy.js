@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultAccountStatusStrategy = exports.PendingVerificationStrategy = exports.DeactivatedAccountStrategy = exports.BlockedAccountStrategy = exports.SuspendedAccountStrategy = void 0;
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 class SuspendedAccountStrategy {
     getMessage() {
         return AuthConstants_1.AuthMessages.ACCOUNT_SUSPENDED;

@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideSearchDispatchService = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("@shared/constants/DITypes");
-const RideRequest_1 = require("@domain/entities/RideRequest");
-const RideRequestGroupStatus_1 = require("@domain/value-objects/RideRequestGroupStatus");
-const RideRequestStatus_1 = require("@domain/value-objects/RideRequestStatus");
-const RedisLockKeys_1 = require("@shared/constants/RedisLockKeys");
-const Logger_1 = require("@shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const RideRequest_1 = require("../../../domain/entities/RideRequest");
+const RideRequestGroupStatus_1 = require("../../../domain/value-objects/RideRequestGroupStatus");
+const RideRequestStatus_1 = require("../../../domain/value-objects/RideRequestStatus");
+const RedisLockKeys_1 = require("../../../shared/constants/RedisLockKeys");
+const Logger_1 = require("../../../shared/utils/Logger");
 let RideSearchDispatchService = class RideSearchDispatchService {
     constructor(rideRequestGroupRepository, rideRequestRepository, driverRepository, userRepository, eventBus, lockService, rideSearchQueue) {
         this.rideRequestGroupRepository = rideRequestGroupRepository;

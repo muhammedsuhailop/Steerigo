@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideMapper = void 0;
-const Ride_1 = require("@domain/entities/Ride");
-const Location_1 = require("@domain/value-objects/Location");
-const RideTimeline_1 = require("@domain/value-objects/RideTimeline");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
-const idHelper_1 = require("@shared/utils/idHelper");
-const PaymentStatus_1 = require("@domain/value-objects/PaymentStatus");
+const Ride_1 = require("../../../domain/entities/Ride");
+const Location_1 = require("../../../domain/value-objects/Location");
+const RideTimeline_1 = require("../../../domain/value-objects/RideTimeline");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../../domain/value-objects/Money");
+const idHelper_1 = require("../../../shared/utils/idHelper");
+const PaymentStatus_1 = require("../../../domain/value-objects/PaymentStatus");
 class RideMapper {
     static toDomain(doc) {
         const pickup = Location_1.Location.create(doc.pickup);

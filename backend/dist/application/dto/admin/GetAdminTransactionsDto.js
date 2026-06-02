@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAdminTransactionsDto = void 0;
-const TransactionType_1 = require("@domain/value-objects/TransactionType");
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
-const WalletOwnerType_1 = require("@domain/value-objects/WalletOwnerType");
-const TransactionErrors_1 = require("@domain/errors/TransactionErrors");
+const TransactionType_1 = require("../../../domain/value-objects/TransactionType");
+const TransactionDirection_1 = require("../../../domain/value-objects/TransactionDirection");
+const WalletOwnerType_1 = require("../../../domain/value-objects/WalletOwnerType");
+const TransactionErrors_1 = require("../../../domain/errors/TransactionErrors");
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;

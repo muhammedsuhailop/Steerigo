@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.kycSubmissionSchema = exports.driverUpdateSchema = exports.driverRegistrationSchema = void 0;
 const zod_1 = require("zod");
-const LicenseCategory_1 = require("@domain/value-objects/LicenseCategory");
-const VehicleType_1 = require("@domain/value-objects/VehicleType");
-const DocumentType_1 = require("@domain/value-objects/DocumentType");
-const Gender_1 = require("@domain/value-objects/Gender");
+const LicenseCategory_1 = require("../../../domain/value-objects/LicenseCategory");
+const VehicleType_1 = require("../../../domain/value-objects/VehicleType");
+const DocumentType_1 = require("../../../domain/value-objects/DocumentType");
+const Gender_1 = require("../../../domain/value-objects/Gender");
 const driverRegistrationBodySchema = zod_1.z.object({
     name: zod_1.z
         .string()

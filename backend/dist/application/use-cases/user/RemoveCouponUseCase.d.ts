@@ -1,10 +1,10 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
-import { RemoveCouponDto } from "@application/dto/user/RemoveCouponDto";
-import { RemoveCouponResponseDto } from "@application/dto/user/RemoveCouponResponseDto";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IEventBus } from "@application/services/IEventBus";
+import { Result } from "../../../shared/utils/Result";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
+import { RemoveCouponDto } from "../../dto/user/RemoveCouponDto";
+import { RemoveCouponResponseDto } from "../../dto/user/RemoveCouponResponseDto";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IEventBus } from "../../services/IEventBus";
 export declare class RemoveCouponUseCase implements IUseCase<RemoveCouponDto, Promise<Result<RemoveCouponResponseDto>>> {
     private readonly rideRepository;
     private readonly driverRepository;

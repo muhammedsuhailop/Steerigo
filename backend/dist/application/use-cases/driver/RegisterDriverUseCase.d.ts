@@ -1,9 +1,9 @@
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { IKYCRepository } from "@domain/repositories/IKYCRepository";
-import { DriverRegistrationRequestDto } from "@application/dto/driver/DriverRegistrationRequestDto";
-import { DriverResponseDto } from "@application/dto/driver/DriverResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IKYCRepository } from "../../../domain/repositories/IKYCRepository";
+import { DriverRegistrationRequestDto } from "../../dto/driver/DriverRegistrationRequestDto";
+import { DriverResponseDto } from "../../dto/driver/DriverResponseDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export interface RegisterDriverResult {
     driver: DriverResponseDto;

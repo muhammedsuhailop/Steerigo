@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.notificationRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const middleware_1 = require("@interface/middleware");
-const getNotificationsSchema_1 = require("@interface/validators/notification/getNotificationsSchema");
-const markNotificationsReadSchema_1 = require("@interface/validators/notification/markNotificationsReadSchema");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const middleware_1 = require("../../middleware");
+const getNotificationsSchema_1 = require("../../validators/notification/getNotificationsSchema");
+const markNotificationsReadSchema_1 = require("../../validators/notification/markNotificationsReadSchema");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const notificationRoutes = (0, express_1.Router)();
 exports.notificationRoutes = notificationRoutes;
 const notificationController = DIContainer_1.container.get(DITypes_1.TYPES.NotificationController);

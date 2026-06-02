@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNotificationsSchema = exports.GetNotificationsDto = void 0;
 const zod_1 = require("zod");
-const NotificationType_1 = require("@domain/value-objects/NotificationType");
-const NotificationChannel_1 = require("@domain/value-objects/NotificationChannel");
+const NotificationType_1 = require("../../../domain/value-objects/NotificationType");
+const NotificationChannel_1 = require("../../../domain/value-objects/NotificationChannel");
 const getNotificationsSchema = zod_1.z.object({
     page: zod_1.z.number().positive().optional().default(1),
     limit: zod_1.z.number().positive().max(100).optional().default(20),

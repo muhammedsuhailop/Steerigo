@@ -1,4 +1,4 @@
-import { AdminUserAction } from "@domain/value-objects/AdminAction";
+import { AdminUserAction } from "../../../domain/value-objects/AdminAction";
 export declare class UpdateUserStatusRequestDto {
     private readonly data;
     constructor(requestData: unknown);

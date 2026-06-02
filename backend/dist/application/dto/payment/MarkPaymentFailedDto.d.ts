@@ -1,4 +1,4 @@
-import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
+import { PaymentFailureReason } from "../../../domain/value-objects/PaymentFailureReason";
 import { z } from "zod";
 declare const markPaymentFailedSchema: z.ZodObject<{
     paymentId: z.ZodString;

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KYCMapper = void 0;
-const KYC_1 = require("@domain/entities/KYC");
+const KYC_1 = require("../../../domain/entities/KYC");
 const mongoose_1 = require("mongoose");
 class KYCMapper {
     static toDomain(raw) {

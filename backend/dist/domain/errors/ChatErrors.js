@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatErrors = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class ChatErrors {
     static rideNotFound(rideId) {
         return new DomainError_1.DomainError(`Ride not found for rideId: ${rideId}`, "RIDE_NOT_FOUND", {

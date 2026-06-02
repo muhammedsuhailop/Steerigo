@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { ApprovePayoutDto } from "@application/dto/admin/ApprovePayoutDto";
-import { ApprovePayoutResponseDto } from "@application/dto/admin/ApprovePayoutResponseDto";
-import { RejectPayoutDto } from "@application/dto/admin/RejectPayoutDto";
-import { RejectPayoutResponseDto } from "@application/dto/admin/RejectPayoutResponseDto";
-import { GetAdminPayoutsDto } from "@application/dto/admin/GetAdminPayoutsDto";
-import { GetPayoutsResponseDto } from "@application/dto/admin/GetPayoutsResponseDto";
-import { Result } from "@shared/utils/Result";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { ApprovePayoutDto } from "../../../application/dto/admin/ApprovePayoutDto";
+import { ApprovePayoutResponseDto } from "../../../application/dto/admin/ApprovePayoutResponseDto";
+import { RejectPayoutDto } from "../../../application/dto/admin/RejectPayoutDto";
+import { RejectPayoutResponseDto } from "../../../application/dto/admin/RejectPayoutResponseDto";
+import { GetAdminPayoutsDto } from "../../../application/dto/admin/GetAdminPayoutsDto";
+import { GetPayoutsResponseDto } from "../../../application/dto/admin/GetPayoutsResponseDto";
+import { Result } from "../../../shared/utils/Result";
 export declare class AdminPayoutController {
     private readonly approvePayoutUseCase;
     private readonly rejectPayoutUseCase;

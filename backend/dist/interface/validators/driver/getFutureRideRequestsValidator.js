@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFutureRideRequestsSchema = void 0;
 const zod_1 = require("zod");
-const FutureRideRequestStatus_1 = require("@domain/value-objects/FutureRideRequestStatus");
+const FutureRideRequestStatus_1 = require("../../../domain/value-objects/FutureRideRequestStatus");
 exports.getFutureRideRequestsSchema = zod_1.z.object({
     query: zod_1.z
         .object({

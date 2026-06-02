@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverWalletUseCase = void 0;
 const inversify_1 = require("inversify");
-const WalletOwnerType_1 = require("@domain/value-objects/WalletOwnerType");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DriverNotFoundError_1 = require("@domain/errors/DriverNotFoundError");
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
-const Wallet_1 = require("@domain/entities/Wallet");
+const WalletOwnerType_1 = require("../../../domain/value-objects/WalletOwnerType");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
+const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
+const Wallet_1 = require("../../../domain/entities/Wallet");
 let GetDriverWalletUseCase = class GetDriverWalletUseCase {
     constructor(driverRepository, walletRepository, transactionRepository, idGenerator) {
         this.driverRepository = driverRepository;

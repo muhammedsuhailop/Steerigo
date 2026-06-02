@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RideRequestErrors = void 0;
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const errorMessageFormatter_1 = require("@shared/utils/errorMessageFormatter");
-const RideRequestMessages_1 = require("@shared/constants/RideRequestMessages");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
+const errorMessageFormatter_1 = require("../../shared/utils/errorMessageFormatter");
+const RideRequestMessages_1 = require("../../shared/constants/RideRequestMessages");
 class RideRequestErrors {
     static driverNotFound(driverId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(RideRequestMessages_1.RIDE_REQUEST_ERROR_MESSAGES.DRIVER_NOT_FOUND, {

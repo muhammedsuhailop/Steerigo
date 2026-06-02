@@ -1,4 +1,4 @@
-import { FareConfiguration } from "@domain/entities/FareConfiguration";
+import { FareConfiguration } from "../../../domain/entities/FareConfiguration";
 import { IFareConfigurationDocument } from "../models/FareConfigurationModel";
 export declare class FareConfigurationMapper {
     static toDomain(doc: IFareConfigurationDocument): FareConfiguration;

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponMapper = void 0;
-const Coupon_1 = require("@domain/entities/Coupon");
+const Coupon_1 = require("../../../domain/entities/Coupon");
 class CouponMapper {
     static toDomain(doc) {
         return Coupon_1.Coupon.fromData({

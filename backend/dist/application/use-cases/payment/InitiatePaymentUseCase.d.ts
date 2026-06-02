@@ -1,12 +1,12 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { InitiatePaymentDto } from "@application/dto/payment/InitiatePaymentDto";
-import { InitiatePaymentResponseDto, OnlinePaymentInitData, WalletPaymentInitData, CashPaymentInitData } from "@application/dto/payment/InitiatePaymentResponseDto";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
-import { IPaymentRepository } from "@domain/repositories/IPaymentRepository";
-import { Result } from "@shared/utils/Result";
-import { IEventBus } from "@application/services/IEventBus";
-import { IPaymentStrategy } from "@application/services/payment/IPaymentStrategy";
-import { IIdGenerator } from "@application/services/IIdGenerator";
+import { InitiatePaymentDto } from "../../dto/payment/InitiatePaymentDto";
+import { InitiatePaymentResponseDto, OnlinePaymentInitData, WalletPaymentInitData, CashPaymentInitData } from "../../dto/payment/InitiatePaymentResponseDto";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
+import { IPaymentRepository } from "../../../domain/repositories/IPaymentRepository";
+import { Result } from "../../../shared/utils/Result";
+import { IEventBus } from "../../services/IEventBus";
+import { IPaymentStrategy } from "../../services/payment/IPaymentStrategy";
+import { IIdGenerator } from "../../services/IIdGenerator";
 export declare class InitiatePaymentUseCase implements IUseCase<InitiatePaymentDto, Promise<Result<InitiatePaymentResponseDto>>> {
     private readonly rideRepository;
     private readonly paymentRepository;

@@ -12,7 +12,7 @@ const socket_1 = require("../realtime/socket");
 const SocketEvents_1 = require("../realtime/constants/SocketEvents");
 const Logger_1 = require("../../shared/utils/Logger");
 const RedisPubSubClient_1 = require("../realtime/RedisPubSubClient");
-const PubSubChannels_1 = require("@infrastructure/realtime/constants/PubSubChannels");
+const PubSubChannels_1 = require("../realtime/constants/PubSubChannels");
 let RideNotificationService = class RideNotificationService {
     constructor() {
         this.redisPublisher = null;

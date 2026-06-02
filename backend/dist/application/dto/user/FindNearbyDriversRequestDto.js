@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FindNearbyDriversRequestDto = void 0;
-const ValidationErrors_1 = require("@domain/errors/ValidationErrors");
+const ValidationErrors_1 = require("../../../domain/errors/ValidationErrors");
 class FindNearbyDriversRequestDto {
     constructor(latitude, longitude, searchDate, timeRequired, radiusKm = 10, gearType = "", bodyType = "", limit = 20) {
         this.latitude = latitude;

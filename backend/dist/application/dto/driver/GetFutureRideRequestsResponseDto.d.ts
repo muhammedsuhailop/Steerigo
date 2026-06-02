@@ -1,4 +1,4 @@
-import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { FutureRideRequestStatus } from "../../../domain/value-objects/FutureRideRequestStatus";
 export interface FutureRideRequestData {
     readonly requestId: string;
     readonly requestGroupId: string;

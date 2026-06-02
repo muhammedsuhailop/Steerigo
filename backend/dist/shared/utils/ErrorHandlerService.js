@@ -8,10 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ErrorHandlerService = void 0;
 const inversify_1 = require("inversify");
-const ErrorClassificationService_1 = require("@shared/errors/ErrorClassificationService");
-const ErrorResponseBuilder_1 = require("@shared/errors/ErrorResponseBuilder");
+const ErrorClassificationService_1 = require("../errors/ErrorClassificationService");
+const ErrorResponseBuilder_1 = require("../errors/ErrorResponseBuilder");
 const Logger_1 = require("./Logger");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const HttpStatusCodes_1 = require("../enums/HttpStatusCodes");
 let ErrorHandlerService = class ErrorHandlerService {
     static handleError(error, context) {
         Logger_1.Logger.debug("[ErrorHandlerService] Handling error", {

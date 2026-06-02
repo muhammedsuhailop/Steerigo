@@ -1,6 +1,6 @@
-import { Payout } from "@domain/entities/Payout";
+import { Payout } from "../entities/Payout";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
-import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
+import { PayoutStatus } from "../value-objects/PayoutStatus";
 export interface PayoutQueryFilters {
     status?: PayoutStatus;
     driverId?: string;

@@ -1,7 +1,7 @@
-import { Location } from "@domain/value-objects/Location";
-import { RideType } from "@domain/value-objects/RideType";
-import { RideRequestGroupStatus } from "@domain/value-objects/RideRequestGroupStatus";
-import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { Location } from "../value-objects/Location";
+import { RideType } from "../value-objects/RideType";
+import { RideRequestGroupStatus } from "../value-objects/RideRequestGroupStatus";
+import { FareBreakdown } from "../value-objects/FareBreakdown";
 export declare class RideRequestGroup {
     private readonly id;
     private readonly riderId;

@@ -1,21 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ControllerFactory = void 0;
-const DITypes_1 = require("@shared/constants/DITypes");
-const LoginController_1 = require("@interface/controllers/auth/LoginController");
-const UserAuthController_1 = require("@interface/controllers/auth/UserAuthController");
-const TokenController_1 = require("@interface/controllers/auth/TokenController");
-const SignupController_1 = require("@interface/controllers/auth/SignupController");
-const PasswordController_1 = require("@interface/controllers/auth/PasswordController");
-const OtpController_1 = require("@interface/controllers/auth/OtpController");
-const SocialAuthController_1 = require("@interface/controllers/auth/SocialAuthController");
-const DriverSearchController_1 = require("@interface/controllers/user/DriverSearchController");
-const AutoRideController_1 = require("@interface/controllers/user/AutoRideController");
-const DriverRideController_1 = require("@interface/controllers/driver/DriverRideController");
-const DriverRideActionsController_1 = require("@interface/controllers/driver/DriverRideActionsController");
-const DriverPayoutController_1 = require("@interface/controllers/driver/DriverPayoutController");
-const AdminPayoutController_1 = require("@interface/controllers/admin/AdminPayoutController");
-const CouponController_1 = require("@interface/controllers/user/CouponController");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const LoginController_1 = require("../../../interface/controllers/auth/LoginController");
+const UserAuthController_1 = require("../../../interface/controllers/auth/UserAuthController");
+const TokenController_1 = require("../../../interface/controllers/auth/TokenController");
+const SignupController_1 = require("../../../interface/controllers/auth/SignupController");
+const PasswordController_1 = require("../../../interface/controllers/auth/PasswordController");
+const OtpController_1 = require("../../../interface/controllers/auth/OtpController");
+const SocialAuthController_1 = require("../../../interface/controllers/auth/SocialAuthController");
+const DriverSearchController_1 = require("../../../interface/controllers/user/DriverSearchController");
+const AutoRideController_1 = require("../../../interface/controllers/user/AutoRideController");
+const DriverRideController_1 = require("../../../interface/controllers/driver/DriverRideController");
+const DriverRideActionsController_1 = require("../../../interface/controllers/driver/DriverRideActionsController");
+const DriverPayoutController_1 = require("../../../interface/controllers/driver/DriverPayoutController");
+const AdminPayoutController_1 = require("../../../interface/controllers/admin/AdminPayoutController");
+const CouponController_1 = require("../../../interface/controllers/user/CouponController");
 class ControllerFactory {
     static register(container) {
         container.bind(DITypes_1.TYPES.LoginController).to(LoginController_1.LoginController);

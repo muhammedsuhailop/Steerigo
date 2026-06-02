@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRoomModel = void 0;
 const mongoose_1 = require("mongoose");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const ChatRoomStatus_1 = require("@domain/value-objects/ChatRoomStatus");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const ChatRoomStatus_1 = require("../../../domain/value-objects/ChatRoomStatus");
 const chatRoomSchema = new mongoose_1.Schema({
     rideId: {
         type: String,

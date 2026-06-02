@@ -1,7 +1,7 @@
 import { IUserDocument } from "../models/UserModel";
-import { QueryOptions, FilterOptions } from "@shared/types/Repository";
-import { AuthProvider } from "@shared/constants/AuthConstants";
-import { User } from "@domain/entities";
+import { QueryOptions, FilterOptions } from "../../../shared/types/Repository";
+import { AuthProvider } from "../../../shared/constants/AuthConstants";
+import { User } from "../../../domain/entities";
 export declare class UserQueryService {
     findById(id: string): Promise<IUserDocument | null>;
     findByEmail(email: string): Promise<IUserDocument | null>;

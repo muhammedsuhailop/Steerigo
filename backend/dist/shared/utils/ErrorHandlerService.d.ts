@@ -1,4 +1,4 @@
-import { ApiResponse } from "@shared/types/Common";
+import { ApiResponse } from "../types/Common";
 export declare class ErrorHandlerService {
     private static classificationService;
     private static responseBuilder;

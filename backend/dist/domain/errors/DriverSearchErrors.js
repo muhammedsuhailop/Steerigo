@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocationServiceError = exports.DriverFilterNotMatchError = exports.InvalidSearchDateError = exports.InvalidLocationError = exports.NoDriversAvailableError = void 0;
-const DriverMessages_1 = require("@shared/constants/DriverMessages");
+const DriverMessages_1 = require("../../shared/constants/DriverMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class NoDriversAvailableError extends DomainError_1.DomainError {
     constructor(message = DriverMessages_1.SEARCH_DRIVER_ERROR_MESSAGES.NO_DRIVERS_AVAILABLE) {
         super(message, "NO_DRIVERS_AVAILABLE", {

@@ -1,6 +1,6 @@
-import { PaymentStatus } from "@domain/value-objects/PaymentStatus";
-import { PaymentMethod } from "@domain/value-objects/PaymentMethod";
-import { PaymentFailureReason } from "@domain/value-objects/PaymentFailureReason";
+import { PaymentStatus } from "../../../domain/value-objects/PaymentStatus";
+import { PaymentMethod } from "../../../domain/value-objects/PaymentMethod";
+import { PaymentFailureReason } from "../../../domain/value-objects/PaymentFailureReason";
 export interface MarkPaymentFailedResponseDto {
     success: boolean;
     message: string;

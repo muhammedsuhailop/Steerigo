@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAdminPayoutsSchema = exports.rejectPayoutSchema = exports.approvePayoutSchema = exports.requestPayoutSchema = void 0;
 const zod_1 = require("zod");
-const PayoutMethod_1 = require("@domain/value-objects/PayoutMethod");
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
+const PayoutMethod_1 = require("../../../domain/value-objects/PayoutMethod");
+const PayoutStatus_1 = require("../../../domain/value-objects/PayoutStatus");
 const bankDestinationSchema = zod_1.z.object({
     type: zod_1.z.literal("BANK"),
     accountNumber: zod_1.z.string().min(8).max(20),

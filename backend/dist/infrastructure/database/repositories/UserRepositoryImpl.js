@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRepositoryImpl = void 0;
 const inversify_1 = require("inversify");
 const UserModel_1 = require("../models/UserModel");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 const UserDomainMapper_1 = require("../mappers/UserDomainMapper");
 const UserQueryService_1 = require("../services/UserQueryService");
 let UserRepositoryImpl = class UserRepositoryImpl {

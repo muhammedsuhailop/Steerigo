@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminDriverRoutes = void 0;
 const express_1 = require("express");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const adminDriverValidators_1 = require("@interface/validators/admin/adminDriverValidators");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DIContainer_1 = require("../../../infrastructure/container/DIContainer");
+const adminDriverValidators_1 = require("../../validators/admin/adminDriverValidators");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 const router = (0, express_1.Router)();
 exports.adminDriverRoutes = router;
 // Get admin driver controller instance from container

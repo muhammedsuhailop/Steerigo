@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletMapper = void 0;
-const Wallet_1 = require("@domain/entities/Wallet");
-const Money_1 = require("@domain/value-objects/Money");
+const Wallet_1 = require("../../../domain/entities/Wallet");
+const Money_1 = require("../../../domain/value-objects/Money");
 class WalletMapper {
     static toDomain(doc) {
         const available = Money_1.Money.forceCreate(doc.availableBalance, doc.currency);

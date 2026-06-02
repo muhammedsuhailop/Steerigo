@@ -18,7 +18,7 @@ export interface IFareConfigurationDocument extends Document {
     updatedAt: Date;
 }
 export declare const FareConfigurationModel: import("mongoose").Model<IFareConfigurationDocument, {}, {}, {}, Document<unknown, {}, IFareConfigurationDocument, {}, {}> & IFareConfigurationDocument & Required<{
-    _id: import("mongoose").Types.ObjectId;
+    _id: unknown;
 }> & {
     __v: number;
 }, any>;

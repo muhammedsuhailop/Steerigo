@@ -1,6 +1,6 @@
 import { ICrudRepository } from "./ICrudRepository";
-import { UserChat } from "@domain/entities/UserChat";
-import { PaginatedResult } from "@shared/types/Repository";
+import { UserChat } from "../entities/UserChat";
+import { PaginatedResult } from "../../shared/types/Repository";
 export interface IUserChatPaginationOptions {
     page: number;
     limit: number;

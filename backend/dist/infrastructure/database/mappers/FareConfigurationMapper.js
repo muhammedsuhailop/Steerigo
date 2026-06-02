@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FareConfigurationMapper = void 0;
-const FareConfiguration_1 = require("@domain/entities/FareConfiguration");
+const FareConfiguration_1 = require("../../../domain/entities/FareConfiguration");
 const mongoose_1 = require("mongoose");
 class FareConfigurationMapper {
     static toDomain(doc) {

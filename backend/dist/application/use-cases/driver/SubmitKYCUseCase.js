@@ -14,15 +14,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubmitKYCUseCase = void 0;
 const inversify_1 = require("inversify");
-const Result_1 = require("@shared/utils/Result");
-const KYC_1 = require("@domain/entities/KYC");
-const DomainError_1 = require("@domain/errors/DomainError");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const DocumentType_1 = require("@domain/value-objects/DocumentType");
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const Result_1 = require("../../../shared/utils/Result");
+const KYC_1 = require("../../../domain/entities/KYC");
+const DomainError_1 = require("../../../domain/errors/DomainError");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const DocumentType_1 = require("../../../domain/value-objects/DocumentType");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 const mongoose_1 = require("mongoose");
-const SubmitKYCResponseDto_1 = require("@application/dto/driver/SubmitKYCResponseDto");
+const SubmitKYCResponseDto_1 = require("../../dto/driver/SubmitKYCResponseDto");
 let SubmitKYCUseCase = class SubmitKYCUseCase {
     constructor(driverRepository, kycRepository) {
         this.driverRepository = driverRepository;

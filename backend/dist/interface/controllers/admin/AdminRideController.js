@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminRideController = void 0;
 const inversify_1 = require("inversify");
-const GetAdminRidesDto_1 = require("@application/dto/admin/GetAdminRidesDto");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const GetAdminRatingsDto_1 = require("@application/dto/admin/GetAdminRatingsDto");
-const GetAdminRideByIdDto_1 = require("@application/dto/admin/GetAdminRideByIdDto");
+const GetAdminRidesDto_1 = require("../../../application/dto/admin/GetAdminRidesDto");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const GetAdminRatingsDto_1 = require("../../../application/dto/admin/GetAdminRatingsDto");
+const GetAdminRideByIdDto_1 = require("../../../application/dto/admin/GetAdminRideByIdDto");
 let AdminRideController = class AdminRideController {
     constructor(getAdminRidesUseCase, getAdminRatingsUseCase, getAdminRideByIdUseCase) {
         this.getAdminRidesUseCase = getAdminRidesUseCase;

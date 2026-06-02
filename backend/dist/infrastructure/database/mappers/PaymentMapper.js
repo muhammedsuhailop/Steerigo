@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentMapper = void 0;
-const Payment_1 = require("@domain/entities/Payment");
-const Money_1 = require("@domain/value-objects/Money");
+const Payment_1 = require("../../../domain/entities/Payment");
+const Money_1 = require("../../../domain/value-objects/Money");
 const mongoose_1 = require("mongoose");
 class PaymentMapper {
     static toDomain(doc) {

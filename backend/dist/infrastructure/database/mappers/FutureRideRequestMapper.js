@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FutureRideRequestMapper = void 0;
 const mongoose_1 = require("mongoose");
-const FutureRideRequest_1 = require("@domain/entities/FutureRideRequest");
-const Location_1 = require("@domain/value-objects/Location");
-const FareBreakdown_1 = require("@domain/value-objects/FareBreakdown");
-const Money_1 = require("@domain/value-objects/Money");
-const idHelper_1 = require("@shared/utils/idHelper");
+const FutureRideRequest_1 = require("../../../domain/entities/FutureRideRequest");
+const Location_1 = require("../../../domain/value-objects/Location");
+const FareBreakdown_1 = require("../../../domain/value-objects/FareBreakdown");
+const Money_1 = require("../../../domain/value-objects/Money");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 class FutureRideRequestMapper {
     static toDomain(doc) {
         const pickup = Location_1.Location.create({

@@ -1,9 +1,9 @@
-import { IAdminUserRepository } from "@domain/repositories/IAdminUserRepository";
-import { GetUsersRequestDto } from "@application/dto/admin/GetUsersRequestDto";
-import { Result } from "@shared/utils/Result";
+import { IAdminUserRepository } from "../../../domain/repositories/IAdminUserRepository";
+import { GetUsersRequestDto } from "../../dto/admin/GetUsersRequestDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
-import { GetUsersResponseDto } from "@application/dto/admin/GetUsersResponseDto";
-import { IRideRepository } from "@domain/repositories/IRideRepository";
+import { GetUsersResponseDto } from "../../dto/admin/GetUsersResponseDto";
+import { IRideRepository } from "../../../domain/repositories/IRideRepository";
 export declare class GetUsersUseCase implements IUseCase<GetUsersRequestDto, Promise<Result<GetUsersResponseDto>>> {
     private adminUserRepository;
     private readonly rideRepository;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserRidesSchema = void 0;
 const zod_1 = require("zod");
-const RideStatus_1 = require("@domain/value-objects/RideStatus");
+const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 const validRideStatuses = Object.values(RideStatus_1.RideStatus);
 exports.getUserRidesSchema = zod_1.z.object({
     query: zod_1.z.object({

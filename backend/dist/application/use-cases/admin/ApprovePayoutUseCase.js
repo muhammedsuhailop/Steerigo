@@ -14,17 +14,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApprovePayoutUseCase = void 0;
 const inversify_1 = require("inversify");
-const Transaction_1 = require("@domain/entities/Transaction");
-const WalletOwnerType_1 = require("@domain/value-objects/WalletOwnerType");
-const TransactionType_1 = require("@domain/value-objects/TransactionType");
-const TransactionDirection_1 = require("@domain/value-objects/TransactionDirection");
-const PayoutStatus_1 = require("@domain/value-objects/PayoutStatus");
-const Result_1 = require("@shared/utils/Result");
-const Logger_1 = require("@shared/utils/Logger");
-const DITypes_1 = require("@shared/constants/DITypes");
-const PayoutErrors_1 = require("@domain/errors/PayoutErrors");
+const Transaction_1 = require("../../../domain/entities/Transaction");
+const WalletOwnerType_1 = require("../../../domain/value-objects/WalletOwnerType");
+const TransactionType_1 = require("../../../domain/value-objects/TransactionType");
+const TransactionDirection_1 = require("../../../domain/value-objects/TransactionDirection");
+const PayoutStatus_1 = require("../../../domain/value-objects/PayoutStatus");
+const Result_1 = require("../../../shared/utils/Result");
+const Logger_1 = require("../../../shared/utils/Logger");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const PayoutErrors_1 = require("../../../domain/errors/PayoutErrors");
 const mongoose_1 = require("mongoose");
-const AdminMessages_1 = require("@shared/constants/AdminMessages");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let ApprovePayoutUseCase = class ApprovePayoutUseCase {
     constructor(payoutRepository, walletRepository, transactionRepository) {
         this.payoutRepository = payoutRepository;

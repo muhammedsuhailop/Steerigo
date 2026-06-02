@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeAvailabilityExceptionSchema = exports.editAvailabilityExceptionSchema = void 0;
 const zod_1 = require("zod");
-const AvailabilityExceptionType_1 = require("@domain/value-objects/AvailabilityExceptionType");
+const AvailabilityExceptionType_1 = require("../../../domain/value-objects/AvailabilityExceptionType");
 exports.editAvailabilityExceptionSchema = zod_1.z.object({
     params: zod_1.z.object({
         exceptionId: zod_1.z

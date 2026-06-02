@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UnknownErrorClassifier = void 0;
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const Logger_1 = require("@shared/utils/Logger");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../enums/ErrorType");
+const Logger_1 = require("../../utils/Logger");
+const HttpStatusCodes_1 = require("../../enums/HttpStatusCodes");
 class UnknownErrorClassifier {
     constructor() {
         this.priority = 99;

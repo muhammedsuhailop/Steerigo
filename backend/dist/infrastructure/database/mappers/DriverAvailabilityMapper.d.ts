@@ -1,5 +1,5 @@
-import { DriverAvailability } from "@domain/entities/DriverAvailability";
-import { AvailabilityException } from "@domain/entities/AvailabilityException";
+import { DriverAvailability } from "../../../domain/entities/DriverAvailability";
+import { AvailabilityException } from "../../../domain/entities/AvailabilityException";
 import { ExceptionDocument, IDriverAvailabilityModel } from "../models/DriverAvailabilityModel";
 export declare class DriverAvailabilityMapper {
     private static mapLocation;

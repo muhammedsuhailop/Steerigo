@@ -1,12 +1,12 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { RejectRideRequestDto } from "@application/dto/driver/RejectRideRequestDto";
-import { RejectRideRequestResponseDto } from "@application/dto/driver/RejectRideRequestResponseDto";
-import { IRideRequestRepository } from "@domain/repositories/IRideRequestRepository";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IRideRequestGroupRepository } from "@domain/repositories/IRideRequestGroupRepository";
-import { Result } from "@shared/utils/Result";
-import { IDistributedLockService } from "@application/services/IDistributedLockService";
-import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
+import { RejectRideRequestDto } from "../../dto/driver/RejectRideRequestDto";
+import { RejectRideRequestResponseDto } from "../../dto/driver/RejectRideRequestResponseDto";
+import { IRideRequestRepository } from "../../../domain/repositories/IRideRequestRepository";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IRideRequestGroupRepository } from "../../../domain/repositories/IRideRequestGroupRepository";
+import { Result } from "../../../shared/utils/Result";
+import { IDistributedLockService } from "../../services/IDistributedLockService";
+import { IRideSearchDispatchService } from "../../services/IRideSearchDispatchService";
 export declare class RejectRideRequestUseCase implements IUseCase<RejectRideRequestDto, Promise<Result<RejectRideRequestResponseDto>>> {
     private driverRepository;
     private rideRequestRepository;

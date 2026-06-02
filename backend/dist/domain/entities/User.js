@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
-const AppConstants_1 = require("@shared/constants/AppConstants");
+const AppConstants_1 = require("../../shared/constants/AppConstants");
 const DomainError_1 = require("../errors/DomainError");
 const Email_1 = require("../value-objects/Email");
 const Password_1 = require("../value-objects/Password");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const AuthConstants_1 = require("../../shared/constants/AuthConstants");
 class User {
     constructor(id, name, email, password, mobile, dob, gender, address, role = AuthConstants_1.UserRole.RIDER, status = AuthConstants_1.UserStatus.PENDING_VERIFICATION, isVerified = false, otpHash, otpExpires, otpAttempts = 0, createdAt = new Date(), updatedAt = new Date(), googleId, profilePicture, authProvider = AuthConstants_1.AuthProvider.EMAIL) {
         this.id = id;

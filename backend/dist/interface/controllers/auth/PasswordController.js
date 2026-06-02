@@ -14,14 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordController = void 0;
 const inversify_1 = require("inversify");
-const ForgotPasswordRequestDto_1 = require("@application/dto/auth/ForgotPasswordRequestDto");
-const ForgotPasswordVerifyDto_1 = require("@application/dto/auth/ForgotPasswordVerifyDto");
-const UpdatePasswordDto_1 = require("@application/dto/auth/UpdatePasswordDto");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ForgotPasswordRequestDto_1 = require("../../../application/dto/auth/ForgotPasswordRequestDto");
+const ForgotPasswordVerifyDto_1 = require("../../../application/dto/auth/ForgotPasswordVerifyDto");
+const UpdatePasswordDto_1 = require("../../../application/dto/auth/UpdatePasswordDto");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 let PasswordController = class PasswordController {
     constructor(forgotPasswordRequestUseCase, forgotPasswordVerifyUseCase, updatePasswordUseCase) {
         this.forgotPasswordRequestUseCase = forgotPasswordRequestUseCase;

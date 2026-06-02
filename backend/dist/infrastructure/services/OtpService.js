@@ -13,8 +13,8 @@ exports.OtpService = void 0;
 const inversify_1 = require("inversify");
 const otp_generator_1 = __importDefault(require("otp-generator"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const AppConstants_1 = require("@shared/constants/AppConstants");
-const Logger_1 = require("@shared/utils/Logger");
+const AppConstants_1 = require("../../shared/constants/AppConstants");
+const Logger_1 = require("../../shared/utils/Logger");
 let OtpService = class OtpService {
     generate() {
         try {

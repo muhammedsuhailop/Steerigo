@@ -15,12 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenController = void 0;
 const inversify_1 = require("inversify");
 const express_validator_1 = require("express-validator");
-const auth_1 = require("@application/dto/auth");
-const Logger_1 = require("@shared/utils/Logger");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const DITypes_1 = require("@shared/constants/DITypes");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
+const auth_1 = require("../../../application/dto/auth");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 let TokenController = class TokenController {
     constructor(logoutUseCase, refreshTokenUseCase) {
         this.logoutUseCase = logoutUseCase;

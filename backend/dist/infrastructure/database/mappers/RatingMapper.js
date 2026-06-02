@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RatingMapper = void 0;
-const Rating_1 = require("@domain/entities/Rating");
-const RatingCriteria_1 = require("@domain/value-objects/RatingCriteria");
-const RatingCriteriaType_1 = require("@domain/value-objects/RatingCriteriaType");
-const idHelper_1 = require("@shared/utils/idHelper");
+const Rating_1 = require("../../../domain/entities/Rating");
+const RatingCriteria_1 = require("../../../domain/value-objects/RatingCriteria");
+const RatingCriteriaType_1 = require("../../../domain/value-objects/RatingCriteriaType");
+const idHelper_1 = require("../../../shared/utils/idHelper");
 class RatingMapper {
     static toDomain(doc) {
         const criteriaObj = {};

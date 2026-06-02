@@ -1,5 +1,5 @@
-import { IPasswordService } from "@application/services/IPasswordService";
-import { CryptoAdapter } from "@infrastructure/adapters/CryptoAdapter";
+import { IPasswordService } from "../../application/services/IPasswordService";
+import { CryptoAdapter } from "../adapters/CryptoAdapter";
 export declare class PasswordService implements IPasswordService {
     private cryptoAdapter;
     constructor(cryptoAdapter: CryptoAdapter);

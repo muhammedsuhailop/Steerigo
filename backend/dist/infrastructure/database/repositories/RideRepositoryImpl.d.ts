@@ -1,7 +1,7 @@
-import { IAdminRidePaginationOptions, IDriverRideStatsResult, IRideFilters, IRidePaginationOptions, IRideRepository, IRiderRideStatsResult, IRideStatsResult } from "@domain/repositories/IRideRepository";
-import { Ride } from "@domain/entities/Ride";
-import { RideStatus } from "@domain/value-objects/RideStatus";
-import { PaginatedResult } from "@shared/types/Repository";
+import { IAdminRidePaginationOptions, IDriverRideStatsResult, IRideFilters, IRidePaginationOptions, IRideRepository, IRiderRideStatsResult, IRideStatsResult } from "../../../domain/repositories/IRideRepository";
+import { Ride } from "../../../domain/entities/Ride";
+import { RideStatus } from "../../../domain/value-objects/RideStatus";
+import { PaginatedResult } from "../../../shared/types/Repository";
 export declare class RideRepositoryImpl implements IRideRepository {
     findById(id: string): Promise<Ride | null>;
     exists(id: string): Promise<boolean>;

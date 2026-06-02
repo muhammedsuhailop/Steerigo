@@ -1,9 +1,9 @@
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IUserRepository } from "@domain/repositories/IUserRepository";
-import { DriverProfileUpdateDto } from "@application/dto/driver/DriverProfileUpdateDto";
-import { Result } from "@shared/utils/Result";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { DriverProfileUpdateDto } from "../../dto/driver/DriverProfileUpdateDto";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
-import { UpdateDriverProfileResponseDto } from "@application/dto/driver/UpdateDriverProfileResponseDto";
+import { UpdateDriverProfileResponseDto } from "../../dto/driver/UpdateDriverProfileResponseDto";
 export declare class UpdateDriverProfileUseCase implements IUseCase<DriverProfileUpdateDto, Promise<Result<UpdateDriverProfileResponseDto>>> {
     private driverRepository;
     private userRepository;

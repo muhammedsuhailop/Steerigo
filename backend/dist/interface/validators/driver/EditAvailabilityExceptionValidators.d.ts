@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AvailabilityExceptionType } from "@domain/value-objects/AvailabilityExceptionType";
+import { AvailabilityExceptionType } from "../../../domain/value-objects/AvailabilityExceptionType";
 export declare const editAvailabilityExceptionSchema: z.ZodObject<{
     params: z.ZodObject<{
         exceptionId: z.ZodString;

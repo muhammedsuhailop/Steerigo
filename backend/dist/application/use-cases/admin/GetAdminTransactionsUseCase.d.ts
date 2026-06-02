@@ -1,8 +1,8 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { ITransactionRepository } from "@domain/repositories/ITransactionRepository";
-import { GetAdminTransactionsDto } from "@application/dto/admin/GetAdminTransactionsDto";
-import { GetAdminTransactionsResponseDto } from "@application/dto/admin/GetAdminTransactionsResponseDto";
+import { Result } from "../../../shared/utils/Result";
+import { ITransactionRepository } from "../../../domain/repositories/ITransactionRepository";
+import { GetAdminTransactionsDto } from "../../dto/admin/GetAdminTransactionsDto";
+import { GetAdminTransactionsResponseDto } from "../../dto/admin/GetAdminTransactionsResponseDto";
 export declare class GetAdminTransactionsUseCase implements IUseCase<GetAdminTransactionsDto, Promise<Result<GetAdminTransactionsResponseDto>>> {
     private readonly transactionRepository;
     constructor(transactionRepository: ITransactionRepository);

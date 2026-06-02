@@ -1,5 +1,5 @@
-import { IFileUploadService } from "@application/services/IFileUploadService";
-import { Result } from "@shared/utils/Result";
+import { IFileUploadService } from "../../services/IFileUploadService";
+import { Result } from "../../../shared/utils/Result";
 import { IUseCase } from "../interfaces/IUseCase";
 export declare class DeleteFileUseCase implements IUseCase<string, Promise<Result<{
     message: string;

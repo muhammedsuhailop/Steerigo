@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageStatusModel = void 0;
-const MessageDeliveryStatus_1 = require("@domain/value-objects/MessageDeliveryStatus");
+const MessageDeliveryStatus_1 = require("../../../domain/value-objects/MessageDeliveryStatus");
 const mongoose_1 = require("mongoose");
 const messageStatusSchema = new mongoose_1.Schema({
     messageId: {

@@ -1,4 +1,4 @@
-import { RideType } from "@domain/value-objects/RideType";
+import { RideType } from "../../../domain/value-objects/RideType";
 import { z } from "zod";
 export declare const autoSearchAndRequestSchema: z.ZodObject<{
     body: z.ZodObject<{
@@ -8,13 +8,13 @@ export declare const autoSearchAndRequestSchema: z.ZodObject<{
         timeRequired: z.ZodNumber;
         radiusKm: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
         gearType: z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
-            Manual: import("@domain/value-objects/VehicleType").GearType.MANUAL;
-            Automatic: import("@domain/value-objects/VehicleType").GearType.AUTOMATIC;
+            Manual: import("../../../domain/value-objects/VehicleType").GearType.MANUAL;
+            Automatic: import("../../../domain/value-objects/VehicleType").GearType.AUTOMATIC;
         }>, z.ZodLiteral<"">]>>;
         bodyType: z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
-            Sedan: import("@domain/value-objects/VehicleType").BodyType.SEDAN;
-            SUV: import("@domain/value-objects/VehicleType").BodyType.SUV;
-            Hatchback: import("@domain/value-objects/VehicleType").BodyType.HATCHBACK;
+            Sedan: import("../../../domain/value-objects/VehicleType").BodyType.SEDAN;
+            SUV: import("../../../domain/value-objects/VehicleType").BodyType.SUV;
+            Hatchback: import("../../../domain/value-objects/VehicleType").BodyType.HATCHBACK;
         }>, z.ZodLiteral<"">]>>;
         maxRideRequests: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
         dropLatitude: z.ZodNumber;

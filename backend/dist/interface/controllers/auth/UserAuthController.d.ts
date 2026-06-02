@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { GetCurrentUserDto, GetCurrentUserResponseDto, LoginRequestDto, LoginResponseDto } from "@application/dto/auth";
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
+import { GetCurrentUserDto, GetCurrentUserResponseDto, LoginRequestDto, LoginResponseDto } from "../../../application/dto/auth";
+import { IUseCase } from "../../../application/use-cases/interfaces/IUseCase";
+import { Result } from "../../../shared/utils/Result";
 export declare class UserAuthController {
     private loginUseCase;
     private getCurrentUserUseCase;

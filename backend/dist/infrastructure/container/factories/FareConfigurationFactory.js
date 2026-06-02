@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FareCalculationFactory = void 0;
-const IFareCalculationService1_1 = require("@application/services/IFareCalculationService1");
-const FareConfigurationRepositoryImpl_1 = require("@infrastructure/database/repositories/FareConfigurationRepositoryImpl");
-const DITypes_1 = require("@shared/constants/DITypes");
+const IFareCalculationService1_1 = require("../../../application/services/IFareCalculationService1");
+const FareConfigurationRepositoryImpl_1 = require("../../database/repositories/FareConfigurationRepositoryImpl");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 class FareCalculationFactory {
     static register(container) {
         container

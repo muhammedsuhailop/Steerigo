@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminUnauthorizedActionError = exports.AdminInvalidActionError = exports.AdminUserNotFoundError = void 0;
-const AdminMessages_1 = require("@shared/constants/AdminMessages");
+const AdminMessages_1 = require("../../shared/constants/AdminMessages");
 const DomainError_1 = require("./DomainError");
-const ErrorType_1 = require("@shared/enums/ErrorType");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
+const ErrorType_1 = require("../../shared/enums/ErrorType");
+const HttpStatusCodes_1 = require("../../shared/enums/HttpStatusCodes");
 class AdminUserNotFoundError extends DomainError_1.DomainError {
     constructor(userId) {
         const baseMessage = AdminMessages_1.ADMIN_ERROR_MESSAGES.USER.NOT_FOUND;

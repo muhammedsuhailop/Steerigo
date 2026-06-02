@@ -16,7 +16,7 @@ exports.LoginController = void 0;
 const inversify_1 = require("inversify");
 const UserAuthController_1 = require("./UserAuthController");
 const TokenController_1 = require("./TokenController");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 let LoginController = class LoginController {
     constructor(userAuthController, tokenController) {
         this.userAuthController = userAuthController;

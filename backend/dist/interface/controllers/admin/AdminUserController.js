@@ -14,13 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminUserController = void 0;
 const inversify_1 = require("inversify");
-const GetUsersRequestDto_1 = require("@application/dto/admin/GetUsersRequestDto");
-const UpdateUserStatusRequestDto_1 = require("@application/dto/admin/UpdateUserStatusRequestDto");
-const ErrorHandlerService_1 = require("@shared/utils/ErrorHandlerService");
-const DITypes_1 = require("@shared/constants/DITypes");
-const AdminMessages_1 = require("@shared/constants/AdminMessages");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const GetUserProfileRequestDto_1 = require("@application/dto/admin/GetUserProfileRequestDto");
+const GetUsersRequestDto_1 = require("../../../application/dto/admin/GetUsersRequestDto");
+const UpdateUserStatusRequestDto_1 = require("../../../application/dto/admin/UpdateUserStatusRequestDto");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const GetUserProfileRequestDto_1 = require("../../../application/dto/admin/GetUserProfileRequestDto");
 let AdminUserController = class AdminUserController {
     constructor(getUsersUseCase, updateUserStatusUseCase, getUserProfileUseCase) {
         this.getUsersUseCase = getUsersUseCase;

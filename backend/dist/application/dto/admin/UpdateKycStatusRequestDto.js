@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateKycStatusRequestDto = void 0;
-const KYCStatus_1 = require("@domain/value-objects/KYCStatus");
+const KYCStatus_1 = require("../../../domain/value-objects/KYCStatus");
 const zod_1 = require("zod");
 const updateKycStatusRequestSchema = zod_1.z.object({
     kycId: zod_1.z

@@ -1,4 +1,4 @@
-import { ChatDomainEvent } from "@application/events/ChatEvents";
+import { ChatDomainEvent } from "../events/ChatEvents";
 export interface IChatEventBus {
     publish(event: ChatDomainEvent): Promise<void>;
 }

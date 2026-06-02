@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateUpdateUserStatusRequest = exports.validateGetUsersRequest = void 0;
 const zod_1 = require("zod");
-const AdminAction_1 = require("@domain/value-objects/AdminAction");
-const HttpStatusCodes_1 = require("@shared/enums/HttpStatusCodes");
-const Logger_1 = require("@shared/utils/Logger");
+const AdminAction_1 = require("../../../domain/value-objects/AdminAction");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const Logger_1 = require("../../../shared/utils/Logger");
 const getUsersSchema = zod_1.z.object({
     query: zod_1.z.object({
         page: zod_1.z.coerce.number().int().min(1).default(1),

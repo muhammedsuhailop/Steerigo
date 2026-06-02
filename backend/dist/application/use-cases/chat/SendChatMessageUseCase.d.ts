@@ -1,14 +1,14 @@
 import { IUseCase } from "../interfaces/IUseCase";
-import { Result } from "@shared/utils/Result";
-import { IChatRoomRepository } from "@domain/repositories/IChatRoomRepository";
-import { IMessageRepository } from "@domain/repositories/IMessageRepository";
-import { IUserChatRepository } from "@domain/repositories/IUserChatRepository";
-import { IMessageStatusRepository } from "@domain/repositories/IMessageStatusRepository";
-import { SendChatMessageDto } from "@application/dto/chat/SendChatMessageDto";
-import { SendChatMessageResponseDto } from "@application/dto/chat/response/SendChatMessageResponseDto";
-import { IIdGenerator } from "@application/services/IIdGenerator";
-import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { IChatEventBus } from "@application/services/IChatEventBus";
+import { Result } from "../../../shared/utils/Result";
+import { IChatRoomRepository } from "../../../domain/repositories/IChatRoomRepository";
+import { IMessageRepository } from "../../../domain/repositories/IMessageRepository";
+import { IUserChatRepository } from "../../../domain/repositories/IUserChatRepository";
+import { IMessageStatusRepository } from "../../../domain/repositories/IMessageStatusRepository";
+import { SendChatMessageDto } from "../../dto/chat/SendChatMessageDto";
+import { SendChatMessageResponseDto } from "../../dto/chat/response/SendChatMessageResponseDto";
+import { IIdGenerator } from "../../services/IIdGenerator";
+import { IDriverRepository } from "../../../domain/repositories/IDriverRepository";
+import { IChatEventBus } from "../../services/IChatEventBus";
 export declare class SendChatMessageUseCase implements IUseCase<SendChatMessageDto, Promise<Result<SendChatMessageResponseDto>>> {
     private readonly chatRoomRepository;
     private readonly messageRepository;
