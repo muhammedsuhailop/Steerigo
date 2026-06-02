@@ -28,6 +28,7 @@ export class AdminCouponController {
       EditCouponDto,
       Promise<Result<EditCouponResponseDto>>
     >,
+    
 
     @inject(TYPES.GetAdminCouponsUseCase)
     private readonly getAdminCouponsUseCase: IUseCase<
