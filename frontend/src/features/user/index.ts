@@ -13,4 +13,4 @@ export {
 } from "./profile";
 export { default as UserProfileLayout } from "./profile/pages/UserProfileLayout";
 
-export type { UserProfile, UserProfileFormData, UserStats } from "./profile";
+export type { UserProfile, UserProfileFormData } from "./profile";

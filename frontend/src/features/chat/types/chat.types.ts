@@ -88,6 +88,12 @@ export interface GetChatMessagesResponse {
   };
 }
 
+export interface EditChatMessageResponse {
+  success: boolean;
+  message: string;
+  data: {};
+}
+
 export interface RawChatMessage {
   id: string;
   chatRoomId: string;

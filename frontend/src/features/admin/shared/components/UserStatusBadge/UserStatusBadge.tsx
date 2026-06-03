@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/shared/components/ui";
-import type { User } from "../UserManagement/UserManagement.types";
+import { User } from "@/features/admin/user/user-management/components/UserManagement";
 
 interface UserStatusBadgeProps {
   status: User["status"];

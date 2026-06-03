@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/AdminTable/StatusRegistry";
 import { Badge, Button } from "@/shared/components/ui";
 import type { Column } from "@/shared/components/ui/Table";
-import type { KYCRequest, KYCAction } from "../../../../shared/types";
+import type { KYCRequest, KYCAction } from "../../../../shared/types/kyc.interfaces";
 import { MdVisibility } from "react-icons/md";
 
 interface KYCRequestsTableProps {

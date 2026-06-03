@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { DriverFilters } from "../types";
+import { DriverFilters } from "../types/driver.interfaces";
 
 // Local state management for admin drivers
 // API calls are handled by adminApi (RTK Query)

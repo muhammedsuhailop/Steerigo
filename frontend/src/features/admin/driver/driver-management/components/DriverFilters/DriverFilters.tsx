@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input, Select, Button, DateInput } from '@/shared/components/ui';
 import { MdSearch, MdRefresh } from 'react-icons/md';
-import type { DriverFilters as DriverFiltersType } from '../../../../shared/types';
+import type { DriverFilters as DriverFiltersType } from '../../../../shared/types/driver.interfaces';
 
 interface DriverFiltersProps {
   filters: DriverFiltersType;

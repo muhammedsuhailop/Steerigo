@@ -3,7 +3,6 @@ export type {
   UserProfileFormData,
   UserProfileState,
   UpdateProfileRequest,
-  UserStats,
   ProfileHeaderProps,
   UpdateProfileFormProps,
   ProfileStatsProps,
