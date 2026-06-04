@@ -45,6 +45,7 @@ export const AuthMessages = {
   PASSWORD_RESET_SUCCESS: "Password reset successfully",
   PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
   GOOGLE_AUTH_SUCCESS: "Google authentication successful",
+  GOOGLE_AUTH_URL_SUCCESS: "Google auth URL generated successfully",
   USER_PROFILE_SUCCESS: "User profile fetched  successfully",
   TOKENS_REFRESHED: "Tokens refreshed successfully",
   USER_RETRIEVED: "User fetched successfully",

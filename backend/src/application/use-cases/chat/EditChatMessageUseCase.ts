@@ -7,7 +7,6 @@ import { IMessageRepository } from "@domain/repositories/IMessageRepository";
 import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
 import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
 import { ChatErrors } from "@domain/errors/ChatErrors";
-import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 import { IChatEventBus } from "@application/services/IChatEventBus";
 import { ChatMessageEditedEvent } from "@application/events/ChatEvents";
 
@@ -68,18 +67,14 @@ export class EditChatMessageUseCase
       await this.chatEventBus.publish(event);
 
       const response: EditChatMessageResponseDto = {
-        success: true,
-        message: CHAT_MESSAGES.MESSAGES.EDITED,
-        data: {
-          id: savedMessage.getId(),
-          chatRoomId: savedMessage.getChatRoomId(),
-          senderId: savedMessage.getSenderId(),
-          content: savedMessage.getContent(),
-          type: savedMessage.getType(),
-          createdAt: savedMessage.getCreatedAt().toISOString(),
-          updatedAt: savedMessage.getUpdatedAt().toISOString(),
-          editedAt: savedMessage.getEditedAt()?.toISOString(),
-        },
+        id: savedMessage.getId(),
+        chatRoomId: savedMessage.getChatRoomId(),
+        senderId: savedMessage.getSenderId(),
+        content: savedMessage.getContent(),
+        type: savedMessage.getType(),
+        createdAt: savedMessage.getCreatedAt().toISOString(),
+        updatedAt: savedMessage.getUpdatedAt().toISOString(),
+        editedAt: savedMessage.getEditedAt()?.toISOString(),
       };
 
       return Result.success(response);

@@ -17,7 +17,6 @@ import { ChatRoomStatus } from "@domain/value-objects/ChatRoomStatus";
 import { IIdGenerator } from "@application/services/IIdGenerator";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { UserChat } from "@domain/entities/UserChat";
-import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 import { IChatEventBus } from "@application/services/IChatEventBus";
 import { ChatMessageSentEvent } from "@application/events/ChatEvents";
 import { UserRole } from "@shared/constants/AuthConstants";
@@ -199,17 +198,13 @@ export class SendChatMessageUseCase
       await this.chatEventBus.publish(event);
 
       const response: SendChatMessageResponseDto = {
-        success: true,
-        message: CHAT_MESSAGES.MESSAGES.SEND_SUCCESS,
-        data: {
-          id: savedMessage.getId(),
-          chatRoomId: savedMessage.getChatRoomId(),
-          senderId: savedMessage.getSenderId(),
-          content: savedMessage.getContent(),
-          type: savedMessage.getType(),
-          createdAt: savedMessage.getCreatedAt().toISOString(),
-          updatedAt: savedMessage.getUpdatedAt().toISOString(),
-        },
+        id: savedMessage.getId(),
+        chatRoomId: savedMessage.getChatRoomId(),
+        senderId: savedMessage.getSenderId(),
+        content: savedMessage.getContent(),
+        type: savedMessage.getType(),
+        createdAt: savedMessage.getCreatedAt().toISOString(),
+        updatedAt: savedMessage.getUpdatedAt().toISOString(),
       };
 
       return Result.success(response);

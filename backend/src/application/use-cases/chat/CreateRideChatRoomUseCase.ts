@@ -86,20 +86,16 @@ export class CreateRideChatRoomUseCase
       const existingRoom = await this.chatRoomRepository.findByRideId(rideId);
       if (existingRoom) {
         const response: CreateRideChatRoomResponseDto = {
-          success: true,
-          message: CHAT_MESSAGES.CHAT_ROOM.EXISTS,
-          data: {
-            chatRoomId: existingRoom.getId(),
-            rideId,
-            type: existingRoom.getType(),
-            status: existingRoom.getStatus(),
-            participants: existingRoom.getParticipants().map((participant) => ({
-              userId: participant.userId,
-              role: participant.role,
-            })),
-            createdAt: existingRoom.getCreatedAt().toISOString(),
-            updatedAt: existingRoom.getUpdatedAt().toISOString(),
-          },
+          chatRoomId: existingRoom.getId(),
+          rideId,
+          type: existingRoom.getType(),
+          status: existingRoom.getStatus(),
+          participants: existingRoom.getParticipants().map((participant) => ({
+            userId: participant.userId,
+            role: participant.role,
+          })),
+          createdAt: existingRoom.getCreatedAt().toISOString(),
+          updatedAt: existingRoom.getUpdatedAt().toISOString(),
         };
 
         return Result.success(response);
@@ -139,20 +135,16 @@ export class CreateRideChatRoomUseCase
       await this.userChatRepository.save(riderUserChat);
 
       const response: CreateRideChatRoomResponseDto = {
-        success: true,
-        message: CHAT_MESSAGES.CHAT_ROOM.CREATED,
-        data: {
-          chatRoomId: savedChatRoom.getId(),
-          rideId,
-          type: savedChatRoom.getType(),
-          status: savedChatRoom.getStatus(),
-          participants: savedChatRoom.getParticipants().map((participant) => ({
-            userId: participant.userId,
-            role: participant.role,
-          })),
-          createdAt: savedChatRoom.getCreatedAt().toISOString(),
-          updatedAt: savedChatRoom.getUpdatedAt().toISOString(),
-        },
+        chatRoomId: savedChatRoom.getId(),
+        rideId,
+        type: savedChatRoom.getType(),
+        status: savedChatRoom.getStatus(),
+        participants: savedChatRoom.getParticipants().map((participant) => ({
+          userId: participant.userId,
+          role: participant.role,
+        })),
+        createdAt: savedChatRoom.getCreatedAt().toISOString(),
+        updatedAt: savedChatRoom.getUpdatedAt().toISOString(),
       };
 
       return Result.success(response);

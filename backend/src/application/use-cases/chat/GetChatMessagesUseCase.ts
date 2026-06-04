@@ -11,7 +11,6 @@ import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { GetChatMessagesDto } from "@application/dto/chat/GetChatMessagesDto";
 import { GetChatMessagesResponseDto } from "@application/dto/chat/response/GetChatMessagesResponseDto";
 import { ChatErrors } from "@domain/errors/ChatErrors";
-import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
 import { ChatRoom, ChatParticipant } from "@domain/entities/ChatRoom";
 import { Message } from "@domain/entities/Message";
@@ -122,42 +121,38 @@ export class GetChatMessagesUseCase
         await this.userChatRepository.getTotalUnreadCountByUserId(userId);
 
       const response: GetChatMessagesResponseDto = {
-        success: true,
-        message: CHAT_MESSAGES.MESSAGES.FETCHED,
-        data: {
-          messages: paginatedMessages.data.map((message: Message) => {
-            const senderId: string = message.getSenderId();
-            const messageId: string = message.getId();
+        messages: paginatedMessages.data.map((message: Message) => {
+          const senderId: string = message.getSenderId();
+          const messageId: string = message.getId();
 
-            const relevantUserId: string | undefined =
-              senderId === activeParticipantId
-                ? otherParticipantId
-                : activeParticipantId;
+          const relevantUserId: string | undefined =
+            senderId === activeParticipantId
+              ? otherParticipantId
+              : activeParticipantId;
 
-            const status: MessageDeliveryStatus | undefined = relevantUserId
-              ? statusMap.get(`${messageId}_${relevantUserId}`)
-              : undefined;
+          const status: MessageDeliveryStatus | undefined = relevantUserId
+            ? statusMap.get(`${messageId}_${relevantUserId}`)
+            : undefined;
 
-            return {
-              id: messageId,
-              chatRoomId: message.getChatRoomId(),
-              senderId: senderId,
-              content: message.getContent(),
-              type: message.getType(),
-              createdAt: message.getCreatedAt().toISOString(),
-              updatedAt: message.getUpdatedAt().toISOString(),
-              isDeleted: message.isDeleted(),
-              messageStatus: status ? { status } : null,
-            };
-          }),
-          unreadCount: userChat ? userChat.getUnreadCount() : 0,
-          totalUnreadCount,
-          pagination: {
-            total: paginatedMessages.total,
-            page: paginatedMessages.page,
-            limit: paginatedMessages.limit,
-            totalPages: paginatedMessages.totalPages,
-          },
+          return {
+            id: messageId,
+            chatRoomId: message.getChatRoomId(),
+            senderId: senderId,
+            content: message.getContent(),
+            type: message.getType(),
+            createdAt: message.getCreatedAt().toISOString(),
+            updatedAt: message.getUpdatedAt().toISOString(),
+            isDeleted: message.isDeleted(),
+            messageStatus: status ? { status } : null,
+          };
+        }),
+        unreadCount: userChat ? userChat.getUnreadCount() : 0,
+        totalUnreadCount,
+        pagination: {
+          total: paginatedMessages.total,
+          page: paginatedMessages.page,
+          limit: paginatedMessages.limit,
+          totalPages: paginatedMessages.totalPages,
         },
       };
 

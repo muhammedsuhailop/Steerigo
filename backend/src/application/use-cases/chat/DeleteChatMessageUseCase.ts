@@ -47,15 +47,11 @@ export class DeleteChatMessageUseCase
 
       if (message.isDeleted()) {
         const response: DeleteChatMessageResponseDto = {
-          success: true,
-          message: "Chat message already deleted",
-          data: {
-            id: message.getId(),
-            chatRoomId: message.getChatRoomId(),
-            senderId: message.getSenderId(),
-            deletedAt: message.getDeletedAt()!.toISOString(),
-            isDeleted: true,
-          },
+          id: message.getId(),
+          chatRoomId: message.getChatRoomId(),
+          senderId: message.getSenderId(),
+          deletedAt: message.getDeletedAt()!.toISOString(),
+          isDeleted: true,
         };
 
         return Result.success(response);
@@ -79,15 +75,11 @@ export class DeleteChatMessageUseCase
       await this.chatEventBus.publish(event);
 
       const response: DeleteChatMessageResponseDto = {
-        success: true,
-        message: "Chat message deleted successfully",
-        data: {
-          id: message.getId(),
-          chatRoomId: message.getChatRoomId(),
-          senderId: message.getSenderId(),
-          deletedAt: deletedAt.toISOString(),
-          isDeleted: true,
-        },
+        id: message.getId(),
+        chatRoomId: message.getChatRoomId(),
+        senderId: message.getSenderId(),
+        deletedAt: deletedAt.toISOString(),
+        isDeleted: true,
       };
 
       return Result.success(response);

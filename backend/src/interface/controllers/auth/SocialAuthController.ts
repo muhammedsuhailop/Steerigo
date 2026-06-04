@@ -10,6 +10,7 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
 import { Result } from "@shared/utils/Result";
 import { SignupVerifyResponseDto } from "@application/dto/auth";
+import { AuthMessages } from "@shared/constants/AuthConstants";
 
 @injectable()
 export class SocialAuthController {
@@ -23,7 +24,7 @@ export class SocialAuthController {
     private googleLoginUseCase: IUseCase<
       GoogleLoginRequestDto,
       Promise<Result<SignupVerifyResponseDto & { isNewUser: boolean }>>
-    >
+    >,
   ) {}
 
   async getGoogleAuthUrl(req: Request, res: Response): Promise<void> {
@@ -32,10 +33,7 @@ export class SocialAuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "google_auth_url"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -43,17 +41,14 @@ export class SocialAuthController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Google auth URL generated successfully",
+        message: AuthMessages.GOOGLE_AUTH_URL_SUCCESS,
         data,
       };
 
       res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Google auth URL generated successfully");
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "google_auth_url"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

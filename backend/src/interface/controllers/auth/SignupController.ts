@@ -25,7 +25,7 @@ export class SignupController {
     private signupVerifyUseCase: IUseCase<
       SignupVerifyDto,
       Promise<Result<SignupVerifyResponseDto, Error>>
-    >
+    >,
   ) {}
 
   async signup(req: Request, res: Response): Promise<void> {
@@ -35,10 +35,7 @@ export class SignupController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "signup"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -55,10 +52,7 @@ export class SignupController {
         email: dto.getEmailValue(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "signup"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -70,10 +64,7 @@ export class SignupController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "signup_verify"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -94,10 +85,7 @@ export class SignupController {
         email: dto.getEmail(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "signup_verify"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

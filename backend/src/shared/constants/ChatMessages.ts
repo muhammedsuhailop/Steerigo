@@ -1,7 +1,7 @@
 export const CHAT_MESSAGES = {
   CHAT_ROOM: {
     EXISTS: "Ride chat room already exists",
-    CREATED: "Ride chat room created successfully",
+    CREATED: "Ride chat room created/existing ",
     RIDE_ROOM_FETCHED: "Ride chat room fetched successfully",
   },
   MESSAGES: {
