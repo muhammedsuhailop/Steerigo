@@ -31,11 +31,11 @@ export class GetDriverDetailedProfileUseCase
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository,
   ) {}
 
   async execute(
-    dto: GetDriverProfileRequestDto
+    dto: GetDriverProfileRequestDto,
   ): Promise<Result<GetDriverProfileResponseDto>> {
     try {
       if (!dto.isValid()) {
@@ -87,7 +87,7 @@ export class GetDriverDetailedProfileUseCase
           docId: kyc.getId(),
           docType: kyc.getDocumentType?.() ?? "",
           docNumberMasked: this.maskDocumentNumber(
-            kyc.getDocumentNumber?.() ?? ""
+            kyc.getDocumentNumber?.() ?? "",
           ),
           issueDate: kyc.getIssueDate?.(),
           expiryDate: kyc.getExpiryDate?.(),
@@ -126,7 +126,31 @@ export class GetDriverDetailedProfileUseCase
         },
       };
 
-      const response = new GetDriverProfileResponseDto(profileData);
+      const response: GetDriverProfileResponseDto = {
+        driverId: driver.getId(),
+        userId: userId,
+        name: user.getName(),
+        profileImageUrl: user.getProfilePicture() || "",
+        email: user.getEmailValue(),
+        mobile: user.getMobile() || "",
+        dob: user.getDob() || new Date(),
+        gender: user.getGender() || "",
+        address: user.getAddress() || "",
+        role: user.getRole(),
+        status: driver.getStatus(),
+        isVerified: user.getIsVerified(),
+        authProvider: user.getAuthProvider(),
+        createdAt: user.getCreatedAt(),
+        updatedAt: user.getUpdatedAt(),
+        license: licenseInfo,
+        kyc: kycInfo,
+        eligibleGearTypes: driver.getEligibleGearTypes(),
+        eligibleBodyTypes: driver.getEligibleBodyTypes(),
+        meta: {
+          lastUpdated: user.getUpdatedAt(),
+          serverTime: new Date(),
+        },
+      };
 
       Logger.info("Driver detailed profile fetched successfully", {
         userId,
@@ -142,7 +166,7 @@ export class GetDriverDetailedProfileUseCase
       return Result.failure(
         error instanceof DomainError
           ? error
-          : new DomainError("Failed to fetch driver profile")
+          : new DomainError("Failed to fetch driver profile"),
       );
     }
   }

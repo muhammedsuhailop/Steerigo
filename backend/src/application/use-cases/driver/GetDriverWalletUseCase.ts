@@ -97,24 +97,20 @@ export class GetDriverWalletUseCase
       });
 
       return Result.success({
-        success: true,
-        message: DRIVER_MESSAGES.WALLET_FETCHED,
-        data: {
-          walletId: wallet.getId(),
-          driverId,
-          availableBalance: wallet.getAvailableBalance().getAmount(),
-          pendingBalance: wallet.getPendingBalance().getAmount(),
-          currency: wallet.getCurrency(),
-          updatedAt: wallet.getUpdatedAt().toISOString(),
-          transactions: paginatedResult.transactions.map(
-            this.toTransactionItemData,
-          ),
-          pagination: {
-            total: paginatedResult.total,
-            page: paginatedResult.page,
-            limit: paginatedResult.limit,
-            totalPages: paginatedResult.totalPages,
-          },
+        walletId: wallet.getId(),
+        driverId,
+        availableBalance: wallet.getAvailableBalance().getAmount(),
+        pendingBalance: wallet.getPendingBalance().getAmount(),
+        currency: wallet.getCurrency(),
+        updatedAt: wallet.getUpdatedAt().toISOString(),
+        transactions: paginatedResult.transactions.map(
+          this.toTransactionItemData,
+        ),
+        pagination: {
+          total: paginatedResult.total,
+          page: paginatedResult.page,
+          limit: paginatedResult.limit,
+          totalPages: paginatedResult.totalPages,
         },
       });
     } catch (error) {

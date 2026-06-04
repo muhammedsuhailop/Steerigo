@@ -103,17 +103,13 @@ export class RequestPayoutUseCase
       });
 
       return Result.success({
-        success: true,
-        message: DRIVER_MESSAGES.PAYOUT_REQUEST_SUBMITTED,
-        data: {
-          payoutId: savedPayout.getId(),
-          driverId,
-          amount: savedPayout.getAmount().getAmount(),
-          currency: savedPayout.getCurrency(),
-          method: savedPayout.getMethod(),
-          status: savedPayout.getStatus(),
-          createdAt: savedPayout.getCreatedAt().toISOString(),
-        },
+        payoutId: savedPayout.getId(),
+        driverId,
+        amount: savedPayout.getAmount().getAmount(),
+        currency: savedPayout.getCurrency(),
+        method: savedPayout.getMethod(),
+        status: savedPayout.getStatus(),
+        createdAt: savedPayout.getCreatedAt().toISOString(),
       });
     } catch (error) {
       Logger.error("Error requesting payout", {

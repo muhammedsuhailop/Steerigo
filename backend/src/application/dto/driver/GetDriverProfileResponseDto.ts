@@ -53,9 +53,25 @@ export interface DriverProfileData {
   meta: ProfileMeta;
 }
 
-export class GetDriverProfileResponseDto {
-  readonly success: boolean = true;
-  readonly message: string = "Driver profile fetched successfully";
-
-  constructor(public readonly data: DriverProfileData) {}
+export interface GetDriverProfileResponseDto {
+  driverId: string;
+  userId: string;
+  name: string;
+  profileImageUrl: string;
+  email: string;
+  mobile: string;
+  dob: Date;
+  gender: string;
+  address: string;
+  role: string;
+  status: string;
+  isVerified: boolean;
+  authProvider: string;
+  createdAt: Date;
+  updatedAt: Date;
+  license: LicenseInfo;
+  kyc: KycInfo;
+  eligibleGearTypes: string[];
+  eligibleBodyTypes: string[];
+  meta: ProfileMeta;
 }

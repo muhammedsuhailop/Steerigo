@@ -44,14 +44,10 @@ export class GetDriverPayoutsUseCase
       });
 
       return Result.success({
-        success: true,
-        message: DRIVER_MESSAGES.PAYOUT_RETRIVED,
-        data: {
-          payouts: payouts.map(this.toPayoutItemDto),
-          total: payouts.length,
-          page: 1,
-          limit: payouts.length,
-        },
+        payouts: payouts.map(this.toPayoutItemDto),
+        total: payouts.length,
+        page: 1,
+        limit: payouts.length,
       });
     } catch (error) {
       Logger.error("Error fetching driver payouts", {

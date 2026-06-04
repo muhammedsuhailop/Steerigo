@@ -23,6 +23,7 @@ import { DriverDashboardResponseDto } from "@application/dto/driver/DriverDashbo
 import { DriverStatusResponseDto } from "@application/dto/driver/DriverStatusResponseDto";
 import { RegisterDriverResult } from "@application/use-cases/driver/RegisterDriverUseCase";
 import { Gender } from "@domain/value-objects/Gender";
+import { ApiResponse } from "@shared/types/Common";
 
 interface DriverRegistrationRequestBody {
   name: string;
@@ -107,7 +108,7 @@ export class DriverController {
     private getStatusUseCase: IUseCase<
       string,
       Promise<Result<DriverStatusResponseDto>>
-    >
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -127,42 +128,6 @@ export class DriverController {
       }
 
       const body = req.body as DriverRegistrationRequestBody;
-
-      const requiredFields = [
-        "name",
-        "mobile",
-        "dob",
-        "gender",
-        "state",
-        "pin",
-        "address",
-        "licenseCategory",
-        "licenseNumber",
-        "licenseBodyTypes",
-        "licenseGearTypes",
-        "licenseIssueDate",
-        "licenseExpiryDate",
-        "idType",
-        "idNumber",
-        "idIssueDate",
-        "licenseFrontImage",
-        "licenseBackImage",
-        "idFrontImage",
-        "idBackImage",
-      ];
-
-      const missingFields = requiredFields.filter(
-        (field) => !body[field as keyof typeof body]
-      );
-
-      if (missingFields.length > 0) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message:
-            DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "),
-        });
-        return;
-      }
 
       const dto = DriverRegistrationRequestDto.fromRequest(userId, body);
 
@@ -184,11 +149,13 @@ export class DriverController {
           idKycId: responseData.kycDocumentsCreated.idDocument,
         });
 
-        res.status(HttpStatusCodes.CREATED).json({
+        const response: ApiResponse = {
           success: true,
           message: DRIVER_MESSAGES.DRIVER_REGISTRATION_SUCCESS,
           data: responseData,
-        });
+        };
+
+        res.status(HttpStatusCodes.CREATED).json(response);
       } else {
         const error = result.getError();
         Logger.warn("Driver registration failed", {
@@ -249,10 +216,7 @@ export class DriverController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_driver_profile"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
         return;
@@ -267,29 +231,20 @@ export class DriverController {
         kycStatusUpdated: responseData.kycStatusUpdated,
       });
 
-      res.status(HttpStatusCodes.OK).json({
+      const response: ApiResponse<UpdateDriverProfileResponseDto> = {
         success: true,
         message: DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
-        data: {
-          driver: responseData.driver,
-          updateSummary: {
-            userUpdated: responseData.userUpdated,
-            vehiclesUpdated: responseData.vehiclesUpdated,
-            kycStatusUpdated: responseData.kycStatusUpdated,
-            updatedFields: responseData.updatedFields,
-          },
-        },
-      });
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Update driver profile controller error", {
         userId: this.getUserId(req),
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_driver_profile"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -339,7 +294,7 @@ export class DriverController {
         dto = KYCSubmissionRequestDto.fromGenericRequest(
           userId,
           docType as DocumentType,
-          genericBody
+          genericBody,
         );
       }
 
@@ -361,44 +316,40 @@ export class DriverController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "submit_kyc"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
         return;
       }
 
-      const response = result.getValue();
+      const responseData = result.getValue();
       Logger.info("KYC submission successful", {
         userId,
         docType,
-        licenseUpdated: response.licenseUpdated,
-        idUpdated: response.idUpdated,
-        driverUpdated: response.driverUpdated,
+        licenseUpdated: responseData.licenseUpdated,
+        idUpdated: responseData.idUpdated,
+        driverUpdated: responseData.driverUpdated,
       });
 
-      res.status(HttpStatusCodes.OK).json({
+      const response: ApiResponse = {
         success: true,
-        message: response.message,
+        message: responseData.message,
         data: {
-          kycDocuments: response.kycDocuments,
-          licenseUpdated: response.licenseUpdated,
-          idUpdated: response.idUpdated,
-          driverUpdated: response.driverUpdated,
+          kycDocuments: responseData.kycDocuments,
+          licenseUpdated: responseData.licenseUpdated,
+          idUpdated: responseData.idUpdated,
+          driverUpdated: responseData.driverUpdated,
         },
-      });
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("KYC submission controller error", {
         userId: this.getUserId(req),
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "submit_kyc"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -416,18 +367,22 @@ export class DriverController {
 
       const result = await this.getKYCStatusUseCase.execute(userId);
 
-      if (result.isSuccessful()) {
-        res.status(HttpStatusCodes.OK).json({
-          success: true,
-          message: DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
-          data: result.getValue(),
-        });
-      } else {
-        res.status(HttpStatusCodes.NOT_FOUND).json({
-          success: false,
-          message: result.getError().message,
-        });
+      if (result.isFailure()) {
+        const { response, statusCode } = ErrorHandlerService.handleError(
+          result.getError(),
+        );
+
+        res.status(statusCode).json(response);
+        return;
       }
+
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get KYC status controller error", { error });
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -453,24 +408,24 @@ export class DriverController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_driver_dashboard"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
       const dashboardResponse = result.getValue();
 
-      res.status(HttpStatusCodes.OK).json(dashboardResponse);
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.DASHBOARD_DATA_RETRIEVED,
+        data: dashboardResponse,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
 
       Logger.info(DRIVER_MESSAGES.DRIVER_DASHBOARD_RETURNED, { userId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_driver_dashboard"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -492,29 +447,25 @@ export class DriverController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_driver_status"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
       const statusResponse = result.getValue();
 
-      res.status(HttpStatusCodes.OK).json({
+      const response: ApiResponse = {
         success: true,
         message: DRIVER_MESSAGES.DRIVER_STATUS_RETRIEVED,
         data: statusResponse,
-      });
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
 
       Logger.info("Driver status returned successfully", { userId });
     } catch (error) {
       Logger.error("Get driver status controller error", { error });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_driver_status"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -548,10 +499,7 @@ export class DriverController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_driver_detailed_profile"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
         return;
@@ -559,17 +507,14 @@ export class DriverController {
 
       const profileResponse = result.getValue();
 
-      res.status(HttpStatusCodes.OK).json({
-        success: profileResponse.success,
-        message: profileResponse.message,
-        data: profileResponse.data,
-      });
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED,
+        data: profileResponse,
+      };
+      
+      res.status(HttpStatusCodes.OK).json(response);
 
-      Logger.info(DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED, {
-        userId,
-        driverId: profileResponse.data.driverId,
-        responseSize: JSON.stringify(profileResponse.data).length,
-      });
     } catch (error) {
       Logger.error("Get detailed driver profile controller error", {
         userId: req.params.userId,
@@ -577,10 +522,7 @@ export class DriverController {
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_driver_detailed_profile"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }

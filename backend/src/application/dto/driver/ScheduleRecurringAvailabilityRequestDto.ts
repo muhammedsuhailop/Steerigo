@@ -91,12 +91,6 @@ export class ScheduleRecurringAvailabilityRequestDto {
 
   validate(): string[] {
     const errors: string[] = [];
-    const now = new Date();
-
-    // Validate start date
-    if (this.getValidityStartDate() < now) {
-      errors.push("Validity start date cannot be in the past");
-    }
 
     // Validate time slots
     const timeSlots = this.getTimeSlots();

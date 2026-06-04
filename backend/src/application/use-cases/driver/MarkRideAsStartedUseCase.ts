@@ -11,7 +11,6 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 
 @injectable()
@@ -113,29 +112,23 @@ export class MarkRideAsStartedUseCase
       await this.eventBus.publish(rideStartedEvent);
 
       const response: MarkRideAsStartedResponseDto = {
-        success: true,
-        message: wasArrivedAutoSet
-          ? RIDE_MESSAGES.RIDE_STARTED_WITH_AUTO_ARRIVED
-          : RIDE_MESSAGES.RIDE_STARTED,
-        data: {
-          rideId: updatedRide.getRideId(),
-          status: updatedRide.getStatus(),
-          arrivedAt: updatedRide.getArrivedAt()!.toISOString(),
-          startedAt: updatedRide.getStartedAt()!.toISOString(),
-          wasArrivedAutoSet,
-          pickup: {
-            latitude: updatedRide.getPickup().getLatitude(),
-            longitude: updatedRide.getPickup().getLongitude(),
-            address: updatedRide.getPickup().getAddress(),
-          },
-          drop: {
-            latitude: updatedRide.getDrop().getLatitude(),
-            longitude: updatedRide.getDrop().getLongitude(),
-            address: updatedRide.getDrop().getAddress(),
-          },
-          riderId: updatedRide.getRiderId(),
-          driverId: updatedRide.getDriverId(),
+        rideId: updatedRide.getRideId(),
+        status: updatedRide.getStatus(),
+        arrivedAt: updatedRide.getArrivedAt()!.toISOString(),
+        startedAt: updatedRide.getStartedAt()!.toISOString(),
+        wasArrivedAutoSet,
+        pickup: {
+          latitude: updatedRide.getPickup().getLatitude(),
+          longitude: updatedRide.getPickup().getLongitude(),
+          address: updatedRide.getPickup().getAddress(),
         },
+        drop: {
+          latitude: updatedRide.getDrop().getLatitude(),
+          longitude: updatedRide.getDrop().getLongitude(),
+          address: updatedRide.getDrop().getAddress(),
+        },
+        riderId: updatedRide.getRiderId(),
+        driverId: updatedRide.getDriverId(),
       };
 
       return Result.success(response);

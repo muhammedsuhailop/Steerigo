@@ -129,16 +129,12 @@ export class GetDriverRidesUseCase
       });
 
       const response: GetDriverRidesResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
-        data: {
-          rides: ridesData,
-          pagination: {
-            total: paginatedResult.total,
-            page: paginatedResult.page,
-            limit: paginatedResult.limit,
-            totalPages: paginatedResult.totalPages,
-          },
+        rides: ridesData,
+        pagination: {
+          total: paginatedResult.total,
+          page: paginatedResult.page,
+          limit: paginatedResult.limit,
+          totalPages: paginatedResult.totalPages,
         },
       };
 

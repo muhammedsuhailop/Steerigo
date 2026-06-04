@@ -132,14 +132,10 @@ export class RejectRideRequestUseCase
       });
 
       const response: RejectRideRequestResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_REQUEST_REJECTED,
-        data: {
-          requestId: rideRequest.getId(),
-          status: rideRequest.getStatus(),
-          rejectedAt: new Date().toISOString(),
-          reason: dto.getReason(),
-        },
+        requestId: rideRequest.getId(),
+        status: rideRequest.getStatus(),
+        rejectedAt: new Date().toISOString(),
+        reason: dto.getReason(),
       };
 
       return Result.success(response);

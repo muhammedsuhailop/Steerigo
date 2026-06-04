@@ -76,18 +76,35 @@ export interface DashboardMeta {
 }
 
 export class DriverDashboardResponseDto {
-  readonly success: boolean = true;
-  readonly message: string = "Driver dashboard fetched successfully";
-
   constructor(
-    public readonly data: {
-      readonly driver: DriverInfo;
-      readonly availability: AvailabilityInfo | null;
-      readonly currentRide: CurrentRideInfo | null;
-      readonly pendingRequests: PendingRequest[];
-      readonly statistics: Statistics;
-      readonly performance: Performance;
-      readonly meta: DashboardMeta;
-    }
+    public readonly driver: DriverInfo,
+    public readonly availability: AvailabilityInfo | null,
+    public readonly currentRide: CurrentRideInfo | null,
+    public readonly pendingRequests: PendingRequest[],
+    public readonly statistics: Statistics,
+    public readonly performance: Performance,
+    public readonly meta: DashboardMeta,
   ) {}
+
+  static create(data: {
+    driver: DriverInfo;
+    availability: AvailabilityInfo | null;
+    currentRide: CurrentRideInfo | null;
+    pendingRequests: PendingRequest[];
+    statistics: Statistics;
+    performance: Performance;
+    meta: DashboardMeta;
+  }): DriverDashboardResponseDto {
+    return Object.assign(
+      new DriverDashboardResponseDto(
+        data.driver,
+        data.availability,
+        data.currentRide,
+        data.pendingRequests,
+        data.statistics,
+        data.performance,
+        data.meta,
+      ),
+    );
+  }
 }

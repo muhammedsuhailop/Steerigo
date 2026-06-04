@@ -94,10 +94,7 @@ export class DriverAvailabilityController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "schedule_availability",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -112,10 +109,7 @@ export class DriverAvailabilityController {
       res.status(HttpStatusCodes.CREATED).json(response);
       Logger.info("Availability scheduled successfully", { userId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "schedule_availability",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -137,10 +131,7 @@ export class DriverAvailabilityController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_availability_status",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -158,10 +149,7 @@ export class DriverAvailabilityController {
         newStatus: dto.getStatus(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_availability_status",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -184,10 +172,7 @@ export class DriverAvailabilityController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_driver_location",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -202,10 +187,7 @@ export class DriverAvailabilityController {
       res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Driver location updated successfully", { driverId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_driver_location",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -237,10 +219,7 @@ export class DriverAvailabilityController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "add_availability_exception",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -248,16 +227,13 @@ export class DriverAvailabilityController {
       const data = result.getValue();
       const response: ApiResponse = {
         success: true,
-        message: "Exception added successfully",
+        message: DRIVER_MESSAGES.EXCEPTION_ADDED,
         data,
       };
       res.status(HttpStatusCodes.CREATED).json(response);
       Logger.info("Exception added successfully", { userId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "add_availability_exception",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -292,7 +268,6 @@ export class DriverAvailabilityController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "edit-availability-exception",
         );
         res.status(statusCode).json(response);
         return;
@@ -311,10 +286,7 @@ export class DriverAvailabilityController {
         exceptionId,
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "edit-availability-exception",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -348,7 +320,6 @@ export class DriverAvailabilityController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "remove-availability-exception",
         );
         res.status(statusCode).json(response);
         return;
@@ -367,10 +338,7 @@ export class DriverAvailabilityController {
         exceptionId,
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "remove-availability-exception",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -392,10 +360,7 @@ export class DriverAvailabilityController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_driver_base_location",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -410,10 +375,7 @@ export class DriverAvailabilityController {
       res.status(HttpStatusCodes.OK).json(response);
       Logger.info("Driver base location updated successfully", { driverId });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_driver_base_location",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

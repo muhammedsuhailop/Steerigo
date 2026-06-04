@@ -12,7 +12,6 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { RideErrors } from "@domain/errors/RideErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { RideStatus } from "@domain/value-objects/RideStatus";
 import { RideFareBreakdownJson } from "@application/services/IRideNotificationService";
 import { ICouponValidationService } from "@application/services/ICouponValidationService";
@@ -205,18 +204,14 @@ export class MarkRideAsCompletedUseCase
       await this.eventBus.publish(rideCompletedEvent);
 
       const response: MarkRideAsCompletedResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_COMPLETED,
-        data: {
-          rideId: updatedRide.getRideId(),
-          status: updatedRide.getStatus(),
-          arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
-          startedAt: updatedRide.getStartedAt()!.toISOString(),
-          completedAt: updatedRide.getCompletedAt()!.toISOString(),
-          fareBreakdown: fareBreakdownJson,
-          riderId: updatedRide.getRiderId(),
-          driverId: updatedRide.getDriverId(),
-        },
+        rideId: updatedRide.getRideId(),
+        status: updatedRide.getStatus(),
+        arrivedAt: updatedRide.getArrivedAt()?.toISOString(),
+        startedAt: updatedRide.getStartedAt()!.toISOString(),
+        completedAt: updatedRide.getCompletedAt()!.toISOString(),
+        fareBreakdown: fareBreakdownJson,
+        riderId: updatedRide.getRiderId(),
+        driverId: updatedRide.getDriverId(),
       };
 
       return Result.success(response);
