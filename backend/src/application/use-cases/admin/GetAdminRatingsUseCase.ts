@@ -78,15 +78,12 @@ export class GetAdminRatingsUseCase
       });
 
       return Result.success({
-        success: true,
-        data: {
-          ratings,
-          pagination: {
-            total: result.total,
-            page: result.page,
-            limit: result.limit,
-            totalPages: result.totalPages,
-          },
+        ratings,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
         },
       });
     } catch (error) {

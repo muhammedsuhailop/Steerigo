@@ -10,6 +10,7 @@ import { AdminPayoutFilters } from "../types/payout.types";
 import ApprovePayoutModal from "../components/ApprovePayoutModal";
 import RejectPayoutModal from "../components/RejectPayoutModal";
 import { AdminLayout } from "../../shared/components/AdminLayout/AdminLayout";
+import { FcRefresh } from "react-icons/fc";
 
 export const PayoutManagement: React.FC = () => {
   const [filters, setFilters] = useState<AdminPayoutFilters>({
@@ -20,7 +21,8 @@ export const PayoutManagement: React.FC = () => {
   const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
 
-  const { data, isLoading, isFetching } = useGetAdminPayoutsQuery(filters);
+  const { data, isLoading, isFetching, refetch } =
+    useGetAdminPayoutsQuery(filters);
   const [approvePayout] = useApprovePayoutMutation();
   const [rejectPayout] = useRejectPayoutMutation();
 
@@ -56,11 +58,26 @@ export const PayoutManagement: React.FC = () => {
   return (
     <AdminLayout title="Payout Management">
       <main className="p-6 space-y-6">
-        <header>
-          <h1 className="text-2xl font-black text-gray-900">Payout Requests</h1>
-          <p className="text-sm text-gray-500">
-            Review and process driver withdrawal requests
-          </p>
+        <header className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">
+              Payout Requests
+            </h1>
+            <p className="text-sm text-gray-500">
+              Review and process driver withdrawal requests
+            </p>
+          </div>
+
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="flex items-center gap-2 border border-gray-300 bg-white px-4 py-3 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+          >
+            <FcRefresh
+              className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
         </header>
 
         <PayoutTable

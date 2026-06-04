@@ -33,7 +33,7 @@ export class AdminUserController {
     private readonly getUserProfileUseCase: IUseCase<
       GetUserProfileRequestDto,
       Promise<Result<GetUserProfileResponseDto>>
-    >
+    >,
   ) {}
 
   async getUsers(req: Request, res: Response): Promise<void> {
@@ -43,10 +43,7 @@ export class AdminUserController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_users"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -59,10 +56,7 @@ export class AdminUserController {
 
       res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_users"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -71,17 +65,14 @@ export class AdminUserController {
     try {
       const dto = UpdateUserStatusRequestDto.fromRequest(
         req.params.userId as string,
-        req.body
+        req.body,
       );
 
       const result = await this.updateUserStatusUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_user_status"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -98,10 +89,7 @@ export class AdminUserController {
 
       res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_user_status"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -116,10 +104,7 @@ export class AdminUserController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_user_profile"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -134,10 +119,7 @@ export class AdminUserController {
 
       res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_user_profile"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

@@ -8,7 +8,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PayoutErrors } from "@domain/errors/PayoutErrors";
-import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class RejectPayoutUseCase
@@ -46,14 +45,10 @@ export class RejectPayoutUseCase
       });
 
       return Result.success({
-        success: true,
-        message: ADMIN_MESSAGES.PAYOUT.REJECTED,
-        data: {
-          payoutId: savedPayout.getId(),
-          driverId: savedPayout.getDriverId(),
-          status: savedPayout.getStatus(),
-          failureReason: dto.getReason(),
-        },
+        payoutId: savedPayout.getId(),
+        driverId: savedPayout.getDriverId(),
+        status: savedPayout.getStatus(),
+        failureReason: dto.getReason(),
       });
     } catch (error) {
       Logger.error("Error rejecting payout", {

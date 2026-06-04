@@ -10,6 +10,7 @@ import {
 import { Footer } from "@/features/public/components";
 import { PayoutStatus } from "@/shared/types/payment.types";
 import PayoutTable from "../components/PayoutTable";
+import { FcRefresh } from "react-icons/fc";
 
 const PayoutPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +23,7 @@ const PayoutPage: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   const { data: walletData } = useGetWalletDetailsQuery({});
-  const { data, isLoading, isFetching } = useGetPayoutsQuery(filters);
+  const { data, isLoading, isFetching, refetch } = useGetPayoutsQuery(filters);
 
   useEffect(() => {
     const handleResize = () => {
@@ -79,12 +80,25 @@ const PayoutPage: React.FC = () => {
               </p>
             </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-gray-900 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              Request Payout
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="flex items-center gap-2 border border-gray-300 bg-white px-4 py-3 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+              >
+                <FcRefresh
+                  className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </button>
+
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gray-900 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Request Payout
+              </button>
+            </div>
           </div>
 
           {/* Payout Table */}

@@ -13,6 +13,8 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
+import { ApiResponse } from "@shared/types/Common";
 
 @injectable()
 export class AdminPayoutController {
@@ -51,21 +53,21 @@ export class AdminPayoutController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "approve_payout",
         );
 
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: ADMIN_MESSAGES.PAYOUT.APPROVED,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("AdminPayoutController.approvePayout error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "approve_payout",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -88,21 +90,21 @@ export class AdminPayoutController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "reject_payout",
         );
 
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: ADMIN_MESSAGES.PAYOUT.REJECTED,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("AdminPayoutController.rejectPayout error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "reject_payout",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -126,21 +128,21 @@ export class AdminPayoutController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_admin_payouts",
         );
 
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: ADMIN_MESSAGES.PAYOUT.RETRIVED,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("AdminPayoutController.getPayouts error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_admin_payouts",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }

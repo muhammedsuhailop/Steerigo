@@ -8,6 +8,7 @@ interface Payout {
   currency: string;
   method: string;
   status: PayoutStatus;
+  failureReason?:string;
   createdAt: string;
 }
 
@@ -42,6 +43,9 @@ const PayoutTable: React.FC<PayoutTableProps> = ({
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 Reference
+              </th>
+              <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Notes
               </th>
             </tr>
           </thead>
@@ -86,6 +90,10 @@ const PayoutTable: React.FC<PayoutTableProps> = ({
 
                 <td className="px-6 py-4 text-xs font-mono text-gray-400">
                   {payout.payoutId.slice(-8).toUpperCase()}
+                </td>
+
+                <td className="px-6 py-4 text-xs font-mono text-gray-400">
+                  {payout.failureReason?.slice(-50)}
                 </td>
               </tr>
             ))}

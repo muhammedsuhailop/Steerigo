@@ -12,6 +12,9 @@ import { GetAdminRatingsDto } from "@application/dto/admin/GetAdminRatingsDto";
 import { GetAdminRatingsResponseDto } from "@application/dto/admin/GetAdminRatingsResponseDto";
 import { GetAdminRideByIdDto } from "@application/dto/admin/GetAdminRideByIdDto";
 import { GetAdminRideByIdResponseDto } from "@application/dto/admin/GetAdminRideByIdResponseDto";
+import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
+import { ApiResponse } from "@shared/types/Common";
+import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class AdminRideController {
@@ -44,15 +47,16 @@ export class AdminRideController {
         const error = result.getError();
         Logger.warn("Admin get rides failed", { error: error.message });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "admin_get_rides",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("Admin get rides controller error", {
         error: error instanceof Error ? error.message : String(error),
@@ -77,24 +81,22 @@ export class AdminRideController {
         const error = result.getError();
         Logger.warn("Admin get ratings failed", { error: error.message });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "admin_get_ratings",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: ADMIN_MESSAGES.RATINGS.FETCHED,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("Admin get ratings controller error", {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "admin_get_ratings",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -115,25 +117,23 @@ export class AdminRideController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "admin_get_ride_by_id",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+        data: result.getValue(),
+      } as ApiResponse);
     } catch (error) {
       Logger.error("Admin get ride by ID controller error", {
         rideId: req.params.rideId,
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "admin_get_ride_by_id",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
