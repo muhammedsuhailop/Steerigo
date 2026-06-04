@@ -37,15 +37,11 @@ export interface UserRideData {
 }
 
 export interface GetUserRidesResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    rides: UserRideData[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  rides: UserRideData[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

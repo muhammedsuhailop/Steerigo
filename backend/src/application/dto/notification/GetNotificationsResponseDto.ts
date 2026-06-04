@@ -12,16 +12,12 @@ export interface NotificationData {
 }
 
 export interface GetNotificationsResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    notifications: NotificationData[];
-    unreadCount: number;
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  notifications: NotificationData[];
+  unreadCount: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

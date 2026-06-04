@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { DriverSidebar, DriverTopbar } from "../../shared/components";
 import { Footer } from "@/features/public/components";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -30,6 +30,7 @@ import { IoLocationOutline } from "react-icons/io5";
 const ViewDriverRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   useViewDriverRide(id);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -102,6 +103,14 @@ const ViewDriverRidePage: React.FC = () => {
 
   useDriverLocationUpdate(id, activeRide?.status, isInactive);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/rides");
+    }
+  };
+
   const handleUpdateLocation = async () => {
     if (!driverLocation || !activeRide) {
       setShowLocationPrompt(false);
@@ -159,6 +168,13 @@ const ViewDriverRidePage: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
+              <button
+                onClick={handleBack}
+                className="inline-flex items-center gap-2 text-gray-600 hover:text-black font-medium transition-colors"
+              >
+                <FaArrowLeft className="text-sm" />
+                Back
+              </button>
               <h1 className="text-2xl font-bold text-gray-900">
                 {isInactive ? "Trip Summary" : "Active Trip"}
               </h1>

@@ -6,12 +6,16 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import { NOTIFICATION_ERROR_MESSAGES } from "@shared/constants/NotificationMessages";
+import {
+  NOTIFICATION_ERROR_MESSAGES,
+  NOTIFICATION_MESSAGES,
+} from "@shared/constants/NotificationMessages";
 
 import { GetNotificationsDto } from "@application/dto/notification/GetNotificationsDto";
 import { GetNotificationsResponseDto } from "@application/dto/notification/GetNotificationsResponseDto";
 import { MarkNotificationsReadDto } from "@application/dto/notification/MarkNotificationsReadDto";
 import { MarkNotificationsReadResponseDto } from "@application/dto/notification/MarkNotificationsReadResponseDto";
+import { ApiResponse } from "@shared/types/Common";
 
 @injectable()
 export class NotificationController {
@@ -35,14 +39,6 @@ export class NotificationController {
   async getNotifications(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: NOTIFICATION_ERROR_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
-
       Logger.info("Get notifications request received", { userId });
 
       const queryData = {
@@ -56,7 +52,7 @@ export class NotificationController {
         toDate: req.query.toDate as string | undefined,
       };
 
-      const dto = GetNotificationsDto.fromRequest(userId, queryData);
+      const dto = GetNotificationsDto.fromRequest(userId as string, queryData);
       const result = await this.getNotificationsUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -65,10 +61,7 @@ export class NotificationController {
           userId,
           error: error.message,
         });
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_notifications",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -76,20 +69,23 @@ export class NotificationController {
       const responseData = result.getValue();
       Logger.info("Notifications fetched successfully", {
         userId,
-        total: responseData.data.pagination.total,
-        unreadCount: responseData.data.unreadCount,
+        total: responseData.pagination.total,
+        unreadCount: responseData.unreadCount,
       });
 
-      res.status(HttpStatusCodes.OK).json(responseData);
+      const response: ApiResponse = {
+        success: true,
+        message: NOTIFICATION_MESSAGES.FETCHED_SUCCESSFULLY,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get notifications controller error", {
         userId: this.getUserId(req),
         error: error instanceof Error ? error.message : String(error),
       });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_notifications",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -97,17 +93,12 @@ export class NotificationController {
   async markAsRead(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: NOTIFICATION_ERROR_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
-
       Logger.info("Mark notifications as read request received", { userId });
 
-      const dto = MarkNotificationsReadDto.fromRequest(userId, req.body);
+      const dto = MarkNotificationsReadDto.fromRequest(
+        userId as string,
+        req.body,
+      );
       const result = await this.markNotificationsReadUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -116,10 +107,7 @@ export class NotificationController {
           userId,
           error: error.message,
         });
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "mark_notifications_read",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -127,19 +115,22 @@ export class NotificationController {
       const responseData = result.getValue();
       Logger.info("Notifications marked as read successfully", {
         userId,
-        updatedCount: responseData.data.updatedCount,
+        updatedCount: responseData.updatedCount,
       });
 
-      res.status(HttpStatusCodes.OK).json(responseData);
+      const response: ApiResponse = {
+        success: true,
+        message: NOTIFICATION_MESSAGES.MARKED_AS_READ,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Mark notifications as read controller error", {
         userId: this.getUserId(req),
         error: error instanceof Error ? error.message : String(error),
       });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "mark_notifications_read",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

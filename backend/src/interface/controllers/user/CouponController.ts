@@ -58,10 +58,7 @@ export class CouponController {
       if (result.isFailure()) {
         const error = result.getError();
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_user_coupons",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
         return;
@@ -80,10 +77,7 @@ export class CouponController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_user_coupons",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -116,10 +110,7 @@ export class CouponController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "apply_coupon",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -146,10 +137,7 @@ export class CouponController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "apply_coupon",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -178,10 +166,7 @@ export class CouponController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "remove_coupon",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -206,10 +191,7 @@ export class CouponController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "remove_coupon",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

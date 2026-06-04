@@ -16,7 +16,6 @@ import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities/User";
 import { Driver } from "@domain/entities/Driver";
@@ -100,12 +99,8 @@ export class GetUserRideByIdUseCase
       const driverDetails = this.mapDriverToDetails(driver, driverUser);
 
       const response: GetUserRideByIdResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-        data: {
-          ride: rideDetails,
-          driver: driverDetails,
-        },
+        ride: rideDetails,
+        driver: driverDetails,
       };
 
       Logger.info("User ride fetched successfully", {
@@ -208,7 +203,7 @@ export class GetUserRideByIdUseCase
       distance: ride.getPickup().distanceTo(ride.getDrop()),
       fare: fareDetails,
       timeline: timelineDetails,
-      verificationCode:ride.getVerificationCode(),
+      verificationCode: ride.getVerificationCode(),
       couponDetails: couponDetails,
       rating: ratingDetails,
       createdAt: ride.getCreatedAt().toISOString(),

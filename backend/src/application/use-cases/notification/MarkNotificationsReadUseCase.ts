@@ -7,7 +7,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { NotificationErrors } from "@domain/errors/NotificationError";
-import { NOTIFICATION_MESSAGES } from "@shared/constants/NotificationMessages";
 
 @injectable()
 export class MarkNotificationsReadUseCase
@@ -72,9 +71,7 @@ export class MarkNotificationsReadUseCase
       }
 
       return Result.success({
-        success: true,
-        message: NOTIFICATION_MESSAGES.MARKED_AS_READ,
-        data: { updatedCount },
+        updatedCount,
       });
     } catch (error) {
       Logger.error("Error marking notifications as read", {

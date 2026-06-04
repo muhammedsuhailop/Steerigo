@@ -61,15 +61,8 @@ export class RideController {
   async sendRideRequest(req: Request, res: Response): Promise<void> {
     try {
       const riderId = this.getUserId(req);
-      if (!riderId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: "Unauthorized: User ID not found in request",
-        } as ApiResponse);
-        return;
-      }
 
-      const dto = SendRideRequestDto.fromRequest(riderId, req.body);
+      const dto = SendRideRequestDto.fromRequest(riderId as string, req.body);
 
       Logger.info("Send ride request received", {
         riderId,
@@ -98,10 +91,7 @@ export class RideController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "SendRideRequest",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
 
         Logger.warn("Send ride request failed", {
@@ -116,10 +106,7 @@ export class RideController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "SendRideRequest",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -127,29 +114,15 @@ export class RideController {
   async getUserRideById(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.RIDE.UNAUTHORIZED,
-        } as ApiResponse);
-        return;
-      }
 
       const rideId = req.params.rideId;
-      if (!rideId) {
-        res.status(HttpStatusCodes.BAD_REQUEST).json({
-          success: false,
-          message: USER_MESSAGES.RIDE.RIDE_ID_REQUIRED,
-        } as ApiResponse);
-        return;
-      }
 
       Logger.info("Get user ride by ID received", {
         userId,
         rideId,
       });
 
-      const dto = GetUserRideByIdDto.fromRequest(userId, { rideId });
+      const dto = GetUserRideByIdDto.fromRequest(userId as string, { rideId });
 
       const result = await this.getUserRideByIdUseCase.execute(dto);
 
@@ -161,10 +134,7 @@ export class RideController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_user_ride_by_id",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -172,12 +142,18 @@ export class RideController {
       const responseData = result.getValue();
       Logger.info("User ride fetched successfully", {
         userId,
-        rideId: responseData.data.ride.rideId,
-        status: responseData.data.ride.status,
-        driverId: responseData.data.driver.driverId,
+        rideId: responseData.ride.rideId,
+        status: responseData.ride.status,
+        driverId: responseData.driver.driverId,
       });
 
-      res.status(HttpStatusCodes.OK).json(responseData);
+      const response: ApiResponse = {
+        success: true,
+        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get user ride by ID controller error", {
         userId: this.getUserId(req),
@@ -185,10 +161,7 @@ export class RideController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_user_ride_by_id",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -196,20 +169,13 @@ export class RideController {
   async getUserRides(req: Request, res: Response): Promise<void> {
     try {
       const userId = this.getUserId(req);
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: USER_MESSAGES.RIDE.UNAUTHORIZED,
-        });
-        return;
-      }
 
       Logger.info("Get user rides received", {
         userId,
         query: req.query,
       });
 
-      const dto = GetUserRidesDto.fromRequest(userId, req.query);
+      const dto = GetUserRidesDto.fromRequest(userId as string, req.query);
 
       const result = await this.getUserRidesUseCase.execute(dto);
 
@@ -221,7 +187,6 @@ export class RideController {
 
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "getuserrides",
         );
         res.status(statusCode).json(response);
         return;
@@ -231,21 +196,24 @@ export class RideController {
 
       Logger.info("User rides fetched successfully", {
         userId,
-        total: responseData.data.pagination.total,
-        page: responseData.data.pagination.page,
+        total: responseData.pagination.total,
+        page: responseData.pagination.page,
       });
 
-      res.status(HttpStatusCodes.OK).json(responseData);
+      const response: ApiResponse = {
+        success: true,
+        message: RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get user rides controller error", {
         userId: this.getUserId(req),
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "getuserrides",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -277,10 +245,7 @@ export class RideController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "cancel_ride",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
