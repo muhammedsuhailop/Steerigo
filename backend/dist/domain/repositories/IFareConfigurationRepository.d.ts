@@ -1,4 +1,4 @@
-import { FareConfiguration } from "../entities/FareConfiguration";
+import { FareConfiguration } from "@domain/entities/FareConfiguration";
 export interface IFareConfigurationRepository {
     findById(id: string): Promise<FareConfiguration | null>;
     findActiveConfiguration(date?: Date): Promise<FareConfiguration | null>;

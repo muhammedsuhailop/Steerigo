@@ -1,5 +1,5 @@
-import { IAvailabilityCheckService } from "../../application/services/IAvailabilityCheckService";
-import { IDriverAvailabilityRepository } from "../../domain/repositories/IDriverAvailabilityRepository";
+import { IAvailabilityCheckService } from "@application/services/IAvailabilityCheckService";
+import { IDriverAvailabilityRepository } from "@domain/repositories/IDriverAvailabilityRepository";
 export declare class AvailabilityCheckService implements IAvailabilityCheckService {
     private availabilityRepository;
     constructor(availabilityRepository: IDriverAvailabilityRepository);

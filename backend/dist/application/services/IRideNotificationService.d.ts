@@ -1,9 +1,9 @@
-import { FutureRideRequestSentToDriverEvent } from "../events/FutureRideEvents";
-import { CouponDiscountType } from "../../domain/value-objects/CouponDiscountType";
-import { DriverCancellationReason } from "../../domain/value-objects/DriverRideCancellationReason";
-import { FareBreakdown } from "../../domain/value-objects/FareBreakdown";
-import { FutureRideRequestStatus } from "../../domain/value-objects/FutureRideRequestStatus";
-import { RideCancellationReason } from "../../domain/value-objects/RideCancellationReason";
+import { FutureRideRequestSentToDriverEvent } from "@application/events/FutureRideEvents";
+import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
+import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
+import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
 export interface DriverRequestNotificationPayload {
     requestId: string;
     requestGroupId: string;

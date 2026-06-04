@@ -1,6 +1,6 @@
-import { ChatRoomStatus } from "../value-objects/ChatRoomStatus";
-import { ChatRoomType } from "../value-objects/ChatRoomType";
-import { UserRole } from "../../shared/constants/AuthConstants";
+import { ChatRoomStatus } from "@domain/value-objects/ChatRoomStatus";
+import { ChatRoomType } from "@domain/value-objects/ChatRoomType";
+import { UserRole } from "@shared/constants/AuthConstants";
 export type ChatParticipant = {
     userId: string;
     role: UserRole;

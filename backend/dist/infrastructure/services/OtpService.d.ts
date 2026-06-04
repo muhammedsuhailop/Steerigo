@@ -1,4 +1,4 @@
-import { IOtpService } from "../../application/services/IOtpService";
+import { IOtpService } from "@application/services/IOtpService";
 export declare class OtpService implements IOtpService {
     generate(): string;
     hash(otp: string): Promise<string>;

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createNotificationSchema = exports.CreateNotificationDto = void 0;
 const zod_1 = require("zod");
-const NotificationType_1 = require("../../../domain/value-objects/NotificationType");
-const NotificationChannel_1 = require("../../../domain/value-objects/NotificationChannel");
+const NotificationType_1 = require("@domain/value-objects/NotificationType");
+const NotificationChannel_1 = require("@domain/value-objects/NotificationChannel");
 const createNotificationSchema = zod_1.z.object({
     recipientId: zod_1.z.string().min(1, "Recipient ID is required"),
     type: zod_1.z.nativeEnum(NotificationType_1.NotificationType),

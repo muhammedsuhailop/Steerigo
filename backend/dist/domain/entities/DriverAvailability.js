@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverAvailability = void 0;
 const AvailabilityStatus_1 = require("../value-objects/AvailabilityStatus");
 const AvailabilityException_1 = require("./AvailabilityException");
-const Logger_1 = require("../../shared/utils/Logger");
+const Logger_1 = require("@shared/utils/Logger");
 class DriverAvailability {
     constructor(id, driverId, status, currentLocation, baseLocation, recurringSchedule, exceptions = [], isActive = true, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

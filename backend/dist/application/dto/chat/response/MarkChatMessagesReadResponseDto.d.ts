@@ -1,4 +1,4 @@
-import { MessageDeliveryStatus } from "../../../../domain/value-objects/MessageDeliveryStatus";
+import { MessageDeliveryStatus } from "@domain/value-objects/MessageDeliveryStatus";
 export interface MarkChatMessagesReadResponseDto {
     success: boolean;
     message: string;

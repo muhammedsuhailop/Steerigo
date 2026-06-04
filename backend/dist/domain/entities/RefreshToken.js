@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RefreshToken = void 0;
-const errors_1 = require("../errors");
+const errors_1 = require("@domain/errors");
 class RefreshToken {
     constructor(id, userId, token, expiresAt, isRevoked = false, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

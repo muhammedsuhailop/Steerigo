@@ -14,7 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AvailabilityCheckService = void 0;
 const inversify_1 = require("inversify");
-const DITypes_1 = require("../../shared/constants/DITypes");
+const DITypes_1 = require("@shared/constants/DITypes");
 let AvailabilityCheckService = class AvailabilityCheckService {
     constructor(availabilityRepository) {
         this.availabilityRepository = availabilityRepository;

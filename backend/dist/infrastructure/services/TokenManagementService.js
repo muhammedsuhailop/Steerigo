@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenManagementService = void 0;
 const inversify_1 = require("inversify");
-const RefreshToken_1 = require("../../domain/entities/RefreshToken");
+const RefreshToken_1 = require("@domain/entities/RefreshToken");
 const uuid_1 = require("uuid");
-const DITypes_1 = require("../../shared/constants/DITypes");
+const DITypes_1 = require("@shared/constants/DITypes");
 let TokenManagementService = class TokenManagementService {
     constructor(tokenService, refreshTokenRepository) {
         this.tokenService = tokenService;

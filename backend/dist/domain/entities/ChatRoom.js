@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRoom = void 0;
-const ChatRoomStatus_1 = require("../value-objects/ChatRoomStatus");
-const ChatRoomType_1 = require("../value-objects/ChatRoomType");
+const ChatRoomStatus_1 = require("@domain/value-objects/ChatRoomStatus");
+const ChatRoomType_1 = require("@domain/value-objects/ChatRoomType");
 class ChatRoom {
     constructor(id, type, rideId, participants, status, lastMessageId, lastMessageAt, createdAt = new Date(), updatedAt = new Date()) {
         this.id = id;

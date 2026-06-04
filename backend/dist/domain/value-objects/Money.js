@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Money = void 0;
-const errors_1 = require("../errors");
+const errors_1 = require("@domain/errors");
 class Money {
     constructor(amount, currency = "INR") {
         this.amount = amount;

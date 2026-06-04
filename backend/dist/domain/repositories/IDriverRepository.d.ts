@@ -1,12 +1,12 @@
-import { QueryOptions } from "../../shared/types/Repository";
-import { Driver } from "../entities/Driver";
+import { QueryOptions } from "@shared/types/Repository";
+import { Driver } from "@domain/entities/Driver";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
 import { IBatchRepository } from "./base/IBatchRepository";
-import { DriverStatus } from "../value-objects/DriverStatus";
-import { KYCStatus } from "../value-objects/KYCStatus";
-import { LicenseCategory } from "../value-objects/LicenseCategory";
+import { DriverStatus } from "@domain/value-objects/DriverStatus";
+import { KYCStatus } from "@domain/value-objects/KYCStatus";
+import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 export interface IDriverDateRangeFilter {
     fromDate: Date;
     toDate: Date;

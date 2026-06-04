@@ -1,4 +1,4 @@
-import { CloudinaryResourceDto } from "../dto/file/CloudinaryResourceDto";
+import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 export interface IFileUploadResult {
     url: string;
     publicId: string;

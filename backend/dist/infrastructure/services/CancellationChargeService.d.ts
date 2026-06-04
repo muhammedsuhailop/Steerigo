@@ -1,7 +1,7 @@
-import { DriverCancellationContext, DriverCancellationOutcome, ICancellationChargeService, RiderCancellationContext } from "../../application/services/ICancellationChargeService";
-import { FareBreakdown } from "../../domain/value-objects/FareBreakdown";
-import { Money } from "../../domain/value-objects/Money";
-import { IFareConfigurationRepository } from "../../domain/repositories/IFareConfigurationRepository";
+import { DriverCancellationContext, DriverCancellationOutcome, ICancellationChargeService, RiderCancellationContext } from "@application/services/ICancellationChargeService";
+import { FareBreakdown } from "@domain/value-objects/FareBreakdown";
+import { Money } from "@domain/value-objects/Money";
+import { IFareConfigurationRepository } from "@domain/repositories/IFareConfigurationRepository";
 export declare class CancellationChargeService implements ICancellationChargeService {
     private fareConfigRepository;
     private readonly MIN_FEE;

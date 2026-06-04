@@ -1,5 +1,5 @@
-import { IFileUploadService, IFileUploadResult, IDeleteResult } from "../../application/services/IFileUploadService";
-import { CloudinaryResourceDto } from "../../application/dto/file/CloudinaryResourceDto";
+import { IFileUploadService, IFileUploadResult, IDeleteResult } from "@application/services/IFileUploadService";
+import { CloudinaryResourceDto } from "@application/dto/file/CloudinaryResourceDto";
 export declare class CloudinaryService implements IFileUploadService {
     constructor();
     upload(fileBuffer: Buffer, userId: string, purpose: string, originalName: string): Promise<IFileUploadResult>;

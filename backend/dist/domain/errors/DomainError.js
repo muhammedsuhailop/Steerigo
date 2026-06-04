@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DomainError = void 0;
-const ErrorMetadata_1 = require("../../shared/errors/ErrorMetadata");
+const ErrorMetadata_1 = require("@shared/errors/ErrorMetadata");
 class DomainError extends Error {
     constructor(message, code, metadata) {
         super(message);

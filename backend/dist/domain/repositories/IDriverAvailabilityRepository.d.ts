@@ -1,9 +1,9 @@
-import { DriverAvailability } from "../entities/DriverAvailability";
-import { AvailabilityStatus } from "../value-objects/AvailabilityStatus";
-import { QueryOptions, FilterOptions } from "../../shared/types/Repository";
+import { DriverAvailability } from "@domain/entities/DriverAvailability";
+import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
+import { QueryOptions, FilterOptions } from "@shared/types/Repository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";
-import { AvailabilityException } from "../entities/AvailabilityException";
+import { AvailabilityException } from "@domain/entities/AvailabilityException";
 export interface IDriverAvailabilityFilters extends FilterOptions<DriverAvailability> {
     status?: AvailabilityStatus;
     driverId?: string;

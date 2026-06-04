@@ -1,4 +1,4 @@
-import { ErrorType } from "../enums/ErrorType";
+import { ErrorType } from "@shared/enums/ErrorType";
 export interface ErrorMetadata {
     statusCode: number;
     errorType: ErrorType;

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ErrorMetadataInferrer = void 0;
-const ErrorType_1 = require("../enums/ErrorType");
+const ErrorType_1 = require("@shared/enums/ErrorType");
 class ErrorMetadataInferrer {
     static inferFromCode(code) {
         if (!code) {

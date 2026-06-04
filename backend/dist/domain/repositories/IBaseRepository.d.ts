@@ -1,4 +1,4 @@
-import { BaseEntity } from "../../shared/types/Repository";
+import { BaseEntity } from "@shared/types/Repository";
 import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
 import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
 import { IQueryableRepository } from "./base/IQueryableRepository";

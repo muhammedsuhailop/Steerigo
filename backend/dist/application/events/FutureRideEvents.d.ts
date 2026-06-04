@@ -1,5 +1,5 @@
 import { DomainEvent } from "./DomainEvent";
-import { FutureRideRequestStatus } from "../../domain/value-objects/FutureRideRequestStatus";
+import { FutureRideRequestStatus } from "@domain/value-objects/FutureRideRequestStatus";
 export interface FutureRideAcceptedEvent extends DomainEvent {
     readonly type: "FutureRideAccepted";
     readonly payload: {
