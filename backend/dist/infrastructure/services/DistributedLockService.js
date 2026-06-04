@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisLockService = void 0;
 const inversify_1 = require("inversify");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 const crypto_1 = require("crypto");
 const RedisService_1 = require("./RedisService");
-const DITypes_1 = require("@shared/constants/DITypes");
+const DITypes_1 = require("../../shared/constants/DITypes");
 let RedisLockService = class RedisLockService {
     constructor(redisService) {
         this.redisService = redisService;

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailService = void 0;
 const inversify_1 = require("inversify");
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 let EmailService = class EmailService {
     constructor() {
         this.transporter = nodemailer_1.default.createTransport({

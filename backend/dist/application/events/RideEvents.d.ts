@@ -1,7 +1,7 @@
-import { DriverRequestNotificationPayload, RideFareBreakdownJson } from "@application/services/IRideNotificationService";
-import { CouponDiscountType } from "@domain/value-objects/CouponDiscountType";
-import { DriverCancellationReason } from "@domain/value-objects/DriverRideCancellationReason";
-import { RideCancellationReason } from "@domain/value-objects/RideCancellationReason";
+import { DriverRequestNotificationPayload, RideFareBreakdownJson } from "../services/IRideNotificationService";
+import { CouponDiscountType } from "../../domain/value-objects/CouponDiscountType";
+import { DriverCancellationReason } from "../../domain/value-objects/DriverRideCancellationReason";
+import { RideCancellationReason } from "../../domain/value-objects/RideCancellationReason";
 export interface BaseRideEvent<TType extends string, TPayload> {
     type: TType;
     occurredAt: Date;

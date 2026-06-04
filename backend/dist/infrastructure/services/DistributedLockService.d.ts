@@ -1,4 +1,4 @@
-import { IDistributedLockService } from "@application/services/IDistributedLockService";
+import { IDistributedLockService } from "../../application/services/IDistributedLockService";
 import { RedisService } from "./RedisService";
 export declare class RedisLockService implements IDistributedLockService {
     private readonly redisService;

@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancellationChargeService = void 0;
 const inversify_1 = require("inversify");
-const Money_1 = require("@domain/value-objects/Money");
-const DITypes_1 = require("@shared/constants/DITypes");
-const Logger_1 = require("@shared/utils/Logger");
+const Money_1 = require("../../domain/value-objects/Money");
+const DITypes_1 = require("../../shared/constants/DITypes");
+const Logger_1 = require("../../shared/utils/Logger");
 let CancellationChargeService = class CancellationChargeService {
     constructor(fareConfigRepository) {
         this.fareConfigRepository = fareConfigRepository;

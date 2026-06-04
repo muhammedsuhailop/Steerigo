@@ -1,4 +1,4 @@
-import { IEmailService } from "@application/services/IEmailService";
+import { IEmailService } from "../../application/services/IEmailService";
 export declare class EmailService implements IEmailService {
     private transporter;
     constructor();

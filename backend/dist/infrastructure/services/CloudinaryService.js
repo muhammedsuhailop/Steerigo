@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CloudinaryService = void 0;
 const inversify_1 = require("inversify");
 const cloudinary_1 = require("cloudinary");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 const streamifier_1 = __importDefault(require("streamifier"));
 let CloudinaryService = class CloudinaryService {
     constructor() {

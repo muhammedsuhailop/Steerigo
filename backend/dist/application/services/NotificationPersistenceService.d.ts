@@ -1,8 +1,8 @@
-import { IUseCase } from "@application/use-cases/interfaces/IUseCase";
-import { CreateNotificationDto } from "@application/dto/notification/CreateNotificationDto";
-import { CreateNotificationResponseDto } from "@application/dto/notification/CreateNotificationResponseDto";
-import { NotificationType } from "@domain/value-objects/NotificationType";
-import { Result } from "@shared/utils/Result";
+import { IUseCase } from "../use-cases/interfaces/IUseCase";
+import { CreateNotificationDto } from "../dto/notification/CreateNotificationDto";
+import { CreateNotificationResponseDto } from "../dto/notification/CreateNotificationResponseDto";
+import { NotificationType } from "../../domain/value-objects/NotificationType";
+import { Result } from "../../shared/utils/Result";
 export interface INotificationPersistenceService {
     persistNotification(recipientId: string, data: {
         type: NotificationType;

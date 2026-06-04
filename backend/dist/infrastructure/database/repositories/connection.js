@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseConnection = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../../shared/utils/Logger");
 class DatabaseConnection {
     constructor() {
         this.isConnected = false;

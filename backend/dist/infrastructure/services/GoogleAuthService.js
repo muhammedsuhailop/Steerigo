@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleAuthService = void 0;
 const inversify_1 = require("inversify");
 const googleapis_1 = require("googleapis");
-const Logger_1 = require("@shared/utils/Logger");
+const Logger_1 = require("../../shared/utils/Logger");
 let GoogleAuthService = class GoogleAuthService {
     constructor() {
         if (!process.env.GOOGLE_CLIENT_ID ||

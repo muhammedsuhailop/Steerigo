@@ -25,19 +25,29 @@ class SecurityMiddleware {
         });
     }
     static cors() {
+        // Change return type to RequestHandler
+        const productionOrigins = [
+            process.env.CLIENT_URL,
+            process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/` : undefined,
+            "https://msuhail.xyz",
+            "https://www.msuhail.xyz",
+        ].filter((origin) => !!origin);
+        const developmentOrigins = [
+            "http://localhost:5173",
+            "http://localhost:4000",
+            "http://165.227.93.170",
+            "http://localhost:4001",
+            /https:\/\/.*\.ngrok-free\.app$/,
+        ];
+        // Wrap the options inside cors() before returning it
         return (0, cors_1.default)({
             origin: process.env.NODE_ENV === "production"
-                ? ["https://steerigo.com", "https://www.steerigo.com"]
-                : [
-                    "http://localhost:5173",
-                    "http://localhost:4000",
-                    "http://localhost:4001",
-                    /https:\/\/.*\.ngrok-free\.app$/,
-                ],
+                ? productionOrigins
+                : developmentOrigins,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
             allowedHeaders: ["Content-Type", "Authorization"],
-            credentials: true, // allows cookies
-            exposedHeaders: ["Set-Cookie"], // Allow frontend to see Set-Cookie header
+            credentials: true,
+            exposedHeaders: ["Set-Cookie"],
         });
     }
     static requestLogger(req, res, next) {

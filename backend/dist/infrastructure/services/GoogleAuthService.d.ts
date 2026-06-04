@@ -1,4 +1,4 @@
-import { IGoogleAuthService, IGoogleTokens, IGoogleUserProfile } from "@application/services/IGoogleAuthService";
+import { IGoogleAuthService, IGoogleTokens, IGoogleUserProfile } from "../../application/services/IGoogleAuthService";
 export declare class GoogleAuthService implements IGoogleAuthService {
     private oauth2Client;
     constructor();

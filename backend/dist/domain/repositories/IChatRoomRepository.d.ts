@@ -1,7 +1,7 @@
-import { ChatRoom } from "@domain/entities/ChatRoom";
+import { ChatRoom } from "../entities/ChatRoom";
 import { ICrudRepository } from "./ICrudRepository";
-import { ChatRoomType } from "@domain/value-objects/ChatRoomType";
-import { PaginatedResult } from "@shared/types/Repository";
+import { ChatRoomType } from "../value-objects/ChatRoomType";
+import { PaginatedResult } from "../../shared/types/Repository";
 export interface IChatRoomPaginationOptions {
     page: number;
     limit: number;

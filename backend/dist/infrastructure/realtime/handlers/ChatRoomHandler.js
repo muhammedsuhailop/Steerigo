@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerChatRoomHandlers = registerChatRoomHandlers;
 const SocketEvents_1 = require("../constants/SocketEvents");
-const Logger_1 = require("@shared/utils/Logger");
-const MarkChatMessagesReadDto_1 = require("@application/dto/chat/MarkChatMessagesReadDto");
-const DIContainer_1 = require("@infrastructure/container/DIContainer");
-const DITypes_1 = require("@shared/constants/DITypes");
+const Logger_1 = require("../../../shared/utils/Logger");
+const MarkChatMessagesReadDto_1 = require("../../../application/dto/chat/MarkChatMessagesReadDto");
+const DIContainer_1 = require("../../container/DIContainer");
+const DITypes_1 = require("../../../shared/constants/DITypes");
 function registerChatRoomHandlers(socket) {
     const { userId, role } = socket.data;
     const markChatMessagesReadUseCase = DIContainer_1.container.get(DITypes_1.TYPES.MarkChatMessagesReadUseCase);

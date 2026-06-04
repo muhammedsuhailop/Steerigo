@@ -16,8 +16,8 @@ exports.TokenService = void 0;
 const inversify_1 = require("inversify");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
-const AuthConstants_1 = require("@shared/constants/AuthConstants");
-const Logger_1 = require("@shared/utils/Logger");
+const AuthConstants_1 = require("../../shared/constants/AuthConstants");
+const Logger_1 = require("../../shared/utils/Logger");
 let TokenService = class TokenService {
     constructor() {
         this.jwtSecret = process.env.JWT_SECRET || "";

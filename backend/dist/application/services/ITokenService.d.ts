@@ -1,4 +1,4 @@
-import { UserRole } from "@shared/constants/AuthConstants";
+import { UserRole } from "../../shared/constants/AuthConstants";
 export interface ITokenPayload {
     userId: string;
     role: UserRole;

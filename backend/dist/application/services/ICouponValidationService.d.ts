@@ -1,4 +1,4 @@
-import { Coupon } from "@domain/entities/Coupon";
+import { Coupon } from "../../domain/entities/Coupon";
 export interface CouponValidationResult {
     coupon: Coupon;
     discountAmount: number;

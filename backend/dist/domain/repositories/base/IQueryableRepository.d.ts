@@ -1,4 +1,4 @@
-import { BaseEntity, QueryOptions, PaginatedResult, FilterOptions } from "@shared/types/Repository";
+import { BaseEntity, QueryOptions, PaginatedResult, FilterOptions } from "../../../shared/types/Repository";
 export interface IQueryableRepository<T extends BaseEntity, ID = string> {
     findAll(options?: QueryOptions<T>): Promise<T[]>;
     findPaginated(options: QueryOptions<T>): Promise<PaginatedResult<T>>;

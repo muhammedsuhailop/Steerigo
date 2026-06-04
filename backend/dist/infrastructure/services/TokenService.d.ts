@@ -1,5 +1,5 @@
-import { ITokenService, ITokenPayload, ITokenPair } from "@application/services/ITokenService";
-import { UserRole } from "@shared/constants/AuthConstants";
+import { ITokenService, ITokenPayload, ITokenPair } from "../../application/services/ITokenService";
+import { UserRole } from "../../shared/constants/AuthConstants";
 export declare class TokenService implements ITokenService {
     private readonly jwtSecret;
     private readonly refreshTokenSecret;

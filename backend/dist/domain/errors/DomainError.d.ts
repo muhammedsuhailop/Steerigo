@@ -1,5 +1,5 @@
-import { ErrorType } from "@shared/enums/ErrorType";
-import { ErrorMetadata } from "@shared/errors/ErrorMetadata";
+import { ErrorType } from "../../shared/enums/ErrorType";
+import { ErrorMetadata } from "../../shared/errors/ErrorMetadata";
 export declare class DomainError extends Error {
     readonly code?: string;
     readonly metadata?: ErrorMetadata;
