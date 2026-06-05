@@ -35,6 +35,12 @@ export const CreateCouponModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!formData.code.trim()) newErrors.code = "Coupon code is required";
     if (!formData.discountValue || formData.discountValue <= 0)
       newErrors.discountValue = "Discount value must be greater than 0";
+    else if (
+      formData.discountType === "PERCENTAGE" &&
+      formData.discountValue > 100
+    ) {
+      newErrors.discountValue = "Percentage value cannot exceed 100%";
+    }
     if (!formData.maxDiscount || formData.maxDiscount <= 0)
       newErrors.maxDiscount = "max discount must be greater than 0";
     if (!formData.minRideAmount || formData.minRideAmount <= 0)
