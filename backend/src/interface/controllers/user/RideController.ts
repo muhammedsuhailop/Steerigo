@@ -11,7 +11,6 @@ import { Result } from "@shared/utils/Result";
 import { SendRideRequestResponseDto } from "@application/dto/user/SendRideRequestResponseDto";
 import { GetUserRideByIdDto } from "@application/dto/user/GetUserRideByIdDto";
 import { GetUserRideByIdResponseDto } from "@application/dto/user/GetUserRideByIdResponseDto";
-import { USER_MESSAGES } from "@shared/constants/UserMessages";
 import { GetUserRidesDto } from "@application/dto/user/GetUserRidesDto";
 import { GetUserRidesResponseDto } from "@application/dto/user/GetUserRidesResponseDto";
 import { CancelRideDto } from "@application/dto/user/CancelRideDto";

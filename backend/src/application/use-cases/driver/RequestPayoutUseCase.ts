@@ -14,7 +14,6 @@ import { TYPES } from "@shared/constants/DITypes";
 import { PayoutErrors } from "@domain/errors/PayoutErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
-import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 const MINIMUM_PAYOUT_AMOUNT = 100;
 const PAYOUT_CURRENCY = "INR";

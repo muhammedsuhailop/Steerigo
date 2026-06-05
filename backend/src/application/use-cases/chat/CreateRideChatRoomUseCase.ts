@@ -16,7 +16,6 @@ import { RideStatus } from "@domain/value-objects/RideStatus";
 import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
 import { IIdGenerator } from "@application/services/IIdGenerator";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
-import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 
 @injectable()
 export class CreateRideChatRoomUseCase

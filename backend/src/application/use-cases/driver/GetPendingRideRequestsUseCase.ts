@@ -11,7 +11,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
 export class GetPendingRideRequestsUseCase

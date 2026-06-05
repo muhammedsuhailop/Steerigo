@@ -6,10 +6,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
-import {
-  NOTIFICATION_ERROR_MESSAGES,
-  NOTIFICATION_MESSAGES,
-} from "@shared/constants/NotificationMessages";
+import { NOTIFICATION_MESSAGES } from "@shared/constants/NotificationMessages";
 
 import { GetNotificationsDto } from "@application/dto/notification/GetNotificationsDto";
 import { GetNotificationsResponseDto } from "@application/dto/notification/GetNotificationsResponseDto";

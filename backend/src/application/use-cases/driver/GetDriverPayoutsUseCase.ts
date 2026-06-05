@@ -12,7 +12,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 @injectable()
 export class GetDriverPayoutsUseCase

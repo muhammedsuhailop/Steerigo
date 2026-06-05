@@ -5,7 +5,6 @@ import { IKYCRepository } from "@domain/repositories/IKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
 import {
   GetDriverProfileResponseDto,
-  DriverProfileData,
   LicenseInfo,
   KycInfo,
 } from "@application/dto/driver/GetDriverProfileResponseDto";
@@ -98,32 +97,6 @@ export class GetDriverDetailedProfileUseCase
           updatedAt: kyc.getUpdatedAt(),
           comments: kyc.getComments(),
         })),
-      };
-
-      const profileData: DriverProfileData = {
-        driverId: driver.getId(),
-        userId: userId,
-        name: user.getName(),
-        profileImageUrl: user.getProfilePicture() || "",
-        email: user.getEmailValue(),
-        mobile: user.getMobile() || "",
-        dob: user.getDob() || new Date(),
-        gender: user.getGender() || "",
-        address: user.getAddress() || "",
-        role: user.getRole(),
-        status: driver.getStatus(),
-        isVerified: user.getIsVerified(),
-        authProvider: user.getAuthProvider(),
-        createdAt: user.getCreatedAt(),
-        updatedAt: user.getUpdatedAt(),
-        license: licenseInfo,
-        kyc: kycInfo,
-        eligibleGearTypes: driver.getEligibleGearTypes(),
-        eligibleBodyTypes: driver.getEligibleBodyTypes(),
-        meta: {
-          lastUpdated: user.getUpdatedAt(),
-          serverTime: new Date(),
-        },
       };
 
       const response: GetDriverProfileResponseDto = {

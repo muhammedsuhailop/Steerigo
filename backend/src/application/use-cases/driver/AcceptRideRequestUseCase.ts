@@ -16,7 +16,6 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { IEventBus } from "@application/services/IEventBus";

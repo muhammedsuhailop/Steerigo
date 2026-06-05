@@ -10,7 +10,6 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
