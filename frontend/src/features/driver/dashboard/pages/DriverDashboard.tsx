@@ -20,6 +20,7 @@ import type {
 import { useNavigate } from "react-router-dom";
 import LiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/LiveLocationUpdater";
 import AutoLiveLocationUpdater from "@/shared/components/ui/LiveLocationUpdater/AutoLiveLocationUpdater";
+import { DashboardCharts } from "@/shared/components/ui/Charts/DashboardCharts";
 
 export type DateFilterOption =
   | "today"
@@ -334,7 +335,30 @@ const DriverDashboard: React.FC = () => {
             </div>
 
             {statsData && (
-              <DriverStats stats={statsData} loading={isStatsLoading} />
+              <div className="space-y-6">
+                <DriverStats stats={statsData} loading={isStatsLoading} />
+
+                <DashboardCharts
+                  role="driver"
+                  isLoading={isStatsLoading}
+                  timelineData={statsData?.graphData?.earningsOverTime?.map(
+                    (item) => ({
+                      date: item.date,
+                      totalRides: item.totalRides,
+                      completedRides: item.completedRides,
+                      cancelledRides: item.cancelledRides,
+                      revenue: item.earnings,
+                    }),
+                  )}
+                  statsSummary={{
+                    totalRides: statsData?.rideStats?.totalRides ?? 0,
+                    completedRides: statsData?.rideStats?.completedRides ?? 0,
+                    cancelledRides: statsData?.rideStats?.cancelledRides ?? 0,
+                    totalAmount: statsData?.rideStats?.totalEarnings ?? 0,
+                    currency: statsData?.rideStats?.currency ?? "INR",
+                  }}
+                />
+              </div>
             )}
           </div>
         </main>

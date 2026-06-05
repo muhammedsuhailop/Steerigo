@@ -61,14 +61,20 @@ export class GetDriverStatsUseCase
         toDate,
       });
 
-      const [rideStats, ratingStats] = await Promise.all([
+      const [rideStats, ratingStats, timeSeriesData] = await Promise.all([
         this.rideRepository.countByDriverStats(driverId, dateFilters),
+
         this.ratingRepository.getRatingStats({
           revieweeId: driverId,
           filters: {
             ...dateFilters,
             reviewType: ReviewType.USER_REVIEW,
           },
+        }),
+
+        this.rideRepository.getRideTimeSeriesData({
+          driverId,
+          filters: dateFilters,
         }),
       ]);
 
@@ -83,10 +89,21 @@ export class GetDriverStatsUseCase
           totalEarnings: rideStats.totalEarnings,
           currency: "INR",
         },
+
         ratingStats: {
           averageRating: ratingStats.averageRating,
           totalRatings: ratingStats.totalRatings,
           distribution: ratingStats.distribution,
+        },
+
+        graphData: {
+          earningsOverTime: timeSeriesData.map((data) => ({
+            date: data.date,
+            totalRides: data.totalRides,
+            completedRides: data.completedRides,
+            cancelledRides: data.cancelledRides,
+            earnings: data.revenue, 
+          })),
         },
       });
     } catch (error) {

@@ -5,6 +5,18 @@ export interface AdminUserStats {
   toDate: string;
 }
 
+export interface DailyRideStat {
+  date: string;
+  totalRides: number;
+  completedRides: number;
+  cancelledRides: number;
+  revenue: number;
+}
+
+export interface AdminGraphData {
+  ridesOverTime: DailyRideStat[];
+}
+
 export interface AdminRideStats {
   fromDate: string;
   toDate: string;
@@ -26,6 +38,7 @@ export interface AdminRideStats {
       fourToFive: number;
     };
   };
+  graphData?: AdminGraphData;
 }
 
 export interface AdminDriverStats {

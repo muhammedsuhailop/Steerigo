@@ -9,6 +9,7 @@ import {
   RecentUsers,
   SystemStatus,
 } from "../components";
+import { DashboardCharts } from "@/shared/components/ui/Charts/DashboardCharts";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -87,6 +88,13 @@ const AdminDashboard: React.FC = () => {
             onFromDateChange={setFromDate}
             toDate={toDate}
             onToDateChange={setToDate}
+          />
+
+          <DashboardCharts
+            role="admin"
+            isLoading={loading}
+            timelineData={rawStats.ride?.graphData?.ridesOverTime}
+            statsSummary={rawStats.ride?.rideStats}
           />
 
           <QuickActions />

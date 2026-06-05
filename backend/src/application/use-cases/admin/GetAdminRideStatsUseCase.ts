@@ -40,11 +40,16 @@ export class GetAdminRideStatsUseCase
 
       const dateFilters = { fromDate, toDate };
 
-      const [rideStats, ratingStats] = await Promise.all([
+      const [rideStats, ratingStats, timeSeriesData] = await Promise.all([
         this.rideRepository.countRideStats({
           filters: dateFilters,
         }),
+
         this.ratingRepository.getRatingStats({
+          filters: dateFilters,
+        }),
+
+        this.rideRepository.getRideTimeSeriesData({
           filters: dateFilters,
         }),
       ]);
@@ -69,6 +74,15 @@ export class GetAdminRideStatsUseCase
             threeToFour: ratingStats.distribution.threeToFour,
             fourToFive: ratingStats.distribution.fourToFive,
           },
+        },
+        graphData: {
+          ridesOverTime: timeSeriesData.map((data) => ({
+            date: data.date,
+            totalRides: data.totalRides,
+            completedRides: data.completedRides,
+            cancelledRides: data.cancelledRides,
+            revenue: data.revenue,
+          })),
         },
       });
     } catch (error) {
