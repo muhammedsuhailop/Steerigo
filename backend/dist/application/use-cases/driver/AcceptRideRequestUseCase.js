@@ -23,7 +23,6 @@ const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundErro
 const Ride_1 = require("../../../domain/entities/Ride");
 const RideTimeline_1 = require("../../../domain/value-objects/RideTimeline");
 const AvailabilityStatus_1 = require("../../../domain/value-objects/AvailabilityStatus");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 const RedisLockKeys_1 = require("../../../shared/constants/RedisLockKeys");
 const RideRequestGroupStatus_1 = require("../../../domain/value-objects/RideRequestGroupStatus");
 const CreateRideChatRoomDto_1 = require("../../dto/chat/CreateRideChatRoomDto");
@@ -138,32 +137,28 @@ let AcceptRideRequestUseCase = class AcceptRideRequestUseCase {
                 rideId: savedRide.getRideId(),
             }));
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
-                data: {
-                    rideId: savedRide.getRideId(),
-                    requestId: acceptedRequest.getId(),
-                    riderId: acceptedRequest.getRiderId(),
-                    driverId,
-                    status: savedRide.getStatus(),
-                    pickup: {
-                        latitude: acceptedRequest.getPickup().getLatitude(),
-                        longitude: acceptedRequest.getPickup().getLongitude(),
-                        address: acceptedRequest.getPickup().getAddress(),
-                    },
-                    drop: {
-                        latitude: acceptedRequest.getDrop().getLatitude(),
-                        longitude: acceptedRequest.getDrop().getLongitude(),
-                        address: acceptedRequest.getDrop().getAddress(),
-                    },
-                    rideType: acceptedRequest.getRideType(),
-                    fare: acceptedRequest.getFare(),
-                    currency: savedRide.getCurrency(),
-                    pickupTime: acceptedRequest.getPickupTime().toISOString(),
-                    timeline: {
-                        requestedAt: savedRide.getTimeline().getRequestedAt().toISOString(),
-                        acceptedAt: savedRide.getTimeline().getAcceptedAt().toISOString(),
-                    },
+                rideId: savedRide.getRideId(),
+                requestId: acceptedRequest.getId(),
+                riderId: acceptedRequest.getRiderId(),
+                driverId,
+                status: savedRide.getStatus(),
+                pickup: {
+                    latitude: acceptedRequest.getPickup().getLatitude(),
+                    longitude: acceptedRequest.getPickup().getLongitude(),
+                    address: acceptedRequest.getPickup().getAddress(),
+                },
+                drop: {
+                    latitude: acceptedRequest.getDrop().getLatitude(),
+                    longitude: acceptedRequest.getDrop().getLongitude(),
+                    address: acceptedRequest.getDrop().getAddress(),
+                },
+                rideType: acceptedRequest.getRideType(),
+                fare: acceptedRequest.getFare(),
+                currency: savedRide.getCurrency(),
+                pickupTime: acceptedRequest.getPickupTime().toISOString(),
+                timeline: {
+                    requestedAt: savedRide.getTimeline().getRequestedAt().toISOString(),
+                    acceptedAt: savedRide.getTimeline().getAcceptedAt().toISOString(),
                 },
             };
             const rideMatchedEvent = {

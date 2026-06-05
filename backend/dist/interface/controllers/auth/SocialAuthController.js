@@ -20,6 +20,7 @@ const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const CookieHelper_1 = require("../../../shared/utils/CookieHelper");
 const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 let SocialAuthController = class SocialAuthController {
     constructor(getGoogleAuthUrlUseCase, googleLoginUseCase) {
         this.getGoogleAuthUrlUseCase = getGoogleAuthUrlUseCase;
@@ -30,21 +31,21 @@ let SocialAuthController = class SocialAuthController {
             const result = await this.getGoogleAuthUrlUseCase.execute();
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "google_auth_url");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const data = result.getValue();
             const response = {
                 success: true,
-                message: "Google auth URL generated successfully",
+                message: AuthConstants_1.AuthMessages.GOOGLE_AUTH_URL_SUCCESS,
                 data,
             };
             res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             Logger_1.Logger.info("Google auth URL generated successfully");
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "google_auth_url");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

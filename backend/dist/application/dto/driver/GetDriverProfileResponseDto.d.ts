@@ -48,10 +48,26 @@ export interface DriverProfileData {
     eligibleBodyTypes: string[];
     meta: ProfileMeta;
 }
-export declare class GetDriverProfileResponseDto {
-    readonly data: DriverProfileData;
-    readonly success: boolean;
-    readonly message: string;
-    constructor(data: DriverProfileData);
+export interface GetDriverProfileResponseDto {
+    driverId: string;
+    userId: string;
+    name: string;
+    profileImageUrl: string;
+    email: string;
+    mobile: string;
+    dob: Date;
+    gender: string;
+    address: string;
+    role: string;
+    status: string;
+    isVerified: boolean;
+    authProvider: string;
+    createdAt: Date;
+    updatedAt: Date;
+    license: LicenseInfo;
+    kyc: KycInfo;
+    eligibleGearTypes: string[];
+    eligibleBodyTypes: string[];
+    meta: ProfileMeta;
 }
 //# sourceMappingURL=GetDriverProfileResponseDto.d.ts.map

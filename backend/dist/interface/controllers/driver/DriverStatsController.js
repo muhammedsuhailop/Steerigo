@@ -34,15 +34,16 @@ let DriverStatsController = class DriverStatsController {
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+            const response = {
                 success: true,
                 message: DriverMessages_1.DRIVER_MESSAGES.STATS_FETCHED,
                 data: result.getValue(),
-            });
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("DriverStatsController.getMyStats error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "driver_get_stats");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

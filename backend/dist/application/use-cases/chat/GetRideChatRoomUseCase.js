@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ChatErrors_1 = require("../../../domain/errors/ChatErrors");
-const ChatMessages_1 = require("../../../shared/constants/ChatMessages");
 let GetRideChatRoomUseCase = class GetRideChatRoomUseCase {
     constructor(driverRepository, rideRepository, chatRoomRepository) {
         this.driverRepository = driverRepository;
@@ -56,22 +55,18 @@ let GetRideChatRoomUseCase = class GetRideChatRoomUseCase {
                 return Result_1.Result.failure(ChatErrors_1.ChatErrors.chatRoomNotFoundByRide(rideId));
             }
             const response = {
-                success: true,
-                message: ChatMessages_1.CHAT_MESSAGES.CHAT_ROOM.RIDE_ROOM_FETCHED,
-                data: {
-                    chatRoomId: chatRoom.getId(),
-                    rideId,
-                    type: chatRoom.getType(),
-                    status: chatRoom.getStatus(),
-                    participants: chatRoom.getParticipants().map((participant) => ({
-                        userId: participant.userId,
-                        role: participant.role,
-                    })),
-                    lastMessageId: chatRoom.getLastMessageId(),
-                    lastMessageAt: chatRoom.getLastMessageAt()?.toISOString(),
-                    createdAt: chatRoom.getCreatedAt().toISOString(),
-                    updatedAt: chatRoom.getUpdatedAt().toISOString(),
-                },
+                chatRoomId: chatRoom.getId(),
+                rideId,
+                type: chatRoom.getType(),
+                status: chatRoom.getStatus(),
+                participants: chatRoom.getParticipants().map((participant) => ({
+                    userId: participant.userId,
+                    role: participant.role,
+                })),
+                lastMessageId: chatRoom.getLastMessageId(),
+                lastMessageAt: chatRoom.getLastMessageAt()?.toISOString(),
+                createdAt: chatRoom.getCreatedAt().toISOString(),
+                updatedAt: chatRoom.getUpdatedAt().toISOString(),
             };
             return Result_1.Result.success(response);
         }

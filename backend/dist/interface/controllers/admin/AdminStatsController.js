@@ -36,7 +36,7 @@ let AdminStatsController = class AdminStatsController {
             const dto = GetUserStatsRequestDto_1.GetUserStatsRequestDto.fromRequest(req.query);
             const result = await this.getAdminUserStatsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "get_user_stats");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -52,7 +52,7 @@ let AdminStatsController = class AdminStatsController {
             Logger_1.Logger.error("AdminStatsController.getUserStats error", {
                 error,
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_stats");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -64,7 +64,7 @@ let AdminStatsController = class AdminStatsController {
             const dto = GetAdminRideStatsRequestDto_1.GetAdminRideStatsRequestDto.fromRequest(req.query);
             const result = await this.getAdminRideStatsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "get_ride_stats");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -78,7 +78,7 @@ let AdminStatsController = class AdminStatsController {
         }
         catch (error) {
             Logger_1.Logger.error("AdminStatsController.getRideStats error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_ride_stats");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -90,7 +90,7 @@ let AdminStatsController = class AdminStatsController {
             const dto = GetAdminDriverStatsRequestDto_1.GetAdminDriverStatsRequestDto.fromRequest(req.query);
             const result = await this.getAdminDriverStatsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "get_driver_stats");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -103,7 +103,7 @@ let AdminStatsController = class AdminStatsController {
         }
         catch (error) {
             Logger_1.Logger.error("AdminStatsController.getDriverStats error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_stats");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

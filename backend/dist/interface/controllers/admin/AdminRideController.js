@@ -21,6 +21,8 @@ const DITypes_1 = require("../../../shared/constants/DITypes");
 const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 const GetAdminRatingsDto_1 = require("../../../application/dto/admin/GetAdminRatingsDto");
 const GetAdminRideByIdDto_1 = require("../../../application/dto/admin/GetAdminRideByIdDto");
+const RideMessages_1 = require("../../../shared/constants/RideMessages");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let AdminRideController = class AdminRideController {
     constructor(getAdminRidesUseCase, getAdminRatingsUseCase, getAdminRideByIdUseCase) {
         this.getAdminRidesUseCase = getAdminRidesUseCase;
@@ -35,11 +37,15 @@ let AdminRideController = class AdminRideController {
             if (result.isFailure()) {
                 const error = result.getError();
                 Logger_1.Logger.warn("Admin get rides failed", { error: error.message });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_rides");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("Admin get rides controller error", {
@@ -57,17 +63,21 @@ let AdminRideController = class AdminRideController {
             if (result.isFailure()) {
                 const error = result.getError();
                 Logger_1.Logger.warn("Admin get ratings failed", { error: error.message });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_ratings");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: AdminMessages_1.ADMIN_MESSAGES.RATINGS.FETCHED,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("Admin get ratings controller error", {
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_ratings");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -83,18 +93,22 @@ let AdminRideController = class AdminRideController {
                     rideId,
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_ride_by_id");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("Admin get ride by ID controller error", {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_ride_by_id");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

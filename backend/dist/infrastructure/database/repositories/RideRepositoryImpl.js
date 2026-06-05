@@ -513,6 +513,65 @@ let RideRepositoryImpl = class RideRepositoryImpl {
             throw error;
         }
     }
+    async getRideTimeSeriesData(params) {
+        const { driverId, riderId, filters } = params;
+        const query = {};
+        if (driverId) {
+            query.driverId = (0, idHelper_1.toObjectId)(driverId);
+        }
+        if (riderId) {
+            query.riderId = (0, idHelper_1.toObjectId)(riderId);
+        }
+        if (filters.fromDate ?? filters.toDate) {
+            query.createdAt = {};
+            if (filters.fromDate)
+                query.createdAt.$gte = filters.fromDate;
+            if (filters.toDate)
+                query.createdAt.$lte = filters.toDate;
+        }
+        const result = await RideModel_1.RideModel.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+                    },
+                    totalRides: { $sum: 1 },
+                    completedRides: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", RideStatus_1.RideStatus.COMPLETED] }, 1, 0],
+                        },
+                    },
+                    cancelledRides: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", RideStatus_1.RideStatus.CANCELLED] }, 1, 0],
+                        },
+                    },
+                    revenue: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", RideStatus_1.RideStatus.COMPLETED] },
+                                "$fareBreakdown.totalFare",
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+            { $sort: { _id: 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalRides: 1,
+                    completedRides: 1,
+                    cancelledRides: 1,
+                    revenue: 1,
+                },
+            },
+        ]);
+        return result;
+    }
 };
 exports.RideRepositoryImpl = RideRepositoryImpl;
 exports.RideRepositoryImpl = RideRepositoryImpl = __decorate([

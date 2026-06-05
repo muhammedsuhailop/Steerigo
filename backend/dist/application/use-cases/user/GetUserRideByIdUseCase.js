@@ -17,7 +17,6 @@ const inversify_1 = require("inversify");
 const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 const RideErrors_1 = require("../../../domain/errors/RideErrors");
 const ReviewType_1 = require("../../../domain/value-objects/ReviewType");
 let GetUserRideByIdUseCase = class GetUserRideByIdUseCase {
@@ -66,12 +65,8 @@ let GetUserRideByIdUseCase = class GetUserRideByIdUseCase {
             const rideDetails = this.mapRideToDetails(ride, riderToDriverRating);
             const driverDetails = this.mapDriverToDetails(driver, driverUser);
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-                data: {
-                    ride: rideDetails,
-                    driver: driverDetails,
-                },
+                ride: rideDetails,
+                driver: driverDetails,
             };
             Logger_1.Logger.info("User ride fetched successfully", {
                 userId: dto.getUserId(),

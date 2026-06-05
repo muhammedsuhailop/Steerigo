@@ -20,10 +20,7 @@ export interface AdminRatingsPagination {
     totalPages: number;
 }
 export interface GetAdminRatingsResponseDto {
-    success: boolean;
-    data: {
-        ratings: AdminRatingItem[];
-        pagination: AdminRatingsPagination;
-    };
+    ratings: AdminRatingItem[];
+    pagination: AdminRatingsPagination;
 }
 //# sourceMappingURL=GetAdminRatingsResponseDto.d.ts.map

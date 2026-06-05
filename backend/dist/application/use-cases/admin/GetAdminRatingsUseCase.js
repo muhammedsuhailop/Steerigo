@@ -66,15 +66,12 @@ let GetAdminRatingsUseCase = class GetAdminRatingsUseCase {
                 totalPages: result.totalPages,
             });
             return Result_1.Result.success({
-                success: true,
-                data: {
-                    ratings,
-                    pagination: {
-                        total: result.total,
-                        page: result.page,
-                        limit: result.limit,
-                        totalPages: result.totalPages,
-                    },
+                ratings,
+                pagination: {
+                    total: result.total,
+                    page: result.page,
+                    limit: result.limit,
+                    totalPages: result.totalPages,
                 },
             });
         }

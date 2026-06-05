@@ -23,7 +23,6 @@ const DITypes_1 = require("../../../shared/constants/DITypes");
 const PayoutErrors_1 = require("../../../domain/errors/PayoutErrors");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
 const mongoose_1 = require("mongoose");
-const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
 const MINIMUM_PAYOUT_AMOUNT = 100;
 const PAYOUT_CURRENCY = "INR";
 let RequestPayoutUseCase = class RequestPayoutUseCase {
@@ -73,17 +72,13 @@ let RequestPayoutUseCase = class RequestPayoutUseCase {
                 amount: dto.getAmount(),
             });
             return Result_1.Result.success({
-                success: true,
-                message: DriverMessages_1.DRIVER_MESSAGES.PAYOUT_REQUEST_SUBMITTED,
-                data: {
-                    payoutId: savedPayout.getId(),
-                    driverId,
-                    amount: savedPayout.getAmount().getAmount(),
-                    currency: savedPayout.getCurrency(),
-                    method: savedPayout.getMethod(),
-                    status: savedPayout.getStatus(),
-                    createdAt: savedPayout.getCreatedAt().toISOString(),
-                },
+                payoutId: savedPayout.getId(),
+                driverId,
+                amount: savedPayout.getAmount().getAmount(),
+                currency: savedPayout.getCurrency(),
+                method: savedPayout.getMethod(),
+                status: savedPayout.getStatus(),
+                createdAt: savedPayout.getCreatedAt().toISOString(),
             });
         }
         catch (error) {

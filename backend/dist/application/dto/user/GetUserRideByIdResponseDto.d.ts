@@ -69,11 +69,7 @@ export interface RideDetails {
     updatedAt: string;
 }
 export interface GetUserRideByIdResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        ride: RideDetails;
-        driver: DriverDetails;
-    };
+    ride: RideDetails;
+    driver: DriverDetails;
 }
 //# sourceMappingURL=GetUserRideByIdResponseDto.d.ts.map

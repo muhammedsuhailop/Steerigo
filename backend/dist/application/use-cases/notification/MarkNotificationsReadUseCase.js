@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const NotificationError_1 = require("../../../domain/errors/NotificationError");
-const NotificationMessages_1 = require("../../../shared/constants/NotificationMessages");
 let MarkNotificationsReadUseCase = class MarkNotificationsReadUseCase {
     constructor(notificationRepository) {
         this.notificationRepository = notificationRepository;
@@ -54,9 +53,7 @@ let MarkNotificationsReadUseCase = class MarkNotificationsReadUseCase {
                 });
             }
             return Result_1.Result.success({
-                success: true,
-                message: NotificationMessages_1.NOTIFICATION_MESSAGES.MARKED_AS_READ,
-                data: { updatedCount },
+                updatedCount,
             });
         }
         catch (error) {

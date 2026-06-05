@@ -76,7 +76,7 @@ let DriverSearchController = class DriverSearchController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "FindNearbyDrivers");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Find nearby drivers request failed", {
                     userId,
@@ -89,7 +89,7 @@ let DriverSearchController = class DriverSearchController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "FindNearbyDrivers");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

@@ -20,6 +20,7 @@ const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService
 const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 const CreateRideChatRoomDto_1 = require("../../../application/dto/chat/CreateRideChatRoomDto");
 const GetRideChatRoomDto_1 = require("../../../application/dto/chat/GetRideChatRoomDto");
+const ChatMessages_1 = require("../../../shared/constants/ChatMessages");
 let ChatRoomController = class ChatRoomController {
     constructor(createRideChatRoomUseCase, getRideChatRoomUseCase) {
         this.createRideChatRoomUseCase = createRideChatRoomUseCase;
@@ -39,11 +40,16 @@ let ChatRoomController = class ChatRoomController {
             const result = await this.createRideChatRoomUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "create_ride_chat_room");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            const response = {
+                success: true,
+                message: ChatMessages_1.CHAT_MESSAGES.CHAT_ROOM.CREATED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Create ride chat room controller error", {
@@ -51,7 +57,7 @@ let ChatRoomController = class ChatRoomController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "create_ride_chat_room");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -63,11 +69,16 @@ let ChatRoomController = class ChatRoomController {
             const result = await this.getRideChatRoomUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_ride_chat_room");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            const response = {
+                success: true,
+                message: ChatMessages_1.CHAT_MESSAGES.CHAT_ROOM.RIDE_ROOM_FETCHED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get ride chat room controller error", {
@@ -75,7 +86,7 @@ let ChatRoomController = class ChatRoomController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_ride_chat_room");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

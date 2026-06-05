@@ -19,7 +19,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const PayoutErrors_1 = require("../../../domain/errors/PayoutErrors");
-const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let RejectPayoutUseCase = class RejectPayoutUseCase {
     constructor(payoutRepository) {
         this.payoutRepository = payoutRepository;
@@ -43,14 +42,10 @@ let RejectPayoutUseCase = class RejectPayoutUseCase {
                 reason: dto.getReason(),
             });
             return Result_1.Result.success({
-                success: true,
-                message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.REJECTED,
-                data: {
-                    payoutId: savedPayout.getId(),
-                    driverId: savedPayout.getDriverId(),
-                    status: savedPayout.getStatus(),
-                    failureReason: dto.getReason(),
-                },
+                payoutId: savedPayout.getId(),
+                driverId: savedPayout.getDriverId(),
+                status: savedPayout.getStatus(),
+                failureReason: dto.getReason(),
             });
         }
         catch (error) {

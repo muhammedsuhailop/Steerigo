@@ -23,7 +23,6 @@ const MessageStatus_1 = require("../../../domain/entities/MessageStatus");
 const MessageType_1 = require("../../../domain/value-objects/MessageType");
 const ChatRoomStatus_1 = require("../../../domain/value-objects/ChatRoomStatus");
 const UserChat_1 = require("../../../domain/entities/UserChat");
-const ChatMessages_1 = require("../../../shared/constants/ChatMessages");
 const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
 let SendChatMessageUseCase = class SendChatMessageUseCase {
     constructor(chatRoomRepository, messageRepository, userChatRepository, driverRepository, messageStatusRepository, idGenerator, chatEventBus) {
@@ -147,17 +146,13 @@ let SendChatMessageUseCase = class SendChatMessageUseCase {
             };
             await this.chatEventBus.publish(event);
             const response = {
-                success: true,
-                message: ChatMessages_1.CHAT_MESSAGES.MESSAGES.SEND_SUCCESS,
-                data: {
-                    id: savedMessage.getId(),
-                    chatRoomId: savedMessage.getChatRoomId(),
-                    senderId: savedMessage.getSenderId(),
-                    content: savedMessage.getContent(),
-                    type: savedMessage.getType(),
-                    createdAt: savedMessage.getCreatedAt().toISOString(),
-                    updatedAt: savedMessage.getUpdatedAt().toISOString(),
-                },
+                id: savedMessage.getId(),
+                chatRoomId: savedMessage.getChatRoomId(),
+                senderId: savedMessage.getSenderId(),
+                content: savedMessage.getContent(),
+                type: savedMessage.getType(),
+                createdAt: savedMessage.getCreatedAt().toISOString(),
+                updatedAt: savedMessage.getUpdatedAt().toISOString(),
             };
             return Result_1.Result.success(response);
         }

@@ -21,6 +21,7 @@ const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let AdminPayoutController = class AdminPayoutController {
     constructor(approvePayoutUseCase, rejectPayoutUseCase, getAdminPayoutsUseCase) {
         this.approvePayoutUseCase = approvePayoutUseCase;
@@ -37,15 +38,19 @@ let AdminPayoutController = class AdminPayoutController {
             });
             const result = await this.approvePayoutUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "approve_payout");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.APPROVED,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("AdminPayoutController.approvePayout error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "approve_payout");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -61,15 +66,19 @@ let AdminPayoutController = class AdminPayoutController {
             });
             const result = await this.rejectPayoutUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "reject_payout");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.REJECTED,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("AdminPayoutController.rejectPayout error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "reject_payout");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -86,15 +95,19 @@ let AdminPayoutController = class AdminPayoutController {
             });
             const result = await this.getAdminPayoutsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "get_admin_payouts");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                success: true,
+                message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.RETRIVED,
+                data: result.getValue(),
+            });
         }
         catch (error) {
             Logger_1.Logger.error("AdminPayoutController.getPayouts error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_admin_payouts");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

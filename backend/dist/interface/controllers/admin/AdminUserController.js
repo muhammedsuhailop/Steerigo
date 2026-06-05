@@ -33,7 +33,7 @@ let AdminUserController = class AdminUserController {
             const result = await this.getUsersUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_users");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -45,7 +45,7 @@ let AdminUserController = class AdminUserController {
             res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_users");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -55,7 +55,7 @@ let AdminUserController = class AdminUserController {
             const result = await this.updateUserStatusUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_user_status");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -71,7 +71,7 @@ let AdminUserController = class AdminUserController {
             res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_user_status");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -82,7 +82,7 @@ let AdminUserController = class AdminUserController {
             const result = await this.getUserProfileUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_profile");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -95,7 +95,7 @@ let AdminUserController = class AdminUserController {
             res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_profile");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

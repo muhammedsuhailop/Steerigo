@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 const RideErrors_1 = require("../../../domain/errors/RideErrors");
 const ReviewType_1 = require("../../../domain/value-objects/ReviewType");
 let GetDriverRideByIdUseCase = class GetDriverRideByIdUseCase {
@@ -68,12 +67,8 @@ let GetDriverRideByIdUseCase = class GetDriverRideByIdUseCase {
             const rideDetails = this.mapRideToDetails(ride, riderToDriverRating);
             const riderDetails = this.mapRiderToDetails(rider);
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-                data: {
-                    ride: rideDetails,
-                    rider: riderDetails,
-                },
+                ride: rideDetails,
+                rider: riderDetails,
             };
             Logger_1.Logger.info("Driver ride fetched successfully", {
                 userId: dto.getUserId(),

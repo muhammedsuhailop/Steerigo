@@ -77,17 +77,13 @@ let ApprovePayoutUseCase = class ApprovePayoutUseCase {
                     walletBalanceAfter: wallet.getAvailableBalance().getAmount(),
                 });
                 return Result_1.Result.success({
-                    success: true,
-                    message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.APPROVED,
-                    data: {
-                        payoutId: savedPayout.getId(),
-                        driverId,
-                        amount: payoutAmount.getAmount(),
-                        currency: savedPayout.getCurrency(),
-                        status: savedPayout.getStatus(),
-                        processedAt: processedAt.toISOString(),
-                        driverWalletBalanceAfter: wallet.getAvailableBalance().getAmount(),
-                    },
+                    payoutId: savedPayout.getId(),
+                    driverId,
+                    amount: payoutAmount.getAmount(),
+                    currency: savedPayout.getCurrency(),
+                    status: savedPayout.getStatus(),
+                    processedAt: processedAt.toISOString(),
+                    driverWalletBalanceAfter: wallet.getAvailableBalance().getAmount(),
                 });
             }
             catch (innerError) {

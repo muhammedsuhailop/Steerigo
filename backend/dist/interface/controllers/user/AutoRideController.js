@@ -76,7 +76,7 @@ let AutoRideController = class AutoRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "AutoSearchAndSendRideRequest");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Auto search and send ride request failed", {
                     userId,
@@ -89,7 +89,7 @@ let AutoRideController = class AutoRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "AutoSearchAndSendRideRequest");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -118,7 +118,7 @@ let AutoRideController = class AutoRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "CancelRideRequests");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Cancel ride requests failed", {
                     userId,
@@ -132,7 +132,7 @@ let AutoRideController = class AutoRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "CancelRideRequests");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -163,7 +163,7 @@ let AutoRideController = class AutoRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "ScheduleFutureRide");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Schedule future ride failed", {
                     userId,
@@ -176,7 +176,7 @@ let AutoRideController = class AutoRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "ScheduleFutureRide");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -208,7 +208,7 @@ let AutoRideController = class AutoRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "CancelFutureRide");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Cancel future ride failed", {
                     userId,
@@ -221,7 +221,7 @@ let AutoRideController = class AutoRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "CancelFutureRide");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

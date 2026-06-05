@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let GetDriverRidesUseCase = class GetDriverRidesUseCase {
     constructor(driverRepository, rideRepository, userRepository) {
         this.driverRepository = driverRepository;
@@ -106,16 +105,12 @@ let GetDriverRidesUseCase = class GetDriverRidesUseCase {
                 };
             });
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
-                data: {
-                    rides: ridesData,
-                    pagination: {
-                        total: paginatedResult.total,
-                        page: paginatedResult.page,
-                        limit: paginatedResult.limit,
-                        totalPages: paginatedResult.totalPages,
-                    },
+                rides: ridesData,
+                pagination: {
+                    total: paginatedResult.total,
+                    page: paginatedResult.page,
+                    limit: paginatedResult.limit,
+                    totalPages: paginatedResult.totalPages,
                 },
             };
             return Result_1.Result.success(response);

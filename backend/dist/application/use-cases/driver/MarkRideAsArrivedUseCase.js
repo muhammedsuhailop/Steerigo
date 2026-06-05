@@ -19,7 +19,6 @@ const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const RideErrors_1 = require("../../../domain/errors/RideErrors");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let MarkRideAsArrivedUseCase = class MarkRideAsArrivedUseCase {
     constructor(driverRepository, rideRepository, eventBus) {
         this.driverRepository = driverRepository;
@@ -73,25 +72,21 @@ let MarkRideAsArrivedUseCase = class MarkRideAsArrivedUseCase {
             };
             await this.eventBus.publish(rideArrivedEvent);
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.DRIVER_ARRIVED_AT_PICKUP,
-                data: {
-                    rideId: updatedRide.getRideId(),
-                    status: updatedRide.getStatus(),
-                    arrivedAt: updatedRide.getArrivedAt().toISOString(),
-                    pickup: {
-                        latitude: updatedRide.getPickup().getLatitude(),
-                        longitude: updatedRide.getPickup().getLongitude(),
-                        address: updatedRide.getPickup().getAddress(),
-                    },
-                    drop: {
-                        latitude: updatedRide.getDrop().getLatitude(),
-                        longitude: updatedRide.getDrop().getLongitude(),
-                        address: updatedRide.getDrop().getAddress(),
-                    },
-                    riderId: updatedRide.getRiderId(),
-                    driverId: updatedRide.getDriverId(),
+                rideId: updatedRide.getRideId(),
+                status: updatedRide.getStatus(),
+                arrivedAt: updatedRide.getArrivedAt().toISOString(),
+                pickup: {
+                    latitude: updatedRide.getPickup().getLatitude(),
+                    longitude: updatedRide.getPickup().getLongitude(),
+                    address: updatedRide.getPickup().getAddress(),
                 },
+                drop: {
+                    latitude: updatedRide.getDrop().getLatitude(),
+                    longitude: updatedRide.getDrop().getLongitude(),
+                    address: updatedRide.getDrop().getAddress(),
+                },
+                riderId: updatedRide.getRiderId(),
+                driverId: updatedRide.getDriverId(),
             };
             return Result_1.Result.success(response);
         }

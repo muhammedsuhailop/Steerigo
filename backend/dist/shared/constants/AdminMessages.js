@@ -26,6 +26,9 @@ exports.ADMIN_MESSAGES = {
         RIDE_FETCHED: "Ride stats fetched successfully",
         DRIVER_FETCHED: "Drivers stats fetched successfully",
     },
+    RATINGS: {
+        FETCHED: "Ratings fetched successfully",
+    },
 };
 exports.ADMIN_ERROR_MESSAGES = {
     USER: {

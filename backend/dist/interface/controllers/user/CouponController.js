@@ -43,7 +43,7 @@ let CouponController = class CouponController {
             const result = await this.getUserCouponsUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_coupons");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -59,7 +59,7 @@ let CouponController = class CouponController {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_coupons");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -81,7 +81,7 @@ let CouponController = class CouponController {
                     rideId,
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "apply_coupon");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -105,7 +105,7 @@ let CouponController = class CouponController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "apply_coupon");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -128,7 +128,7 @@ let CouponController = class CouponController {
                     rideId,
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "remove_coupon");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -150,7 +150,7 @@ let CouponController = class CouponController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "remove_coupon");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

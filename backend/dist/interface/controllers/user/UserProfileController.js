@@ -40,11 +40,12 @@ let UserProfileController = class UserProfileController {
             const dto = GetUserProfileDto_1.GetUserProfileDto.fromRequest(userId);
             const result = await this.getUserProfileUseCase.execute(dto);
             if (result.isSuccessful()) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                const response = {
                     success: true,
                     message: UserMessages_1.USER_MESSAGES.PROFILE.PROFILE_FETCHED,
                     data: result.getValue(),
-                });
+                };
+                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             }
             else {
                 res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
@@ -69,14 +70,12 @@ let UserProfileController = class UserProfileController {
             const result = await this.updateUserProfileUseCase.execute(dto);
             if (result.isSuccessful()) {
                 const responseData = result.getValue();
-                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                const response = {
                     success: true,
                     message: UserMessages_1.USER_MESSAGES.PROFILE.PROFILE_UPDATED,
                     data: responseData.user,
-                    updateSummary: {
-                        updatedFields: responseData.updatedFields,
-                    },
-                });
+                };
+                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             }
             else {
                 res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
@@ -100,7 +99,7 @@ let UserProfileController = class UserProfileController {
             const result = await this.registerUserAsDriverUseCase.execute(dto);
             if (result.isSuccessful()) {
                 const responseData = result.getValue();
-                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+                const response = {
                     success: true,
                     message: responseData.message,
                     data: {
@@ -113,7 +112,8 @@ let UserProfileController = class UserProfileController {
                         isVerified: responseData.isVerified,
                         updatedAt: responseData.updatedAt,
                     },
-                });
+                };
+                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             }
             else {
                 res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
@@ -144,19 +144,20 @@ let UserProfileController = class UserProfileController {
             const dto = GetUserStatsRequestDto_1.GetUserStatsRequestDto.fromRequest(userId, req.query);
             const result = await this.getUserStatsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "user_get_stats");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+            const response = {
                 success: true,
                 message: UserMessages_1.USER_MESSAGES.PROFILE.STATS_FETCHED,
                 data: result.getValue(),
-            });
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("UserProfileController.getMyStats error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "user_get_stats");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ChatErrors_1 = require("../../../domain/errors/ChatErrors");
-const ChatMessages_1 = require("../../../shared/constants/ChatMessages");
 let EditChatMessageUseCase = class EditChatMessageUseCase {
     constructor(messageRepository, chatEventBus) {
         this.messageRepository = messageRepository;
@@ -56,18 +55,14 @@ let EditChatMessageUseCase = class EditChatMessageUseCase {
             };
             await this.chatEventBus.publish(event);
             const response = {
-                success: true,
-                message: ChatMessages_1.CHAT_MESSAGES.MESSAGES.EDITED,
-                data: {
-                    id: savedMessage.getId(),
-                    chatRoomId: savedMessage.getChatRoomId(),
-                    senderId: savedMessage.getSenderId(),
-                    content: savedMessage.getContent(),
-                    type: savedMessage.getType(),
-                    createdAt: savedMessage.getCreatedAt().toISOString(),
-                    updatedAt: savedMessage.getUpdatedAt().toISOString(),
-                    editedAt: savedMessage.getEditedAt()?.toISOString(),
-                },
+                id: savedMessage.getId(),
+                chatRoomId: savedMessage.getChatRoomId(),
+                senderId: savedMessage.getSenderId(),
+                content: savedMessage.getContent(),
+                type: savedMessage.getType(),
+                createdAt: savedMessage.getCreatedAt().toISOString(),
+                updatedAt: savedMessage.getUpdatedAt().toISOString(),
+                editedAt: savedMessage.getEditedAt()?.toISOString(),
             };
             return Result_1.Result.success(response);
         }

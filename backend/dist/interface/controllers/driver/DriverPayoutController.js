@@ -20,6 +20,7 @@ const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
 let DriverPayoutController = class DriverPayoutController {
     constructor(requestPayoutUseCase, getDriverPayoutsUseCase) {
         this.requestPayoutUseCase = requestPayoutUseCase;
@@ -41,7 +42,12 @@ let DriverPayoutController = class DriverPayoutController {
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.CREATED).json(result.getValue());
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.PAYOUT_REQUEST_SUBMITTED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.CREATED).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("DriverPayoutController.requestPayout error", { error });
@@ -59,7 +65,12 @@ let DriverPayoutController = class DriverPayoutController {
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.PAYOUT_RETRIVED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("DriverPayoutController.getMyPayouts error", { error });

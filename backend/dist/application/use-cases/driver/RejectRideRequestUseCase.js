@@ -19,7 +19,6 @@ const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const RideRequestErrors_1 = require("../../../domain/errors/RideRequestErrors");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 const RedisLockKeys_1 = require("../../../shared/constants/RedisLockKeys");
 let RejectRideRequestUseCase = class RejectRideRequestUseCase {
     constructor(driverRepository, rideRequestRepository, rideRequestGroupRepository, rideSearchDispatchService, lockService) {
@@ -83,14 +82,10 @@ let RejectRideRequestUseCase = class RejectRideRequestUseCase {
                 reason: dto.getReason(),
             });
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDE_REQUEST_REJECTED,
-                data: {
-                    requestId: rideRequest.getId(),
-                    status: rideRequest.getStatus(),
-                    rejectedAt: new Date().toISOString(),
-                    reason: dto.getReason(),
-                },
+                requestId: rideRequest.getId(),
+                status: rideRequest.getStatus(),
+                rejectedAt: new Date().toISOString(),
+                reason: dto.getReason(),
             };
             return Result_1.Result.success(response);
         }

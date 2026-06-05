@@ -15,13 +15,9 @@ export interface PayoutItemDto {
     updatedAt: string;
 }
 export interface GetPayoutsResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        payouts: PayoutItemDto[];
-        total: number;
-        page: number;
-        limit: number;
-    };
+    payouts: PayoutItemDto[];
+    total: number;
+    page: number;
+    limit: number;
 }
 //# sourceMappingURL=GetPayoutsResponseDto.d.ts.map

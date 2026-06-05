@@ -36,6 +36,13 @@ export interface IRideStatsResult {
     cancelled: number;
     totalAmount: number;
 }
+export interface IDailyRideStatResult {
+    date: string;
+    totalRides: number;
+    completedRides: number;
+    cancelledRides: number;
+    revenue: number;
+}
 export interface IRideRepository extends IReadOnlyRepository<Ride, string>, IWriteOnlyRepository<Ride, string> {
     findByRideId(rideId: string): Promise<Ride | null>;
     findActiveRideByDriverId(driverId: string): Promise<Ride | null>;
@@ -55,5 +62,10 @@ export interface IRideRepository extends IReadOnlyRepository<Ride, string>, IWri
     countByDriverStats(driverId: string, filters: IRideFilters): Promise<IDriverRideStatsResult>;
     countByRiderStats(riderId: string, filters: IRideFilters): Promise<IRiderRideStatsResult>;
     hasTimeSlotConflict(driverId: string, pickupTime: Date, timeRequiredHours: number, excludeStatuses?: RideStatus[]): Promise<boolean>;
+    getRideTimeSeriesData(params: {
+        driverId?: string;
+        riderId?: string;
+        filters: IRideFilters;
+    }): Promise<IDailyRideStatResult[]>;
 }
 //# sourceMappingURL=IRideRepository.d.ts.map

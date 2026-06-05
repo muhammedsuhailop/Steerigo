@@ -39,6 +39,7 @@ export declare const AuthMessages: {
     readonly PASSWORD_RESET_SUCCESS: "Password reset successfully";
     readonly PASSWORD_UPDATE_SUCCESS: "Password updated successfully";
     readonly GOOGLE_AUTH_SUCCESS: "Google authentication successful";
+    readonly GOOGLE_AUTH_URL_SUCCESS: "Google auth URL generated successfully";
     readonly USER_PROFILE_SUCCESS: "User profile fetched  successfully";
     readonly TOKENS_REFRESHED: "Tokens refreshed successfully";
     readonly USER_RETRIEVED: "User fetched successfully";

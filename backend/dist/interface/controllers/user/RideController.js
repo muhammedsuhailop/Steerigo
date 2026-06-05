@@ -20,7 +20,6 @@ const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
 const GetUserRideByIdDto_1 = require("../../../application/dto/user/GetUserRideByIdDto");
-const UserMessages_1 = require("../../../shared/constants/UserMessages");
 const GetUserRidesDto_1 = require("../../../application/dto/user/GetUserRidesDto");
 const CancelRideDto_1 = require("../../../application/dto/user/CancelRideDto");
 const RateDriverDto_1 = require("../../../application/dto/user/RateDriverDto");
@@ -40,13 +39,6 @@ let RideController = class RideController {
     async sendRideRequest(req, res) {
         try {
             const riderId = this.getUserId(req);
-            if (!riderId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: "Unauthorized: User ID not found in request",
-                });
-                return;
-            }
             const dto = SendRideRequestDto_1.SendRideRequestDto.fromRequest(riderId, req.body);
             Logger_1.Logger.info("Send ride request received", {
                 riderId,
@@ -73,7 +65,7 @@ let RideController = class RideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "SendRideRequest");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Send ride request failed", {
                     riderId,
@@ -87,28 +79,14 @@ let RideController = class RideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "SendRideRequest");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
     async getUserRideById(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: UserMessages_1.USER_MESSAGES.RIDE.UNAUTHORIZED,
-                });
-                return;
-            }
             const rideId = req.params.rideId;
-            if (!rideId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
-                    success: false,
-                    message: UserMessages_1.USER_MESSAGES.RIDE.RIDE_ID_REQUIRED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Get user ride by ID received", {
                 userId,
                 rideId,
@@ -122,18 +100,23 @@ let RideController = class RideController {
                     rideId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_ride_by_id");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("User ride fetched successfully", {
                 userId,
-                rideId: responseData.data.ride.rideId,
-                status: responseData.data.ride.status,
-                driverId: responseData.data.driver.driverId,
+                rideId: responseData.ride.rideId,
+                status: responseData.ride.status,
+                driverId: responseData.driver.driverId,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get user ride by ID controller error", {
@@ -141,20 +124,13 @@ let RideController = class RideController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_user_ride_by_id");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
     async getUserRides(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: UserMessages_1.USER_MESSAGES.RIDE.UNAUTHORIZED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Get user rides received", {
                 userId,
                 query: req.query,
@@ -166,24 +142,29 @@ let RideController = class RideController {
                     userId,
                     error: result.getError().message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "getuserrides");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("User rides fetched successfully", {
                 userId,
-                total: responseData.data.pagination.total,
-                page: responseData.data.pagination.page,
+                total: responseData.pagination.total,
+                page: responseData.pagination.page,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get user rides controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "getuserrides");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -205,7 +186,7 @@ let RideController = class RideController {
                     rideId,
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "cancel_ride");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }

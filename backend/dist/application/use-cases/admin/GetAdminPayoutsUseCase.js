@@ -17,7 +17,6 @@ const inversify_1 = require("inversify");
 const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
-const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let GetAdminPayoutsUseCase = class GetAdminPayoutsUseCase {
     constructor(payoutRepository) {
         this.payoutRepository = payoutRepository;
@@ -38,14 +37,10 @@ let GetAdminPayoutsUseCase = class GetAdminPayoutsUseCase {
                 sortOrder: dto.getSortOrder(),
             });
             return Result_1.Result.success({
-                success: true,
-                message: AdminMessages_1.ADMIN_MESSAGES.PAYOUT.RETRIVED,
-                data: {
-                    payouts: result.payouts.map(this.toPayoutItemDto),
-                    total: result.total,
-                    page: result.page,
-                    limit: result.limit,
-                },
+                payouts: result.payouts.map(this.toPayoutItemDto),
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         }
         catch (error) {

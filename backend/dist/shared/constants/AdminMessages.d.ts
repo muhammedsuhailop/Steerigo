@@ -23,6 +23,9 @@ export declare const ADMIN_MESSAGES: {
         readonly RIDE_FETCHED: "Ride stats fetched successfully";
         readonly DRIVER_FETCHED: "Drivers stats fetched successfully";
     };
+    readonly RATINGS: {
+        readonly FETCHED: "Ratings fetched successfully";
+    };
 };
 export declare const ADMIN_ERROR_MESSAGES: {
     USER: {

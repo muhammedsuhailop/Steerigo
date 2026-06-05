@@ -32,11 +32,14 @@ let GetAdminRideStatsUseCase = class GetAdminRideStatsUseCase {
                 fromDate.setDate(now.getDate() - 7); // default last 7 days
             }
             const dateFilters = { fromDate, toDate };
-            const [rideStats, ratingStats] = await Promise.all([
+            const [rideStats, ratingStats, timeSeriesData] = await Promise.all([
                 this.rideRepository.countRideStats({
                     filters: dateFilters,
                 }),
                 this.ratingRepository.getRatingStats({
+                    filters: dateFilters,
+                }),
+                this.rideRepository.getRideTimeSeriesData({
                     filters: dateFilters,
                 }),
             ]);
@@ -60,6 +63,15 @@ let GetAdminRideStatsUseCase = class GetAdminRideStatsUseCase {
                         threeToFour: ratingStats.distribution.threeToFour,
                         fourToFive: ratingStats.distribution.fourToFive,
                     },
+                },
+                graphData: {
+                    ridesOverTime: timeSeriesData.map((data) => ({
+                        date: data.date,
+                        totalRides: data.totalRides,
+                        completedRides: data.completedRides,
+                        cancelledRides: data.cancelledRides,
+                        revenue: data.revenue,
+                    })),
                 },
             });
         }

@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const RideErrors_1 = require("../../../domain/errors/RideErrors");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let GetAdminRideByIdUseCase = class GetAdminRideByIdUseCase {
     constructor(rideRepository, ratingRepository, userRepository, driverRepository) {
         this.rideRepository = rideRepository;
@@ -57,13 +56,9 @@ let GetAdminRideByIdUseCase = class GetAdminRideByIdUseCase {
             const driverDetails = this.buildDriverDetails(driver, driverUserAccount);
             Logger_1.Logger.info("Admin ride fetched successfully", { rideId });
             return Result_1.Result.success({
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-                data: {
-                    ride: rideDetails,
-                    rider: riderDetails,
-                    driver: driverDetails,
-                },
+                ride: rideDetails,
+                rider: riderDetails,
+                driver: driverDetails,
             });
         }
         catch (error) {

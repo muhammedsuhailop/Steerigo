@@ -30,7 +30,7 @@ let OtpController = class OtpController {
             const result = await this.resendOtpUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "resend_otp");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }

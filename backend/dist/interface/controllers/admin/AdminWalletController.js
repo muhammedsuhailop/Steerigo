@@ -19,6 +19,7 @@ const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
 const GetAdminWalletDto_1 = require("../../../application/dto/admin/GetAdminWalletDto");
+const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let AdminWalletController = class AdminWalletController {
     constructor(getAdminWalletUseCase) {
         this.getAdminWalletUseCase = getAdminWalletUseCase;
@@ -31,17 +32,22 @@ let AdminWalletController = class AdminWalletController {
             if (result.isFailure()) {
                 const error = result.getError();
                 Logger_1.Logger.warn("Admin get wallet failed", { error: error?.message });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_wallet");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            const response = {
+                success: true,
+                message: AdminMessages_1.ADMIN_MESSAGES.WALLET.FETCHED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("AdminWalletController.getWallet error", {
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "admin_get_wallet");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

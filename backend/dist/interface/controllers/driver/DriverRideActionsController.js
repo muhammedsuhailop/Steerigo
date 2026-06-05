@@ -22,6 +22,7 @@ const MarkRideAsArrivedDto_1 = require("../../../application/dto/driver/MarkRide
 const MarkRideAsStartedDto_1 = require("../../../application/dto/driver/MarkRideAsStartedDto");
 const MarkRideAsCompletedDto_1 = require("../../../application/dto/driver/MarkRideAsCompletedDto");
 const DriverCancelRideDto_1 = require("../../../application/dto/driver/DriverCancelRideDto");
+const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let DriverRideActionsController = class DriverRideActionsController {
     constructor(markRideAsArrivedUseCase, markRideAsStartedUseCase, markRideAsCompletedUseCase, driverCancelRideUseCase) {
         this.markRideAsArrivedUseCase = markRideAsArrivedUseCase;
@@ -52,17 +53,22 @@ let DriverRideActionsController = class DriverRideActionsController {
                     rideId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_arrived");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Ride marked as arrived successfully", {
                 userId,
-                rideId: responseData.data.rideId,
-                arrivedAt: responseData.data.arrivedAt,
+                rideId: responseData.rideId,
+                arrivedAt: responseData.arrivedAt,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.DRIVER_ARRIVED_AT_PICKUP,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Mark ride as arrived controller error", {
@@ -70,7 +76,7 @@ let DriverRideActionsController = class DriverRideActionsController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_arrived");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -92,19 +98,24 @@ let DriverRideActionsController = class DriverRideActionsController {
                     rideId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_started");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Ride marked as started successfully", {
                 userId,
-                rideId: responseData.data.rideId,
-                arrivedAt: responseData.data.arrivedAt,
-                startedAt: responseData.data.startedAt,
-                wasArrivedAutoSet: responseData.data.wasArrivedAutoSet,
+                rideId: responseData.rideId,
+                arrivedAt: responseData.arrivedAt,
+                startedAt: responseData.startedAt,
+                wasArrivedAutoSet: responseData.wasArrivedAutoSet,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_STARTED,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Mark ride as started controller error", {
@@ -112,7 +123,7 @@ let DriverRideActionsController = class DriverRideActionsController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_started");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -132,19 +143,24 @@ let DriverRideActionsController = class DriverRideActionsController {
                     rideId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_completed");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Ride completed successfully", {
                 userId,
-                rideId: responseData.data.rideId,
-                totalFare: responseData.data.fareBreakdown.totalFare.amount,
-                actualDurationMinutes: responseData.data.fareBreakdown.actualDurationMinutes,
-                durationHours: responseData.data.fareBreakdown.durationHours,
+                rideId: responseData.rideId,
+                totalFare: responseData.fareBreakdown.totalFare.amount,
+                actualDurationMinutes: responseData.fareBreakdown.actualDurationMinutes,
+                durationHours: responseData.fareBreakdown.durationHours,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_COMPLETED,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Mark ride as completed controller error", {
@@ -152,7 +168,7 @@ let DriverRideActionsController = class DriverRideActionsController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_ride_as_completed");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -174,7 +190,7 @@ let DriverRideActionsController = class DriverRideActionsController {
                     rideId,
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "driver_cancel_ride");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -190,6 +206,12 @@ let DriverRideActionsController = class DriverRideActionsController {
                 message: data.message,
                 data,
             });
+            const response = {
+                success: true,
+                message: data.message,
+                data,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Driver cancel ride controller error", {
@@ -197,7 +219,7 @@ let DriverRideActionsController = class DriverRideActionsController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "driver_cancel_ride");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

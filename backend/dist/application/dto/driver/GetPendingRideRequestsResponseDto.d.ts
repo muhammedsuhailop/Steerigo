@@ -21,13 +21,9 @@ export interface PendingRideRequestData {
     expiresAt?: string;
 }
 export interface GetPendingRideRequestsResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        requests: PendingRideRequestData[];
-        total: number;
-        limit: number;
-        offset: number;
-    };
+    requests: PendingRideRequestData[];
+    total: number;
+    limit: number;
+    offset: number;
 }
 //# sourceMappingURL=GetPendingRideRequestsResponseDto.d.ts.map

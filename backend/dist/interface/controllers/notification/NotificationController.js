@@ -32,13 +32,6 @@ let NotificationController = class NotificationController {
     async getNotifications(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: NotificationMessages_1.NOTIFICATION_ERROR_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Get notifications request received", { userId });
             const queryData = {
                 page: req.query.page ? parseInt(req.query.page, 10) : 1,
@@ -58,37 +51,35 @@ let NotificationController = class NotificationController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_notifications");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Notifications fetched successfully", {
                 userId,
-                total: responseData.data.pagination.total,
-                unreadCount: responseData.data.unreadCount,
+                total: responseData.pagination.total,
+                unreadCount: responseData.unreadCount,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: NotificationMessages_1.NOTIFICATION_MESSAGES.FETCHED_SUCCESSFULLY,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get notifications controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_notifications");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
     async markAsRead(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: NotificationMessages_1.NOTIFICATION_ERROR_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Mark notifications as read request received", { userId });
             const dto = MarkNotificationsReadDto_1.MarkNotificationsReadDto.fromRequest(userId, req.body);
             const result = await this.markNotificationsReadUseCase.execute(dto);
@@ -98,23 +89,28 @@ let NotificationController = class NotificationController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_notifications_read");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Notifications marked as read successfully", {
                 userId,
-                updatedCount: responseData.data.updatedCount,
+                updatedCount: responseData.updatedCount,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: NotificationMessages_1.NOTIFICATION_MESSAGES.MARKED_AS_READ,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Mark notifications as read controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "mark_notifications_read");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

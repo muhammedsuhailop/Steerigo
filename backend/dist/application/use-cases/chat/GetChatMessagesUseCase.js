@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Logger_1 = require("../../../shared/utils/Logger");
 const ChatErrors_1 = require("../../../domain/errors/ChatErrors");
-const ChatMessages_1 = require("../../../shared/constants/ChatMessages");
 let GetChatMessagesUseCase = class GetChatMessagesUseCase {
     constructor(chatRoomRepository, messageRepository, messageStatusRepository, userChatRepository, driverRepository) {
         this.chatRoomRepository = chatRoomRepository;
@@ -70,38 +69,34 @@ let GetChatMessagesUseCase = class GetChatMessagesUseCase {
             const userChat = await this.userChatRepository.findByUserIdAndChatRoomId(userId, chatRoomId);
             const totalUnreadCount = await this.userChatRepository.getTotalUnreadCountByUserId(userId);
             const response = {
-                success: true,
-                message: ChatMessages_1.CHAT_MESSAGES.MESSAGES.FETCHED,
-                data: {
-                    messages: paginatedMessages.data.map((message) => {
-                        const senderId = message.getSenderId();
-                        const messageId = message.getId();
-                        const relevantUserId = senderId === activeParticipantId
-                            ? otherParticipantId
-                            : activeParticipantId;
-                        const status = relevantUserId
-                            ? statusMap.get(`${messageId}_${relevantUserId}`)
-                            : undefined;
-                        return {
-                            id: messageId,
-                            chatRoomId: message.getChatRoomId(),
-                            senderId: senderId,
-                            content: message.getContent(),
-                            type: message.getType(),
-                            createdAt: message.getCreatedAt().toISOString(),
-                            updatedAt: message.getUpdatedAt().toISOString(),
-                            isDeleted: message.isDeleted(),
-                            messageStatus: status ? { status } : null,
-                        };
-                    }),
-                    unreadCount: userChat ? userChat.getUnreadCount() : 0,
-                    totalUnreadCount,
-                    pagination: {
-                        total: paginatedMessages.total,
-                        page: paginatedMessages.page,
-                        limit: paginatedMessages.limit,
-                        totalPages: paginatedMessages.totalPages,
-                    },
+                messages: paginatedMessages.data.map((message) => {
+                    const senderId = message.getSenderId();
+                    const messageId = message.getId();
+                    const relevantUserId = senderId === activeParticipantId
+                        ? otherParticipantId
+                        : activeParticipantId;
+                    const status = relevantUserId
+                        ? statusMap.get(`${messageId}_${relevantUserId}`)
+                        : undefined;
+                    return {
+                        id: messageId,
+                        chatRoomId: message.getChatRoomId(),
+                        senderId: senderId,
+                        content: message.getContent(),
+                        type: message.getType(),
+                        createdAt: message.getCreatedAt().toISOString(),
+                        updatedAt: message.getUpdatedAt().toISOString(),
+                        isDeleted: message.isDeleted(),
+                        messageStatus: status ? { status } : null,
+                    };
+                }),
+                unreadCount: userChat ? userChat.getUnreadCount() : 0,
+                totalUnreadCount,
+                pagination: {
+                    total: paginatedMessages.total,
+                    page: paginatedMessages.page,
+                    limit: paginatedMessages.limit,
+                    totalPages: paginatedMessages.totalPages,
                 },
             };
             return Result_1.Result.success(response);

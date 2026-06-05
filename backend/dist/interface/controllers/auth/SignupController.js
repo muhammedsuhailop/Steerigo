@@ -33,7 +33,7 @@ let SignupController = class SignupController {
             const result = await this.signupRequestUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "signup");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -49,7 +49,7 @@ let SignupController = class SignupController {
             });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "signup");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -59,7 +59,7 @@ let SignupController = class SignupController {
             const result = await this.signupVerifyUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "signup_verify");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -77,7 +77,7 @@ let SignupController = class SignupController {
             });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "signup_verify");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

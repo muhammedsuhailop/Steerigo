@@ -32,17 +32,13 @@ export interface FinalFareBreakdownData {
     actualDurationMinutes: number;
 }
 export interface MarkRideAsCompletedResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        rideId: string;
-        status: RideStatus;
-        arrivedAt?: string;
-        startedAt: string;
-        completedAt: string;
-        fareBreakdown: FinalFareBreakdownData;
-        riderId: string;
-        driverId: string;
-    };
+    rideId: string;
+    status: RideStatus;
+    arrivedAt?: string;
+    startedAt: string;
+    completedAt: string;
+    fareBreakdown: FinalFareBreakdownData;
+    riderId: string;
+    driverId: string;
 }
 //# sourceMappingURL=MarkRideAsCompletedResponseDto.d.ts.map

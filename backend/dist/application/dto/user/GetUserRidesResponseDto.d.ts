@@ -35,16 +35,12 @@ export interface UserRideData {
     updatedAt: string;
 }
 export interface GetUserRidesResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        rides: UserRideData[];
-        pagination: {
-            total: number;
-            page: number;
-            limit: number;
-            totalPages: number;
-        };
+    rides: UserRideData[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     };
 }
 //# sourceMappingURL=GetUserRidesResponseDto.d.ts.map

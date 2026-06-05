@@ -9,6 +9,7 @@ export declare const RIDE_MESSAGES: {
     RIDE_STARTED_WITH_AUTO_ARRIVED: string;
     RIDE_COMPLETED: string;
     RIDE_RATED: string;
+    RIDE_CANCELLED: string;
 };
 export declare const RIDE_ERROR_MESSAGES: {
     readonly RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found";

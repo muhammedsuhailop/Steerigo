@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let GetPendingRideRequestsUseCase = class GetPendingRideRequestsUseCase {
     constructor(driverRepository, rideRequestRepository) {
         this.driverRepository = driverRepository;
@@ -69,14 +68,10 @@ let GetPendingRideRequestsUseCase = class GetPendingRideRequestsUseCase {
                 createdAt: request.getCreatedAt().toISOString(),
             }));
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.PENDING_REQUESTS_FETCHED,
-                data: {
-                    requests: requestsData,
-                    total: pendingRequests.length,
-                    limit: dto.getLimit(),
-                    offset: dto.getOffset(),
-                },
+                requests: requestsData,
+                total: pendingRequests.length,
+                limit: dto.getLimit(),
+                offset: dto.getOffset(),
             };
             return Result_1.Result.success(response);
         }

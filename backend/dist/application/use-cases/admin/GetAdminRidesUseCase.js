@@ -17,7 +17,6 @@ const inversify_1 = require("inversify");
 const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
-const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let GetAdminRidesUseCase = class GetAdminRidesUseCase {
     constructor(rideRepository, driverRepository, userRepository) {
         this.rideRepository = rideRepository;
@@ -136,16 +135,12 @@ let GetAdminRidesUseCase = class GetAdminRidesUseCase {
                 };
             });
             const response = {
-                success: true,
-                message: RideMessages_1.RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
-                data: {
-                    rides: ridesData,
-                    pagination: {
-                        total: paginatedResult.total,
-                        page: paginatedResult.page,
-                        limit: paginatedResult.limit,
-                        totalPages: paginatedResult.totalPages,
-                    },
+                rides: ridesData,
+                pagination: {
+                    total: paginatedResult.total,
+                    page: paginatedResult.page,
+                    limit: paginatedResult.limit,
+                    totalPages: paginatedResult.totalPages,
                 },
             };
             Logger_1.Logger.info("Admin rides fetched successfully", {

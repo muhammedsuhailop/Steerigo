@@ -27,13 +27,6 @@ let DriverWalletController = class DriverWalletController {
     async getWallet(req, res) {
         try {
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Driver wallet fetch request received", {
                 userId,
                 query: req.query,
@@ -46,11 +39,16 @@ let DriverWalletController = class DriverWalletController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_wallet");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(result.getValue());
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.WALLET_FETCHED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Driver wallet controller error", {

@@ -55,7 +55,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const result = await this.scheduleAvailabilityUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "schedule_availability");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -69,7 +69,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             Logger_1.Logger.info("Availability scheduled successfully", { userId });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "schedule_availability");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -86,7 +86,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const result = await this.updateStatusUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_availability_status");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -103,7 +103,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_availability_status");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -120,7 +120,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const result = await this.updateLocationUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_location");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -134,7 +134,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             Logger_1.Logger.info("Driver location updated successfully", { driverId });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_location");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -158,21 +158,21 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const result = await this.addExceptionUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "add_availability_exception");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const data = result.getValue();
             const response = {
                 success: true,
-                message: "Exception added successfully",
+                message: DriverMessages_1.DRIVER_MESSAGES.EXCEPTION_ADDED,
                 data,
             };
             res.status(HttpStatusCodes_1.HttpStatusCodes.CREATED).json(response);
             Logger_1.Logger.info("Exception added successfully", { userId });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "add_availability_exception");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -196,7 +196,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const dto = EditAvailabilityExceptionRequestDto_1.EditAvailabilityExceptionRequestDto.fromRequest(userId, exceptionId, req.body);
             const result = await this.editExceptionUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "edit-availability-exception");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -213,7 +213,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "edit-availability-exception");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -237,7 +237,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const dto = RemoveAvailabilityExceptionRequestDto_1.RemoveAvailabilityExceptionRequestDto.fromRequest(userId, exceptionId);
             const result = await this.removeExceptionUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "remove-availability-exception");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -254,7 +254,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "remove-availability-exception");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -271,7 +271,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             const result = await this.updateBaseLocationUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_base_location");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -285,7 +285,7 @@ let DriverAvailabilityController = class DriverAvailabilityController {
             Logger_1.Logger.info("Driver base location updated successfully", { driverId });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_base_location");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

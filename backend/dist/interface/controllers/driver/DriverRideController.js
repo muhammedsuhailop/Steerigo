@@ -24,6 +24,7 @@ const RejectRideRequestDto_1 = require("../../../application/dto/driver/RejectRi
 const GetPendingRideRequestsDto_1 = require("../../../application/dto/driver/GetPendingRideRequestsDto");
 const GetDriverRidesDto_1 = require("../../../application/dto/driver/GetDriverRidesDto");
 const GetDriverRideByIdDto_1 = require("../../../application/dto/driver/GetDriverRideByIdDto");
+const RideMessages_1 = require("../../../shared/constants/RideMessages");
 let DriverRideController = class DriverRideController {
     constructor(acceptRideRequestUseCase, rejectRideRequestUseCase, getPendingRideRequestsUseCase, getDriverRidesUseCase, getDriverRideByIdUseCase) {
         this.acceptRideRequestUseCase = acceptRideRequestUseCase;
@@ -39,26 +40,14 @@ let DriverRideController = class DriverRideController {
     async acceptRideRequest(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
             const requestId = req.params.requestId;
-            if (!requestId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.REQUEST_ID_REQUIRED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Accept ride request received", {
                 userId,
                 requestId,
             });
-            const dto = AcceptRideRequestDto_1.AcceptRideRequestDto.fromRequest(userId, { requestId });
+            const dto = AcceptRideRequestDto_1.AcceptRideRequestDto.fromRequest(userId, {
+                requestId,
+            });
             const result = await this.acceptRideRequestUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
@@ -66,24 +55,29 @@ let DriverRideController = class DriverRideController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "accept_ride_request");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Ride request accepted successfully", {
                 userId,
-                rideId: responseData.data.rideId,
-                requestId: responseData.data.requestId,
+                rideId: responseData.rideId,
+                requestId: responseData.requestId,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Accept ride request controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "accept_ride_request");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -120,39 +114,34 @@ let DriverRideController = class DriverRideController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "cancel_ride_request");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Ride request cancelled successfully", {
                 userId,
-                requestId: responseData.data.requestId,
+                requestId: responseData.requestId,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_REQUEST_REJECTED,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Cancel ride request controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "cancel_ride_request");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
     async getPendingRideRequests(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
-            Logger_1.Logger.info("Get pending ride requests received", {
-                userId,
-            });
             const limit = req.query.limit
                 ? parseInt(req.query.limit, 10)
                 : 10;
@@ -170,36 +159,34 @@ let DriverRideController = class DriverRideController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_pending_ride_requests");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Pending ride requests fetched successfully", {
                 userId,
-                count: responseData.data.total,
+                count: responseData.total,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.PENDING_REQUESTS_FETCHED,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get pending ride requests controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_pending_ride_requests");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
     async getDriverRides(req, res) {
         try {
             const userId = this.getUserId(req);
-            if (!userId) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.UNAUTHORIZED,
-                });
-                return;
-            }
             Logger_1.Logger.info("Get driver rides received", {
                 userId,
                 query: req.query,
@@ -221,24 +208,29 @@ let DriverRideController = class DriverRideController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_rides");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Driver rides fetched successfully", {
                 userId,
-                total: responseData.data.pagination.total,
-                page: responseData.data.pagination.page,
+                total: responseData.pagination.total,
+                page: responseData.pagination.page,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get driver rides controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_rides");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -273,17 +265,22 @@ let DriverRideController = class DriverRideController {
                     rideId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_ride_by_id");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const responseData = result.getValue();
             Logger_1.Logger.info("Driver ride fetched successfully", {
                 userId,
-                rideId: responseData.data.ride.rideId,
-                status: responseData.data.ride.status,
+                rideId: responseData.ride.rideId,
+                status: responseData.ride.status,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(responseData);
+            const response = {
+                success: true,
+                message: RideMessages_1.RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get driver ride by ID controller error", {
@@ -291,7 +288,7 @@ let DriverRideController = class DriverRideController {
                 rideId: req.params.rideId,
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_ride_by_id");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

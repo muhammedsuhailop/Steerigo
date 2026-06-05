@@ -53,7 +53,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "GetFutureRideRequests");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Get future ride requests failed", {
                     userId,
@@ -66,7 +66,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "GetFutureRideRequests");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -94,7 +94,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "AcceptFutureRideRequest");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Accept future ride request failed", {
                     userId,
@@ -107,7 +107,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "AcceptFutureRideRequest");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -135,7 +135,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
             }
             else {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "RejectFutureRideRequest");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 Logger_1.Logger.warn("Reject future ride request failed", {
                     userId,
@@ -148,7 +148,7 @@ let DriverScheduleRideController = class DriverScheduleRideController {
                 error,
                 userId: this.getUserId(req),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "RejectFutureRideRequest");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

@@ -25,6 +25,8 @@ export declare const DRIVER_MESSAGES: {
     WALLET_FETCHED: string;
     STATS_FETCHED: string;
     DRIVER_BASE_LOCATION_UPDATED: string;
+    EXCEPTION_ADDED: string;
+    DASHBOARD_DATA_RETRIEVED: string;
 };
 export declare const DRIVER_ERROR_MESSAGES: {
     readonly USER_NOT_FOUND: "User not found";

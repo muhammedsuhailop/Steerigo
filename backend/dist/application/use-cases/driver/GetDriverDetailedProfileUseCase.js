@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetDriverDetailedProfileUseCase = void 0;
 const inversify_1 = require("inversify");
-const GetDriverProfileResponseDto_1 = require("../../dto/driver/GetDriverProfileResponseDto");
 const Result_1 = require("../../../shared/utils/Result");
 const DomainError_1 = require("../../../domain/errors/DomainError");
 const Logger_1 = require("../../../shared/utils/Logger");
@@ -81,7 +80,7 @@ let GetDriverDetailedProfileUseCase = class GetDriverDetailedProfileUseCase {
                     comments: kyc.getComments(),
                 })),
             };
-            const profileData = {
+            const response = {
                 driverId: driver.getId(),
                 userId: userId,
                 name: user.getName(),
@@ -106,7 +105,6 @@ let GetDriverDetailedProfileUseCase = class GetDriverDetailedProfileUseCase {
                     serverTime: new Date(),
                 },
             };
-            const response = new GetDriverProfileResponseDto_1.GetDriverProfileResponseDto(profileData);
             Logger_1.Logger.info("Driver detailed profile fetched successfully", {
                 userId,
                 driverId: driver.getId(),

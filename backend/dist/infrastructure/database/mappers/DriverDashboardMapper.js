@@ -5,29 +5,21 @@ const DriverDashboardResponseDto_1 = require("../../../application/dto/driver/Dr
 const RideStatus_1 = require("../../../domain/value-objects/RideStatus");
 class DriverDashboardMapper {
     static toResponseDto(driver, driverUser, availability, currentRide, currentRideRiderUser, pendingRequests, pendingRequestUsers, statistics, performance, scheduledRidesCount) {
-        return new DriverDashboardResponseDto_1.DriverDashboardResponseDto({
-            driver: this.mapDriverInfo(driver, driverUser),
-            availability: availability ? this.mapAvailability(availability) : null,
-            currentRide: currentRide
-                ? this.mapCurrentRide(currentRide, currentRideRiderUser)
-                : null,
-            pendingRequests: pendingRequests.map((req, idx) => this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null)),
-            statistics: {
-                ridesCompleted: statistics.getRidesCompleted(),
-                ridesCancelled: statistics.getRidesCancelled(),
-                scheduledRides: scheduledRidesCount,
-                totalEarnings: statistics.getTotalEarnings(),
-                currency: "INR",
-            },
-            performance: {
-                acceptanceRate: performance.getAcceptanceRate(),
-                cancellationRate: performance.getCancellationRate(),
-                averageRating: performance.getAverageRating(),
-            },
-            meta: {
-                lastUpdated: new Date(),
-                serverTime: new Date(),
-            },
+        return new DriverDashboardResponseDto_1.DriverDashboardResponseDto(this.mapDriverInfo(driver, driverUser), availability ? this.mapAvailability(availability) : null, currentRide
+            ? this.mapCurrentRide(currentRide, currentRideRiderUser)
+            : null, pendingRequests.map((req, idx) => this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null)), {
+            ridesCompleted: statistics.getRidesCompleted(),
+            ridesCancelled: statistics.getRidesCancelled(),
+            scheduledRides: scheduledRidesCount,
+            totalEarnings: statistics.getTotalEarnings(),
+            currency: "INR",
+        }, {
+            acceptanceRate: performance.getAcceptanceRate(),
+            cancellationRate: performance.getCancellationRate(),
+            averageRating: performance.getAverageRating(),
+        }, {
+            lastUpdated: new Date(),
+            serverTime: new Date(),
         });
     }
     static mapDriverInfo(driver, user) {

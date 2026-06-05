@@ -19,7 +19,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
 const Wallet_1 = require("../../../domain/entities/Wallet");
 let GetDriverWalletUseCase = class GetDriverWalletUseCase {
     constructor(driverRepository, walletRepository, transactionRepository, idGenerator) {
@@ -70,22 +69,18 @@ let GetDriverWalletUseCase = class GetDriverWalletUseCase {
                 transactionTotal: paginatedResult.total,
             });
             return Result_1.Result.success({
-                success: true,
-                message: DriverMessages_1.DRIVER_MESSAGES.WALLET_FETCHED,
-                data: {
-                    walletId: wallet.getId(),
-                    driverId,
-                    availableBalance: wallet.getAvailableBalance().getAmount(),
-                    pendingBalance: wallet.getPendingBalance().getAmount(),
-                    currency: wallet.getCurrency(),
-                    updatedAt: wallet.getUpdatedAt().toISOString(),
-                    transactions: paginatedResult.transactions.map(this.toTransactionItemData),
-                    pagination: {
-                        total: paginatedResult.total,
-                        page: paginatedResult.page,
-                        limit: paginatedResult.limit,
-                        totalPages: paginatedResult.totalPages,
-                    },
+                walletId: wallet.getId(),
+                driverId,
+                availableBalance: wallet.getAvailableBalance().getAmount(),
+                pendingBalance: wallet.getPendingBalance().getAmount(),
+                currency: wallet.getCurrency(),
+                updatedAt: wallet.getUpdatedAt().toISOString(),
+                transactions: paginatedResult.transactions.map(this.toTransactionItemData),
+                pagination: {
+                    total: paginatedResult.total,
+                    page: paginatedResult.page,
+                    limit: paginatedResult.limit,
+                    totalPages: paginatedResult.totalPages,
                 },
             });
         }

@@ -33,7 +33,7 @@ let AdminCouponController = class AdminCouponController {
             const dto = GetAdminCouponsDto_1.GetAdminCouponsDto.fromRequest(req.query);
             const result = await this.getAdminCouponsUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "get_admin_coupons");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -41,7 +41,7 @@ let AdminCouponController = class AdminCouponController {
         }
         catch (error) {
             Logger_1.Logger.error("AdminCouponController.getCoupons error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_admin_coupons");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -51,7 +51,7 @@ let AdminCouponController = class AdminCouponController {
             const dto = CreateCouponDto_1.CreateCouponDto.fromRequest(req.body);
             const result = await this.createCouponUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "create_coupon");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -61,7 +61,7 @@ let AdminCouponController = class AdminCouponController {
         }
         catch (error) {
             Logger_1.Logger.error("AdminCouponController.createCoupon error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "create_coupon");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -75,7 +75,7 @@ let AdminCouponController = class AdminCouponController {
             const dto = EditCouponDto_1.EditCouponDto.fromRequest({ couponId: couponId }, req.body);
             const result = await this.editCouponUseCase.execute(dto);
             if (result.isFailure()) {
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError(), "edit_coupon");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
                 res.status(statusCode).json(response);
                 return;
             }
@@ -83,7 +83,7 @@ let AdminCouponController = class AdminCouponController {
         }
         catch (error) {
             Logger_1.Logger.error("AdminCouponController.editCoupon error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "edit_coupon");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

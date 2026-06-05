@@ -68,25 +68,22 @@ export interface DashboardMeta {
     readonly serverTime: Date;
 }
 export declare class DriverDashboardResponseDto {
-    readonly data: {
-        readonly driver: DriverInfo;
-        readonly availability: AvailabilityInfo | null;
-        readonly currentRide: CurrentRideInfo | null;
-        readonly pendingRequests: PendingRequest[];
-        readonly statistics: Statistics;
-        readonly performance: Performance;
-        readonly meta: DashboardMeta;
-    };
-    readonly success: boolean;
-    readonly message: string;
-    constructor(data: {
-        readonly driver: DriverInfo;
-        readonly availability: AvailabilityInfo | null;
-        readonly currentRide: CurrentRideInfo | null;
-        readonly pendingRequests: PendingRequest[];
-        readonly statistics: Statistics;
-        readonly performance: Performance;
-        readonly meta: DashboardMeta;
-    });
+    readonly driver: DriverInfo;
+    readonly availability: AvailabilityInfo | null;
+    readonly currentRide: CurrentRideInfo | null;
+    readonly pendingRequests: PendingRequest[];
+    readonly statistics: Statistics;
+    readonly performance: Performance;
+    readonly meta: DashboardMeta;
+    constructor(driver: DriverInfo, availability: AvailabilityInfo | null, currentRide: CurrentRideInfo | null, pendingRequests: PendingRequest[], statistics: Statistics, performance: Performance, meta: DashboardMeta);
+    static create(data: {
+        driver: DriverInfo;
+        availability: AvailabilityInfo | null;
+        currentRide: CurrentRideInfo | null;
+        pendingRequests: PendingRequest[];
+        statistics: Statistics;
+        performance: Performance;
+        meta: DashboardMeta;
+    }): DriverDashboardResponseDto;
 }
 //# sourceMappingURL=DriverDashboardResponseDto.d.ts.map

@@ -12,6 +12,7 @@ exports.RIDE_MESSAGES = {
     RIDE_STARTED_WITH_AUTO_ARRIVED: "Ride has started. Driver arrival has been automatically recorded",
     RIDE_COMPLETED: "Ride completed successfully",
     RIDE_RATED: "Ride rated successfully",
+    RIDE_CANCELLED: "Ride Cancelled",
 };
 exports.RIDE_ERROR_MESSAGES = {
     RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",

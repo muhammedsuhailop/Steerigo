@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DriverRegistrationRequestDto = void 0;
+const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
+const errors_1 = require("../../../domain/errors");
 class DriverRegistrationRequestDto {
     constructor(userId, name, mobile, dob, gender, state, pin, address, licenseCategory, licenseNumber, licenseBodyTypes, licenseGearTypes, licenseIssueDate, licenseExpiryDate, idType, idNumber, idIssueDate, idExpiryDate, licenseFrontImage, licenseBackImage, idFrontImage, idBackImage) {
         this.userId = userId;
@@ -27,6 +29,32 @@ class DriverRegistrationRequestDto {
         this.idBackImage = idBackImage;
     }
     static fromRequest(userId, body) {
+        const requiredFields = [
+            "name",
+            "mobile",
+            "dob",
+            "gender",
+            "state",
+            "pin",
+            "address",
+            "licenseCategory",
+            "licenseNumber",
+            "licenseBodyTypes",
+            "licenseGearTypes",
+            "licenseIssueDate",
+            "licenseExpiryDate",
+            "idType",
+            "idNumber",
+            "idIssueDate",
+            "licenseFrontImage",
+            "licenseBackImage",
+            "idFrontImage",
+            "idBackImage",
+        ];
+        const missingFields = requiredFields.filter((field) => !body[field]);
+        if (missingFields.length > 0) {
+            throw new errors_1.DomainError(DriverMessages_1.DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "));
+        }
         return new DriverRegistrationRequestDto(userId, body.name, body.mobile, new Date(body.dob), body.gender, body.state, body.pin, body.address, body.licenseCategory, body.licenseNumber, body.licenseBodyTypes, body.licenseGearTypes, new Date(body.licenseIssueDate), new Date(body.licenseExpiryDate), body.idType, body.idNumber, new Date(body.idIssueDate), body.idExpiryDate && body.idExpiryDate.trim() !== ""
             ? new Date(body.idExpiryDate)
             : null, body.licenseFrontImage, body.licenseBackImage, body.idFrontImage, body.idBackImage);

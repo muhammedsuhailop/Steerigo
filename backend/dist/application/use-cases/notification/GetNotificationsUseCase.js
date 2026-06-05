@@ -17,7 +17,6 @@ const inversify_1 = require("inversify");
 const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
-const NotificationMessages_1 = require("../../../shared/constants/NotificationMessages");
 let GetNotificationsUseCase = class GetNotificationsUseCase {
     constructor(notificationRepository) {
         this.notificationRepository = notificationRepository;
@@ -49,17 +48,13 @@ let GetNotificationsUseCase = class GetNotificationsUseCase {
                 unreadCount,
             });
             return Result_1.Result.success({
-                success: true,
-                message: NotificationMessages_1.NOTIFICATION_MESSAGES.FETCHED_SUCCESSFULLY,
-                data: {
-                    notifications,
-                    unreadCount,
-                    pagination: {
-                        total: paginatedResult.total,
-                        page: paginatedResult.page,
-                        limit: paginatedResult.limit,
-                        totalPages: paginatedResult.totalPages,
-                    },
+                notifications,
+                unreadCount,
+                pagination: {
+                    total: paginatedResult.total,
+                    page: paginatedResult.page,
+                    limit: paginatedResult.limit,
+                    totalPages: paginatedResult.totalPages,
                 },
             });
         }

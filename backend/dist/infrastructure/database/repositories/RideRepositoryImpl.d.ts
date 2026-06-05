@@ -1,4 +1,4 @@
-import { IAdminRidePaginationOptions, IDriverRideStatsResult, IRideFilters, IRidePaginationOptions, IRideRepository, IRiderRideStatsResult, IRideStatsResult } from "../../../domain/repositories/IRideRepository";
+import { IAdminRidePaginationOptions, IDailyRideStatResult, IDriverRideStatsResult, IRideFilters, IRidePaginationOptions, IRideRepository, IRiderRideStatsResult, IRideStatsResult } from "../../../domain/repositories/IRideRepository";
 import { Ride } from "../../../domain/entities/Ride";
 import { RideStatus } from "../../../domain/value-objects/RideStatus";
 import { PaginatedResult } from "../../../shared/types/Repository";
@@ -24,5 +24,10 @@ export declare class RideRepositoryImpl implements IRideRepository {
     countByRiderStats(riderId: string, filters: IRideFilters): Promise<IRiderRideStatsResult>;
     hasTimeSlotConflict(driverId: string, pickupTime: Date, timeRequiredHours: number): Promise<boolean>;
     findLatestByRiderId(riderId: string): Promise<Ride | null>;
+    getRideTimeSeriesData(params: {
+        driverId?: string;
+        riderId?: string;
+        filters: IRideFilters;
+    }): Promise<IDailyRideStatResult[]>;
 }
 //# sourceMappingURL=RideRepositoryImpl.d.ts.map

@@ -19,7 +19,6 @@ const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const Wallet_1 = require("../../../domain/entities/Wallet");
 const WalletOwnerType_1 = require("../../../domain/value-objects/WalletOwnerType");
-const AdminMessages_1 = require("../../../shared/constants/AdminMessages");
 let GetAdminWalletUseCase = class GetAdminWalletUseCase {
     constructor(walletRepository, transactionRepository, idGenerator) {
         this.walletRepository = walletRepository;
@@ -62,23 +61,19 @@ let GetAdminWalletUseCase = class GetAdminWalletUseCase {
                 transactionTotal: paginatedResult.total,
             });
             return Result_1.Result.success({
-                success: true,
-                message: AdminMessages_1.ADMIN_MESSAGES.WALLET.FETCHED,
-                data: {
-                    walletId: wallet.getId(),
-                    ownerId: wallet.getOwnerId(),
-                    availableBalance: wallet.getAvailableBalance().getAmount(),
-                    pendingBalance: wallet.getPendingBalance().getAmount(),
-                    totalBalance: wallet.getTotalBalance().getAmount(),
-                    currency: wallet.getCurrency(),
-                    updatedAt: wallet.getUpdatedAt().toISOString(),
-                    transactions: paginatedResult.transactions.map(this.toTransactionItemData),
-                    pagination: {
-                        total: paginatedResult.total,
-                        page: paginatedResult.page,
-                        limit: paginatedResult.limit,
-                        totalPages: paginatedResult.totalPages,
-                    },
+                walletId: wallet.getId(),
+                ownerId: wallet.getOwnerId(),
+                availableBalance: wallet.getAvailableBalance().getAmount(),
+                pendingBalance: wallet.getPendingBalance().getAmount(),
+                totalBalance: wallet.getTotalBalance().getAmount(),
+                currency: wallet.getCurrency(),
+                updatedAt: wallet.getUpdatedAt().toISOString(),
+                transactions: paginatedResult.transactions.map(this.toTransactionItemData),
+                pagination: {
+                    total: paginatedResult.total,
+                    page: paginatedResult.page,
+                    limit: paginatedResult.limit,
+                    totalPages: paginatedResult.totalPages,
                 },
             });
         }

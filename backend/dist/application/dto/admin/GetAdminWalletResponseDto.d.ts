@@ -14,23 +14,19 @@ export interface AdminTransactionItemData {
     createdAt: string;
 }
 export interface GetAdminWalletResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        walletId: string;
-        ownerId: string;
-        availableBalance: number;
-        pendingBalance: number;
-        totalBalance: number;
-        currency: string;
-        updatedAt: string;
-        transactions: AdminTransactionItemData[];
-        pagination: {
-            total: number;
-            page: number;
-            limit: number;
-            totalPages: number;
-        };
+    walletId: string;
+    ownerId: string;
+    availableBalance: number;
+    pendingBalance: number;
+    totalBalance: number;
+    currency: string;
+    updatedAt: string;
+    transactions: AdminTransactionItemData[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     };
 }
 //# sourceMappingURL=GetAdminWalletResponseDto.d.ts.map

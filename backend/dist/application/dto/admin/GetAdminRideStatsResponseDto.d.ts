@@ -17,10 +17,21 @@ export interface AdminRatingStatsDto {
     totalRatings: number;
     distribution: RatingDistributionDto;
 }
+export interface DailyRideStatDto {
+    date: string;
+    totalRides: number;
+    completedRides: number;
+    cancelledRides: number;
+    revenue: number;
+}
+export interface AdminGraphDataDto {
+    ridesOverTime: DailyRideStatDto[];
+}
 export interface GetAdminRideStatsResponseDto {
     fromDate: string;
     toDate: string;
     rideStats: AdminRideStatsDto;
     ratingStats: AdminRatingStatsDto;
+    graphData?: AdminGraphDataDto;
 }
 //# sourceMappingURL=GetAdminRideStatsResponseDto.d.ts.map

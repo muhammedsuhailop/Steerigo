@@ -50,36 +50,6 @@ let DriverController = class DriverController {
                 return;
             }
             const body = req.body;
-            const requiredFields = [
-                "name",
-                "mobile",
-                "dob",
-                "gender",
-                "state",
-                "pin",
-                "address",
-                "licenseCategory",
-                "licenseNumber",
-                "licenseBodyTypes",
-                "licenseGearTypes",
-                "licenseIssueDate",
-                "licenseExpiryDate",
-                "idType",
-                "idNumber",
-                "idIssueDate",
-                "licenseFrontImage",
-                "licenseBackImage",
-                "idFrontImage",
-                "idBackImage",
-            ];
-            const missingFields = requiredFields.filter((field) => !body[field]);
-            if (missingFields.length > 0) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST).json({
-                    success: false,
-                    message: DriverMessages_1.DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "),
-                });
-                return;
-            }
             const dto = DriverRegistrationRequestDto_1.DriverRegistrationRequestDto.fromRequest(userId, body);
             Logger_1.Logger.info("Driver registration request received", {
                 userId,
@@ -96,11 +66,12 @@ let DriverController = class DriverController {
                     licenseKycId: responseData.kycDocumentsCreated.license,
                     idKycId: responseData.kycDocumentsCreated.idDocument,
                 });
-                res.status(HttpStatusCodes_1.HttpStatusCodes.CREATED).json({
+                const response = {
                     success: true,
                     message: DriverMessages_1.DRIVER_MESSAGES.DRIVER_REGISTRATION_SUCCESS,
                     data: responseData,
-                });
+                };
+                res.status(HttpStatusCodes_1.HttpStatusCodes.CREATED).json(response);
             }
             else {
                 const error = result.getError();
@@ -153,7 +124,7 @@ let DriverController = class DriverController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_profile");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -164,26 +135,19 @@ let DriverController = class DriverController {
                 vehiclesUpdated: responseData.vehiclesUpdated,
                 kycStatusUpdated: responseData.kycStatusUpdated,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+            const response = {
                 success: true,
                 message: DriverMessages_1.DRIVER_MESSAGES.PROFILE_UPDATE_SUCCESS,
-                data: {
-                    driver: responseData.driver,
-                    updateSummary: {
-                        userUpdated: responseData.userUpdated,
-                        vehiclesUpdated: responseData.vehiclesUpdated,
-                        kycStatusUpdated: responseData.kycStatusUpdated,
-                        updatedFields: responseData.updatedFields,
-                    },
-                },
-            });
+                data: responseData,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Update driver profile controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "update_driver_profile");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -240,35 +204,36 @@ let DriverController = class DriverController {
                     docType,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "submit_kyc");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
-            const response = result.getValue();
+            const responseData = result.getValue();
             Logger_1.Logger.info("KYC submission successful", {
                 userId,
                 docType,
-                licenseUpdated: response.licenseUpdated,
-                idUpdated: response.idUpdated,
-                driverUpdated: response.driverUpdated,
+                licenseUpdated: responseData.licenseUpdated,
+                idUpdated: responseData.idUpdated,
+                driverUpdated: responseData.driverUpdated,
             });
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+            const response = {
                 success: true,
-                message: response.message,
+                message: responseData.message,
                 data: {
-                    kycDocuments: response.kycDocuments,
-                    licenseUpdated: response.licenseUpdated,
-                    idUpdated: response.idUpdated,
-                    driverUpdated: response.driverUpdated,
+                    kycDocuments: responseData.kycDocuments,
+                    licenseUpdated: responseData.licenseUpdated,
+                    idUpdated: responseData.idUpdated,
+                    driverUpdated: responseData.driverUpdated,
                 },
-            });
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("KYC submission controller error", {
                 userId: this.getUserId(req),
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "submit_kyc");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -282,19 +247,17 @@ let DriverController = class DriverController {
                 return;
             }
             const result = await this.getKYCStatusUseCase.execute(userId);
-            if (result.isSuccessful()) {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
-                    success: true,
-                    message: DriverMessages_1.DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
-                    data: result.getValue(),
-                });
+            if (result.isFailure()) {
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(result.getError());
+                res.status(statusCode).json(response);
+                return;
             }
-            else {
-                res.status(HttpStatusCodes_1.HttpStatusCodes.NOT_FOUND).json({
-                    success: false,
-                    message: result.getError().message,
-                });
-            }
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.KYC_STATUS_RETRIEVED,
+                data: result.getValue(),
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get KYC status controller error", { error });
@@ -317,16 +280,21 @@ let DriverController = class DriverController {
             const result = await this.getDashboardUseCase.execute(dto);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_dashboard");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const dashboardResponse = result.getValue();
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(dashboardResponse);
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.DASHBOARD_DATA_RETRIEVED,
+                data: dashboardResponse,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             Logger_1.Logger.info(DriverMessages_1.DRIVER_MESSAGES.DRIVER_DASHBOARD_RETURNED, { userId });
         }
         catch (error) {
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_dashboard");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -344,21 +312,22 @@ let DriverController = class DriverController {
             const result = await this.getStatusUseCase.execute(userId);
             if (result.isFailure()) {
                 const error = result.getError();
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_status");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const statusResponse = result.getValue();
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
+            const response = {
                 success: true,
                 message: DriverMessages_1.DRIVER_MESSAGES.DRIVER_STATUS_RETRIEVED,
                 data: statusResponse,
-            });
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
             Logger_1.Logger.info("Driver status returned successfully", { userId });
         }
         catch (error) {
             Logger_1.Logger.error("Get driver status controller error", { error });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_status");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }
@@ -384,21 +353,17 @@ let DriverController = class DriverController {
                     userId,
                     error: error.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_detailed_profile");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
             const profileResponse = result.getValue();
-            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json({
-                success: profileResponse.success,
-                message: profileResponse.message,
-                data: profileResponse.data,
-            });
-            Logger_1.Logger.info(DriverMessages_1.DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED, {
-                userId,
-                driverId: profileResponse.data.driverId,
-                responseSize: JSON.stringify(profileResponse.data).length,
-            });
+            const response = {
+                success: true,
+                message: DriverMessages_1.DRIVER_MESSAGES.DRIVER_DETAILED_PROFILE_RETURNED,
+                data: profileResponse,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
         }
         catch (error) {
             Logger_1.Logger.error("Get detailed driver profile controller error", {
@@ -406,7 +371,7 @@ let DriverController = class DriverController {
                 error: error instanceof Error ? error.message : String(error),
                 stack: error instanceof Error ? error.stack : undefined,
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_driver_detailed_profile");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

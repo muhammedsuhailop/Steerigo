@@ -35,7 +35,7 @@ let AdminTransactionController = class AdminTransactionController {
                 Logger_1.Logger.warn("Admin get transactions failed", {
                     error: error?.message,
                 });
-                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_admin_transactions");
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
                 res.status(statusCode).json(response);
                 return;
             }
@@ -45,7 +45,7 @@ let AdminTransactionController = class AdminTransactionController {
             Logger_1.Logger.error("AdminTransactionController.getTransactions error", {
                 error: error instanceof Error ? error.message : String(error),
             });
-            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error, "get_admin_transactions");
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
             res.status(statusCode).json(response);
         }
     }

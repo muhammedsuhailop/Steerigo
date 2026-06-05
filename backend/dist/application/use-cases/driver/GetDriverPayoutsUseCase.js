@@ -18,7 +18,6 @@ const Result_1 = require("../../../shared/utils/Result");
 const Logger_1 = require("../../../shared/utils/Logger");
 const DITypes_1 = require("../../../shared/constants/DITypes");
 const DriverNotFoundError_1 = require("../../../domain/errors/DriverNotFoundError");
-const DriverMessages_1 = require("../../../shared/constants/DriverMessages");
 let GetDriverPayoutsUseCase = class GetDriverPayoutsUseCase {
     constructor(driverRepository, payoutRepository) {
         this.driverRepository = driverRepository;
@@ -37,14 +36,10 @@ let GetDriverPayoutsUseCase = class GetDriverPayoutsUseCase {
                 count: payouts.length,
             });
             return Result_1.Result.success({
-                success: true,
-                message: DriverMessages_1.DRIVER_MESSAGES.PAYOUT_RETRIVED,
-                data: {
-                    payouts: payouts.map(this.toPayoutItemDto),
-                    total: payouts.length,
-                    page: 1,
-                    limit: payouts.length,
-                },
+                payouts: payouts.map(this.toPayoutItemDto),
+                total: payouts.length,
+                page: 1,
+                limit: payouts.length,
             });
         }
         catch (error) {

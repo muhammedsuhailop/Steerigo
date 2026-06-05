@@ -50,16 +50,12 @@ export interface AdminRideData {
     updatedAt: string;
 }
 export interface GetAdminRidesResponseDto {
-    success: boolean;
-    message: string;
-    data: {
-        rides: AdminRideData[];
-        pagination: {
-            total: number;
-            page: number;
-            limit: number;
-            totalPages: number;
-        };
+    rides: AdminRideData[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     };
 }
 //# sourceMappingURL=GetAdminRidesResponseDto.d.ts.map
