@@ -1,0 +1,1 @@
+{"version":3,"file":"adminRideValidators.js","sourceRoot":"","sources":["../../../../src/interface/validators/admin/adminRideValidators.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AAEX,QAAA,sBAAsB,GAAG,OAAC,CAAC,MAAM,CAAC;IAC7C,MAAM,EAAE,OAAC,CAAC,MAAM,CAAC;QACf,MAAM,EAAE,OAAC,CAAC,MAAM,EAAE,CAAC,GAAG,CAAC,CAAC,EAAE,qBAAqB,CAAC;KACjD,CAAC;CACH,CAAC,CAAC"}

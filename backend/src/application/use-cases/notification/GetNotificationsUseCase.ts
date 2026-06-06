@@ -10,7 +10,6 @@ import { Notification } from "@domain/entities/Notification";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { NOTIFICATION_MESSAGES } from "@shared/constants/NotificationMessages";
 
 @injectable()
 export class GetNotificationsUseCase
@@ -57,17 +56,13 @@ export class GetNotificationsUseCase
       });
 
       return Result.success({
-        success: true,
-        message: NOTIFICATION_MESSAGES.FETCHED_SUCCESSFULLY,
-        data: {
-          notifications,
-          unreadCount,
-          pagination: {
-            total: paginatedResult.total,
-            page: paginatedResult.page,
-            limit: paginatedResult.limit,
-            totalPages: paginatedResult.totalPages,
-          },
+        notifications,
+        unreadCount,
+        pagination: {
+          total: paginatedResult.total,
+          page: paginatedResult.page,
+          limit: paginatedResult.limit,
+          totalPages: paginatedResult.totalPages,
         },
       });
     } catch (error) {

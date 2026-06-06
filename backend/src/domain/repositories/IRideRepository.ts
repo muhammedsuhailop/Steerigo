@@ -43,9 +43,16 @@ export interface IRideStatsResult {
   totalAmount: number;
 }
 
+export interface IDailyRideStatResult {
+  date: string;
+  totalRides: number;
+  completedRides: number;
+  cancelledRides: number;
+  revenue: number;
+}
+
 export interface IRideRepository
-  extends
-    IReadOnlyRepository<Ride, string>,
+  extends IReadOnlyRepository<Ride, string>,
     IWriteOnlyRepository<Ride, string> {
   findByRideId(rideId: string): Promise<Ride | null>;
 
@@ -56,7 +63,7 @@ export interface IRideRepository
   findByDriverId(driverId: string, status?: RideStatus): Promise<Ride[]>;
 
   findByRiderId(riderId: string, status?: RideStatus): Promise<Ride[]>;
-  
+
   findLatestByRiderId(riderId: string): Promise<Ride | null>;
 
   findPaginatedByDriverId(
@@ -95,4 +102,10 @@ export interface IRideRepository
     timeRequiredHours: number,
     excludeStatuses?: RideStatus[],
   ): Promise<boolean>;
+
+  getRideTimeSeriesData(params: {
+    driverId?: string;
+    riderId?: string;
+    filters: IRideFilters;
+  }): Promise<IDailyRideStatResult[]>;
 }

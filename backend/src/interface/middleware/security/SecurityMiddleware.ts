@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import helmet from "helmet";
 import cors from "cors";
 
@@ -21,21 +21,33 @@ export class SecurityMiddleware {
     });
   }
 
-  static cors() {
+  static cors(): RequestHandler {
+    // Change return type to RequestHandler
+    const productionOrigins = [
+      process.env.CLIENT_URL,
+      process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/` : undefined,
+      "https://msuhail.xyz",
+      "https://www.msuhail.xyz",
+    ].filter((origin): origin is string => !!origin);
+
+    const developmentOrigins: (string | RegExp)[] = [
+      "http://localhost:5173",
+      "http://localhost:4000",
+      "http://165.227.93.170",
+      "http://localhost:4001",
+      /https:\/\/.*\.ngrok-free\.app$/,
+    ];
+
+    // Wrap the options inside cors() before returning it
     return cors({
       origin:
         process.env.NODE_ENV === "production"
-          ? ["https://steerigo.com", "https://www.steerigo.com"]
-          : [
-              "http://localhost:5173",
-              "http://localhost:4000",
-              "http://localhost:4001",
-              /https:\/\/.*\.ngrok-free\.app$/,
-            ],
+          ? productionOrigins
+          : developmentOrigins,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true, // allows cookies
-      exposedHeaders: ["Set-Cookie"], // Allow frontend to see Set-Cookie header
+      credentials: true,
+      exposedHeaders: ["Set-Cookie"],
     });
   }
 

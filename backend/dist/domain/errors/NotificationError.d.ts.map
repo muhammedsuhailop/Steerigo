@@ -1,0 +1,1 @@
+{"version":3,"file":"NotificationError.d.ts","sourceRoot":"","sources":["../../../src/domain/errors/NotificationError.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,MAAM,eAAe,CAAC;AAM5C,qBAAa,kBAAkB;IAC7B,MAAM,CAAC,oBAAoB,CAAC,cAAc,EAAE,MAAM,GAAG,WAAW;IAgBhE,MAAM,CAAC,+BAA+B,IAAI,WAAW;CAatD"}

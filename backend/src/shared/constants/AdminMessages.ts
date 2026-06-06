@@ -27,6 +27,10 @@ export const ADMIN_MESSAGES = {
     RIDE_FETCHED: "Ride stats fetched successfully",
     DRIVER_FETCHED: "Drivers stats fetched successfully",
   },
+
+  RATINGS: {
+    FETCHED: "Ratings fetched successfully",
+  },
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {

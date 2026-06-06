@@ -17,6 +17,7 @@ import { Result } from "@shared/utils/Result";
 import { GetUserStatsRequestDto } from "@application/dto/user/GetUserStatsRequestDto";
 import { GetUserStatsResponseDto } from "@application/dto/user/GetUserStatsResponseDto";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { ApiResponse } from "@shared/types/Common";
 
 interface UserProfileRequestBody {
   name?: string;
@@ -66,11 +67,12 @@ export class UserProfileController {
       const result = await this.getUserProfileUseCase.execute(dto);
 
       if (result.isSuccessful()) {
-        res.status(HttpStatusCodes.OK).json({
+        const response: ApiResponse = {
           success: true,
           message: USER_MESSAGES.PROFILE.PROFILE_FETCHED,
           data: result.getValue(),
-        });
+        };
+        res.status(HttpStatusCodes.OK).json(response);
       } else {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
@@ -98,14 +100,12 @@ export class UserProfileController {
 
       if (result.isSuccessful()) {
         const responseData = result.getValue();
-        res.status(HttpStatusCodes.OK).json({
+        const response: ApiResponse = {
           success: true,
           message: USER_MESSAGES.PROFILE.PROFILE_UPDATED,
           data: responseData.user,
-          updateSummary: {
-            updatedFields: responseData.updatedFields,
-          },
-        });
+        };
+        res.status(HttpStatusCodes.OK).json(response);
       } else {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
@@ -123,7 +123,6 @@ export class UserProfileController {
 
   async registerAsDriver(req: Request, res: Response): Promise<void> {
     try {
-
       const userId = this.getUserId(req);
 
       const dto = RegisterAsDriverRequestDto.fromRequest(userId as string);
@@ -131,7 +130,7 @@ export class UserProfileController {
 
       if (result.isSuccessful()) {
         const responseData = result.getValue();
-        res.status(HttpStatusCodes.OK).json({
+        const response: ApiResponse = {
           success: true,
           message: responseData.message,
           data: {
@@ -144,7 +143,8 @@ export class UserProfileController {
             isVerified: responseData.isVerified,
             updatedAt: responseData.updatedAt,
           },
-        });
+        };
+        res.status(HttpStatusCodes.OK).json(response);
       } else {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           success: false,
@@ -183,24 +183,22 @@ export class UserProfileController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "user_get_stats",
         );
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json({
+      const response: ApiResponse = {
         success: true,
         message: USER_MESSAGES.PROFILE.STATS_FETCHED,
         data: result.getValue(),
-      });
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("UserProfileController.getMyStats error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "user_get_stats",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }

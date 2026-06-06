@@ -21,15 +21,14 @@ import {
 import { Rating } from "@domain/entities/Rating";
 import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDriverRepository } from "@domain/repositories/IDriverRepository";
 import { Driver } from "@domain/entities/Driver";
 
 @injectable()
-export class GetAdminRideByIdUseCase implements IUseCase<
-  GetAdminRideByIdDto,
-  Promise<Result<GetAdminRideByIdResponseDto>>
-> {
+export class GetAdminRideByIdUseCase
+  implements
+    IUseCase<GetAdminRideByIdDto, Promise<Result<GetAdminRideByIdResponseDto>>>
+{
   constructor(
     @inject(TYPES.RideRepository)
     private readonly rideRepository: IRideRepository,
@@ -94,13 +93,9 @@ export class GetAdminRideByIdUseCase implements IUseCase<
       Logger.info("Admin ride fetched successfully", { rideId });
 
       return Result.success({
-        success: true,
-        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-        data: {
-          ride: rideDetails,
-          rider: riderDetails,
-          driver: driverDetails,
-        },
+        ride: rideDetails,
+        rider: riderDetails,
+        driver: driverDetails,
       });
     } catch (error) {
       Logger.error("Error fetching admin ride by ID", {

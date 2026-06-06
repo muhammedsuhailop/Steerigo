@@ -69,7 +69,7 @@ export interface RideDetails {
   duration?: number;
   fare: FareDetails;
   timeline: TimelineDetails;
-  verificationCode:number;
+  verificationCode: number;
   couponDetails?: CouponDetails;
   rating?: RatingDetails;
   createdAt: string;
@@ -77,10 +77,6 @@ export interface RideDetails {
 }
 
 export interface GetUserRideByIdResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    ride: RideDetails;
-    driver: DriverDetails;
-  };
+  ride: RideDetails;
+  driver: DriverDetails;
 }

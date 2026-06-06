@@ -1,0 +1,1 @@
+{"version":3,"file":"RideRequestFactory.d.ts","sourceRoot":"","sources":["../../../../src/infrastructure/container/factories/RideRequestFactory.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,WAAW,CAAC;AAStC,qBAAa,kBAAkB;IAC7B,MAAM,CAAC,QAAQ,CAAC,SAAS,EAAE,SAAS,GAAG,IAAI;CAc5C"}

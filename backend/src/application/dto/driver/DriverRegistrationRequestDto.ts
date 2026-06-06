@@ -2,6 +2,8 @@ import { LicenseCategory } from "@domain/value-objects/LicenseCategory";
 import { GearType, BodyType } from "@domain/value-objects/VehicleType";
 import { DocumentType } from "@domain/value-objects/DocumentType";
 import { Gender } from "@domain/value-objects/Gender";
+import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { DomainError } from "@domain/errors";
 
 interface DriverRegistrationRequestBody {
   name: string;
@@ -50,13 +52,46 @@ export class DriverRegistrationRequestDto {
     private readonly licenseFrontImage: string,
     private readonly licenseBackImage: string,
     private readonly idFrontImage: string,
-    private readonly idBackImage: string
+    private readonly idBackImage: string,
   ) {}
 
   static fromRequest(
     userId: string,
-    body: DriverRegistrationRequestBody
+    body: DriverRegistrationRequestBody,
   ): DriverRegistrationRequestDto {
+    const requiredFields = [
+      "name",
+      "mobile",
+      "dob",
+      "gender",
+      "state",
+      "pin",
+      "address",
+      "licenseCategory",
+      "licenseNumber",
+      "licenseBodyTypes",
+      "licenseGearTypes",
+      "licenseIssueDate",
+      "licenseExpiryDate",
+      "idType",
+      "idNumber",
+      "idIssueDate",
+      "licenseFrontImage",
+      "licenseBackImage",
+      "idFrontImage",
+      "idBackImage",
+    ];
+
+    const missingFields = requiredFields.filter(
+      (field) => !body[field as keyof DriverRegistrationRequestBody],
+    );
+
+    if (missingFields.length > 0) {
+      throw new DomainError(
+        DRIVER_MESSAGES.MISSING_FIELDS_PREFIX + missingFields.join(", "),
+      );
+    }
+
     return new DriverRegistrationRequestDto(
       userId,
       body.name,
@@ -81,7 +116,7 @@ export class DriverRegistrationRequestDto {
       body.licenseFrontImage,
       body.licenseBackImage,
       body.idFrontImage,
-      body.idBackImage
+      body.idBackImage,
     );
   }
 

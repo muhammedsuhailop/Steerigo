@@ -10,7 +10,6 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { RideRequestErrors } from "@domain/errors/RideRequestErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { IRideSearchDispatchService } from "@application/services/IRideSearchDispatchService";
@@ -132,14 +131,10 @@ export class RejectRideRequestUseCase
       });
 
       const response: RejectRideRequestResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_REQUEST_REJECTED,
-        data: {
-          requestId: rideRequest.getId(),
-          status: rideRequest.getStatus(),
-          rejectedAt: new Date().toISOString(),
-          reason: dto.getReason(),
-        },
+        requestId: rideRequest.getId(),
+        status: rideRequest.getStatus(),
+        rejectedAt: new Date().toISOString(),
+        reason: dto.getReason(),
       };
 
       return Result.success(response);

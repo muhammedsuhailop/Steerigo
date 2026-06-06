@@ -1,0 +1,9 @@
+export declare enum PaymentFailureReason {
+    PAYMENT_DECLINED = "PAYMENT_DECLINED",
+    MODAL_CANCELLED = "MODAL_CANCELLED",
+    TIMEOUT = "TIMEOUT",
+    NETWORK_ERROR = "NETWORK_ERROR",
+    USER_CANCELLED = "USER_CANCELLED",
+    SIGNATURE_VERIFICATION_FAILED = "Signature verification failed"
+}
+//# sourceMappingURL=PaymentFailureReason.d.ts.map

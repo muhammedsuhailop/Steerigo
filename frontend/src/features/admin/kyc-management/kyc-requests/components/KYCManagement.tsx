@@ -12,7 +12,7 @@ import {
   selectPage,
   selectLimit,
 } from "@/features/admin/shared/store/adminKYCSlice";
-import type { KYCAction, KYCRequest } from "@/features/admin/shared/types";
+import type { KYCAction, KYCRequest } from "@/features/admin/shared/types/kyc.interfaces";
 import type { KYCFiltersType } from "./KYCManagement.types";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 

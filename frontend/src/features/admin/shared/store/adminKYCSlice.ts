@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { KYCDetailRequest, KYCFilters } from "../types";
+import type { KYCDetailRequest, KYCFilters } from "../types/kyc.interfaces";
 
 // Local state management for admin KYC feature
 // API calls are handled by adminApi (RTK Query)

@@ -232,12 +232,23 @@ export interface RatingStats {
   distribution: RatingDistribution;
 }
 
+export interface GraphData {
+  earningsOverTime: Array<{
+    date: string;
+    totalRides: number;
+    completedRides: number;
+    cancelledRides: number;
+    earnings: number;
+  }>;
+}
+
 export interface DriverStatsData {
   driverId: string;
   fromDate: string;
   toDate: string;
   rideStats: RideStats;
   ratingStats: RatingStats;
+  graphData: GraphData;
 }
 
 export interface DriverStatsResponse {

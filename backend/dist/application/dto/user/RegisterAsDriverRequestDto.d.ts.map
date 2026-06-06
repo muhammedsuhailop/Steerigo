@@ -1,0 +1,1 @@
+{"version":3,"file":"RegisterAsDriverRequestDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/user/RegisterAsDriverRequestDto.ts"],"names":[],"mappings":"AAAA,qBAAa,0BAA0B;IACrC,SAAgB,MAAM,EAAE,MAAM,CAAC;gBAEnB,MAAM,EAAE,MAAM;IAI1B,MAAM,CAAC,WAAW,CAAC,MAAM,EAAE,MAAM,GAAG,0BAA0B;IAI9D,QAAQ,IAAI,MAAM,EAAE;CAarB"}

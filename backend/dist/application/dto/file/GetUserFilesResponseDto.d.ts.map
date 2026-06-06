@@ -1,0 +1,1 @@
+{"version":3,"file":"GetUserFilesResponseDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/file/GetUserFilesResponseDto.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,qBAAqB,EAAE,MAAM,yBAAyB,CAAC;AAEhE,qBAAa,uBAAuB;IAClC,QAAQ,CAAC,SAAS,EAAE,qBAAqB,EAAE,CAAC;gBAEhC,SAAS,EAAE,qBAAqB,EAAE;CAG/C"}

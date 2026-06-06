@@ -1,0 +1,103 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserAuthController = void 0;
+const inversify_1 = require("inversify");
+const express_validator_1 = require("express-validator");
+const auth_1 = require("../../../application/dto/auth");
+const Logger_1 = require("../../../shared/utils/Logger");
+const ErrorHandlerService_1 = require("../../../shared/utils/ErrorHandlerService");
+const DITypes_1 = require("../../../shared/constants/DITypes");
+const CookieHelper_1 = require("../../../shared/utils/CookieHelper");
+const HttpStatusCodes_1 = require("../../../shared/enums/HttpStatusCodes");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+let UserAuthController = class UserAuthController {
+    constructor(loginUseCase, getCurrentUserUseCase) {
+        this.loginUseCase = loginUseCase;
+        this.getCurrentUserUseCase = getCurrentUserUseCase;
+    }
+    async login(req, res) {
+        try {
+            const errors = (0, express_validator_1.validationResult)(req);
+            if (!errors.isEmpty()) {
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleValidationErrors(errors.array());
+                res.status(statusCode).json(response);
+                return;
+            }
+            const dto = auth_1.LoginRequestDto.fromrequest(req.body);
+            const result = await this.loginUseCase.execute(dto);
+            if (result.isFailure()) {
+                const error = result.getError();
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
+                res.status(statusCode).json(response);
+                return;
+            }
+            const data = result.getValue();
+            // Set refresh token as httpOnly cookie
+            CookieHelper_1.CookieHelper.setRefreshTokenCookie(res, data.refreshToken);
+            const { refreshToken: _refreshToken, ...dataWithoutRefreshToken } = data;
+            const response = {
+                success: true,
+                message: AuthConstants_1.AuthMessages.LOGIN_SUCCESS,
+                data: dataWithoutRefreshToken,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
+            Logger_1.Logger.info("Login completed successfully", {
+                email: dto.getEmailValue(),
+            });
+        }
+        catch (error) {
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
+            res.status(statusCode).json(response);
+        }
+    }
+    async getCurrentUser(req, res) {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                res
+                    .status(HttpStatusCodes_1.HttpStatusCodes.UNAUTHORIZED)
+                    .json({ success: false, message: AuthConstants_1.AuthMessages.UNAUTHORIZED });
+                return;
+            }
+            const getCurrentUserDto = auth_1.GetCurrentUserDto.fromRequest({ userId });
+            const result = await this.getCurrentUserUseCase.execute(getCurrentUserDto);
+            if (result.isFailure()) {
+                const error = result.getError();
+                const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
+                res.status(statusCode).json(response);
+                return;
+            }
+            const data = result.getValue();
+            const response = {
+                success: true,
+                message: AuthConstants_1.AuthMessages.USER_RETRIEVED,
+                data,
+            };
+            res.status(HttpStatusCodes_1.HttpStatusCodes.OK).json(response);
+        }
+        catch (error) {
+            const { response, statusCode } = ErrorHandlerService_1.ErrorHandlerService.handleError(error);
+            res.status(statusCode).json(response);
+        }
+    }
+};
+exports.UserAuthController = UserAuthController;
+exports.UserAuthController = UserAuthController = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)(DITypes_1.TYPES.LoginUseCase)),
+    __param(1, (0, inversify_1.inject)(DITypes_1.TYPES.GetCurrentUserUseCase)),
+    __metadata("design:paramtypes", [Object, Object])
+], UserAuthController);
+//# sourceMappingURL=UserAuthController.js.map

@@ -11,8 +11,8 @@ export interface RiderDetails {
 }
 
 export interface DriverDetails {
-  id: string;         
-  userId: string;     
+  id: string;
+  userId: string;
   name: string;
   email: string;
   phoneNumber?: string;
@@ -88,11 +88,7 @@ export interface RideDetails {
 }
 
 export interface GetAdminRideByIdResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    ride: RideDetails;
-    rider: RiderDetails;
-    driver: DriverDetails;
-  };
+  ride: RideDetails;
+  rider: RiderDetails;
+  driver: DriverDetails;
 }

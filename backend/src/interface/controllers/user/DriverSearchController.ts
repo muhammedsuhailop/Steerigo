@@ -18,7 +18,7 @@ export class DriverSearchController {
     private findNearbyDriversUseCase: IUseCase<
       FindNearbyDriversRequestDto,
       Promise<Result<FindNearbyDriversResponseDto>>
-    >
+    >,
   ) {}
 
   private getUserId(req: Request): string | null {
@@ -89,10 +89,7 @@ export class DriverSearchController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "FindNearbyDrivers"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
 
@@ -107,10 +104,7 @@ export class DriverSearchController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "FindNearbyDrivers"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }

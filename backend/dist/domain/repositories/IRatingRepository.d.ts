@@ -1,0 +1,52 @@
+import { ReviewType } from "../value-objects/ReviewType";
+import { IReadOnlyRepository } from "./base/IReadOnlyRepository";
+import { IWriteOnlyRepository } from "./base/IWriteOnlyRepository";
+import { Rating } from "../entities/Rating";
+export interface RatingFilters {
+    reviewType?: ReviewType;
+    reviewerId?: string;
+    revieweeId?: string;
+    rideId?: string;
+    minRating?: number;
+    maxRating?: number;
+    fromDate?: Date;
+    toDate?: Date;
+}
+export type RatingSortField = "createdAt" | "overallRating";
+export interface RatingQueryOptions {
+    filters: RatingFilters;
+    sortBy: RatingSortField;
+    sortOrder: "asc" | "desc";
+    page: number;
+    limit: number;
+}
+export interface PaginatedRatings {
+    ratings: Rating[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+export interface IRatingStatsResult {
+    totalRatings: number;
+    averageRating: number;
+    distribution: {
+        zeroToOne: number;
+        oneToTwo: number;
+        twoToThree: number;
+        threeToFour: number;
+        fourToFive: number;
+    };
+}
+export interface IRatingRepository extends IReadOnlyRepository<Rating, string>, IWriteOnlyRepository<Rating, string> {
+    findAllByRideId(rideId: string): Promise<Rating[]>;
+    findByRevieweeId(revieweeId: string): Promise<Rating[]>;
+    existsByRideAndReviewer(rideId: string, reviewerId: string): Promise<boolean>;
+    findAll(options: RatingQueryOptions): Promise<PaginatedRatings>;
+    getRatingStats(params: {
+        reviewerId?: string;
+        revieweeId?: string;
+        filters: RatingFilters;
+    }): Promise<IRatingStatsResult>;
+}
+//# sourceMappingURL=IRatingRepository.d.ts.map

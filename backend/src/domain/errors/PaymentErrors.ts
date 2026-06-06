@@ -18,6 +18,21 @@ export class PaymentErrors {
       },
     );
   }
+  static rideNotCompletedOrCancelled(rideId: string): DomainError {
+    return new DomainError(
+      formatMessage(PAYMENT_ERROR_MESSAGES.RIDE_NOT_COMPLETED_OR_CANCELLED, {
+        rideId,
+      }),
+      "RIDE_NOT_COMPLETED",
+      {
+        statusCode: HttpStatusCodes.BAD_REQUEST,
+        errorType: ErrorType.VALIDATION_ERROR,
+        shouldLog: false,
+        isOperational: true,
+        category: "VALIDATION",
+      },
+    );
+  }
 
   static paymentAlreadyExists(rideId: string): DomainError {
     return new DomainError(

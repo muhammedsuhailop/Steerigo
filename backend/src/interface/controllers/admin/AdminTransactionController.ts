@@ -36,10 +36,7 @@ export class AdminTransactionController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_admin_transactions",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -50,10 +47,7 @@ export class AdminTransactionController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_admin_transactions",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

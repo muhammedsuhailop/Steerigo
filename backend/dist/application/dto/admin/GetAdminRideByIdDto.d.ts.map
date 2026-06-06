@@ -1,0 +1,1 @@
+{"version":3,"file":"GetAdminRideByIdDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/admin/GetAdminRideByIdDto.ts"],"names":[],"mappings":"AAEA,qBAAa,mBAAmB;aACM,MAAM,EAAE,MAAM;IAAlD,OAAO;IAEP,MAAM,CAAC,WAAW,CAAC,MAAM,EAAE;QAAE,MAAM,CAAC,EAAE,MAAM,CAAA;KAAE,GAAG,mBAAmB;IAMpE,QAAQ,IAAI,IAAI;CAKjB"}

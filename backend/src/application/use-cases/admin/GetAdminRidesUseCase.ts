@@ -14,7 +14,6 @@ import { IUserRepository } from "@domain/repositories/IUserRepository";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { Ride } from "@domain/entities/Ride";
 import { Driver } from "@domain/entities/Driver";
 import { User } from "@domain/entities/User";
@@ -180,16 +179,12 @@ export class GetAdminRidesUseCase
       );
 
       const response: GetAdminRidesResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
-        data: {
-          rides: ridesData,
-          pagination: {
-            total: paginatedResult.total,
-            page: paginatedResult.page,
-            limit: paginatedResult.limit,
-            totalPages: paginatedResult.totalPages,
-          },
+        rides: ridesData,
+        pagination: {
+          total: paginatedResult.total,
+          page: paginatedResult.page,
+          limit: paginatedResult.limit,
+          totalPages: paginatedResult.totalPages,
         },
       };
 

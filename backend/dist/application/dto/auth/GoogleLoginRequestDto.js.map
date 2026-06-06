@@ -1,0 +1,1 @@
+{"version":3,"file":"GoogleLoginRequestDto.js","sourceRoot":"","sources":["../../../../src/application/dto/auth/GoogleLoginRequestDto.ts"],"names":[],"mappings":";;;AAAA,MAAa,qBAAqB;IAGhC,YAAY,IAAsB;QAChC,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC,IAAI,CAAC;IACxB,CAAC;IAED,OAAO;QACL,OAAO,IAAI,CAAC,IAAI,CAAC;IACnB,CAAC;CACF;AAVD,sDAUC"}

@@ -1,0 +1,106 @@
+import { Email } from "../value-objects/Email";
+import { Password } from "../value-objects/Password";
+import { AuthProvider, UserRole, UserStatus } from "../../shared/constants/AuthConstants";
+import { BaseEntity } from "../../shared/types/Repository";
+import { Gender } from "../value-objects/Gender";
+export interface UserCreationProps {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    mobile?: string;
+    dob?: Date;
+    gender?: Gender;
+    address?: string;
+    role?: UserRole;
+}
+export interface UserReconstructionProps extends UserCreationProps {
+    role: UserRole;
+    status: UserStatus;
+    isVerified: boolean;
+    otpHash?: string;
+    otpExpires?: Date;
+    otpAttempts: number;
+    createdAt: Date;
+    updatedAt: Date;
+    googleId?: string;
+    profilePicture?: string;
+    authProvider?: AuthProvider;
+}
+export declare class User implements BaseEntity {
+    private readonly id;
+    private name;
+    private email;
+    private password;
+    private mobile?;
+    private dob?;
+    private gender?;
+    private address?;
+    private role;
+    private status;
+    private isVerified;
+    private otpHash?;
+    private otpExpires?;
+    private otpAttempts;
+    private createdAt;
+    private updatedAt;
+    private googleId?;
+    private profilePicture?;
+    private authProvider;
+    private constructor();
+    static create(props: UserCreationProps): User;
+    static reconstruct(props: UserReconstructionProps): User;
+    static createFromGoogle(props: {
+        id: string;
+        googleId: string;
+        name: string;
+        email: string;
+        profilePicture?: string;
+    }): User;
+    canLogin(): boolean;
+    isAccountLocked(): boolean;
+    isGoogleUser(): boolean;
+    canAttemptOtpVerification(): boolean;
+    isOtpExpired(): boolean;
+    markEmailAsVerified(): void;
+    incrementOtpAttempts(): void;
+    resetOtpAttempts(): void;
+    updateProfile(updates: {
+        name?: string;
+        mobile?: string;
+        dob?: Date;
+        gender?: Gender;
+        address?: string;
+    }): void;
+    updateProfilePicture(newPictureUrl: string): void;
+    setOtpDetails(otpHash: string, otpExpires: Date): void;
+    setResetOtpDetails(otpHash: string, expiresAt: Date): void;
+    getResetOtpHash(): string | undefined;
+    isResetOtpExpired(): boolean;
+    canAttemptResetOtp(): boolean;
+    incrementResetOtpAttempts(): void;
+    updatePassword(newPasswordHash: Password): void;
+    updateRole(newRole: string): void;
+    getId(): string;
+    getName(): string;
+    getEmail(): Email;
+    getEmailValue(): string;
+    getPassword(): Password;
+    getPasswordHash(): string;
+    getMobile(): string | undefined;
+    getDob(): Date | undefined;
+    getGender(): Gender | undefined;
+    getAddress(): string | undefined;
+    getRole(): UserRole;
+    getStatus(): UserStatus;
+    getIsVerified(): boolean;
+    getOtpHash(): string | undefined;
+    getOtpExpires(): Date | undefined;
+    getOtpAttempts(): number;
+    getCreatedAt(): Date;
+    getUpdatedAt(): Date;
+    getGoogleId(): string | undefined;
+    getProfilePicture(): string | undefined;
+    getAuthProvider(): AuthProvider;
+}
+//# sourceMappingURL=User.d.ts.map

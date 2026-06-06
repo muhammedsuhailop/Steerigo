@@ -28,6 +28,8 @@ export const DRIVER_MESSAGES = {
   WALLET_FETCHED: "Wallet details fetched successfully.",
   STATS_FETCHED: "Driver stats fetched successfully.",
   DRIVER_BASE_LOCATION_UPDATED: "Driver base location updated successfully",
+  EXCEPTION_ADDED: "Exception added successfully",
+  DASHBOARD_DATA_RETRIEVED: "Dashboard data retrieved",
 };
 
 export const DRIVER_ERROR_MESSAGES = {

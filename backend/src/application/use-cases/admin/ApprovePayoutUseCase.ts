@@ -15,10 +15,7 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { PayoutErrors } from "@domain/errors/PayoutErrors";
 import { Types } from "mongoose";
-import {
-  ADMIN_ERROR_MESSAGES,
-  ADMIN_MESSAGES,
-} from "@shared/constants/AdminMessages";
+import { ADMIN_ERROR_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class ApprovePayoutUseCase
@@ -103,17 +100,13 @@ export class ApprovePayoutUseCase
         });
 
         return Result.success({
-          success: true,
-          message: ADMIN_MESSAGES.PAYOUT.APPROVED,
-          data: {
-            payoutId: savedPayout.getId(),
-            driverId,
-            amount: payoutAmount.getAmount(),
-            currency: savedPayout.getCurrency(),
-            status: savedPayout.getStatus(),
-            processedAt: processedAt.toISOString(),
-            driverWalletBalanceAfter: wallet.getAvailableBalance().getAmount(),
-          },
+          payoutId: savedPayout.getId(),
+          driverId,
+          amount: payoutAmount.getAmount(),
+          currency: savedPayout.getCurrency(),
+          status: savedPayout.getStatus(),
+          processedAt: processedAt.toISOString(),
+          driverWalletBalanceAfter: wallet.getAvailableBalance().getAmount(),
         });
       } catch (innerError) {
         payout.markFailed(

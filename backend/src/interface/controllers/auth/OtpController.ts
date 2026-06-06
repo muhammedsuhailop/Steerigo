@@ -17,7 +17,7 @@ export class OtpController {
     private resendOtpUseCase: IUseCase<
       ResendOtpDto,
       Promise<Result<{ expiresAt: Date }>>
-    >
+    >,
   ) {}
 
   async resendOtp(req: Request, res: Response): Promise<void> {
@@ -27,10 +27,7 @@ export class OtpController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "resend_otp"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }

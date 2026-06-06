@@ -10,6 +10,7 @@ export const RIDE_MESSAGES = {
     "Ride has started. Driver arrival has been automatically recorded",
   RIDE_COMPLETED: "Ride completed successfully",
   RIDE_RATED: "Ride rated successfully",
+  RIDE_CANCELLED:"Ride Cancelled",
 };
 export const RIDE_ERROR_MESSAGES = {
   RIDE_NOT_FOUND: "Ride with ID {{rideId}} not found",

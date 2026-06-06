@@ -1,9 +1,6 @@
 import { PayoutStatus } from "@domain/value-objects/PayoutStatus";
 
 export interface ApprovePayoutResponseDto {
-  success: boolean;
-  message: string;
-  data: {
     payoutId: string;
     driverId: string;
     amount: number;
@@ -11,5 +8,4 @@ export interface ApprovePayoutResponseDto {
     status: PayoutStatus;
     processedAt: string;
     driverWalletBalanceAfter: number;
-  };
 }

@@ -23,9 +23,6 @@ export interface AdminRatingsPagination {
 }
 
 export interface GetAdminRatingsResponseDto {
-  success: boolean;
-  data: {
-    ratings: AdminRatingItem[];
-    pagination: AdminRatingsPagination;
-  };
+  ratings: AdminRatingItem[];
+  pagination: AdminRatingsPagination;
 }

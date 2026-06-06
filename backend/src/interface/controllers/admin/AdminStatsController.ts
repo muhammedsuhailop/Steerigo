@@ -50,7 +50,6 @@ export class AdminStatsController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_user_stats",
         );
         res.status(statusCode).json(response);
         return;
@@ -70,10 +69,7 @@ export class AdminStatsController {
         error,
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_user_stats",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -94,7 +90,6 @@ export class AdminStatsController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_ride_stats",
         );
         res.status(statusCode).json(response);
         return;
@@ -112,10 +107,7 @@ export class AdminStatsController {
     } catch (error) {
       Logger.error("AdminStatsController.getRideStats error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_ride_stats",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -135,7 +127,6 @@ export class AdminStatsController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_driver_stats",
         );
         res.status(statusCode).json(response);
         return;
@@ -150,10 +141,7 @@ export class AdminStatsController {
       res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("AdminStatsController.getDriverStats error", { error });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_driver_stats",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

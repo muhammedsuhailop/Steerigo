@@ -10,6 +10,8 @@ import { HttpStatusCodes } from "@shared/enums/HttpStatusCodes";
 import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
+import { ApiResponse } from "@shared/types/Common";
+import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 @injectable()
 export class DriverPayoutController {
@@ -51,7 +53,13 @@ export class DriverPayoutController {
         return;
       }
 
-      res.status(HttpStatusCodes.CREATED).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.PAYOUT_REQUEST_SUBMITTED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.CREATED).json(response);
     } catch (error) {
       Logger.error("DriverPayoutController.requestPayout error", { error });
 
@@ -82,7 +90,13 @@ export class DriverPayoutController {
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.PAYOUT_RETRIVED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("DriverPayoutController.getMyPayouts error", { error });
 

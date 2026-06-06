@@ -28,7 +28,3 @@ export {
 // Services
 export * from "./shared/services";
 
-// Hooks
-export * from "./dashboard/hooks";
-
-

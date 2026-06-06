@@ -9,6 +9,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { ApiResponse } from "@shared/types/Common";
 
 @injectable()
 export class DriverWalletController {
@@ -23,20 +24,12 @@ export class DriverWalletController {
   async getWallet(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.userId;
-      if (!userId) {
-        res.status(HttpStatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: DRIVER_MESSAGES.UNAUTHORIZED,
-        });
-        return;
-      }
-
       Logger.info("Driver wallet fetch request received", {
         userId,
         query: req.query,
       });
 
-      const dto = GetDriverWalletDto.fromRequest(userId, req.query);
+      const dto = GetDriverWalletDto.fromRequest(userId as string, req.query);
       const result = await this.getDriverWalletUseCase.execute(dto);
 
       if (result.isFailure()) {
@@ -46,16 +39,19 @@ export class DriverWalletController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_driver_wallet",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: DRIVER_MESSAGES.WALLET_FETCHED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Driver wallet controller error", {
         userId: req.user?.userId,

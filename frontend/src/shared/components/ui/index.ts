@@ -48,7 +48,7 @@ export type {
   ConfirmationVariant,
 } from "./ConfirmationModal";
 export type { MessagesDropdownProps, Message } from "./Messages";
-export type { WalletDropdownProps, Transaction } from "./Wallet";
+export type { WalletDropdownProps } from "./Wallet";
 export type { OnlineStatusProps } from "./OnlineStatus";
 
 // Error Handling types

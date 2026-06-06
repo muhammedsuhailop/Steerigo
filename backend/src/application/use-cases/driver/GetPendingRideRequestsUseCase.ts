@@ -11,13 +11,15 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
-export class GetPendingRideRequestsUseCase implements IUseCase<
-  GetPendingRideRequestsDto,
-  Promise<Result<GetPendingRideRequestsResponseDto>>
-> {
+export class GetPendingRideRequestsUseCase
+  implements
+    IUseCase<
+      GetPendingRideRequestsDto,
+      Promise<Result<GetPendingRideRequestsResponseDto>>
+    >
+{
   constructor(
     @inject(TYPES.DriverRepository)
     private driverRepository: IDriverRepository,
@@ -82,14 +84,10 @@ export class GetPendingRideRequestsUseCase implements IUseCase<
       );
 
       const response: GetPendingRideRequestsResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.PENDING_REQUESTS_FETCHED,
-        data: {
-          requests: requestsData,
-          total: pendingRequests.length,
-          limit: dto.getLimit(),
-          offset: dto.getOffset(),
-        },
+        requests: requestsData,
+        total: pendingRequests.length,
+        limit: dto.getLimit(),
+        offset: dto.getOffset(),
       };
 
       return Result.success(response);

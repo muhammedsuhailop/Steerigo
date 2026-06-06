@@ -1,0 +1,1 @@
+{"version":3,"file":"GetDriverPayoutsDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/driver/GetDriverPayoutsDto.ts"],"names":[],"mappings":"AAAA,qBAAa,mBAAmB;IACV,OAAO,CAAC,QAAQ,CAAC,MAAM;IAA3C,OAAO;IAEP,MAAM,CAAC,MAAM,CAAC,MAAM,EAAE,MAAM,GAAG,mBAAmB;IAIlD,SAAS,IAAI,MAAM;CAGpB"}

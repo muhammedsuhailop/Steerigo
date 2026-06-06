@@ -1,0 +1,27 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.adminRoutes = void 0;
+const express_1 = require("express");
+const adminUserRoutes_1 = require("./adminUserRoutes");
+const adminDriverRoutes_1 = require("./adminDriverRoutes");
+const adminRideRoutes_1 = require("./adminRideRoutes");
+const adminPayoutRoutes_1 = require("./adminPayoutRoutes");
+const adminCouponRoutes_1 = require("./adminCouponRoutes");
+const adminTransactionRoutes_1 = require("./adminTransactionRoutes");
+const adminWalletRoutes_1 = require("./adminWalletRoutes");
+const middleware_1 = require("../../middleware");
+const AuthConstants_1 = require("../../../shared/constants/AuthConstants");
+const adminStatsRoutes_1 = require("./adminStatsRoutes");
+const router = (0, express_1.Router)();
+exports.adminRoutes = router;
+router.use(middleware_1.authMiddleware);
+router.use((0, middleware_1.requireRole)([AuthConstants_1.UserRole.ADMIN]));
+router.use("/users", adminUserRoutes_1.adminUserRoutes);
+router.use("/drivers", adminDriverRoutes_1.adminDriverRoutes);
+router.use("/rides", adminRideRoutes_1.adminRideRoutes);
+router.use("/payouts", adminPayoutRoutes_1.adminPayoutRoutes);
+router.use("/coupons", adminCouponRoutes_1.adminCouponRoutes);
+router.use("/transactions", adminTransactionRoutes_1.adminTransactionRoutes);
+router.use("/wallet", adminWalletRoutes_1.adminWalletRoutes);
+router.use("/stats", adminStatsRoutes_1.adminStatsRoutes);
+//# sourceMappingURL=index.js.map

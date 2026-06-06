@@ -107,10 +107,7 @@ export class AutoRideController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "AutoSearchAndSendRideRequest",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
 
@@ -125,10 +122,7 @@ export class AutoRideController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "AutoSearchAndSendRideRequest",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -165,10 +159,7 @@ export class AutoRideController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "CancelRideRequests",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
 
         res.status(statusCode).json(response);
 
@@ -184,10 +175,7 @@ export class AutoRideController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "CancelRideRequests",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }
@@ -223,10 +211,7 @@ export class AutoRideController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "ScheduleFutureRide",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
 
         Logger.warn("Schedule future ride failed", {
@@ -240,10 +225,7 @@ export class AutoRideController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "ScheduleFutureRide",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -280,10 +262,7 @@ export class AutoRideController {
         });
       } else {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "CancelFutureRide",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
 
         Logger.warn("Cancel future ride failed", {
@@ -297,10 +276,7 @@ export class AutoRideController {
         userId: this.getUserId(req),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "CancelFutureRide",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

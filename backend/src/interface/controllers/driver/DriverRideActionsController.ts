@@ -14,6 +14,8 @@ import { MarkRideAsCompletedDto } from "@application/dto/driver/MarkRideAsComple
 import { MarkRideAsCompletedResponseDto } from "@application/dto/driver/MarkRideAsCompletedResponseDto";
 import { DriverCancelRideDto } from "@application/dto/driver/DriverCancelRideDto";
 import { DriverCancelRideResponseDto } from "@application/dto/driver/DriverCancelRideResponseDto";
+import { ApiResponse } from "@shared/types/Common";
+import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
 export class DriverRideActionsController {
@@ -70,10 +72,7 @@ export class DriverRideActionsController {
           error: error.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "mark_ride_as_arrived",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -81,11 +80,17 @@ export class DriverRideActionsController {
       const responseData = result.getValue();
       Logger.info("Ride marked as arrived successfully", {
         userId,
-        rideId: responseData.data.rideId,
-        arrivedAt: responseData.data.arrivedAt,
+        rideId: responseData.rideId,
+        arrivedAt: responseData.arrivedAt,
       });
 
-      res.status(HttpStatusCodes.OK).json(responseData);
+      const response: ApiResponse = {
+        success: true,
+        message: RIDE_MESSAGES.DRIVER_ARRIVED_AT_PICKUP,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Mark ride as arrived controller error", {
         userId: this.getUserId(req),
@@ -93,10 +98,7 @@ export class DriverRideActionsController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "mark_ride_as_arrived",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -108,7 +110,7 @@ export class DriverRideActionsController {
       const rideId = req.params.rideId;
 
       const { verificationCode } = req.body;
-      
+
       Logger.info("Mark ride as started request received", { userId, rideId });
 
       const dto = MarkRideAsStartedDto.fromRequest(userId, {
@@ -124,10 +126,7 @@ export class DriverRideActionsController {
           rideId,
           error: error.message,
         });
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "mark_ride_as_started",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -135,22 +134,26 @@ export class DriverRideActionsController {
       const responseData = result.getValue();
       Logger.info("Ride marked as started successfully", {
         userId,
-        rideId: responseData.data.rideId,
-        arrivedAt: responseData.data.arrivedAt,
-        startedAt: responseData.data.startedAt,
-        wasArrivedAutoSet: responseData.data.wasArrivedAutoSet,
+        rideId: responseData.rideId,
+        arrivedAt: responseData.arrivedAt,
+        startedAt: responseData.startedAt,
+        wasArrivedAutoSet: responseData.wasArrivedAutoSet,
       });
-      res.status(HttpStatusCodes.OK).json(responseData);
+
+      const response: ApiResponse = {
+        success: true,
+        message: RIDE_MESSAGES.RIDE_STARTED,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Mark ride as started controller error", {
         userId: this.getUserId(req),
         rideId: req.params.rideId,
         error: error instanceof Error ? error.message : String(error),
       });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "mark_ride_as_started",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -175,10 +178,7 @@ export class DriverRideActionsController {
           rideId,
           error: error.message,
         });
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "mark_ride_as_completed",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -186,23 +186,26 @@ export class DriverRideActionsController {
       const responseData = result.getValue();
       Logger.info("Ride completed successfully", {
         userId,
-        rideId: responseData.data.rideId,
-        totalFare: responseData.data.fareBreakdown.totalFare.amount,
-        actualDurationMinutes:
-          responseData.data.fareBreakdown.actualDurationMinutes,
-        durationHours: responseData.data.fareBreakdown.durationHours,
+        rideId: responseData.rideId,
+        totalFare: responseData.fareBreakdown.totalFare.amount,
+        actualDurationMinutes: responseData.fareBreakdown.actualDurationMinutes,
+        durationHours: responseData.fareBreakdown.durationHours,
       });
-      res.status(HttpStatusCodes.OK).json(responseData);
+
+      const response: ApiResponse = {
+        success: true,
+        message: RIDE_MESSAGES.RIDE_COMPLETED,
+        data: responseData,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Mark ride as completed controller error", {
         userId: this.getUserId(req),
         rideId: req.params.rideId,
         error: error instanceof Error ? error.message : String(error),
       });
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "mark_ride_as_completed",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -234,10 +237,7 @@ export class DriverRideActionsController {
           error: error?.message,
         });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "driver_cancel_ride",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -256,6 +256,14 @@ export class DriverRideActionsController {
         message: data.message,
         data,
       });
+
+      const response: ApiResponse = {
+        success: true,
+        message: data.message,
+        data,
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Driver cancel ride controller error", {
         userId: this.getUserId(req),
@@ -263,10 +271,7 @@ export class DriverRideActionsController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "driver_cancel_ride",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

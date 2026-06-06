@@ -8,6 +8,8 @@ import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { GetAdminWalletDto } from "@application/dto/admin/GetAdminWalletDto";
 import { GetAdminWalletResponseDto } from "@application/dto/admin/GetAdminWalletResponseDto";
+import { ApiResponse } from "@shared/types/Common";
+import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class AdminWalletController {
@@ -30,24 +32,24 @@ export class AdminWalletController {
         const error = result.getError();
         Logger.warn("Admin get wallet failed", { error: error?.message });
 
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "admin_get_wallet",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: ADMIN_MESSAGES.WALLET.FETCHED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("AdminWalletController.getWallet error", {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "admin_get_wallet",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

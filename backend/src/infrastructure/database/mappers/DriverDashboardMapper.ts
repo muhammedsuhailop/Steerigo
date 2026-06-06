@@ -27,32 +27,38 @@ export class DriverDashboardMapper {
     performance: DriverDashboardPerformance,
     scheduledRidesCount: number,
   ): DriverDashboardResponseDto {
-    return new DriverDashboardResponseDto({
-      driver: this.mapDriverInfo(driver, driverUser),
-      availability: availability ? this.mapAvailability(availability) : null,
-      currentRide: currentRide
+    return new DriverDashboardResponseDto(
+      this.mapDriverInfo(driver, driverUser),
+
+      availability ? this.mapAvailability(availability) : null,
+
+      currentRide
         ? this.mapCurrentRide(currentRide, currentRideRiderUser)
         : null,
-      pendingRequests: pendingRequests.map((req, idx) =>
+
+      pendingRequests.map((req, idx) =>
         this.mapPendingRequest(req, pendingRequestUsers[idx] ?? null),
       ),
-      statistics: {
+
+      {
         ridesCompleted: statistics.getRidesCompleted(),
         ridesCancelled: statistics.getRidesCancelled(),
         scheduledRides: scheduledRidesCount,
         totalEarnings: statistics.getTotalEarnings(),
         currency: "INR",
       },
-      performance: {
+
+      {
         acceptanceRate: performance.getAcceptanceRate(),
         cancellationRate: performance.getCancellationRate(),
         averageRating: performance.getAverageRating(),
       },
-      meta: {
+
+      {
         lastUpdated: new Date(),
         serverTime: new Date(),
       },
-    });
+    );
   }
 
   private static mapDriverInfo(driver: Driver, user: User): DriverInfo {

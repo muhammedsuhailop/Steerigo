@@ -1,0 +1,1 @@
+{"version":3,"file":"RideMapper.d.ts","sourceRoot":"","sources":["../../../../src/infrastructure/database/mappers/RideMapper.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,uBAAuB,CAAC;AAO7C,OAAO,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAIpD,qBAAa,UAAU;IACrB,MAAM,CAAC,QAAQ,CAAC,GAAG,EAAE,aAAa,GAAG,IAAI;IA4EzC,MAAM,CAAC,aAAa,CAAC,MAAM,EAAE,IAAI,GAAG,OAAO,CAAC,aAAa,CAAC;CAsE3D"}

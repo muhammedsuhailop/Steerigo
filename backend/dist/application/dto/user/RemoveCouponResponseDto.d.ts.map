@@ -1,0 +1,1 @@
+{"version":3,"file":"RemoveCouponResponseDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/user/RemoveCouponResponseDto.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,uBAAuB;IACtC,MAAM,EAAE,MAAM,CAAC;IACf,YAAY,EAAE,MAAM,CAAC;IACrB,aAAa,EAAE,MAAM,CAAC;IACtB,QAAQ,EAAE,MAAM,CAAC;IACjB,OAAO,EAAE,MAAM,CAAC;CACjB"}

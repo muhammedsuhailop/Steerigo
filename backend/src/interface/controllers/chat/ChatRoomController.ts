@@ -10,6 +10,8 @@ import { CreateRideChatRoomDto } from "@application/dto/chat/CreateRideChatRoomD
 import { GetRideChatRoomDto } from "@application/dto/chat/GetRideChatRoomDto";
 import { CreateRideChatRoomResponseDto } from "@application/dto/chat/response/CreateRideChatRoomResponseDto";
 import { GetRideChatRoomResponseDto } from "@application/dto/chat/response/GetRideChatRoomResponseDto";
+import { ApiResponse } from "@shared/types/Common";
+import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 
 @injectable()
 export class ChatRoomController {
@@ -44,15 +46,17 @@ export class ChatRoomController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "create_ride_chat_room",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.CHAT_ROOM.CREATED,
+        data: result.getValue(),
+      };
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Create ride chat room controller error", {
         userId: this.getUserId(req),
@@ -60,10 +64,7 @@ export class ChatRoomController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "create_ride_chat_room",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -79,15 +80,18 @@ export class ChatRoomController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_ride_chat_room",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.CHAT_ROOM.RIDE_ROOM_FETCHED,
+        data: result.getValue(),
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get ride chat room controller error", {
         userId: this.getUserId(req),
@@ -95,10 +99,7 @@ export class ChatRoomController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_ride_chat_room",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

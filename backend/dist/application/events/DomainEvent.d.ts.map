@@ -1,0 +1,1 @@
+{"version":3,"file":"DomainEvent.d.ts","sourceRoot":"","sources":["../../../src/application/events/DomainEvent.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,WAAW,CAC1B,KAAK,SAAS,MAAM,GAAG,MAAM,EAC7B,QAAQ,GAAG,OAAO;IAElB,QAAQ,CAAC,IAAI,EAAE,KAAK,CAAC;IACrB,QAAQ,CAAC,UAAU,EAAE,IAAI,CAAC;IAC1B,QAAQ,CAAC,OAAO,EAAE,QAAQ,CAAC;CAC5B"}

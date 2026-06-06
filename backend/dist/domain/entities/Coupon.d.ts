@@ -1,0 +1,52 @@
+import { CouponDiscountType } from "../value-objects/CouponDiscountType";
+export declare class Coupon {
+    private readonly id;
+    private readonly code;
+    private readonly discountType;
+    private readonly discountValue;
+    private readonly maxDiscount;
+    private readonly minRideAmount;
+    private readonly usageLimit;
+    private readonly usagePerUser;
+    private readonly validFrom;
+    private readonly validTo;
+    private isActive;
+    private readonly createdAt;
+    private updatedAt;
+    private constructor();
+    static create(id: string, code: string, discountType: CouponDiscountType, discountValue: number, maxDiscount?: number, minRideAmount?: number, usageLimit?: number, usagePerUser?: number, validFrom?: Date, validTo?: Date): Coupon;
+    static fromData(data: {
+        id: string;
+        code: string;
+        discountType: CouponDiscountType;
+        discountValue: number;
+        maxDiscount?: number;
+        minRideAmount?: number;
+        usageLimit?: number;
+        usagePerUser?: number;
+        validFrom?: Date;
+        validTo?: Date;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }): Coupon;
+    isValidNow(currentDate: Date): boolean;
+    isMinimumAmountSatisfied(amount: number): boolean;
+    calculateDiscount(amount: number): number;
+    activate(): void;
+    deactivate(): void;
+    getId(): string;
+    getCode(): string;
+    getDiscountType(): CouponDiscountType;
+    getDiscountValue(): number;
+    getMaxDiscount(): number | undefined;
+    getMinRideAmount(): number | undefined;
+    getUsageLimit(): number | undefined;
+    getUsagePerUser(): number | undefined;
+    getValidFrom(): Date | undefined;
+    getValidTo(): Date | undefined;
+    getIsActive(): boolean;
+    getCreatedAt(): Date;
+    getUpdatedAt(): Date;
+}
+//# sourceMappingURL=Coupon.d.ts.map

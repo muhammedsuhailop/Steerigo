@@ -23,12 +23,8 @@ export interface PendingRideRequestData {
 }
 
 export interface GetPendingRideRequestsResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    requests: PendingRideRequestData[];
-    total: number;
-    limit: number;
-    offset: number;
-  };
+  requests: PendingRideRequestData[];
+  total: number;
+  limit: number;
+  offset: number;
 }

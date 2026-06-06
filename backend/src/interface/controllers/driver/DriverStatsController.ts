@@ -9,6 +9,7 @@ import { TYPES } from "@shared/constants/DITypes";
 import { Logger } from "@shared/utils/Logger";
 import { ErrorHandlerService } from "@shared/utils/ErrorHandlerService";
 import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
+import { ApiResponse } from "@shared/types/Common";
 
 @injectable()
 export class DriverStatsController {
@@ -40,18 +41,17 @@ export class DriverStatsController {
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json({
+      const response: ApiResponse = {
         success: true,
         message: DRIVER_MESSAGES.STATS_FETCHED,
         data: result.getValue(),
-      });
+      };
+
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("DriverStatsController.getMyStats error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "driver_get_stats",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
 
       res.status(statusCode).json(response);
     }

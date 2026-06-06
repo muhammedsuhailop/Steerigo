@@ -54,15 +54,11 @@ export interface AdminRideData {
 }
 
 export interface GetAdminRidesResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    rides: AdminRideData[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  rides: AdminRideData[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

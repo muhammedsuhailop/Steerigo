@@ -14,6 +14,8 @@ import { EditChatMessageDto } from "@application/dto/chat/EditChatMessageDto";
 import { EditChatMessageResponseDto } from "@application/dto/chat/response/EditChatMessageResponseDto";
 import { DeleteChatMessageDto } from "@application/dto/chat/DeleteChatMessageDto";
 import { DeleteChatMessageResponseDto } from "@application/dto/chat/response/DeleteChatMessageResponseDto";
+import { ApiResponse } from "@shared/types/Common";
+import { CHAT_MESSAGES } from "@shared/constants/ChatMessages";
 
 @injectable()
 export class ChatMessageController {
@@ -68,15 +70,17 @@ export class ChatMessageController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_chat_messages",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.MESSAGES.FETCHED,
+        data: result.getValue(),
+      };
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Get chat messages controller error", {
         userId: this.getUserId(req),
@@ -84,10 +88,7 @@ export class ChatMessageController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_chat_messages",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -109,15 +110,17 @@ export class ChatMessageController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "send_chat_message",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.MESSAGES.SEND_SUCCESS,
+        data: result.getValue(),
+      };
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
       Logger.error("Send chat message controller error", {
         userId: this.getUserId(req),
@@ -125,10 +128,7 @@ export class ChatMessageController {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "send_chat_message",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -150,20 +150,19 @@ export class ChatMessageController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "edit_chat_message",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.MESSAGES.EDITED,
+        data: result.getValue(),
+      };
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "edit_chat_message",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -182,20 +181,19 @@ export class ChatMessageController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "delete_chat_message",
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
 
-      res.status(HttpStatusCodes.OK).json(result.getValue());
+      const response: ApiResponse = {
+        success: true,
+        message: CHAT_MESSAGES.MESSAGES.DELETED,
+        data: result.getValue(),
+      };
+      res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "delete_chat_message",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

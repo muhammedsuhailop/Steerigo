@@ -35,15 +35,11 @@ export interface RideData {
 }
 
 export interface GetDriverRidesResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    rides: RideData[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  rides: RideData[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

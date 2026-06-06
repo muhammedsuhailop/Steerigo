@@ -1,5 +1,5 @@
 import React from "react";
-import type { KYCDocumentDetail } from "../../../shared/types";
+import type { KYCDocumentDetail } from "../../../shared/types/kyc.interfaces";
 
 interface DocumentInfoProps {
   kyc: KYCDocumentDetail;

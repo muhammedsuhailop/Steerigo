@@ -17,7 +17,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { Ride } from "@domain/entities/Ride";
 import { User } from "@domain/entities/User";
 import { RideErrors } from "@domain/errors/RideErrors";
@@ -104,12 +103,8 @@ export class GetDriverRideByIdUseCase
       const riderDetails = this.mapRiderToDetails(rider);
 
       const response: GetDriverRideByIdResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_FETCHED_SUCCESSFULLY,
-        data: {
-          ride: rideDetails,
-          rider: riderDetails,
-        },
+        ride: rideDetails,
+        rider: riderDetails,
       };
 
       Logger.info("Driver ride fetched successfully", {

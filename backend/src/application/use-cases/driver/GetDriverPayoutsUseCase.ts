@@ -12,7 +12,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 @injectable()
 export class GetDriverPayoutsUseCase
@@ -44,14 +43,10 @@ export class GetDriverPayoutsUseCase
       });
 
       return Result.success({
-        success: true,
-        message: DRIVER_MESSAGES.PAYOUT_RETRIVED,
-        data: {
-          payouts: payouts.map(this.toPayoutItemDto),
-          total: payouts.length,
-          page: 1,
-          limit: payouts.length,
-        },
+        payouts: payouts.map(this.toPayoutItemDto),
+        total: payouts.length,
+        page: 1,
+        limit: payouts.length,
       });
     } catch (error) {
       Logger.error("Error fetching driver payouts", {

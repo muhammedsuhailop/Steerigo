@@ -4,6 +4,7 @@ import {
   RegistrationStep,
   DriverRegistrationState,
 } from "../types/driverRegistration.types";
+import { RootState } from "@/app/store/store";
 
 const initialState: DriverRegistrationState = {
   currentStep: RegistrationStep.PERSONAL_INFO,
@@ -134,8 +135,6 @@ export const {
 export default driverRegistrationSlice.reducer;
 
 // Selectors
-import type { RootState } from "@/app/store/rootReducer";
-
 export const selectFormData = (state: RootState) =>
   state.driverRegistration.formData;
 

@@ -11,21 +11,17 @@ export interface TransactionItemData {
 }
 
 export interface GetDriverWalletResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    walletId: string;
-    driverId: string;
-    availableBalance: number;
-    pendingBalance: number;
-    currency: string;
-    updatedAt: string;
-    transactions: TransactionItemData[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  walletId: string;
+  driverId: string;
+  availableBalance: number;
+  pendingBalance: number;
+  currency: string;
+  updatedAt: string;
+  transactions: TransactionItemData[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

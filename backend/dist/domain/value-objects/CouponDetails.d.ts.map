@@ -1,0 +1,1 @@
+{"version":3,"file":"CouponDetails.d.ts","sourceRoot":"","sources":["../../../src/domain/value-objects/CouponDetails.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,sBAAsB,CAAC;AAE1D,MAAM,WAAW,aAAa;IAC5B,QAAQ,EAAE,MAAM,CAAC;IACjB,IAAI,EAAE,MAAM,CAAC;IACb,cAAc,EAAE,MAAM,CAAC;IACvB,YAAY,EAAE,kBAAkB,CAAC;CAClC"}

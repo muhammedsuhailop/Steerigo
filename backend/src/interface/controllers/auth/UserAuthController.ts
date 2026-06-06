@@ -29,7 +29,7 @@ export class UserAuthController {
     private getCurrentUserUseCase: IUseCase<
       GetCurrentUserDto,
       Promise<Result<GetCurrentUserResponseDto>>
-    >
+    >,
   ) {}
 
   async login(req: Request, res: Response): Promise<void> {
@@ -47,10 +47,7 @@ export class UserAuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "login"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -72,10 +69,7 @@ export class UserAuthController {
         email: dto.getEmailValue(),
       });
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "login"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -96,10 +90,7 @@ export class UserAuthController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_current_user"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -113,10 +104,7 @@ export class UserAuthController {
 
       res.status(HttpStatusCodes.OK).json(response);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_current_user"
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

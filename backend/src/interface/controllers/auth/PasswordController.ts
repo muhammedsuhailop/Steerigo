@@ -29,7 +29,7 @@ export class PasswordController {
     private updatePasswordUseCase: IUseCase<
       UpdatePasswordDto,
       Promise<Result<void>>
-    >
+    >,
   ) {}
 
   async forgotPasswordRequest(req: Request, res: Response): Promise<void> {
@@ -39,10 +39,7 @@ export class PasswordController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "forgot_password_request"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -72,10 +69,7 @@ export class PasswordController {
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "forgot_password_verify"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }
@@ -100,17 +94,14 @@ export class PasswordController {
 
   async updatePassword(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId as string; // From auth middleware
+      const userId = req.user?.userId as string;
       const dto = UpdatePasswordDto.fromRequest(userId, req.body);
 
       const result = await this.updatePasswordUseCase.execute(dto);
 
       if (result.isFailure()) {
         const error = result.getError();
-        const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "update_password"
-        );
+        const { response, statusCode } = ErrorHandlerService.handleError(error);
         res.status(statusCode).json(response);
         return;
       }

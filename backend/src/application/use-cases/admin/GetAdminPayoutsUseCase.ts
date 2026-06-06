@@ -10,7 +10,6 @@ import { Payout } from "@domain/entities/Payout";
 import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
-import { ADMIN_MESSAGES } from "@shared/constants/AdminMessages";
 
 @injectable()
 export class GetAdminPayoutsUseCase
@@ -42,14 +41,10 @@ export class GetAdminPayoutsUseCase
       });
 
       return Result.success({
-        success: true,
-        message: ADMIN_MESSAGES.PAYOUT.RETRIVED,
-        data: {
-          payouts: result.payouts.map(this.toPayoutItemDto),
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-        },
+        payouts: result.payouts.map(this.toPayoutItemDto),
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
       });
     } catch (error) {
       Logger.error("Error fetching payouts for admin", {

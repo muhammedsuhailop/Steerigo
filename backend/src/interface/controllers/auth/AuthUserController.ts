@@ -40,9 +40,7 @@ export class AuthUserController {
       if (result.isFailure()) {
         const error = result.getError();
         const { response, statusCode } = ErrorHandlerService.handleError(
-          error,
-          "get_current_user"
-        );
+          error        );
         res.status(statusCode).json(response);
         return;
       }

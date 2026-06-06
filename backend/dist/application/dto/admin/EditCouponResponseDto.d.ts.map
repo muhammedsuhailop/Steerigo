@@ -1,0 +1,1 @@
+{"version":3,"file":"EditCouponResponseDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/admin/EditCouponResponseDto.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,2BAA2B,CAAC;AAEvD,MAAM,WAAW,qBAAqB;IACpC,OAAO,EAAE,OAAO,CAAC;IACjB,OAAO,EAAE,MAAM,CAAC;IAChB,IAAI,EAAE;QACJ,MAAM,EAAE,UAAU,CAAC;KACpB,CAAC;CACH"}

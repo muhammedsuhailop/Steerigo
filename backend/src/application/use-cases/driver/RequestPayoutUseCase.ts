@@ -14,7 +14,6 @@ import { TYPES } from "@shared/constants/DITypes";
 import { PayoutErrors } from "@domain/errors/PayoutErrors";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Types } from "mongoose";
-import { DRIVER_MESSAGES } from "@shared/constants/DriverMessages";
 
 const MINIMUM_PAYOUT_AMOUNT = 100;
 const PAYOUT_CURRENCY = "INR";
@@ -103,17 +102,13 @@ export class RequestPayoutUseCase
       });
 
       return Result.success({
-        success: true,
-        message: DRIVER_MESSAGES.PAYOUT_REQUEST_SUBMITTED,
-        data: {
-          payoutId: savedPayout.getId(),
-          driverId,
-          amount: savedPayout.getAmount().getAmount(),
-          currency: savedPayout.getCurrency(),
-          method: savedPayout.getMethod(),
-          status: savedPayout.getStatus(),
-          createdAt: savedPayout.getCreatedAt().toISOString(),
-        },
+        payoutId: savedPayout.getId(),
+        driverId,
+        amount: savedPayout.getAmount().getAmount(),
+        currency: savedPayout.getCurrency(),
+        method: savedPayout.getMethod(),
+        status: savedPayout.getStatus(),
+        createdAt: savedPayout.getCreatedAt().toISOString(),
       });
     } catch (error) {
       Logger.error("Error requesting payout", {

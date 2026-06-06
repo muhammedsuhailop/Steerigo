@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetRideDetailsQuery } from "../services/viewRideApi";
 import {
@@ -19,11 +19,12 @@ import CompletedRideSummary from "../components/CompletedRideSummary";
 import CancelRideButton from "../components/CancelRideButton";
 import CouponSection from "../components/CouponSection";
 import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
-import { FaShieldAlt } from "react-icons/fa";
+import { FaArrowLeft, FaShieldAlt } from "react-icons/fa";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, isLoading: _isAuthLoading } = useAuth();
 
   const { data, isLoading, isFetching, error } = useGetRideDetailsQuery(
@@ -34,6 +35,14 @@ const ViewRidePage: React.FC = () => {
   const activeRide = useSelector(selectActiveRide);
   const activeDriver = useSelector(selectActiveDriver);
   const { driverLocation } = useViewRide(id);
+
+ const handleBack = () => {
+   if (window.history.length > 1) {
+     navigate(-1);
+   } else {
+     navigate("/rides");
+   }
+ };
 
   useEffect(() => {
     if (data?.success) {
@@ -87,6 +96,15 @@ const ViewRidePage: React.FC = () => {
       <Header />
 
       <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6">
+          <button
+            onClick={handleBack}
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-black font-medium transition-colors"
+          >
+            <FaArrowLeft className="text-sm" />
+            Back
+          </button>
+        </div>
         {isOngoing && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex justify-between items-end">
@@ -139,7 +157,7 @@ const ViewRidePage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  
+
                 {activeDriver ? (
                   <RideDriverCard
                     driver={activeDriver}

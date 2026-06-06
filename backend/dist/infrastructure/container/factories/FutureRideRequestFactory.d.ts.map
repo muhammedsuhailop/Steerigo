@@ -1,0 +1,1 @@
+{"version":3,"file":"FutureRideRequestFactory.d.ts","sourceRoot":"","sources":["../../../../src/infrastructure/container/factories/FutureRideRequestFactory.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,WAAW,CAAC;AA8BtC,qBAAa,wBAAwB;IACnC,MAAM,CAAC,QAAQ,CAAC,SAAS,EAAE,SAAS,GAAG,IAAI;CA2E5C"}

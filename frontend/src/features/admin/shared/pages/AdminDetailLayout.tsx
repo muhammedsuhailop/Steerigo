@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AdminSidebar, AdminTopbar } from "../components";
-import { AdminDetailLayoutProps } from "../types";
+import { AdminDetailLayoutProps } from "../types/admin.interfaces";
 
 const AdminDetailLayout: React.FC<AdminDetailLayoutProps> = ({
   children,

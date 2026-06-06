@@ -1,0 +1,24 @@
+export declare const PAYMENT_ERROR_MESSAGES: {
+    RIDE_NOT_COMPLETED: string;
+    RIDE_NOT_COMPLETED_OR_CANCELLED: string;
+    PAYMENT_ALREADY_EXISTS: string;
+    PAYMENT_NOT_FOUND: string;
+    PAYMENT_NOT_PENDING: string;
+    INVALID_PAYMENT_SIGNATURE: string;
+    INSUFFICIENT_WALLET_BALANCE: string;
+    WALLET_NOT_FOUND: string;
+    UNAUTHORIZED_PAYMENT_ACCESS: string;
+    INVALID_PAYMENT_METHOD: string;
+    CASH_CONFIRMATION_UNAUTHORIZED: string;
+    INVALID_PAYMENT_AMOUNT: string;
+    CANNOT_MARK_PAYMENT_FAILED: string;
+};
+export declare const PAYMENT_MESSAGES: {
+    CONFIRMED: string;
+    VERIFIED: string;
+    ONLINE_ORDER_CREATED: string;
+    WALLET_PAYMENT_SUCCESS: string;
+    CASH_PAYMENT_INITIATED: string;
+    PAYMENT_FAILED: string;
+};
+//# sourceMappingURL=PaymentMessages.d.ts.map

@@ -47,7 +47,6 @@ export class AdminCouponController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_admin_coupons",
         );
         res.status(statusCode).json(response);
         return;
@@ -57,10 +56,7 @@ export class AdminCouponController {
     } catch (error) {
       Logger.error("AdminCouponController.getCoupons error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_admin_coupons",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -76,7 +72,6 @@ export class AdminCouponController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "create_coupon",
         );
         res.status(statusCode).json(response);
         return;
@@ -88,10 +83,7 @@ export class AdminCouponController {
     } catch (error) {
       Logger.error("AdminCouponController.createCoupon error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "create_coupon",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -115,7 +107,6 @@ export class AdminCouponController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "edit_coupon",
         );
         res.status(statusCode).json(response);
         return;
@@ -125,10 +116,7 @@ export class AdminCouponController {
     } catch (error) {
       Logger.error("AdminCouponController.editCoupon error", { error });
 
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "edit_coupon",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

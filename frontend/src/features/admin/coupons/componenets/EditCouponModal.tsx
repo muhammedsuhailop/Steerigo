@@ -55,6 +55,11 @@ export const EditCouponModal: React.FC<Props> = ({
 
     if (!formData.discountValue || formData.discountValue <= 0) {
       newErrors.discountValue = "Value must be greater than 0";
+    } else if (
+      formData.discountType === "PERCENTAGE" &&
+      formData.discountValue > 100
+    ) {
+      newErrors.discountValue = "Percentage value cannot exceed 100%";
     }
 
     if (!formData.validFrom) {

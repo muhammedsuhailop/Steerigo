@@ -82,7 +82,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_drivers",
         );
         res.status(statusCode).json(response);
         return;
@@ -93,10 +92,7 @@ export class AdminDriverController {
         data: result.getValue(),
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_drivers",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -112,7 +108,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "driver_action",
         );
         res.status(statusCode).json(response);
         return;
@@ -127,10 +122,7 @@ export class AdminDriverController {
         },
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "driver_action",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -144,7 +136,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_driver_profile",
         );
         res.status(statusCode).json(response);
         return;
@@ -155,10 +146,7 @@ export class AdminDriverController {
         data: result.getValue(),
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_driver_profile",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -181,10 +169,7 @@ export class AdminDriverController {
         data: result.getValue(),
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_kyc_requests",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -199,7 +184,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "update_kyc_status",
         );
         res.status(statusCode).json(response);
         return;
@@ -214,10 +198,7 @@ export class AdminDriverController {
         },
       } as ApiResponse<unknown>);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_kyc_status",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -231,7 +212,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "get_kyc_request_by_id",
         );
         res.status(statusCode).json(response);
         return;
@@ -242,10 +222,7 @@ export class AdminDriverController {
         data: result.getValue(),
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "get_kyc_request_by_id",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }
@@ -262,7 +239,6 @@ export class AdminDriverController {
       if (result.isFailure()) {
         const { response, statusCode } = ErrorHandlerService.handleError(
           result.getError(),
-          "update_driver_kyc_status",
         );
         res.status(statusCode).json(response);
         return;
@@ -279,10 +255,7 @@ export class AdminDriverController {
         },
       } as ApiResponse);
     } catch (error) {
-      const { response, statusCode } = ErrorHandlerService.handleError(
-        error,
-        "update_driver_kyc_status",
-      );
+      const { response, statusCode } = ErrorHandlerService.handleError(error);
       res.status(statusCode).json(response);
     }
   }

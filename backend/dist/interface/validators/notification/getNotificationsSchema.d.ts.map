@@ -1,0 +1,1 @@
+{"version":3,"file":"getNotificationsSchema.d.ts","sourceRoot":"","sources":["../../../../src/interface/validators/notification/getNotificationsSchema.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,CAAC,EAAE,MAAM,KAAK,CAAC;AACxB,OAAO,EAAE,gBAAgB,EAAE,MAAM,wCAAwC,CAAC;AAC1E,OAAO,EAAE,mBAAmB,EAAE,MAAM,2CAA2C,CAAC;AAEhF,eAAO,MAAM,sBAAsB;;;;;;;;;;;;;;;;;iBAWjC,CAAC"}

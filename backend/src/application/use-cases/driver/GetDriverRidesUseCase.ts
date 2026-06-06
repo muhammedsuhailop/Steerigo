@@ -12,7 +12,6 @@ import { Result } from "@shared/utils/Result";
 import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 
 @injectable()
 export class GetDriverRidesUseCase
@@ -129,16 +128,12 @@ export class GetDriverRidesUseCase
       });
 
       const response: GetDriverRidesResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDES_FETCHED_SUCCESSFULLY,
-        data: {
-          rides: ridesData,
-          pagination: {
-            total: paginatedResult.total,
-            page: paginatedResult.page,
-            limit: paginatedResult.limit,
-            totalPages: paginatedResult.totalPages,
-          },
+        rides: ridesData,
+        pagination: {
+          total: paginatedResult.total,
+          page: paginatedResult.page,
+          limit: paginatedResult.limit,
+          totalPages: paginatedResult.totalPages,
         },
       };
 

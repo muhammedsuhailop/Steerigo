@@ -16,7 +16,6 @@ import { DriverNotFoundError } from "@domain/errors/DriverNotFoundError";
 import { Ride } from "@domain/entities/Ride";
 import { RideTimeline } from "@domain/value-objects/RideTimeline";
 import { AvailabilityStatus } from "@domain/value-objects/AvailabilityStatus";
-import { RIDE_MESSAGES } from "@shared/constants/RideMessages";
 import { IDistributedLockService } from "@application/services/IDistributedLockService";
 import { REDIS_LOCK_KEYS } from "@shared/constants/RedisLockKeys";
 import { IEventBus } from "@application/services/IEventBus";
@@ -30,10 +29,13 @@ import { BookingType } from "@domain/value-objects/BookingType";
 import { IOtpService } from "@application/services/IOtpService";
 
 @injectable()
-export class AcceptRideRequestUseCase implements IUseCase<
-  AcceptRideRequestDto,
-  Promise<Result<AcceptRideRequestResponseDto>>
-> {
+export class AcceptRideRequestUseCase
+  implements
+    IUseCase<
+      AcceptRideRequestDto,
+      Promise<Result<AcceptRideRequestResponseDto>>
+    >
+{
   private readonly LOCK_TTL_SECONDS =
     Number(process.env.RIDE_ACCEPT_LOCK_TTL_SECONDS) || 10;
   private readonly LOCK_KEY_PREFIX = REDIS_LOCK_KEYS.RIDE_ACCEPT;
@@ -65,7 +67,7 @@ export class AcceptRideRequestUseCase implements IUseCase<
     @inject(TYPES.IDGenerator)
     private readonly idGenerator: IIdGenerator,
     @inject(TYPES.OtpService)
-    private readonly otpService : IOtpService
+    private readonly otpService: IOtpService,
   ) {}
 
   async execute(
@@ -245,32 +247,28 @@ export class AcceptRideRequestUseCase implements IUseCase<
       );
 
       const response: AcceptRideRequestResponseDto = {
-        success: true,
-        message: RIDE_MESSAGES.RIDE_REQUEST_ACCEPTED,
-        data: {
-          rideId: savedRide.getRideId(),
-          requestId: acceptedRequest.getId(),
-          riderId: acceptedRequest.getRiderId(),
-          driverId,
-          status: savedRide.getStatus(),
-          pickup: {
-            latitude: acceptedRequest.getPickup().getLatitude(),
-            longitude: acceptedRequest.getPickup().getLongitude(),
-            address: acceptedRequest.getPickup().getAddress(),
-          },
-          drop: {
-            latitude: acceptedRequest.getDrop().getLatitude(),
-            longitude: acceptedRequest.getDrop().getLongitude(),
-            address: acceptedRequest.getDrop().getAddress(),
-          },
-          rideType: acceptedRequest.getRideType(),
-          fare: acceptedRequest.getFare(),
-          currency: savedRide.getCurrency(),
-          pickupTime: acceptedRequest.getPickupTime().toISOString(),
-          timeline: {
-            requestedAt: savedRide.getTimeline().getRequestedAt().toISOString(),
-            acceptedAt: savedRide.getTimeline().getAcceptedAt()!.toISOString(),
-          },
+        rideId: savedRide.getRideId(),
+        requestId: acceptedRequest.getId(),
+        riderId: acceptedRequest.getRiderId(),
+        driverId,
+        status: savedRide.getStatus(),
+        pickup: {
+          latitude: acceptedRequest.getPickup().getLatitude(),
+          longitude: acceptedRequest.getPickup().getLongitude(),
+          address: acceptedRequest.getPickup().getAddress(),
+        },
+        drop: {
+          latitude: acceptedRequest.getDrop().getLatitude(),
+          longitude: acceptedRequest.getDrop().getLongitude(),
+          address: acceptedRequest.getDrop().getAddress(),
+        },
+        rideType: acceptedRequest.getRideType(),
+        fare: acceptedRequest.getFare(),
+        currency: savedRide.getCurrency(),
+        pickupTime: acceptedRequest.getPickupTime().toISOString(),
+        timeline: {
+          requestedAt: savedRide.getTimeline().getRequestedAt().toISOString(),
+          acceptedAt: savedRide.getTimeline().getAcceptedAt()!.toISOString(),
         },
       };
 

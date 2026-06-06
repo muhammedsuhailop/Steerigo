@@ -1,0 +1,55 @@
+import { KYCStatus } from "../value-objects/KYCStatus";
+import { DocumentType } from "../value-objects/DocumentType";
+export declare class KYC {
+    private readonly id;
+    private readonly driverId;
+    private docType;
+    private docNumber;
+    private verificationStatus;
+    private issueDate?;
+    private expiryDate?;
+    private comments?;
+    private docImageUrlsFront;
+    private docImageUrlsBack;
+    private readonly createdAt;
+    private updatedAt;
+    private constructor();
+    static create(id: string, driverId: string, docType: DocumentType, docNumber: string, issueDate?: Date, expiryDate?: Date, frontUrls?: string[], backUrls?: string[]): KYC;
+    static fromData(data: {
+        id: string;
+        driverId: string;
+        docType: DocumentType;
+        docNumber: string;
+        issueDate?: Date;
+        expiryDate?: Date;
+        verificationStatus: KYCStatus;
+        comments?: string;
+        docImageUrlsFront: string[];
+        docImageUrlsBack: string[];
+        createdAt: Date;
+        updatedAt: Date;
+    }): KYC;
+    getId(): string;
+    getDriverId(): string;
+    getDocType(): DocumentType;
+    getDocNumber(): string;
+    getIssueDate(): Date | undefined;
+    getExpiryDate(): Date | undefined;
+    getVerificationStatus(): KYCStatus;
+    getComments(): string | undefined;
+    getCreatedAt(): Date;
+    getUpdatedAt(): Date;
+    getDocImageUrlsFront(): string[];
+    getDocImageUrlsBack(): string[];
+    getDocumentType(): string;
+    getDocumentNumber(): string;
+    approve(comments?: string): void;
+    reject(comments: string): void;
+    markExpired(comments?: string): void;
+    updateDocument(docType: DocumentType, docNumber: string, issueDate?: Date, expiryDate?: Date): void;
+    updateDocumentImages(frontUrls: string[], backUrls: string[]): void;
+    isExpired(): boolean;
+    isApproved(): boolean;
+    isRejected(): boolean;
+}
+//# sourceMappingURL=KYC.d.ts.map

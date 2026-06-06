@@ -1,6 +1,6 @@
 import React from "react";
-import { UserStatusBadge } from "../../../shared/components/UserStatusBadge";
 import type { UserItemProps } from "./RecentUsers.types";
+import { UserStatusBadge } from "@/features/admin/shared/components/UserStatusBadge/UserStatusBadge";
 
 export const UserItem: React.FC<UserItemProps> = ({ user, onClick }) => {
   const handleClick = () => {

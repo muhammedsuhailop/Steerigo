@@ -17,7 +17,6 @@ export { userProfileReducer } from "./store";
 export type {
   UserProfile,
   UserProfileFormData,
-  UserStats,
   ProfileHeaderProps,
   UpdateProfileFormProps,
   ProfileStatsProps,

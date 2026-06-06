@@ -5,7 +5,6 @@ import { IKYCRepository } from "@domain/repositories/IKYCRepository";
 import { GetDriverProfileRequestDto } from "@application/dto/driver/GetDriverProfileRequestDto";
 import {
   GetDriverProfileResponseDto,
-  DriverProfileData,
   LicenseInfo,
   KycInfo,
 } from "@application/dto/driver/GetDriverProfileResponseDto";
@@ -31,11 +30,11 @@ export class GetDriverDetailedProfileUseCase
   constructor(
     @inject(TYPES.DriverRepository) private driverRepository: IDriverRepository,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository
+    @inject(TYPES.KYCRepository) private kycRepository: IKYCRepository,
   ) {}
 
   async execute(
-    dto: GetDriverProfileRequestDto
+    dto: GetDriverProfileRequestDto,
   ): Promise<Result<GetDriverProfileResponseDto>> {
     try {
       if (!dto.isValid()) {
@@ -87,7 +86,7 @@ export class GetDriverDetailedProfileUseCase
           docId: kyc.getId(),
           docType: kyc.getDocumentType?.() ?? "",
           docNumberMasked: this.maskDocumentNumber(
-            kyc.getDocumentNumber?.() ?? ""
+            kyc.getDocumentNumber?.() ?? "",
           ),
           issueDate: kyc.getIssueDate?.(),
           expiryDate: kyc.getExpiryDate?.(),
@@ -100,7 +99,7 @@ export class GetDriverDetailedProfileUseCase
         })),
       };
 
-      const profileData: DriverProfileData = {
+      const response: GetDriverProfileResponseDto = {
         driverId: driver.getId(),
         userId: userId,
         name: user.getName(),
@@ -126,8 +125,6 @@ export class GetDriverDetailedProfileUseCase
         },
       };
 
-      const response = new GetDriverProfileResponseDto(profileData);
-
       Logger.info("Driver detailed profile fetched successfully", {
         userId,
         driverId: driver.getId(),
@@ -142,7 +139,7 @@ export class GetDriverDetailedProfileUseCase
       return Result.failure(
         error instanceof DomainError
           ? error
-          : new DomainError("Failed to fetch driver profile")
+          : new DomainError("Failed to fetch driver profile"),
       );
     }
   }

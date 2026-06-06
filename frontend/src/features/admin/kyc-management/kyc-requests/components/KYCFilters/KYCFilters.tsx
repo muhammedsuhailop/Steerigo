@@ -6,7 +6,7 @@ import {
   MdArrowDownward,
   MdFilterAltOff,
 } from "react-icons/md";
-import type { KYCFilters as KYCFiltersType } from "../../../../shared/types";
+import type { KYCFilters as KYCFiltersType } from "../../../../shared/types/kyc.interfaces";
 
 interface KYCFiltersProps {
   filters: KYCFiltersType;

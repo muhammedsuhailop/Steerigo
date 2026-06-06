@@ -1,0 +1,1 @@
+{"version":3,"file":"GetDriverDashboardDto.d.ts","sourceRoot":"","sources":["../../../../src/application/dto/driver/GetDriverDashboardDto.ts"],"names":[],"mappings":"AAAA,qBAAa,qBAAqB;IAChC,OAAO,CAAC,QAAQ,CAAC,MAAM,CAAS;gBAEpB,MAAM,EAAE,MAAM;IAO1B,MAAM,CAAC,WAAW,CAAC,MAAM,EAAE,MAAM,GAAG,qBAAqB;IAIzD,SAAS,IAAI,MAAM;CAGpB"}

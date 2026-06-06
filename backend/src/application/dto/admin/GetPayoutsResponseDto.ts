@@ -17,12 +17,8 @@ export interface PayoutItemDto {
 }
 
 export interface GetPayoutsResponseDto {
-  success: boolean;
-  message: string;
-  data: {
-    payouts: PayoutItemDto[];
-    total: number;
-    page: number;
-    limit: number;
-  };
+  payouts: PayoutItemDto[];
+  total: number;
+  page: number;
+  limit: number;
 }
