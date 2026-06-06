@@ -1,5 +1,6 @@
 export declare const PAYMENT_ERROR_MESSAGES: {
     RIDE_NOT_COMPLETED: string;
+    RIDE_NOT_COMPLETED_OR_CANCELLED: string;
     PAYMENT_ALREADY_EXISTS: string;
     PAYMENT_NOT_FOUND: string;
     PAYMENT_NOT_PENDING: string;

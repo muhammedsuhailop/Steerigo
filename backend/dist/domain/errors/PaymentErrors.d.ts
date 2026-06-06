@@ -1,6 +1,7 @@
 import { DomainError } from "./DomainError";
 export declare class PaymentErrors {
     static rideNotCompleted(rideId: string): DomainError;
+    static rideNotCompletedOrCancelled(rideId: string): DomainError;
     static paymentAlreadyExists(rideId: string): DomainError;
     static paymentNotFound(paymentId: string): DomainError;
     static paymentNotPending(paymentId: string): DomainError;

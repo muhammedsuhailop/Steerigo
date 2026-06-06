@@ -16,6 +16,17 @@ class PaymentErrors {
             category: "VALIDATION",
         });
     }
+    static rideNotCompletedOrCancelled(rideId) {
+        return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(PaymentMessages_1.PAYMENT_ERROR_MESSAGES.RIDE_NOT_COMPLETED_OR_CANCELLED, {
+            rideId,
+        }), "RIDE_NOT_COMPLETED", {
+            statusCode: HttpStatusCodes_1.HttpStatusCodes.BAD_REQUEST,
+            errorType: ErrorType_1.ErrorType.VALIDATION_ERROR,
+            shouldLog: false,
+            isOperational: true,
+            category: "VALIDATION",
+        });
+    }
     static paymentAlreadyExists(rideId) {
         return new DomainError_1.DomainError((0, errorMessageFormatter_1.formatMessage)(PaymentMessages_1.PAYMENT_ERROR_MESSAGES.PAYMENT_ALREADY_EXISTS, { rideId }), "PAYMENT_ALREADY_EXISTS", {
             statusCode: HttpStatusCodes_1.HttpStatusCodes.CONFLICT,

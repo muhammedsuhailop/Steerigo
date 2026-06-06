@@ -43,8 +43,8 @@ class RideTimeline {
         this.rejectedAt = date;
     }
     setPaymentInitiatedAt(date) {
-        if (!this.completedAt)
-            throw new Error("Payment cannot start before ride completion");
+        if (!this.completedAt && !this.cancelledAt)
+            throw new Error("Payment cannot start before ride completion or cancellation");
         this.paymentInitiatedAt = date;
     }
     setPaymentCompletedAt(date) {

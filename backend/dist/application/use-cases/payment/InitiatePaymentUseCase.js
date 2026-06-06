@@ -38,8 +38,8 @@ let InitiatePaymentUseCase = class InitiatePaymentUseCase {
             const ride = await this.rideRepository.findByRideId(rideId);
             if (!ride)
                 return Result_1.Result.failure(RideErrors_1.RideErrors.rideNotFound(rideId));
-            if (!ride.isCompleted()) {
-                return Result_1.Result.failure(PaymentErrors_1.PaymentErrors.rideNotCompleted(rideId));
+            if (!ride.isCompleted() && !ride.isCancelled()) {
+                return Result_1.Result.failure(PaymentErrors_1.PaymentErrors.rideNotCompletedOrCancelled(rideId));
             }
             if (ride.getRiderId() !== userId) {
                 return Result_1.Result.failure(PaymentErrors_1.PaymentErrors.unauthorizedPaymentAccess(rideId));
