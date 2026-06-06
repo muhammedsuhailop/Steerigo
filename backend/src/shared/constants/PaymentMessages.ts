@@ -1,6 +1,8 @@
 export const PAYMENT_ERROR_MESSAGES = {
   RIDE_NOT_COMPLETED:
     "Ride {{rideId}} is not completed. Payment can only be initiated for completed rides.",
+  RIDE_NOT_COMPLETED_OR_CANCELLED:
+    "Payment can only be initiated for completed or cancelled rides.",
   PAYMENT_ALREADY_EXISTS: "Payment already exists for ride {{rideId}}.",
   PAYMENT_NOT_FOUND: "Payment {{paymentId}} not found.",
   PAYMENT_NOT_PENDING: "Payment {{paymentId}} is not in PENDING state.",

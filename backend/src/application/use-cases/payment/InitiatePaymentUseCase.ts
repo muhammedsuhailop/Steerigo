@@ -69,8 +69,8 @@ export class InitiatePaymentUseCase
       const ride = await this.rideRepository.findByRideId(rideId);
       if (!ride) return Result.failure(RideErrors.rideNotFound(rideId));
 
-      if (!ride.isCompleted()) {
-        return Result.failure(PaymentErrors.rideNotCompleted(rideId));
+      if (!ride.isCompleted() && !ride.isCancelled()) {
+        return Result.failure(PaymentErrors.rideNotCompletedOrCancelled(rideId));
       }
 
       if (ride.getRiderId() !== userId) {

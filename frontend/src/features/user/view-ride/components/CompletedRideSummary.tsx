@@ -40,11 +40,18 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
   const { handlePayment, isLoading } = usePayment();
 
   const isCompleted = status === RideStatus.COMPLETED;
-  const needsPayment =
-    isCompleted &&
-    (!paymentStatus ||
-      paymentStatus === PaymentStatus.FAILED ||
-      paymentStatus === PaymentStatus.PENDING);
+
+  const canRequestPayment =
+    status === RideStatus.COMPLETED || status === RideStatus.CANCELLED;
+
+  const hasPendingPayment =
+    !paymentStatus ||
+    paymentStatus === PaymentStatus.PENDING ||
+    paymentStatus === PaymentStatus.FAILED;
+
+  const hasAmountToPay = fare.payableAmount > 0;
+
+  const needsPayment = canRequestPayment && hasPendingPayment && hasAmountToPay;
 
   const isEligibleForRating =
     status === RideStatus.COMPLETED && paymentStatus === PaymentStatus.SUCCESS;
@@ -83,23 +90,33 @@ const CompletedRideSummary: React.FC<CompletedRideSummaryProps> = ({
             </div>
             <div>
               <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">
-                Amount to Pay
+                {status === RideStatus.CANCELLED
+                  ? "Cancellation Charge"
+                  : "Amount to Pay"}
               </p>
               <h3 className="text-4xl font-black text-gray-900 tracking-tight">
                 ₹{fare.payableAmount.toFixed(2)}
               </h3>
             </div>
           </div>
+
           <div className="flex flex-col items-center md:items-end gap-3">
             <button
               onClick={() => handlePayment({ rideId, user })}
               disabled={isLoading}
               className="px-12 py-4 bg-black text-white rounded-2xl font-black text-base flex items-center gap-3 hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/10 disabled:opacity-50"
             >
-              {isLoading ? "Processing..." : "Pay Online"}
+              {isLoading
+                ? "Processing..."
+                : status === RideStatus.CANCELLED
+                  ? "Pay Cancellation Fee"
+                  : "Pay Online"}
             </button>
+
             <p className="text-[10px] font-bold text-gray-300 italic">
-              Or pay by cash directly to the driver
+              {status === RideStatus.CANCELLED
+                ? "Cancellation fee pending payment"
+                : "Or pay by cash directly to the driver"}
             </p>
           </div>
         </div>
