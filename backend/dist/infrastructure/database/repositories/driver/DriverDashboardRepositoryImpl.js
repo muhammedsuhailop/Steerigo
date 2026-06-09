@@ -146,9 +146,7 @@ let DriverDashboardRepositoryImpl = class DriverDashboardRepositoryImpl {
             const rideDoc = await RideModel_1.RideModel.findOne({
                 driverId,
                 status: RideStatus_1.RideStatus.STARTED,
-            })
-                .populate("riderId", "name mobile")
-                .exec();
+            }).exec();
             if (!rideDoc) {
                 return null;
             }
@@ -252,9 +250,17 @@ let DriverDashboardRepositoryImpl = class DriverDashboardRepositoryImpl {
         }
         // Reconstruct RideTimeline from document
         const timeline = RideTimeline_1.RideTimeline.fromData({
-            startedAt: doc.timeline.startedAt || undefined,
-            completedAt: doc.timeline.completedAt || undefined,
-            cancelledAt: doc.timeline.cancelledAt || undefined,
+            requestedAt: doc.timeline.requestedAt,
+            acceptedAt: doc.timeline.acceptedAt,
+            arrivedAt: doc.timeline.arrivedAt,
+            startedAt: doc.timeline.startedAt,
+            completedAt: doc.timeline.completedAt,
+            cancelledAt: doc.timeline.cancelledAt,
+            rejectedAt: doc.timeline.rejectedAt,
+            paymentInitiatedAt: doc.timeline.paymentInitiatedAt,
+            paymentCompletedAt: doc.timeline.paymentCompletedAt,
+            paymentFailedAt: doc.timeline.paymentFailedAt,
+            paymentRefundedAt: doc.timeline.paymentRefundedAt,
         });
         const rideTypeValue = this.parseRideType(doc.rideType);
         return Ride_1.Ride.fromData({
