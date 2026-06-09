@@ -29,9 +29,10 @@ export const createSocket = (accessToken: string) => {
     socket.disconnect();
   }
 
-  // socket = io(import.meta.env.VITE_SOCKET_URL, {}
+  const socketUrl = import.meta.env.VITE_SOCKET_URL || "/";
 
-  socket = io("/", {
+  // socket = io("/", {
+  socket = io(socketUrl, {
     auth: { accessToken },
     transports: ["websocket"],
     reconnection: true,

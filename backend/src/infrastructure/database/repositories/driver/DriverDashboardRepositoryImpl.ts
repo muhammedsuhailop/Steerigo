@@ -33,7 +33,9 @@ interface RatingResult {
 }
 
 @injectable()
-export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository {
+export class DriverDashboardRepositoryImpl
+  implements IDriverDashboardRepository
+{
   private parseRideType(rideTypeValue: string): RideType {
     const normalizedValue = rideTypeValue?.trim().toLowerCase() ?? "";
     if (normalizedValue === "one way" || normalizedValue === "oneway") {
@@ -190,9 +192,7 @@ export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository
       const rideDoc = await RideModel.findOne({
         driverId,
         status: RideStatus.STARTED,
-      })
-        .populate("riderId", "name mobile")
-        .exec();
+      }).exec();
 
       if (!rideDoc) {
         return null;
@@ -314,9 +314,18 @@ export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository
 
     // Reconstruct RideTimeline from document
     const timeline = RideTimeline.fromData({
-      startedAt: doc.timeline.startedAt || undefined,
-      completedAt: doc.timeline.completedAt || undefined,
-      cancelledAt: doc.timeline.cancelledAt || undefined,
+      requestedAt: doc.timeline.requestedAt,
+      acceptedAt: doc.timeline.acceptedAt,
+      arrivedAt: doc.timeline.arrivedAt,
+      startedAt: doc.timeline.startedAt,
+      completedAt: doc.timeline.completedAt,
+      cancelledAt: doc.timeline.cancelledAt,
+      rejectedAt: doc.timeline.rejectedAt,
+
+      paymentInitiatedAt: doc.timeline.paymentInitiatedAt,
+      paymentCompletedAt: doc.timeline.paymentCompletedAt,
+      paymentFailedAt: doc.timeline.paymentFailedAt,
+      paymentRefundedAt: doc.timeline.paymentRefundedAt,
     });
 
     const rideTypeValue = this.parseRideType(doc.rideType);
@@ -337,7 +346,7 @@ export class DriverDashboardRepositoryImpl implements IDriverDashboardRepository
       fareBreakdown,
       currency: doc.currency,
       timeline,
-      verificationCode:doc.verificationCode,
+      verificationCode: doc.verificationCode,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
