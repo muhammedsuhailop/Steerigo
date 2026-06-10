@@ -8,6 +8,7 @@ import { Select } from "@/shared/components/ui";
 import { type RidesFilters } from "../types/driverRides.types";
 import { FaChevronLeft, FaChevronRight, FaFilter } from "react-icons/fa";
 import { RideStatus } from "@/shared/types/ride.types";
+import { getPaginationRange } from "@/shared/utils/paginationRangeHelper";
 
 const DriverRidesPage: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -124,30 +125,76 @@ const DriverRidesPage: React.FC = () => {
               )}
 
               {/* Pagination */}
-              {data && data.pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 pt-6">
+              {data?.pagination && data.pagination.totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  {/* Previous */}
                   <button
-                    disabled={filters.page === 1 || isFetching}
                     onClick={() =>
-                      setFilters((p) => ({ ...p, page: p.page - 1 }))
+                      setFilters((p) => ({
+                        ...p,
+                        page: Math.max(1, p.page - 1),
+                      }))
                     }
-                    className="p-2 rounded-lg border border-gray-200 bg-white disabled:opacity-50"
+                    disabled={filters.page === 1 || isFetching}
+                    className="p-2 rounded-lg border border-slate-100 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-30 transition-all"
                   >
-                    <FaChevronLeft size={14} />
+                    <FaChevronLeft size={12} />
                   </button>
-                  <span className="text-sm font-medium">
-                    Page {data.pagination.page} of {data.pagination.totalPages}
-                  </span>
+
+                  {/* Page Numbers */}
+                  {getPaginationRange(
+                    data.pagination.page,
+                    data.pagination.totalPages,
+                  ).map((page, index) => {
+                    if (page === "...") {
+                      return (
+                        <span
+                          key={`dots-${index}`}
+                          className="px-1 text-slate-300 font-bold"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    const pageNumber = page as number;
+                    const isActive = filters.page === pageNumber;
+
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() =>
+                          setFilters((p) => ({
+                            ...p,
+                            page: pageNumber,
+                          }))
+                        }
+                        disabled={isFetching}
+                        className={`w-9 h-9 rounded-xl text-xs font-bold transition-all duration-200 ${
+                          isActive
+                            ? "bg-slate-900 text-white shadow-lg shadow-slate-200 scale-105"
+                            : "bg-white text-slate-400 hover:bg-slate-50 border border-slate-100 hover:border-slate-300"
+                        } disabled:opacity-50`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+
+                  {/* Next */}
                   <button
+                    onClick={() =>
+                      setFilters((p) => ({
+                        ...p,
+                        page: Math.min(data.pagination.totalPages, p.page + 1),
+                      }))
+                    }
                     disabled={
                       filters.page === data.pagination.totalPages || isFetching
                     }
-                    onClick={() =>
-                      setFilters((p) => ({ ...p, page: p.page + 1 }))
-                    }
-                    className="p-2 rounded-lg border border-gray-200 bg-white disabled:opacity-50"
+                    className="p-2 rounded-lg border border-slate-100 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-30 transition-all"
                   >
-                    <FaChevronRight size={14} />
+                    <FaChevronRight size={12} />
                   </button>
                 </div>
               )}

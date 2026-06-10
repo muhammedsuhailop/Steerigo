@@ -89,6 +89,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
   return (
     <div>
       {/* Welcome Section Filter */}
@@ -132,11 +134,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <input
                   type="date"
                   value={convertToInputDate(fromDate)}
-                  onChange={(e) =>
-                    onFromDateChange(
-                      e.target.value ? new Date(e.target.value) : null,
-                    )
-                  }
+                  max={toDate ? convertToInputDate(toDate) : today}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value
+                      ? new Date(e.target.value)
+                      : null;
+
+                    onFromDateChange(selectedDate);
+
+                    if (selectedDate && toDate && selectedDate > toDate) {
+                      onToDateChange(selectedDate);
+                    }
+                  }}
                   className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -148,11 +157,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <input
                   type="date"
                   value={convertToInputDate(toDate)}
-                  onChange={(e) =>
-                    onToDateChange(
-                      e.target.value ? new Date(e.target.value) : null,
-                    )
-                  }
+                  min={fromDate ? convertToInputDate(fromDate) : undefined}
+                  max={today}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value
+                      ? new Date(e.target.value)
+                      : null;
+
+                    if (fromDate && selectedDate && selectedDate < fromDate) {
+                      return;
+                    }
+
+                    onToDateChange(selectedDate);
+                  }}
                   className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

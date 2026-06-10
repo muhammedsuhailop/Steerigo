@@ -239,6 +239,8 @@ const DriverDashboard: React.FC = () => {
     return d.toISOString().split("T")[0];
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DriverSidebar
@@ -306,14 +308,22 @@ const DriverDashboard: React.FC = () => {
                       <input
                         type="date"
                         value={formatToInputString(fromDate)}
-                        onChange={(e) =>
-                          setFromDate(
-                            e.target.value ? new Date(e.target.value) : null,
-                          )
-                        }
+                        max={toDate ? formatToInputString(toDate) : today}
+                        onChange={(e) => {
+                          const selectedDate = e.target.value
+                            ? new Date(e.target.value)
+                            : null;
+
+                          setFromDate(selectedDate);
+
+                          if (selectedDate && toDate && selectedDate > toDate) {
+                            setToDate(selectedDate);
+                          }
+                        }}
                         className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-1.5 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
+
                     <div className="flex items-center space-x-1">
                       <label className="text-[10px] font-bold text-gray-400 uppercase">
                         To
@@ -321,11 +331,25 @@ const DriverDashboard: React.FC = () => {
                       <input
                         type="date"
                         value={formatToInputString(toDate)}
-                        onChange={(e) =>
-                          setToDate(
-                            e.target.value ? new Date(e.target.value) : null,
-                          )
+                        min={
+                          fromDate ? formatToInputString(fromDate) : undefined
                         }
+                        max={today}
+                        onChange={(e) => {
+                          const selectedDate = e.target.value
+                            ? new Date(e.target.value)
+                            : null;
+
+                          if (
+                            fromDate &&
+                            selectedDate &&
+                            selectedDate < fromDate
+                          ) {
+                            return;
+                          }
+
+                          setToDate(selectedDate);
+                        }}
                         className="bg-gray-50 border border-gray-300 text-gray-800 text-xs rounded-lg p-1.5 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>

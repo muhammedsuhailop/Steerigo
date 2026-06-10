@@ -9,6 +9,7 @@ import { FaRegEye, FaRegEyeSlash, FaLock } from "react-icons/fa";
 import type { UpdatePasswordFormProps } from "./UpdatePasswordForm.types";
 import LogoText from "@/../public/SteeriGoHorizontal.png";
 import { IoIosArrowBack } from "react-icons/io";
+import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 export const UpdatePasswordForm: React.FC<UpdatePasswordFormProps> = ({
     className = "",
@@ -31,19 +32,19 @@ export const UpdatePasswordForm: React.FC<UpdatePasswordFormProps> = ({
         handleSubmit,
     } = useUpdatePasswordForm(async (data: any) => {
         try {
-            const res = await updatePassword(data).unwrap();
-            if (res.success) {
-                setTimeout(async () => {
-                    await logout();
-                    navigate("/login", { state: { message: res.message } });
-                }, 2000);
-            }
-            return res;
-        } catch (e: any) {
-            return {
-                success: false,
-                message: e.data?.message || "Failed to update password",
-            };
+          const res = await updatePassword(data).unwrap();
+          if (res.success) {
+            setTimeout(async () => {
+              await logout();
+              navigate("/login", { state: { message: res.message } });
+            }, 2000);
+          }
+          return res;
+        } catch (error: unknown) {
+          return {
+            success: false,
+            message: getErrorMessage(error, "Failed to update password"),
+          };
         }
     });
 

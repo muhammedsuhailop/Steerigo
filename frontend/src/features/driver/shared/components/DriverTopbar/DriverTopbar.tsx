@@ -9,6 +9,7 @@ import {
   RiArrowDropDownLine,
   RiWallet3Line,
   RiMore2Line,
+  RiLockPasswordLine,
 } from "react-icons/ri";
 import {
   NotificationDropdown,
@@ -125,6 +126,12 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
       label: "Your Profile",
       icon: HiOutlineUser,
       to: "/driver/profile",
+    },
+    {
+      id: "update-password",
+      label: "Update Password",
+      icon: RiLockPasswordLine,
+      to: "/update-password",
     },
     { id: "logout", label: "Sign out", icon: HiOutlineLogout, danger: true },
   ];

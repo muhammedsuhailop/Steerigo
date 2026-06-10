@@ -171,7 +171,8 @@ export const axiosBaseQuery = (): BaseQueryFn<
         !skipAuth &&
         !url.includes("/auth/refresh-token") &&
         !url.includes("/auth/login") &&
-        !url.includes("/auth/signup")
+        !url.includes("/auth/signup") &&
+        !url.includes("/auth/update-password")
       ) {
         try {
           let newAccessToken: string;
@@ -204,7 +205,7 @@ export const axiosBaseQuery = (): BaseQueryFn<
           await clearReduxAuth();
           const parsedError = errorHandler.parseApiError(
             refreshError,
-            "Token Refresh Failed"
+            "Token Refresh Failed",
           );
           parsedError.timestamp = new Date().toISOString(); // ensure serializable
           ErrorDispatcher.dispatchError(parsedError);
@@ -218,7 +219,8 @@ export const axiosBaseQuery = (): BaseQueryFn<
         url.includes("/auth/signup") ||
         url.includes("/auth/verify") ||
         url.includes("/auth/forgot-password") ||
-        url.includes("/auth/reset-password");
+        url.includes("/auth/reset-password") ||
+        url.includes("/auth/update-password");
 
       let parsedError: BaseError;
 

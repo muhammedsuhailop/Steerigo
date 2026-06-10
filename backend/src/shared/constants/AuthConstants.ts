@@ -24,6 +24,7 @@ export const AuthMessages = {
   LOGOUT_SUCCESS: "Logged out successfully",
   TOKEN_REFRESH_SUCCESS: "Tokens refreshed successfully",
   INVALID_CREDENTIALS: "Invalid email or password",
+  INVALID_CURRENT_PASSWORD: "Invalid current password",
   ACCOUNT_NOT_VERIFIED: "Account not verified. Please verify your email first",
   ACCOUNT_SUSPENDED:
     "Account has been suspended. Contact support for assistance",

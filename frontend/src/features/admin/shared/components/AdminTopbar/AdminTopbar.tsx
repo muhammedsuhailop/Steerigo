@@ -2,11 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { AdminTopbarProps } from "./AdminTopbar.types";
 import type { RootState } from "@/app/store/store";
-import { FaRegBell } from "react-icons/fa";
-import { RiMenuLine, RiUserLine, RiArrowDropDownLine } from "react-icons/ri";
-import { NotificationDropdown } from "@/shared/components/ui/Notification";
+import {
+  RiMenuLine,
+  RiUserLine,
+  RiArrowDropDownLine,
+  RiLockPasswordLine,
+} from "react-icons/ri";
 import { ProfileDropdown } from "@/shared/components/ui/Profile";
-import { HiOutlineUser, HiOutlineCog, HiOutlineLogout } from "react-icons/hi";
+import { HiOutlineLogout } from "react-icons/hi";
 import { Logo } from "@/shared/components/ui";
 
 export const AdminTopbar: React.FC<AdminTopbarProps> = ({
@@ -46,6 +49,12 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({
 
   // Profile actions
   const profileActions = [
+    {
+      id: "update-password",
+      label: "Update Password",
+      icon: RiLockPasswordLine,
+      to: "/update-password",
+    },
     {
       id: "logout",
       label: "Logout",

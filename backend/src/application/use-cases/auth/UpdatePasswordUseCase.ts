@@ -7,9 +7,9 @@ import { Logger } from "@shared/utils/Logger";
 import { TYPES } from "@shared/constants/DITypes";
 import {
   UserNotFoundError,
-  InvalidCredentialsError,
   DomainError,
   PasswordResetError,
+  InvalidCurrentPasswordError,
 } from "@domain/errors";
 import { Password } from "@domain/value-objects/Password";
 import { IUseCase } from "../interfaces/IUseCase";
@@ -20,7 +20,7 @@ export class UpdatePasswordUseCase
 {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.PasswordService) private passwordService: IPasswordService
+    @inject(TYPES.PasswordService) private passwordService: IPasswordService,
   ) {}
 
   async execute(dto: UpdatePasswordDto): Promise<Result<void>> {
@@ -40,27 +40,27 @@ export class UpdatePasswordUseCase
           userId: dto.getUserId(),
         });
         return Result.failure(
-          new DomainError("Google users cannot change password")
+          new DomainError("Google users cannot change password"),
         );
       }
 
       // Verify current password
       const isCurrentPasswordValid = await this.passwordService.compare(
         dto.getCurrentPassword(),
-        user.getPasswordHash()
+        user.getPasswordHash(),
       );
 
       if (!isCurrentPasswordValid) {
         Logger.warn("Update password failed - invalid current password", {
           userId: dto.getUserId(),
         });
-        return Result.failure(new InvalidCredentialsError());
+        return Result.failure(new InvalidCurrentPasswordError());
       }
 
       // Check if new password is same as current
       const isSamePassword = await this.passwordService.compare(
         dto.getNewPassword(),
-        user.getPasswordHash()
+        user.getPasswordHash(),
       );
 
       if (isSamePassword) {
@@ -69,8 +69,8 @@ export class UpdatePasswordUseCase
         });
         return Result.failure(
           new DomainError(
-            "New password must be different from current password"
-          )
+            "New password must be different from current password",
+          ),
         );
       }
 
@@ -82,13 +82,15 @@ export class UpdatePasswordUseCase
           userId: dto.getUserId(),
         });
         return Result.failure(
-          new PasswordResetError("Password does not meet security requirements")
+          new PasswordResetError(
+            "Password does not meet security requirements",
+          ),
         );
       }
 
       // Hash new password and update
       const newPasswordHash = await this.passwordService.hash(
-        dto.getNewPassword()
+        dto.getNewPassword(),
       );
       const passwordVO = Password.createFromHash(newPasswordHash);
       user.updatePassword(passwordVO);

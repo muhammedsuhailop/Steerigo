@@ -19,7 +19,6 @@ import KYCRequestsLayout from "@/features/admin/kyc-management/kyc-requests/page
 import { UserProfileLayout } from "@/features/user";
 import DriverScheduling from "@/features/driver/scheduling/pages/DriverScheduling";
 import KYCRequestDetailPage from "@/features/admin/kyc-management/KYCDetailComponent/pages/KYCRequestDetailPage";
-import AdminDetailLayout from "@/features/admin/shared/pages/AdminDetailLayout";
 import DriverProfilePage from "@/features/driver/profile/pages/DriverProfilePage";
 import DriverSearchPage from "@/features/user/driver-search/pages/DriverSearchPage";
 import HelpPage from "@/features/public/pages/Help";

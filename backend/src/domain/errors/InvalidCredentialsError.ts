@@ -15,3 +15,17 @@ export class InvalidCredentialsError extends DomainError {
     this.name = "InvalidCredentialsError";
   }
 }
+
+export class InvalidCurrentPasswordError extends DomainError {
+  constructor() {
+    super(AuthMessages.INVALID_CURRENT_PASSWORD, "INVALID_CURRENT_PASSWORD", {
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      errorType: ErrorType.AUTHENTICATION_ERROR,
+      shouldLog: false,
+      isOperational: true,
+      category: "AUTH",
+    });
+
+    this.name = "InvalidCurrentPasswordError";
+  }
+}
