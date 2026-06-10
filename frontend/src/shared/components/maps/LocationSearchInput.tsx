@@ -134,10 +134,11 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     }
     setIsLoading(true);
     try {
+      const regionBias = "Kerala";
       const response = await fetch(
         `${NOMINATIM_BASE_URL}/search?format=json&q=${encodeURIComponent(
-          searchQuery,
-        )}&limit=5&addressdetails=1`,
+          `${regionBias} ${searchQuery}`,
+        )}&limit=5&addressdetails=1&countrycodes=in&bounded=1`,
         { headers: { "User-Agent": "SteeriGo-App/1.0" } },
       );
       const data: SearchSuggestion[] = await response.json();

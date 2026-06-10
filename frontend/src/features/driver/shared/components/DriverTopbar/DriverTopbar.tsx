@@ -7,14 +7,12 @@ import {
   RiMenuLine,
   RiUserLine,
   RiArrowDropDownLine,
-  RiMessage3Line,
   RiWallet3Line,
   RiMore2Line,
 } from "react-icons/ri";
 import {
   NotificationDropdown,
   ProfileDropdown,
-  MessagesDropdown,
   WalletDropdown,
   Logo,
 } from "@/shared/components/ui";
@@ -38,7 +36,6 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
   const [liveUnreadCount, setLiveUnreadCount] = useState(0);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
   const walletRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -58,17 +55,10 @@ export const DriverTopbar: React.FC<DriverTopbarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const refs = [
-        profileRef,
-        notificationRef,
-        messagesRef,
-        walletRef,
-        mobileMenuRef,
-      ];
+      const refs = [profileRef, notificationRef, walletRef, mobileMenuRef];
       const setters = [
         setIsProfileOpen,
         setIsNotificationOpen,
-        // setIsMessagesOpen,
         setIsWalletOpen,
         setIsMobileMenuOpen,
       ];

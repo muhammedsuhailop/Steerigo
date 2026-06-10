@@ -52,8 +52,6 @@ const FutureRideSearchPage: React.FC = () => {
     "pickup" | "drop" | null
   >(null);
 
-  const [isCancelling, setIsCancelling] = useState<boolean>(false);
-
   const handleFormChange = useCallback(
     (formData: TripFormData) => {
       if (isExpired || isAllRejected || hasNoDriversInResponse) {

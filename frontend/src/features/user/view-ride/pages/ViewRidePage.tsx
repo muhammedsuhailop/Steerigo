@@ -20,6 +20,7 @@ import CancelRideButton from "../components/CancelRideButton";
 import CouponSection from "../components/CouponSection";
 import LiveNavigationMap from "@/shared/components/maps/LiveNavigationMap";
 import { FaArrowLeft, FaShieldAlt } from "react-icons/fa";
+import { useSocketContext } from "@/shared/socket/SocketContext";
 
 const ViewRidePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,19 +35,26 @@ const ViewRidePage: React.FC = () => {
 
   const activeRide = useSelector(selectActiveRide);
   const activeDriver = useSelector(selectActiveDriver);
-  const { driverLocation } = useViewRide(id);
+  const { socketReady } = useSocketContext();
 
- const handleBack = () => {
-   if (window.history.length > 1) {
-     navigate(-1);
-   } else {
-     navigate("/rides");
-   }
- };
+  const { driverLocation } = useViewRide(id, socketReady);
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/rides");
+    }
+  };
 
   useEffect(() => {
     if (data?.success) {
-      dispatch(setRideData({ ride: data.data.ride, driver: data.data.driver }));
+      dispatch(
+        setRideData({
+          ride: data.data.ride,
+          driver: data.data.driver,
+        }),
+      );
     }
   }, [data, dispatch]);
 

@@ -16,13 +16,13 @@ import {
   RideCancelledEventPayload,
   RideCancelledByDriverEventPayload,
 } from "@/shared/types/ride.types";
-import {
-  PaymentStatus,
-  PaymentFailureReason,
-} from "@/shared/types/payment.types";
+import { PaymentStatus } from "@/shared/types/payment.types";
 import { FareDetails, LocationUpdatePayload } from "../types/viewRide.types";
 
-export const useViewRide = (rideId: string | undefined) => {
+export const useViewRide = (
+  rideId: string | undefined,
+  socketReady: boolean,
+) => {
   const dispatch = useDispatch();
   const [driverLocation, setDriverLocation] = useState<{
     lat: number;
@@ -32,61 +32,103 @@ export const useViewRide = (rideId: string | undefined) => {
 
   useEffect(() => {
     if (!rideId) return;
-    const socket = getSocket();
-    if (!socket) return;
 
-    socket.emit(SOCKET_EVENTS.RIDE.JOIN, rideId);
+    if (!socketReady) {
+      console.log("Waiting for socket...");
+      return;
+    }
+
+    const socket = getSocket();
+
+    if (!socket) {
+      console.warn("Socket unavailable");
+      return;
+    }
+
+    const joinRoom = () => {
+      socket.emit(SOCKET_EVENTS.RIDE.JOIN, rideId);
+    };
+
+    joinRoom();
+
+    socket.on("connect", joinRoom);
 
     const onArrived = (data: RideArrivedPayload) => {
-      const payload = Array.isArray(data) ? data[0] : data;
-      if (payload.rideId === rideId) {
-        dispatch(
-          updateRideStatusLocal({
-            status: payload.status,
-            timestampField: "arrivedAt",
-            timestampValue: payload.arrivedAt,
-          }),
-        );
+      try {
+        const payload = Array.isArray(data) ? data[0] : data;
+
+        if (payload.rideId === rideId) {
+          dispatch(
+            updateRideStatusLocal({
+              status: payload.status,
+              timestampField: "arrivedAt",
+              timestampValue: payload.arrivedAt,
+            }),
+          );
+        } else {
+          console.warn("ARRIVED ignored - Ride ID mismatch");
+        }
+      } catch (error) {
+        console.error("ARRIVED HANDLER ERROR", error);
       }
     };
 
     const onStarted = (data: RideStartedPayload) => {
-      const payload = Array.isArray(data) ? data[0] : data;
-      if (payload.rideId === rideId) {
-        dispatch(
-          updateRideStatusLocal({
-            status: payload.status,
-            timestampField: "startedAt",
-            timestampValue: payload.startedAt,
-          }),
-        );
+      try {
+        const payload = Array.isArray(data) ? data[0] : data;
+
+        if (payload.rideId === rideId) {
+          dispatch(
+            updateRideStatusLocal({
+              status: payload.status,
+              timestampField: "startedAt",
+              timestampValue: payload.startedAt,
+            }),
+          );
+        } else {
+          console.warn("STARTED ignored - Ride ID mismatch");
+        }
+
+        console.groupEnd();
+      } catch (error) {
+        console.error("STARTED HANDLER ERROR", error);
       }
     };
 
     const onCompleted = (data: RideCompletedPayload) => {
-      const payload = Array.isArray(data) ? data[0] : data;
-      if (payload.rideId === rideId) {
-        const mappedFare: FareDetails = {
-          baseFare: payload.fareBreakdown?.baseFare?.amount ?? 0,
-          tax: {
-            total:
-              (payload.fareBreakdown?.taxes?.fare?.amount?.amount ?? 0) +
-              (payload.fareBreakdown?.taxes?.platformFee?.amount?.amount ?? 0),
-          },
-          platformFee: payload.fareBreakdown?.platformFee?.amount ?? 0,
-          totalFare: payload.fareBreakdown?.totalFare?.amount ?? 0,
-          currency: payload.fareBreakdown?.totalFare?.currency ?? "INR",
-          payableAmount: payload.payableAmount ?? 0,
-        };
+      try {
+        const payload = Array.isArray(data) ? data[0] : data;
 
-        dispatch(
-          updateRideStatusLocal({
-            status: payload.status as RideStatus,
-            timestampField: "completedAt",
-            timestampValue: payload.completedAt,
-            fare: mappedFare,
-          }),
-        );
+        if (payload.rideId === rideId) {
+          const mappedFare: FareDetails = {
+            baseFare: payload.fareBreakdown?.baseFare?.amount ?? 0,
+            tax: {
+              total:
+                (payload.fareBreakdown?.taxes?.fare?.amount?.amount ?? 0) +
+                (payload.fareBreakdown?.taxes?.platformFee?.amount?.amount ??
+                  0),
+            },
+            platformFee: payload.fareBreakdown?.platformFee?.amount ?? 0,
+            totalFare: payload.fareBreakdown?.totalFare?.amount ?? 0,
+            currency: payload.fareBreakdown?.totalFare?.currency ?? "INR",
+            payableAmount: payload.payableAmount ?? 0,
+          };
+
+          dispatch(
+            updateRideStatusLocal({
+              status: payload.status as RideStatus,
+              timestampField: "completedAt",
+              timestampValue: payload.completedAt,
+              fare: mappedFare,
+            }),
+          );
+        } else {
+          console.warn("COMPLETED ignored - Ride ID mismatch");
+        }
+
+        console.groupEnd();
+      } catch (error) {
+        console.error("COMPLETED HANDLER ERROR", error);
       }
     };
 
@@ -141,8 +183,7 @@ export const useViewRide = (rideId: string | undefined) => {
       }
     };
 
-    const handleLocationUpdate = (data: LocationUpdatePayload
-    ) => {
+    const handleLocationUpdate = (data: LocationUpdatePayload) => {
       const payload = Array.isArray(data) ? data[0] : data;
       if (payload.rideId === rideId) {
         setDriverLocation({
@@ -168,6 +209,7 @@ export const useViewRide = (rideId: string | undefined) => {
     socket.on(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
 
     return () => {
+      socket.off("connect", joinRoom);
       socket.emit(SOCKET_EVENTS.RIDE.LEAVE, rideId);
       socket.off(SOCKET_EVENTS.RIDE.ARRIVED, onArrived);
       socket.off(SOCKET_EVENTS.RIDE.STARTED, onStarted);
@@ -181,10 +223,8 @@ export const useViewRide = (rideId: string | undefined) => {
 
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_COMPLETED, onPaymentSucceeded);
       socket.off(SOCKET_EVENTS.PAYMENT.PAYMENT_FAILED, onPaymentFailed);
-
-      // socket.offAny();
     };
-  }, [rideId, dispatch]);
+  }, [rideId, socketReady, dispatch]);
 
   return { driverLocation };
 };

@@ -8,28 +8,28 @@ import { ErrorDispatcher } from "@/shared/api/services/errorDispatcherService";
 import { ErrorBoundary, ToastContainer } from "@/shared/components/ui";
 import { useSocket } from "@/shared/socket/useSocket";
 import { useAppSelector } from "./store/hooks";
+import { SocketContext } from "@/shared/socket/SocketContext";
 
 const AppContent: React.FC = () => {
   const dispatch = useDispatch();
   const accessToken = useAppSelector((state) => state.auth.accessToken);
 
+  const socketReady = useSocket({
+    accessToken,
+  });
+
   useEffect(() => {
     ErrorDispatcher.setDispatch(dispatch);
-
-    // Initialize auth state from localStorage on app load
     store.dispatch(initializeAuth());
   }, [dispatch]);
 
-  useSocket({ accessToken });
-
   return (
-    <>
-      {/* Global Error Handling Components */}
+    <SocketContext.Provider value={{ socketReady }}>
       <ErrorBoundary>
         <AppRouter />
         <ToastContainer />
       </ErrorBoundary>
-    </>
+    </SocketContext.Provider>
   );
 };
 
