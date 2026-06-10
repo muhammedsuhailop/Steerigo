@@ -21,6 +21,7 @@ export declare const AuthMessages: {
     readonly LOGOUT_SUCCESS: "Logged out successfully";
     readonly TOKEN_REFRESH_SUCCESS: "Tokens refreshed successfully";
     readonly INVALID_CREDENTIALS: "Invalid email or password";
+    readonly INVALID_CURRENT_PASSWORD: "Invalid current password";
     readonly ACCOUNT_NOT_VERIFIED: "Account not verified. Please verify your email first";
     readonly ACCOUNT_SUSPENDED: "Account has been suspended. Contact support for assistance";
     readonly ACCOUNT_BLOCKED: "Account has been blocked. Contact support for assistance";

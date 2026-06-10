@@ -46,7 +46,7 @@ let UpdatePasswordUseCase = class UpdatePasswordUseCase {
                 Logger_1.Logger.warn("Update password failed - invalid current password", {
                     userId: dto.getUserId(),
                 });
-                return Result_1.Result.failure(new errors_1.InvalidCredentialsError());
+                return Result_1.Result.failure(new errors_1.InvalidCurrentPasswordError());
             }
             // Check if new password is same as current
             const isSamePassword = await this.passwordService.compare(dto.getNewPassword(), user.getPasswordHash());
